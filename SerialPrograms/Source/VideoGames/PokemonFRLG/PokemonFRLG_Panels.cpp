@@ -10,6 +10,7 @@
 #include "PokemonFRLG_Panels.h"
 
 #include "PokemonFRLG_Settings.h"
+#include "Programs/AutoStory/PokemonFRLG_AutoStory.h"
 #include "Programs/Farming/PokemonFRLG_EliteFourFarmer.h"
 #include "Programs/Farming/PokemonFRLG_HeldItemFarmer-SafariZone.h"
 #include "Programs/Farming/PokemonFRLG_ItemDuplication.h"
@@ -55,6 +56,9 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     
     ret.emplace_back("---- Settings ----");
     ret.emplace_back(make_OptionsPanel<GameSettingsPanel>());
+
+    ret.emplace_back("---- Story ----");
+    ret.emplace_back(make_SingleSwitchProgram<AutoStory>());
 
     ret.emplace_back("---- Farming ----");
     ret.emplace_back(make_SingleSwitchProgram<NuggetBridgeFarmer>());

@@ -1,0 +1,91 @@
+name: FRLG Autostory - Windows build
+
+# Builds a ready-to-run Windows version of SerialPrograms with the FRLG
+# Autostory (Qt DLLs, resources and firmware included), and publishes it as a
+# pre-release of this repository and as a workflow artifact.
+
+on:
+  push:
+    branches: [frlg-autostory]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - name: Checkout Arduino-Source
+        uses: actions/checkout@v7
+        with:
+          path: 'Arduino-Source'
+          submodules: 'recursive'
+
+      - name: Checkout Packages
+        uses: actions/checkout@v7
+        with:
+          repository: 'PokemonAutomation/Packages'
+          ref: 'master'
+          path: 'Arduino-Source/Packages'
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall'
+          version: '6.10.2'
+          modules: 'qtmultimedia qtserialport'
+          cache: true
+
+      #  Visual Studio generator, release build without debug info.
+      - name: Build
+        shell: bash
+        run: |
+          cd Arduino-Source/SerialPrograms
+          mkdir bin
+          cd bin
+          cmake .. -DQT_MAJOR:STRING=6 \
+            -DCMAKE_POLICY_DEFAULT_CMP0141=NEW \
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= \
+            -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=/INCREMENTAL:NO \
+            -DPA_ASSEMBLY_LISTINGS=OFF
+          cmake --build . --config RelWithDebInfo --parallel 4
+
+      #  On GitHub Actions the CMake project skips windeployqt (it expects
+      #  the developer's Qt next to the build). Deploy the Qt DLLs here so
+      #  the folder runs on its own.
+      - name: Deploy Qt and package
+        shell: pwsh
+        run: |
+          $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
+          windeployqt --release --dir $out "$out/SerialPrograms.exe"
+          Remove-Item "$out/*.lib", "$out/*.exp", "$out/*.pdb", "$out/*.ilk" -ErrorAction SilentlyContinue
+          $sha = git -C Arduino-Source rev-parse HEAD
+          "https://github.com/${{ github.repository }}/commit/$sha" | Out-File "$out/version.txt"
+          New-Item -ItemType Directory -Path "package" | Out-Null
+          Copy-Item -Recurse $out "package/SerialPrograms-FRLG-Autostory"
+          Compress-Archive -Path "package/SerialPrograms-FRLG-Autostory" -DestinationPath "SerialPrograms-FRLG-Autostory-Windows.zip"
+          Get-Item "SerialPrograms-FRLG-Autostory-Windows.zip" | Format-List Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: SerialPrograms-FRLG-Autostory-Windows
+          path: SerialPrograms-FRLG-Autostory-Windows.zip
+
+      - name: Publish pre-release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="frlg-autostory-build-${{ github.run_number }}"
+          gh release create "$TAG" SerialPrograms-FRLG-Autostory-Windows.zip \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            --title "FRLG Autostory - Windows build ${{ github.run_number }}" \
+            --notes "SerialPrograms (Pokemon Automation) with the FRLG Autostory. Unzip, then run SerialPrograms.exe. Built from ${{ github.sha }}."
