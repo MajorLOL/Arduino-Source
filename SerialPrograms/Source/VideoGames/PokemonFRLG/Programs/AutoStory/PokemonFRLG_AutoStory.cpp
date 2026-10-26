@@ -49,7 +49,11 @@ AutoStory_Descriptor::AutoStory_Descriptor()
         PanelQualityStanding::THIRD_PARTY_UNVETTED,
         ProgramControllerClass::StandardController_RequiresPrecision,
         FeedbackType::REQUIRED,
-        AllowCommandsWhenRunning::DISABLE_COMMANDS
+        AllowCommandsWhenRunning::DISABLE_COMMANDS,
+        {
+            //  Multi-line OCR (battle text, dialogs, bag descriptions).
+            "PaddleOCRDetection",
+        }
     )
 {}
 

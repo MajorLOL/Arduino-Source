@@ -64,6 +64,9 @@ jobs:
           $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
           windeployqt --release --dir $out "$out/SerialPrograms.exe"
           Remove-Item "$out/*.lib", "$out/*.exp", "$out/*.pdb", "$out/*.ilk" -ErrorAction SilentlyContinue
+          #  The program only adds to an existing stats file ("Unable to save stats." otherwise).
+          New-Item -ItemType Directory -Force -Path "$out/UserSettings" | Out-Null
+          if (-not (Test-Path "$out/UserSettings/PA-Stats.txt")) { New-Item -ItemType File -Path "$out/UserSettings/PA-Stats.txt" | Out-Null }
           $sha = git -C Arduino-Source rev-parse HEAD
           "https://github.com/${{ github.repository }}/commit/$sha" | Out-File "$out/version.txt"
           New-Item -ItemType Directory -Path "package" | Out-Null
