@@ -630,14 +630,16 @@ StoryBattleResult run_story_battle(
                     console
                 );
             }
-            //  Nothing to answer on screen. An evolution (or a long battle
-            //  animation) shows the battle text box without the arrow:
-            //  wait, and never press B (that stops the evolution).
+            //  The battle text box without the advance arrow: FRLG shows no
+            //  arrow on some last lines (a trainer's words when defeated), and
+            //  an evolution shows the box while it runs. A goes on in both
+            //  cases. Never B here: B stops an evolution.
             VideoSnapshot screen = console.video().snapshot();
             BattleDialogDetector battle_text(COLOR_RED);
             if (battle_text.detect(screen)){
                 seen_battle = true;
-                pbf_wait(context, 1000ms);
+                last_activity = current_time();
+                pbf_press_button(context, BUTTON_A, 160ms, 840ms);
                 context.wait_for_all_requests();
                 break;
             }

@@ -404,10 +404,13 @@ bool story_cutscene(
         WhiteDialogWatcher dialog(COLOR_RED);
         BattleMenuWatcher battle_menu(COLOR_RED);
         AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+        //  Also the battle text box without the advance arrow (a trainer's
+        //  last words in battle): the battle logic handles it.
+        BattleDialogWatcher battle_box(COLOR_RED);
         rt.context.wait_for_all_requests();
         int ret = wait_until(
             rt.console, rt.context, 1000ms,
-            { yes_no, dialog, battle_menu, battle_text }
+            { yes_no, dialog, battle_menu, battle_text, battle_box }
         );
         switch (ret){
         case 0:{
@@ -429,7 +432,8 @@ bool story_cutscene(
             break;
         case 2:
         case 3:
-            rt.console.log("A battle started: " + what);
+        case 4:
+            rt.console.log("A battle is on screen: " + what);
             return true;
         default:
             if (current_time() - start >= min_time){
