@@ -485,9 +485,12 @@ namespace{
 //  "scene_at_end": the last move lands on a script trigger, so a text box
 //  or a change of screen right at the end is the scene starting (the next
 //  step takes care of it), not a battle.
-void walk_run(
+//  "warp_at_end": the leg ends by pushing into a door or onto a mat. If the
+//  screen fades right at the end, the warp already started (the input
+//  lasted a little long). Returns true then.
+bool walk_run(
     StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, uint16_t count,
-    bool track, bool scene_at_end, const std::string& where
+    bool track, bool scene_at_end, bool warp_at_end, const std::string& where
 ){
     const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
     const double frames = run.kind == RunKind::JUMP ? JUMP_FRAMES : (surf ? SURF_FRAMES : WALK_FRAMES);
@@ -504,7 +507,7 @@ void walk_run(
                 where + " step " + std::to_string(i + 1) + "/" + std::to_string(count)
             );
         }
-        return;
+        return false;
     }
 
     int remaining = count;
@@ -539,7 +542,13 @@ void walk_run(
             if (a.event != RunEvent::NONE){
                 rt.console.log("On the trigger: the scene starts.");
             }
-            return;
+            return false;
+        }
+        if (warp_at_end && remaining == 0 &&
+            (a.event == RunEvent::SCREEN_CHANGED || a.event == RunEvent::BATTLE_START)
+        ){
+            rt.console.log("The warp started at the end of the run.");
+            return true;
         }
 
         switch (a.event){
@@ -593,6 +602,36 @@ void walk_run(
             not_moving = 0;
         }
     }
+    return false;
+}
+
+
+//  With the video check, runs one after the other in the same direction
+//  are walked as one (walking onto grass and on through it), without a stop
+//  in between. Each kind keeps its own handling otherwise.
+std::vector<StoryRun> merge_runs(const StoryRun* runs, uint16_t count, bool merge){
+    std::vector<StoryRun> result;
+    auto mergeable = [](RunKind a, RunKind b){
+        auto walk = [](RunKind k){ return k == RunKind::WALK || k == RunKind::CHECKED; };
+        auto surf = [](RunKind k){ return k == RunKind::SURF || k == RunKind::SURF_CHECKED; };
+        return (walk(a) && walk(b)) || (surf(a) && surf(b));
+    };
+    for (uint16_t r = 0; r < count; r++){
+        const StoryRun& run = runs[r];
+        if (merge && !result.empty() &&
+            result.back().direction == run.direction &&
+            mergeable(result.back().kind, run.kind)
+        ){
+            StoryRun& back = result.back();
+            back.count = (uint16_t)(back.count + run.count);
+            if (run.kind == RunKind::CHECKED || run.kind == RunKind::SURF_CHECKED){
+                back.kind = run.kind;
+            }
+            continue;
+        }
+        result.push_back(run);
+    }
+    return result;
 }
 
 }
@@ -601,15 +640,23 @@ void walk_run(
 void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     const StoryLeg& leg = script.leg(leg_index);
     rt.console.log(std::string("Walking: ") + leg.name);
-    if (leg.start_facing != DPAD_NONE){
+    const std::vector<StoryRun> runs = merge_runs(script.leg_runs(leg), leg.run_count, rt.verify_walking);
+
+    //  Which way the player faces is what our own last move left. The
+    //  route only guesses it (a scene may have turned the player), so it is
+    //  used only on the water, where a wrong guess costs a step either way.
+    //  Walking, an unknown facing is allowed for (half a turn).
+    if (rt.facing == DPAD_NONE && leg.start_facing != DPAD_NONE && !runs.empty() &&
+        (runs[0].kind == RunKind::SURF || runs[0].kind == RunKind::SURF_CHECKED)
+    ){
         rt.facing = leg.start_facing;
     }
 
-    const StoryRun* runs = script.leg_runs(leg);
     bool warped = false;
-    for (uint16_t r = 0; r < leg.run_count; r++){
+    bool warped_early = false;
+    for (size_t r = 0; r < runs.size(); r++){
         const StoryRun& run = runs[r];
-        const bool last = r + 1 == leg.run_count;
+        const bool last = r + 1 == runs.size();
         const RunKind next = last ? RunKind::WALK : runs[r + 1].kind;
         switch (run.kind){
         case RunKind::WALK:
@@ -624,8 +671,9 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             const bool onto_warp = last && leg.end == LegEnd::WARP_STEP && run.kind != RunKind::JUMP;
             uint16_t count = onto_warp ? (uint16_t)(run.count - 1) : run.count;
             const bool scene_at_end = last && leg.end == LegEnd::TRIGGER;
+            const bool warp_at_end = last && leg.end == LegEnd::WARP_PUSH;
             if (count > 0){
-                walk_run(rt, leg, run, count, track, scene_at_end, leg.name);
+                warped_early = walk_run(rt, leg, run, count, track, scene_at_end, warp_at_end, leg.name);
             }
             if (onto_warp){
                 const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
@@ -660,7 +708,11 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     case LegEnd::STOP:
         break;
     case LegEnd::WARP_PUSH:
-        take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
+        if (warped_early){
+            wait_warp_step(rt, leg.dark || leg.dest_dark, leg.preview, leg.name);
+        }else{
+            take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
+        }
         rt.facing = DPAD_NONE;
         break;
     case LegEnd::WARP_STEP:
@@ -687,6 +739,8 @@ bool story_cutscene(
     bool answer_yes, const std::string& what
 ){
     rt.console.log("Cutscene: " + what);
+    //  A scene can turn or move the player.
+    rt.facing = DPAD_NONE;
     WallClock start = current_time();
     WallClock deadline = start + max_time;
     while (current_time() < deadline){
