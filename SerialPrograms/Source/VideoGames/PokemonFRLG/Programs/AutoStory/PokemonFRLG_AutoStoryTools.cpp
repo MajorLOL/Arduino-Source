@@ -478,25 +478,28 @@ void walk_run(
     int remaining = count;
     int not_moving = 0;
     while (remaining > 0){
-        RunAttempt a = attempt_moves(rt, run.direction, remaining, frames, tiles_per_move, surf, leg.dark, track);
+        //  After a try that did not move at all, one move at a time: if the
+        //  video is wrong about it, little harm is done.
+        const int moves = not_moving > 0 ? 1 : remaining;
+        RunAttempt a = attempt_moves(rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track);
         if (track){
             rt.console.log(
                 std::string("Walked ") + dpad_name(run.direction) + ": " +
-                std::to_string(a.moves) + " of " + std::to_string(remaining) +
+                std::to_string(a.moves) + " of " + std::to_string(moves) +
                 (a.measured ? "" : " (video unsure)") + " - " + a.video
             );
         }
         int made = a.moves;
-        if (made > remaining && a.measured && !scene_at_end){
+        if (made > moves && a.measured && !scene_at_end){
             //  One too many (the input lasted too long): step back.
-            int back = made - remaining;
+            int back = made - moves;
             rt.console.log("Walked " + std::to_string(back) + " too far. Stepping back.", COLOR_ORANGE);
             for (int i = 0; i < back; i++){
                 attempt_moves(rt, opposite(run.direction), 1, frames, tiles_per_move, surf, leg.dark, false);
             }
-            made = remaining;
+            made = moves;
         }
-        made = std::min(made, remaining);
+        made = std::min(made, moves);
         remaining -= made;
         rt.steps += (uint64_t)made * (uint64_t)tiles_per_move;
 
