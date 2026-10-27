@@ -530,6 +530,7 @@ StoryBattleResult run_story_battle(
 ){
     memory.battles++;
     memory.last_slot = -1;
+    memory.list_back = 0;
     StoryBattleResult result = StoryBattleResult::WON;
     bool seen_battle = false;
     bool decided = false;       //  wild: fight/run/catch decided
@@ -559,6 +560,7 @@ StoryBattleResult run_story_battle(
         case 0:{
             seen_battle = true;
             last_activity = current_time();
+            memory.list_back = 0;   //  The last pick went through.
             if (!decided){
                 decided = true;
                 safari = menu_is_safari(console);
@@ -689,11 +691,13 @@ StoryBattleResult run_story_battle(
                     last_activity = current_time();
                     unknown_in_row = 0;
                     console.log("The move list is open. Picking a move.", COLOR_ORANGE);
-                    if (memory.last_slot >= 0){
-                        //  The move picked last did not happen: no PP left.
+                    if (memory.last_slot >= 0 && ++memory.list_back >= 2){
+                        //  The move picked last did not happen, twice: no PP
+                        //  left. (Once is also a press the game missed.)
                         console.log("Move " + std::to_string(memory.last_slot + 1) + " seems to be out of PP.", COLOR_ORANGE);
                         memory.no_pp |= (uint8_t)(1 << memory.last_slot);
                         memory.last_slot = -1;
+                        memory.list_back = 0;
                     }
                     std::string slug;
                     const SpeciesInfo* opponent = read_opponent(console, slug);

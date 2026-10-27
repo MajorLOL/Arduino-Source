@@ -78,6 +78,9 @@ struct StoryBattleMemory{
     uint8_t no_pp = 0;
     //  The slot picked last, -1 if none in this battle.
     int last_slot = -1;
+    //  How many times in a row the move list came back after picking
+    //  "last_slot" (a press the game missed brings it back once).
+    int list_back = 0;
 };
 
 
