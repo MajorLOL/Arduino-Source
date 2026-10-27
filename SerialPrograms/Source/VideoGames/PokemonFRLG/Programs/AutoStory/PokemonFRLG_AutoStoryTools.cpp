@@ -10,6 +10,9 @@
 #include <vector>
 #include "Common/Cpp/Time.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
+#include "CommonFramework/ImageTypes/ImageViewRGB32.h"
+#include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonTools/Async/InferenceRoutines.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
@@ -21,6 +24,7 @@
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_SelectionArrowDetector.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_StartMenuNavigation.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
+#include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_AutoStoryWalkTracker.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
@@ -432,10 +436,16 @@ StoryBattleResult story_checked_step(
         );
         rt.facing = direction;
         const AutoStoryScroll::Tracker& t = tracker.tracker();
-        //  Not moved: only if the screen still looks exactly as before the
-        //  step. (If it changed some other way, the video cannot tell.)
-        const bool unchanged = !t.lost() && t.last_mismatch() <= t.noise() + 2.0;
-        if (ret < 0 && rt.verify_walking && t.reliable() && t.tiles() == 0 && unchanged){
+        if (rt.verify_walking && ret < 0 && (t.lost() || !t.reliable() || t.tiles() != 1)){
+            rt.console.log(
+                "Step " + std::string(dpad_name(direction)) + " (" + where + "): " + t.summary() +
+                (t.reliable() ? "" : ", unsure"),
+                COLOR_ORANGE
+            );
+        }
+        //  Not moved: the map did not scroll. (Animated water or flowers,
+        //  or someone walking around, do not make it look scrolled.)
+        if (ret < 0 && rt.verify_walking && !t.lost() && t.reliable() && t.tiles() == 0){
             //  The step did not happen (the game ignored the input, or
             //  something is in the way). Take it again, so the caller's
             //  idea of where the player is stays right.
@@ -486,6 +496,43 @@ void story_face(StoryRuntime& rt, DpadPosition direction){
     pbf_press_dpad(rt.context, direction, frames_to_ms(4), frames_to_ms(14));
     rt.context.wait_for_all_requests();
     rt.facing = direction;
+}
+
+
+
+bool story_take_picture(StoryRuntime& rt, AutoStoryScroll::Screen& picture){
+    if (!rt.verify_walking){
+        return false;
+    }
+    wait_for_still_screen(rt);
+    VideoSnapshot frame = rt.console.video().snapshot();
+    if (!frame){
+        return false;
+    }
+    ImageViewRGB32 game = extract_box_reference(*frame.frame, GameSettings::instance().GAME_BOX);
+    AutoStoryScroll::sample_screen(
+        picture,
+        game.data(), game.bytes_per_row(),
+        game.width(), game.height()
+    );
+    return true;
+}
+
+bool story_offset_from(
+    StoryRuntime& rt, const AutoStoryScroll::Screen& picture, const std::string& where,
+    int& dx, int& dy, AutoStoryScroll::Screen& now
+){
+    if (!story_take_picture(rt, now)){
+        return false;
+    }
+    AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(picture, now, 3);
+    rt.console.log("Position check (" + where + "): " + offset.summary());
+    if (!offset.clear){
+        return false;
+    }
+    dx = offset.x;
+    dy = offset.y;
+    return true;
 }
 
 

@@ -18,6 +18,7 @@
 #include "NintendoSwitch/Controllers/NintendoSwitch_ControllerButtons.h"
 #include "PokemonFRLG_AutoStoryScript.h"
 #include "PokemonFRLG_AutoStoryBattle.h"
+#include "PokemonFRLG_AutoStoryScroll.h"
 
 namespace PokemonAutomation{
 
@@ -98,6 +99,20 @@ StoryBattleResult story_checked_step(
 
 //  Turn to face "direction" without walking.
 void story_face(StoryRuntime& rt, DpadPosition direction);
+
+//  With the video check: a picture of the map around the player, once the
+//  screen stands still, to tell later where the player stands compared to
+//  now. False without the video check.
+bool story_take_picture(StoryRuntime& rt, AutoStoryScroll::Screen& picture);
+
+//  Where the player stands now compared to when "picture" was taken, in
+//  tiles (x to the right, y down), up to 3 tiles away. False if the video
+//  does not tell clearly (a text box, someone in the way, too far), or
+//  without the video check. "now": the picture taken for this.
+bool story_offset_from(
+    StoryRuntime& rt, const AutoStoryScroll::Screen& picture, const std::string& where,
+    int& dx, int& dy, AutoStoryScroll::Screen& now
+);
 
 
 //  Get through a scene: B advances the text, YES/NO questions are answered

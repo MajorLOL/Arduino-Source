@@ -127,6 +127,93 @@ double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy){
 
 
 
+std::string TileOffset::summary() const{
+    char buffer[128];
+    snprintf(
+        buffer, sizeof(buffer), "(%d, %d) tiles, mismatch %.1f, margin %.1f%s",
+        x, y, best, margin, clear ? "" : " - unclear"
+    );
+    return buffer;
+}
+
+TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles){
+    auto in_player = [](int x, int y){
+        return x >= PLAYER_X0 && x < PLAYER_X1 && y >= PLAYER_Y0 && y < PLAYER_Y1;
+    };
+
+    //  The best offset over the whole screen.
+    TileOffset result;
+    result.best = 1e18;
+    for (int ty = -max_tiles; ty <= max_tiles; ty++){
+        for (int tx = -max_tiles; tx <= max_tiles; tx++){
+            double m = screen_mismatch(key, now, tx * TILE_PIXELS, ty * TILE_PIXELS);
+            if (m < result.best){
+                result.best = m;
+                result.x = tx;
+                result.y = ty;
+            }
+        }
+    }
+
+    //  Against every other offset: over a field of identical tiles (grass,
+    //  floor) the picture looks the same a tile further, so the whole screen
+    //  says little. Compare only the pixels where the two offsets would show
+    //  different things (edges of trees, paths, water, buildings). There, the
+    //  right offset matches up to the noise and the wrong one does not.
+    const int bx = result.x * TILE_PIXELS;
+    const int by = result.y * TILE_PIXELS;
+    result.margin = 1e18;
+    for (int ty = -max_tiles; ty <= max_tiles; ty++){
+        for (int tx = -max_tiles; tx <= max_tiles; tx++){
+            if (tx == result.x && ty == result.y){
+                continue;
+            }
+            const int cx = tx * TILE_PIXELS;
+            const int cy = ty * TILE_PIXELS;
+            long sum_best = 0;
+            long sum_other = 0;
+            long count = 0;
+            for (int y = 0; y < SCREEN_HEIGHT; y += 2){
+                const int yb = y + by;
+                const int yc = y + cy;
+                if (yb < 0 || yb >= SCREEN_HEIGHT || yc < 0 || yc >= SCREEN_HEIGHT){
+                    continue;
+                }
+                for (int x = 0; x < SCREEN_WIDTH; x += 2){
+                    const int xb = x + bx;
+                    const int xc = x + cx;
+                    if (xb < 0 || xb >= SCREEN_WIDTH || xc < 0 || xc >= SCREEN_WIDTH){
+                        continue;
+                    }
+                    if (in_player(x, y) || in_player(xb, yb) || in_player(xc, yc)){
+                        continue;
+                    }
+                    const int kb = key.at(xb, yb);
+                    const int kc = key.at(xc, yc);
+                    if (abs(kb - kc) <= 16){
+                        continue;
+                    }
+                    const int n = now.at(x, y);
+                    sum_best += std::min(abs(n - kb), DIFF_CAP);
+                    sum_other += std::min(abs(n - kc), DIFF_CAP);
+                    count++;
+                }
+            }
+            double margin = count < 50
+                ? 0     //  The two offsets look the same: no telling them apart.
+                : (double)(sum_other - sum_best) / (double)count;
+            result.margin = std::min(result.margin, margin);
+        }
+    }
+
+    //  The same place shows the same picture, give or take the video noise
+    //  (about 1), animated water and flowers, and people walking around.
+    result.clear = result.best <= 10.0 && result.margin >= 8.0;
+    return result;
+}
+
+
+
 Tracker::Tracker(int dir_x, int dir_y, double max_pixels_per_ms)
     : m_dir_x(dir_x)
     , m_dir_y(dir_y)

@@ -63,6 +63,20 @@ void sample_screen(
 double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy);
 
 
+//  Where the player stands in "now" compared to "key", both taken with the
+//  player standing still, in whole tiles: x to the right, y down. Looks up
+//  to "max_tiles" tiles away each way.
+struct TileOffset{
+    int x = 0;
+    int y = 0;
+    double best = 0;        //  The mismatch at that offset, over the whole screen.
+    double margin = 0;      //  How much worse the next best offset is, where they differ.
+    bool clear = false;     //  The best offset stands out: the answer can be trusted.
+    std::string summary() const;
+};
+TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles);
+
+
 
 //  Follows the scrolling during a straight run in one direction.
 class Tracker{
