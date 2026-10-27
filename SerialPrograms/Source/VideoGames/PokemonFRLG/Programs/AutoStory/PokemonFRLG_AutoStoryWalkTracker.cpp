@@ -87,6 +87,48 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
 
 
 
+StableScreenWatcher::StableScreenWatcher(Milliseconds duration)
+    : VisualInferenceCallback("StableScreenWatcher")
+    , m_duration(duration)
+    , m_last(WallClock::min())
+    , m_stable_since(WallClock::min())
+{}
+
+void StableScreenWatcher::make_overlays(VideoOverlaySet&) const{}
+
+bool StableScreenWatcher::process_frame(const VideoSnapshot& frame){
+    if (!frame || frame.timestamp == m_last){
+        return false;
+    }
+    m_last = frame.timestamp;
+    ImageViewRGB32 game = extract_box_reference(*frame.frame, GameSettings::instance().GAME_BOX);
+    AutoStoryScroll::sample_screen(
+        m_screen,
+        game.data(), game.bytes_per_row(),
+        game.width(), game.height()
+    );
+    if (!m_has_previous){
+        m_previous = m_screen;
+        m_has_previous = true;
+        return false;
+    }
+    //  The video noise is about 1. Animated tiles and people walking
+    //  around add a little.
+    double change = AutoStoryScroll::screen_mismatch(m_previous, m_screen, 0, 0);
+    m_previous = m_screen;
+    if (change > 3.0){
+        m_stable_since = WallClock::min();
+        return false;
+    }
+    if (m_stable_since == WallClock::min()){
+        m_stable_since = frame.timestamp;
+        return false;
+    }
+    return frame.timestamp - m_stable_since >= m_duration;
+}
+
+
+
 }
 }
 }

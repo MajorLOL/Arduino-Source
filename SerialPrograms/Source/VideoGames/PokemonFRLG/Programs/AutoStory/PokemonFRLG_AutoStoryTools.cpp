@@ -227,6 +227,15 @@ DpadPosition opposite(DpadPosition direction){
 }
 
 
+//  Wait (a moment at most) until the screen stops changing: menus closed,
+//  fades over. A move is measured against the first picture, which must
+//  show the map as it is.
+void wait_for_still_screen(StoryRuntime& rt){
+    StableScreenWatcher stable(100ms);
+    rt.context.wait_for_all_requests();
+    wait_until(rt.console, rt.context, 1000ms, { {stable, 10ms} });
+}
+
 //  What ended an attempt to walk part of a run.
 enum class RunEvent{
     NONE,               //  The input was done.
@@ -272,6 +281,9 @@ RunAttempt attempt_moves(
     events.push_back(RunEvent::DIALOG);
 
     DpadPosition facing = rt.facing;
+    if (track){
+        wait_for_still_screen(rt);
+    }
     rt.context.wait_for_all_requests();
     int ret = run_until<ProControllerContext>(
         rt.console, rt.context,
@@ -392,6 +404,9 @@ StoryBattleResult story_checked_step(
             callbacks.emplace_back(tracker, 10ms);
         }
         DpadPosition& facing = rt.facing;
+        if (rt.verify_walking){
+            wait_for_still_screen(rt);
+        }
         rt.context.wait_for_all_requests();
         int ret = run_until<ProControllerContext>(
             rt.console, rt.context,
@@ -403,7 +418,10 @@ StoryBattleResult story_checked_step(
         );
         rt.facing = direction;
         const AutoStoryScroll::Tracker& t = tracker.tracker();
-        if (ret < 0 && rt.verify_walking && t.reliable() && t.tiles() == 0){
+        //  Not moved: only if the screen still looks exactly as before the
+        //  step. (If it changed some other way, the video cannot tell.)
+        const bool unchanged = t.last_mismatch() <= t.noise() + 2.0;
+        if (ret < 0 && rt.verify_walking && t.reliable() && t.tiles() == 0 && unchanged){
             //  The step did not happen (the game ignored the input, or
             //  something is in the way). Take it again, so the caller's
             //  idea of where the player is stays right.
@@ -412,16 +430,30 @@ StoryBattleResult story_checked_step(
             continue;
         }
         rt.steps++;
+        //  Two steps for one press (the press lasted too long): one back,
+        //  after the battle if one started.
+        const int extra = rt.verify_walking && t.reliable() ? t.tiles() - 1 : 0;
+        auto step_back = [&](){
+            for (int i = 0; i < extra; i++){
+                rt.console.log("The step " + std::string(dpad_name(direction)) + " went one tile too far: " + where + ". Stepping back.", COLOR_ORANGE);
+                attempt_moves(rt, opposite(direction), 1, frames, 1, surf, false, false);
+            }
+        };
         if (ret < 0){
+            step_back();
             return StoryBattleResult::NO_BATTLE;
         }
         //  ret 3: the tracker lost the map, a battle transition.
         StoryBattleKind kind = (ret == 2 || trainer) ? StoryBattleKind::TRAINER : wild_kind;
-        return story_battle(
+        StoryBattleResult result = story_battle(
             rt, kind,
             where + " (going " + dpad_name(direction) + ")",
             throw_on_loss
         );
+        if (result != StoryBattleResult::LOST){
+            step_back();
+        }
+        return result;
     }
     OperationFailedExceptionWithScreenshot::fire(
         ErrorReportMode::SEND_ERROR_REPORT,

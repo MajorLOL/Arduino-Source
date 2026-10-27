@@ -44,6 +44,27 @@ private:
 };
 
 
+//  Stops once the game screen has not changed for "duration": menus are
+//  closed, fades are over. A move measured from a screen that was still
+//  changing would be measured wrong.
+class StableScreenWatcher : public VisualInferenceCallback{
+public:
+    StableScreenWatcher(Milliseconds duration);
+
+    using VisualInferenceCallback::process_frame;
+    virtual void make_overlays(VideoOverlaySet& items) const override;
+    virtual bool process_frame(const VideoSnapshot& frame) override;
+
+private:
+    Milliseconds m_duration;
+    bool m_has_previous = false;
+    AutoStoryScroll::Screen m_previous;
+    AutoStoryScroll::Screen m_screen;
+    WallClock m_last;
+    WallClock m_stable_since;
+};
+
+
 
 }
 }
