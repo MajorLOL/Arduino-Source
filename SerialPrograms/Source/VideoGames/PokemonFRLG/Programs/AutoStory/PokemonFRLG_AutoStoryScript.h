@@ -47,6 +47,15 @@ enum class LegEnd : uint8_t{
     INTERACT,       //  Turn to "face" something to talk to or use.
 };
 
+//  The area picture the game shows when the warp at the end of a leg enters
+//  a dungeon area from another area (src/map_preview_screen.c). The player
+//  cannot move while it is shown.
+enum class MapPreview : uint8_t{
+    NONE,
+    FOREST,         //  Drawn over the new map, 40-120 frames and a cross-fade.
+    CAVE,           //  Full screen picture before the map fades in. Holding B skips it.
+};
+
 struct StoryRun{
     DpadPosition direction;
     uint16_t count;
@@ -63,6 +72,7 @@ struct StoryLeg{
     LegEnd end;
     bool dark;                  //  The leg starts on a map that is dark without Flash.
     bool dest_dark;             //  The warp at the end leads to a dark map.
+    MapPreview preview;         //  Shown after the warp at the end.
 };
 
 enum class StepType : uint8_t{

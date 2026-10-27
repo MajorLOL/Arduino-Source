@@ -5,6 +5,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include "Common/Cpp/Time.h"
@@ -20,6 +21,7 @@
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_SelectionArrowDetector.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_StartMenuNavigation.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
+#include "PokemonFRLG_AutoStoryWalkTracker.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
 namespace PokemonAutomation{
@@ -95,40 +97,31 @@ void single_move(
 }
 
 
-//  A straight run of moves of the same length in one direction.
-struct Move{
-    DpadPosition direction;
-    uint32_t count;
-    double frames;      //  per move
-};
-
-//  Walk the moves as one continuous input, starting from a standstill.
-//  Direction switches happen halfway through the last move of a run,
-//  which gives a tolerance of half a move either way. The last run is
-//  released halfway through its last move, so the player stops on the
-//  final tile.
-void walk_continuous(
-    ProControllerContext& context, DpadPosition& facing,
-    const std::vector<Move>& moves
-){
-    if (moves.empty()){
-        return;
+//  The new map is fading in: wait until the player can move.
+void wait_after_warp(StoryRuntime& rt, MapPreview preview, const char* leg_name){
+    switch (preview){
+    case MapPreview::FOREST:
+        //  The area picture is drawn over the new map: a fade in, 40 to 120
+        //  frames, a cross-fade of about 50 frames. The player cannot move
+        //  until it is gone (Task_RunMapPreviewScreenForest).
+        rt.console.log(std::string("Area picture, waiting for it to go away: ") + leg_name);
+        pbf_wait(rt.context, 5000ms);
+        break;
+    case MapPreview::CAVE:
+        //  A full screen picture comes first. Holding B ends it
+        //  (Task_MapPreviewScreen_0), then a flash and the map fades in.
+        rt.console.log(std::string("Area picture, skipping it with B: ") + leg_name);
+        pbf_press_button(rt.context, BUTTON_B, 1500ms, 3500ms);
+        break;
+    case MapPreview::NONE:
+        //  Coming out of a door, the game opens the door, walks the player
+        //  one step out and closes it again (Task_ExitDoor), and input is
+        //  ignored until that is done.
+        pbf_wait(rt.context, 2000ms);
+        break;
     }
-    double t = moves[0].direction == facing ? 0 : TURN_FRAMES;
-    double previous = 0;
-    double last_half = 0;
-    for (const Move& move : moves){
-        t += move.frames * move.count;
-        last_half = move.frames / 2;
-        double end = t - last_half;
-        pbf_press_dpad(context, move.direction, frames_to_ms(end - previous), 0ms);
-        previous = end;
-    }
-    //  Let the last move finish.
-    pbf_wait(context, frames_to_ms(last_half + 6));
-    facing = moves.back().direction;
+    rt.context.wait_for_all_requests();
 }
-
 
 //  Hold "direction" from a standstill until the warp has finished.
 //  Doors, mats and stairs all warp while the direction is held:
@@ -136,7 +129,7 @@ void walk_continuous(
 //    mat:    standing on it, holding the arrow       (TryArrowWarp)
 //    stairs: standing on them, holding sideways      (TryArrowWarp)
 void take_warp_push(
-    StoryRuntime& rt, DpadPosition direction, bool dark, const char* leg_name
+    StoryRuntime& rt, DpadPosition direction, bool dark, MapPreview preview, const char* leg_name
 ){
     BlackScreenOverWatcher warp_finished(COLOR_RED);
     rt.context.wait_for_all_requests();
@@ -162,15 +155,12 @@ void take_warp_push(
             );
         }
     }
-    //  The new map is fading in. Coming out of a door, the game opens the
-    //  door, walks the player one step out and closes it again
-    //  (Task_ExitDoor), and input is ignored until that is done.
-    pbf_wait(rt.context, 2000ms);
-    rt.context.wait_for_all_requests();
+    wait_after_warp(rt, preview, leg_name);
 }
 
-//  The last step landed on a warp tile (ladder, hole, warp pad, cave).
-void wait_warp_step(StoryRuntime& rt, bool dark, const char* leg_name){
+//  The last step landed on a warp tile (ladder, hole, warp pad, cave), or
+//  a spinner carries the player onto one.
+void wait_warp_step(StoryRuntime& rt, bool dark, MapPreview preview, const char* leg_name){
     BlackScreenOverWatcher warp_finished(COLOR_RED);
     int ret = wait_until(rt.console, rt.context, 10000ms, { warp_finished });
     if (ret < 0){
@@ -184,9 +174,154 @@ void wait_warp_step(StoryRuntime& rt, bool dark, const char* leg_name){
             );
         }
     }
-    //  Arriving on a cave entrance, the game walks the player one step out.
-    pbf_wait(rt.context, 2000ms);
+    wait_after_warp(rt, preview, leg_name);
+}
+
+//  Take the last step, onto a warp tile. If the step did not happen (the
+//  game ignored the input), take it again.
+void step_onto_warp(
+    StoryRuntime& rt, DpadPosition direction, double frames, bool surf,
+    bool dark, MapPreview preview, const char* leg_name
+){
+    for (int attempt = 0; attempt < 3; attempt++){
+        BlackScreenOverWatcher warp_finished(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        int ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                single_move(context, rt.facing, direction, frames, surf);
+                pbf_wait(context, 5000ms);
+            },
+            { warp_finished }
+        );
+        rt.facing = direction;
+        rt.steps++;
+        if (ret == 0){
+            wait_after_warp(rt, preview, leg_name);
+            return;
+        }
+        if (dark){
+            rt.console.log(std::string("Warp not seen on a dark map: ") + leg_name, COLOR_ORANGE);
+            wait_after_warp(rt, preview, leg_name);
+            return;
+        }
+        rt.console.log(std::string("No warp after the last step of ") + leg_name + ". Taking the step again.", COLOR_ORANGE);
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        std::string("walk_leg(): Stepping onto the warp did not warp: ") + leg_name +
+        ". The player is probably not where the route expects.",
+        rt.console
+    );
+}
+
+
+DpadPosition opposite(DpadPosition direction){
+    switch (direction){
+    case DPAD_UP:       return DPAD_DOWN;
+    case DPAD_DOWN:     return DPAD_UP;
+    case DPAD_LEFT:     return DPAD_RIGHT;
+    case DPAD_RIGHT:    return DPAD_LEFT;
+    default:            return DPAD_NONE;
+    }
+}
+
+
+//  What ended an attempt to walk part of a run.
+enum class RunEvent{
+    NONE,               //  The input was done.
+    SCREEN_CHANGED,     //  The video no longer shows the map (battle, fade, menu).
+    BATTLE_START,       //  The screen went black: a battle transition.
+    BATTLE_TEXT,        //  Battle text with the advance arrow.
+    DIALOG,             //  A text box: a trainer saw the player, or a sign.
+};
+
+struct RunAttempt{
+    int moves = 0;          //  Moves made.
+    bool measured = false;  //  "moves" was measured on the video.
+    RunEvent event = RunEvent::NONE;
+    std::string video;      //  What the video tracker saw.
+};
+
+//  From a standstill, try to make "moves" moves (steps, jumps) in
+//  "direction" as one held input. Stops early if a battle or a text box
+//  shows up. With "track", the video tells how many moves were made.
+RunAttempt attempt_moves(
+    StoryRuntime& rt, DpadPosition direction, int moves,
+    double frames, int tiles_per_move, bool surf, bool dark, bool track
+){
+    BlackScreenWatcher battle_starting(COLOR_RED);
+    AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+    WhiteDialogWatcher dialog(COLOR_RED);
+    WalkTracker tracker(direction, frames / tiles_per_move);
+
+    std::vector<PeriodicInferenceCallback> callbacks;
+    std::vector<RunEvent> events;
+    if (track){
+        callbacks.emplace_back(tracker, 10ms);
+        events.push_back(RunEvent::SCREEN_CHANGED);
+    }
+    if (!dark){
+        //  Without Flash the screen is mostly black anyway.
+        callbacks.emplace_back(battle_starting);
+        events.push_back(RunEvent::BATTLE_START);
+    }
+    callbacks.emplace_back(battle_text);
+    events.push_back(RunEvent::BATTLE_TEXT);
+    callbacks.emplace_back(dialog);
+    events.push_back(RunEvent::DIALOG);
+
+    DpadPosition facing = rt.facing;
     rt.context.wait_for_all_requests();
+    int ret = run_until<ProControllerContext>(
+        rt.console, rt.context,
+        [&](ProControllerContext& context){
+            if (moves == 1){
+                single_move(context, facing, direction, frames, surf);
+            }else{
+                //  Released halfway through the last move: the player stops
+                //  at the end of it. Not knowing which way the player faces,
+                //  half a turn: within the last move either way.
+                double turn = direction == facing ? 0 : (facing == DPAD_NONE ? TURN_FRAMES / 2 : TURN_FRAMES);
+                double hold = turn + frames * moves - frames / 2;
+                pbf_press_dpad(context, direction, frames_to_ms(hold), frames_to_ms(frames / 2 + 6));
+            }
+        },
+        callbacks
+    );
+    rt.facing = direction;
+
+    RunAttempt result;
+    result.event = ret < 0 ? RunEvent::NONE : events[(size_t)ret];
+    if (!track){
+        result.moves = moves;
+        return result;
+    }
+    if (ret < 0){
+        //  The video lags behind the game: keep watching until the player
+        //  is seen standing still.
+        tracker.stop_when_still(150ms);
+        int still = wait_until(rt.console, rt.context, 700ms, { tracker });
+        if (still == 0 && tracker.tracker().lost()){
+            result.event = RunEvent::SCREEN_CHANGED;
+        }
+    }
+    const AutoStoryScroll::Tracker& t = tracker.tracker();
+    result.video = t.summary();
+    int tiles = t.tiles();
+    if (t.reliable() || result.event != RunEvent::NONE){
+        //  Interrupted: the video is the best guess there is, even unsure.
+        result.moves = (tiles + tiles_per_move / 2) / tiles_per_move;
+        result.measured = t.reliable();
+        if (result.moves < 0){
+            result.moves = 0;
+        }
+    }else{
+        //  The picture has too little detail (open water, darkness): trust
+        //  the timing.
+        result.moves = moves;
+    }
+    return result;
 }
 
 
@@ -245,31 +380,54 @@ StoryBattleResult story_checked_step(
     StoryBattleKind wild_kind, const std::string& where,
     bool throw_on_loss
 ){
-    BlackScreenWatcher battle_starting(COLOR_RED);
-    AdvanceBattleDialogWatcher battle_started(COLOR_RED);
-    WhiteDialogWatcher trainer_talking(COLOR_RED);
     Milliseconds check = trainer ? rt.trainer_check : rt.encounter_check;
     double frames = surf ? SURF_FRAMES : WALK_FRAMES;
-    DpadPosition& facing = rt.facing;
-    rt.context.wait_for_all_requests();
-    int ret = run_until<ProControllerContext>(
-        rt.console, rt.context,
-        [&](ProControllerContext& context){
-            single_move(context, facing, direction, frames, surf);
-            pbf_wait(context, check);
-        },
-        { battle_starting, battle_started, trainer_talking }
-    );
-    rt.steps++;
-    rt.facing = direction;
-    if (ret < 0){
-        return StoryBattleResult::NO_BATTLE;
+    for (int attempt = 0; attempt < 6; attempt++){
+        BlackScreenWatcher battle_starting(COLOR_RED);
+        AdvanceBattleDialogWatcher battle_started(COLOR_RED);
+        WhiteDialogWatcher trainer_talking(COLOR_RED);
+        WalkTracker tracker(direction, frames);
+        std::vector<PeriodicInferenceCallback> callbacks{battle_starting, battle_started, trainer_talking};
+        if (rt.verify_walking){
+            callbacks.emplace_back(tracker, 10ms);
+        }
+        DpadPosition& facing = rt.facing;
+        rt.context.wait_for_all_requests();
+        int ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                single_move(context, facing, direction, frames, surf);
+                pbf_wait(context, check);
+            },
+            callbacks
+        );
+        rt.facing = direction;
+        const AutoStoryScroll::Tracker& t = tracker.tracker();
+        if (ret < 0 && rt.verify_walking && t.reliable() && t.tiles() == 0){
+            //  The step did not happen (the game ignored the input, or
+            //  something is in the way). Take it again, so the caller's
+            //  idea of where the player is stays right.
+            rt.console.log("The step " + std::string(dpad_name(direction)) + " did not happen: " + where + ". Again.", COLOR_ORANGE);
+            pbf_wait(rt.context, attempt < 2 ? 300ms : 1500ms);
+            continue;
+        }
+        rt.steps++;
+        if (ret < 0){
+            return StoryBattleResult::NO_BATTLE;
+        }
+        //  ret 3: the tracker lost the map, a battle transition.
+        StoryBattleKind kind = (ret == 2 || trainer) ? StoryBattleKind::TRAINER : wild_kind;
+        return story_battle(
+            rt, kind,
+            where + " (going " + dpad_name(direction) + ")",
+            throw_on_loss
+        );
     }
-    StoryBattleKind kind = (ret == 2 || trainer) ? StoryBattleKind::TRAINER : wild_kind;
-    return story_battle(
-        rt, kind,
-        where + " (going " + dpad_name(direction) + ")",
-        throw_on_loss
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "The player does not move " + std::string(dpad_name(direction)) + ": " + where +
+        ". Something is in the way, or the player is not where the route expects.",
+        rt.console
     );
 }
 
@@ -287,6 +445,124 @@ void story_face(StoryRuntime& rt, DpadPosition direction){
 
 
 
+namespace{
+
+//  Walk one run of a leg, making sure all its moves happen: missing moves
+//  (the game ignored the input, an NPC was in the way, a battle stopped the
+//  player) are made again, moves too many are walked back.
+//  "scene_at_end": the last move lands on a script trigger, so a text box
+//  or a change of screen right at the end is the scene starting (the next
+//  step takes care of it), not a battle.
+void walk_run(
+    StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, uint16_t count,
+    bool track, bool scene_at_end, const std::string& where
+){
+    const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
+    const double frames = run.kind == RunKind::JUMP ? JUMP_FRAMES : (surf ? SURF_FRAMES : WALK_FRAMES);
+    const int tiles_per_move = run.kind == RunKind::JUMP ? 2 : 1;
+    const bool encounters = run.kind == RunKind::CHECKED || run.kind == RunKind::SURF_CHECKED || run.kind == RunKind::CHECKED_TRAINER;
+    const StoryBattleKind battle_kind = run.kind == RunKind::CHECKED_TRAINER ? StoryBattleKind::TRAINER : StoryBattleKind::WILD;
+    const std::string label = where + " (going " + dpad_name(run.direction) + ")";
+
+    if (!track && encounters){
+        //  No video check: one step at a time, watching for a battle after each.
+        for (uint16_t i = 0; i < count; i++){
+            story_checked_step(
+                rt, run.direction, surf, run.kind == RunKind::CHECKED_TRAINER, StoryBattleKind::WILD,
+                where + " step " + std::to_string(i + 1) + "/" + std::to_string(count)
+            );
+        }
+        return;
+    }
+
+    int remaining = count;
+    int not_moving = 0;
+    while (remaining > 0){
+        RunAttempt a = attempt_moves(rt, run.direction, remaining, frames, tiles_per_move, surf, leg.dark, track);
+        if (track){
+            rt.console.log(
+                std::string("Walked ") + dpad_name(run.direction) + ": " +
+                std::to_string(a.moves) + " of " + std::to_string(remaining) +
+                (a.measured ? "" : " (video unsure)") + " - " + a.video
+            );
+        }
+        int made = a.moves;
+        if (made > remaining && a.measured && !scene_at_end){
+            //  One too many (the input lasted too long): step back.
+            int back = made - remaining;
+            rt.console.log("Walked " + std::to_string(back) + " too far. Stepping back.", COLOR_ORANGE);
+            for (int i = 0; i < back; i++){
+                attempt_moves(rt, opposite(run.direction), 1, frames, tiles_per_move, surf, leg.dark, false);
+            }
+            made = remaining;
+        }
+        made = std::min(made, remaining);
+        remaining -= made;
+        rt.steps += (uint64_t)made * (uint64_t)tiles_per_move;
+
+        if (scene_at_end && remaining == 0){
+            if (a.event != RunEvent::NONE){
+                rt.console.log("On the trigger: the scene starts.");
+            }
+            return;
+        }
+
+        switch (a.event){
+        case RunEvent::BATTLE_START:
+        case RunEvent::BATTLE_TEXT:
+            story_battle(rt, battle_kind, label);
+            break;
+        case RunEvent::DIALOG:
+            //  A trainer saw the player (or a sign or person talks).
+            story_battle(rt, StoryBattleKind::TRAINER, label);
+            break;
+        case RunEvent::SCREEN_CHANGED:{
+            //  Maybe a battle is starting. Give it a moment to show.
+            BlackScreenWatcher battle_starting(COLOR_RED);
+            AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+            BattleMenuWatcher battle_menu(COLOR_RED);
+            WhiteDialogWatcher dialog(COLOR_RED);
+            std::vector<PeriodicInferenceCallback> callbacks{battle_text, battle_menu, dialog};
+            if (!leg.dark){
+                callbacks.emplace_back(battle_starting);
+            }
+            int ret = wait_until(rt.console, rt.context, 3000ms, callbacks);
+            if (ret == 2){
+                story_battle(rt, StoryBattleKind::TRAINER, label);
+            }else if (ret >= 0){
+                story_battle(rt, battle_kind, label);
+            }else{
+                rt.console.log("The screen changed but no battle came. Walking on.", COLOR_ORANGE);
+            }
+            break;
+        }
+        case RunEvent::NONE:
+            break;
+        }
+
+        if (made == 0 && a.event == RunEvent::NONE){
+            not_moving++;
+            if (not_moving >= 10){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "walk_leg(): The player does not move: " + label +
+                    ", " + std::to_string(remaining) + " of " + std::to_string(count) + " moves left. "
+                    "Something is in the way, or the player is not where the route expects.",
+                    rt.console
+                );
+            }
+            rt.console.log("Not moving (in the way, or the game is busy). Trying again.", COLOR_ORANGE);
+            pbf_wait(rt.context, not_moving <= 2 ? 500ms : 1500ms);
+            rt.context.wait_for_all_requests();
+        }else{
+            not_moving = 0;
+        }
+    }
+}
+
+}
+
+
 void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     const StoryLeg& leg = script.leg(leg_index);
     rt.console.log(std::string("Walking: ") + leg.name);
@@ -294,62 +570,41 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
         rt.facing = leg.start_facing;
     }
 
-    std::vector<Move> pending;      //  moves without wild encounters
-
-    auto flush = [&](){
-        if (pending.empty()){
-            return;
-        }
-        //  The first move works whichever way the player faces. After it,
-        //  the rest is one continuous input.
-        Move& first = pending[0];
-        single_move(rt.context, rt.facing, first.direction, first.frames, first.frames == SURF_FRAMES);
-        rt.steps++;
-        first.count--;
-        if (first.count == 0){
-            pending.erase(pending.begin());
-        }
-        if (!pending.empty()){
-            walk_continuous(rt.context, rt.facing, pending);
-            for (const Move& move : pending){
-                rt.steps += move.count;
-            }
-        }
-        pending.clear();
-        rt.context.wait_for_all_requests();
-    };
-
     const StoryRun* runs = script.leg_runs(leg);
+    bool warped = false;
     for (uint16_t r = 0; r < leg.run_count; r++){
         const StoryRun& run = runs[r];
+        const bool last = r + 1 == leg.run_count;
+        const RunKind next = last ? RunKind::WALK : runs[r + 1].kind;
         switch (run.kind){
         case RunKind::WALK:
-            pending.push_back({run.direction, run.count, WALK_FRAMES});
-            break;
         case RunKind::JUMP:
-            pending.push_back({run.direction, run.count, JUMP_FRAMES});
-            break;
         case RunKind::SURF:
-            pending.push_back({run.direction, run.count, SURF_FRAMES});
-            break;
         case RunKind::CHECKED:
         case RunKind::CHECKED_TRAINER:
         case RunKind::SURF_CHECKED:{
-            flush();
-            bool surf = run.kind == RunKind::SURF_CHECKED;
-            bool trainer = run.kind == RunKind::CHECKED_TRAINER;
-            for (uint16_t i = 0; i < run.count; i++){
-                story_checked_step(
-                    rt, run.direction, surf, trainer, StoryBattleKind::WILD,
-                    std::string(leg.name) + " step " + std::to_string(i + 1) + "/" + std::to_string(run.count)
+            //  A spinner after this run carries the player on: the video
+            //  would see that too.
+            const bool track = rt.verify_walking && next != RunKind::SPIN;
+            const bool onto_warp = last && leg.end == LegEnd::WARP_STEP && run.kind != RunKind::JUMP;
+            uint16_t count = onto_warp ? (uint16_t)(run.count - 1) : run.count;
+            const bool scene_at_end = last && leg.end == LegEnd::TRIGGER;
+            if (count > 0){
+                walk_run(rt, leg, run, count, track, scene_at_end, leg.name);
+            }
+            if (onto_warp){
+                const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
+                step_onto_warp(
+                    rt, run.direction, surf ? SURF_FRAMES : WALK_FRAMES, surf,
+                    leg.dark || leg.dest_dark, leg.preview, leg.name
                 );
+                warped = true;
             }
             break;
         }
         case RunKind::SPIN:
-            //  The step onto the spinner was the last pending move. The
+            //  The step onto the spinner was the end of the last run. The
             //  player is carried without input, then stops.
-            flush();
             pbf_wait(rt.context, frames_to_ms(SPIN_FRAMES * run.count + 20) + 300ms);
             rt.context.wait_for_all_requests();
             rt.facing = run.direction;
@@ -358,7 +613,6 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             //  Jump from the water onto the shore (Task_StopSurfingInit).
             //  12 frames works whichever way the player faces, and is over
             //  before the player can move again.
-            flush();
             pbf_press_dpad(rt.context, run.direction, frames_to_ms(12), 1200ms);
             rt.context.wait_for_all_requests();
             rt.facing = run.direction;
@@ -366,17 +620,18 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             break;
         }
     }
-    flush();
 
     switch (leg.end){
     case LegEnd::STOP:
         break;
     case LegEnd::WARP_PUSH:
-        take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.name);
+        take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
         rt.facing = DPAD_NONE;
         break;
     case LegEnd::WARP_STEP:
-        wait_warp_step(rt, leg.dark || leg.dest_dark, leg.name);
+        if (!warped){
+            wait_warp_step(rt, leg.dark || leg.dest_dark, leg.preview, leg.name);
+        }
         rt.facing = DPAD_NONE;
         break;
     case LegEnd::TRIGGER:

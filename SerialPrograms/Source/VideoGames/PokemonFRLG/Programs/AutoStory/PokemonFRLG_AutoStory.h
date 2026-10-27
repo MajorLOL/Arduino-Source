@@ -77,6 +77,7 @@ private:
     BooleanCheckBoxOption RESET_AT_START;
     SimpleIntegerOption<uint16_t> RETRIES;
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;
+    BooleanCheckBoxOption VERIFY_WALKING;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;

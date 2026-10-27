@@ -272,25 +272,12 @@ BattleMoveOption slot_option(int slot){
 }
 
 
-//  At the battle menu: FIGHT, pick the best move.
-void fight_one_turn(
+//  The move list is open: pick the best move and use it.
+void use_best_move(
     ConsoleHandle& console, ProControllerContext& context,
-    const StoryBattleSettings& settings, StoryBattleMemory& memory
+    const StoryBattleSettings& settings, StoryBattleMemory& memory,
+    const SpeciesInfo* opponent
 ){
-    std::string slug;
-    const SpeciesInfo* opponent = read_opponent(console, slug);
-
-    if (!move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
-        console.log("FIGHT not selected. Pressing A anyway.", COLOR_ORANGE);
-    }
-    pbf_press_button(context, BUTTON_A, 160ms, 640ms);
-    context.wait_for_all_requests();
-
-    BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
-    if (wait_until(console, context, 3000ms, { move_list }) < 0){
-        console.log("The move list did not open.", COLOR_ORANGE);
-        return;
-    }
     read_fight_menu(console, memory);
 
     uint8_t excluded = 0;
@@ -318,6 +305,29 @@ void fight_one_turn(
     }
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     context.wait_for_all_requests();
+}
+
+//  At the battle menu: FIGHT, pick the best move.
+void fight_one_turn(
+    ConsoleHandle& console, ProControllerContext& context,
+    const StoryBattleSettings& settings, StoryBattleMemory& memory
+){
+    std::string slug;
+    const SpeciesInfo* opponent = read_opponent(console, slug);
+
+    if (!move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
+        console.log("FIGHT not selected. Pressing A anyway.", COLOR_ORANGE);
+    }
+    pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+    context.wait_for_all_requests();
+
+    BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
+    if (wait_until(console, context, 3000ms, { move_list }) < 0){
+        //  (The old man's catching demo: the player has no say.)
+        console.log("The move list did not open.", COLOR_ORANGE);
+        return;
+    }
+    use_best_move(console, context, settings, memory, opponent);
 }
 
 void run_from_battle(ConsoleHandle& console, ProControllerContext& context, bool safari){
@@ -514,6 +524,7 @@ StoryBattleResult run_story_battle(
     int run_attempts = 0;
     bool lost = false;
     int next_slot = 1;
+    int unknown_in_row = 0;     //  turns of the loop with nothing recognized
     WallClock deadline = current_time() + 20min;
     WallClock last_activity = current_time();
 
@@ -527,6 +538,9 @@ StoryBattleResult run_story_battle(
             console, context, 6000ms,
             { battle_menu, question, party_menu, advance }
         );
+        if (ret >= 0){
+            unknown_in_row = 0;
+        }
         switch (ret){
         case 0:{
             seen_battle = true;
@@ -635,6 +649,39 @@ StoryBattleResult run_story_battle(
             //  an evolution shows the box while it runs. A goes on in both
             //  cases. Never B here: B stops an evolution.
             VideoSnapshot screen = console.video().snapshot();
+
+            //  The level-up window over the right of the screen (the stat
+            //  gains, then the new stats). It hides the advance arrow. A
+            //  goes on.
+            BattleLevelUpDetector level_up(COLOR_RED, BattleLevelUpDialog::either, Language::English);
+            if (level_up.detect(screen)){
+                seen_battle = true;
+                memory.level_up_seen = true;
+                last_activity = current_time();
+                unknown_in_row = 0;
+                console.log("Level-up window.");
+                pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+                context.wait_for_all_requests();
+                break;
+            }
+
+            //  The move list is open (a pick that did not go through): pick
+            //  a move. Pressing A or B blindly here would go round in
+            //  circles with the battle menu.
+            {
+                BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
+                if (wait_until(console, context, 500ms, { move_list }) == 0){
+                    seen_battle = true;
+                    last_activity = current_time();
+                    unknown_in_row = 0;
+                    console.log("The move list is open. Picking a move.", COLOR_ORANGE);
+                    std::string slug;
+                    const SpeciesInfo* opponent = read_opponent(console, slug);
+                    use_best_move(console, context, settings, memory, opponent);
+                    break;
+                }
+            }
+
             BattleDialogDetector battle_text(COLOR_RED);
             if (battle_text.detect(screen)){
                 seen_battle = true;
@@ -662,7 +709,16 @@ StoryBattleResult run_story_battle(
                 console.log("Battle over.");
                 return result;
             }
-            pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+            //  Something else. Mostly A, now and then B (which backs out of
+            //  menus and also advances text).
+            unknown_in_row++;
+            if (unknown_in_row % 3 == 0){
+                console.log("Nothing recognized. Pressing B.", COLOR_ORANGE);
+                pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+            }else{
+                console.log("Nothing recognized. Pressing A.", COLOR_ORANGE);
+                pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+            }
             context.wait_for_all_requests();
         }
         }

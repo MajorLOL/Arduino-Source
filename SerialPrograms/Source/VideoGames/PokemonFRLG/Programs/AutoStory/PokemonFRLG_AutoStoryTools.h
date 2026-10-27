@@ -52,6 +52,10 @@ struct StoryRuntime{
     //  walks up to the player).
     Milliseconds trainer_check = std::chrono::milliseconds(2500);
 
+    //  Check on the video how far the player really walked, and make up
+    //  for missing steps.
+    bool verify_walking = true;
+
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;
 
@@ -74,9 +78,11 @@ StoryBattleResult story_battle(
 
 
 //  Walk one generated leg. Handles wild battles and turning trainers on the
-//  way. For a warp leg, returns once the new map has faded in. For an
-//  interact leg, returns facing the target. For a trigger leg, returns
-//  standing on the trigger (a scene starts).
+//  way. Each straight run is checked on the video (verify_walking): missing
+//  steps are made again, steps too many walked back. For a warp leg,
+//  returns once the new map has faded in (and its area picture is gone).
+//  For an interact leg, returns facing the target. For a trigger leg,
+//  returns standing on the trigger (a scene starts).
 void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index);
 
 //  One step, whichever way the player faces. "surf" for 8-frame steps.

@@ -221,6 +221,14 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         1500, 600, 5000
     )
+    , VERIFY_WALKING(
+        "<b>Check walking on the video:</b><br>Measure on the video how far the player really walked "
+        "after every straight stretch, and make up for steps the game missed (a person in the way, "
+        "a battle, a screen that was still fading in). Without this the program walks by timing only, "
+        "and takes grass one step at a time.",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
     , GO_HOME_WHEN_DONE(false)
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
@@ -239,6 +247,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(RESET_AT_START);
     PA_ADD_OPTION(RETRIES);
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
+    PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
 }
@@ -413,6 +422,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     rt.encounter_check = Milliseconds((int64_t)(uint16_t)GRASS_STEP_CHECK_MS);
     rt.trainer_check = rt.encounter_check + 1000ms;
+    rt.verify_walking = VERIFY_WALKING;
 
     home_black_border_check(env.console, context);
 
