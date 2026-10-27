@@ -72,6 +72,12 @@ struct StoryBattleMemory{
     //  Set when "... grew to LV. X!" was seen. The grinding clears it after
     //  reading the lead's level.
     bool level_up_seen = false;
+    //  Moves found to be out of PP (bit per slot): picking them just brings
+    //  the move list back ("There's no PP left for this move!"). Cleared
+    //  when the party is healed.
+    uint8_t no_pp = 0;
+    //  The slot picked last, -1 if none in this battle.
+    int last_slot = -1;
 };
 
 

@@ -20,8 +20,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <array>
 #include <string>
+#include <vector>
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -35,8 +35,14 @@ constexpr int TILE_PIXELS = 16;
 
 
 //  The game screen at GBA resolution, one brightness value per pixel.
+//  (On the heap: several of these at once would be a lot for the stack of
+//  the program thread.)
 struct Screen{
-    std::array<uint8_t, SCREEN_WIDTH * SCREEN_HEIGHT> pixels;
+    std::vector<uint8_t> pixels;
+
+    Screen()
+        : pixels((size_t)SCREEN_WIDTH * SCREEN_HEIGHT, 0)
+    {}
 
     uint8_t at(int x, int y) const{
         return pixels[(size_t)y * SCREEN_WIDTH + (size_t)x];

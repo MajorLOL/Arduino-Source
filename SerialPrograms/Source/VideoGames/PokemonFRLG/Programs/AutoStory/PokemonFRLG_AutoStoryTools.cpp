@@ -76,20 +76,27 @@ const char* dpad_name(DpadPosition direction){
 //  One move (a step, a jump, a step on the water) from a standstill,
 //  whichever way the player faces.
 //
-//  Walking (16-frame steps, 32-frame jumps): the press is held 12 frames.
-//    - Facing that way: the move starts at once. The input is gone before
-//      it ends, so the player stops after one move.
-//    - Facing another way: the turn ends at frame 8, the input is still
-//      held, so one move starts. The input is gone before it ends.
-//  Surfing (8-frame steps): 12 frames would be a second step when already
-//  facing that way, so then the press is 4 frames.
+//  Walking (16-frame steps, 32-frame jumps):
+//    - Facing that way: the move starts at once. The press is 10 frames,
+//      over well before the move ends (frame 16), so the player stops
+//      after one move.
+//    - Facing another way: the turn ends at frame 8 and the input must
+//      still be held then for a move to start. The press is 14 frames;
+//      a second move could only start at frame 24.
+//    - Not known: 12 frames, which works both ways.
+//  Surfing (8-frame steps): already facing that way, 4 frames; otherwise
+//  12 (turn, then one step).
 void single_move(
     ProControllerContext& context, DpadPosition& facing,
     DpadPosition direction, double move_frames, bool surf
 ){
-    double press = 12;
-    if (surf && facing == direction){
-        press = 4;
+    double press;
+    if (surf){
+        press = facing == direction ? 4 : 12;
+    }else if (facing == DPAD_NONE){
+        press = 12;
+    }else{
+        press = facing == direction ? 10 : 14;
     }
     double total = TURN_FRAMES + move_frames + 6;
     pbf_press_dpad(context, direction, frames_to_ms(press), frames_to_ms(total - press));
@@ -233,7 +240,7 @@ DpadPosition opposite(DpadPosition direction){
 void wait_for_still_screen(StoryRuntime& rt){
     StableScreenWatcher stable(100ms);
     rt.context.wait_for_all_requests();
-    wait_until(rt.console, rt.context, 1000ms, { {stable, 10ms} });
+    wait_until(rt.console, rt.context, 1000ms, { stable });
 }
 
 //  What ended an attempt to walk part of a run.
@@ -248,6 +255,7 @@ enum class RunEvent{
 struct RunAttempt{
     int moves = 0;          //  Moves made.
     bool measured = false;  //  "moves" was measured on the video.
+    bool lost = false;      //  The video lost the map on the way.
     RunEvent event = RunEvent::NONE;
     std::string video;      //  What the video tracker saw.
 };
@@ -267,8 +275,13 @@ RunAttempt attempt_moves(
     std::vector<PeriodicInferenceCallback> callbacks;
     std::vector<RunEvent> events;
     if (track){
-        callbacks.emplace_back(tracker, 10ms);
-        events.push_back(RunEvent::SCREEN_CHANGED);
+        //  At the usual 50 ms: every video frame that is looked at has to be
+        //  converted first, and doing that for every frame keeps the CPU
+        //  busy enough for the video recording to fall behind and use up
+        //  the memory. 3 pixels walking between two looks is plenty.
+        //  (It never stops the run itself.)
+        callbacks.emplace_back(tracker);
+        events.push_back(RunEvent::NONE);
     }
     if (!dark){
         //  Without Flash the screen is mostly black anyway.
@@ -309,28 +322,28 @@ RunAttempt attempt_moves(
         result.moves = moves;
         return result;
     }
-    if (ret < 0){
+    if (ret < 0 && !tracker.tracker().lost()){
         //  The video lags behind the game: keep watching until the player
         //  is seen standing still.
         tracker.stop_when_still(150ms);
-        int still = wait_until(rt.console, rt.context, 700ms, { tracker });
-        if (still == 0 && tracker.tracker().lost()){
-            result.event = RunEvent::SCREEN_CHANGED;
-        }
+        wait_until(rt.console, rt.context, 700ms, { tracker });
     }
     const AutoStoryScroll::Tracker& t = tracker.tracker();
     result.video = t.summary();
+    result.lost = t.lost();
     int tiles = t.tiles();
-    if (t.reliable() || result.event != RunEvent::NONE){
-        //  Interrupted: the video is the best guess there is, even unsure.
-        result.moves = (tiles + tiles_per_move / 2) / tiles_per_move;
+    if (result.event != RunEvent::NONE){
+        //  A battle or a trainer stopped the player. The video saw up to
+        //  that moment: the best guess there is, even unsure.
+        result.moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
         result.measured = t.reliable();
-        if (result.moves < 0){
-            result.moves = 0;
-        }
+    }else if (!t.lost() && t.reliable()){
+        result.moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
+        result.measured = true;
     }else{
-        //  The picture has too little detail (open water, darkness): trust
-        //  the timing.
+        //  The picture changed on the way without a battle (a fade, a text
+        //  box), or has too little detail (open water, darkness): the run
+        //  went on as timed.
         result.moves = moves;
     }
     return result;
@@ -363,6 +376,7 @@ StoryBattleResult story_battle(
     case StoryBattleResult::LOST:
         //  The player is back at the last Pokemon Center, healed.
         rt.lead_fainted = false;
+        rt.memory.no_pp = 0;
         rt.facing = DPAD_UP;
         if (throw_on_loss){
             OperationFailedExceptionWithScreenshot::fire(
@@ -401,7 +415,7 @@ StoryBattleResult story_checked_step(
         WalkTracker tracker(direction, frames);
         std::vector<PeriodicInferenceCallback> callbacks{battle_starting, battle_started, trainer_talking};
         if (rt.verify_walking){
-            callbacks.emplace_back(tracker, 10ms);
+            callbacks.emplace_back(tracker);
         }
         DpadPosition& facing = rt.facing;
         if (rt.verify_walking){
@@ -420,7 +434,7 @@ StoryBattleResult story_checked_step(
         const AutoStoryScroll::Tracker& t = tracker.tracker();
         //  Not moved: only if the screen still looks exactly as before the
         //  step. (If it changed some other way, the video cannot tell.)
-        const bool unchanged = t.last_mismatch() <= t.noise() + 2.0;
+        const bool unchanged = !t.lost() && t.last_mismatch() <= t.noise() + 2.0;
         if (ret < 0 && rt.verify_walking && t.reliable() && t.tiles() == 0 && unchanged){
             //  The step did not happen (the game ignored the input, or
             //  something is in the way). Take it again, so the caller's
@@ -432,7 +446,7 @@ StoryBattleResult story_checked_step(
         rt.steps++;
         //  Two steps for one press (the press lasted too long): one back,
         //  after the battle if one started.
-        const int extra = rt.verify_walking && t.reliable() ? t.tiles() - 1 : 0;
+        const int extra = rt.verify_walking && t.reliable() && !t.lost() ? t.tiles() - 1 : 0;
         auto step_back = [&](){
             for (int i = 0; i < extra; i++){
                 rt.console.log("The step " + std::string(dpad_name(direction)) + " went one tile too far: " + where + ". Stepping back.", COLOR_ORANGE);
@@ -443,7 +457,6 @@ StoryBattleResult story_checked_step(
             step_back();
             return StoryBattleResult::NO_BATTLE;
         }
-        //  ret 3: the tracker lost the map, a battle transition.
         StoryBattleKind kind = (ret == 2 || trainer) ? StoryBattleKind::TRAINER : wild_kind;
         StoryBattleResult result = story_battle(
             rt, kind,
@@ -545,7 +558,7 @@ bool walk_run(
             return false;
         }
         if (warp_at_end && remaining == 0 &&
-            (a.event == RunEvent::SCREEN_CHANGED || a.event == RunEvent::BATTLE_START)
+            (a.event == RunEvent::BATTLE_START || a.lost)
         ){
             rt.console.log("The warp started at the end of the run.");
             return true;
@@ -860,6 +873,7 @@ void story_heal(StoryRuntime& rt, const std::string& where){
     heal_at_pokecenter(rt.console, rt.context);
     story_cutscene(rt, 0ms, 30s, false, "Nurse at " + where);
     rt.lead_fainted = false;
+    rt.memory.no_pp = 0;
     rt.facing = DPAD_UP;
 }
 

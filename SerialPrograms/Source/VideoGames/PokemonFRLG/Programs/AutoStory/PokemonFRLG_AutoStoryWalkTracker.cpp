@@ -76,11 +76,12 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
         game.width(), game.height()
     );
     double time_ms = std::chrono::duration<double, std::milli>(frame.timestamp - m_start).count();
-    AutoStoryScroll::Tracker::Result result = m_tracker.add(m_screen, time_ms);
-    if (result == AutoStoryScroll::Tracker::Result::LOST){
-        return true;
-    }
-    return m_stop_when_still_ms > 0 &&
+    //  Losing the picture does not stop anything: a battle is stopped by the
+    //  battle detectors, and anything else (a fade, a text box) lets the
+    //  run go on. Stopping the input then would leave a step half known.
+    m_tracker.add(m_screen, time_ms);
+    return !m_tracker.lost() &&
+        m_stop_when_still_ms > 0 &&
         m_tracker.frames() >= 3 &&
         m_tracker.still_ms() >= m_stop_when_still_ms;
 }

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include <algorithm>
+#include <array>
 #include "PokemonFRLG_AutoStoryScroll.h"
 
 namespace PokemonAutomation{
@@ -52,7 +53,7 @@ void sample_screen(
     size_t width, size_t height
 ){
     if (data == nullptr || width == 0 || height == 0){
-        out.pixels.fill(0);
+        std::fill(out.pixels.begin(), out.pixels.end(), (uint8_t)0);
         return;
     }
     //  Each GBA pixel is a block of several video pixels. Average the 2x2

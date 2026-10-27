@@ -278,11 +278,23 @@ void use_best_move(
     const StoryBattleSettings& settings, StoryBattleMemory& memory,
     const SpeciesInfo* opponent
 ){
+    int before[4] = {memory.moves[0], memory.moves[1], memory.moves[2], memory.moves[3]};
     read_fight_menu(console, memory);
+    for (int i = 0; i < 4; i++){
+        if (memory.moves[i] != before[i]){
+            //  A new move in this slot: its PP is full.
+            memory.no_pp &= (uint8_t)~(1 << i);
+        }
+    }
+    if ((memory.no_pp & 0x0f) == 0x0f){
+        memory.no_pp = 0;   //  Then something was wrong. Try them all again.
+    }
 
-    uint8_t excluded = 0;
+    uint8_t excluded = memory.no_pp;
+    int cursor_slot = 0;
     for (int attempt = 0; attempt < 4; attempt++){
         int slot = best_move_slot(memory, settings, opponent, excluded);
+        cursor_slot = slot;
         if (memory.moves[slot] >= 0){
             console.log(std::string("Using ") + AutoStoryDex::moves()[(size_t)memory.moves[slot]].name);
         }else{
@@ -303,6 +315,7 @@ void use_best_move(
         }
         break;
     }
+    memory.last_slot = cursor_slot;
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     context.wait_for_all_requests();
 }
@@ -516,6 +529,7 @@ StoryBattleResult run_story_battle(
     StoryBattleMemory& memory
 ){
     memory.battles++;
+    memory.last_slot = -1;
     StoryBattleResult result = StoryBattleResult::WON;
     bool seen_battle = false;
     bool decided = false;       //  wild: fight/run/catch decided
@@ -675,6 +689,12 @@ StoryBattleResult run_story_battle(
                     last_activity = current_time();
                     unknown_in_row = 0;
                     console.log("The move list is open. Picking a move.", COLOR_ORANGE);
+                    if (memory.last_slot >= 0){
+                        //  The move picked last did not happen: no PP left.
+                        console.log("Move " + std::to_string(memory.last_slot + 1) + " seems to be out of PP.", COLOR_ORANGE);
+                        memory.no_pp |= (uint8_t)(1 << memory.last_slot);
+                        memory.last_slot = -1;
+                    }
                     std::string slug;
                     const SpeciesInfo* opponent = read_opponent(console, slug);
                     use_best_move(console, context, settings, memory, opponent);
