@@ -612,13 +612,20 @@ bool walk_run(
         return false;
     }
 
+    //  In the dark (no Flash) the video cannot see the steps, only that the
+    //  screen changes when a battle starts, and the battle text comes long
+    //  after the input is over. Where battles can start, one step at a
+    //  time then: a battle starts at the end of a step, so the count stays
+    //  right.
+    const bool one_by_one = leg.dark && encounters && track;
+
     int remaining = count;
     int not_moving = 0;
     int no_progress = 0;    //  tries in a row that did not move, whatever stopped them
     while (remaining > 0){
         //  After a try that did not move at all, one move at a time: if the
         //  video is wrong about it, little harm is done.
-        const int moves = not_moving > 0 ? 1 : remaining;
+        const int moves = not_moving > 0 || one_by_one ? 1 : remaining;
         RunAttempt a = attempt_moves(rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track);
         if (track){
             rt.console.log(
@@ -628,6 +635,10 @@ bool walk_run(
             );
         }
         int made = a.moves;
+        if (leg.dark && !a.measured && (a.event != RunEvent::NONE || a.lost)){
+            //  The step was made: battles and trainers start at its end.
+            made = moves;
+        }
         if (made > moves && a.measured && !scene_at_end){
             //  One too many (the input lasted too long): step back.
             int back = made - moves;
@@ -650,8 +661,25 @@ bool walk_run(
         if (warp_at_end && remaining == 0 &&
             (a.event == RunEvent::BATTLE_START || a.lost)
         ){
+            if (one_by_one){
+                //  In the dark a wild battle on the last step looks the same
+                //  as the warp: see whether battle text comes.
+                AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+                BattleMenuWatcher battle_menu(COLOR_RED);
+                if (wait_until(rt.console, rt.context, 4000ms, { battle_text, battle_menu }) >= 0){
+                    rt.console.log("A battle on the last step before the warp.", COLOR_ORANGE);
+                    story_battle(rt, battle_kind, label);
+                    return false;
+                }
+            }
             rt.console.log("The warp started at the end of the run.");
             return true;
+        }
+
+        if (one_by_one && a.lost && a.event == RunEvent::NONE){
+            //  The dark screen changed: a battle is starting.
+            rt.console.log("The screen changed in the dark: a battle?", COLOR_ORANGE);
+            a.event = RunEvent::BATTLE_START;
         }
 
         StoryBattleResult battle = StoryBattleResult::NO_BATTLE;
@@ -691,7 +719,7 @@ bool walk_run(
         //  Something stopped the run. The video saw up to that moment, but
         //  the step under way then was still finished. Now that the player
         //  stands still again, compare with the screen before the run.
-        if (a.event != RunEvent::NONE && a.has_start){
+        if (a.event != RunEvent::NONE && a.has_start && !leg.dark){
             const int dx = run.direction == DPAD_LEFT ? -1 : (run.direction == DPAD_RIGHT ? 1 : 0);
             const int dy = run.direction == DPAD_UP ? -1 : (run.direction == DPAD_DOWN ? 1 : 0);
             const int reach = (moves + 1) * tiles_per_move;
@@ -737,8 +765,19 @@ bool walk_run(
         if (made == 0 && a.event == RunEvent::NONE){
             //  Someone talking stops the player too. A text box that was
             //  there from the start is not noticed while walking.
+            VideoSnapshot screen = rt.console.video().snapshot();
+            BattleMenuDetector battle_menu(COLOR_RED);
+            AdvanceBattleDialogDetector battle_text(COLOR_RED);
+            if (screen && (battle_menu.detect(screen) || battle_text.detect(screen))){
+                //  A battle that started unseen (in the dark).
+                rt.console.log("A battle is on.", COLOR_ORANGE);
+                if (trainer_came(story_battle(rt, battle_kind, label))){
+                    return false;
+                }
+                continue;
+            }
             AdvanceWhiteDialogDetector talking(COLOR_RED);
-            if (talking.detect(rt.console.video().snapshot())){
+            if (screen && talking.detect(screen)){
                 rt.console.log("Someone is talking.", COLOR_ORANGE);
                 if (trainer_came(story_battle(rt, StoryBattleKind::TRAINER, label))){
                     return false;
