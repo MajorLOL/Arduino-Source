@@ -12,6 +12,7 @@
 
 #include "Common/Cpp/Time.h"
 #include "CommonTools/InferenceCallbacks/VisualInferenceCallback.h"
+#include "CommonTools/VisualDetector.h"
 #include "NintendoSwitch/Controllers/NintendoSwitch_ControllerButtons.h"
 #include "PokemonFRLG_AutoStoryScroll.h"
 
@@ -41,6 +42,32 @@ private:
     WallClock m_start;
     WallClock m_last;
     double m_stop_when_still_ms = 0;
+};
+
+
+//  Stops when "detector" sees its thing for "duration", but only after it
+//  did not see it at first: some places look like a text box all the time
+//  (the white bottom of the S.S. Anne corridors), and a text box that
+//  matters (a trainer talking) appears while walking.
+class TurnsOnWatcher : public VisualInferenceCallback{
+public:
+    TurnsOnWatcher(const std::string& name, StaticScreenDetector& detector, Milliseconds duration);
+
+    using VisualInferenceCallback::process_frame;
+    virtual void make_overlays(VideoOverlaySet& items) const override;
+    virtual bool process_frame(const VideoSnapshot& frame) override;
+
+    //  The detector saw its thing in the first frame looked at.
+    bool on_at_start() const{ return m_on_at_start; }
+
+private:
+    StaticScreenDetector& m_detector;
+    Milliseconds m_duration;
+    bool m_first = true;
+    bool m_on_at_start = false;
+    bool m_seen_off = false;
+    WallClock m_last;
+    WallClock m_on_since;
 };
 
 

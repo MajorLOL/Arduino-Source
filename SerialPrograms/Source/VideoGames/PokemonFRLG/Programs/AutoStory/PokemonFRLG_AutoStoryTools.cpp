@@ -274,8 +274,12 @@ RunAttempt attempt_moves(
     double frames, int tiles_per_move, bool surf, bool dark, bool track
 ){
     BlackScreenWatcher battle_starting(COLOR_RED);
-    AdvanceBattleDialogWatcher battle_text(COLOR_RED);
-    WhiteDialogWatcher dialog(COLOR_RED);
+    //  Text boxes count when they appear, not when the place looks like one
+    //  all the time (the white bottom of the S.S. Anne corridors).
+    AdvanceBattleDialogDetector battle_text_detector(COLOR_RED);
+    TurnsOnWatcher battle_text("BattleTextAppears", battle_text_detector, 250ms);
+    WhiteDialogDetector dialog_detector(COLOR_RED);
+    TurnsOnWatcher dialog("DialogAppears", dialog_detector, 250ms);
     WalkTracker tracker(direction, frames / tiles_per_move);
 
     std::vector<PeriodicInferenceCallback> callbacks;
@@ -579,6 +583,7 @@ bool walk_run(
 
     int remaining = count;
     int not_moving = 0;
+    int no_progress = 0;    //  tries in a row that did not move, whatever stopped them
     while (remaining > 0){
         //  After a try that did not move at all, one move at a time: if the
         //  video is wrong about it, little harm is done.
@@ -651,7 +656,29 @@ bool walk_run(
             break;
         }
 
+        if (made == 0){
+            no_progress++;
+            if (no_progress >= 15){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "walk_leg(): The player does not get any further: " + label +
+                    ", " + std::to_string(remaining) + " of " + std::to_string(count) + " moves left.",
+                    rt.console
+                );
+            }
+        }else{
+            no_progress = 0;
+        }
+
         if (made == 0 && a.event == RunEvent::NONE){
+            //  Someone talking stops the player too. A text box that was
+            //  there from the start is not noticed while walking.
+            AdvanceWhiteDialogDetector talking(COLOR_RED);
+            if (talking.detect(rt.console.video().snapshot())){
+                rt.console.log("Someone is talking.", COLOR_ORANGE);
+                story_battle(rt, StoryBattleKind::TRAINER, label);
+                continue;
+            }
             not_moving++;
             if (not_moving >= 10){
                 OperationFailedExceptionWithScreenshot::fire(
@@ -810,6 +837,10 @@ bool story_cutscene(
     rt.facing = DPAD_NONE;
     WallClock start = current_time();
     WallClock deadline = start + max_time;
+    //  Some places look like a text box all the time (the white bottom of
+    //  the S.S. Anne corridors): after a few presses on one, check whether
+    //  the player is free to move.
+    int dialog_in_row = 0;
     while (current_time() < deadline){
         SelectionDialogWatcher yes_no(COLOR_RED);
         WhiteDialogWatcher dialog(COLOR_RED);
@@ -838,12 +869,29 @@ bool story_cutscene(
             break;
         }
         case 1:
+            if (++dialog_in_row % 5 == 0 && current_time() - start >= min_time &&
+                in_overworld(rt.console, rt.context)
+            ){
+                rt.console.log("Cutscene over: " + what);
+                return false;
+            }
             //  B advances the text (and never says YES to anything).
             pbf_press_button(rt.context, BUTTON_B, 160ms, 340ms);
             break;
-        case 2:
         case 3:
         case 4:
+            //  The battle text detectors also take some overworld places
+            //  for a text box.
+            if (in_overworld(rt.console, rt.context)){
+                if (current_time() - start >= min_time){
+                    rt.console.log("Cutscene over: " + what);
+                    return false;
+                }
+                break;
+            }
+            rt.console.log("A battle is on screen: " + what);
+            return true;
+        case 2:
             rt.console.log("A battle is on screen: " + what);
             return true;
         default:

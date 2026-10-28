@@ -88,6 +88,44 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
 
 
 
+TurnsOnWatcher::TurnsOnWatcher(const std::string& name, StaticScreenDetector& detector, Milliseconds duration)
+    : VisualInferenceCallback(name)
+    , m_detector(detector)
+    , m_duration(duration)
+    , m_last(WallClock::min())
+    , m_on_since(WallClock::min())
+{}
+
+void TurnsOnWatcher::make_overlays(VideoOverlaySet& items) const{
+    m_detector.make_overlays(items);
+}
+
+bool TurnsOnWatcher::process_frame(const VideoSnapshot& frame){
+    if (!frame || frame.timestamp == m_last){
+        return false;
+    }
+    m_last = frame.timestamp;
+    const bool on = m_detector.detect(*frame.frame);
+    if (m_first){
+        m_first = false;
+        m_on_at_start = on;
+    }
+    if (!on){
+        m_seen_off = true;
+        m_on_since = WallClock::min();
+        return false;
+    }
+    if (!m_seen_off){
+        return false;
+    }
+    if (m_on_since == WallClock::min()){
+        m_on_since = frame.timestamp;
+    }
+    return frame.timestamp - m_on_since >= m_duration;
+}
+
+
+
 StableScreenWatcher::StableScreenWatcher(Milliseconds duration)
     : VisualInferenceCallback("StableScreenWatcher")
     , m_duration(duration)
