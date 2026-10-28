@@ -63,6 +63,22 @@ struct StoryRuntime{
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
 
+    //  Save the game after every heal at a Pokemon Center.
+    bool save_after_heal = true;
+
+    //  Where the program is in the story, set for each step.
+    std::string segment_id;
+    bool has_dex = true;            //  The start menu has the POKeDEX entry.
+    size_t step_index = 0;          //  The running step, in its segment.
+    bool next_is_save = false;      //  The next step saves anyway.
+
+    //  Set when the game was saved in the running segment: the step (in
+    //  this segment) to continue from after a reset. SIZE_MAX if not.
+    size_t resume_at = (size_t)-1;
+
+    //  Memory use of the program, logged now and then.
+    WallClock last_memory_log = WallClock::min();
+
     uint64_t steps = 0;
     uint64_t wild_battles = 0;
     uint64_t trainer_battles = 0;
@@ -133,7 +149,19 @@ void story_talk_start(StoryRuntime& rt, const std::string& what);
 void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what);
 
 //  Talk to the nurse in front of the player (across the counter) and heal.
-void story_heal(StoryRuntime& rt, const std::string& where);
+//  Then save (unless the next step saves anyway). "mid_step": the running
+//  step goes on afterwards and starts from here again after a reset
+//  (training); otherwise a reset continues with the next step.
+void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step = false);
+
+//  The game was just saved: after a reset the story continues from step
+//  "resume_at" of the running segment. Logs where to start the program to
+//  go on from this save, and stops the program here if it uses so much
+//  memory that it could crash soon.
+void story_saved(StoryRuntime& rt, size_t resume_at);
+
+//  Log the memory the program uses (every few minutes, or now if "force").
+void story_log_memory(StoryRuntime& rt, bool force = false);
 
 //  Save from the overworld. "has_pokedex" picks the start menu layout.
 void story_save(StoryRuntime& rt, bool has_pokedex);

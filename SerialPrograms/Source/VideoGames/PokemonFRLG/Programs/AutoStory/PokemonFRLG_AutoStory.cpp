@@ -181,6 +181,13 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         0
     )
+    , START_STEP(
+        "<b>Start at step:</b><br>The step of the start segment to begin with. 1 for the start of "
+        "the segment; after a stop, the log says where the last save was (\"Saved. To go on from "
+        "this save later: ...\").",
+        LockMode::LOCK_WHILE_RUNNING,
+        1, 1, 999
+    )
     , END_SEGMENT(
         "<b>End after segment:</b>",
         segment_database(),
@@ -205,6 +212,12 @@ AutoStory::AutoStory()
     )
     , RESET_AT_START(
         "<b>Soft reset at start:</b><br>Load the save first, so the game is exactly at the start of the segment.",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
+    , SAVE_AFTER_HEAL(
+        "<b>Save after healing:</b><br>Save the game after every heal at a Pokemon Center, so a "
+        "stop or a crash loses little. The log says where to start again.",
         LockMode::LOCK_WHILE_RUNNING,
         true
     )
@@ -241,10 +254,12 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(STOP_AFTER_CURRENT);
     PA_ADD_OPTION(STARTER);
     PA_ADD_OPTION(START_SEGMENT);
+    PA_ADD_OPTION(START_STEP);
     PA_ADD_OPTION(END_SEGMENT);
     PA_ADD_OPTION(WILD_BATTLES);
     PA_ADD_OPTION(EXTRA_LEVELS);
     PA_ADD_OPTION(RESET_AT_START);
+    PA_ADD_OPTION(SAVE_AFTER_HEAL);
     PA_ADD_OPTION(RETRIES);
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
     PA_ADD_OPTION(VERIFY_WALKING);
@@ -257,7 +272,7 @@ AutoStory::AutoStory()
 void AutoStory::run_segment(
     SingleSwitchProgramEnvironment& env, StoryRuntime& rt,
     const StoryScript& script, const StorySegment& segment,
-    size_t first_step, size_t& saved_step
+    size_t first_step
 ){
     AutoStory_Descriptor::Stats& stats = env.current_stats<AutoStory_Descriptor::Stats>();
     ProControllerContext& context = rt.context;
@@ -268,6 +283,12 @@ void AutoStory::run_segment(
         const bool next_battle = next != nullptr && next->type == StepType::BATTLE;
         const bool next_scene = next != nullptr && (next->type == StepType::BATTLE || next->type == StepType::CUTSCENE);
         const std::string label = step.label;
+
+        rt.segment_id = segment.id;
+        rt.has_dex = segment.has_dex;
+        rt.step_index = i;
+        rt.next_is_save = next != nullptr && next->type == StepType::SAVE;
+        story_log_memory(rt);
 
         uint64_t steps_before = rt.steps;
         uint64_t wild_before = rt.wild_battles;
@@ -324,7 +345,7 @@ void AutoStory::run_segment(
             break;
         case StepType::SAVE:
             story_save(rt, step.p0 == 1);
-            saved_step = i;
+            story_saved(rt, i + 1);
             break;
         case StepType::GRIND:
             story_grind(rt, script, step, EXTRA_LEVELS);
@@ -423,6 +444,16 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.encounter_check = Milliseconds((int64_t)(uint16_t)GRASS_STEP_CHECK_MS);
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
+    rt.save_after_heal = SAVE_AFTER_HEAL;
+
+    const size_t first_step = (size_t)START_STEP - 1;
+    if (first_step >= script.segments[first].step_count){
+        throw UserSetupError(
+            env.console,
+            "Segment " + std::string(script.segments[first].id) + " has only " +
+            std::to_string(script.segments[first].step_count) + " steps."
+        );
+    }
 
     home_black_border_check(env.console, context);
 
@@ -436,9 +467,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  Where the current save is: the segment and the step to continue
     //  from after a reset.
     size_t resume_segment = first;
-    size_t resume_step = 0;
+    size_t resume_step = first_step;
     size_t current_segment = first;
-    size_t current_step = 0;
+    size_t current_step = first_step;
     uint16_t failures = 0;
 
     while (current_segment <= last){
@@ -451,31 +482,32 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
         env.log("Segment " + segment_name(segment) + " from step " + std::to_string(current_step + 1), COLOR_BLUE);
 
-        size_t saved_step = (size_t)-1;
+        //  Saved in this segment: a reset continues from that save.
+        auto take_resume = [&](){
+            if (rt.resume_at == (size_t)-1){
+                return;
+            }
+            resume_segment = current_segment;
+            resume_step = rt.resume_at;
+            if (resume_step >= segment.step_count){
+                resume_segment++;
+                resume_step = 0;
+            }
+        };
+        rt.resume_at = (size_t)-1;
         try{
-            run_segment(env, rt, script, segment, current_step, saved_step);
+            run_segment(env, rt, script, segment, current_step);
             stats.segments++;
             env.update_stats();
             failures = 0;
-            if (saved_step != (size_t)-1){
-                //  Saved in this segment: a reset continues after that save.
-                resume_segment = current_segment;
-                resume_step = saved_step + 1;
-                if (resume_step >= segment.step_count){
-                    resume_segment++;
-                    resume_step = 0;
-                }
-            }
+            take_resume();
             current_segment++;
             current_step = 0;
             if (STOP_AFTER_CURRENT.should_stop()){
                 break;
             }
         }catch (OperationFailedException&){
-            if (saved_step != (size_t)-1){
-                resume_segment = current_segment;
-                resume_step = saved_step + 1;
-            }
+            take_resume();
             stats.errors++;
             env.update_stats();
             failures++;

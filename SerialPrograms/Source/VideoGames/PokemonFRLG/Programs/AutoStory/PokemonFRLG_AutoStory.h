@@ -59,22 +59,24 @@ public:
     };
 
 private:
-    //  Run the steps of a segment from "first_step". "saved_step" is set to
-    //  the index of every SAVE step that finished.
+    //  Run the steps of a segment from "first_step". Saves in the segment
+    //  set "rt.resume_at" (where to continue after a reset).
     void run_segment(
         SingleSwitchProgramEnvironment& env, StoryRuntime& rt,
         const StoryScript& script, const StorySegment& segment,
-        size_t first_step, size_t& saved_step
+        size_t first_step
     );
 
     StaticTextOption SETUP_TEXT;
     DeferredStopButtonOption STOP_AFTER_CURRENT;
     EnumDropdownOption<Starter> STARTER;
     IntegerEnumDropdownOption START_SEGMENT;
+    SimpleIntegerOption<uint16_t> START_STEP;
     IntegerEnumDropdownOption END_SEGMENT;
     EnumDropdownOption<WildBattles> WILD_BATTLES;
     SimpleIntegerOption<uint16_t> EXTRA_LEVELS;
     BooleanCheckBoxOption RESET_AT_START;
+    BooleanCheckBoxOption SAVE_AFTER_HEAL;
     SimpleIntegerOption<uint16_t> RETRIES;
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;
     BooleanCheckBoxOption VERIFY_WALKING;

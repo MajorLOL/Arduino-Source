@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 #include "Common/Cpp/Time.h"
+#include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
+#include "CommonFramework/Exceptions/ProgramFinishedException.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
@@ -915,13 +917,70 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what){
 }
 
 
-void story_heal(StoryRuntime& rt, const std::string& where){
+void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step){
     rt.console.log("Healing: " + where);
     heal_at_pokecenter(rt.console, rt.context);
     story_cutscene(rt, 0ms, 30s, false, "Nurse at " + where);
     rt.lead_fainted = false;
     rt.memory.no_pp = 0;
     rt.facing = DPAD_UP;
+    if (!rt.save_after_heal || (!mid_step && rt.next_is_save)){
+        return;
+    }
+    //  In front of the nurse: a good place to come back to.
+    story_save(rt, rt.has_dex);
+    rt.facing = DPAD_UP;
+    story_saved(rt, mid_step ? rt.step_index : rt.step_index + 1);
+}
+
+namespace{
+std::string gigabytes(size_t bytes){
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%.2f GB", (double)bytes / (1024.0 * 1024.0 * 1024.0));
+    return buffer;
+}
+}
+
+void story_log_memory(StoryRuntime& rt, bool force){
+    WallClock now = current_time();
+    if (!force && rt.last_memory_log != WallClock::min() && now - rt.last_memory_log < std::chrono::minutes(5)){
+        return;
+    }
+    rt.last_memory_log = now;
+    MemoryUsage memory = process_memory_usage();
+    rt.console.log(
+        "Memory: program " + gigabytes(memory.process_physical_memory) +
+        " (virtual " + gigabytes(memory.process_virtual_memory) + "), system " +
+        gigabytes(memory.total_used_system_memory) + " of " + gigabytes(memory.total_system_memory) + " in use."
+    );
+}
+
+void story_saved(StoryRuntime& rt, size_t resume_at){
+    rt.resume_at = resume_at;
+    rt.console.log(
+        "Saved. To go on from this save later: start at segment " + rt.segment_id +
+        ", step " + std::to_string(resume_at + 1) + ".",
+        COLOR_BLUE
+    );
+    story_log_memory(rt, true);
+
+    //  The program's memory use keeps growing on some computers (video
+    //  pipeline) until it crashes after some hours. Stop here, right after
+    //  a save, before that happens.
+    //  (The two crashes seen happened with 6.4 and 7.9 GB committed on a
+    //  12 GB computer, while it starts with about 2 GB.)
+    MemoryUsage memory = process_memory_usage();
+    if (memory.total_system_memory > 0 && (
+        memory.process_virtual_memory > memory.total_system_memory / 5 * 2 ||
+        memory.process_physical_memory > memory.total_system_memory / 2
+    )){
+        throw ProgramFinishedException(
+            "Pokemon Automation uses " + gigabytes(memory.process_virtual_memory) + " of the " +
+            gigabytes(memory.total_system_memory) + " of memory and could crash soon. The game was "
+            "just saved: close Pokemon Automation, open it again and start at segment " +
+            rt.segment_id + ", step " + std::to_string(resume_at + 1) + "."
+        );
+    }
 }
 
 

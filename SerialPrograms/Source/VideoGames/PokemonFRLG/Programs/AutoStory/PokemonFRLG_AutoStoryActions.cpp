@@ -804,6 +804,11 @@ void story_grind(
             console.log("The party fainted while training. Back to the grass.", COLOR_ORANGE);
             away = false;
             since_heal = 0;
+            if (rt.save_after_heal){
+                story_save(rt, rt.has_dex);
+                rt.facing = DPAD_UP;
+                story_saved(rt, rt.step_index);
+            }
             walk(to_grass_again);
             spot.arrived();
             continue;
@@ -831,7 +836,9 @@ void story_grind(
         if (rt.lead_fainted || since_heal >= heal_every){
             spot.to_first_tile(away);
             walk(to_nurse);
-            story_heal(rt, where);
+            //  The training goes on: after a reset, it starts again from
+            //  this save in front of the nurse.
+            story_heal(rt, where, true);
             since_heal = 0;
             int now = story_read_lead_level(rt);
             if (now > 0){
@@ -839,6 +846,10 @@ void story_grind(
             }
             if (level >= target){
                 console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
+                if (rt.save_after_heal){
+                    //  Saved right here: after a reset, go on with the next step.
+                    story_saved(rt, rt.step_index + 1);
+                }
                 return;     //  Already healed at the nurse.
             }
             walk(to_grass_again);
