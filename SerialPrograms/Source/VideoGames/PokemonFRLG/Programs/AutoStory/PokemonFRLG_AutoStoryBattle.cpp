@@ -540,6 +540,12 @@ StoryBattleResult run_story_battle(
     bool lost = false;
     int next_slot = 1;
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
+    //  A battle for sure: its menu, a move list, a level-up window, a
+    //  question or the party menu was seen. (The battle text detectors
+    //  also take a plain white area at the bottom of the overworld, like
+    //  on the S.S. Anne, for a text box.)
+    bool battle_confirmed = false;
+    int text_only_in_row = 0;   //  turns with only a text box (no arrow) seen
     WallClock deadline = current_time() + 20min;
     WallClock last_activity = current_time();
 
@@ -555,6 +561,10 @@ StoryBattleResult run_story_battle(
         );
         if (ret >= 0){
             unknown_in_row = 0;
+            text_only_in_row = 0;
+        }
+        if (ret == 0 || ret == 1 || ret == 2){
+            battle_confirmed = true;
         }
         switch (ret){
         case 0:{
@@ -672,6 +682,7 @@ StoryBattleResult run_story_battle(
             BattleLevelUpDetector level_up(COLOR_RED, BattleLevelUpDialog::either, Language::English);
             if (level_up.detect(screen)){
                 seen_battle = true;
+                battle_confirmed = true;
                 memory.level_up_seen = true;
                 last_activity = current_time();
                 unknown_in_row = 0;
@@ -688,6 +699,7 @@ StoryBattleResult run_story_battle(
                 BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
                 if (wait_until(console, context, 500ms, { move_list }) == 0){
                     seen_battle = true;
+                    battle_confirmed = true;
                     last_activity = current_time();
                     unknown_in_row = 0;
                     console.log("The move list is open. Picking a move.", COLOR_ORANGE);
@@ -708,6 +720,23 @@ StoryBattleResult run_story_battle(
 
             BattleDialogDetector battle_text(COLOR_RED);
             if (battle_text.detect(screen)){
+                //  Only a text box, again and again: maybe no battle at all
+                //  (a white area at the bottom of the overworld), or the
+                //  battle is over. Look.
+                if (++text_only_in_row >= 3){
+                    text_only_in_row = 0;
+                    if (in_overworld(console, context)){
+                        if (lost){
+                            return StoryBattleResult::LOST;
+                        }
+                        if (!battle_confirmed){
+                            console.log("No battle after all: the screen only looked like battle text.", COLOR_ORANGE);
+                            return StoryBattleResult::NO_BATTLE;
+                        }
+                        console.log("Battle over.");
+                        return result;
+                    }
+                }
                 seen_battle = true;
                 last_activity = current_time();
                 pbf_press_button(context, BUTTON_A, 160ms, 840ms);
