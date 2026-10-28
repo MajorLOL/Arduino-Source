@@ -80,6 +80,7 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
     //  battle detectors, and anything else (a fade, a text box) lets the
     //  run go on. Stopping the input then would leave a step half known.
     m_tracker.add(m_screen, time_ms);
+    m_moving.store(!m_tracker.lost() && m_tracker.still_ms() < 120.0, std::memory_order_relaxed);
     return !m_tracker.lost() &&
         m_stop_when_still_ms > 0 &&
         m_tracker.frames() >= 3 &&
@@ -88,10 +89,14 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
 
 
 
-TurnsOnWatcher::TurnsOnWatcher(const std::string& name, StaticScreenDetector& detector, Milliseconds duration)
+TurnsOnWatcher::TurnsOnWatcher(
+    const std::string& name, StaticScreenDetector& detector, Milliseconds duration,
+    const WalkTracker* motion
+)
     : VisualInferenceCallback(name)
     , m_detector(detector)
     , m_duration(duration)
+    , m_motion(motion)
     , m_last(WallClock::min())
     , m_on_since(WallClock::min())
 {}
@@ -119,6 +124,12 @@ bool TurnsOnWatcher::process_frame(const VideoSnapshot& frame){
         return false;
     }
     if (m_on_since == WallClock::min()){
+        if (m_motion != nullptr && m_motion->moving()){
+            //  Came into view with the scrolling: scenery. It counts again
+            //  only after it is gone.
+            m_seen_off = false;
+            return false;
+        }
         m_on_since = frame.timestamp;
     }
     return frame.timestamp - m_on_since >= m_duration;

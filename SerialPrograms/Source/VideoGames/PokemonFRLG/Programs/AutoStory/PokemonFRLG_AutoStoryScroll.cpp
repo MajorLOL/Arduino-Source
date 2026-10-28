@@ -9,6 +9,8 @@
 #include <cmath>
 #include <algorithm>
 #include <array>
+#include <utility>
+#include <vector>
 #include "PokemonFRLG_AutoStoryScroll.h"
 
 namespace PokemonAutomation{
@@ -136,7 +138,10 @@ std::string TileOffset::summary() const{
     return buffer;
 }
 
-TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles){
+namespace{
+
+//  The best of the candidate offsets (in tiles), and how clearly it wins.
+TileOffset best_tile_offset(const Screen& key, const Screen& now, const std::vector<std::pair<int, int>>& candidates){
     auto in_player = [](int x, int y){
         return x >= PLAYER_X0 && x < PLAYER_X1 && y >= PLAYER_Y0 && y < PLAYER_Y1;
     };
@@ -144,14 +149,12 @@ TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles){
     //  The best offset over the whole screen.
     TileOffset result;
     result.best = 1e18;
-    for (int ty = -max_tiles; ty <= max_tiles; ty++){
-        for (int tx = -max_tiles; tx <= max_tiles; tx++){
-            double m = screen_mismatch(key, now, tx * TILE_PIXELS, ty * TILE_PIXELS);
-            if (m < result.best){
-                result.best = m;
-                result.x = tx;
-                result.y = ty;
-            }
+    for (const auto& c : candidates){
+        double m = screen_mismatch(key, now, c.first * TILE_PIXELS, c.second * TILE_PIXELS);
+        if (m < result.best){
+            result.best = m;
+            result.x = c.first;
+            result.y = c.second;
         }
     }
 
@@ -163,53 +166,71 @@ TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles){
     const int bx = result.x * TILE_PIXELS;
     const int by = result.y * TILE_PIXELS;
     result.margin = 1e18;
-    for (int ty = -max_tiles; ty <= max_tiles; ty++){
-        for (int tx = -max_tiles; tx <= max_tiles; tx++){
-            if (tx == result.x && ty == result.y){
+    for (const auto& c : candidates){
+        if (c.first == result.x && c.second == result.y){
+            continue;
+        }
+        const int cx = c.first * TILE_PIXELS;
+        const int cy = c.second * TILE_PIXELS;
+        long sum_best = 0;
+        long sum_other = 0;
+        long count = 0;
+        for (int y = 0; y < SCREEN_HEIGHT; y += 2){
+            const int yb = y + by;
+            const int yc = y + cy;
+            if (yb < 0 || yb >= SCREEN_HEIGHT || yc < 0 || yc >= SCREEN_HEIGHT){
                 continue;
             }
-            const int cx = tx * TILE_PIXELS;
-            const int cy = ty * TILE_PIXELS;
-            long sum_best = 0;
-            long sum_other = 0;
-            long count = 0;
-            for (int y = 0; y < SCREEN_HEIGHT; y += 2){
-                const int yb = y + by;
-                const int yc = y + cy;
-                if (yb < 0 || yb >= SCREEN_HEIGHT || yc < 0 || yc >= SCREEN_HEIGHT){
+            for (int x = 0; x < SCREEN_WIDTH; x += 2){
+                const int xb = x + bx;
+                const int xc = x + cx;
+                if (xb < 0 || xb >= SCREEN_WIDTH || xc < 0 || xc >= SCREEN_WIDTH){
                     continue;
                 }
-                for (int x = 0; x < SCREEN_WIDTH; x += 2){
-                    const int xb = x + bx;
-                    const int xc = x + cx;
-                    if (xb < 0 || xb >= SCREEN_WIDTH || xc < 0 || xc >= SCREEN_WIDTH){
-                        continue;
-                    }
-                    if (in_player(x, y) || in_player(xb, yb) || in_player(xc, yc)){
-                        continue;
-                    }
-                    const int kb = key.at(xb, yb);
-                    const int kc = key.at(xc, yc);
-                    if (abs(kb - kc) <= 16){
-                        continue;
-                    }
-                    const int n = now.at(x, y);
-                    sum_best += std::min(abs(n - kb), DIFF_CAP);
-                    sum_other += std::min(abs(n - kc), DIFF_CAP);
-                    count++;
+                if (in_player(x, y) || in_player(xb, yb) || in_player(xc, yc)){
+                    continue;
                 }
+                const int kb = key.at(xb, yb);
+                const int kc = key.at(xc, yc);
+                if (abs(kb - kc) <= 16){
+                    continue;
+                }
+                const int n = now.at(x, y);
+                sum_best += std::min(abs(n - kb), DIFF_CAP);
+                sum_other += std::min(abs(n - kc), DIFF_CAP);
+                count++;
             }
-            double margin = count < 50
-                ? 0     //  The two offsets look the same: no telling them apart.
-                : (double)(sum_other - sum_best) / (double)count;
-            result.margin = std::min(result.margin, margin);
         }
+        double margin = count < 50
+            ? 0     //  The two offsets look the same: no telling them apart.
+            : (double)(sum_other - sum_best) / (double)count;
+        result.margin = std::min(result.margin, margin);
     }
 
     //  The same place shows the same picture, give or take the video noise
     //  (about 1), animated water and flowers, and people walking around.
     result.clear = result.best <= 10.0 && result.margin >= 8.0;
     return result;
+}
+
+}
+
+TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles){
+    std::vector<std::pair<int, int>> candidates;
+    for (int ty = -max_tiles; ty <= max_tiles; ty++){
+        for (int tx = -max_tiles; tx <= max_tiles; tx++){
+            candidates.emplace_back(tx, ty);
+        }
+    }
+    return best_tile_offset(key, now, candidates);
+}
+
+TileOffset tile_offset_along(const Screen& key, const Screen& now, int dir_x, int dir_y, int max_tiles){
+    std::vector<std::pair<int, int>> candidates;
+    for (int k = -1; k <= max_tiles; k++){
+        candidates.emplace_back(k * dir_x, k * dir_y);
+    }
+    return best_tile_offset(key, now, candidates);
 }
 
 

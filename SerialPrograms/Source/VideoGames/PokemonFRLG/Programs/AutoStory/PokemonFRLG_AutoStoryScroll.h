@@ -76,6 +76,10 @@ struct TileOffset{
 };
 TileOffset tile_offset(const Screen& key, const Screen& now, int max_tiles);
 
+//  Same, looking only along (dir_x, dir_y), from 1 tile back to "max_tiles"
+//  ahead: how far a straight run got.
+TileOffset tile_offset_along(const Screen& key, const Screen& now, int dir_x, int dir_y, int max_tiles);
+
 
 
 //  Follows the scrolling during a straight run in one direction.

@@ -264,6 +264,10 @@ struct RunAttempt{
     bool lost = false;      //  The video lost the map on the way.
     RunEvent event = RunEvent::NONE;
     std::string video;      //  What the video tracker saw.
+    //  The screen before the run (with the video check), to measure later
+    //  how far the run got when something stopped it.
+    bool has_start = false;
+    AutoStoryScroll::Screen start;
 };
 
 //  From a standstill, try to make "moves" moves (steps, jumps) in
@@ -274,13 +278,15 @@ RunAttempt attempt_moves(
     double frames, int tiles_per_move, bool surf, bool dark, bool track
 ){
     BlackScreenWatcher battle_starting(COLOR_RED);
-    //  Text boxes count when they appear, not when the place looks like one
-    //  all the time (the white bottom of the S.S. Anne corridors).
-    AdvanceBattleDialogDetector battle_text_detector(COLOR_RED);
-    TurnsOnWatcher battle_text("BattleTextAppears", battle_text_detector, 250ms);
-    WhiteDialogDetector dialog_detector(COLOR_RED);
-    TurnsOnWatcher dialog("DialogAppears", dialog_detector, 250ms);
     WalkTracker tracker(direction, frames / tiles_per_move);
+    //  Text boxes count when they appear with the player standing, not when
+    //  the place looks like one (the white bottom of the S.S. Anne
+    //  corridors), all the time or as it comes into view.
+    const WalkTracker* motion = track ? &tracker : nullptr;
+    AdvanceBattleDialogDetector battle_text_detector(COLOR_RED);
+    TurnsOnWatcher battle_text("BattleTextAppears", battle_text_detector, 250ms, motion);
+    WhiteDialogDetector dialog_detector(COLOR_RED);
+    TurnsOnWatcher dialog("DialogAppears", dialog_detector, 250ms, motion);
 
     std::vector<PeriodicInferenceCallback> callbacks;
     std::vector<RunEvent> events;
@@ -309,8 +315,15 @@ RunAttempt attempt_moves(
     events.push_back(RunEvent::DIALOG);
 
     DpadPosition facing = rt.facing;
+    RunAttempt result;
     if (track){
         wait_for_still_screen(rt);
+        VideoSnapshot frame = rt.console.video().snapshot();
+        if (frame){
+            ImageViewRGB32 game = extract_box_reference(*frame.frame, GameSettings::instance().GAME_BOX);
+            AutoStoryScroll::sample_screen(result.start, game.data(), game.bytes_per_row(), game.width(), game.height());
+            result.has_start = true;
+        }
     }
     rt.context.wait_for_all_requests();
     int ret = run_until<ProControllerContext>(
@@ -331,7 +344,6 @@ RunAttempt attempt_moves(
     );
     rt.facing = direction;
 
-    RunAttempt result;
     result.event = ret < 0 ? RunEvent::NONE : events[(size_t)ret];
     if (!track){
         result.moves = moves;
@@ -654,6 +666,32 @@ bool walk_run(
         }
         case RunEvent::NONE:
             break;
+        }
+
+        //  Something stopped the run. The video saw up to that moment, but
+        //  the step under way then was still finished. Now that the player
+        //  stands still again, compare with the screen before the run.
+        if (a.event != RunEvent::NONE && a.has_start){
+            const int dx = run.direction == DPAD_LEFT ? -1 : (run.direction == DPAD_RIGHT ? 1 : 0);
+            const int dy = run.direction == DPAD_UP ? -1 : (run.direction == DPAD_DOWN ? 1 : 0);
+            const int reach = (moves + 1) * tiles_per_move;
+            AutoStoryScroll::Screen now;
+            if (reach <= (dx != 0 ? 10 : 6) && story_take_picture(rt, now)){
+                AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset_along(a.start, now, dx, dy, reach);
+                rt.console.log("After the stop, the run got: " + offset.summary());
+                const int tiles = offset.x * dx + offset.y * dy;
+                if (offset.clear && tiles >= 0 && tiles % tiles_per_move == 0 && tiles / tiles_per_move <= moves){
+                    const int real = tiles / tiles_per_move;
+                    if (real != made){
+                        rt.console.log(
+                            "Walked " + std::to_string(real) + " instead of " + std::to_string(made) + ".",
+                            COLOR_ORANGE
+                        );
+                        remaining += made - real;
+                        made = real;
+                    }
+                }
+            }
         }
 
         if (made == 0){

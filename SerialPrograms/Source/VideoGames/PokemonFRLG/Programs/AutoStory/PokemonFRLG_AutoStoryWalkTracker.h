@@ -10,6 +10,7 @@
 #ifndef PokemonAutomation_PokemonFRLG_AutoStoryWalkTracker_H
 #define PokemonAutomation_PokemonFRLG_AutoStoryWalkTracker_H
 
+#include <atomic>
 #include "Common/Cpp/Time.h"
 #include "CommonTools/InferenceCallbacks/VisualInferenceCallback.h"
 #include "CommonTools/VisualDetector.h"
@@ -36,8 +37,12 @@ public:
 
     const AutoStoryScroll::Tracker& tracker() const{ return m_tracker; }
 
+    //  The map scrolls (the player walks). Safe to ask from other callbacks.
+    bool moving() const{ return m_moving.load(std::memory_order_relaxed); }
+
 private:
     AutoStoryScroll::Tracker m_tracker;
+    std::atomic<bool> m_moving{false};
     AutoStoryScroll::Screen m_screen;
     WallClock m_start;
     WallClock m_last;
@@ -49,9 +54,14 @@ private:
 //  did not see it at first: some places look like a text box all the time
 //  (the white bottom of the S.S. Anne corridors), and a text box that
 //  matters (a trainer talking) appears while walking.
+//  With "motion": something that turns up while the map scrolls is scenery
+//  coming into view (a text box does not appear while the player walks).
 class TurnsOnWatcher : public VisualInferenceCallback{
 public:
-    TurnsOnWatcher(const std::string& name, StaticScreenDetector& detector, Milliseconds duration);
+    TurnsOnWatcher(
+        const std::string& name, StaticScreenDetector& detector, Milliseconds duration,
+        const WalkTracker* motion = nullptr
+    );
 
     using VisualInferenceCallback::process_frame;
     virtual void make_overlays(VideoOverlaySet& items) const override;
@@ -63,6 +73,7 @@ public:
 private:
     StaticScreenDetector& m_detector;
     Milliseconds m_duration;
+    const WalkTracker* m_motion;
     bool m_first = true;
     bool m_on_at_start = false;
     bool m_seen_off = false;
