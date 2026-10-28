@@ -578,17 +578,36 @@ bool walk_run(
     const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
     const double frames = run.kind == RunKind::JUMP ? JUMP_FRAMES : (surf ? SURF_FRAMES : WALK_FRAMES);
     const int tiles_per_move = run.kind == RunKind::JUMP ? 2 : 1;
-    const bool encounters = run.kind == RunKind::CHECKED || run.kind == RunKind::SURF_CHECKED || run.kind == RunKind::CHECKED_TRAINER;
-    const StoryBattleKind battle_kind = run.kind == RunKind::CHECKED_TRAINER ? StoryBattleKind::TRAINER : StoryBattleKind::WILD;
+    const bool approach = run.kind == RunKind::APPROACH;
+    const bool trainer = run.kind == RunKind::CHECKED_TRAINER || approach;
+    const bool encounters = run.kind == RunKind::CHECKED || run.kind == RunKind::SURF_CHECKED || trainer;
+    const StoryBattleKind battle_kind = trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD;
     const std::string label = where + " (going " + dpad_name(run.direction) + ")";
 
+    //  On an approach, a battle is the trainer to talk to: it saw the
+    //  player, walked up, and now stands in the way of the rest of the leg.
+    auto trainer_came = [&](StoryBattleResult result){
+        if (!approach || result == StoryBattleResult::NO_BATTLE){
+            return false;
+        }
+        rt.console.log("The trainer came to the player. The leg ends here: " + label, COLOR_BLUE);
+        rt.trainer_came = true;
+        rt.facing = leg.face;
+        return true;
+    };
     if (!track && encounters){
         //  No video check: one step at a time, watching for a battle after each.
         for (uint16_t i = 0; i < count; i++){
-            story_checked_step(
-                rt, run.direction, surf, run.kind == RunKind::CHECKED_TRAINER, StoryBattleKind::WILD,
+            StoryBattleResult result = story_checked_step(
+                rt, run.direction, surf, trainer, StoryBattleKind::WILD,
                 where + " step " + std::to_string(i + 1) + "/" + std::to_string(count)
             );
+            if (approach){
+                rt.approach_made++;
+            }
+            if (trainer_came(result)){
+                return false;
+            }
         }
         return false;
     }
@@ -635,14 +654,15 @@ bool walk_run(
             return true;
         }
 
+        StoryBattleResult battle = StoryBattleResult::NO_BATTLE;
         switch (a.event){
         case RunEvent::BATTLE_START:
         case RunEvent::BATTLE_TEXT:
-            story_battle(rt, battle_kind, label);
+            battle = story_battle(rt, battle_kind, label);
             break;
         case RunEvent::DIALOG:
             //  A trainer saw the player (or a sign or person talks).
-            story_battle(rt, StoryBattleKind::TRAINER, label);
+            battle = story_battle(rt, StoryBattleKind::TRAINER, label);
             break;
         case RunEvent::SCREEN_CHANGED:{
             //  Maybe a battle is starting. Give it a moment to show.
@@ -656,9 +676,9 @@ bool walk_run(
             }
             int ret = wait_until(rt.console, rt.context, 3000ms, callbacks);
             if (ret == 2){
-                story_battle(rt, StoryBattleKind::TRAINER, label);
+                battle = story_battle(rt, StoryBattleKind::TRAINER, label);
             }else if (ret >= 0){
-                story_battle(rt, battle_kind, label);
+                battle = story_battle(rt, battle_kind, label);
             }else{
                 rt.console.log("The screen changed but no battle came. Walking on.", COLOR_ORANGE);
             }
@@ -694,6 +714,12 @@ bool walk_run(
             }
         }
 
+        if (approach){
+            rt.approach_made = (uint16_t)(rt.approach_made + made);
+        }
+        if (trainer_came(battle)){
+            return false;
+        }
         if (made == 0){
             no_progress++;
             if (no_progress >= 15){
@@ -714,7 +740,9 @@ bool walk_run(
             AdvanceWhiteDialogDetector talking(COLOR_RED);
             if (talking.detect(rt.console.video().snapshot())){
                 rt.console.log("Someone is talking.", COLOR_ORANGE);
-                story_battle(rt, StoryBattleKind::TRAINER, label);
+                if (trainer_came(story_battle(rt, StoryBattleKind::TRAINER, label))){
+                    return false;
+                }
                 continue;
             }
             not_moving++;
@@ -784,9 +812,20 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
         rt.facing = leg.start_facing;
     }
 
+    rt.trainer_came = false;
+    uint16_t approach_total = 0;
+    for (const StoryRun& run : runs){
+        if (run.kind == RunKind::APPROACH){
+            approach_total = (uint16_t)(approach_total + run.count);
+        }
+    }
+    if (approach_total > 0){
+        rt.approach_total = approach_total;
+        rt.approach_made = 0;
+    }
     bool warped = false;
     bool warped_early = false;
-    for (size_t r = 0; r < runs.size(); r++){
+    for (size_t r = 0; r < runs.size() && !rt.trainer_came; r++){
         const StoryRun& run = runs[r];
         const bool last = r + 1 == runs.size();
         const RunKind next = last ? RunKind::WALK : runs[r + 1].kind;
@@ -796,6 +835,7 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
         case RunKind::SURF:
         case RunKind::CHECKED:
         case RunKind::CHECKED_TRAINER:
+        case RunKind::APPROACH:
         case RunKind::SURF_CHECKED:{
             //  A spinner after this run carries the player on: the video
             //  would see that too.
@@ -815,6 +855,29 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
                 );
                 warped = true;
             }
+            break;
+        }
+        case RunKind::BACK:{
+            //  Out of the line of the trainer just talked to, back to where
+            //  the approach entered it. If the trainer came up to the
+            //  player, the approach got that much less far. (The first move
+            //  of the approach only went into the line.) Not known (the
+            //  program started here): all of it.
+            const int into_line = (int)rt.approach_total - (int)run.count;
+            const int back = std::max(0, std::min((int)run.count, (int)rt.approach_made - into_line));
+            if (back != run.count){
+                rt.console.log(
+                    "The trainer came " + std::to_string(run.count - back) + " tile(s) closer: walking back " +
+                    std::to_string(back) + " of " + std::to_string(run.count) + ".",
+                    COLOR_BLUE
+                );
+            }
+            if (back > 0){
+                StoryRun plain{run.direction, (uint16_t)back, RunKind::WALK};
+                walk_run(rt, leg, plain, (uint16_t)back, rt.verify_walking, false, false, leg.name);
+            }
+            rt.approach_total = 0;
+            rt.approach_made = 0;
             break;
         }
         case RunKind::SPIN:
@@ -858,6 +921,10 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
         rt.context.wait_for_all_requests();
         break;
     case LegEnd::INTERACT:
+        if (rt.trainer_came){
+            //  The player already faces the trainer, who stands next to them.
+            break;
+        }
         story_face(rt, leg.face);
         break;
     }
@@ -1048,9 +1115,12 @@ void story_log_memory(StoryRuntime& rt, bool force){
 
 void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.resume_at = resume_at;
+    //  Saved at the end of the segment: the next one starts there.
+    const std::string where = resume_at >= rt.segment_steps && !rt.next_segment_id.empty()
+        ? rt.next_segment_id + ", step 1"
+        : rt.segment_id + ", step " + std::to_string(resume_at + 1);
     rt.console.log(
-        "Saved. To go on from this save later: start at segment " + rt.segment_id +
-        ", step " + std::to_string(resume_at + 1) + ".",
+        "Saved. To go on from this save later: start at segment " + where + ".",
         COLOR_BLUE
     );
     story_log_memory(rt, true);
@@ -1069,7 +1139,7 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
             "Pokemon Automation uses " + gigabytes(memory.process_virtual_memory) + " of the " +
             gigabytes(memory.total_system_memory) + " of memory and could crash soon. The game was "
             "just saved: close Pokemon Automation, open it again and start at segment " +
-            rt.segment_id + ", step " + std::to_string(resume_at + 1) + "."
+            where + "."
         );
     }
 }

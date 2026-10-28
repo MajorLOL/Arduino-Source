@@ -60,6 +60,13 @@ struct StoryRuntime{
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;
 
+    //  The last walked leg ended early: the trainer it went to talk to saw
+    //  the player and came, and the battle is over.
+    bool trainer_came = false;
+    //  Moves of the APPROACH runs: in the leg, and really made.
+    uint16_t approach_total = 0;
+    uint16_t approach_made = 0;
+
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
 
@@ -68,6 +75,8 @@ struct StoryRuntime{
 
     //  Where the program is in the story, set for each step.
     std::string segment_id;
+    size_t segment_steps = 0;       //  Steps of the running segment.
+    std::string next_segment_id;    //  The segment after it ("" if none).
     bool has_dex = true;            //  The start menu has the POKeDEX entry.
     size_t step_index = 0;          //  The running step, in its segment.
     bool next_is_save = false;      //  The next step saves anyway.

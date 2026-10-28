@@ -277,14 +277,24 @@ void AutoStory::run_segment(
     AutoStory_Descriptor::Stats& stats = env.current_stats<AutoStory_Descriptor::Stats>();
     ProControllerContext& context = rt.context;
 
+    //  The trainer the last leg went to talk to came to the player on the
+    //  way, and the battle is over: its talk and battle steps are skipped.
+    bool skip_talk = false;
+    bool skip_battle = false;
+
     for (size_t i = first_step; i < segment.step_count; i++){
         const StoryStep& step = script.step(segment, i);
         const StoryStep* next = i + 1 < segment.step_count ? &script.step(segment, i + 1) : nullptr;
+        const bool came = skip_talk;
+        const bool came_battle = skip_battle;
+        skip_talk = false;
+        skip_battle = false;
         const bool next_battle = next != nullptr && next->type == StepType::BATTLE;
         const bool next_scene = next != nullptr && (next->type == StepType::BATTLE || next->type == StepType::CUTSCENE);
         const std::string label = step.label;
 
         rt.segment_id = segment.id;
+        rt.segment_steps = segment.step_count;
         rt.has_dex = segment.has_dex;
         rt.step_index = i;
         rt.next_is_save = next != nullptr && next->type == StepType::SAVE;
@@ -314,8 +324,14 @@ void AutoStory::run_segment(
         switch (step.type){
         case StepType::WALK:
             walk_leg(rt, script, step.leg);
+            skip_talk = rt.trainer_came;
             break;
         case StepType::TALK:
+            if (came){
+                env.log("Already battled on the way: " + label);
+                skip_battle = next_battle;
+                break;
+            }
             story_talk_start(rt, label);
             if (!next_scene){
                 finish_scene(0ms, 60s, false);
@@ -338,6 +354,9 @@ void AutoStory::run_segment(
             );
             break;
         case StepType::BATTLE:
+            if (came_battle){
+                break;
+            }
             story_battle(rt, step.p1 == 1 ? StoryBattleKind::WILD_RUN : StoryBattleKind::TRAINER, label);
             break;
         case StepType::SCRIPTED_BATTLE:
@@ -495,6 +514,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
         };
         rt.resume_at = (size_t)-1;
+        rt.next_segment_id = current_segment + 1 < script.segment_count ? script.segments[current_segment + 1].id : "";
         try{
             run_segment(env, rt, script, segment, current_step);
             stats.segments++;

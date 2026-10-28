@@ -31,6 +31,12 @@ enum class RunKind : uint8_t{
     WALK,               //  Plain tiles: one continuous input.
     CHECKED,            //  Wild-encounter tiles: one step at a time, watching for a battle.
     CHECKED_TRAINER,    //  In sight of a trainer that turns around: one step at a time.
+    APPROACH,           //  Like CHECKED_TRAINER: the last moves up to a trainer that turns
+                        //  around, to talk to it. If it sees the player on the way, it walks
+                        //  up and stands in the way: the leg ends there (the talk and battle
+                        //  after it are skipped).
+    BACK,               //  Back out of that trainer's line: only as many moves as the
+                        //  approach made (after the move into the line).
     JUMP,               //  Over a ledge: one input, two tiles.
     SPIN,               //  Carried by spinner tiles: "count" tiles without input.
     SURF,               //  Surfing over water without encounters.
