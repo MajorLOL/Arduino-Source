@@ -111,6 +111,20 @@ int read_move_name(Logger& logger, const ImageViewRGB32& image, const std::vecto
     return token_to_move(result.results.begin()->second.token);
 }
 
+//  Whether at least one move name of the FIGHT menu can be read: the move
+//  list is really open. (Its arrow detector also fires on some overworld
+//  scenes, Route 9: the D-pad presses that pick a move would walk then.)
+bool move_names_readable(ConsoleHandle& console){
+    VideoSnapshot screen = console.video().snapshot();
+    for (int i = 0; i < 4; i++){
+        ImageViewRGB32 box = game_box(screen, MOVE_NAME_BOXES[i]);
+        if (read_move_name(console.logger(), box, DARK_TEXT_FILTERS()) >= 0){
+            return true;
+        }
+    }
+    return false;
+}
+
 //  Read the four move names of the FIGHT menu.
 void read_fight_menu(ConsoleHandle& console, StoryBattleMemory& memory){
     VideoSnapshot screen = console.video().snapshot();
@@ -697,7 +711,12 @@ StoryBattleResult run_story_battle(
             //  circles with the battle menu.
             {
                 BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
-                if (wait_until(console, context, 500ms, { move_list }) == 0){
+                bool list_open = wait_until(console, context, 500ms, { move_list }) == 0;
+                if (list_open && !move_names_readable(console)){
+                    console.log("Looked like the move list, but no move name is there.", COLOR_ORANGE);
+                    list_open = false;
+                }
+                if (list_open){
                     seen_battle = true;
                     battle_confirmed = true;
                     last_activity = current_time();
