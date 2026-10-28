@@ -293,9 +293,14 @@ RunAttempt attempt_moves(
         //  Without Flash the screen is mostly black anyway.
         callbacks.emplace_back(battle_starting);
         events.push_back(RunEvent::BATTLE_START);
+    }else{
+        //  In the dark, the battle text is what shows a battle. Elsewhere
+        //  the screen goes black first (and the battle text detector also
+        //  takes some overworld places for a text box, like the white
+        //  bottom of the S.S. Anne corridors).
+        callbacks.emplace_back(battle_text);
+        events.push_back(RunEvent::BATTLE_TEXT);
     }
-    callbacks.emplace_back(battle_text);
-    events.push_back(RunEvent::BATTLE_TEXT);
     callbacks.emplace_back(dialog);
     events.push_back(RunEvent::DIALOG);
 

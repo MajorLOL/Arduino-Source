@@ -720,10 +720,11 @@ StoryBattleResult run_story_battle(
 
             BattleDialogDetector battle_text(COLOR_RED);
             if (battle_text.detect(screen)){
-                //  Only a text box, again and again: maybe no battle at all
-                //  (a white area at the bottom of the overworld), or the
-                //  battle is over. Look.
-                if (++text_only_in_row >= 3){
+                //  Only a text box: before the battle is certain, maybe no
+                //  battle at all (a white area at the bottom of the
+                //  overworld: A would talk to whoever stands there). Again
+                //  and again: maybe the battle is over. Look.
+                if (!battle_confirmed || ++text_only_in_row >= 3){
                     text_only_in_row = 0;
                     if (in_overworld(console, context)){
                         if (lost){
