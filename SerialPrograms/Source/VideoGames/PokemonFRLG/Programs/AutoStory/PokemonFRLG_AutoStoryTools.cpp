@@ -263,6 +263,7 @@ struct RunAttempt{
     bool measured = false;  //  "moves" was measured on the video.
     bool lost = false;      //  The video lost the map on the way.
     bool lost_early = false;    //  ... so early that no step can have been made then.
+    bool on_turn = false;       //  ... on the turn in place before the step.
     RunEvent event = RunEvent::NONE;
     std::string video;      //  What the video tracker saw.
     //  The screen before the run (with the video check), to measure later
@@ -328,6 +329,34 @@ RunAttempt attempt_moves(
         }
     }
     rt.context.wait_for_all_requests();
+    if (battles && dark && track && moves == 1 && !surf &&
+        facing != DPAD_NONE && facing != direction
+    ){
+        //  Gen 3 also looks for a wild battle when a turn in place is over
+        //  (FieldGetPlayerInput(): the player is at a tile center then), not
+        //  only at the end of a step. In the dark both look the same on the
+        //  video. So turn first, on its own (released before the 8-frame
+        //  turn is over), and watch: a battle now means no step.
+        WalkTracker turn_tracker(direction, frames / tiles_per_move);
+        turn_tracker.stop_when_lost();
+        int turned = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                pbf_press_dpad(context, direction, frames_to_ms(4), frames_to_ms(TURN_FRAMES + 6 - 4));
+                pbf_wait(context, 1000ms);
+            },
+            { turn_tracker }
+        );
+        rt.facing = direction;
+        facing = direction;
+        if (turned >= 0 || turn_tracker.tracker().lost()){
+            result.video = turn_tracker.tracker().summary();
+            result.lost = true;
+            result.lost_early = true;
+            result.on_turn = true;
+            return result;
+        }
+    }
     int ret = run_until<ProControllerContext>(
         rt.console, rt.context,
         [&](ProControllerContext& context){
@@ -669,7 +698,9 @@ bool walk_run(
             //  Unless the screen changed before it could be over: then it
             //  was the step before.
             made = a.lost_early ? 0 : moves;
-            if (a.lost_early){
+            if (a.on_turn){
+                rt.console.log("The screen changed on the turn (a battle can start after a turn too): no step.", COLOR_ORANGE);
+            }else if (a.lost_early){
                 rt.console.log("The screen changed right away: this step did not happen.", COLOR_ORANGE);
             }
         }
@@ -723,8 +754,10 @@ bool walk_run(
             battle = story_battle(rt, battle_kind, label);
             break;
         case RunEvent::DIALOG:
-            //  A trainer saw the player (or a sign or person talks).
+            //  A trainer saw the player (or a sign or person talks). The
+            //  player turns to the trainer.
             battle = story_battle(rt, StoryBattleKind::TRAINER, label);
+            rt.facing = DPAD_NONE;
             break;
         case RunEvent::SCREEN_CHANGED:{
             //  Maybe a battle is starting. Give it a moment to show.
@@ -739,6 +772,7 @@ bool walk_run(
             int ret = wait_until(rt.console, rt.context, 3000ms, callbacks);
             if (ret == 2){
                 battle = story_battle(rt, StoryBattleKind::TRAINER, label);
+                rt.facing = DPAD_NONE;
             }else if (ret >= 0){
                 battle = story_battle(rt, battle_kind, label);
             }else{
@@ -813,7 +847,9 @@ bool walk_run(
             AdvanceWhiteDialogDetector talking(COLOR_RED);
             if (screen && talking.detect(screen)){
                 rt.console.log("Someone is talking.", COLOR_ORANGE);
-                if (trainer_came(story_battle(rt, StoryBattleKind::TRAINER, label))){
+                StoryBattleResult talked = story_battle(rt, StoryBattleKind::TRAINER, label);
+                rt.facing = DPAD_NONE;
+                if (trainer_came(talked)){
                     return false;
                 }
                 continue;
@@ -884,6 +920,15 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     ){
         rt.facing = leg.start_facing;
     }
+    //  In the dark a turn has to be known to be one (see attempt_moves()).
+    //  After a warp the game sets the facing (GetAdjustedInitialDirection():
+    //  on a ladder, the way the player went), and the route has it.
+    if (rt.facing == DPAD_NONE && rt.arrived_by_warp && leg.dark && leg.start_facing != DPAD_NONE){
+        rt.facing = leg.start_facing;
+    }
+    rt.arrived_by_warp = false;
+    rt.last_leg_dark = leg.dark;
+    rt.trainer_battles_before_leg = rt.trainer_battles;
 
     rt.trainer_came = false;
     uint16_t approach_total = 0;
@@ -982,12 +1027,14 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
         }
         rt.facing = DPAD_NONE;
+        rt.arrived_by_warp = true;
         break;
     case LegEnd::WARP_STEP:
         if (!warped){
             wait_warp_step(rt, leg.dark || leg.dest_dark, leg.preview, leg.name);
         }
         rt.facing = DPAD_NONE;
+        rt.arrived_by_warp = true;
         break;
     case LegEnd::TRIGGER:
         pbf_wait(rt.context, 300ms);

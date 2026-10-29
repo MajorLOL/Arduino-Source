@@ -20,6 +20,7 @@
 #include <string>
 #include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
+#include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
@@ -373,6 +374,10 @@ void AutoStory::run_segment(
             std::string(segment.id) + " step " + std::to_string(i + 1) + "/" +
             std::to_string(segment.step_count) + ": " + label
         );
+        if (step.type != StepType::WALK && step.type != StepType::WAIT){
+            //  Only right after the warp is the facing the game's.
+            rt.arrived_by_warp = false;
+        }
 
         //  A scene that turned into a battle: run the battle, then finish the scene.
         auto finish_scene = [&](Milliseconds min_time, Milliseconds max_time, bool yes){
@@ -418,12 +423,32 @@ void AutoStory::run_segment(
                 std::string(step.text) == "YES"
             );
             break;
-        case StepType::BATTLE:
+        case StepType::BATTLE:{
             if (came_battle){
                 break;
             }
-            story_battle(rt, step.p1 == 1 ? StoryBattleKind::WILD_RUN : StoryBattleKind::TRAINER, label);
+            const bool trainer = step.p1 != 1;
+            StoryBattleResult result = story_battle(rt, trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD_RUN, label);
+            if (result != StoryBattleResult::NO_BATTLE && step.dir != DPAD_NONE){
+                //  The player turned to the trainer that saw them.
+                rt.facing = step.dir;
+            }
+            if (result == StoryBattleResult::NO_BATTLE && trainer && rt.last_leg_dark &&
+                rt.trainer_battles == rt.trainer_battles_before_leg
+            ){
+                //  The trainer sees the player where the route ends (and no
+                //  trainer came on the way). In the dark the video cannot
+                //  check the steps: missing it means the player is somewhere
+                //  else, and walking on from there goes wrong.
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::NO_ERROR_REPORT,
+                    "No battle with " + label + ": in the dark the player is not where the route expects. "
+                    "Going back to the last save.",
+                    rt.console
+                );
+            }
             break;
+        }
         case StepType::SCRIPTED_BATTLE:
             story_scripted_battle(rt, label);
             break;
@@ -642,6 +667,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             stats.resets++;
             env.update_stats();
             rt.facing = DPAD_NONE;
+            rt.arrived_by_warp = false;
             rt.lead_fainted = false;
             rt.caught = rt.caught_at_save;
             //  A team member may have been training in front.

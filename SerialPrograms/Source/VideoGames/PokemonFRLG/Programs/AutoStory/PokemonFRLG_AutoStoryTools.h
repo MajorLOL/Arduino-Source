@@ -60,6 +60,14 @@ struct StoryRuntime{
 
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;
+    //  The last leg ended with a warp, and no other step came since: the
+    //  game set which way the player faces (on a ladder, the way they
+    //  went), and the next leg's start facing has it.
+    bool arrived_by_warp = false;
+    //  The last leg walked was on a dark map (no Flash), and the trainer
+    //  battles before it.
+    bool last_leg_dark = false;
+    uint64_t trainer_battles_before_leg = 0;
 
     //  The last walked leg ended early: the trainer it went to talk to saw
     //  the player and came, and the battle is over.
