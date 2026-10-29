@@ -136,24 +136,38 @@ void wait_after_warp(StoryRuntime& rt, MapPreview preview, const char* leg_name)
     rt.context.wait_for_all_requests();
 }
 
-//  Hold "direction" from a standstill until the warp has finished.
-//  Doors, mats and stairs all warp while the direction is held:
+//  Hold "direction" from a standstill until the warp starts, then wait
+//  until it has finished. Doors, mats and stairs all warp while the
+//  direction is held:
 //    door:   facing the door, holding toward it      (TryDoorWarp)
 //    mat:    standing on it, holding the arrow       (TryArrowWarp)
 //    stairs: standing on them, holding sideways      (TryArrowWarp)
+//  Released when the screen turns black: a direction still held when the
+//  new map comes up can take the player straight back. Stairs are quick,
+//  and the player arrives standing on the other stairs (Task_ExitStairs):
+//  holding sideways there goes back down.
 void take_warp_push(
     StoryRuntime& rt, DpadPosition direction, bool dark, MapPreview preview, const char* leg_name
 ){
     BlackScreenOverWatcher warp_finished(COLOR_RED);
+    BlackScreenWatcher warp_starting(COLOR_RED);
+    std::vector<PeriodicInferenceCallback> callbacks;
+    callbacks.emplace_back(warp_finished);
+    if (!dark){
+        //  (Without Flash the screen is black anyway.)
+        callbacks.emplace_back(warp_starting);
+    }
     rt.context.wait_for_all_requests();
     int ret = run_until<ProControllerContext>(
         rt.console, rt.context,
         [&](ProControllerContext& context){
-            pbf_press_dpad(context, direction, 1500ms, 0ms);
-            pbf_wait(context, 10000ms);
+            pbf_press_dpad(context, direction, dark ? 700ms : 1500ms, 0ms);
         },
-        { warp_finished }
+        callbacks
     );
+    if (ret != 0){
+        ret = wait_until(rt.console, rt.context, 10000ms, { warp_finished });
+    }
     if (ret < 0){
         if (dark){
             //  Without Flash most of the screen is black, so the end of the
