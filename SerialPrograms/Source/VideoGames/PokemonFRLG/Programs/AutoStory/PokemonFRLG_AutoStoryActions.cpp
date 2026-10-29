@@ -431,6 +431,59 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 
 
 
+void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Using an item on party slot " + std::to_string(party_slot) + ": " + what);
+    open_bag_from_overworld(console, context);
+    if (!select_bag_item(rt, BagPocket::ITEMS, {words.c_str()}, {}, what)){
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_use_item(): Not in the bag: " + what,
+            console
+        );
+    }
+    //  A: USE / GIVE / TOSS / CANCEL, cursor on USE. A: the party menu.
+    press(context, BUTTON_A, 800ms);
+    press(context, BUTTON_A, 2500ms);
+    context.wait_for_all_requests();
+    PartyMenuWatcher party(COLOR_RED);
+    if (wait_until(console, context, 3000ms, { party }) != 0){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_use_item(): The party menu did not open: " + what,
+            console
+        );
+    }
+    for (int i = 1; i < party_slot; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    press(context, BUTTON_A, 3000ms);
+    //  An evolution stone: "What? X is evolving!", the evolution (an item
+    //  evolution cannot be stopped), "Congratulations! ...", then the bag.
+    //  A goes through the text.
+    WallClock deadline = current_time() + 40s;
+    bool back = false;
+    while (current_time() < deadline){
+        BagWatcher bag(COLOR_RED);
+        context.wait_for_all_requests();
+        if (wait_until(console, context, 2000ms, { bag }) == 0){
+            back = true;
+            break;
+        }
+        press(context, BUTTON_A, 500ms);
+    }
+    console.log(back ? "Back in the bag: " + what : "Not back in the bag: " + what, back ? COLOR_BLUE : COLOR_ORANGE);
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "bag");
+}
+
+
+
 void story_heal_with_items(StoryRuntime& rt){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -867,19 +920,12 @@ void story_grind(
 
 void story_catch(StoryRuntime& rt, const StoryStep& step){
     ConsoleHandle& console = rt.console;
-    std::set<std::string> species;
-    std::string list = step.text;
-    size_t start = 0;
-    while (start <= list.size()){
-        size_t comma = list.find(',', start);
-        std::string slug = list.substr(start, comma == std::string::npos ? std::string::npos : comma - start);
-        if (!slug.empty()){
-            species.insert(slug);
+    std::set<std::string> species = story_species_list(step.text);
+    for (const std::string& slug : species){
+        if (rt.caught.count(slug) != 0){
+            console.log("Already caught on the way: " + slug, COLOR_BLUE);
+            return;
         }
-        if (comma == std::string::npos){
-            break;
-        }
-        start = comma + 1;
     }
     console.log(std::string("Catching one of: ") + step.text);
 

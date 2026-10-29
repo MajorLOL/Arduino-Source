@@ -269,6 +269,35 @@ AutoStory::AutoStory()
 
 
 
+namespace{
+
+//  The species the next catch step of the segment (from step "from" on)
+//  wants, if not caught yet: met on the way, they are caught right there.
+//  Only the next one, so the team joins in the planned order (party slots).
+void set_wanted(StoryRuntime& rt, const StoryScript& script, const StorySegment& segment, size_t from){
+    rt.battle.catch_species.clear();
+    for (size_t k = from; k < segment.step_count; k++){
+        const StoryStep& step = script.step(segment, k);
+        if (step.type != StepType::CATCH){
+            continue;
+        }
+        std::set<std::string> species = story_species_list(step.text);
+        bool done = false;
+        for (const std::string& slug : species){
+            done |= rt.caught.count(slug) != 0;
+        }
+        if (done){
+            continue;
+        }
+        rt.battle.catch_species = species;
+        rt.battle.catch_balls = (uint16_t)std::max(1, step.p0);
+        return;
+    }
+}
+
+}
+
+
 void AutoStory::run_segment(
     SingleSwitchProgramEnvironment& env, StoryRuntime& rt,
     const StoryScript& script, const StorySegment& segment,
@@ -295,6 +324,7 @@ void AutoStory::run_segment(
 
         rt.segment_id = segment.id;
         rt.segment_steps = segment.step_count;
+        set_wanted(rt, script, segment, i);
         rt.has_dex = segment.has_dex;
         rt.step_index = i;
         rt.next_is_save = next != nullptr && next->type == StepType::SAVE;
@@ -417,6 +447,9 @@ void AutoStory::run_segment(
         case StepType::HEAL_ITEMS:
             story_heal_with_items(rt);
             break;
+        case StepType::USE_ITEM:
+            story_use_item(rt, step.p0, step.text, label);
+            break;
         }
 
         stats.steps += rt.steps - steps_before;
@@ -473,6 +506,21 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             std::to_string(script.segments[first].step_count) + " steps."
         );
     }
+
+    //  The catches before the start are done (the game was played up to
+    //  there).
+    for (size_t s = 0; s <= first; s++){
+        const StorySegment& segment = script.segments[s];
+        const size_t end = s == first ? first_step : segment.step_count;
+        for (size_t k = 0; k < end; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type == StepType::CATCH){
+                std::set<std::string> species = story_species_list(step.text);
+                rt.caught.insert(species.begin(), species.end());
+            }
+        }
+    }
+    rt.caught_at_save = rt.caught;
 
     home_black_border_check(env.console, context);
 
@@ -544,6 +592,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             env.update_stats();
             rt.facing = DPAD_NONE;
             rt.lead_fainted = false;
+            rt.caught = rt.caught_at_save;
             current_segment = resume_segment;
             current_step = resume_step;
         }

@@ -42,6 +42,10 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 //  Full Restore on the second one too).
 void story_heal_with_items(StoryRuntime& rt);
 
+//  Use an item from the bag's ITEMS pocket (found by a word of its
+//  description) on a party slot (1-6): an evolution stone.
+void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what);
+
 //  Facing an elevator panel: pick a floor. "from" is where the cursor
 //  starts (the current floor), "to" the floor to pick.
 void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what);

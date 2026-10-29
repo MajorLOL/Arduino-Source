@@ -104,6 +104,7 @@ enum class StepType : uint8_t{
     PUSH,               //  push a Strength boulder toward dir
     BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity
     HEAL_ITEMS,         //  heal the party with items from the bag
+    USE_ITEM,           //  use an item on party slot p0; text = a word of its description
 };
 
 struct StoryStep{

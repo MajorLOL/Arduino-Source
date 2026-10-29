@@ -57,7 +57,8 @@ struct StoryBattleSettings{
     AutoStoryDex::Type lead_type1 = AutoStoryDex::Type::NORMAL;
     AutoStoryDex::Type lead_type2 = AutoStoryDex::Type::NORMAL;
 
-    //  For StoryBattleKind::CATCH: Pokemon Automation slugs.
+    //  For StoryBattleKind::CATCH: Pokemon Automation slugs. Also caught
+    //  when met in a StoryBattleKind::WILD battle.
     std::set<std::string> catch_species;
     uint16_t catch_balls = 5;
 };
@@ -81,6 +82,8 @@ struct StoryBattleMemory{
     //  How many times in a row the move list came back after picking
     //  "last_slot" (a press the game missed brings it back once).
     int list_back = 0;
+    //  The species caught in the last battle ("" if none).
+    std::string caught;
 };
 
 

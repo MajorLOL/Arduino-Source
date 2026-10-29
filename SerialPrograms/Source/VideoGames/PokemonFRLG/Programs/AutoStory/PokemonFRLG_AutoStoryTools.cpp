@@ -410,6 +410,12 @@ StoryBattleResult story_battle(
 ){
     rt.console.log("Battle: " + where);
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
+    if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty()){
+        rt.caught.insert(rt.memory.caught);
+        rt.console.log("Caught for the team: " + rt.memory.caught, COLOR_BLUE);
+        //  Wanted no more on the way.
+        rt.battle.catch_species.clear();
+    }
     if (result == StoryBattleResult::NO_BATTLE){
         rt.console.log("No battle started: " + where, COLOR_ORANGE);
         return result;
@@ -1180,8 +1186,28 @@ void story_log_memory(StoryRuntime& rt, bool force){
     );
 }
 
+std::set<std::string> story_species_list(const char* text){
+    std::set<std::string> species;
+    std::string list = text == nullptr ? "" : text;
+    size_t start = 0;
+    while (start <= list.size()){
+        size_t comma = list.find(',', start);
+        std::string slug = list.substr(start, comma == std::string::npos ? std::string::npos : comma - start);
+        if (!slug.empty()){
+            species.insert(slug);
+        }
+        if (comma == std::string::npos){
+            break;
+        }
+        start = comma + 1;
+    }
+    return species;
+}
+
+
 void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.resume_at = resume_at;
+    rt.caught_at_save = rt.caught;
     //  Saved at the end of the segment: the next one starts there.
     const std::string where = resume_at >= rt.segment_steps && !rt.next_segment_id.empty()
         ? rt.next_segment_id + ", step 1"

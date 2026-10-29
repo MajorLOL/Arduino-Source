@@ -545,6 +545,7 @@ StoryBattleResult run_story_battle(
     memory.battles++;
     memory.last_slot = -1;
     memory.list_back = 0;
+    memory.caught.clear();
     StoryBattleResult result = StoryBattleResult::WON;
     bool seen_battle = false;
     bool decided = false;       //  wild: fight/run/catch decided
@@ -588,19 +589,21 @@ StoryBattleResult run_story_battle(
             if (!decided){
                 decided = true;
                 safari = menu_is_safari(console);
-                if (safari){
-                    console.log("Safari Zone battle: running.");
-                    run = true;
-                }else if (kind == StoryBattleKind::WILD_RUN || (kind == StoryBattleKind::WILD && settings.wild_run)){
-                    run = true;
-                }else if (kind == StoryBattleKind::CATCH){
+                //  A wanted species: in a catch step, and also when met on
+                //  the way in a wild battle.
+                bool catching = !safari && (kind == StoryBattleKind::CATCH ||
+                    (kind == StoryBattleKind::WILD && !settings.catch_species.empty()));
+                bool wanted = false;
+                if (catching){
                     std::string slug;
                     read_opponent(console, slug);
-                    if (settings.catch_species.count(slug) != 0){
+                    wanted = settings.catch_species.count(slug) != 0;
+                    if (wanted){
                         console.log("Catching " + slug + ".");
                         int thrown = auto_catch(console, context, settings.catch_balls);
                         if (thrown > 0){
                             console.log("Caught " + slug + ".", COLOR_BLUE);
+                            memory.caught = slug;
                             return StoryBattleResult::CAUGHT;
                         }
                         //  Not caught (out of balls?) or the battle went on.
@@ -608,6 +611,13 @@ StoryBattleResult run_story_battle(
                             return StoryBattleResult::RAN;
                         }
                     }
+                }
+                if (safari){
+                    console.log("Safari Zone battle: running.");
+                    run = true;
+                }else if (kind == StoryBattleKind::WILD_RUN || (kind == StoryBattleKind::WILD && settings.wild_run)){
+                    run = true;
+                }else if (kind == StoryBattleKind::CATCH || wanted){
                     run = true;
                 }
             }

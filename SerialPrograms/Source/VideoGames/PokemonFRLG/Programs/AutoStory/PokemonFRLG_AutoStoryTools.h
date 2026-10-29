@@ -12,6 +12,7 @@
 #define PokemonAutomation_PokemonFRLG_AutoStoryTools_H
 
 #include <stdint.h>
+#include <set>
 #include <string>
 #include "Common/Cpp/Time.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
@@ -67,6 +68,11 @@ struct StoryRuntime{
     uint16_t approach_total = 0;
     uint16_t approach_made = 0;
 
+    //  Team members caught (species slugs): in this run, and at the last
+    //  save (a reset goes back to that).
+    std::set<std::string> caught;
+    std::set<std::string> caught_at_save;
+
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
 
@@ -101,6 +107,10 @@ StoryBattleResult story_battle(
     StoryRuntime& rt, StoryBattleKind kind, const std::string& where,
     bool throw_on_loss = true
 );
+
+
+//  The species of a catch step ("a,b,c").
+std::set<std::string> story_species_list(const char* text);
 
 
 //  Walk one generated leg. Handles wild battles and turning trainers on the
