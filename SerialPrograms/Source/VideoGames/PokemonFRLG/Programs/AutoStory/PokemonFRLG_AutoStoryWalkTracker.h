@@ -30,6 +30,12 @@ public:
     //  Also stop the inference once the player has stood still this long
     //  (to let the video catch up with the end of a run).
     void stop_when_still(Milliseconds duration);
+    //  Also stop the inference once the picture changes completely (a
+    //  battle starting).
+    void stop_when_lost(){ m_stop_when_lost = true; }
+    //  When the picture changed completely, in ms after the first frame
+    //  (negative: not lost).
+    double lost_at_ms() const{ return m_lost_at_ms; }
 
     using VisualInferenceCallback::process_frame;
     virtual void make_overlays(VideoOverlaySet& items) const override;
@@ -47,6 +53,8 @@ private:
     WallClock m_start;
     WallClock m_last;
     double m_stop_when_still_ms = 0;
+    bool m_stop_when_lost = false;
+    double m_lost_at_ms = -1;
 };
 
 

@@ -81,6 +81,12 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
     //  run go on. Stopping the input then would leave a step half known.
     m_tracker.add(m_screen, time_ms);
     m_moving.store(!m_tracker.lost() && m_tracker.still_ms() < 120.0, std::memory_order_relaxed);
+    if (m_tracker.lost()){
+        if (m_lost_at_ms < 0){
+            m_lost_at_ms = time_ms;
+        }
+        return m_stop_when_lost;
+    }
     return !m_tracker.lost() &&
         m_stop_when_still_ms > 0 &&
         m_tracker.frames() >= 3 &&

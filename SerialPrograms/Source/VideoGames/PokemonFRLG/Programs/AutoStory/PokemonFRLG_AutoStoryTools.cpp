@@ -262,6 +262,7 @@ struct RunAttempt{
     int moves = 0;          //  Moves made.
     bool measured = false;  //  "moves" was measured on the video.
     bool lost = false;      //  The video lost the map on the way.
+    bool lost_early = false;    //  ... so early that no step can have been made then.
     RunEvent event = RunEvent::NONE;
     std::string video;      //  What the video tracker saw.
     //  The screen before the run (with the video check), to measure later
@@ -275,7 +276,8 @@ struct RunAttempt{
 //  shows up. With "track", the video tells how many moves were made.
 RunAttempt attempt_moves(
     StoryRuntime& rt, DpadPosition direction, int moves,
-    double frames, int tiles_per_move, bool surf, bool dark, bool track
+    double frames, int tiles_per_move, bool surf, bool dark, bool track,
+    bool battles = false
 ){
     BlackScreenWatcher battle_starting(COLOR_RED);
     WalkTracker tracker(direction, frames / tiles_per_move);
@@ -345,6 +347,25 @@ RunAttempt attempt_moves(
     rt.facing = direction;
 
     result.event = ret < 0 ? RunEvent::NONE : events[(size_t)ret];
+    if (ret < 0 && battles && track && dark && !tracker.tracker().lost()){
+        //  In the dark only a battle starting shows on the video (the whole
+        //  screen changes). It must be seen now, at the end of the step
+        //  that started it, not in the next try: watch a little longer.
+        tracker.stop_when_lost();
+        wait_until(rt.console, rt.context, 800ms, { tracker });
+    }
+    if (ret < 0 && battles && track && !dark && tracker.tracker().lost()){
+        //  The whole picture changed on the way, where wild battles start:
+        //  a battle. It started at the end of a step, and the screen only
+        //  goes black after the input is over. The video counted the steps
+        //  up to the change.
+        BlackScreenWatcher black(COLOR_RED);
+        AdvanceBattleDialogWatcher text(COLOR_RED);
+        int late = wait_until(rt.console, rt.context, 2500ms, { black, text });
+        if (late >= 0){
+            result.event = late == 0 ? RunEvent::BATTLE_START : RunEvent::BATTLE_TEXT;
+        }
+    }
     if (!track){
         result.moves = moves;
         return result;
@@ -358,6 +379,8 @@ RunAttempt attempt_moves(
     const AutoStoryScroll::Tracker& t = tracker.tracker();
     result.video = t.summary();
     result.lost = t.lost();
+    //  A step takes 16 frames (267 ms) from the press.
+    result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 && tracker.lost_at_ms() < 200;
     int tiles = t.tiles();
     if (result.event != RunEvent::NONE){
         //  A battle or a trainer stopped the player. The video saw up to
@@ -626,7 +649,7 @@ bool walk_run(
         //  After a try that did not move at all, one move at a time: if the
         //  video is wrong about it, little harm is done.
         const int moves = not_moving > 0 || one_by_one ? 1 : remaining;
-        RunAttempt a = attempt_moves(rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track);
+        RunAttempt a = attempt_moves(rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track, encounters);
         if (track){
             rt.console.log(
                 std::string("Walked ") + dpad_name(run.direction) + ": " +
@@ -637,7 +660,12 @@ bool walk_run(
         int made = a.moves;
         if (leg.dark && !a.measured && (a.event != RunEvent::NONE || a.lost)){
             //  The step was made: battles and trainers start at its end.
-            made = moves;
+            //  Unless the screen changed before it could be over: then it
+            //  was the step before.
+            made = a.lost_early ? 0 : moves;
+            if (a.lost_early){
+                rt.console.log("The screen changed right away: this step did not happen.", COLOR_ORANGE);
+            }
         }
         if (made > moves && a.measured && !scene_at_end){
             //  One too many (the input lasted too long): step back.
@@ -661,9 +689,9 @@ bool walk_run(
         if (warp_at_end && remaining == 0 &&
             (a.event == RunEvent::BATTLE_START || a.lost)
         ){
-            if (one_by_one){
-                //  In the dark a wild battle on the last step looks the same
-                //  as the warp: see whether battle text comes.
+            if (encounters){
+                //  A wild battle on the last step looks the same as the
+                //  warp: see whether battle text comes.
                 AdvanceBattleDialogWatcher battle_text(COLOR_RED);
                 BattleMenuWatcher battle_menu(COLOR_RED);
                 if (wait_until(rt.console, rt.context, 4000ms, { battle_text, battle_menu }) >= 0){
