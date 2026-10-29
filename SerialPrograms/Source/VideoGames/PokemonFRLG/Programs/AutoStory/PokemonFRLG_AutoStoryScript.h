@@ -92,7 +92,10 @@ enum class StepType : uint8_t{
     SCRIPTED_BATTLE,    //  the first rival battle
     SAVE,               //  p0 = 1 if the start menu has POKeDEX
     GRIND,              //  p0 = level, p1 = battles between heals, dir = back and forth,
-                        //  legs_a = to grass, legs_b = to nurse, legs_c = back to grass
+                        //  legs_a = to grass, legs_b = to nurse, legs_c = back to grass;
+                        //  a team member: p2 = its party slot, text = its evolution
+                        //  line, p3 = the highest wild level there (below it, the
+                        //  member only takes part and shares the experience)
     TEACH_HM,           //  p0 = HM rank in the TM Case, p1 = party slot (1-6),
                         //  p2 = move slot to forget (-1: decide), text = move
     CATCH,              //  text = species slugs (comma separated), p0 = balls, dir = back and forth
@@ -115,6 +118,7 @@ struct StoryStep{
     int32_t p0;
     int32_t p1;
     int32_t p2;
+    int32_t p3;
     DpadPosition dir;
     const char* text;
     uint32_t legs_a;    //  Offsets into StoryScript::leg_lists (0 = none).

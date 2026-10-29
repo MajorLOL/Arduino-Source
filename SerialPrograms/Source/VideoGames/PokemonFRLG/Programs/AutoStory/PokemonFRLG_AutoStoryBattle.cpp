@@ -705,6 +705,8 @@ StoryBattleResult run_story_battle(
 
     StoryBattleResult result = StoryBattleResult::WON;
     bool seen_battle = false;
+    bool shared = false;        //  the member came out and the other one went in
+    memory.learner.clear();
     bool decided = false;       //  wild: fight/run/catch decided
     bool run = false;
     bool safari = false;
@@ -743,6 +745,47 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
+            if (settings.share_position > 0 && !shared && kind == StoryBattleKind::WILD_FIGHT){
+                shared = true;
+                //  The member was sent out: it gets half the experience. Its
+                //  moves first (it may learn one while the other fights),
+                //  then the other one comes in.
+                if (move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
+                    pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+                    context.wait_for_all_requests();
+                    BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
+                    if (wait_until(console, context, 3000ms, { move_list }) == 0){
+                        read_fight_menu(console, memory);
+                    }
+                    pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                    context.wait_for_all_requests();
+                }
+                for (int i = 0; i < 4; i++){
+                    memory.member_moves[i] = memory.moves[i];
+                }
+                if (move_cursor_to_option(console, context, BattleMenuOption::POKEMON)){
+                    console.log("Shared experience: battle position " + std::to_string(settings.share_position + 1) + " comes in.");
+                    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+                    PartyMenuWatcher party(COLOR_RED);
+                    context.wait_for_all_requests();
+                    if (wait_until(console, context, 3000ms, { party }) == 0){
+                        pick_in_party_menu(settings.share_position);
+                        settings.lead_type1 = settings.share_type1;
+                        settings.lead_type2 = settings.share_type2;
+                        memory.no_pp = 0;
+                        memory.last_slot = -1;
+                        for (int& m : memory.moves){
+                            m = -1;
+                        }
+                    }else{
+                        console.log("The party menu did not open.", COLOR_ORANGE);
+                        pbf_mash_button(context, BUTTON_B, 1000ms);
+                    }
+                }else{
+                    console.log("POKeMON not selected: the member fights.", COLOR_ORANGE);
+                }
+                break;
+            }
             if (team){
                 //  A new foe: the best answer comes in, if much better than
                 //  the active (the switch costs the turn).
@@ -825,9 +868,36 @@ StoryBattleResult run_story_battle(
             std::string text;
             Question q = read_question(console, text);
             switch (q){
-            case Question::DELETE_MOVE:
-                handle_move_learning(console, context, settings, memory, text);
+            case Question::DELETE_MOVE:{
+                bool member_learns = false;
+                if (shared){
+                    //  The member that stayed out learns, unless the text
+                    //  named another Pokemon.
+                    member_learns = memory.learner.empty();
+                    for (const std::string& slug : settings.share_members){
+                        if (memory.learner.find(slug) != std::string::npos){
+                            member_learns = true;
+                        }
+                    }
+                }
+                if (member_learns){
+                    //  Its moves and its types (the settings it came in with).
+                    int active[4];
+                    for (int i = 0; i < 4; i++){
+                        active[i] = memory.moves[i];
+                        memory.moves[i] = memory.member_moves[i];
+                    }
+                    handle_move_learning(console, context, base_settings, memory, text);
+                    for (int i = 0; i < 4; i++){
+                        memory.member_moves[i] = memory.moves[i];
+                        memory.moves[i] = active[i];
+                    }
+                }else{
+                    handle_move_learning(console, context, settings, memory, text);
+                }
+                memory.learner.clear();
                 break;
+            }
             case Question::STOP_LEARNING:
                 answer(context, true);
                 break;
@@ -903,6 +973,9 @@ StoryBattleResult run_story_battle(
                 }
                 if (text.find("grew to") != std::string::npos){
                     memory.level_up_seen = true;
+                }
+                if (text.find("trying to learn") != std::string::npos){
+                    memory.learner = text;
                 }
             }
             //  A advances the text. (B would cancel an evolution.)

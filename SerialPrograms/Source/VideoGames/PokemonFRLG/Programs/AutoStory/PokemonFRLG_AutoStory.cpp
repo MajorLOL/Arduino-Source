@@ -669,6 +669,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             //  A team member may have been training in front.
             rt.battle.lead_type1 = rt.lead_type1;
             rt.battle.lead_type2 = rt.lead_type2;
+            rt.battle.share_position = 0;
             current_segment = resume_segment;
             current_step = resume_step;
         }

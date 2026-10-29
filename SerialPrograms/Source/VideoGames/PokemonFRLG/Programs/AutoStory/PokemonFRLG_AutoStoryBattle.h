@@ -78,6 +78,16 @@ struct StoryBattleSettings{
     //  answer to each opponent comes in (free when the game asks "Will
     //  PLAYER change POKeMON?", and when one faints).
     std::vector<StoryTeamMember> team;
+
+    //  Training a weak team member in front (StoryBattleKind::WILD_FIGHT):
+    //  it is sent out first, so it gets half the experience, then the
+    //  Pokemon at this battle position (1-5) comes in and fights. 0: no.
+    int share_position = 0;
+    //  The types of the one that comes in, and the member's evolution line
+    //  (slugs: to know when the member is the one learning a move).
+    AutoStoryDex::Type share_type1 = AutoStoryDex::Type::NORMAL;
+    AutoStoryDex::Type share_type2 = AutoStoryDex::Type::NORMAL;
+    std::set<std::string> share_members;
 };
 
 //  What the battle logic remembers between battles.
@@ -101,6 +111,10 @@ struct StoryBattleMemory{
     int list_back = 0;
     //  The species caught in the last battle ("" if none).
     std::string caught;
+    //  Shared experience: the moves of the member that stayed out, and the
+    //  last "X is trying to learn Y." text (who learns).
+    int member_moves[4] = {-1, -1, -1, -1};
+    std::string learner;
     //  Team play: the members (team indexes) that fought in the last
     //  battle, and those that fainted.
     std::set<int> team_used;

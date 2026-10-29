@@ -889,7 +889,7 @@ namespace{
 //  is a team member put in front for this (see story_grind()).
 void grind_front(
     StoryRuntime& rt, const StoryScript& script, const StoryStep& step,
-    int extra_levels, bool member
+    int extra_levels, bool member, int share_position = 0
 ){
     ConsoleHandle& console = rt.console;
     const int target = step.p0 + extra_levels;
@@ -924,7 +924,32 @@ void grind_front(
     bool away = false;      //  on the second grass tile
     bool done = level >= target;
 
+    //  A member below the strongest wild Pokemon here only takes part: the
+    //  lead comes in and fights, and the experience is shared. From that
+    //  level on it fights alone.
+    const int solo_level = member ? step.p3 : 0;
+    auto update_share = [&](){
+        const bool share = share_position > 0 && level >= 0 && level < solo_level;
+        if (share != (rt.battle.share_position > 0)){
+            if (share){
+                console.log(
+                    where + ": level " + std::to_string(level) + ", the wild Pokemon here go up to " +
+                    std::to_string(solo_level) + ". The lead fights, the experience is shared.",
+                    COLOR_BLUE
+                );
+            }else{
+                console.log(where + ": level " + std::to_string(level) + ". Fighting alone now.", COLOR_BLUE);
+                rt.memory.no_pp = 0;
+                for (int& m : rt.memory.moves){
+                    m = -1;
+                }
+            }
+        }
+        rt.battle.share_position = share ? share_position : 0;
+    };
+
     while (!done){
+        update_share();
         DpadPosition d = away ? back : forth;
         StoryBattleResult result = story_checked_step(
             rt, d, false, false, StoryBattleKind::WILD_FIGHT, where, false
@@ -991,6 +1016,7 @@ void grind_front(
                 level = now;
             }
             if (level >= target){
+                rt.battle.share_position = 0;
                 console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
                 if (rt.save_after_heal){
                     //  Saved right here: after a reset, go on with the next
@@ -1005,6 +1031,7 @@ void grind_front(
         }
     }
 
+    rt.battle.share_position = 0;
     console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
     spot.to_first_tile(away);
     walk(to_nurse);
@@ -1065,8 +1092,14 @@ void story_grind(
     for (int& m : rt.memory.moves){
         m = -1;
     }
+    //  If it is too weak for the wild Pokemon here: the lead, now in its
+    //  slot, comes in (shared experience).
+    rt.battle.share_type1 = rt.lead_type1;
+    rt.battle.share_type2 = rt.lead_type2;
+    rt.battle.share_members = line;
 
-    grind_front(rt, script, step, extra_levels, true);
+    grind_front(rt, script, step, extra_levels, true, slot - 1);
+    rt.battle.share_position = 0;
 
     rt.battle.lead_type1 = rt.lead_type1;
     rt.battle.lead_type2 = rt.lead_type2;
