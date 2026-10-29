@@ -275,10 +275,12 @@ struct RunAttempt{
 //  From a standstill, try to make "moves" moves (steps, jumps) in
 //  "direction" as one held input. Stops early if a battle or a text box
 //  shows up. With "track", the video tells how many moves were made.
+//  "trainer_watch": in the dark, how long to watch after a step where a
+//  trainer may see the player.
 RunAttempt attempt_moves(
     StoryRuntime& rt, DpadPosition direction, int moves,
     double frames, int tiles_per_move, bool surf, bool dark, bool track,
-    bool battles = false
+    bool battles = false, Milliseconds trainer_watch = Milliseconds(0)
 ){
     BlackScreenWatcher battle_starting(COLOR_RED);
     WalkTracker tracker(direction, frames / tiles_per_move);
@@ -381,7 +383,18 @@ RunAttempt attempt_moves(
         //  screen changes). It must be seen now, at the end of the step
         //  that started it, not in the next try: watch a little longer.
         tracker.stop_when_lost();
-        wait_until(rt.console, rt.context, 800ms, { tracker });
+        if (trainer_watch > 800ms){
+            //  A trainer that saw the player at the end of the step comes
+            //  later: the "!", maybe a walk, then its words (a text box
+            //  without the advance arrow). Until they show, the player
+            //  cannot move, and in the dark a step taken then would look
+            //  made.
+            if (wait_until(rt.console, rt.context, trainer_watch, { tracker, dialog }) == 1){
+                result.event = RunEvent::DIALOG;
+            }
+        }else{
+            wait_until(rt.console, rt.context, 800ms, { tracker });
+        }
     }
     if (ret < 0 && battles && track && !dark && tracker.tracker().lost()){
         //  The whole picture changed on the way, where wild battles start:
@@ -679,12 +692,16 @@ bool walk_run(
 
     int remaining = count;
     int not_moving = 0;
+    int box_talks = 0;      //  text boxes without the arrow taken for someone talking
     int no_progress = 0;    //  tries in a row that did not move, whatever stopped them
     while (remaining > 0){
         //  After a try that did not move at all, one move at a time: if the
         //  video is wrong about it, little harm is done.
         const int moves = not_moving > 0 || one_by_one ? 1 : remaining;
-        RunAttempt a = attempt_moves(rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track, encounters);
+        RunAttempt a = attempt_moves(
+            rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track, encounters,
+            trainer ? rt.trainer_check : Milliseconds(0)
+        );
         if (track){
             rt.console.log(
                 std::string("Walked ") + dpad_name(run.direction) + ": " +
@@ -810,6 +827,10 @@ bool walk_run(
             }
         }
 
+        if (battle != StoryBattleResult::NO_BATTLE && battle_kind == StoryBattleKind::TRAINER){
+            //  If a trainer saw the player, the player turned to it.
+            rt.facing = DPAD_NONE;
+        }
         if (approach){
             rt.approach_made = (uint16_t)(rt.approach_made + made);
         }
@@ -845,7 +866,16 @@ bool walk_run(
                 continue;
             }
             AdvanceWhiteDialogDetector talking(COLOR_RED);
-            if (screen && talking.detect(screen)){
+            WhiteDialogDetector text_box(COLOR_RED);
+            const bool arrow = screen && talking.detect(screen);
+            //  A trainer's first words have no advance arrow. (A few tries:
+            //  some places look like a text box, like the white bottom of
+            //  the S.S. Anne corridors.)
+            const bool box = !arrow && box_talks < 3 && screen && text_box.detect(screen);
+            if (arrow || box){
+                if (box){
+                    box_talks++;
+                }
                 rt.console.log("Someone is talking.", COLOR_ORANGE);
                 StoryBattleResult talked = story_battle(rt, StoryBattleKind::TRAINER, label);
                 rt.facing = DPAD_NONE;
