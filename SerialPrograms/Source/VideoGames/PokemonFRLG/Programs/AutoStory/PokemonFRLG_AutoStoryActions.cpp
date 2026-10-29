@@ -213,6 +213,10 @@ void use_item_on(StoryRuntime& rt, int party_slot, const std::string& what){
         rt.console.log("The party menu did not open.", COLOR_RED);
         return;
     }
+    //  The party menu opened from the bag keeps the cursor where the last
+    //  one left it (InitPartyMenu(), keepCursorPos). LEFT from any slot on
+    //  the right goes to slot 1.
+    dpad(context, DPAD_LEFT, 500ms);
     for (int i = 1; i < party_slot; i++){
         dpad(context, DPAD_DOWN);
     }
@@ -380,14 +384,30 @@ void story_teach_hm(
             console
         );
     }
+    //  The party menu opened from the bag keeps the cursor where the last
+    //  one left it (InitPartyMenu(), keepCursorPos). LEFT from any slot on
+    //  the right goes to slot 1.
+    dpad(context, DPAD_LEFT, 500ms);
     for (int i = 1; i < party_slot; i++){
         dpad(context, DPAD_DOWN);
     }
     press(context, BUTTON_A, 500ms);
 
     std::string text = wait_party_message(
-        rt, {"learned", "four", "delete", "replace", "wants", "can't", "cannot", "already"}, 4, false
+        rt, {"learned", "four", "delete", "replace", "wants", "can't", "cannot", "already", "compatible"}, 4, false
     );
+    if (contains(text, "compatible") && !contains(text, "four")){
+        //  "X and Y are not compatible. Y can't be learned." (Not "... can't
+        //  learn more than four moves.")
+        pbf_mash_button(context, BUTTON_B, 4000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "TM Case");
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_teach_hm(): Party slot " + std::to_string(party_slot) + " cannot learn " + move + ": " + text,
+            console
+        );
+    }
     int new_move = find_move(move);
     if (contains(text, "four") || contains(text, "delete") || contains(text, "replace") || contains(text, "wants")){
         int slot = forget_slot;
@@ -497,6 +517,10 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
             console
         );
     }
+    //  The party menu opened from the bag keeps the cursor where the last
+    //  one left it (InitPartyMenu(), keepCursorPos). LEFT from any slot on
+    //  the right goes to slot 1.
+    dpad(context, DPAD_LEFT, 500ms);
     for (int i = 1; i < party_slot; i++){
         dpad(context, DPAD_DOWN);
     }
