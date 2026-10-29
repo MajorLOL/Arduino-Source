@@ -771,10 +771,10 @@ bool walk_run(
             battle = story_battle(rt, battle_kind, label);
             break;
         case RunEvent::DIALOG:
-            //  A trainer saw the player (or a sign or person talks). The
-            //  player turns to the trainer.
+            //  A trainer saw the player (or a sign or person talks). In
+            //  FRLG the player does not turn to the trainer
+            //  (TrainerSeeFunc_PrepareToEngage()).
             battle = story_battle(rt, StoryBattleKind::TRAINER, label);
-            rt.facing = DPAD_NONE;
             break;
         case RunEvent::SCREEN_CHANGED:{
             //  Maybe a battle is starting. Give it a moment to show.
@@ -789,7 +789,6 @@ bool walk_run(
             int ret = wait_until(rt.console, rt.context, 3000ms, callbacks);
             if (ret == 2){
                 battle = story_battle(rt, StoryBattleKind::TRAINER, label);
-                rt.facing = DPAD_NONE;
             }else if (ret >= 0){
                 battle = story_battle(rt, battle_kind, label);
             }else{
@@ -827,10 +826,6 @@ bool walk_run(
             }
         }
 
-        if (battle != StoryBattleResult::NO_BATTLE && battle_kind == StoryBattleKind::TRAINER){
-            //  If a trainer saw the player, the player turned to it.
-            rt.facing = DPAD_NONE;
-        }
         if (approach){
             rt.approach_made = (uint16_t)(rt.approach_made + made);
         }
@@ -878,6 +873,8 @@ bool walk_run(
                 }
                 rt.console.log("Someone is talking.", COLOR_ORANGE);
                 StoryBattleResult talked = story_battle(rt, StoryBattleKind::TRAINER, label);
+                //  The last input came while the player could not move: it
+                //  may not have turned them.
                 rt.facing = DPAD_NONE;
                 if (trainer_came(talked)){
                     return false;

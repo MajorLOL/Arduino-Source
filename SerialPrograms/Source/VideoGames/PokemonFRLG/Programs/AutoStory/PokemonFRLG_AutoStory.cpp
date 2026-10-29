@@ -429,13 +429,6 @@ void AutoStory::run_segment(
             }
             const bool trainer = step.p1 != 1;
             StoryBattleResult result = story_battle(rt, trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD_RUN, label);
-            if (step.dir != DPAD_NONE &&
-                (result != StoryBattleResult::NO_BATTLE || rt.trainer_battles != rt.trainer_battles_before_leg)
-            ){
-                //  The player turned to the trainer that saw them (here, or
-                //  already at the end of the walk).
-                rt.facing = step.dir;
-            }
             if (result == StoryBattleResult::NO_BATTLE && trainer && rt.last_leg_dark &&
                 rt.trainer_battles == rt.trainer_battles_before_leg
             ){
