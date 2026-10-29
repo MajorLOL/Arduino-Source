@@ -42,6 +42,13 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 //  Full Restore on the second one too).
 void story_heal_with_items(StoryRuntime& rt);
 
+//  The level of a party slot (1-6), from its summary (-1 if not read), and
+//  its species (slug, "" if not read).
+int story_read_slot(StoryRuntime& rt, int slot, std::string* species);
+
+//  Swap two party slots in the overworld party menu (a < b).
+void story_swap_party(StoryRuntime& rt, int a, int b);
+
 //  Use an item from the bag's ITEMS pocket (found by a word of its
 //  description) on a party slot (1-6): an evolution stone.
 void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what);

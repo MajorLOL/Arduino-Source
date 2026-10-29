@@ -105,6 +105,7 @@ enum class StepType : uint8_t{
     BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity
     HEAL_ITEMS,         //  heal the party with items from the bag
     USE_ITEM,           //  use an item on party slot p0; text = a word of its description
+    TEAM,               //  p0 = 1: trainer battles are fought by the whole team from now on
 };
 
 struct StoryStep{

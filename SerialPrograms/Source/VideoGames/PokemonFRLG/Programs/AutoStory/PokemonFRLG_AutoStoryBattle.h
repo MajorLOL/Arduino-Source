@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <set>
 #include <string>
+#include <vector>
 #include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "PokemonFRLG_AutoStoryDex.h"
 
@@ -50,6 +51,17 @@ enum class StoryBattleResult{
 
 //  The game must be in English: move names, the opponent and the battle text
 //  are read with English OCR.
+//  A member of the team (party slot order outside of battle). For trainer
+//  battles where the team plays together (the Elite Four).
+struct StoryTeamMember{
+    std::set<std::string> line;     //  slugs of its evolution line
+    AutoStoryDex::Type type1;       //  its types (the final evolution's)
+    AutoStoryDex::Type type2;
+    std::vector<AutoStoryDex::Type> attacks;    //  types its moves hit with
+    double strength = 1.0;          //  higher level than the others: more
+    bool fights = true;             //  false: only carried along (Cut helper)
+};
+
 struct StoryBattleSettings{
     bool wild_run = false;
 
@@ -61,6 +73,11 @@ struct StoryBattleSettings{
     //  when met in a StoryBattleKind::WILD battle.
     std::set<std::string> catch_species;
     uint16_t catch_balls = 5;
+
+    //  Not empty: trainer battles are fought by the whole team. The best
+    //  answer to each opponent comes in (free when the game asks "Will
+    //  PLAYER change POKeMON?", and when one faints).
+    std::vector<StoryTeamMember> team;
 };
 
 //  What the battle logic remembers between battles.
@@ -84,6 +101,10 @@ struct StoryBattleMemory{
     int list_back = 0;
     //  The species caught in the last battle ("" if none).
     std::string caught;
+    //  Team play: the members (team indexes) that fought in the last
+    //  battle, and those that fainted.
+    std::set<int> team_used;
+    std::set<int> team_fainted;
 };
 
 

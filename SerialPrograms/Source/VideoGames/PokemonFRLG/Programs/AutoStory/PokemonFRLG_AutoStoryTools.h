@@ -68,6 +68,13 @@ struct StoryRuntime{
     uint16_t approach_total = 0;
     uint16_t approach_made = 0;
 
+    //  The team for the Elite Four (party slot order), by starter. Copied
+    //  into "battle.team" for the battles the whole team fights.
+    std::vector<StoryTeamMember> team;
+    //  The lead's types (the starter's), while a member trains in front.
+    AutoStoryDex::Type lead_type1 = AutoStoryDex::Type::NORMAL;
+    AutoStoryDex::Type lead_type2 = AutoStoryDex::Type::NORMAL;
+
     //  Team members caught (species slugs): in this run, and at the last
     //  save (a reset goes back to that).
     std::set<std::string> caught;

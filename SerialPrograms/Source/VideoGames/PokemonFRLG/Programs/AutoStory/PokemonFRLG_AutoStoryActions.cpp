@@ -263,12 +263,20 @@ std::string probe_trash_can(StoryRuntime& rt){
 
 
 int story_read_lead_level(StoryRuntime& rt){
+    return story_read_slot(rt, 1, nullptr);
+}
+
+
+int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     for (int attempt = 0; attempt < 2; attempt++){
         open_party_menu_from_overworld(console, context);
         //  LEFT from any slot on the right goes to slot 1.
         dpad(context, DPAD_LEFT, 500ms);
+        for (int i = 1; i < slot; i++){
+            dpad(context, DPAD_DOWN);
+        }
         //  A: SUMMARY is the first action. A: the summary (fades).
         press(context, BUTTON_A, 800ms);
         press(context, BUTTON_A, 500ms);
@@ -286,15 +294,46 @@ int story_read_lead_level(StoryRuntime& rt){
             if (stats.level.has_value()){
                 level = (int)stats.level.value();
             }
+            if (species != nullptr){
+                *species = stats.name;
+            }
         }
         story_back_to_overworld(rt, "summary");
         if (level > 0){
-            console.log("Lead level: " + std::to_string(level));
+            console.log(
+                "Party slot " + std::to_string(slot) + ": " +
+                (species != nullptr ? *species + " " : std::string()) + "level " + std::to_string(level)
+            );
             return level;
         }
-        console.log("Could not read the lead's level.", COLOR_ORANGE);
+        console.log("Could not read party slot " + std::to_string(slot) + ".", COLOR_ORANGE);
     }
     return -1;
+}
+
+
+void story_swap_party(StoryRuntime& rt, int a, int b){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Swapping party slots " + std::to_string(a) + " and " + std::to_string(b) + ".");
+    open_party_menu_from_overworld(console, context);
+    dpad(context, DPAD_LEFT, 500ms);
+    for (int i = 1; i < a; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    //  SUMMARY, (field moves), SWITCH, ITEM, CANCEL: up from the top wraps
+    //  around to CANCEL, then ITEM, then SWITCH.
+    press(context, BUTTON_A, 800ms);
+    for (int i = 0; i < 3; i++){
+        dpad(context, DPAD_UP, 300ms);
+    }
+    press(context, BUTTON_A, 1000ms);       //  "Move to where?"
+    for (int i = a; i < b; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    press(context, BUTTON_A, 2500ms);       //  The two slide out and back.
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "party menu");
 }
 
 
@@ -487,6 +526,32 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
 void story_heal_with_items(StoryRuntime& rt){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
+    if (!rt.battle.team.empty()){
+        //  The team: revive who fainted in the last battle, then a Full
+        //  Restore for everyone who fought.
+        for (int index : rt.memory.team_used){
+            const int slot = index + 1;
+            for (int round = 0; round < 2; round++){
+                const bool revive = round == 0;
+                if (revive && rt.memory.team_fainted.count(index) == 0){
+                    continue;
+                }
+                console.log((revive ? "Reviving party slot " : "Full Restore on party slot ") + std::to_string(slot) + ".");
+                open_bag_from_overworld(console, context);
+                bool found = revive
+                    ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
+                    : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
+                if (found){
+                    use_item_on(rt, slot, revive ? "REVIVE" : "FULL RESTORE");
+                }
+                pbf_mash_button(context, BUTTON_B, 3000ms);
+                context.wait_for_all_requests();
+                story_back_to_overworld(rt, "bag");
+            }
+        }
+        rt.lead_fainted = false;
+        return;
+    }
     bool fainted = rt.lead_fainted;
     console.log(fainted ? "Healing with items (the lead fainted)." : "Healing with items.");
 
@@ -794,9 +859,13 @@ private:
 
 
 
-void story_grind(
+namespace{
+
+//  The training itself: the Pokemon in party slot 1 fights. "member": it
+//  is a team member put in front for this (see story_grind()).
+void grind_front(
     StoryRuntime& rt, const StoryScript& script, const StoryStep& step,
-    int extra_levels
+    int extra_levels, bool member
 ){
     ConsoleHandle& console = rt.console;
     const int target = step.p0 + extra_levels;
@@ -900,8 +969,10 @@ void story_grind(
             if (level >= target){
                 console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
                 if (rt.save_after_heal){
-                    //  Saved right here: after a reset, go on with the next step.
-                    story_saved(rt, rt.step_index + 1);
+                    //  Saved right here: after a reset, go on with the next
+                    //  step (a team member: this step again, to put the
+                    //  party back in order).
+                    story_saved(rt, member ? rt.step_index : rt.step_index + 1);
                 }
                 return;     //  Already healed at the nurse.
             }
@@ -913,7 +984,83 @@ void story_grind(
     console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
     spot.to_first_tile(away);
     walk(to_nurse);
-    story_heal(rt, where);
+    story_heal(rt, where, member);
+}
+
+const AutoStoryDex::SpeciesInfo* dex_species(const std::string& slug){
+    for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
+        if (slug == info.slug){
+            return &info;
+        }
+    }
+    return nullptr;
+}
+
+}   //  namespace
+
+
+void story_grind(
+    StoryRuntime& rt, const StoryScript& script, const StoryStep& step,
+    int extra_levels
+){
+    //  A team member (step.p2 = its party slot, step.text = its evolution
+    //  line) trains in front: swapped with slot 1, and back afterwards.
+    //  Saves during the training have it in front: after a reset the step
+    //  starts again and finds it there.
+    const int slot = step.p2 > 1 ? step.p2 : 0;
+    if (slot == 0){
+        grind_front(rt, script, step, extra_levels, false);
+        return;
+    }
+    ConsoleHandle& console = rt.console;
+    const std::set<std::string> line = story_species_list(step.text);
+    std::string front;
+    for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
+        story_read_slot(rt, 1, &front);
+    }
+    if (line.count(front) == 0){
+        story_swap_party(rt, 1, slot);
+        story_read_slot(rt, 1, &front);
+        if (!front.empty() && line.count(front) == 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_grind(): Party slot " + std::to_string(slot) + " (" + step.text + ") did not come to the front: " + front,
+                console
+            );
+        }
+    }
+    console.log("Training team member " + (front.empty() ? std::string(step.text) : front) + " (party slot " + std::to_string(slot) + ").", COLOR_BLUE);
+
+    //  Its types count for the moves.
+    const AutoStoryDex::SpeciesInfo* info = dex_species(front);
+    if (info != nullptr){
+        rt.battle.lead_type1 = info->type1;
+        rt.battle.lead_type2 = info->type2;
+    }
+    rt.memory.no_pp = 0;
+    for (int& m : rt.memory.moves){
+        m = -1;
+    }
+
+    grind_front(rt, script, step, extra_levels, true);
+
+    rt.battle.lead_type1 = rt.lead_type1;
+    rt.battle.lead_type2 = rt.lead_type2;
+    rt.memory.no_pp = 0;
+    for (int& m : rt.memory.moves){
+        m = -1;
+    }
+    //  Back in order. (A member evolves while training: compare the line.)
+    story_swap_party(rt, 1, slot);
+    story_read_slot(rt, 1, &front);
+    if (!front.empty() && line.count(front) != 0){
+        console.log("The party is still out of order. Swapping again.", COLOR_ORANGE);
+        story_swap_party(rt, 1, slot);
+    }
+    if (rt.save_after_heal){
+        story_save(rt, rt.has_dex);
+        story_saved(rt, rt.step_index + 1);
+    }
 }
 
 

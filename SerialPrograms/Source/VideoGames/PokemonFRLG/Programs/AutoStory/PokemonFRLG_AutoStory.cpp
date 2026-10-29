@@ -271,6 +271,41 @@ AutoStory::AutoStory()
 
 namespace{
 
+using AutoStoryDex::Type;
+
+//  The team for the Elite Four in party slot order (story_spec.py, from
+//  team_sim.py), with the types each one's moves hit with by then. The
+//  starter counts double: it is about 20 levels higher.
+std::vector<StoryTeamMember> team_for(AutoStory::Starter starter){
+    StoryTeamMember voltorb{{"voltorb", "electrode"}, Type::ELECTRIC, Type::ELECTRIC, {Type::ELECTRIC, Type::NORMAL}, 1.0, true};
+    StoryTeamMember lapras{{"lapras"}, Type::WATER, Type::ICE, {Type::WATER, Type::ICE, Type::NORMAL}, 1.0, true};
+    switch (starter){
+    case AutoStory::Starter::CHARMANDER:
+        return {
+            {{"charmander", "charmeleon", "charizard"}, Type::FIRE, Type::FLYING, {Type::FIRE, Type::FLYING, Type::NORMAL}, 2.0, true},
+            voltorb,
+            {{"eevee", "vaporeon"}, Type::WATER, Type::WATER, {Type::WATER, Type::ICE, Type::DARK, Type::NORMAL}, 1.0, true},
+            lapras,
+        };
+    case AutoStory::Starter::BULBASAUR:
+        return {
+            {{"bulbasaur", "ivysaur", "venusaur"}, Type::GRASS, Type::POISON, {Type::GRASS, Type::NORMAL}, 2.0, true},
+            voltorb,
+            {{"eevee", "jolteon"}, Type::ELECTRIC, Type::ELECTRIC, {Type::ELECTRIC, Type::FIGHTING, Type::NORMAL}, 1.0, true},
+            lapras,
+        };
+    case AutoStory::Starter::SQUIRTLE:
+        return {
+            {{"squirtle", "wartortle", "blastoise"}, Type::WATER, Type::WATER, {Type::WATER, Type::DARK, Type::NORMAL}, 2.0, true},
+            {{"oddish", "gloom", "bellsprout", "weepinbell"}, Type::GRASS, Type::POISON, {Type::GRASS}, 0.5, false},
+            voltorb,
+            {{"eevee", "flareon"}, Type::FIRE, Type::FIRE, {Type::FIRE, Type::DARK, Type::NORMAL}, 1.0, true},
+            lapras,
+        };
+    }
+    return {};
+}
+
 //  The species the next catch step of the segment (from step "from" on)
 //  wants, if not caught yet: met on the way, they are caught right there.
 //  Only the next one, so the team joins in the planned order (party slots).
@@ -450,6 +485,10 @@ void AutoStory::run_segment(
         case StepType::USE_ITEM:
             story_use_item(rt, step.p0, step.text, label);
             break;
+        case StepType::TEAM:
+            rt.battle.team = step.p0 == 1 ? rt.team : std::vector<StoryTeamMember>();
+            env.log(step.p0 == 1 ? "The whole team fights from now on." : "The lead fights alone from now on.", COLOR_BLUE);
+            break;
         }
 
         stats.steps += rt.steps - steps_before;
@@ -493,6 +532,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         rt.battle.lead_type2 = AutoStoryDex::Type::FIRE;
         break;
     }
+    rt.team = team_for(starter);
+    rt.lead_type1 = rt.battle.lead_type1;
+    rt.lead_type2 = rt.battle.lead_type2;
     rt.encounter_check = Milliseconds((int64_t)(uint16_t)GRASS_STEP_CHECK_MS);
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
@@ -538,6 +580,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     size_t current_segment = first;
     size_t current_step = first_step;
     uint16_t failures = 0;
+    size_t failed_segment = (size_t)-1;     //  the save the last failure went back to
+    size_t failed_step = (size_t)-1;
 
     while (current_segment <= last){
         const StorySegment& segment = script.segments[current_segment];
@@ -578,6 +622,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             take_resume();
             stats.errors++;
             env.update_stats();
+            //  Retries count in a row from the same save: once a later save
+            //  was reached (an Elite Four room won), counting starts over.
+            if (resume_segment != failed_segment || resume_step != failed_step){
+                failures = 0;
+                failed_segment = resume_segment;
+                failed_step = resume_step;
+            }
             failures++;
             if (failures > RETRIES){
                 throw;
@@ -593,6 +644,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.facing = DPAD_NONE;
             rt.lead_fainted = false;
             rt.caught = rt.caught_at_save;
+            //  A team member may have been training in front.
+            rt.battle.lead_type1 = rt.lead_type1;
+            rt.battle.lead_type2 = rt.lead_type2;
             current_segment = resume_segment;
             current_step = resume_step;
         }

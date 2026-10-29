@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <map>
 #include <cctype>
 #include <cstdlib>
 #include <string>
@@ -208,6 +209,96 @@ double effectiveness(Type move_type, const SpeciesInfo* opponent){
         m *= AutoStoryDex::type_multiplier_x10(move_type, opponent->type2) / 10.0;
     }
     return m;
+}
+
+double type_effect(Type move_type, Type type1, Type type2){
+    double m = AutoStoryDex::type_multiplier_x10(move_type, type1) / 10.0;
+    if (type2 != type1){
+        m *= AutoStoryDex::type_multiplier_x10(move_type, type2) / 10.0;
+    }
+    return m;
+}
+
+//  The types the moves of the Elite Four's and the Champion's Pokemon hit
+//  with (src/data/trainer_parties.h, all three Champion teams). Others: the
+//  types of the species.
+const std::vector<Type>* league_attacks(const std::string& slug){
+    static const std::map<std::string, std::vector<Type>> table{
+        {"aerodactyl", {Type::FLYING, Type::NORMAL, Type::ROCK}},
+        {"alakazam", {Type::PSYCHIC}},
+        {"arbok", {Type::DARK, Type::POISON, Type::STEEL}},
+        {"arcanine", {Type::DARK, Type::FIRE, Type::NORMAL}},
+        {"blastoise", {Type::DARK, Type::NORMAL, Type::WATER}},
+        {"charizard", {Type::FIRE, Type::FLYING, Type::NORMAL}},
+        {"cloyster", {Type::WATER}},
+        {"dewgong", {Type::ICE, Type::WATER}},
+        {"dragonair", {Type::DRAGON, Type::NORMAL}},
+        {"dragonite", {Type::DRAGON, Type::FLYING, Type::NORMAL}},
+        {"exeggutor", {Type::GRASS, Type::NORMAL}},
+        {"gengar", {Type::GHOST, Type::POISON}},
+        {"golbat", {Type::DARK, Type::FLYING, Type::POISON}},
+        {"gyarados", {Type::DARK, Type::DRAGON, Type::NORMAL, Type::WATER}},
+        {"hitmonchan", {Type::FIGHTING, Type::ROCK}},
+        {"hitmonlee", {Type::FIGHTING, Type::NORMAL}},
+        {"jynx", {Type::ICE, Type::NORMAL}},
+        {"lapras", {Type::ICE, Type::NORMAL, Type::WATER}},
+        {"machamp", {Type::FIGHTING, Type::ROCK}},
+        {"onix", {Type::GROUND, Type::NORMAL, Type::ROCK, Type::STEEL}},
+        {"pidgeot", {Type::FLYING}},
+        {"rhydon", {Type::GROUND, Type::NORMAL, Type::ROCK}},
+        {"slowbro", {Type::ICE, Type::WATER}},
+        {"venusaur", {Type::GRASS}},
+    };
+    auto iter = table.find(slug);
+    return iter == table.end() ? nullptr : &iter->second;
+}
+
+//  How well a team member does against "foe": its best hit on the foe
+//  over the foe's best hit on it (by types, same-type bonus included).
+double team_score(const StoryTeamMember& member, const SpeciesInfo* foe){
+    if (foe == nullptr){
+        return member.strength;
+    }
+    double offense = 0.25;
+    for (Type t : member.attacks){
+        double e = type_effect(t, foe->type1, foe->type2);
+        if (t == member.type1 || t == member.type2){
+            e *= 1.5;
+        }
+        offense = std::max(offense, e);
+    }
+    std::vector<Type> foe_attacks{foe->type1, foe->type2};
+    const std::vector<Type>* known = league_attacks(foe->slug);
+    if (known != nullptr){
+        foe_attacks = *known;
+    }
+    double defense = 0.25;
+    for (Type t : foe_attacks){
+        double e = type_effect(t, member.type1, member.type2);
+        if (t == foe->type1 || t == foe->type2){
+            e *= 1.5;
+        }
+        defense = std::max(defense, e);
+    }
+    return member.strength * offense / defense;
+}
+
+//  The species named in a text ("LORELEI is about to use DEWGONG."):
+//  the longest name found in it.
+const SpeciesInfo* species_in_text(const std::string& text){
+    const SpeciesInfo* best = nullptr;
+    size_t best_length = 0;
+    for (const SpeciesInfo& info : AutoStoryDex::species()){
+        std::string name;
+        for (const char* c = info.name; *c; c++){
+            name += (char)std::tolower((unsigned char)*c);
+        }
+        if (name.size() >= 3 && name.size() > best_length && text.find(name) != std::string::npos){
+            best = &info;
+            best_length = name.size();
+        }
+    }
+    return best;
 }
 
 double base_damage(const MoveInfo& move){
@@ -539,13 +630,79 @@ int choose_move_to_forget(const int moves[4], int new_move, const StoryBattleSet
 StoryBattleResult run_story_battle(
     ConsoleHandle& console, ProControllerContext& context,
     StoryBattleKind kind,
-    const StoryBattleSettings& settings,
+    const StoryBattleSettings& base_settings,
     StoryBattleMemory& memory
 ){
     memory.battles++;
     memory.last_slot = -1;
     memory.list_back = 0;
     memory.caught.clear();
+
+    //  The active Pokemon's types count for the moves (same-type bonus).
+    StoryBattleSettings settings = base_settings;
+
+    //  Team play (trainer battles): the battle order of the team (team
+    //  indexes, the active first; the in-battle party menu shows this
+    //  order), who is down, and the foe the active was chosen against.
+    const bool team = !settings.team.empty() && kind == StoryBattleKind::TRAINER;
+    std::vector<int> order;
+    std::vector<bool> down(settings.team.size(), false);
+    const SpeciesInfo* foe = nullptr;
+    std::string evaluated;
+    memory.team_used.clear();
+    memory.team_fainted.clear();
+    if (team){
+        for (size_t i = 0; i < settings.team.size(); i++){
+            order.push_back((int)i);
+        }
+        memory.team_used.insert(0);
+    }
+    //  The member at battle position "pos" came in.
+    auto set_active = [&](int pos){
+        std::swap(order[0], order[(size_t)pos]);
+        const StoryTeamMember& member = settings.team[(size_t)order[0]];
+        settings.lead_type1 = member.type1;
+        settings.lead_type2 = member.type2;
+        memory.team_used.insert(order[0]);
+        memory.no_pp = 0;
+        memory.last_slot = -1;
+        memory.list_back = 0;
+        for (int& m : memory.moves){
+            m = -1;
+        }
+    };
+    //  The battle position of the best member against "against" (-1: none).
+    auto best_position = [&](const SpeciesInfo* against, bool with_active){
+        int best = -1;
+        double best_score = -1;
+        for (size_t p = with_active ? 0 : 1; p < order.size(); p++){
+            int index = order[p];
+            if (down[(size_t)index] || !settings.team[(size_t)index].fights){
+                continue;
+            }
+            double score = team_score(settings.team[(size_t)index], against);
+            if (score > best_score){
+                best_score = score;
+                best = (int)p;
+            }
+        }
+        return best;
+    };
+    auto score_at = [&](int pos, const SpeciesInfo* against){
+        int index = order[(size_t)pos];
+        return down[(size_t)index] ? 0.0 : team_score(settings.team[(size_t)index], against);
+    };
+    //  In the party menu (cursor on the active): send in the one at "pos".
+    auto pick_in_party_menu = [&](int pos){
+        for (int i = 0; i < pos; i++){
+            pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+        }
+        //  A opens the small menu, A on SHIFT sends it in.
+        pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+        pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+        context.wait_for_all_requests();
+    };
+
     StoryBattleResult result = StoryBattleResult::WON;
     bool seen_battle = false;
     bool decided = false;       //  wild: fight/run/catch decided
@@ -586,6 +743,35 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
+            if (team){
+                //  A new foe: the best answer comes in, if much better than
+                //  the active (the switch costs the turn).
+                std::string slug;
+                const SpeciesInfo* seen = read_opponent(console, slug);
+                if (seen != nullptr){
+                    foe = seen;
+                }
+                if (seen != nullptr && slug != evaluated){
+                    evaluated = slug;
+                    int pos = best_position(foe, false);
+                    if (pos > 0 && score_at(pos, foe) >= score_at(0, foe) * 1.5 + 0.5 &&
+                        move_cursor_to_option(console, context, BattleMenuOption::POKEMON)
+                    ){
+                        console.log("Switching to team member " + std::to_string(order[(size_t)pos] + 1) + " against " + seen->name + ".");
+                        pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+                        PartyMenuWatcher party(COLOR_RED);
+                        context.wait_for_all_requests();
+                        if (wait_until(console, context, 3000ms, { party }) == 0){
+                            pick_in_party_menu(pos);
+                            set_active(pos);
+                        }else{
+                            console.log("The party menu did not open.", COLOR_ORANGE);
+                            pbf_mash_button(context, BUTTON_B, 1000ms);
+                        }
+                        break;
+                    }
+                }
+            }
             if (!decided){
                 decided = true;
                 safari = menu_is_safari(console);
@@ -651,6 +837,30 @@ StoryBattleResult run_story_battle(
                 answer(context, true);
                 break;
             case Question::SWITCH:
+                if (team){
+                    //  "FOE is about to use X. Will PLAYER change POKeMON?":
+                    //  a free switch to the best answer.
+                    const SpeciesInfo* next = species_in_text(text);
+                    if (next != nullptr){
+                        foe = next;
+                        evaluated = next->slug;
+                        int pos = best_position(next, false);
+                        if (pos > 0 && score_at(pos, next) >= score_at(0, next) * 1.25 + 0.25){
+                            console.log("Switching to team member " + std::to_string(order[(size_t)pos] + 1) + " against " + next->name + ".");
+                            answer(context, true);
+                            PartyMenuWatcher party(COLOR_RED);
+                            if (wait_until(console, context, 3000ms, { party }) == 0){
+                                pick_in_party_menu(pos);
+                                set_active(pos);
+                            }else{
+                                console.log("The party menu did not open.", COLOR_ORANGE);
+                            }
+                            break;
+                        }
+                    }
+                }
+                answer(context, false);
+                break;
             case Question::NICKNAME:
             case Question::UNKNOWN:
                 answer(context, false);
@@ -663,6 +873,18 @@ StoryBattleResult run_story_battle(
             if (seen_battle){
                 memory.lead_faints++;
                 result = StoryBattleResult::LEAD_FAINTED;
+            }
+            if (team){
+                //  The active fainted: the best one left against the foe.
+                down[(size_t)order[0]] = true;
+                memory.team_fainted.insert(order[0]);
+                int pos = best_position(foe, false);
+                if (pos > 0){
+                    console.log("Sending in team member " + std::to_string(order[(size_t)pos] + 1) + ".");
+                    pick_in_party_menu(pos);
+                    set_active(pos);
+                    break;
+                }
             }
             send_next_pokemon(console, context, next_slot);
             break;
