@@ -593,6 +593,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         stats.resets++;
         env.update_stats();
     }
+    {
+        //  Once there is a starter, it must lead.
+        const std::string id = script.segments[first].id;
+        if (id.rfind("C0_01", 0) != 0 && id.rfind("C0_02", 0) != 0){
+            story_check_lead(rt);
+        }
+    }
 
     //  Where the current save is: the segment and the step to continue
     //  from after a reset.

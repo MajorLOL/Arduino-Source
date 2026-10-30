@@ -316,6 +316,37 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
 }
 
 
+void story_check_lead(StoryRuntime& rt){
+    if (rt.team.empty()){
+        return;
+    }
+    ConsoleHandle& console = rt.console;
+    const std::set<std::string>& line = rt.team[0].line;
+    std::string front;
+    for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
+        story_read_slot(rt, 1, &front);
+    }
+    if (front.empty() || line.count(front) != 0){
+        return;
+    }
+    console.log("Party slot 1 is " + front + ", not the starter. Looking for the starter.", COLOR_ORANGE);
+    //  A member trains in front by swapping places with slot 1: the starter
+    //  is in one of the team's slots.
+    const int last = std::min(6, (int)rt.team.size() + 1);
+    for (int slot = 2; slot <= last; slot++){
+        std::string species;
+        if (story_read_slot(rt, slot, &species) < 0){
+            break;      //  No Pokemon there (or not readable).
+        }
+        if (line.count(species) != 0){
+            story_swap_party(rt, 1, slot);
+            console.log("The starter was in party slot " + std::to_string(slot) + ": back in slot 1.", COLOR_BLUE);
+            return;
+        }
+    }
+    console.log("The starter was not found in the party. Going on as it is.", COLOR_RED);
+}
+
 void story_swap_party(StoryRuntime& rt, int a, int b){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -1060,6 +1091,8 @@ void story_grind(
     //  starts again and finds it there.
     const int slot = step.p2 > 1 ? step.p2 : 0;
     if (slot == 0){
+        //  The lead trains: make sure it is the starter.
+        story_check_lead(rt);
         grind_front(rt, script, step, extra_levels, false);
         return;
     }

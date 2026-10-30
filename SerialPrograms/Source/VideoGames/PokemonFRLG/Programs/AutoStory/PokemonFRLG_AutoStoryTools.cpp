@@ -415,11 +415,15 @@ RunAttempt attempt_moves(
         //  a battle. It started at the end of a step, and the screen only
         //  goes black after the input is over. The video counted the steps
         //  up to the change.
+        //  Or a trainer saw the player: its words come up (a text box
+        //  without the advance arrow), and the rest of the run did not
+        //  happen.
         BlackScreenWatcher black(COLOR_RED);
         AdvanceBattleDialogWatcher text(COLOR_RED);
-        int late = wait_until(rt.console, rt.context, 2500ms, { black, text });
+        WhiteDialogWatcher words(COLOR_RED);
+        int late = wait_until(rt.console, rt.context, 2500ms, { black, text, words });
         if (late >= 0){
-            result.event = late == 0 ? RunEvent::BATTLE_START : RunEvent::BATTLE_TEXT;
+            result.event = late == 0 ? RunEvent::BATTLE_START : (late == 1 ? RunEvent::BATTLE_TEXT : RunEvent::DIALOG);
         }
     }
     if (!track){

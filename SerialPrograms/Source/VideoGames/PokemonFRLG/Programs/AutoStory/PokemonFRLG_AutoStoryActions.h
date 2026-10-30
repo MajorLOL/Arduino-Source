@@ -49,6 +49,11 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species);
 //  Swap two party slots in the overworld party menu (a < b).
 void story_swap_party(StoryRuntime& rt, int a, int b);
 
+//  The starter must lead (party slot 1). A run stopped while a team member
+//  trained in front, then started again at a later segment, leaves it out
+//  of order: find the starter and swap it back to slot 1.
+void story_check_lead(StoryRuntime& rt);
+
 //  Use an item from the bag's ITEMS pocket (found by a word of its
 //  description) on a party slot (1-6): an evolution stone.
 void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what);
