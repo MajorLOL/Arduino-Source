@@ -585,6 +585,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     rt.caught_at_save = rt.caught;
 
+    story_check_memory_at_start(rt);
     home_black_border_check(env.console, context);
 
     if (RESET_AT_START){

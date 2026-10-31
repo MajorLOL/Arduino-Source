@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Time.h"
 #include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
@@ -1316,15 +1317,35 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     //  (The two crashes seen happened with 6.4 and 7.9 GB committed on a
     //  12 GB computer, while it starts with about 2 GB.)
     MemoryUsage memory = process_memory_usage();
-    if (memory.total_system_memory > 0 && (
-        memory.process_virtual_memory > memory.total_system_memory / 5 * 2 ||
-        memory.process_physical_memory > memory.total_system_memory / 2
-    )){
+    if (story_memory_too_high(memory)){
         throw ProgramFinishedException(
             "Pokemon Automation uses " + gigabytes(memory.process_virtual_memory) + " of the " +
             gigabytes(memory.total_system_memory) + " of memory and could crash soon. The game was "
-            "just saved: close Pokemon Automation, open it again and start at segment " +
-            where + "."
+            "just saved: close Pokemon Automation completely (its main window too), open it again "
+            "and start at segment " + where + "."
+        );
+    }
+}
+
+bool story_memory_too_high(const MemoryUsage& memory){
+    return memory.total_system_memory > 0 && (
+        memory.process_virtual_memory > memory.total_system_memory / 5 * 2 ||
+        memory.process_physical_memory > memory.total_system_memory / 2
+    );
+}
+
+void story_check_memory_at_start(StoryRuntime& rt){
+    //  The memory use only goes down when Pokemon Automation is closed:
+    //  starting the program again in the same window stops at the first
+    //  save. Say so now instead.
+    MemoryUsage memory = process_memory_usage();
+    if (story_memory_too_high(memory)){
+        throw UserSetupError(
+            rt.console.logger(),
+            "Pokemon Automation already uses " + gigabytes(memory.process_virtual_memory) + " of the " +
+            gigabytes(memory.total_system_memory) + " of memory (it starts with less than 1 GB), and "
+            "would stop again at the first save. Close Pokemon Automation completely (its main window "
+            "too), open it again, then start this program."
         );
     }
 }

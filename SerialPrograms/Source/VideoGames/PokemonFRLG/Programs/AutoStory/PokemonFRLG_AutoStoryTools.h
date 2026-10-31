@@ -15,6 +15,7 @@
 #include <set>
 #include <string>
 #include "Common/Cpp/Time.h"
+#include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "NintendoSwitch/Controllers/NintendoSwitch_ControllerButtons.h"
 #include "PokemonFRLG_AutoStoryScript.h"
@@ -193,6 +194,11 @@ void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step = fals
 //  go on from this save, and stops the program here if it uses so much
 //  memory that it could crash soon.
 void story_saved(StoryRuntime& rt, size_t resume_at);
+
+//  Pokemon Automation's memory use is high enough to crash before long (it
+//  grows over hours). At the start of a run: stop at once if it is already.
+bool story_memory_too_high(const MemoryUsage& memory);
+void story_check_memory_at_start(StoryRuntime& rt);
 
 //  Log the memory the program uses (every few minutes, or now if "force").
 void story_log_memory(StoryRuntime& rt, bool force = false);
