@@ -4,7 +4,8 @@
  *
  *  Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame,
  *  segment by segment. The routes and steps are generated from the
- *  pret/pokefirered map data and scripts (tools/route_generator).
+ *  pret/pokefirered map data and scripts by the scripts in
+ *  SerialPrograms/Scripts/PokemonFRLG/AutoStory/ (see the README there).
  *
  */
 
