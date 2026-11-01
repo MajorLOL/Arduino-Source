@@ -12,6 +12,7 @@
 #define PokemonAutomation_PokemonFRLG_AutoStoryTools_H
 
 #include <stdint.h>
+#include <functional>
 #include <set>
 #include <string>
 #include "Common/Cpp/Time.h"
@@ -106,6 +107,9 @@ struct StoryRuntime{
     //  Set when the game was saved in the running segment: the step (in
     //  this segment) to continue from after a reset. SIZE_MAX if not.
     size_t resume_at = (size_t)-1;
+    //  Called after each save with where to go on from it (the segment
+    //  and its step, counted from 1).
+    std::function<void(const std::string& segment_id, size_t step)> on_saved;
 
     //  Memory use of the program, logged now and then.
     WallClock last_memory_log = WallClock::min();

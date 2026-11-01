@@ -1324,13 +1324,17 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.resume_at = resume_at;
     rt.caught_at_save = rt.caught;
     //  Saved at the end of the segment: the next one starts there.
-    const std::string where = resume_at >= rt.segment_steps && !rt.next_segment_id.empty()
-        ? rt.next_segment_id + ", step 1"
-        : rt.segment_id + ", step " + std::to_string(resume_at + 1);
+    const bool next = resume_at >= rt.segment_steps && !rt.next_segment_id.empty();
+    const std::string resume_segment = next ? rt.next_segment_id : rt.segment_id;
+    const size_t resume_step = next ? 1 : resume_at + 1;
+    const std::string where = resume_segment + ", step " + std::to_string(resume_step);
     rt.console.log(
         "Saved. To go on from this save later: start at segment " + where + ".",
         COLOR_BLUE
     );
+    if (rt.on_saved){
+        rt.on_saved(resume_segment, resume_step);
+    }
     story_log_memory(rt, true);
 
     //  The program's memory use keeps growing on some computers (video

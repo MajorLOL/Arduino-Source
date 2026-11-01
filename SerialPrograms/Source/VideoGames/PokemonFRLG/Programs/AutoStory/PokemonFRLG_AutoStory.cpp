@@ -16,6 +16,7 @@
  *
  */
 
+#include <algorithm>
 #include <cctype>
 #include <string>
 #include "Common/Cpp/Exceptions.h"
@@ -178,15 +179,16 @@ AutoStory::AutoStory()
     )
     , START_SEGMENT(
         "<b>Start at segment:</b><br>The game must be saved at the start of this segment "
-        "(where the previous segment saved).",
+        "(where the previous segment saved). After each save, the program sets this and the "
+        "step below to that save: to go on from the last save, leave both as they are.",
         segment_database(),
         LockMode::LOCK_WHILE_RUNNING,
         0
     )
     , START_STEP(
         "<b>Start at step:</b><br>The step of the start segment to begin with. 1 for the start of "
-        "the segment; after a stop, the log says where the last save was (\"Saved. To go on from "
-        "this save later: ...\").",
+        "the segment. Set by the program after each save (the log also says where the last save "
+        "was: \"Saved. To go on from this save later: ...\").",
         LockMode::LOCK_WHILE_RUNNING,
         1, 1, 999
     )
@@ -561,6 +563,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
     rt.save_after_heal = SAVE_AFTER_HEAL;
+    //  The start options follow the saves: the next run goes on from the
+    //  last save without setting them by hand.
+    rt.on_saved = [&](const std::string& segment_id, size_t step){
+        for (size_t i = 0; i < script.segment_count; i++){
+            if (segment_id == script.segments[i].id){
+                START_SEGMENT.set_value(i);
+                START_STEP.set((uint16_t)std::min<size_t>(step, 999));
+                return;
+            }
+        }
+    };
 
     const size_t first_step = (size_t)START_STEP - 1;
     if (first_step >= script.segments[first].step_count){
