@@ -289,6 +289,7 @@ enum class RunEvent{
 
 struct RunAttempt{
     int moves = 0;          //  Moves made.
+    int pixels = 0;         //  How far the video saw the map scroll.
     bool measured = false;  //  "moves" was measured on the video.
     bool lost = false;      //  The video lost the map on the way.
     bool lost_early = false;    //  ... so early that no step can have been made then.
@@ -388,6 +389,8 @@ RunAttempt attempt_moves(
             return result;
         }
     }
+    //  (single_move() updates "facing" as it presses.)
+    const DpadPosition facing_before = facing;
     int ret = run_until<ProControllerContext>(
         rt.console, rt.context,
         [&](ProControllerContext& context){
@@ -406,7 +409,7 @@ RunAttempt attempt_moves(
     );
     rt.facing = direction;
     //  The player turned first (or may have: facing not known).
-    const bool turned = facing != direction;
+    const bool turned = facing_before != direction;
 
     result.event = ret < 0 ? RunEvent::NONE : events[(size_t)ret];
     if (ret < 0 && battles && track && dark && !tracker.tracker().lost()){
@@ -469,6 +472,7 @@ RunAttempt attempt_moves(
     }
     const AutoStoryScroll::Tracker& t = tracker.tracker();
     result.video = t.summary();
+    result.pixels = t.pixels();
     result.lost = t.lost();
     //  A step takes 16 frames (267 ms) from the press.
     result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 && tracker.lost_at_ms() < 200;
@@ -771,8 +775,14 @@ bool walk_run(
                 rt.console.log("The screen changed right away: this step did not happen.", COLOR_ORANGE);
             }
         }
-        if (made > moves && a.measured && !scene_at_end){
-            //  One too many (the input lasted too long): step back.
+        if (made > moves && a.measured && !scene_at_end &&
+            a.pixels >= (moves * tiles_per_move) * AutoStoryScroll::TILE_PIXELS + AutoStoryScroll::TILE_PIXELS * 3 / 4
+        ){
+            //  One too many (the input lasted too long): step back. Only
+            //  when the video saw most of that extra step: 89 px for a run
+            //  of 5 (80 px) rounds to 6, but on a floor with little detail
+            //  (Koga's gym) that is the video being off, and stepping back
+            //  then puts the player beside the route.
             int back = made - moves;
             rt.console.log("Walked " + std::to_string(back) + " too far. Stepping back.", COLOR_ORANGE);
             for (int i = 0; i < back; i++){
