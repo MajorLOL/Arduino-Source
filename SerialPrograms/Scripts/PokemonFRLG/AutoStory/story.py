@@ -768,8 +768,14 @@ class Builder:
         """
         Grind at a grass tile until the lead reaches a level, healing at the
         Pokemon Center every few battles. Emits three legs:
-          here -> grass, grass -> nurse, nurse -> grass
+          nurse -> grass, grass -> nurse, nurse -> grass
         and a GRIND step that uses them. Ends at the nurse, healed.
+
+        The GRIND step starts in front of its nurse. After a reset it starts
+        again from a save made there (each heal while training saves), and a
+        party that faints is brought back there. So from anywhere else, the
+        walk to the nurse and a heal (which saves) come first, as steps of
+        their own.
         """
         g = step["grind"]
         label = step.get("label", "Grind")
@@ -777,6 +783,11 @@ class Builder:
         pc = self.d.map(g["pc"])
         nx, ny = self.nurse_xy(pc)
         nurse_goals = set(self.interact_goals(pc, nx, ny, ["up"], counter=True).keys())
+
+        if self.pos[:3] not in nurse_goals:
+            self.walk_to(nurse_goals, label + "_FirstToNurse", out)
+            out.append({"type": "HEAL", "label": "Heal at " + pc.name})
+        self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")
 
         sub = []
         self.walk_to(grass, label + "_ToGrass", sub)
@@ -794,8 +805,10 @@ class Builder:
         nurse_pos = (self.pos[0], self.pos[1], self.pos[2], "up")
         self.pos = nurse_pos
 
+        #  Back onto the same tile: the one the training goes from, and the
+        #  walk to the nurse starts from.
         sub3 = []
-        self.walk_to(grass, label + "_BackToGrass", sub3)
+        self.walk_to({tuple(grass_pos[:3])}, label + "_BackToGrass", sub3)
         legs_back = [s["leg"] for s in sub3 if s["type"] == "WALK"]
         if any(s["type"] != "WALK" for s in sub3):
             raise StoryError("Grind route back to grass must be plain walking: " + label)

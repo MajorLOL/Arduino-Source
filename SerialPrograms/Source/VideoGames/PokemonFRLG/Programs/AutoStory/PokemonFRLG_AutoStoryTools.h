@@ -146,10 +146,13 @@ void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf = fal
 
 //  One step on a wild-encounter tile, then watch for a battle (and run it).
 //  Returns the battle result, or NO_BATTLE.
+//  A step the video sees not happen is taken again. With "moved": after a
+//  few tries it is given up, and "moved" says so (false); without, the
+//  program stops.
 StoryBattleResult story_checked_step(
     StoryRuntime& rt, DpadPosition direction, bool surf, bool trainer,
     StoryBattleKind wild_kind, const std::string& where,
-    bool throw_on_loss = true
+    bool throw_on_loss = true, bool* moved = nullptr
 );
 
 //  Turn to face "direction" without walking.

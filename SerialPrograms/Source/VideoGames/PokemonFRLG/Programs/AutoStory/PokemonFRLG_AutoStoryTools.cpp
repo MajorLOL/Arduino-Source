@@ -556,12 +556,16 @@ void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf){
 StoryBattleResult story_checked_step(
     StoryRuntime& rt, DpadPosition direction, bool surf, bool trainer,
     StoryBattleKind wild_kind, const std::string& where,
-    bool throw_on_loss
+    bool throw_on_loss, bool* moved
 ){
     StoryMemoryScope memory_scope("single steps");
     Milliseconds check = trainer ? rt.trainer_check : rt.encounter_check;
     double frames = surf ? SURF_FRAMES : WALK_FRAMES;
-    for (int attempt = 0; attempt < 6; attempt++){
+    if (moved != nullptr){
+        *moved = true;
+    }
+    const int attempts = moved == nullptr ? 6 : 3;
+    for (int attempt = 0; attempt < attempts; attempt++){
         BlackScreenWatcher battle_starting(COLOR_RED);
         AdvanceBattleDialogWatcher battle_started(COLOR_RED);
         WhiteDialogWatcher trainer_talking(COLOR_RED);
@@ -626,6 +630,10 @@ StoryBattleResult story_checked_step(
             step_back();
         }
         return result;
+    }
+    if (moved != nullptr){
+        *moved = false;
+        return StoryBattleResult::NO_BATTLE;
     }
     OperationFailedExceptionWithScreenshot::fire(
         ErrorReportMode::SEND_ERROR_REPORT,
