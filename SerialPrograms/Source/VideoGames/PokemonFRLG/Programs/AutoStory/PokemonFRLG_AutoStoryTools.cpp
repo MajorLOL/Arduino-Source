@@ -18,6 +18,7 @@
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonTools/Async/InferenceRoutines.h"
+#include "CommonTools/VisualDetectors/BlackScreenDetector.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
@@ -193,6 +194,17 @@ void take_warp_push(
 void wait_warp_step(StoryRuntime& rt, bool dark, MapPreview preview, const char* leg_name){
     BlackScreenOverWatcher warp_finished(COLOR_RED);
     int ret = wait_until(rt.console, rt.context, 10000ms, { warp_finished });
+    if (ret < 0 && !dark){
+        //  The fade can be over before this looks for it: the watchers of
+        //  the run saw the screen change, and by the time they let go, the
+        //  black was gone (a short fade, a gate). Then the new map is up.
+        VideoSnapshot frame = rt.console.video().snapshot();
+        BlackScreenDetector black(COLOR_RED);
+        if (frame && !black.detect(frame)){
+            rt.console.log(std::string("The fade was over before it was watched: ") + leg_name, COLOR_ORANGE);
+            ret = 0;
+        }
+    }
     if (ret < 0){
         if (dark){
             rt.console.log(std::string("Warp not seen on a dark map: ") + leg_name, COLOR_ORANGE);

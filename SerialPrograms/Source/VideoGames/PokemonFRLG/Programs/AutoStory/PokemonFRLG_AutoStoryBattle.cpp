@@ -787,6 +787,10 @@ StoryBattleResult run_story_battle(
     bool lost = false;
     int next_slot = 1;
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
+    //  The last press was a blind one ("Nothing recognized"): a move list
+    //  open now may be its doing (A on FIGHT), not a pick that did not go
+    //  through.
+    bool pressed_blind = false;
     //  A battle for sure: its menu, a move list, a level-up window, a
     //  question or the party menu was seen. (The battle text detectors
     //  also take a plain white area at the bottom of the overworld, like
@@ -809,6 +813,7 @@ StoryBattleResult run_story_battle(
         if (ret >= 0){
             unknown_in_row = 0;
             text_only_in_row = 0;
+            pressed_blind = false;
         }
         if (ret == 0 || ret == 1 || ret == 2){
             battle_confirmed = true;
@@ -1122,7 +1127,9 @@ StoryBattleResult run_story_battle(
                     last_activity = current_time();
                     unknown_in_row = 0;
                     console.log("The move list is open. Picking a move.", COLOR_ORANGE);
-                    if (memory.last_slot >= 0 && ++memory.list_back >= 2){
+                    if (pressed_blind){
+                        memory.list_back = 0;
+                    }else if (memory.last_slot >= 0 && ++memory.list_back >= 2){
                         //  The move picked last did not happen, twice: no PP
                         //  left. (Once is also a press the game missed.)
                         console.log("Move " + std::to_string(memory.last_slot + 1) + " seems to be out of PP.", COLOR_ORANGE);
@@ -1133,6 +1140,7 @@ StoryBattleResult run_story_battle(
                     std::string slug;
                     const SpeciesInfo* opponent = read_opponent(console, slug);
                     use_best_move(console, context, settings, memory, opponent);
+                    pressed_blind = false;
                     break;
                 }
             }
@@ -1193,6 +1201,7 @@ StoryBattleResult run_story_battle(
                 pbf_press_button(context, BUTTON_A, 160ms, 840ms);
             }
             context.wait_for_all_requests();
+            pressed_blind = true;
         }
         }
     }
