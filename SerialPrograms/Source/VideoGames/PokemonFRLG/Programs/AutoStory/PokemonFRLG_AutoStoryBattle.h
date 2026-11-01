@@ -119,6 +119,9 @@ struct StoryBattleMemory{
     //  level-up (a move learned on its own, an evolution) or a move learned
     //  in its place (then they are kept up to date).
     bool member_moves_known = false;
+    //  The HP bar of the player's Pokemon (the one out) the last time it was
+    //  seen in the last battle: 0 to 1. -1 if not seen.
+    double player_hp = -1;
     //  Team play: the members (team indexes) that fought in the last
     //  battle, and those that fainted.
     std::set<int> team_used;

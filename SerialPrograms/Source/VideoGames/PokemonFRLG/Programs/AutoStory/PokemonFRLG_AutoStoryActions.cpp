@@ -1037,7 +1037,19 @@ void grind_front(
             break;
         }
 
-        if (rt.lead_fainted || since_heal >= heal_every){
+        //  Heal once the one that fights is below half its HP (its HP bar
+        //  is no longer green). Without a reading of the bar, every few
+        //  battles; with one, still now and then (the PP).
+        const double hp = rt.memory.player_hp;
+        const bool hp_known = hp >= 0;
+        console.log(
+            where + ": HP " + (hp_known ? std::to_string((int)(hp * 100 + 0.5)) + "%" : std::string("not seen")) +
+            ", " + std::to_string(since_heal) + " battles since healing."
+        );
+        if (rt.lead_fainted ||
+            (hp_known && hp < 0.5) ||
+            since_heal >= (hp_known ? heal_every * 4 : heal_every)
+        ){
             spot.to_first_tile(away);
             walk(to_nurse);
             //  The training goes on: after a reset, it starts again from

@@ -74,6 +74,65 @@ ImageViewRGB32 game_box(const ImageViewRGB32& frame, const ImageFloatBox& box){
     return extract_box_reference(game_screen, box);
 }
 
+//  The HP bar of the player's Pokemon in a single battle (its box at the
+//  bottom right): 48 GBA pixels from x = 174, rows 91 to 93. Each column is
+//  filled (green, yellow or red) or empty (dark grey-green), filled ones
+//  first. Returns the filled part, or -1 if no such bar shows there (the
+//  box sliding in, the level-up window over it, not a battle).
+double read_player_hp(const ImageViewRGB32& frame){
+    ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
+    const size_t width = game.width();
+    const size_t height = game.height();
+    if (width < 240 || height < 160){
+        return -1;
+    }
+    const double sx = (double)width / 240.0;
+    const double sy = (double)height / 160.0;
+    const size_t y0 = (size_t)(91.3 * sy);
+    const size_t y1 = std::max(y0 + 1, (size_t)(93.7 * sy));
+    int filled = 0;
+    int empty = 0;
+    int unknown = 0;
+    int out_of_order = 0;
+    for (int c = 0; c < 48; c++){
+        const size_t x0 = (size_t)((174.0 + c + 0.25) * sx);
+        const size_t x1 = std::max(x0 + 1, (size_t)((174.0 + c + 0.75) * sx));
+        uint64_t sum[3] = {0, 0, 0};
+        uint64_t count = 0;
+        for (size_t y = y0; y < y1 && y < height; y++){
+            for (size_t x = x0; x < x1 && x < width; x++){
+                const uint32_t pixel = game.pixel(x, y);
+                sum[0] += (pixel >> 16) & 0xff;
+                sum[1] += (pixel >> 8) & 0xff;
+                sum[2] += pixel & 0xff;
+                count++;
+            }
+        }
+        if (count == 0){
+            return -1;
+        }
+        const int r = (int)(sum[0] / count);
+        const int g = (int)(sum[1] / count);
+        const int b = (int)(sum[2] / count);
+        const int high = std::max({r, g, b});
+        const int low = std::min({r, g, b});
+        if (high - low > 50 && high > 150){
+            filled++;
+            if (empty > 0){
+                out_of_order++;
+            }
+        }else if (high < 140 && high - low < 50 && g >= r && g + 10 >= b){
+            empty++;
+        }else{
+            unknown++;
+        }
+    }
+    if (unknown > 3 || out_of_order > 1 || filled + empty == 0){
+        return -1;
+    }
+    return (double)filled / (double)(filled + empty);
+}
+
 
 //  Dictionary of all move names (English). Tokens are "m<index>".
 const OCR::SmallDictionaryMatcher& move_matcher(){
@@ -720,6 +779,7 @@ StoryBattleResult run_story_battle(
     bool seen_battle = false;
     bool shared = false;        //  the member came out and the other one went in
     memory.learner.clear();
+    memory.player_hp = -1;
     bool decided = false;       //  wild: fight/run/catch decided
     bool run = false;
     bool safari = false;
@@ -752,6 +812,16 @@ StoryBattleResult run_story_battle(
         }
         if (ret == 0 || ret == 1 || ret == 2){
             battle_confirmed = true;
+        }
+        if (ret == 0 || ret == 3){
+            //  The battle menu or battle text: the player's HP bar shows.
+            VideoSnapshot screen = console.video().snapshot();
+            if (screen){
+                double hp = read_player_hp(screen);
+                if (hp >= 0){
+                    memory.player_hp = hp;
+                }
+            }
         }
         switch (ret){
         case 0:{
@@ -792,6 +862,7 @@ StoryBattleResult run_story_battle(
                     context.wait_for_all_requests();
                     if (wait_until(console, context, 3000ms, { party }) == 0){
                         pick_in_party_menu(settings.share_position);
+                        memory.player_hp = -1;  //  That was the member's.
                         settings.lead_type1 = settings.share_type1;
                         settings.lead_type2 = settings.share_type2;
                         memory.no_pp = 0;
