@@ -104,6 +104,16 @@ struct StoryBattleMemory{
     //  the move list back ("There's no PP left for this move!"). Cleared
     //  when the party is healed.
     uint8_t no_pp = 0;
+    //  Moves that took none of the foe's HP twice in a row (bit per slot):
+    //  an ability absorbs them (WATER ABSORB, FLASH FIRE; also on a DITTO
+    //  that took the form of the player's Pokemon) or the foe is immune.
+    //  Left out until the foe changes. "no_damage": the count per slot,
+    //  "foe_hp": the foe's HP bar when the last move was picked, and the
+    //  foe it was.
+    uint8_t useless = 0;
+    uint8_t no_damage[4] = {0, 0, 0, 0};
+    double foe_hp = -1;
+    const AutoStoryDex::SpeciesInfo* foe_for_hp = nullptr;
     //  The slot picked last, -1 if none in this battle.
     int last_slot = -1;
     //  How many times in a row the move list came back after picking

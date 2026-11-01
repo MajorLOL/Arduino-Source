@@ -74,12 +74,13 @@ ImageViewRGB32 game_box(const ImageViewRGB32& frame, const ImageFloatBox& box){
     return extract_box_reference(game_screen, box);
 }
 
-//  The HP bar of the player's Pokemon in a single battle (its box at the
-//  bottom right): 48 GBA pixels from x = 174, rows 91 to 93. Each column is
-//  filled (green, yellow or red) or empty (dark grey-green), filled ones
-//  first. Returns the filled part, or -1 if no such bar shows there (the
-//  box sliding in, the level-up window over it, not a battle).
-double read_player_hp(const ImageViewRGB32& frame){
+//  An HP bar in a single battle: 48 GBA pixels from x = "left", rows "top"
+//  to "bottom". Each column is filled (green, yellow or red) or empty (dark
+//  grey-green), filled ones first. Returns the filled part, or -1 if no
+//  such bar shows there (the box sliding in, the level-up window over it,
+//  not a battle). The player's Pokemon: its box at the bottom right, from
+//  x = 174, rows 91 to 93.
+double read_hp_bar(const ImageViewRGB32& frame, double left, double top, double bottom){
     ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
     const size_t width = game.width();
     const size_t height = game.height();
@@ -88,15 +89,15 @@ double read_player_hp(const ImageViewRGB32& frame){
     }
     const double sx = (double)width / 240.0;
     const double sy = (double)height / 160.0;
-    const size_t y0 = (size_t)(91.3 * sy);
-    const size_t y1 = std::max(y0 + 1, (size_t)(93.7 * sy));
+    const size_t y0 = (size_t)(top * sy);
+    const size_t y1 = std::max(y0 + 1, (size_t)(bottom * sy));
     int filled = 0;
     int empty = 0;
     int unknown = 0;
     int out_of_order = 0;
     for (int c = 0; c < 48; c++){
-        const size_t x0 = (size_t)((174.0 + c + 0.25) * sx);
-        const size_t x1 = std::max(x0 + 1, (size_t)((174.0 + c + 0.75) * sx));
+        const size_t x0 = (size_t)((left + c + 0.25) * sx);
+        const size_t x1 = std::max(x0 + 1, (size_t)((left + c + 0.75) * sx));
         uint64_t sum[3] = {0, 0, 0};
         uint64_t count = 0;
         for (size_t y = y0; y < y1 && y < height; y++){
@@ -131,6 +132,14 @@ double read_player_hp(const ImageViewRGB32& frame){
         return -1;
     }
     return (double)filled / (double)(filled + empty);
+}
+double read_player_hp(const ImageViewRGB32& frame){
+    return read_hp_bar(frame, 174, 91.3, 93.7);
+}
+//  The foe's, in its box at the top left: 48 pixels from x = 52, rows 34
+//  to 36.
+double read_foe_hp(const ImageViewRGB32& frame){
+    return read_hp_bar(frame, 52, 33.8, 36.2);
 }
 
 
@@ -454,6 +463,43 @@ void use_best_move(
     const StoryBattleSettings& settings, StoryBattleMemory& memory,
     const SpeciesInfo* opponent
 ){
+    //  Did the move picked last turn take any of the foe's HP? (The move
+    //  list leaves both HP bars in view.)
+    double foe_hp = -1;
+    {
+        VideoSnapshot screen = console.video().snapshot();
+        if (screen){
+            foe_hp = read_foe_hp(screen);
+        }
+    }
+    if (opponent != nullptr && opponent != memory.foe_for_hp){
+        //  Another foe: start over.
+        memory.useless = 0;
+        for (uint8_t& count : memory.no_damage){
+            count = 0;
+        }
+        memory.foe_hp = -1;
+        memory.foe_for_hp = opponent;
+    }else if (memory.last_slot >= 0 && memory.last_slot < 4 && memory.foe_hp >= 0 && foe_hp >= 0){
+        const int slot = memory.last_slot;
+        const int move = memory.moves[slot];
+        if (move >= 0 && base_damage(AutoStoryDex::moves()[(size_t)move]) > 0){
+            if (foe_hp >= memory.foe_hp - 0.01){
+                //  Nothing (or it got HP back). Once is also a miss.
+                if (++memory.no_damage[slot] >= 2 && !(memory.useless & (1 << slot))){
+                    memory.useless |= (uint8_t)(1 << slot);
+                    console.log(
+                        std::string(AutoStoryDex::moves()[(size_t)move].name) +
+                        " took none of the foe's HP twice: not using it against this foe.",
+                        COLOR_ORANGE
+                    );
+                }
+            }else{
+                memory.no_damage[slot] = 0;
+            }
+        }
+    }
+
     int before[4] = {memory.moves[0], memory.moves[1], memory.moves[2], memory.moves[3]};
     read_fight_menu(console, memory);
     for (int i = 0; i < 4; i++){
@@ -466,7 +512,10 @@ void use_best_move(
         memory.no_pp = 0;   //  Then something was wrong. Try them all again.
     }
 
-    uint8_t excluded = memory.no_pp;
+    uint8_t excluded = (uint8_t)(memory.no_pp | memory.useless);
+    if ((excluded & 0x0f) == 0x0f){
+        excluded = memory.no_pp;
+    }
     int cursor_slot = 0;
     for (int attempt = 0; attempt < 4; attempt++){
         int slot = best_move_slot(memory, settings, opponent, excluded);
@@ -492,6 +541,7 @@ void use_best_move(
         break;
     }
     memory.last_slot = cursor_slot;
+    memory.foe_hp = foe_hp;
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     context.wait_for_all_requests();
 }
@@ -780,6 +830,12 @@ StoryBattleResult run_story_battle(
     bool shared = false;        //  the member came out and the other one went in
     memory.learner.clear();
     memory.player_hp = -1;
+    memory.useless = 0;
+    for (uint8_t& count : memory.no_damage){
+        count = 0;
+    }
+    memory.foe_hp = -1;
+    memory.foe_for_hp = nullptr;
     bool decided = false;       //  wild: fight/run/catch decided
     bool run = false;
     bool safari = false;
