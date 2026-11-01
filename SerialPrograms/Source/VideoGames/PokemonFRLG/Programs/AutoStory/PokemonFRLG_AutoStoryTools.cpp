@@ -5,6 +5,7 @@
  */
 
 #include <cmath>
+#include <cstdlib>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -29,6 +30,7 @@
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_AutoStoryWalkTracker.h"
+#include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
 namespace PokemonAutomation{
@@ -391,6 +393,8 @@ RunAttempt attempt_moves(
         callbacks
     );
     rt.facing = direction;
+    //  The player turned first (or may have: facing not known).
+    const bool turned = facing != direction;
 
     result.event = ret < 0 ? RunEvent::NONE : events[(size_t)ret];
     if (ret < 0 && battles && track && dark && !tracker.tracker().lost()){
@@ -411,7 +415,10 @@ RunAttempt attempt_moves(
             wait_until(rt.console, rt.context, 800ms, { tracker });
         }
     }
-    if (ret < 0 && battles && track && !dark && tracker.tracker().lost()){
+    //  The picture changed before the video saw any step.
+    const bool no_step = tracker.tracker().lost() &&
+        std::abs(tracker.tracker().pixels()) < AutoStoryScroll::TILE_PIXELS / 2;
+    if (ret < 0 && track && !dark && tracker.tracker().lost() && (battles || (turned && no_step))){
         //  The whole picture changed on the way, where wild battles start:
         //  a battle. It started at the end of a step, and the screen only
         //  goes black after the input is over. The video counted the steps
@@ -419,12 +426,23 @@ RunAttempt attempt_moves(
         //  Or a trainer saw the player: its words come up (a text box
         //  without the advance arrow), and the rest of the run did not
         //  happen.
+        //  Or, on a run without grass: the player turned on the grass tile
+        //  the run starts from, and Gen 3 also looks for a wild battle when
+        //  a turn in place is over (FieldGetPlayerInput()). Then no step
+        //  was made.
         BlackScreenWatcher black(COLOR_RED);
         AdvanceBattleDialogWatcher text(COLOR_RED);
         WhiteDialogWatcher words(COLOR_RED);
-        int late = wait_until(rt.console, rt.context, 2500ms, { black, text, words });
-        if (late >= 0){
-            result.event = late == 0 ? RunEvent::BATTLE_START : (late == 1 ? RunEvent::BATTLE_TEXT : RunEvent::DIALOG);
+        if (battles){
+            int late = wait_until(rt.console, rt.context, 2500ms, { black, text, words });
+            if (late >= 0){
+                result.event = late == 0 ? RunEvent::BATTLE_START : (late == 1 ? RunEvent::BATTLE_TEXT : RunEvent::DIALOG);
+            }
+        }else if (wait_until(rt.console, rt.context, 5000ms, { text }) == 0){
+            //  Only the battle text tells: a warp's fade looks like a battle
+            //  starting.
+            rt.console.log("A wild battle after the turn, before the first step.", COLOR_ORANGE);
+            result.event = RunEvent::BATTLE_TEXT;
         }
     }
     if (!track){
@@ -523,6 +541,7 @@ StoryBattleResult story_checked_step(
     StoryBattleKind wild_kind, const std::string& where,
     bool throw_on_loss
 ){
+    StoryMemoryScope memory_scope("single steps");
     Milliseconds check = trainer ? rt.trainer_check : rt.encounter_check;
     double frames = surf ? SURF_FRAMES : WALK_FRAMES;
     for (int attempt = 0; attempt < 6; attempt++){
@@ -953,6 +972,7 @@ std::vector<StoryRun> merge_runs(const StoryRun* runs, uint16_t count, bool merg
 
 
 void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
+    StoryMemoryScope memory_scope("walking");
     const StoryLeg& leg = script.leg(leg_index);
     rt.console.log(std::string("Walking: ") + leg.name);
     const std::vector<StoryRun> runs = merge_runs(script.leg_runs(leg), leg.run_count, rt.verify_walking);
@@ -1242,6 +1262,7 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what){
 
 
 void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step){
+    StoryMemoryScope memory_scope("healing");
     rt.console.log("Healing: " + where);
     heal_at_pokecenter(rt.console, rt.context);
     story_cutscene(rt, 0ms, 30s, false, "Nurse at " + where);
@@ -1277,6 +1298,7 @@ void story_log_memory(StoryRuntime& rt, bool force){
         " (virtual " + gigabytes(memory.process_virtual_memory) + "), system " +
         gigabytes(memory.total_used_system_memory) + " of " + gigabytes(memory.total_system_memory) + " in use."
     );
+    rt.console.log(story_memory_summary());
 }
 
 std::set<std::string> story_species_list(const char* text){
@@ -1352,6 +1374,7 @@ void story_check_memory_at_start(StoryRuntime& rt){
 
 
 void story_save(StoryRuntime& rt, bool has_pokedex){
+    StoryMemoryScope memory_scope("saving");
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     console.log(has_pokedex ? "Saving the game." : "Saving the game (no Pokedex yet).");

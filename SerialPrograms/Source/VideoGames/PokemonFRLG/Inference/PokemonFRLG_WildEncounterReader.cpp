@@ -52,6 +52,18 @@ PokemonFRLG_WildEncounter WildEncounterReader::read_encounter(
     const std::set<std::string>& subset,
     double max_log10p
 ){
+    if (subset.size() == 0){
+        return read_encounter_with_reader(logger, language, frame, Pokemon::PokemonNameReader::instance(), max_log10p);
+    }
+    return read_encounter_with_reader(logger, language, frame, Pokemon::PokemonNameReader(subset), max_log10p);
+}
+
+PokemonFRLG_WildEncounter WildEncounterReader::read_encounter_with_reader(
+    Logger& logger, Language language,
+    const ImageViewRGB32& frame,
+    const Pokemon::PokemonNameReader& name_reader,
+    double max_log10p
+){
     const bool jpn = language == Language::Japanese;
 
     PokemonFRLG_WildEncounter encounter; 
@@ -64,18 +76,10 @@ PokemonFRLG_WildEncounter WildEncounterReader::read_encounter(
     //  font, then let the matcher try each threshold in turn.
     ImageRGB32 name_ready = preprocess_for_ocr(name_box);
 
-    OCR::StringMatchResult name_result;
-    if (subset.size() == 0){
-        name_result = Pokemon::PokemonNameReader::instance().read_substring(
-            logger, language, name_ready,
-            DARK_TEXT_FILTERS(),
-            0.01, 0.50, max_log10p);
-    }else{
-        name_result = Pokemon::PokemonNameReader(subset).read_substring(
-            logger, language, name_ready,
-            DARK_TEXT_FILTERS(),
-            0.01, 0.50, max_log10p);
-    }
+    OCR::StringMatchResult name_result = name_reader.read_substring(
+        logger, language, name_ready,
+        DARK_TEXT_FILTERS(),
+        0.01, 0.50, max_log10p);
    
     if (!name_result.results.empty()){
         encounter.name = name_result.results.begin()->second.token;

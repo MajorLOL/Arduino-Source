@@ -34,6 +34,8 @@
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_OcrPreprocessing.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_WildEncounterReader.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_BattleMenuNavigation.h"
+#include "Pokemon/Inference/Pokemon_NameReader.h"
+#include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryBattle.h"
 
 namespace PokemonAutomation{
@@ -128,6 +130,7 @@ bool move_names_readable(ConsoleHandle& console){
 
 //  Read the four move names of the FIGHT menu.
 void read_fight_menu(ConsoleHandle& console, StoryBattleMemory& memory){
+    StoryMemoryScope memory_scope("reading moves");
     VideoSnapshot screen = console.video().snapshot();
     std::string log = "Moves:";
     for (int i = 0; i < 4; i++){
@@ -161,12 +164,20 @@ const std::set<std::string>& all_species_slugs(){
     return slugs;
 }
 
+//  Made once: making a name reader for some of the species loads the name
+//  lists of every language.
+const Pokemon::PokemonNameReader& species_name_reader(){
+    static const Pokemon::PokemonNameReader reader(all_species_slugs());
+    return reader;
+}
+
 //  Read the opponent's species from its HP box (top left).
 const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug){
+    StoryMemoryScope memory_scope("reading species");
     VideoSnapshot screen = console.video().snapshot();
     WildEncounterReader reader(COLOR_RED);
-    PokemonFRLG_WildEncounter encounter = reader.read_encounter(
-        console.logger(), Language::English, screen, all_species_slugs()
+    PokemonFRLG_WildEncounter encounter = reader.read_encounter_with_reader(
+        console.logger(), Language::English, screen, species_name_reader()
     );
     slug = encounter.name;
     const SpeciesInfo* info = find_species(slug);
@@ -179,6 +190,7 @@ const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug){
 }
 
 std::string read_text(ConsoleHandle& console, const ImageFloatBox& box, bool bright){
+    StoryMemoryScope memory_scope("reading text");
     VideoSnapshot screen = console.video().snapshot();
     ImageViewRGB32 image = game_box(screen, box);
     //  The OCR wants dark text on a light background: the text pixels
@@ -633,6 +645,7 @@ StoryBattleResult run_story_battle(
     const StoryBattleSettings& base_settings,
     StoryBattleMemory& memory
 ){
+    StoryMemoryScope memory_scope("battle");
     memory.battles++;
     memory.last_slot = -1;
     memory.list_back = 0;
@@ -749,19 +762,28 @@ StoryBattleResult run_story_battle(
                 shared = true;
                 //  The member was sent out: it gets half the experience. Its
                 //  moves first (it may learn one while the other fights),
-                //  then the other one comes in.
-                if (move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
+                //  then the other one comes in. They stay the same until a
+                //  level-up: no need to read them every battle.
+                if (memory.member_moves_known){
+                    //  The member is the active one.
+                    for (int i = 0; i < 4; i++){
+                        memory.moves[i] = memory.member_moves[i];
+                    }
+                }else if (move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
                     pbf_press_button(context, BUTTON_A, 160ms, 640ms);
                     context.wait_for_all_requests();
                     BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
                     if (wait_until(console, context, 3000ms, { move_list }) == 0){
                         read_fight_menu(console, memory);
+                        for (int i = 0; i < 4; i++){
+                            memory.member_moves[i] = memory.moves[i];
+                            if (memory.moves[i] >= 0){
+                                memory.member_moves_known = true;
+                            }
+                        }
                     }
                     pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                     context.wait_for_all_requests();
-                }
-                for (int i = 0; i < 4; i++){
-                    memory.member_moves[i] = memory.moves[i];
                 }
                 if (move_cursor_to_option(console, context, BattleMenuOption::POKEMON)){
                     console.log("Shared experience: battle position " + std::to_string(settings.share_position + 1) + " comes in.");
@@ -973,6 +995,7 @@ StoryBattleResult run_story_battle(
                 }
                 if (text.find("grew to") != std::string::npos){
                     memory.level_up_seen = true;
+                    memory.member_moves_known = false;
                 }
                 if (text.find("trying to learn") != std::string::npos){
                     memory.learner = text;
@@ -1003,6 +1026,7 @@ StoryBattleResult run_story_battle(
                 seen_battle = true;
                 battle_confirmed = true;
                 memory.level_up_seen = true;
+                memory.member_moves_known = false;
                 last_activity = current_time();
                 unknown_in_row = 0;
                 console.log("Level-up window.");

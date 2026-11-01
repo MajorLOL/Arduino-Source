@@ -115,6 +115,10 @@ struct StoryBattleMemory{
     //  last "X is trying to learn Y." text (who learns).
     int member_moves[4] = {-1, -1, -1, -1};
     std::string learner;
+    //  "member_moves" are read and still right: they change only with a
+    //  level-up (a move learned on its own, an evolution) or a move learned
+    //  in its place (then they are kept up to date).
+    bool member_moves_known = false;
     //  Team play: the members (team indexes) that fought in the last
     //  battle, and those that fainted.
     std::set<int> team_used;

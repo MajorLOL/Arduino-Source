@@ -31,6 +31,7 @@
 #include "PokemonFRLG_AutoStoryData.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 #include "PokemonFRLG_AutoStoryActions.h"
+#include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStory.h"
 
 namespace PokemonAutomation{
@@ -586,11 +587,15 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.caught_at_save = rt.caught;
 
     story_check_memory_at_start(rt);
+    story_memory_reset();
     home_black_border_check(env.console, context);
 
     if (RESET_AT_START){
         env.log("Soft resetting to load the save.");
-        soft_reset(env.console, context);
+        {
+            StoryMemoryScope memory_scope("soft reset");
+            soft_reset(env.console, context);
+        }
         stats.resets++;
         env.update_stats();
     }
@@ -667,7 +672,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 "continuing from " + script.segments[resume_segment].id + " step " + std::to_string(resume_step + 1) + ".",
                 COLOR_RED
             );
-            soft_reset(env.console, context);
+            {
+                StoryMemoryScope memory_scope("soft reset");
+                soft_reset(env.console, context);
+            }
             stats.resets++;
             env.update_stats();
             rt.facing = DPAD_NONE;
@@ -678,6 +686,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.battle.lead_type1 = rt.lead_type1;
             rt.battle.lead_type2 = rt.lead_type2;
             rt.battle.share_position = 0;
+            rt.memory.member_moves_known = false;
             current_segment = resume_segment;
             current_step = resume_step;
         }

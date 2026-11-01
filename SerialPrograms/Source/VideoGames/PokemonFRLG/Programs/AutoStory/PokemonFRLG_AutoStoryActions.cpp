@@ -23,6 +23,7 @@
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_SummaryDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_StatsReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
+#include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryActions.h"
 
 namespace PokemonAutomation{
@@ -272,6 +273,7 @@ int story_read_lead_level(StoryRuntime& rt){
 
 
 int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
+    StoryMemoryScope memory_scope("party menu");
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     for (int attempt = 0; attempt < 2; attempt++){
@@ -1130,6 +1132,7 @@ void story_grind(
     rt.battle.share_type1 = rt.lead_type1;
     rt.battle.share_type2 = rt.lead_type2;
     rt.battle.share_members = line;
+    rt.memory.member_moves_known = false;
 
     grind_front(rt, script, step, extra_levels, true, slot - 1);
     rt.battle.share_position = 0;

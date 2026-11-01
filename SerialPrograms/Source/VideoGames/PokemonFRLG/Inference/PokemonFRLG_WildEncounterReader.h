@@ -20,6 +20,9 @@ namespace PokemonAutomation{
 class Logger;
 class ImageViewRGB32;
 class VideoOverlaySet;
+namespace Pokemon{
+    class PokemonNameReader;
+}
 
 namespace NintendoSwitch{
 namespace PokemonFRLG{
@@ -44,6 +47,16 @@ public:
         Logger& logger, Language language,
         const ImageViewRGB32& frame, 
         const std::set<std::string>& subset,
+        double max_log10p = MAX_LOG10P
+    );
+
+    // Same, with a name reader made by the caller. Making one for a subset
+    // loads the name lists of every language: a caller that reads often
+    // can make it once.
+    PokemonFRLG_WildEncounter read_encounter_with_reader(
+        Logger& logger, Language language,
+        const ImageViewRGB32& frame,
+        const Pokemon::PokemonNameReader& name_reader,
         double max_log10p = MAX_LOG10P
     );
 
