@@ -474,28 +474,30 @@ void use_best_move(
     }
     if (opponent != nullptr && opponent != memory.foe_for_hp){
         //  Another foe: start over.
-        memory.useless = 0;
-        for (uint8_t& count : memory.no_damage){
-            count = 0;
-        }
-        memory.foe_hp = -1;
+        memory.reset_foe();
         memory.foe_for_hp = opponent;
     }else if (memory.last_slot >= 0 && memory.last_slot < 4 && memory.foe_hp >= 0 && foe_hp >= 0){
         const int slot = memory.last_slot;
         const int move = memory.moves[slot];
         if (move >= 0 && base_damage(AutoStoryDex::moves()[(size_t)move]) > 0){
-            if (foe_hp >= memory.foe_hp - 0.01){
-                //  Nothing (or it got HP back). Once is also a miss.
-                if (++memory.no_damage[slot] >= 2 && !(memory.useless & (1 << slot))){
-                    memory.useless |= (uint8_t)(1 << slot);
-                    console.log(
-                        std::string(AutoStoryDex::moves()[(size_t)move].name) +
-                        " took none of the foe's HP twice: not using it against this foe.",
-                        COLOR_ORANGE
-                    );
-                }
-            }else{
+            const std::string name = AutoStoryDex::moves()[(size_t)move].name;
+            if (foe_hp < memory.foe_hp - 0.01){
+                memory.damage_turns++;
                 memory.no_damage[slot] = 0;
+            }else if (memory.no_damage[slot] > 0 && memory.damage_turns > memory.damage_turns_at[slot]){
+                //  Again nothing, and since the first time another move did
+                //  damage: the player's Pokemon can attack, this move does
+                //  nothing to this foe.
+                memory.useless |= (uint8_t)(1 << slot);
+                console.log(name + " again took none of the foe's HP, another move did: not using it against this foe.", COLOR_ORANGE);
+            }else{
+                //  Nothing, but maybe the player's Pokemon did not move
+                //  (asleep, paralyzed, confused) or missed: try another move
+                //  once, then this one again.
+                memory.no_damage[slot]++;
+                memory.damage_turns_at[slot] = memory.damage_turns;
+                memory.probe |= (uint8_t)(1 << slot);
+                console.log(name + " took none of the foe's HP. Trying another move once.", COLOR_ORANGE);
             }
         }
     }
@@ -512,10 +514,14 @@ void use_best_move(
         memory.no_pp = 0;   //  Then something was wrong. Try them all again.
     }
 
-    uint8_t excluded = (uint8_t)(memory.no_pp | memory.useless);
+    uint8_t excluded = (uint8_t)(memory.no_pp | memory.useless | memory.probe);
+    if ((excluded & 0x0f) == 0x0f){
+        excluded = (uint8_t)(memory.no_pp | memory.useless);
+    }
     if ((excluded & 0x0f) == 0x0f){
         excluded = memory.no_pp;
     }
+    memory.probe = 0;
     int cursor_slot = 0;
     for (int attempt = 0; attempt < 4; attempt++){
         int slot = best_move_slot(memory, settings, opponent, excluded);
@@ -830,12 +836,7 @@ StoryBattleResult run_story_battle(
     bool shared = false;        //  the member came out and the other one went in
     memory.learner.clear();
     memory.player_hp = -1;
-    memory.useless = 0;
-    for (uint8_t& count : memory.no_damage){
-        count = 0;
-    }
-    memory.foe_hp = -1;
-    memory.foe_for_hp = nullptr;
+    memory.reset_foe();
     bool decided = false;       //  wild: fight/run/catch decided
     bool run = false;
     bool safari = false;

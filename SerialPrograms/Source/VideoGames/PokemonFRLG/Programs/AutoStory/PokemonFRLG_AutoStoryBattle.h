@@ -104,16 +104,33 @@ struct StoryBattleMemory{
     //  the move list back ("There's no PP left for this move!"). Cleared
     //  when the party is healed.
     uint8_t no_pp = 0;
-    //  Moves that took none of the foe's HP twice in a row (bit per slot):
-    //  an ability absorbs them (WATER ABSORB, FLASH FIRE; also on a DITTO
-    //  that took the form of the player's Pokemon) or the foe is immune.
-    //  Left out until the foe changes. "no_damage": the count per slot,
-    //  "foe_hp": the foe's HP bar when the last move was picked, and the
-    //  foe it was.
+    //  Moves that do nothing to the foe (bit per slot): an ability absorbs
+    //  them (WATER ABSORB, FLASH FIRE; also on a DITTO that took the form of
+    //  the player's Pokemon) or the foe is immune. Left out until the foe
+    //  changes. A turn without damage alone does not tell: the player's
+    //  Pokemon may not have moved (asleep, paralyzed, confused) or missed.
+    //  So after such a turn another move is tried once ("probe"); only if
+    //  that one (or any other) did damage and the first one again did not,
+    //  the first one does nothing.
     uint8_t useless = 0;
+    uint8_t probe = 0;              //  left out for the next pick only
     uint8_t no_damage[4] = {0, 0, 0, 0};
-    double foe_hp = -1;
+    int damage_turns = 0;           //  turns in which the foe lost HP
+    int damage_turns_at[4] = {0, 0, 0, 0};  //  ... when a slot first did nothing
+    double foe_hp = -1;             //  the foe's HP bar when the last move was picked
     const AutoStoryDex::SpeciesInfo* foe_for_hp = nullptr;
+
+    void reset_foe(){
+        useless = 0;
+        probe = 0;
+        damage_turns = 0;
+        for (int i = 0; i < 4; i++){
+            no_damage[i] = 0;
+            damage_turns_at[i] = 0;
+        }
+        foe_hp = -1;
+        foe_for_hp = nullptr;
+    }
     //  The slot picked last, -1 if none in this battle.
     int last_slot = -1;
     //  How many times in a row the move list came back after picking
