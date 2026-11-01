@@ -857,11 +857,14 @@ CHAPTER7 = [
         "title": "To Saffron City (the gate guard gets the Tea)",
         "steps": [
             #  Route8_WestEntrance_EventScript_GuardTriggerMid with FLAG_GOT_TEA:
-            #  one var opens all four gates.
+            #  one var opens all four gates. The player turns up to the guard
+            #  and walks up one tile to him (Route8_WestEntrance_Movement_
+            #  WalkToGuardMid): the scene ends at (6, 4) facing up. Only
+            #  (1, 5) of the west doorway is the exit (an arrow warp).
             goto("MAP_ROUTE8_WEST_ENTRANCE", [[6, 5]], "ToSaffronGate", trigger=True),
             cutscene(4000, 40000, "The guard drinks the tea"),
             setst(vars={"VAR_MAP_SCENE_ROUTE5_ROUTE6_ROUTE7_ROUTE8_GATES": 1}),
-            pos("MAP_ROUTE8_WEST_ENTRANCE", 6, 5, "left"),
+            pos("MAP_ROUTE8_WEST_ENTRANCE", 6, 4, "up"),
             heal(PC["SAFFRON"], "GateToSaffronPC"),
             save(),
         ],

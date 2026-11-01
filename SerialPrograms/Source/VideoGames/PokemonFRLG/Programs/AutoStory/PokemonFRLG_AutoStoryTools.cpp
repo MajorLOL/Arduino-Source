@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <string>
+#include <utility>
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Time.h"
@@ -696,9 +697,76 @@ namespace{
 //  "warp_at_end": the leg ends by pushing into a door or onto a mat. If the
 //  screen fades right at the end, the warp already started (the input
 //  lasted a little long). Returns true then.
+//  A trainer that came up to the player stays where it stopped and no
+//  longer wanders (trainer_see.c: SetTrainerMovementType()), and it may
+//  stand in the way: a picnicker or bird keeper on the walkways of Route 13.
+//  Walk around it: a step aside, past it, and back into line. With one move
+//  left (the trainer stands on the tile where the route turns), only a step
+//  aside the way the route turns next gets past: then that next run is one
+//  shorter ("next_reduce"). Returns the moves of this run made that way (0:
+//  no way around).
+int walk_around(
+    StoryRuntime& rt, DpadPosition direction, int remaining,
+    DpadPosition next_direction, uint16_t& next_reduce
+){
+    const bool across = direction == DPAD_LEFT || direction == DPAD_RIGHT;
+    DpadPosition sides[2] = {across ? DPAD_UP : DPAD_LEFT, across ? DPAD_DOWN : DPAD_RIGHT};
+    if (next_direction == sides[1]){
+        std::swap(sides[0], sides[1]);
+    }
+    auto moved = [](const RunAttempt& a, int moves){
+        return a.event == RunEvent::NONE && !a.lost && a.measured && a.moves == moves;
+    };
+    for (DpadPosition side : sides){
+        if (remaining < 2 && side != next_direction){
+            continue;
+        }
+        RunAttempt aside = attempt_moves(rt, side, 1, WALK_FRAMES, 1, false, false, true);
+        if (!moved(aside, 1)){
+            if (aside.event != RunEvent::NONE || aside.lost){
+                return 0;   //  Something else came up: back to the usual way.
+            }
+            continue;
+        }
+        const int ahead = std::min(remaining, 2);
+        RunAttempt past = attempt_moves(rt, direction, ahead, WALK_FRAMES, 1, false, false, true);
+        if (moved(past, ahead)){
+            if (remaining < 2){
+                rt.console.log(
+                    std::string("Walked around someone in the way: ") + dpad_name(side) + ", then " +
+                    dpad_name(direction) + ". The next run is one shorter.",
+                    COLOR_ORANGE
+                );
+                next_reduce = 1;
+                return 1;
+            }
+            RunAttempt back = attempt_moves(rt, opposite(side), 1, WALK_FRAMES, 1, false, false, true);
+            if (moved(back, 1)){
+                rt.console.log(
+                    std::string("Walked around someone in the way: ") + dpad_name(side) + ", " +
+                    dpad_name(direction) + " 2, back.",
+                    COLOR_ORANGE
+                );
+                return 2;
+            }
+            return 0;
+        }
+        //  Not that way: back to where it started.
+        if (past.event != RunEvent::NONE || past.lost){
+            return 0;
+        }
+        if (past.moves > 0){
+            attempt_moves(rt, opposite(direction), past.moves, WALK_FRAMES, 1, false, false, true);
+        }
+        attempt_moves(rt, opposite(side), 1, WALK_FRAMES, 1, false, false, true);
+    }
+    return 0;
+}
+
 bool walk_run(
     StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, uint16_t count,
-    bool track, bool scene_at_end, bool warp_at_end, const std::string& where
+    bool track, bool scene_at_end, bool warp_at_end, const std::string& where,
+    DpadPosition next_direction, uint16_t& next_reduce
 ){
     const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
     const double frames = run.kind == RunKind::JUMP ? JUMP_FRAMES : (surf ? SURF_FRAMES : WALK_FRAMES);
@@ -746,6 +814,8 @@ bool walk_run(
 
     int remaining = count;
     int not_moving = 0;
+    const uint64_t battles_at_start = rt.trainer_battles + rt.wild_battles;
+    bool walked_around = false;
     int box_talks = 0;      //  text boxes without the arrow taken for someone talking
     int no_progress = 0;    //  tries in a row that did not move, whatever stopped them
     while (remaining > 0){
@@ -942,6 +1012,22 @@ bool walk_run(
                 continue;
             }
             not_moving++;
+            if (!walked_around && not_moving >= 2 &&
+                rt.trainer_battles + rt.wild_battles > battles_at_start &&
+                track && !leg.dark && !surf && run.kind != RunKind::JUMP
+            ){
+                //  A battle on this run, and now the way is shut: maybe the
+                //  trainer stands in it.
+                walked_around = true;
+                const int around = walk_around(rt, run.direction, remaining, next_direction, next_reduce);
+                if (around > 0){
+                    remaining -= around;
+                    rt.steps += (uint64_t)around;
+                    not_moving = 0;
+                    no_progress = 0;
+                    continue;
+                }
+            }
             if (not_moving >= 10){
                 OperationFailedExceptionWithScreenshot::fire(
                     ErrorReportMode::SEND_ERROR_REPORT,
@@ -1031,6 +1117,7 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     }
     bool warped = false;
     bool warped_early = false;
+    uint16_t reduce_next = 0;   //  a walk around someone made part of the next run
     for (size_t r = 0; r < runs.size() && !rt.trainer_came; r++){
         const StoryRun& run = runs[r];
         const bool last = r + 1 == runs.size();
@@ -1048,10 +1135,16 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             const bool track = rt.verify_walking && next != RunKind::SPIN;
             const bool onto_warp = last && leg.end == LegEnd::WARP_STEP && run.kind != RunKind::JUMP;
             uint16_t count = onto_warp ? (uint16_t)(run.count - 1) : run.count;
+            count = (uint16_t)(count - std::min(count, reduce_next));
+            reduce_next = 0;
             const bool scene_at_end = last && leg.end == LegEnd::TRIGGER;
             const bool warp_at_end = last && leg.end == LegEnd::WARP_PUSH;
+            const DpadPosition next_direction = last ? DPAD_NONE : runs[r + 1].direction;
             if (count > 0){
-                warped_early = walk_run(rt, leg, run, count, track, scene_at_end, warp_at_end, leg.name);
+                warped_early = walk_run(
+                    rt, leg, run, count, track, scene_at_end, warp_at_end, leg.name,
+                    next_direction, reduce_next
+                );
             }
             if (onto_warp){
                 const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
@@ -1080,7 +1173,8 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             }
             if (back > 0){
                 StoryRun plain{run.direction, (uint16_t)back, RunKind::WALK};
-                walk_run(rt, leg, plain, (uint16_t)back, rt.verify_walking, false, false, leg.name);
+                uint16_t no_reduce = 0;
+                walk_run(rt, leg, plain, (uint16_t)back, rt.verify_walking, false, false, leg.name, DPAD_NONE, no_reduce);
             }
             rt.approach_total = 0;
             rt.approach_made = 0;
