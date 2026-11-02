@@ -290,6 +290,7 @@ enum class RunEvent{
 
 struct RunAttempt{
     int moves = 0;          //  Moves made.
+    int video_moves = 0;    //  Moves the video saw (up to a change of screen).
     int pixels = 0;         //  How far the video saw the map scroll.
     bool measured = false;  //  "moves" was measured on the video.
     bool lost = false;      //  The video lost the map on the way.
@@ -478,6 +479,7 @@ RunAttempt attempt_moves(
     //  A step takes 16 frames (267 ms) from the press.
     result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 && tracker.lost_at_ms() < 200;
     int tiles = t.tiles();
+    result.video_moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
     if (result.event != RunEvent::NONE){
         //  A battle or a trainer stopped the player. The video saw up to
         //  that moment: the best guess there is, even unsure.
@@ -737,6 +739,10 @@ int walk_around(
             continue;
         }
         const int ahead = std::min(remaining, 2);
+        rt.console.log(
+            std::string("Trying to walk around: one step ") + dpad_name(side) + ", then " + dpad_name(direction) + ".",
+            COLOR_ORANGE
+        );
         RunAttempt past = attempt_moves(rt, direction, ahead, WALK_FRAMES, 1, false, false, true);
         if (moved(past, ahead)){
             if (remaining < 2){
@@ -757,6 +763,15 @@ int walk_around(
                 );
                 return 2;
             }
+            if (back.event != RunEvent::NONE || back.lost){
+                return 0;
+            }
+            //  The way back onto the route is shut: not someone in the way
+            //  but a wall, and the player is not where the route thinks.
+            //  Back to where this started, so that stays known.
+            rt.console.log("No way back onto the route there. Back to where the player was.", COLOR_ORANGE);
+            attempt_moves(rt, opposite(direction), ahead, WALK_FRAMES, 1, false, false, true);
+            attempt_moves(rt, opposite(side), 1, WALK_FRAMES, 1, false, false, true);
             return 0;
         }
         //  Not that way: back to where it started.
@@ -900,6 +915,28 @@ bool walk_run(
             //  The dark screen changed: a battle is starting.
             rt.console.log("The screen changed in the dark: a battle?", COLOR_ORANGE);
             a.event = RunEvent::BATTLE_START;
+        }
+        if (a.event == RunEvent::NONE && a.lost && encounters && track && !leg.dark &&
+            !(warp_at_end && remaining == 0) && !(scene_at_end && remaining == 0)
+        ){
+            //  The picture changed where wild battles start, but no battle
+            //  showed yet: some battle transitions do not go all black, and
+            //  the battle text comes seconds later. The run did not go on
+            //  as timed then: the video counted the moves up to the change
+            //  (the Mansion: 5 counted as 6, and the route went up the
+            //  wrong column).
+            const int seen = std::min(a.video_moves, moves);
+            if (seen != made){
+                rt.console.log(
+                    "The screen changed on the way: " + std::to_string(seen) + " moves seen, not " +
+                    std::to_string(made) + " as timed.",
+                    COLOR_ORANGE
+                );
+                remaining += made - seen;
+                rt.steps -= (uint64_t)(made - seen) * (uint64_t)tiles_per_move;
+                made = seen;
+            }
+            a.event = RunEvent::SCREEN_CHANGED;
         }
 
         StoryBattleResult battle = StoryBattleResult::NO_BATTLE;
