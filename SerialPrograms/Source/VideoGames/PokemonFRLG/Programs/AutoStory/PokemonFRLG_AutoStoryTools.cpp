@@ -516,6 +516,7 @@ StoryBattleResult story_battle(
     }
     if (result == StoryBattleResult::NO_BATTLE){
         rt.console.log("No battle started: " + where, COLOR_ORANGE);
+        rt.false_battles++;
         return result;
     }
     if (kind == StoryBattleKind::TRAINER){
@@ -1367,20 +1368,46 @@ bool story_cutscene(
 }
 
 
+namespace{
+//  Nothing came up on A: the player may not face what to talk to. The tap
+//  that turns them can be missed by the game (the Mansion statues, now and
+//  then, with the same inputs that work other times). Turn again, with a
+//  moment of standing still first. (Facing it already, the tap only
+//  bumps into it.)
+void face_again(StoryRuntime& rt, const std::string& what){
+    if (rt.facing == DPAD_NONE){
+        return;
+    }
+    rt.console.log(
+        "No text at " + what + ". Turning " + std::string(dpad_name(rt.facing)) + " again.",
+        COLOR_ORANGE
+    );
+    pbf_wait(rt.context, 500ms);
+    pbf_press_dpad(rt.context, rt.facing, frames_to_ms(4), frames_to_ms(14));
+    rt.context.wait_for_all_requests();
+}
+}
+
 void story_talk_start(StoryRuntime& rt, const std::string& what){
     rt.console.log("Talking: " + what);
-    WhiteDialogWatcher dialog(COLOR_RED);
-    AdvanceBattleDialogWatcher battle_text(COLOR_RED);
-    rt.context.wait_for_all_requests();
-    int ret = run_until<ProControllerContext>(
-        rt.console, rt.context,
-        [](ProControllerContext& context){
-            for (int i = 0; i < 5; i++){
-                pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
-            }
-        },
-        { dialog, battle_text }
-    );
+    int ret = -1;
+    for (int attempt = 0; attempt < 3 && ret < 0; attempt++){
+        if (attempt > 0){
+            face_again(rt, what);
+        }
+        WhiteDialogWatcher dialog(COLOR_RED);
+        AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [](ProControllerContext& context){
+                for (int i = 0; i < 2; i++){
+                    pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+                }
+            },
+            { dialog, battle_text }
+        );
+    }
     if (ret < 0){
         OperationFailedExceptionWithScreenshot::fire(
             ErrorReportMode::SEND_ERROR_REPORT,
@@ -1394,20 +1421,45 @@ void story_talk_start(StoryRuntime& rt, const std::string& what){
 
 void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what){
     rt.console.log(std::string(yes ? "Talking and answering YES: " : "Talking and answering NO: ") + what);
-    SelectionDialogWatcher yes_no(COLOR_RED);
-    rt.context.wait_for_all_requests();
-
     //  One A starts the conversation, more A advance the text. They are
-    //  spaced out so the YES/NO box is seen before an A answers it.
-    int ret = run_until<ProControllerContext>(
-        rt.console, rt.context,
-        [](ProControllerContext& context){
-            for (int i = 0; i < 6; i++){
+    //  spaced out so the YES/NO box is seen before an A answers it. If no
+    //  text comes up at all, the player is turned again.
+    int ret = -1;
+    for (int attempt = 0; attempt < 3; attempt++){
+        if (attempt > 0){
+            face_again(rt, what);
+        }
+        SelectionDialogWatcher yes_no(COLOR_RED);
+        WhiteDialogWatcher text(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [](ProControllerContext& context){
                 pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
-            }
-        },
-        { yes_no }
-    );
+            },
+            { yes_no, text }
+        );
+        if (ret >= 0){
+            break;
+        }
+    }
+    if (ret == 1){
+        //  The text is up: on to the question, the A presses still spaced
+        //  out from the first one (the box may come up on its own once the
+        //  text is printed).
+        SelectionDialogWatcher yes_no(COLOR_RED);
+        ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [](ProControllerContext& context){
+                for (int i = 0; i < 5; i++){
+                    pbf_wait(context, 2700ms);
+                    pbf_press_button(context, BUTTON_A, 160ms, 140ms);
+                }
+                pbf_wait(context, 2700ms);
+            },
+            { yes_no }
+        );
+    }
     if (ret < 0){
         OperationFailedExceptionWithScreenshot::fire(
             ErrorReportMode::SEND_ERROR_REPORT,

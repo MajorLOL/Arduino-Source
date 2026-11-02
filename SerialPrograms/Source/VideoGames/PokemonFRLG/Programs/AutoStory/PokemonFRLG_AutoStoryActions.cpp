@@ -836,10 +836,11 @@ public:
     }
 
     //  Make "away" (on the second tile) match where the player stands. Off
-    //  the two tiles, walk back to the first one.
-    void check(bool& away){
+    //  the two tiles, walk back to the first one. Returns whether the video
+    //  told where the player stands.
+    bool check(bool& away){
         if (!m_has_picture){
-            return;
+            return false;
         }
         const int forth_x = m_forth == DPAD_LEFT ? -1 : (m_forth == DPAD_RIGHT ? 1 : 0);
         const int forth_y = m_forth == DPAD_UP ? -1 : (m_forth == DPAD_DOWN ? 1 : 0);
@@ -848,7 +849,7 @@ public:
             int dy = 0;
             AutoStoryScroll::Screen now;
             if (!story_offset_from(m_rt, m_picture, m_where, dx, dy, now)){
-                return;     //  The video does not tell: go by the count.
+                return false;   //  The video does not tell: go by the count.
             }
             if (dx == 0 && dy == 0){
                 if (away){
@@ -861,7 +862,7 @@ public:
                 //  The latest look of the place (people walking around, a
                 //  sign popping up and going away).
                 m_picture = std::move(now);
-                return;
+                return true;
             }
             if (dx == forth_x && dy == forth_y){
                 if (!away){
@@ -871,7 +872,7 @@ public:
                     );
                 }
                 away = true;
-                return;
+                return true;
             }
             const DpadPosition toward =
                 dy > 0 ? DPAD_UP :
@@ -886,6 +887,7 @@ public:
             away = false;   //  Not known yet: looked at again.
         }
         m_rt.console.log(m_where + ": could not get back onto the grass tiles. Going on.", COLOR_RED);
+        return false;
     }
 
     //  Onto the first tile, where the routes there and back meet.
@@ -922,10 +924,29 @@ public:
     StoryBattleResult step(bool& away, StoryBattleKind kind, bool throw_on_loss = true){
         const DpadPosition direction = away ? opposite(m_forth) : m_forth;
         bool moved = true;
+        const uint64_t false_before = m_rt.false_battles;
         StoryBattleResult result = story_checked_step(
             m_rt, direction, false, false, kind, m_where, throw_on_loss, &moved
         );
         away = !away;
+        if (m_rt.false_battles != false_before){
+            //  The screen faded but no battle came: the player may have
+            //  stepped onto a warp off the two tiles (the Mansion's door,
+            //  next to the training spot: out and in again for 20 minutes).
+            //  Look where the player is.
+            if (check(away)){
+                m_false_in_row = 0;
+            }else if (++m_false_in_row >= 2){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "The player is no longer on the grass of " + m_where +
+                    ": the screen changed twice without a battle (a warp?).",
+                    m_rt.console
+                );
+            }
+        }else if (result != StoryBattleResult::NO_BATTLE){
+            m_false_in_row = 0;
+        }
         if (moved){
             m_not_moved = 0;
             return result;
@@ -954,6 +975,7 @@ private:
     bool m_has_picture = false;
     AutoStoryScroll::Screen m_picture;
     int m_not_moved = 0;
+    int m_false_in_row = 0;
 };
 
 }

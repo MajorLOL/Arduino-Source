@@ -747,12 +747,17 @@ class Builder:
         tile next to them (to walk back and forth on)."""
         v = self.engine.view(map_id)
         m = self.d.maps[map_id]
+        #  Not next to a warp: a step the count gets wrong would take the
+        #  player off the map (the Mansion's door: out and in again).
+        warps = {(w["x"], w["y"]) for w in m.warps}
         ok = set()
         for x, y in tiles:
             if not m.in_bounds(x, y):
                 continue
             t = v.tile(x, y)
             if t[1] or t[4] != 1 or (x, y) in v.blocked or (x, y) in v.sight or (x, y) in v.triggers:
+                continue
+            if (x, y) in warps or any((x + dx, y + dy) in warps for dx, dy in DIRS.values()):
                 continue
             ok.add((x, y))
         out = set()

@@ -117,6 +117,9 @@ struct StoryRuntime{
     uint64_t steps = 0;
     uint64_t wild_battles = 0;
     uint64_t trainer_battles = 0;
+    //  The screen looked like a battle starting, but none came (a fade: a
+    //  warp, or the end of the last battle).
+    uint64_t false_battles = 0;
 };
 
 
