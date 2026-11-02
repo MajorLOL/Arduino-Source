@@ -292,6 +292,8 @@ struct RunAttempt{
     int moves = 0;          //  Moves made.
     int video_moves = 0;    //  Moves the video saw (up to a change of screen).
     int pixels = 0;         //  How far the video saw the map scroll.
+    size_t frames = 0;      //  Video frames looked at, and how many of them
+    size_t unsure = 0;      //  did not tell the offset well.
     bool measured = false;  //  "moves" was measured on the video.
     bool lost = false;      //  The video lost the map on the way.
     bool lost_early = false;    //  ... so early that no step can have been made then.
@@ -475,6 +477,8 @@ RunAttempt attempt_moves(
     const AutoStoryScroll::Tracker& t = tracker.tracker();
     result.video = t.summary();
     result.pixels = t.pixels();
+    result.frames = t.frames();
+    result.unsure = t.unsure_frames();
     result.lost = t.lost();
     //  A step takes 16 frames (267 ms) from the press.
     result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 && tracker.lost_at_ms() < 200;
@@ -869,9 +873,18 @@ bool walk_run(
                 rt.console.log("The screen changed right away: this step did not happen.", COLOR_ORANGE);
             }
         }
-        if (made > moves && a.measured && !scene_at_end &&
-            a.pixels >= (moves * tiles_per_move) * AutoStoryScroll::TILE_PIXELS + AutoStoryScroll::TILE_PIXELS * 3 / 4
-        ){
+        const bool too_far =
+            made > moves && a.measured && !scene_at_end &&
+            a.pixels >= (moves * tiles_per_move) * AutoStoryScroll::TILE_PIXELS + AutoStoryScroll::TILE_PIXELS * 3 / 4;
+        if (too_far && a.unsure * 10 > a.frames){
+            //  A whole tile more, seen on a picture that often did not
+            //  tell: a repeating ground fooling the video, not a step too
+            //  many (Cinnabar, on the way to the Pokemon Center: 8 of 7 with
+            //  11 frames of 52 unsure, and the step back left the player
+            //  beside the door).
+            rt.console.log("The video says one too far, but it was often unsure on the way. Not stepping back.", COLOR_ORANGE);
+            made = moves;
+        }else if (too_far){
             //  One too many (the input lasted too long): step back. Only
             //  when the video saw most of that extra step: 89 px for a run
             //  of 5 (80 px) rounds to 6, but on a floor with little detail
