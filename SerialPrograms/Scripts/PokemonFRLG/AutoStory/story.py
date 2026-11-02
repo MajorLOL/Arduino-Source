@@ -501,6 +501,19 @@ class Builder:
             return ov.get("x", o["x"]), ov.get("y", o["y"])
         raise StoryError("Object %s not on %s" % (key, m.id))
 
+    def sign_dirs(self, m, tx, ty):
+        """The way the player must face to read the sign at (tx,ty), if it
+        only works from one side (BG_EVENT_PLAYER_FACING_*), else None. The
+        Mansion statues only work facing north: from below."""
+        facing = {"BG_EVENT_PLAYER_FACING_NORTH": "up", "BG_EVENT_PLAYER_FACING_SOUTH": "down",
+                  "BG_EVENT_PLAYER_FACING_EAST": "right", "BG_EVENT_PLAYER_FACING_WEST": "left"}
+        for e in m.bg_events:
+            if e.get("type") == "sign" and (e["x"], e["y"]) == (tx, ty):
+                d = facing.get(e.get("player_facing_dir", ""))
+                if d:
+                    return [d]
+        return None
+
     def interact_goals(self, m, tx, ty, only_dirs=None, counter=False):
         """Tiles next to (tx,ty) to stand on, and the facing for each.
         counter=True: also stand 2 tiles away across a counter (nurse, clerk)."""
@@ -550,7 +563,8 @@ class Builder:
                 tx, ty = self.object_xy(m, t["object"])
             else:
                 tx, ty = t["xy"]
-            goals_face = self.interact_goals(m, tx, ty, t.get("dirs"), t.get("counter", False))
+            dirs = t.get("dirs") or ("object" not in t and self.sign_dirs(m, tx, ty)) or None
+            goals_face = self.interact_goals(m, tx, ty, dirs, t.get("counter", False))
             goals = set(goals_face.keys())
             label = step.get("label", "Talk")
             target_key = None
@@ -908,7 +922,7 @@ class Builder:
                 continue
             for st in statues:
                 m = self.d.maps[st[0]]
-                gf = self.interact_goals(m, st[1], st[2])
+                gf = self.interact_goals(m, st[1], st[2], self.sign_dirs(m, st[1], st[2]))
                 r = reachable(node, facing, on, set(gf.keys()))
                 if r is None:
                     continue
