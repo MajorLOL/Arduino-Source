@@ -1148,7 +1148,25 @@ CHAPTER10 = [
     {
         "id": "C10_01_GRIND_LEAGUE", "chapter": 10,
         "title": "Train in Victory Road for the Elite Four",
-        "steps": grind_all("LEAGUE", "MAP_VICTORY_ROAD_2F", rect(40, 13, 50, 21), PC["INDIGO"], "GrindVictoryRoad") + [save()],
+        #  Every walk to the training spot crosses Route 23, whose
+        #  Route23_OnTransition resets the Victory Road puzzles: the rock
+        #  barriers are back (VictoryRoad_*F_OnLoad), and the boulder that
+        #  fell to 2F is gone again. (The barrier at 2F (33, 17) stood in the
+        #  route to the grass.)
+        "state": {
+            "flags": ["FLAG_HIDE_VICTORY_ROAD_2F_BOULDER"],
+            "clear_flags": ["FLAG_HIDE_VICTORY_ROAD_3F_BOULDER"],
+            "vars": {"VAR_MAP_SCENE_VICTORY_ROAD_1F": 0, "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER1": 0,
+                     "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER2": 0, "VAR_MAP_SCENE_VICTORY_ROAD_3F": 0},
+            "script_tiles": [
+                ["MAP_VICTORY_ROAD_1F", "VictoryRoad_1F_EventScript_SetRockBarrier"],
+                ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier1"],
+                ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier2"],
+                ["MAP_VICTORY_ROAD_3F", "VictoryRoad_3F_EventScript_SetRockBarrier"],
+            ],
+        },
+        #  Near the way out to Route 23: the barriers shut the rest of 2F off.
+        "steps": grind_all("LEAGUE", "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), PC["INDIGO"], "GrindVictoryRoad") + [save()],
     },
     {
         "id": "C10_02_ITEMS", "chapter": 10,

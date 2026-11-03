@@ -1296,6 +1296,13 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     case LegEnd::WARP_PUSH:
         if (warped_early){
             wait_warp_step(rt, leg.dark || leg.dest_dark, leg.preview, leg.name);
+            //  The change of screen at the end of the run was a battle whose
+            //  text came late (Victory Road's way out: a Marowak, and the
+            //  route went on as if on Route 23). The player still stands
+            //  at the warp: push again.
+            if (battle_instead_of_warp(rt, leg.dark || leg.dest_dark, leg.name)){
+                take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
+            }
         }else{
             take_warp_push(rt, leg.push, leg.dark || leg.dest_dark, leg.preview, leg.name);
         }
