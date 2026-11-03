@@ -13,9 +13,12 @@
 #define PokemonAutomation_PokemonFRLG_AutoStoryBattle_H
 
 #include <stdint.h>
+#include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <vector>
+#include "Common/Cpp/Time.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "PokemonFRLG_AutoStoryDex.h"
 
@@ -48,6 +51,44 @@ enum class StoryBattleResult{
     NO_BATTLE,      //  No battle showed up.
     LOST,           //  The whole party fainted ("... whited out!").
 };
+
+//  Listens for the shiny sound the whole time the program runs (an audio
+//  inference session of its own). The battle code starts looking only once
+//  the battle is noticed, and that can be after the intro: the transition,
+//  the wild Pokemon sliding in and its sparkles (in a cave in the dark only
+//  the battle text shows a battle).
+class StoryShinyWatch{
+public:
+    StoryShinyWatch(ConsoleHandle& console, ProControllerContext& context);
+    ~StoryShinyWatch();
+
+    //  The shiny sound was heard between "from" and "to", and after the last
+    //  consume().
+    bool heard(WallClock from, WallClock to) const;
+    //  What was heard so far belongs to a battle that is over.
+    void consume();
+    //  Sound came in at all: the capture card's audio input is set.
+    bool has_sound() const;
+    //  When it started listening, and since when with the same detector.
+    WallClock started() const{ return m_started; }
+    WallClock detector_started() const{ return m_detector_started; }
+    //  Start over with a new detector: while nothing comes close to the
+    //  sound, the detector keeps a history of its scores.
+    void restart();
+
+private:
+    struct Data;
+    ConsoleHandle& m_console;
+    ProControllerContext& m_context;
+    WallClock m_started;
+    WallClock m_detector_started;
+    bool m_had_sound = false;
+    mutable std::mutex m_lock;
+    std::vector<WallClock> m_heard;     //  the last few times
+    WallClock m_consumed = WallClock::min();
+    std::unique_ptr<Data> m_data;
+};
+
 
 //  The game must be in English: move names, the opponent and the battle text
 //  are read with English OCR.
@@ -100,6 +141,13 @@ struct StoryBattleSettings{
     //  the foe taken to be about as strong. Not known: by power and type.
     const AutoStoryDex::SpeciesInfo* lead_species = nullptr;
     int lead_level = 0;
+
+    //  Not null: a wild Pokemon whose shiny sound played in the intro is
+    //  caught with the best ball in the bag (the Safari Zone: SAFARI BALLs),
+    //  until it is caught, gets away or the balls run out. "shiny_catch"
+    //  false: only noticed (no room for it in the party yet).
+    const StoryShinyWatch* shiny_watch = nullptr;
+    bool shiny_catch = true;
 };
 
 //  What the battle logic remembers between battles.
@@ -148,8 +196,15 @@ struct StoryBattleMemory{
     //  How many times in a row the move list came back after picking
     //  "last_slot" (a press the game missed brings it back once).
     int list_back = 0;
-    //  The species caught in the last battle ("" if none).
+    //  The species caught in the last battle ("" if none). A shiny counts
+    //  only if it was one of the wanted species.
     std::string caught;
+    //  The last battle was against a shiny (its species, "" if not read),
+    //  it was caught, and it went to the PC (the party was full).
+    bool shiny = false;
+    std::string shiny_species;
+    bool shiny_caught = false;
+    bool shiny_to_pc = false;
     //  Shared experience: the moves of the member that stayed out, and the
     //  last "X is trying to learn Y." text (who learns).
     int member_moves[4] = {-1, -1, -1, -1};

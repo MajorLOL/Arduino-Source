@@ -69,6 +69,7 @@ struct AutoStory_Descriptor::Stats : public StatsTracker{
         , trainer_battles(m_stats["Trainer Battles"])
         , resets(m_stats["Resets"])
         , errors(m_stats["Errors"])
+        , shinies(m_stats["Shinies"])
     {
         m_display_order.emplace_back("Segments");
         m_display_order.emplace_back("Steps");
@@ -76,6 +77,7 @@ struct AutoStory_Descriptor::Stats : public StatsTracker{
         m_display_order.emplace_back("Trainer Battles");
         m_display_order.emplace_back("Resets", HIDDEN_IF_ZERO);
         m_display_order.emplace_back("Errors", HIDDEN_IF_ZERO);
+        m_display_order.emplace_back("Shinies", HIDDEN_IF_ZERO);
     }
 
     std::atomic<uint64_t>& segments;
@@ -84,6 +86,7 @@ struct AutoStory_Descriptor::Stats : public StatsTracker{
     std::atomic<uint64_t>& trainer_battles;
     std::atomic<uint64_t>& resets;
     std::atomic<uint64_t>& errors;
+    std::atomic<uint64_t>& shinies;
 };
 
 std::unique_ptr<StatsTracker> AutoStory_Descriptor::make_stats() const{
@@ -209,6 +212,17 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         WildBattles::FIGHT
     )
+    , CATCH_SHINIES(
+        "<b>Catch shiny Pokemon:</b><br>When a wild Pokemon is shiny (its shiny sound plays as it "
+        "appears), throw the best ball in the bag at it until it is caught, it gets away or the balls "
+        "run out, then go on with the story. The story buys Great Balls in Lavender Town and Ultra Balls "
+        "in Fuchsia City and at the Indigo Plateau.<br>"
+        "<b>Needs the game's sound:</b> set the audio input of the capture card, game volume on. "
+        "A shiny that joins the party stays behind the team; it is safe once the game is saved "
+        "(at the next heal).",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
     , EXTRA_LEVELS(
         "<b>Extra levels:</b><br>Train the lead this many levels above the planned level at every "
         "training spot. Raise this if battles are lost.",
@@ -262,6 +276,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(START_STEP);
     PA_ADD_OPTION(END_SEGMENT);
     PA_ADD_OPTION(WILD_BATTLES);
+    PA_ADD_OPTION(CATCH_SHINIES);
     PA_ADD_OPTION(EXTRA_LEVELS);
     PA_ADD_OPTION(RESET_AT_START);
     PA_ADD_OPTION(SAVE_AFTER_HEAL);
@@ -373,6 +388,7 @@ void AutoStory::run_segment(
         uint64_t steps_before = rt.steps;
         uint64_t wild_before = rt.wild_battles;
         uint64_t trainer_before = rt.trainer_battles;
+        uint64_t shinies_before = rt.shinies;
 
         env.log(
             std::string(segment.id) + " step " + std::to_string(i + 1) + "/" +
@@ -511,6 +527,9 @@ void AutoStory::run_segment(
             story_use_item(rt, step.p0, step.text, label);
             break;
         case StepType::TEAM:
+            if (step.p0 == 1){
+                story_fix_party_order(rt, false);
+            }
             rt.battle.team = step.p0 == 1 ? rt.team : std::vector<StoryTeamMember>();
             env.log(step.p0 == 1 ? "The whole team fights from now on." : "The lead fights alone from now on.", COLOR_BLUE);
             break;
@@ -519,6 +538,7 @@ void AutoStory::run_segment(
         stats.steps += rt.steps - steps_before;
         stats.wild_battles += rt.wild_battles - wild_before;
         stats.trainer_battles += rt.trainer_battles - trainer_before;
+        stats.shinies += rt.shinies - shinies_before;
         env.update_stats();
     }
 }
@@ -565,6 +585,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
     rt.save_after_heal = SAVE_AFTER_HEAL;
+    if (CATCH_SHINIES){
+        rt.shiny_watch.reset(new StoryShinyWatch(env.console, context));
+        env.log("Listening for the shiny sound: shiny Pokemon are caught.", COLOR_BLUE);
+    }
     //  The start options follow the saves: the next run goes on from the
     //  last save without setting them by hand.
     rt.on_saved = [&](const std::string& segment_id, size_t step){
@@ -697,6 +721,12 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.arrived_by_warp = false;
             rt.lead_fainted = false;
             rt.caught = rt.caught_at_save;
+            if (rt.shiny_unsaved){
+                env.log("The shiny Pokemon caught after the last save is lost with this reset.", COLOR_RED);
+                rt.shiny_unsaved = false;
+            }
+            rt.party_extras = rt.party_extras_at_save;
+            rt.party_order_final = rt.party_order_final_at_save;
             //  A team member may have been training in front.
             rt.battle.lead_type1 = rt.lead_type1;
             rt.battle.lead_type2 = rt.lead_type2;

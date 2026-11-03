@@ -49,6 +49,13 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species);
 //  Swap two party slots in the overworld party menu (a < b).
 void story_swap_party(StoryRuntime& rt, int a, int b);
 
+//  Shinies caught on the way join at the end of the party, and a team member
+//  that joins after them lands behind them. Read the party and swap the
+//  team (StoryRuntime::team, in slot order) back into its slots. Only when
+//  there are such shinies and the team was not found complete in its slots
+//  already, or "force".
+void story_fix_party_order(StoryRuntime& rt, bool force);
+
 //  The starter must lead (party slot 1). A run stopped while a team member
 //  trained in front, then started again at a later segment, leaves it out
 //  of order: find the starter and swap it back to slot 1.

@@ -18,7 +18,9 @@
 #include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
+#include "Common/Cpp/CancellableScope.h"
 #include "CommonTools/Async/InferenceRoutines.h"
+#include "CommonTools/Async/InferenceSession.h"
 #include "CommonTools/OCR/OCR_Routines.h"
 #include "CommonTools/OCR/OCR_SmallDictionaryMatcher.h"
 #include "CommonTools/OCR/OCR_StringMatchResult.h"
@@ -30,7 +32,10 @@
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_BattleDialogs.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_BagDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/Sounds/PokemonFRLG_ShinySoundDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_PokedexRegisteredDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_BattleSelectionArrowDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_OcrPreprocessing.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_WildEncounterReader.h"
@@ -780,7 +785,200 @@ void handle_move_learning(
 }
 
 
+//  Item description in the bag. Window 1 of sDefaultBagWindowsStd:
+//  tiles (5,14) 25x6.
+const ImageFloatBox BAG_DESCRIPTION_BOX(0.170, 0.705, 0.810, 0.280);
+
+std::string read_bag_text(ConsoleHandle& console){
+    std::string text = read_text(console, BAG_DESCRIPTION_BOX, true);
+    if (text.size() < 8){
+        text += " " + read_text(console, BAG_DESCRIPTION_BOX, false);
+    }
+    return text;
+}
+
+//  How good a ball is, by its description in the bag (items.json). 0: not
+//  a ball to throw (the SAFARI BALL works only in the Safari Zone).
+int ball_rank(const std::string& text){
+    auto has = [&](const char* word){
+        return text.find(word) != std::string::npos;
+    };
+    if (has("safari") || has("camouflage")){
+        return 0;
+    }
+    if (has("ultimate") || has("without fail")){
+        return 4;       //  MASTER BALL
+    }
+    if (has("high-grade") || has("high grade") || has("very high")){
+        return 3;       //  ULTRA BALL
+    }
+    if (has("quality") || has("than a standard")){
+        return 2;       //  GREAT BALL
+    }
+    if (has("capsule") || has("somewhat different") || has("comfortable") || has("commemorate")){
+        return 1;       //  POKe BALL, and the others that catch about as well
+    }
+    return 0;
+}
+const char* ball_name(int rank){
+    switch (rank){
+    case 4: return "MASTER BALL";
+    case 3: return "ULTRA BALL";
+    case 2: return "GREAT BALL";
+    default: return "POKe BALL";
+    }
+}
+
+enum class BallThrow{
+    THROWN,
+    NO_BALLS,
+    FAILED,     //  a menu did not come: back at the battle menu
+};
+
+//  At the battle menu: BAG, the POKe BALLS pocket, the best ball in it, USE.
+BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context){
+    if (!move_cursor_to_option(console, context, BattleMenuOption::BAG)){
+        console.log("BAG not selected.", COLOR_ORANGE);
+        return BallThrow::FAILED;
+    }
+    pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+    context.wait_for_all_requests();
+    BagWatcher bag(COLOR_RED);
+    if (wait_until(console, context, 4000ms, { bag }) != 0){
+        console.log("The bag did not open.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 1500ms);
+        context.wait_for_all_requests();
+        return BallThrow::FAILED;
+    }
+    //  The pockets do not wrap around: LEFT x3 is ITEMS, then KEY ITEMS,
+    //  POKe BALLS. The list does not wrap either: UP to the top.
+    for (int i = 0; i < 3; i++){
+        pbf_press_dpad(context, DPAD_LEFT, 160ms, 500ms);
+    }
+    for (int i = 0; i < 2; i++){
+        pbf_press_dpad(context, DPAD_RIGHT, 160ms, 500ms);
+    }
+    for (int i = 0; i < 15; i++){
+        pbf_press_dpad(context, DPAD_UP, 80ms, 80ms);
+    }
+    pbf_wait(context, 500ms);
+    context.wait_for_all_requests();
+
+    int best = -1;
+    int best_rank = 0;
+    std::string last;
+    int same = 0;
+    for (int row = 0; row < 14; row++){
+        std::string text = read_bag_text(console);
+        if (text == last){
+            if (++same >= 2){
+                break;      //  The end of the list.
+            }
+        }else{
+            same = 0;
+            const int rank = ball_rank(text);
+            if (rank > best_rank){
+                best_rank = rank;
+                best = row;
+            }
+        }
+        last = text;
+        pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+        context.wait_for_all_requests();
+    }
+    if (best < 0){
+        console.log("No POKe BALL in the bag.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 2000ms);
+        context.wait_for_all_requests();
+        return BallThrow::NO_BALLS;
+    }
+    for (int i = 0; i < 15; i++){
+        pbf_press_dpad(context, DPAD_UP, 80ms, 80ms);
+    }
+    for (int i = 0; i < best; i++){
+        pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+    }
+    pbf_wait(context, 300ms);
+    context.wait_for_all_requests();
+    std::string text = read_bag_text(console);
+    if (ball_rank(text) != best_rank){
+        console.log("Not on the ball to throw: " + text, COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 2000ms);
+        context.wait_for_all_requests();
+        return BallThrow::FAILED;
+    }
+    console.log(std::string("Throwing a ") + ball_name(best_rank) + ".", COLOR_BLUE);
+    //  A: USE / CANCEL (on USE). A: the bag closes and the ball flies.
+    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+    pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+    context.wait_for_all_requests();
+    return BallThrow::THROWN;
+}
+
+
 }   //  namespace
+
+
+
+struct StoryShinyWatch::Data{
+    class Detector : public ShinySoundDetector{
+    public:
+        using ShinySoundDetector::ShinySoundDetector;
+        uint64_t spectrums() const{
+            return m_spectrums_processed;
+        }
+    };
+
+    Data(ConsoleHandle& console, ProControllerContext& context, StoryShinyWatch& watch)
+        : scope(static_cast<CancellableScope&>(context))
+        , detector(console.logger(), [&watch](float){
+            //  From the audio inference thread. Never stops anything.
+            std::lock_guard<std::mutex> lg(watch.m_lock);
+            watch.m_heard.push_back(current_time());
+            if (watch.m_heard.size() > 8){
+                watch.m_heard.erase(watch.m_heard.begin());
+            }
+            return false;
+        })
+        , session(scope, console, { detector })
+    {}
+
+    CancellableHolder<CancellableScope> scope;
+    Detector detector;
+    InferenceSession session;
+};
+
+StoryShinyWatch::StoryShinyWatch(ConsoleHandle& console, ProControllerContext& context)
+    : m_console(console)
+    , m_context(context)
+    , m_started(current_time())
+    , m_detector_started(m_started)
+    , m_data(new Data(console, context, *this))
+{}
+StoryShinyWatch::~StoryShinyWatch() = default;
+
+bool StoryShinyWatch::heard(WallClock from, WallClock to) const{
+    std::lock_guard<std::mutex> lg(m_lock);
+    for (WallClock time : m_heard){
+        if (time > m_consumed && time >= from && time <= to){
+            return true;
+        }
+    }
+    return false;
+}
+void StoryShinyWatch::consume(){
+    std::lock_guard<std::mutex> lg(m_lock);
+    m_consumed = current_time();
+}
+bool StoryShinyWatch::has_sound() const{
+    return m_had_sound || (m_data != nullptr && m_data->detector.spectrums() > 0);
+}
+void StoryShinyWatch::restart(){
+    m_had_sound = has_sound();
+    m_data.reset();
+    m_detector_started = current_time();
+    m_data.reset(new Data(m_console, m_context, *this));
+}
 
 
 
@@ -859,6 +1057,10 @@ StoryBattleResult run_story_battle(
     memory.last_slot = -1;
     memory.list_back = 0;
     memory.caught.clear();
+    memory.shiny = false;
+    memory.shiny_species.clear();
+    memory.shiny_caught = false;
+    memory.shiny_to_pc = false;
 
     //  The active Pokemon's types count for the moves (same-type bonus).
     StoryBattleSettings settings = base_settings;
@@ -951,16 +1153,50 @@ StoryBattleResult run_story_battle(
     WallClock deadline = current_time() + 20min;
     WallClock last_activity = current_time();
 
+    //  A shiny: its sound played in the intro of a wild battle. Looked at on
+    //  the first battle menu: heard from a little before the battle was
+    //  noticed (in the dark only its text shows it) until shortly after the
+    //  first thing seen in it ("Wild X appeared!"). The sparkles come before
+    //  that text, those of the player's own Pokemon after it.
+    const WallClock entered = current_time();
+    WallClock intro_seen = WallClock::max();
+    const bool wild = kind != StoryBattleKind::TRAINER;
+    bool shiny_checked = false;
+    bool shiny_catching = false;
+    bool shiny_safari = false;
+    bool shiny_wanted = false;
+    bool shiny_caught = false;
+    int balls_thrown = 0;
+    int throw_failures = 0;
+    //  The battle is over: what it was.
+    auto over = [&](){
+        if (!shiny_caught){
+            return result;
+        }
+        memory.shiny_caught = true;
+        if (shiny_wanted){
+            memory.caught = memory.shiny_species;
+            return StoryBattleResult::CAUGHT;
+        }
+        return result == StoryBattleResult::LEAD_FAINTED ? result : StoryBattleResult::WON;
+    };
+
     while (current_time() < deadline){
         BattleMenuWatcher battle_menu(COLOR_RED);
         BattleLearnDialogWatcher question(COLOR_RED);
         PartyMenuWatcher party_menu(COLOR_RED);
         AdvanceBattleDialogWatcher advance(COLOR_RED);
+        //  After a ball: the POKeDEX page of a species caught the first time.
+        PokedexRegisteredWatcher dex_page(COLOR_RED, &console.overlay());
+        std::vector<PeriodicInferenceCallback> callbacks{ battle_menu, question, party_menu, advance };
+        if (balls_thrown > 0){
+            callbacks.emplace_back(dex_page);
+        }
         context.wait_for_all_requests();
-        int ret = wait_until(
-            console, context, 6000ms,
-            { battle_menu, question, party_menu, advance }
-        );
+        int ret = wait_until(console, context, 6000ms, callbacks);
+        if (ret >= 0 && intro_seen == WallClock::max()){
+            intro_seen = current_time();
+        }
         if (ret >= 0){
             unknown_in_row = 0;
             text_only_in_row = 0;
@@ -984,6 +1220,63 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
+            if (!shiny_checked){
+                shiny_checked = true;
+                if (wild && settings.shiny_watch != nullptr &&
+                    settings.shiny_watch->heard(entered - 6s, intro_seen + 3s)
+                ){
+                    memory.shiny = true;
+                    shiny_safari = menu_is_safari(console);
+                    std::string slug;
+                    read_opponent(console, slug);
+                    memory.shiny_species = slug;
+                    shiny_wanted = !slug.empty() && settings.catch_species.count(slug) != 0;
+                    console.log("A shiny Pokemon: " + (slug.empty() ? std::string("(not read)") : slug) + "!", COLOR_BLUE);
+                    if (settings.shiny_catch || shiny_wanted){
+                        shiny_catching = true;
+                    }else{
+                        console.log(
+                            "Not caught: it would take a party slot one of the team still has to join in.",
+                            COLOR_ORANGE
+                        );
+                    }
+                }
+            }
+            if (shiny_catching){
+                //  The Safari Zone: 20 of the 30 SAFARI BALLs at most (the
+                //  game ends when they run out, and the way goes on there).
+                const int max_throws = shiny_safari ? 20 : 60;
+                if (balls_thrown >= max_throws || throw_failures >= 4){
+                    console.log("No more balls thrown at the shiny: the battle goes on as usual.", COLOR_ORANGE);
+                    shiny_catching = false;
+                }else if (shiny_safari){
+                    if (move_cursor_to_option(console, context, SafariBattleMenuOption::BALL)){
+                        balls_thrown++;
+                        console.log("SAFARI BALL " + std::to_string(balls_thrown) + " at the shiny.", COLOR_BLUE);
+                        pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+                        context.wait_for_all_requests();
+                    }else{
+                        throw_failures++;
+                    }
+                    break;
+                }else{
+                    switch (throw_best_ball(console, context)){
+                    case BallThrow::THROWN:
+                        balls_thrown++;
+                        throw_failures = 0;
+                        console.log("Ball " + std::to_string(balls_thrown) + " at the shiny.", COLOR_BLUE);
+                        break;
+                    case BallThrow::NO_BALLS:
+                        console.log("No balls left for the shiny: the battle goes on as usual.", COLOR_ORANGE);
+                        shiny_catching = false;
+                        break;
+                    case BallThrow::FAILED:
+                        throw_failures++;
+                        break;
+                    }
+                    break;
+                }
+            }
             if ((settings.share_position > 0 || settings.slow_share_position > 0) &&
                 !shared && kind == StoryBattleKind::WILD_FIGHT
             ){
@@ -1253,9 +1546,34 @@ StoryBattleResult run_story_battle(
                 if (text.find("trying to learn") != std::string::npos){
                     memory.learner = text;
                 }
+                if (balls_thrown > 0){
+                    //  "Gotcha! X was caught!" ("It appeared to be caught!"
+                    //  is one that broke free.)
+                    if (text.find("gotcha") != std::string::npos || text.find("was caught") != std::string::npos){
+                        if (!shiny_caught){
+                            console.log("Caught the shiny Pokemon!", COLOR_BLUE);
+                        }
+                        shiny_caught = true;
+                        shiny_catching = false;
+                    }
+                    //  "X was transferred to BILL's PC." (the party is full)
+                    if (text.find("transferred") != std::string::npos || text.find("pc was full") != std::string::npos){
+                        memory.shiny_to_pc = true;
+                    }
+                    //  The ghost: "It dodged the thrown BALL! This POKeMON can't be caught!"
+                    if (text.find("dodged") != std::string::npos){
+                        shiny_catching = false;
+                    }
+                }
             }
             //  A advances the text. (B would cancel an evolution.)
             pbf_press_button(context, BUTTON_A, 160ms, 340ms);
+            break;
+        case 4:
+            //  The POKeDEX page of the caught species: B closes it.
+            last_activity = current_time();
+            pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+            context.wait_for_all_requests();
             break;
         default:{
             if (current_time() - last_activity > 3min){
@@ -1339,7 +1657,7 @@ StoryBattleResult run_story_battle(
                             return StoryBattleResult::NO_BATTLE;
                         }
                         console.log("Battle over.");
-                        return result;
+                        return over();
                     }
                 }
                 seen_battle = true;
@@ -1365,7 +1683,7 @@ StoryBattleResult run_story_battle(
                     return StoryBattleResult::NO_BATTLE;
                 }
                 console.log("Battle over.");
-                return result;
+                return over();
             }
             //  Something else. Mostly A, now and then B (which backs out of
             //  menus and also advances text).

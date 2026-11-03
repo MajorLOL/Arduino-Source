@@ -349,6 +349,68 @@ void story_check_lead(StoryRuntime& rt){
     console.log("The starter was not found in the party. Going on as it is.", COLOR_RED);
 }
 
+void story_fix_party_order(StoryRuntime& rt, bool force){
+    if (rt.team.empty()){
+        return;
+    }
+    if (!force && (rt.party_extras <= 0 || rt.party_order_final)){
+        return;
+    }
+    StoryMemoryScope memory_scope("party order");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Checking that the team is in its party slots.");
+    open_party_menu_from_overworld(console, context);
+    pbf_wait(context, 800ms);
+    context.wait_for_all_requests();
+    const int count = (int)detect_last_occupied_party_slot(console) + 1;
+    story_back_to_overworld(rt, "party menu");
+    console.log("Pokemon in the party: " + std::to_string(count));
+
+    std::vector<std::string> species((size_t)count + 1);
+    bool all_read = true;
+    for (int slot = 1; slot <= count; slot++){
+        if (story_read_slot(rt, slot, &species[(size_t)slot]) < 0 || species[(size_t)slot].empty()){
+            all_read = false;
+        }
+    }
+    //  The team joins in its order: up to the first member not in the party.
+    int in_place = 0;
+    for (size_t i = 0; i < rt.team.size() && (int)i < count; i++){
+        const std::set<std::string>& line = rt.team[i].line;
+        const int want = (int)i + 1;
+        if (species[(size_t)want].empty()){
+            break;      //  Not read: not known.
+        }
+        if (line.count(species[(size_t)want]) != 0){
+            in_place++;
+            continue;
+        }
+        int found = -1;
+        for (int j = want + 1; j <= count; j++){
+            if (line.count(species[(size_t)j]) != 0){
+                found = j;
+                break;
+            }
+        }
+        if (found < 0){
+            break;
+        }
+        console.log("Team member " + species[(size_t)found] + " is in party slot " + std::to_string(found) + ", not " + std::to_string(want) + ".", COLOR_ORANGE);
+        story_swap_party(rt, want, found);
+        std::swap(species[(size_t)want], species[(size_t)found]);
+        in_place++;
+    }
+    if (all_read && count - in_place != rt.party_extras){
+        rt.party_extras = count - in_place;
+        console.log("Pokemon in the party besides the team: " + std::to_string(rt.party_extras));
+    }
+    rt.party_order_final = all_read && in_place == (int)rt.team.size();
+    if (rt.party_order_final){
+        console.log("The whole team is in its party slots.", COLOR_BLUE);
+    }
+}
+
 void story_swap_party(StoryRuntime& rt, int a, int b){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -383,6 +445,7 @@ void story_teach_hm(
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     console.log("Teaching " + move + " to party slot " + std::to_string(party_slot) + ".");
+    story_fix_party_order(rt, false);
 
     open_bag_from_overworld(console, context);
     if (!select_bag_item(rt, BagPocket::KEY_ITEMS, {"tms and", "holds tm", "and hms", "case that"}, {}, "TM CASE")){
@@ -527,6 +590,7 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     console.log("Using an item on party slot " + std::to_string(party_slot) + ": " + what);
+    story_fix_party_order(rt, false);
     open_bag_from_overworld(console, context);
     if (!select_bag_item(rt, BagPocket::ITEMS, {words.c_str()}, {}, what)){
         pbf_mash_button(context, BUTTON_B, 3000ms);
@@ -1281,6 +1345,7 @@ void story_grind(
     }
     ConsoleHandle& console = rt.console;
     const std::set<std::string> line = story_species_list(step.text);
+    story_fix_party_order(rt, false);
     std::string front;
     for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
         story_read_slot(rt, 1, &front);
@@ -1288,6 +1353,17 @@ void story_grind(
     if (line.count(front) == 0){
         story_swap_party(rt, 1, slot);
         story_read_slot(rt, 1, &front);
+        if (!front.empty() && line.count(front) == 0){
+            //  Not the member: maybe a shiny is in its slot (caught before
+            //  the program was started this time). Back, sort the party,
+            //  and again.
+            console.log("Party slot " + std::to_string(slot) + " was " + front + ". Sorting the party.", COLOR_ORANGE);
+            story_swap_party(rt, 1, slot);
+            story_fix_party_order(rt, true);
+            story_swap_party(rt, 1, slot);
+            front.clear();
+            story_read_slot(rt, 1, &front);
+        }
         if (!front.empty() && line.count(front) == 0){
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::SEND_ERROR_REPORT,

@@ -543,7 +543,50 @@ StoryBattleResult story_battle(
     bool throw_on_loss
 ){
     rt.console.log("Battle: " + where);
+    rt.battle.shiny_watch = rt.shiny_watch.get();
+    //  A shiny takes the next free party slot. Until the whole team is in,
+    //  keep the slots the team still needs.
+    rt.battle.shiny_catch = rt.party_order_final || (int)rt.team.size() + rt.party_extras < 6;
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
+    if (rt.shiny_watch){
+        StoryShinyWatch& watch = *rt.shiny_watch;
+        watch.consume();
+        if (!rt.warned_no_sound && kind != StoryBattleKind::TRAINER &&
+            current_time() - watch.started() > 60s && !watch.has_sound()
+        ){
+            rt.warned_no_sound = true;
+            rt.console.log(
+                "No sound comes in from the capture card: shiny Pokemon cannot be noticed. "
+                "Set the audio input (and turn the game's sound on) to have them caught.",
+                COLOR_RED
+            );
+        }
+        if (current_time() - watch.detector_started() > 20min){
+            watch.restart();
+        }
+    }
+    if (rt.memory.shiny){
+        rt.shinies++;
+        const std::string name = rt.memory.shiny_species.empty() ? std::string("Pokemon") : rt.memory.shiny_species;
+        if (rt.memory.shiny_caught){
+            rt.shinies_caught++;
+            rt.shiny_unsaved = true;
+            if (!rt.memory.caught.empty()){
+                rt.console.log("The shiny " + name + " is the team member to catch here.", COLOR_BLUE);
+            }else if (rt.memory.shiny_to_pc){
+                rt.console.log("The shiny " + name + " went to the PC (the party is full).", COLOR_BLUE);
+            }else{
+                rt.party_extras++;
+                rt.console.log(
+                    "The shiny " + name + " is in the party, behind the team (" +
+                    std::to_string(rt.party_extras) + " besides the team).",
+                    COLOR_BLUE
+                );
+            }
+        }else{
+            rt.console.log("The shiny " + name + " was not caught. Going on.", COLOR_ORANGE);
+        }
+    }
     if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty()){
         rt.caught.insert(rt.memory.caught);
         rt.console.log("Caught for the team: " + rt.memory.caught, COLOR_BLUE);
@@ -1598,6 +1641,12 @@ std::set<std::string> story_species_list(const char* text){
 void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.resume_at = resume_at;
     rt.caught_at_save = rt.caught;
+    rt.party_extras_at_save = rt.party_extras;
+    rt.party_order_final_at_save = rt.party_order_final;
+    if (rt.shiny_unsaved){
+        rt.console.log("The shiny Pokemon caught is saved.", COLOR_BLUE);
+    }
+    rt.shiny_unsaved = false;
     //  Saved at the end of the segment: the next one starts there.
     const bool next = resume_at >= rt.segment_steps && !rt.next_segment_id.empty();
     const std::string resume_segment = next ? rt.next_segment_id : rt.segment_id;

@@ -741,7 +741,9 @@ CHAPTER5 = [
     {
         "id": "C5_03_TO_LAVENDER", "chapter": 5,
         "title": "Back to Lavender Town",
-        "steps": [
+        #  Balls for a shiny (the option "Catch shiny Pokemon"): the best on
+        #  sale on the way, as many as the money allows (LavenderTown_Mart_Items).
+        "steps": buy("MAP_LAVENDER_TOWN_MART", [2, 3], 0, 5, "BuyGreatBalls") + [
             heal(PC["LAVENDER"], "CeladonToLavenderPC"),
             save(),
         ],
@@ -794,6 +796,7 @@ CHAPTER6 = [
             battle("Snorlax", 40000, flee=True),
             cutscene(1000, 15000, "Snorlax gone"),
             setst(flags=["FLAG_HIDE_ROUTE_12_SNORLAX", "FLAG_WOKE_UP_ROUTE_12_SNORLAX"]),
+        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 5, "BuyUltraBalls") + [
             heal(PC["FUCHSIA"], "Route12ToFuchsiaPC"),
             save(),
         ],
@@ -1170,11 +1173,13 @@ CHAPTER10 = [
     },
     {
         "id": "C10_02_ITEMS", "chapter": 10,
-        "title": "Buy Full Restores and Revives",
+        "title": "Buy Full Restores, Revives and Ultra Balls",
         #  Between the rooms everyone who fought gets a Full Restore (and a
         #  Revive first if they fainted).
         "steps": buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 2, 15, "BuyFullRestore")
         + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 4, 8, "BuyRevive")
+        #  With the money left: Ultra Balls for a shiny.
+        + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 0, 5, "BuyUltraBalls")
         + [heal(PC["INDIGO"], "ShopToIndigoNurse"), save()],
     },
     {

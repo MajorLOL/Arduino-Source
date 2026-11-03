@@ -75,6 +75,7 @@ private:
     SimpleIntegerOption<uint16_t> START_STEP;
     IntegerEnumDropdownOption END_SEGMENT;
     EnumDropdownOption<WildBattles> WILD_BATTLES;
+    BooleanCheckBoxOption CATCH_SHINIES;
     SimpleIntegerOption<uint16_t> EXTRA_LEVELS;
     BooleanCheckBoxOption RESET_AT_START;
     BooleanCheckBoxOption SAVE_AFTER_HEAL;

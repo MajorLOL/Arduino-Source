@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <functional>
+#include <memory>
 #include <set>
 #include <string>
 #include "Common/Cpp/Time.h"
@@ -92,6 +93,23 @@ struct StoryRuntime{
 
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
+
+    //  Shiny Pokemon are caught: listens for the shiny sound (null: off).
+    std::unique_ptr<StoryShinyWatch> shiny_watch;
+    bool warned_no_sound = false;
+    uint64_t shinies = 0;
+    uint64_t shinies_caught = 0;
+    //  A shiny was caught since the last save (a reset loses it).
+    bool shiny_unsaved = false;
+    //  Shinies in the party besides the team (in this run, and at the last
+    //  save). They join at the end of the party, so a team member that joins
+    //  after them is behind them: story_fix_party_order() puts the team back
+    //  in its party slots (the steps use the slots). "party_order_final":
+    //  the whole team was found in its slots, nothing changes that any more.
+    int party_extras = 0;
+    int party_extras_at_save = 0;
+    bool party_order_final = false;
+    bool party_order_final_at_save = false;
 
     //  Save the game after every heal at a Pokemon Center.
     bool save_after_heal = true;
