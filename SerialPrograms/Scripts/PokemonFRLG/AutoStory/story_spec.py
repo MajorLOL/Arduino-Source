@@ -1061,6 +1061,11 @@ CHAPTER9 = [
             battle("Rival (Route 22)", 40000),
             cutscene(3000, 60000, "Rival leaves"),
             setst(vars={"VAR_MAP_SCENE_ROUTE22": 4}),
+            #  Heal after the rival (the save there means a failure later
+            #  on does not mean fighting him again), and save on Route 23
+            #  below: a failure in Victory Road then starts again at its
+            #  door, not at the rival.
+            heal(PC["VIRIDIAN"], "Route22RivalToViridianPC"),
             #  Route22_NorthEntrance_EventScript_BoulderBadgeGuardTrigger and the
             #  Route 23 guards: each one bumps VAR_MAP_SCENE_ROUTE23.
             {"trigger_var": {"map": "MAP_ROUTE22_NORTH_ENTRANCE", "var": "VAR_MAP_SCENE_ROUTE23", "value": 0}, "label": "BoulderBadgeGuard"},
@@ -1070,7 +1075,7 @@ CHAPTER9 = [
             {"trigger_var": {"map": "MAP_ROUTE23", "var": "VAR_MAP_SCENE_ROUTE23", "value": k}, "label": "BadgeGuard%d" % k},
             cutscene(2000, 30000, "Badge %d" % (k + 1)),
             setst(vars={"VAR_MAP_SCENE_ROUTE23": k + 1}),
-        )],
+        )] + [save()],
     },
     {
         "id": "C9_04_VICTORY_ROAD", "chapter": 9,
@@ -1185,6 +1190,13 @@ INITIAL_STATE = {
         ["MAP_CELADON_CITY_GAME_CORNER", "CeladonCity_GameCorner_EventScript_HideRocketHideout"],
         ["MAP_ROCKET_HIDEOUT_B1F", "RocketHideout_B1F_EventScript_SetBarrier"],
         ["MAP_ROCKET_HIDEOUT_B4F", "RocketHideout_B4F_EventScript_SetBarrier"],
+        #  Victory Road: a rock barrier on each floor until a boulder is
+        #  pushed onto its floor switch (VAR_MAP_SCENE_VICTORY_ROAD_*). The
+        #  3F one at (12, 12) stood in the route to that floor's boulder.
+        ["MAP_VICTORY_ROAD_1F", "VictoryRoad_1F_EventScript_SetRockBarrier"],
+        ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier1"],
+        ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier2"],
+        ["MAP_VICTORY_ROAD_3F", "VictoryRoad_3F_EventScript_SetRockBarrier"],
     ],
 }
 
