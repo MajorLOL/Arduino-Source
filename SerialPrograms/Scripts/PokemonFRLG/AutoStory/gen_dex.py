@@ -135,7 +135,12 @@ def main():
         name = sp_names[key]
         if name in ("??????????", "?"):
             continue
-        species.append((slug_of(name), name, t1, t2))
+        base = {}
+        for stat in ("HP", "Attack", "Defense", "SpAttack", "SpDefense", "Speed"):
+            mm = re.search(r"\.base%s\s*=\s*(\d+)" % stat, m.group(2))
+            base[stat] = int(mm.group(1)) if mm else 0
+        species.append((slug_of(name), name, t1, t2,
+                        (base["HP"], base["Attack"], base["Defense"], base["SpAttack"], base["SpDefense"], base["Speed"])))
 
     bm = open(os.path.join(root, "src/battle_main.c")).read()
     m = re.search(r"gTypeEffectiveness\[\d+\]\s*=\s*\{(.*?)\};", bm, re.S)
@@ -196,6 +201,13 @@ def main():
     L.append("    const char* name;       //  as shown in the game (English)")
     L.append("    Type type1;")
     L.append("    Type type2;")
+    L.append("    //  Base stats.")
+    L.append("    uint8_t hp = 0;")
+    L.append("    uint8_t attack = 0;")
+    L.append("    uint8_t defense = 0;")
+    L.append("    uint8_t sp_attack = 0;")
+    L.append("    uint8_t sp_defense = 0;")
+    L.append("    uint8_t speed = 0;")
     L.append("};")
     L.append("")
     L.append("inline const std::vector<MoveInfo>& moves(){")
@@ -209,8 +221,9 @@ def main():
     L.append("")
     L.append("inline const std::vector<SpeciesInfo>& species(){")
     L.append("    static const std::vector<SpeciesInfo> data{")
-    for slug, name, t1, t2 in species:
-        L.append("        {%s, %s, Type::%s, Type::%s}," % (cstr(slug), cstr(name.encode("ascii", "replace").decode()), t1, t2))
+    for slug, name, t1, t2, b in species:
+        L.append("        {%s, %s, Type::%s, Type::%s, %d, %d, %d, %d, %d, %d}," % (
+            (cstr(slug), cstr(name.encode("ascii", "replace").decode()), t1, t2) + b))
     L.append("    };")
     L.append("    return data;")
     L.append("}")

@@ -1147,6 +1147,9 @@ void grind_front(
             }
         }
         rt.battle.share_position = share ? share_position : 0;
+        //  Alone, but not against a foe it needs many turns for.
+        rt.battle.slow_share_position = !share && share_position > 0 ? share_position : 0;
+        rt.battle.lead_level = level > 0 ? level : 0;
     };
 
     while (!done){
@@ -1226,6 +1229,7 @@ void grind_front(
             }
             if (level >= target){
                 rt.battle.share_position = 0;
+                rt.battle.slow_share_position = 0;
                 console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
                 if (rt.save_after_heal){
                     //  Saved right here: after a reset, go on with the next
@@ -1241,6 +1245,7 @@ void grind_front(
     }
 
     rt.battle.share_position = 0;
+    rt.battle.slow_share_position = 0;
     console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
     spot.to_first_tile(away);
     walk(to_nurse);
@@ -1299,6 +1304,8 @@ void story_grind(
         rt.battle.lead_type1 = info->type1;
         rt.battle.lead_type2 = info->type2;
     }
+    //  Its moves are valued with its stats (its level: grind_front()).
+    rt.battle.lead_species = info;
     rt.memory.no_pp = 0;
     for (int& m : rt.memory.moves){
         m = -1;
@@ -1312,6 +1319,9 @@ void story_grind(
 
     grind_front(rt, script, step, extra_levels, true, slot - 1);
     rt.battle.share_position = 0;
+    rt.battle.slow_share_position = 0;
+    rt.battle.lead_species = nullptr;
+    rt.battle.lead_level = 0;
 
     rt.battle.lead_type1 = rt.lead_type1;
     rt.battle.lead_type2 = rt.lead_type2;

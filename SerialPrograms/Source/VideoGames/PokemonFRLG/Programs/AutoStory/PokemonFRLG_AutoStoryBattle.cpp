@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <cctype>
 #include <cstdlib>
@@ -403,9 +404,98 @@ bool type_ignores_matchups(MoveClass c){
     return c == MoveClass::LEVEL_DAMAGE || c == MoveClass::FIXED_40 || c == MoveClass::FIXED_20;
 }
 
+//  Stats at a level (IVs 15, no EVs).
+int stat_at(int base, int level){
+    return (2 * base + 15) * level / 100 + 5;
+}
+int hp_at(int base, int level){
+    return (2 * base + 15) * level / 100 + level + 10;
+}
+bool physical_type(Type t){
+    switch (t){
+    case Type::NORMAL: case Type::FIGHTING: case Type::FLYING: case Type::POISON: case Type::GROUND:
+    case Type::ROCK: case Type::BUG: case Type::GHOST: case Type::STEEL:
+        return true;
+    default:
+        return false;
+    }
+}
+
+//  Damage of a move by the Gen 3 formula (without the random factor and
+//  crits), times its accuracy: the attacker's species and level from
+//  "settings", against a foe of the same level with the given base
+//  defenses and type multiplier. Fixed-damage moves do what they do.
+double damage_estimate(
+    int move, const StoryBattleSettings& settings,
+    int foe_defense, int foe_sp_defense, double effect
+){
+    const MoveInfo& info = AutoStoryDex::moves()[(size_t)move];
+    const SpeciesInfo& me = *settings.lead_species;
+    const int level = settings.lead_level;
+    double damage = 0;
+    switch (info.move_class){
+    case MoveClass::STATUS:
+    case MoveClass::AVOID:
+        return 0;
+    case MoveClass::FIXED_20:
+        damage = effect == 0 ? 0 : 20;
+        break;
+    case MoveClass::FIXED_40:
+        damage = effect == 0 ? 0 : 40;
+        break;
+    case MoveClass::LEVEL_DAMAGE:
+        damage = effect == 0 ? 0 : level;
+        break;
+    default:{
+        const bool physical = physical_type(info.type);
+        const double attack = stat_at(physical ? me.attack : me.sp_attack, level);
+        const double defense = stat_at(physical ? foe_defense : foe_sp_defense, level);
+        damage = ((2.0 * level / 5 + 2) * base_damage(info) * attack / defense) / 50 + 2;
+        if (info.type == settings.lead_type1 || info.type == settings.lead_type2){
+            damage *= 1.5;
+        }
+        damage *= effect;
+    }
+    }
+    if (info.accuracy > 0){
+        damage *= info.accuracy / 100.0;
+    }
+    return damage;
+}
+bool can_estimate(const StoryBattleSettings& settings){
+    return settings.lead_species != nullptr && settings.lead_species->attack > 0 && settings.lead_level > 0;
+}
+
+//  Turns the best of "moves" takes to bring the foe down, as estimated.
+//  -1: not known.
+int turns_to_win(const int moves[4], const StoryBattleSettings& settings, const SpeciesInfo* foe){
+    if (!can_estimate(settings) || foe == nullptr || foe->hp == 0){
+        return -1;
+    }
+    double best = 0;
+    bool known = false;
+    for (int i = 0; i < 4; i++){
+        if (moves[i] < 0){
+            continue;
+        }
+        known = true;
+        const MoveInfo& info = AutoStoryDex::moves()[(size_t)moves[i]];
+        best = std::max(best, damage_estimate(moves[i], settings, foe->defense, foe->sp_defense, effectiveness(info.type, foe)));
+    }
+    if (!known){
+        return -1;
+    }
+    const int hp = hp_at(foe->hp, settings.lead_level);
+    return best <= 0 ? 99 : (int)std::ceil(hp / best);
+}
+
 double move_score(int move, const StoryBattleSettings& settings, const SpeciesInfo* opponent){
     if (move < 0){
         return -1;
+    }
+    if (opponent != nullptr && opponent->defense > 0 && can_estimate(settings)){
+        const MoveInfo& info = AutoStoryDex::moves()[(size_t)move];
+        return damage_estimate(move, settings, opponent->defense, opponent->sp_defense, effectiveness(info.type, opponent));
     }
     const MoveInfo& info = AutoStoryDex::moves()[(size_t)move];
     double score = base_damage(info);
@@ -704,6 +794,10 @@ double move_value(int move, const StoryBattleSettings& settings){
     if (move < 0){
         return 0;
     }
+    if (can_estimate(settings)){
+        //  Against a middling foe (base defenses 70, no type matchup).
+        return damage_estimate(move, settings, 70, 70, 1.0);
+    }
     const MoveInfo& info = AutoStoryDex::moves()[(size_t)move];
     double score = base_damage(info);
     if (!type_ignores_matchups(info.move_class) &&
@@ -890,7 +984,9 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
-            if (settings.share_position > 0 && !shared && kind == StoryBattleKind::WILD_FIGHT){
+            if ((settings.share_position > 0 || settings.slow_share_position > 0) &&
+                !shared && kind == StoryBattleKind::WILD_FIGHT
+            ){
                 shared = true;
                 //  The member was sent out: it gets half the experience. Its
                 //  moves first (it may learn one while the other fights),
@@ -917,29 +1013,53 @@ StoryBattleResult run_story_battle(
                     pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                     context.wait_for_all_requests();
                 }
-                if (move_cursor_to_option(console, context, BattleMenuOption::POKEMON)){
-                    console.log("Shared experience: battle position " + std::to_string(settings.share_position + 1) + " comes in.");
-                    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
-                    PartyMenuWatcher party(COLOR_RED);
-                    context.wait_for_all_requests();
-                    if (wait_until(console, context, 3000ms, { party }) == 0){
-                        pick_in_party_menu(settings.share_position);
-                        memory.player_hp = -1;  //  That was the member's.
-                        settings.lead_type1 = settings.share_type1;
-                        settings.lead_type2 = settings.share_type2;
-                        memory.no_pp = 0;
-                        memory.last_slot = -1;
-                        for (int& m : memory.moves){
-                            m = -1;
+                int position = settings.share_position;
+                bool switch_in = true;
+                if (position <= 0){
+                    //  The member fights alone, unless this foe takes it long.
+                    std::string slug;
+                    const SpeciesInfo* seen = read_opponent(console, slug);
+                    const int turns = turns_to_win(memory.moves, settings, seen);
+                    if (turns >= 4){
+                        console.log(
+                            "The member needs about " + std::to_string(turns) + " turns against " +
+                            (seen == nullptr ? std::string("this foe") : std::string(seen->name)) +
+                            ": the other one comes in, the experience is shared.",
+                            COLOR_BLUE
+                        );
+                        position = settings.slow_share_position;
+                    }else{
+                        switch_in = false;
+                    }
+                }
+                if (switch_in){
+                    if (move_cursor_to_option(console, context, BattleMenuOption::POKEMON)){
+                        console.log("Shared experience: battle position " + std::to_string(position + 1) + " comes in.");
+                        pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+                        PartyMenuWatcher party(COLOR_RED);
+                        context.wait_for_all_requests();
+                        if (wait_until(console, context, 3000ms, { party }) == 0){
+                            pick_in_party_menu(position);
+                            memory.player_hp = -1;  //  That was the member's.
+                            settings.lead_type1 = settings.share_type1;
+                            settings.lead_type2 = settings.share_type2;
+                            settings.lead_species = nullptr;    //  Not known: valued by power and type.
+                            settings.lead_level = 0;
+                            memory.no_pp = 0;
+                            memory.last_slot = -1;
+                            for (int& m : memory.moves){
+                                m = -1;
+                            }
+                        }else{
+                            console.log("The party menu did not open.", COLOR_ORANGE);
+                            pbf_mash_button(context, BUTTON_B, 1000ms);
                         }
                     }else{
-                        console.log("The party menu did not open.", COLOR_ORANGE);
-                        pbf_mash_button(context, BUTTON_B, 1000ms);
+                        console.log("POKeMON not selected: the member fights.", COLOR_ORANGE);
                     }
-                }else{
-                    console.log("POKeMON not selected: the member fights.", COLOR_ORANGE);
+                    break;
                 }
-                break;
+                //  The member fights: on to its move, in this same menu.
             }
             if (team){
                 //  A new foe: the best answer comes in, if much better than

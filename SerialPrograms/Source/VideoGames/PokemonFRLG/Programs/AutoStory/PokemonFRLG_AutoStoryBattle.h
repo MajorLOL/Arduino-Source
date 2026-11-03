@@ -83,11 +83,23 @@ struct StoryBattleSettings{
     //  it is sent out first, so it gets half the experience, then the
     //  Pokemon at this battle position (1-5) comes in and fights. 0: no.
     int share_position = 0;
+    //  The member fights alone, but against a foe it needs many turns for
+    //  (Electrode against Onix in Victory Road: SPARK does nothing, SWIFT a
+    //  twentieth of its HP), the Pokemon at this battle position still
+    //  comes in. 0: never.
+    int slow_share_position = 0;
     //  The types of the one that comes in, and the member's evolution line
     //  (slugs: to know when the member is the one learning a move).
     AutoStoryDex::Type share_type1 = AutoStoryDex::Type::NORMAL;
     AutoStoryDex::Type share_type2 = AutoStoryDex::Type::NORMAL;
     std::set<std::string> share_members;
+
+    //  The species and level of the one that fights, if known (training):
+    //  the moves are then valued by the damage they do with its stats
+    //  against the foe's (a Voltorb's TACKLE does less than SONICBOOM),
+    //  the foe taken to be about as strong. Not known: by power and type.
+    const AutoStoryDex::SpeciesInfo* lead_species = nullptr;
+    int lead_level = 0;
 };
 
 //  What the battle logic remembers between battles.
