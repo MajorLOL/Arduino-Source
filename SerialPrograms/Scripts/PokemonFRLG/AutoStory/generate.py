@@ -138,6 +138,12 @@ def write_cpp(results, path):
         L.append("    return script;")
         L.append("}")
         L.append("")
+    #  Which story data a build has: the program logs it when it starts.
+    import hashlib
+    digest = hashlib.sha1("\n".join(L).encode("utf-8")).hexdigest()[:10]
+    L.append("//  A digest of all of the above.")
+    L.append('inline constexpr const char* DATA_ID = "%s";' % digest)
+    L.append("")
     L.append("}")
     L.append("}")
     L.append("}")

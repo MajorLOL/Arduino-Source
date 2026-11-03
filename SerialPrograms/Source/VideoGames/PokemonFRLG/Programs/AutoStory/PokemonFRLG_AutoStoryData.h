@@ -14051,6 +14051,9 @@ inline const StoryScript& story_CHARMANDER(){
     return script;
 }
 
+//  A digest of all of the above.
+inline constexpr const char* DATA_ID = "124ccf44f2";
+
 }
 }
 }

@@ -540,6 +540,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         throw InternalProgramError(&env.logger(), PA_CURRENT_FUNCTION, "Segment out of range.");
     }
     env.log(std::string("Starter: ") + starter_name(starter), COLOR_BLUE);
+    env.log(std::string("Story data: ") + AutoStoryData::DATA_ID, COLOR_BLUE);
 
     StoryRuntime rt(env.console, context);
     rt.battle.wild_run = WILD_BATTLES == WildBattles::FLEE;
