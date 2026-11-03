@@ -141,6 +141,28 @@ void wait_after_warp(StoryRuntime& rt, MapPreview preview, const char* leg_name)
     rt.context.wait_for_all_requests();
 }
 
+//  A fade was taken for a warp. A wild battle starts the same way (black,
+//  then a new picture), and the step onto the warp tile never brings one
+//  (the warp comes first): a battle means the player did not reach the
+//  warp. Then it is fought, and the caller tries the warp again.
+//  (Victory Road 1F: a battle on the step to the ladder passed for the
+//  warp, and the route went on as if on 2F.)
+bool battle_instead_of_warp(StoryRuntime& rt, bool dark, const char* leg_name){
+    if (dark){
+        return false;
+    }
+    AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+    BattleMenuWatcher battle_menu(COLOR_RED);
+    rt.context.wait_for_all_requests();
+    if (wait_until(rt.console, rt.context, 3000ms, { battle_text, battle_menu }) < 0){
+        return false;
+    }
+    rt.console.log(std::string("A wild battle, not the warp: ") + leg_name + ". The warp again after it.", COLOR_ORANGE);
+    story_battle(rt, StoryBattleKind::WILD, std::string(leg_name) + " (before the warp)");
+    rt.facing = DPAD_NONE;
+    return true;
+}
+
 //  Hold "direction" from a standstill until the warp starts, then wait
 //  until it has finished. Doors, mats and stairs all warp while the
 //  direction is held:
@@ -154,24 +176,31 @@ void wait_after_warp(StoryRuntime& rt, MapPreview preview, const char* leg_name)
 void take_warp_push(
     StoryRuntime& rt, DpadPosition direction, bool dark, MapPreview preview, const char* leg_name
 ){
-    BlackScreenOverWatcher warp_finished(COLOR_RED);
-    BlackScreenWatcher warp_starting(COLOR_RED);
-    std::vector<PeriodicInferenceCallback> callbacks;
-    callbacks.emplace_back(warp_finished);
-    if (!dark){
-        //  (Without Flash the screen is black anyway.)
-        callbacks.emplace_back(warp_starting);
-    }
-    rt.context.wait_for_all_requests();
-    int ret = run_until<ProControllerContext>(
-        rt.console, rt.context,
-        [&](ProControllerContext& context){
-            pbf_press_dpad(context, direction, dark ? 700ms : 1500ms, 0ms);
-        },
-        callbacks
-    );
-    if (ret != 0){
-        ret = wait_until(rt.console, rt.context, 10000ms, { warp_finished });
+    int ret = -1;
+    for (int attempt = 0; attempt < 3; attempt++){
+        BlackScreenOverWatcher warp_finished(COLOR_RED);
+        BlackScreenWatcher warp_starting(COLOR_RED);
+        std::vector<PeriodicInferenceCallback> callbacks;
+        callbacks.emplace_back(warp_finished);
+        if (!dark){
+            //  (Without Flash the screen is black anyway.)
+            callbacks.emplace_back(warp_starting);
+        }
+        rt.context.wait_for_all_requests();
+        ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                pbf_press_dpad(context, direction, dark ? 700ms : 1500ms, 0ms);
+            },
+            callbacks
+        );
+        if (ret != 0){
+            ret = wait_until(rt.console, rt.context, 10000ms, { warp_finished });
+        }
+        if (ret < 0 || !battle_instead_of_warp(rt, dark, leg_name)){
+            break;
+        }
+        ret = -1;
     }
     if (ret < 0){
         if (dark){
@@ -240,6 +269,9 @@ void step_onto_warp(
         rt.facing = direction;
         rt.steps++;
         if (ret == 0){
+            if (battle_instead_of_warp(rt, dark, leg_name)){
+                continue;
+            }
             wait_after_warp(rt, preview, leg_name);
             return;
         }

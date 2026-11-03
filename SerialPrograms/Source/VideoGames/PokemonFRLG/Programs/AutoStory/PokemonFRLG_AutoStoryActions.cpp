@@ -660,13 +660,79 @@ void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what)
 
 
 
+namespace{
+//  How much the screen changed where the boulder was and where a push
+//  takes it: the tile in front of the player and the one beyond. The
+//  player's tile is in the middle of the screen, (112..127, 72..87) at GBA
+//  resolution. Mean brightness difference over both tiles and a margin.
+double boulder_area_change(
+    const AutoStoryScroll::Screen& before, const AutoStoryScroll::Screen& after,
+    DpadPosition direction
+){
+    const int dx = direction == DPAD_LEFT ? -1 : (direction == DPAD_RIGHT ? 1 : 0);
+    const int dy = direction == DPAD_UP ? -1 : (direction == DPAD_DOWN ? 1 : 0);
+    const int tile = AutoStoryScroll::TILE_PIXELS;
+    const int cx = 120;
+    const int cy = 80;
+    const int x0 = std::max(0, std::min(cx + dx * tile, cx + 2 * dx * tile) - 10);
+    const int x1 = std::min(AutoStoryScroll::SCREEN_WIDTH, std::max(cx + dx * tile, cx + 2 * dx * tile) + 10);
+    const int y0 = std::max(0, std::min(cy + dy * tile, cy + 2 * dy * tile) - 10);
+    const int y1 = std::min(AutoStoryScroll::SCREEN_HEIGHT, std::max(cy + dy * tile, cy + 2 * dy * tile) + 10);
+    double sum = 0;
+    size_t count = 0;
+    for (int y = y0; y < y1; y++){
+        for (int x = x0; x < x1; x++){
+            sum += std::abs((int)before.at(x, y) - (int)after.at(x, y));
+            count++;
+        }
+    }
+    return count == 0 ? 0 : sum / (double)count;
+}
+const char* push_word(DpadPosition direction){
+    switch (direction){
+    case DPAD_UP:       return "up";
+    case DPAD_DOWN:     return "down";
+    case DPAD_LEFT:     return "left";
+    case DPAD_RIGHT:    return "right";
+    default:            return "none";
+    }
+}
+}
+
 void story_push_boulder(StoryRuntime& rt, DpadPosition direction){
     //  Facing the boulder with Strength on, a short press pushes it. The
     //  player stays. Released long before the push is over, so the player
     //  does not walk after it.
-    pbf_press_dpad(rt.context, direction, 80ms, 1400ms);
-    rt.context.wait_for_all_requests();
-    rt.facing = direction;
+    //  The press is now and then missed, like the tap that turns the player
+    //  (Victory Road 1F: the next walk then ran into the boulder that had
+    //  not moved). With the video check, see that the boulder moved, and
+    //  press again if it did not.
+    AutoStoryScroll::Screen before;
+    const bool check = story_take_picture(rt, before);
+    for (int attempt = 0; attempt < 3; attempt++){
+        pbf_press_dpad(rt.context, direction, 80ms, 1400ms);
+        rt.context.wait_for_all_requests();
+        rt.facing = direction;
+        AutoStoryScroll::Screen after;
+        if (!check || !story_take_picture(rt, after)){
+            return;
+        }
+        const double change = boulder_area_change(before, after, direction);
+        if (change >= 6){
+            return;
+        }
+        rt.console.log(
+            "The boulder did not move (change " + std::to_string(change).substr(0, 4) + "). Pushing " +
+            push_word(direction) + " again.",
+            COLOR_ORANGE
+        );
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        std::string("story_push_boulder(): The boulder does not move ") + push_word(direction) +
+        ". The player may not be in front of it, or Strength is not on.",
+        rt.console
+    );
 }
 
 
