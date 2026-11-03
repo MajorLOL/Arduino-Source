@@ -63,6 +63,10 @@ class Builder:
         self.pos = None          # (map_id, x, y, facing)
         self.surfing = False
         self.legs = []           # all legs (dicts)
+        #  Strength stays on until the player leaves the map by a warp
+        #  (ClearTempFieldEventData()): (map, number of legs then) when it
+        #  was used.
+        self.strength_used = None
         self.segments = []
         self.leg_counter = 0
         self.warnings = []
@@ -1086,8 +1090,16 @@ class Builder:
         if found is None:
             raise StoryError("No boulder solution for %s on %s" % (label, mid))
         #  Emit: walk behind the boulder, (first time) use Strength, push.
+        #  Still on from a puzzle before on this map (no warp since), a
+        #  boulder only says "Strength made it possible...", without the
+        #  YES/NO (EventScript_AlreadyUsedStrength).
         cur = dict(keys)        # position -> key
         strength_on = False
+        if self.strength_used is not None and self.strength_used[0] == mid:
+            strength_on = all(
+                L["start"][0] == mid and L["end"] not in ("WARP_PUSH", "WARP_STEP")
+                for L in self.legs[self.strength_used[1]:]
+            )
         for i, (b, d, nb) in enumerate(found):
             key = cur.pop(b)
             dx, dy = DIRS[d]
@@ -1098,6 +1110,7 @@ class Builder:
                 out.append({"type": "TALK_YES", "label": "Use Strength"})
                 out.append({"type": "CUTSCENE", "label": "Strength", "p0": 1500, "p1": 20000, "text": ""})
                 strength_on = True
+                self.strength_used = (mid, len(self.legs))
             out.append({"type": "PUSH", "label": "Push boulder %s" % d, "text": d})
             fell = self.d.behaviors.name(v0.tile(nb[0], nb[1])[3]) == "MB_FALL_WARP"
             if fell:

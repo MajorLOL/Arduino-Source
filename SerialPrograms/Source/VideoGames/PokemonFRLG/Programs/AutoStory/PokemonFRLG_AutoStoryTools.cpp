@@ -1488,6 +1488,7 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what){
             break;
         }
     }
+    const bool text_seen = ret == 1;
     if (ret == 1){
         //  The text is up: on to the question, the A presses still spaced
         //  out from the first one (the box may come up on its own once the
@@ -1504,6 +1505,15 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what){
             },
             { yes_no }
         );
+    }
+    if (ret < 0 && text_seen && what == "Use Strength"){
+        //  Strength is on already (used on this map before, no warp since):
+        //  the boulder only says "STRENGTH made it possible to move boulders
+        //  around." (EventScript_AlreadyUsedStrength). Close it and go on.
+        rt.console.log("Strength is on already: no question. Going on.", COLOR_ORANGE);
+        pbf_mash_button(rt.context, BUTTON_B, 2000ms);
+        rt.context.wait_for_all_requests();
+        return;
     }
     if (ret < 0){
         OperationFailedExceptionWithScreenshot::fire(

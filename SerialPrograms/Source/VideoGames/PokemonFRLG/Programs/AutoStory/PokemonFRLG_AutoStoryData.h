@@ -4635,8 +4635,6 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VR3F_Boulder_Push33", 715, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3F_Hole_Push1", 716, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK_YES, "Use Strength", -1, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::CUTSCENE, "Strength", -1, 1500, 20000, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder", 717, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder_1", 718, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
@@ -4787,11 +4785,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C9_01_TO_VIRIDIAN", "Back to Viridian City", 9, true, 764, 20},
     {"C9_02_GIOVANNI", "Giovanni in the Viridian Gym (Earth Badge)", 9, true, 784, 17},
     {"C9_03_ROUTE22_ROUTE23", "Rival on Route 22, the badge guards on Route 23", 9, true, 801, 39},
-    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 840, 181},
-    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1021, 5},
-    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1026, 7},
-    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1033, 33},
-    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1066, 5},
+    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 840, 179},
+    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1019, 5},
+    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1024, 7},
+    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1031, 33},
+    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1064, 5},
 };
 
 }
@@ -9443,8 +9441,6 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VR3F_Boulder_Push33", 716, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3F_Hole_Push1", 717, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK_YES, "Use Strength", -1, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::CUTSCENE, "Strength", -1, 1500, 20000, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder", 718, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder_1", 719, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
@@ -9595,11 +9591,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C9_01_TO_VIRIDIAN", "Back to Viridian City", 9, true, 765, 20},
     {"C9_02_GIOVANNI", "Giovanni in the Viridian Gym (Earth Badge)", 9, true, 785, 17},
     {"C9_03_ROUTE22_ROUTE23", "Rival on Route 22, the badge guards on Route 23", 9, true, 802, 39},
-    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 841, 181},
-    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1022, 5},
-    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1027, 7},
-    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1034, 33},
-    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1067, 5},
+    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 841, 179},
+    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1020, 5},
+    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1025, 7},
+    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1032, 33},
+    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1065, 5},
 };
 
 }
@@ -14236,8 +14232,6 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VR3F_Boulder_Push33", 715, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3F_Hole_Push1", 716, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK_YES, "Use Strength", -1, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::CUTSCENE, "Strength", -1, 1500, 20000, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, DPAD_RIGHT, "right", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder", 717, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "VR3FTo2FBoulder_1", 718, 0, 0, -1, 0, DPAD_NONE, "", 0, 0, 0},
@@ -14388,11 +14382,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C9_01_TO_VIRIDIAN", "Back to Viridian City", 9, true, 764, 20},
     {"C9_02_GIOVANNI", "Giovanni in the Viridian Gym (Earth Badge)", 9, true, 784, 17},
     {"C9_03_ROUTE22_ROUTE23", "Rival on Route 22, the badge guards on Route 23", 9, true, 801, 39},
-    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 840, 181},
-    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1021, 5},
-    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1026, 7},
-    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1033, 33},
-    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1066, 5},
+    {"C9_04_VICTORY_ROAD", "Victory Road: boulders onto the switches, to Indigo Plateau", 9, true, 840, 179},
+    {"C10_01_GRIND_LEAGUE", "Train in Victory Road for the Elite Four", 10, true, 1019, 5},
+    {"C10_02_ITEMS", "Buy Full Restores and Revives", 10, true, 1024, 7},
+    {"C10_03_ELITE_FOUR", "Elite Four: Lorelei, Bruno, Agatha, Lance", 10, true, 1031, 33},
+    {"C10_04_CHAMPION", "Champion: the rival, Hall of Fame", 10, true, 1064, 5},
 };
 
 }

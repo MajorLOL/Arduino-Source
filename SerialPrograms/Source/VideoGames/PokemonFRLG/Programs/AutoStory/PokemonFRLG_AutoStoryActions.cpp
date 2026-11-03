@@ -703,12 +703,20 @@ void story_push_boulder(StoryRuntime& rt, DpadPosition direction){
     //  Facing the boulder with Strength on, a short press pushes it. The
     //  player stays. Released long before the push is over, so the player
     //  does not walk after it.
-    //  The press is now and then missed, like the tap that turns the player
-    //  (Victory Road 1F: the next walk then ran into the boulder that had
-    //  not moved). With the video check, see that the boulder moved, and
-    //  press again if it did not.
+    //  With the video check, each push is looked at:
+    //   - The press is now and then missed, like the tap that turns the
+    //     player: nothing changed in front of the player. Press again.
+    //   - The boulder was pushed already, by the tap that turned the player
+    //     or the end of the walk to it (Victory Road, three times in 144
+    //     pushes): the press walks the player into the tile it left. The
+    //     boulder is then where this push would have put it, and the player
+    //     one tile too far: step back, and the route goes on from there.
+    //     (Before, the next walk pushed it once more, and two pushes later
+    //     it would not move: against a wall, or already on the switch.)
     AutoStoryScroll::Screen before;
     const bool check = story_take_picture(rt, before);
+    const int dx = direction == DPAD_LEFT ? -1 : (direction == DPAD_RIGHT ? 1 : 0);
+    const int dy = direction == DPAD_UP ? -1 : (direction == DPAD_DOWN ? 1 : 0);
     for (int attempt = 0; attempt < 3; attempt++){
         pbf_press_dpad(rt.context, direction, 80ms, 1400ms);
         rt.context.wait_for_all_requests();
@@ -717,7 +725,29 @@ void story_push_boulder(StoryRuntime& rt, DpadPosition direction){
         if (!check || !story_take_picture(rt, after)){
             return;
         }
+        const AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(before, after, 2);
         const double change = boulder_area_change(before, after, direction);
+        rt.console.log(
+            std::string("Push ") + push_word(direction) + ": " + offset.summary() +
+            ", change in front " + std::to_string(change).substr(0, 4)
+        );
+        if (offset.clear && offset.x == dx && offset.y == dy){
+            rt.console.log(
+                "The player walked instead of pushing: the boulder had moved already. Stepping back.",
+                COLOR_ORANGE
+            );
+            story_single_step(rt, opposite(direction));
+            rt.facing = opposite(direction);
+            return;
+        }
+        if (offset.clear && (offset.x != 0 || offset.y != 0)){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                std::string("story_push_boulder(): The player moved while pushing ") + push_word(direction) +
+                ". The route does not know where the boulders are now.",
+                rt.console
+            );
+        }
         if (change >= 6){
             return;
         }
