@@ -165,6 +165,17 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index);
 //  One step, whichever way the player faces. "surf" for 8-frame steps.
 void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf = false);
 
+//  "moves" steps straight on wild-encounter tiles as one held input (a
+//  training spot's grass line), then watch for a battle as after a single
+//  step. A battle on the way stops the player: it is run. "made": the moves
+//  made, as far as the video saw (or as timed); "sure": the video counted
+//  them and nothing stopped the run.
+StoryBattleResult story_grass_run(
+    StoryRuntime& rt, DpadPosition direction, int moves,
+    StoryBattleKind wild_kind, const std::string& where, bool throw_on_loss,
+    int& made, bool& sure
+);
+
 //  One step on a wild-encounter tile, then watch for a battle (and run it).
 //  Returns the battle result, or NO_BATTLE.
 //  A step the video sees not happen is taken again. With "moved": after a
@@ -185,12 +196,12 @@ void story_face(StoryRuntime& rt, DpadPosition direction);
 bool story_take_picture(StoryRuntime& rt, AutoStoryScroll::Screen& picture);
 
 //  Where the player stands now compared to when "picture" was taken, in
-//  tiles (x to the right, y down), up to 3 tiles away. False if the video
-//  does not tell clearly (a text box, someone in the way, too far), or
-//  without the video check. "now": the picture taken for this.
+//  tiles (x to the right, y down), up to "max_tiles" away. False if the
+//  video does not tell clearly (a text box, someone in the way, too far),
+//  or without the video check. "now": the picture taken for this.
 bool story_offset_from(
     StoryRuntime& rt, const AutoStoryScroll::Screen& picture, const std::string& where,
-    int& dx, int& dy, AutoStoryScroll::Screen& now
+    int& dx, int& dy, AutoStoryScroll::Screen& now, int max_tiles = 3
 );
 
 

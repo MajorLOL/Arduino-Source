@@ -248,8 +248,8 @@ AutoStory::AutoStory()
     )
     , GRASS_STEP_CHECK_MS(
         "<b>Grass step check (ms):</b><br>After each step in tall grass (or on water, or in a cave), "
-        "how long to watch for a wild battle. Too short and a battle can start after the next step "
-        "was already counted.",
+        "and after each walk along the grass line of a training spot, how long to watch for a wild "
+        "battle. Too short and a battle can start after the next step was already counted.",
         LockMode::LOCK_WHILE_RUNNING,
         1500, 600, 5000
     )

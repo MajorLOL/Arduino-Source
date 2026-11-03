@@ -635,6 +635,81 @@ void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf){
     rt.context.wait_for_all_requests();
 }
 
+StoryBattleResult story_grass_run(
+    StoryRuntime& rt, DpadPosition direction, int moves,
+    StoryBattleKind wild_kind, const std::string& where, bool throw_on_loss,
+    int& made, bool& sure
+){
+    StoryMemoryScope memory_scope("grass runs");
+    const std::string label = where + " (going " + dpad_name(direction) + ")";
+    //  Walking, not running: the video counts the tiles, and a battle on
+    //  the way stops the player at the end of the step that started it.
+    RunAttempt a = attempt_moves(rt, direction, moves, WALK_FRAMES, 1, false, false, rt.verify_walking, true);
+    rt.facing = direction;
+    made = a.moves;
+    sure = rt.verify_walking && a.measured && !a.lost && a.event == RunEvent::NONE;
+    rt.steps += (uint64_t)std::max(0, made);
+    if (rt.verify_walking){
+        rt.console.log(
+            "Grass " + std::string(dpad_name(direction)) + ": " + std::to_string(a.moves) + " of " +
+            std::to_string(moves) + (a.measured ? "" : " (video unsure)") + " - " + a.video
+        );
+    }
+
+    RunEvent event = a.event;
+    if (event == RunEvent::NONE && !a.lost){
+        //  A battle that starts at the end of the last step shows a moment
+        //  later, as after a single step.
+        BlackScreenWatcher battle_starting(COLOR_RED);
+        AdvanceBattleDialogWatcher battle_started(COLOR_RED);
+        WhiteDialogWatcher trainer_talking(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        int ret = wait_until(
+            rt.console, rt.context, rt.encounter_check,
+            { battle_starting, battle_started, trainer_talking }
+        );
+        if (ret == 0){
+            event = RunEvent::BATTLE_START;
+        }else if (ret == 1){
+            event = RunEvent::BATTLE_TEXT;
+        }else if (ret == 2){
+            event = RunEvent::DIALOG;
+        }
+    }else if (event == RunEvent::NONE && a.lost){
+        event = RunEvent::SCREEN_CHANGED;
+    }
+
+    StoryBattleResult result = StoryBattleResult::NO_BATTLE;
+    switch (event){
+    case RunEvent::BATTLE_START:
+    case RunEvent::BATTLE_TEXT:
+        result = story_battle(rt, wild_kind, label, throw_on_loss);
+        break;
+    case RunEvent::DIALOG:
+        result = story_battle(rt, StoryBattleKind::TRAINER, label, throw_on_loss);
+        break;
+    case RunEvent::SCREEN_CHANGED:{
+        //  Maybe a battle is starting (some transitions do not go all black).
+        BlackScreenWatcher battle_starting(COLOR_RED);
+        AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+        BattleMenuWatcher battle_menu(COLOR_RED);
+        int ret = wait_until(rt.console, rt.context, 3000ms, { battle_text, battle_menu, battle_starting });
+        if (ret >= 0){
+            result = story_battle(rt, wild_kind, label, throw_on_loss);
+        }else{
+            rt.console.log("The screen changed in the grass but no battle came.", COLOR_ORANGE);
+        }
+        break;
+    }
+    case RunEvent::NONE:
+        break;
+    }
+    if (result != StoryBattleResult::NO_BATTLE){
+        sure = false;
+    }
+    return result;
+}
+
 StoryBattleResult story_checked_step(
     StoryRuntime& rt, DpadPosition direction, bool surf, bool trainer,
     StoryBattleKind wild_kind, const std::string& where,
@@ -759,12 +834,12 @@ bool story_take_picture(StoryRuntime& rt, AutoStoryScroll::Screen& picture){
 
 bool story_offset_from(
     StoryRuntime& rt, const AutoStoryScroll::Screen& picture, const std::string& where,
-    int& dx, int& dy, AutoStoryScroll::Screen& now
+    int& dx, int& dy, AutoStoryScroll::Screen& now, int max_tiles
 ){
     if (!story_take_picture(rt, now)){
         return false;
     }
-    AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(picture, now, 3);
+    AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(picture, now, max_tiles);
     rt.console.log("Position check (" + where + "): " + offset.summary());
     if (!offset.clear){
         return false;

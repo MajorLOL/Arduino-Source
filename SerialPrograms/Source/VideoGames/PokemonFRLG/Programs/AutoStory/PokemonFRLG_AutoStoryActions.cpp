@@ -977,124 +977,178 @@ const char* direction_word(DpadPosition direction){
 //  tells where the player really stands.
 class GrassSpot{
 public:
-    GrassSpot(StoryRuntime& rt, DpadPosition forth, StoryBattleKind kind, const std::string& where)
+    //  A straight line of "length" grass tiles from the first one, toward
+    //  "forth". The player walks it from end to end, each way as one held
+    //  input: far fewer pauses to watch for a battle than one step at a
+    //  time. A battle on the way stops the player somewhere on it: the
+    //  picture taken on the first tile tells where (up to "length" tiles
+    //  away), and the next run goes on from there.
+    GrassSpot(StoryRuntime& rt, DpadPosition forth, int length, StoryBattleKind kind, const std::string& where)
         : m_rt(rt)
         , m_forth(forth)
+        , m_length(std::max(2, std::min(length, 5)))
         , m_kind(kind)
         , m_where(where)
-    {}
+    {
+        if (m_length > 2){
+            rt.console.log(where + ": training along " + std::to_string(m_length) + " grass tiles.");
+        }
+    }
 
     //  The route has just brought the player onto the first tile. The first
     //  time, that is where the picture is taken; after that, it is checked.
     void arrived(){
+        m_pos = 0;
+        m_forward = true;
         if (!m_has_picture){
             m_has_picture = story_take_picture(m_rt, m_picture);
             return;
         }
-        bool away = false;
-        to_first_tile(away);
+        to_first_tile();
     }
 
-    //  Make "away" (on the second tile) match where the player stands. Off
-    //  the two tiles, walk back to the first one. Returns whether the video
-    //  told where the player stands.
-    bool check(bool& away){
+    //  Make the position on the line match where the player stands. Off the
+    //  line, walk back onto it. Returns whether the video told where the
+    //  player stands.
+    bool check(){
         if (!m_has_picture){
             return false;
         }
-        const int forth_x = m_forth == DPAD_LEFT ? -1 : (m_forth == DPAD_RIGHT ? 1 : 0);
-        const int forth_y = m_forth == DPAD_UP ? -1 : (m_forth == DPAD_DOWN ? 1 : 0);
+        const int fx = forth_x();
+        const int fy = forth_y();
         for (int attempt = 0; attempt < 4; attempt++){
             int dx = 0;
             int dy = 0;
             AutoStoryScroll::Screen now;
-            if (!story_offset_from(m_rt, m_picture, m_where, dx, dy, now)){
+            if (!story_offset_from(m_rt, m_picture, m_where, dx, dy, now, std::max(3, m_length))){
                 return false;   //  The video does not tell: go by the count.
             }
-            if (dx == 0 && dy == 0){
-                if (away){
+            const int along = dx * fx + dy * fy;
+            const int side = dx * fy - dy * fx;
+            if (side == 0 && along >= 0 && along < m_length){
+                if (along != m_pos){
                     m_rt.console.log(
-                        m_where + ": the player is on the first grass tile, not the second as counted. Going by the video.",
+                        m_where + ": the player is on grass tile " + std::to_string(along + 1) +
+                        ", not " + std::to_string(m_pos + 1) + " as counted. Going by the video.",
                         COLOR_ORANGE
                     );
                 }
-                away = false;
-                //  The latest look of the place (people walking around, a
-                //  sign popping up and going away).
-                m_picture = std::move(now);
-                return true;
-            }
-            if (dx == forth_x && dy == forth_y){
-                if (!away){
-                    m_rt.console.log(
-                        m_where + ": the player is on the second grass tile, not the first as counted. Going by the video.",
-                        COLOR_ORANGE
-                    );
+                m_pos = along;
+                if (along == 0){
+                    //  The latest look of the place (people walking around,
+                    //  a sign popping up and going away).
+                    m_picture = std::move(now);
                 }
-                away = true;
                 return true;
             }
-            const DpadPosition toward =
-                dy > 0 ? DPAD_UP :
-                dy < 0 ? DPAD_DOWN :
-                dx > 0 ? DPAD_LEFT : DPAD_RIGHT;
+            //  Off the line: a step back toward the nearest tile on it,
+            //  sideways first.
+            DpadPosition toward;
+            if (side != 0){
+                //  "side" is how far the player is to the left of "forth".
+                const int sx = fy;
+                const int sy = -fx;
+                const int bx = side > 0 ? -sx : sx;
+                const int by = side > 0 ? -sy : sy;
+                toward = bx > 0 ? DPAD_RIGHT : bx < 0 ? DPAD_LEFT : by > 0 ? DPAD_DOWN : DPAD_UP;
+            }else{
+                toward = along < 0 ? m_forth : opposite(m_forth);
+            }
             m_rt.console.log(
                 m_where + ": the player is " + std::to_string(dx) + ", " + std::to_string(dy) +
-                " tiles from the first grass tile. A step " + direction_word(toward) + " back toward it.",
+                " tiles from the first grass tile, off the line. A step " + direction_word(toward) + " back toward it.",
                 COLOR_ORANGE
             );
             story_checked_step(m_rt, toward, false, false, m_kind, m_where);
-            away = false;   //  Not known yet: looked at again.
         }
-        m_rt.console.log(m_where + ": could not get back onto the grass tiles. Going on.", COLOR_RED);
+        m_rt.console.log(m_where + ": could not get back onto the grass line. Going on.", COLOR_RED);
         return false;
     }
 
     //  Onto the first tile, where the routes there and back meet.
-    void to_first_tile(bool& away){
-        for (int attempt = 0; attempt < 3; attempt++){
-            check(away);
-            if (!away){
+    void to_first_tile(){
+        for (int attempt = 0; attempt < 4; attempt++){
+            check();
+            if (m_pos <= 0){
+                m_pos = 0;
+                m_forward = true;
                 return;
             }
-            bool moved = true;
-            story_checked_step(m_rt, opposite(m_forth), false, false, m_kind, m_where, true, &moved);
-            away = false;
-            if (!moved){
-                //  In the way: the player is there already (see step()).
-                m_rt.console.log(
-                    m_where + ": the step " + direction_word(opposite(m_forth)) +
-                    " to the first grass tile does not happen. Taking the player to be on it already.",
-                    COLOR_ORANGE
-                );
-                return;
+            const int moves = m_pos;
+            if (moves == 1){
+                bool moved = true;
+                story_checked_step(m_rt, opposite(m_forth), false, false, m_kind, m_where, true, &moved);
+                if (!moved){
+                    //  In the way: the player is there already (see step()).
+                    m_rt.console.log(
+                        m_where + ": the step " + direction_word(opposite(m_forth)) +
+                        " to the first grass tile does not happen. Taking the player to be on it already.",
+                        COLOR_ORANGE
+                    );
+                }
+                m_pos = 0;
+            }else{
+                int made = 0;
+                bool sure = false;
+                story_grass_run(m_rt, opposite(m_forth), moves, m_kind, m_where, true, made, sure);
+                m_pos = std::max(0, m_pos - std::max(0, made));
             }
+            m_forward = true;
             if (!m_has_picture){
+                m_pos = 0;
                 return;
             }
         }
     }
 
-    //  One step of the back and forth: forth from the first tile, back
-    //  from the second. A step that does not happen (something is in the
-    //  way) most likely means that the player already stands on the tile it
-    //  goes to: a step the count got wrong, with no clear picture to tell.
-    //  Then the count goes by that. Neither way: the player is somewhere
-    //  else, and the program stops.
-    StoryBattleResult step(bool& away, StoryBattleKind kind, bool throw_on_loss = true){
-        const DpadPosition direction = away ? opposite(m_forth) : m_forth;
-        bool moved = true;
+    //  The next run along the line: to the end it is heading for (and turn
+    //  around there). A run that does not move at all (something is in the
+    //  way) most likely means that the player already stands where it
+    //  goes: a count that got it wrong, with no clear picture to tell. Then
+    //  the count goes by that. Twice in a row: the player is somewhere else,
+    //  and the program stops.
+    StoryBattleResult step(StoryBattleKind kind, bool throw_on_loss = true){
+        int target = m_forward ? m_length - 1 : 0;
+        if (m_pos == target){
+            m_forward = !m_forward;
+            target = m_forward ? m_length - 1 : 0;
+        }
+        const int moves = std::abs(target - m_pos);
+        const int sign = target > m_pos ? 1 : -1;
+        const DpadPosition direction = sign > 0 ? m_forth : opposite(m_forth);
         const uint64_t false_before = m_rt.false_battles;
-        StoryBattleResult result = story_checked_step(
-            m_rt, direction, false, false, kind, m_where, throw_on_loss, &moved
-        );
-        away = !away;
+
+        bool moved = true;
+        bool sure = true;
+        StoryBattleResult result;
+        if (moves == 1){
+            result = story_checked_step(
+                m_rt, direction, false, false, kind, m_where, throw_on_loss, &moved
+            );
+            if (moved){
+                m_pos = target;
+            }
+        }else{
+            int made = 0;
+            result = story_grass_run(m_rt, direction, moves, kind, m_where, throw_on_loss, made, sure);
+            moved = made > 0 || result != StoryBattleResult::NO_BATTLE;
+            if (made > moves){
+                //  Past the end of the line (the input lasted too long):
+                //  look, and back onto it.
+                sure = false;
+            }
+            m_pos = std::max(0, std::min(m_length - 1, m_pos + sign * std::max(0, made)));
+        }
+        if (result == StoryBattleResult::LOST){
+            return result;      //  At the Pokemon Center.
+        }
+
         if (m_rt.false_battles != false_before){
             //  The screen faded but no battle came: the player may have
-            //  stepped onto a warp off the two tiles (the Mansion's door,
-            //  next to the training spot: out and in again for 20 minutes).
+            //  stepped onto a warp off the line (the Mansion's door, next
+            //  to the training spot: out and in again for 20 minutes).
             //  Look where the player is.
-            if (check(away)){
+            if (check()){
                 m_false_in_row = 0;
             }else if (++m_false_in_row >= 2){
                 OperationFailedExceptionWithScreenshot::fire(
@@ -1106,6 +1160,9 @@ public:
             }
         }else if (result != StoryBattleResult::NO_BATTLE){
             m_false_in_row = 0;
+        }else if (!sure){
+            //  The video did not count the run well: look.
+            check();
         }
         if (moved){
             m_not_moved = 0;
@@ -1119,21 +1176,39 @@ public:
                 m_rt.console
             );
         }
+        if (moves > 1 && check()){
+            m_rt.console.log(
+                m_where + ": the run " + direction_word(direction) + " did not move. Going on from grass tile " +
+                std::to_string(m_pos + 1) + ", as the video says.",
+                COLOR_ORANGE
+            );
+            return result;
+        }
         m_rt.console.log(
-            m_where + ": the step " + direction_word(direction) + " does not happen. Taking the player to be on the " +
-            (away ? "second" : "first") + " grass tile already.",
+            m_where + ": the way " + direction_word(direction) + " does not happen. Taking the player to be at that end already.",
             COLOR_ORANGE
         );
+        m_pos = target;
         return result;
     }
 
 private:
+    int forth_x() const{
+        return m_forth == DPAD_LEFT ? -1 : (m_forth == DPAD_RIGHT ? 1 : 0);
+    }
+    int forth_y() const{
+        return m_forth == DPAD_UP ? -1 : (m_forth == DPAD_DOWN ? 1 : 0);
+    }
+
     StoryRuntime& m_rt;
     DpadPosition m_forth;
+    int m_length;
     StoryBattleKind m_kind;
     std::string m_where;
     bool m_has_picture = false;
     AutoStoryScroll::Screen m_picture;
+    int m_pos = 0;              //  0 = the first tile, m_length - 1 = the far end
+    bool m_forward = true;      //  heading for the far end
     int m_not_moved = 0;
     int m_false_in_row = 0;
 };
@@ -1154,6 +1229,7 @@ void grind_front(
     const int target = step.p0 + extra_levels;
     const int heal_every = std::max(1, step.p1);
     const DpadPosition forth = step.dir;
+    const int length = std::max(2, (int)step.p4);
     std::vector<int32_t> to_grass = script.leg_list(step.legs_a);
     std::vector<int32_t> to_nurse = script.leg_list(step.legs_b);
     std::vector<int32_t> to_grass_again = script.leg_list(step.legs_c);
@@ -1178,7 +1254,7 @@ void grind_front(
         return;
     }
     walk(to_grass);
-    GrassSpot spot(rt, forth, StoryBattleKind::WILD_FIGHT, where);
+    GrassSpot spot(rt, forth, length, StoryBattleKind::WILD_FIGHT, where);
     spot.arrived();
 
     //  If the level cannot be read, stop after a fixed number of battles.
@@ -1186,7 +1262,6 @@ void grind_front(
     uint64_t battles = 0;
     uint64_t steps_without_battle = 0;
     int since_heal = 0;
-    bool away = false;      //  on the second grass tile
     bool done = level >= target;
 
     //  A member below the strongest wild Pokemon here only takes part: the
@@ -1218,7 +1293,7 @@ void grind_front(
 
     while (!done){
         update_share();
-        StoryBattleResult result = spot.step(away, StoryBattleKind::WILD_FIGHT, false);
+        StoryBattleResult result = spot.step(StoryBattleKind::WILD_FIGHT, false);
         if (result == StoryBattleResult::NO_BATTLE){
             steps_without_battle++;
             if (steps_without_battle > 1000){
@@ -1237,7 +1312,6 @@ void grind_front(
         if (result == StoryBattleResult::LOST){
             //  Back at the Pokemon Center in front of the nurse, healed.
             console.log("The party fainted while training. Back to the grass.", COLOR_ORANGE);
-            away = false;
             since_heal = 0;
             if (rt.save_after_heal){
                 story_save(rt, rt.has_dex);
@@ -1251,7 +1325,7 @@ void grind_front(
 
         //  The battle is a moment the screen stands still anyway: check the
         //  count of the steps.
-        spot.check(away);
+        spot.check();
 
         if (rt.memory.level_up_seen){
             rt.memory.level_up_seen = false;
@@ -1281,7 +1355,7 @@ void grind_front(
             (hp_known && hp < 0.5) ||
             since_heal >= (hp_known ? heal_every * 4 : heal_every)
         ){
-            spot.to_first_tile(away);
+            spot.to_first_tile();
             walk(to_nurse);
             //  The training goes on: after a reset, it starts again from
             //  this save in front of the nurse.
@@ -1311,7 +1385,7 @@ void grind_front(
     rt.battle.share_position = 0;
     rt.battle.slow_share_position = 0;
     console.log(where + ": level " + std::to_string(level) + " reached.", COLOR_BLUE);
-    spot.to_first_tile(away);
+    spot.to_first_tile();
     walk(to_nurse);
     story_heal(rt, where, member);
 }
@@ -1436,23 +1510,22 @@ void story_catch(StoryRuntime& rt, const StoryStep& step){
     rt.battle.catch_balls = (uint16_t)std::max(1, step.p0);
 
     const DpadPosition forth = step.dir;
-    GrassSpot spot(rt, forth, StoryBattleKind::WILD_RUN, step.label);
+    GrassSpot spot(rt, forth, std::max(2, (int)step.p4), StoryBattleKind::WILD_RUN, step.label);
     spot.arrived();
-    bool away = false;
     bool caught = false;
     WallClock deadline = current_time() + std::chrono::minutes(30);
     while (current_time() < deadline){
-        StoryBattleResult result = spot.step(away, StoryBattleKind::CATCH);
+        StoryBattleResult result = spot.step(StoryBattleKind::CATCH);
         if (result == StoryBattleResult::CAUGHT){
             caught = true;
             break;
         }
         if (result != StoryBattleResult::NO_BATTLE){
-            spot.check(away);
+            spot.check();
         }
     }
     rt.battle.catch_species.clear();
-    spot.to_first_tile(away);
+    spot.to_first_tile();
     rt.battle = saved;
     if (!caught){
         OperationFailedExceptionWithScreenshot::fire(

@@ -774,6 +774,56 @@ class Builder:
             raise StoryError("No usable grass on %s" % map_id)
         return out
 
+    #  The longest straight line of grass a training spot is walked along
+    #  (end to end, the position checked on the video against the first
+    #  tile, up to that many tiles away): 5 across, 4 up and down (the
+    #  screen is 15 by 10 tiles).
+    STRIP_MAX = {"left": 5, "right": 5, "up": 4, "down": 4}
+
+    def grass_strips(self, map_id, tiles):
+        """Straight lines of training grass (grass_tiles) to walk end to
+        end: start tile -> (direction, length). Off the ways of people
+        walking around and of trainers, without boulders, item balls or
+        trees, all at one height and of one kind (no ledge). In the dark
+        (nothing on the video to check the position with) two tiles only."""
+        grass = self.grass_tiles(map_id, tiles)
+        v = self.engine.view(map_id)
+        dark = map_id in self.gd.dark_maps
+
+        def free(x, y):
+            return ((map_id, x, y) in grass and (x, y) not in v.soft and (x, y) not in v.blocked
+                    and (x, y) not in v.boulders and (x, y) not in v.items and (x, y) not in v.cut_trees
+                    and not v.tile(x, y)[1])
+
+        strips = {}
+        for (_, x, y) in sorted(grass):
+            if not free(x, y):
+                continue
+            ref = v.tile(x, y)
+            for dname in ("left", "right", "up", "down"):
+                dx, dy = DIRS[dname]
+                cap = 2 if dark else self.STRIP_MAX[dname]
+                n = 1
+                while n < cap:
+                    tx, ty = x + dx * n, y + dy * n
+                    t = v.tile(tx, ty) if self.d.maps[map_id].in_bounds(tx, ty) else None
+                    if t is None or not free(tx, ty) or t[2] != ref[2] or t[3] != ref[3]:
+                        break
+                    n += 1
+                if n >= 2 and n > strips.get((map_id, x, y), (None, 0))[1]:
+                    strips[(map_id, x, y)] = (dname, n)
+        return strips
+
+    def strip_goal(self, map_id, tiles):
+        """The tiles to walk to for training: the starts of the longest
+        grass lines there (4 tiles or more count the same, the nearest is
+        taken), and those lines. Without any: the plain grass tiles."""
+        strips = self.grass_strips(map_id, tiles)
+        if not strips:
+            return self.grass_tiles(map_id, tiles), {}
+        best = min(4, max(n for _, n in strips.values()))
+        return {k for k, (_, n) in strips.items() if n >= best}, strips
+
     def osc_dir(self, grass, label):
         """Direction to the second grass tile to walk back and forth on."""
         grass_pos = self.pos
@@ -813,12 +863,16 @@ class Builder:
         self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")
 
         sub = []
-        self.walk_to(grass, label + "_ToGrass", sub)
+        goal, strips = self.strip_goal(g["map"], g["tiles"])
+        self.walk_to(goal, label + "_ToGrass", sub)
         legs_to_grass = [s["leg"] for s in sub if s["type"] == "WALK"]
         if any(s["type"] != "WALK" for s in sub):
             raise StoryError("Grind route to grass must be plain walking: " + label)
         grass_pos = self.pos
-        osc = self.osc_dir(grass, label)
+        if tuple(grass_pos[:3]) in strips:
+            osc, length = strips[tuple(grass_pos[:3])]
+        else:
+            osc, length = self.osc_dir(grass, label), 2
 
         sub2 = []
         self.walk_to(nurse_goals, label + "_ToNurse", sub2)
@@ -842,6 +896,8 @@ class Builder:
             #  A team member below the level of the strongest wild Pokemon
             #  here only takes part (shared experience) until it gets there.
             "p3": self.gd.wild_max_level.get(g["map"], 0) if g.get("slot") else 0,
+            #  The grass line walked along: this many tiles from the start.
+            "p4": length,
             "legs_to_grass": legs_to_grass, "legs_to_nurse": legs_to_nurse, "legs_back": legs_back,
         })
         #  The grind ends healed at the nurse.
@@ -1124,12 +1180,16 @@ class Builder:
         c = step["catch"]
         label = step.get("label", "Catch")
         grass = self.grass_tiles(c["map"], c["tiles"])
+        goal, strips = self.strip_goal(c["map"], c["tiles"])
         sub = []
-        self.walk_to(grass, label + "_ToGrass", sub)
+        self.walk_to(goal, label + "_ToGrass", sub)
         out.extend(sub)
-        osc = self.osc_dir(grass, label)
+        if tuple(self.pos[:3]) in strips:
+            osc, length = strips[tuple(self.pos[:3])]
+        else:
+            osc, length = self.osc_dir(grass, label), 2
         out.append({"type": "CATCH", "label": label, "text": ",".join(c["species"]), "p0": c.get("balls", 5),
-                    "dir": osc})
+                    "dir": osc, "p4": length})
 
     # ------------------------------------------------------------ segments
     def build(self, spec):

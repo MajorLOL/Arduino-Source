@@ -105,9 +105,10 @@ def write_cpp(results, path):
                 d = st.get("dir")
                 if d is None and st["type"] in DIR_STEPS:
                     d = st.get("text") or None
-                steps_out.append("    {StepType::%s, %s, %d, %d, %d, %d, %d, %s, %s, %d, %d, %d}," % (
+                steps_out.append("    {StepType::%s, %s, %d, %d, %d, %d, %d, %d, %s, %s, %d, %d, %d}," % (
                     st["type"], cstr(st.get("label", "")), st.get("leg", -1),
                     int(st.get("p0", 0)), int(st.get("p1", 0)), int(st.get("p2", -1)), int(st.get("p3", 0)),
+                    int(st.get("p4", 0)),
                     DPAD[d], cstr(st.get("text", "")), offs[0], offs[1], offs[2]))
             seg_out.append("    {%s, %s, %d, %s, %d, %d}," % (
                 cstr(seg["id"]), cstr(seg["title"]), seg["chapter"],
