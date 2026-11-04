@@ -215,6 +215,13 @@ class Builder:
 
     def close_leg(self, leg, out):
         self.note_visited(leg)
+        #  Thin ice walked on cracks (it breaks under the next step there).
+        thin = self.d.behaviors.by_name.get("MB_THIN_ICE", -1)
+        for mid, x, y in leg["points"]:
+            m = self.d.maps[mid]
+            if m.in_bounds(x, y) and self.engine.view(mid).tile(x, y)[3] == thin:
+                self.state.ice_cracked.setdefault(mid, set()).add((x, y))
+                self.engine.invalidate()
         leg["run"] = self.can_run(leg)
         if leg["runs"] or leg["push"] or leg["face"] or leg["end"] != "STOP":
             self.legs.append(leg)
@@ -435,6 +442,16 @@ class Builder:
                 self.add_run(leg, d, RUN_CHECKED if "encounter" in risk else RUN_WALK)
                 self.pos = (node[0], node[1], node[2], d)
                 leg["points"].append((node[0], node[1], node[2]))
+            elif k == "waterfall":
+                #  EventScript_Waterfall: "Would you like to use WATERFALL?"
+                leg["face"] = d
+                leg["end"] = "INTERACT"
+                self.close_leg(leg, out)
+                out.append({"type": "TALK_YES", "label": "Waterfall"})
+                out.append({"type": "WAIT", "label": "Waterfall climb", "p0": 2500 + 500 * edge["tiles"]})
+                self.pos = (node[0], node[1], node[2], "up")
+                part += 1
+                leg = self.new_leg("%s_%d" % (label, part))
             elif k == "surf_start":
                 leg["face"] = d
                 leg["end"] = "INTERACT"
@@ -673,6 +690,7 @@ class Builder:
         self.state.extra_blocked.pop(map_id, None)
         self.state.cut_done.pop(map_id, None)
         self.state.smash_done.pop(map_id, None)
+        self.state.ice_cracked.pop(map_id, None)
         self.maybe_came.pop(map_id, None)
         self.maybe_at.pop(map_id, None)
         self.engine.invalidate()
@@ -745,6 +763,14 @@ class Builder:
             out.append({"type": "SKIP_IF_DEX", "label": step.get("label", "Enough species?"), "p0": len(sub),
                         "p1": u["count"], "text": ",".join(u["owned"])})
             out.extend(sub)
+            return
+        if "field_move" in step:
+            #  A field move from the party menu, facing "face" (Cut on the
+            #  braille of the Dotted Hole: CutMoveRuinValleyCheck).
+            out.append({"type": "FIELD_MOVE", "label": step.get("label", "Field move"), "p0": step["slot"],
+                        "text": step["field_move"], "dir": step.get("face")})
+            if step.get("face"):
+                self.pos = (self.pos[0], self.pos[1], self.pos[2], step["face"])
             return
         if "stop" in step:
             out.append({"type": "STOP", "label": step.get("label", "Stop"), "text": step["stop"]})
@@ -893,6 +919,9 @@ class Builder:
             return
         if "dex" in step:
             self.dex(step, out)
+            return
+        if "roam" in step:
+            self.roam(step, out)
             return
         if "elevator" in step:
             e = step["elevator"]
@@ -1454,6 +1483,37 @@ class Builder:
                 self.set_state({"objects": {mid: {key: {"x": nb[0], "y": nb[1]}}}})
                 cur[nb] = key
             self.pos = (self.pos[0], self.pos[1], self.pos[2], d)
+
+    def roam(self, step, out):
+        """The roaming legendary: to the grass of a route, a ROAM step that
+        walks back and forth there, with legs into a building next to it
+        (legs_to_nurse) and back onto the first grass tile (legs_to_grass):
+        each warp sends the roamer to another route
+        (RoamerMoveToOtherLocationSet)."""
+        r = step["roam"]
+        label = step.get("label", "Roam")
+        building = self.d.map(r["building"])
+        goal, strips = self.strip_goal(r["map"], r["tiles"])
+        self.walk_to(goal, label + "_ToGrass", out)
+        grass_pos = self.pos
+        if tuple(grass_pos[:3]) in strips:
+            osc, length = strips[tuple(grass_pos[:3])]
+        else:
+            osc, length = self.osc_dir(self.grass_tiles(r["map"], r["tiles"]), label), 2
+        sub = []
+        self.walk_to(MapGoals([building.id]), label + "_In", sub)
+        legs_in = [s["leg"] for s in sub if s["type"] == "WALK"]
+        if any(s["type"] != "WALK" for s in sub):
+            raise StoryError("Roam route into the building must be plain walking: " + label)
+        sub = []
+        self.walk_to({tuple(grass_pos[:3])}, label + "_Out", sub)
+        legs_out = [s["leg"] for s in sub if s["type"] == "WALK"]
+        if any(s["type"] != "WALK" for s in sub):
+            raise StoryError("Roam route back to the grass must be plain walking: " + label)
+        out.append({"type": "ROAM", "label": label, "text": ",".join(r["species"]),
+                    "p0": r.get("per_cycle", 3), "p1": r.get("minutes", 300), "dir": osc, "p4": length,
+                    "legs_to_grass": legs_out, "legs_to_nurse": legs_in})
+        self.pos = grass_pos
 
     def dex(self, step, out):
         """For the POKeDEX: to grass (a cave) of the place, then a DEX step

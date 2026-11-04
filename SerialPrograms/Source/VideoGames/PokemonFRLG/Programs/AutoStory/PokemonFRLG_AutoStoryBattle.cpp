@@ -1323,6 +1323,7 @@ StoryBattleResult run_story_battle(
     bool shiny_caught = false;
     bool legendary = false;
     bool dex_catch = false;     //  a species wanted for the POKeDEX
+    bool roamer = false;        //  the roaming legendary: the MASTER BALL
     int last_ball_rank = 0;
     //  Weakening a legendary Pokemon (settings.weaken_legendary): its HP
     //  before the last hit, the most one hit took, the hits so far.
@@ -1399,6 +1400,20 @@ StoryBattleResult run_story_battle(
                 shiny_catching = true;
                 shiny_safari = false;
                 console.log("Catching " + (slug.empty() ? std::string("the legendary Pokemon") : slug) + ".", COLOR_BLUE);
+            }
+            if (!shiny_checked && wild && !settings.roamer_species.empty()){
+                std::string slug;
+                read_opponent(console, slug);
+                if (!slug.empty() && settings.roamer_species.count(slug) != 0){
+                    shiny_checked = true;
+                    roamer = true;
+                    legendary = true;
+                    shiny_wanted = true;
+                    shiny_catching = true;
+                    shiny_safari = false;
+                    memory.shiny_species = slug;
+                    console.log("The roaming " + slug + "! The MASTER BALL, before it runs.", COLOR_BLUE);
+                }
             }
             if (!shiny_checked){
                 shiny_checked = true;
@@ -1515,7 +1530,7 @@ StoryBattleResult run_story_battle(
                         //  Up to 99 balls at half a minute each.
                         deadline = current_time() + 150min;
                     }
-                    switch (throw_best_ball(console, context, legendary && settings.legendary_master, last_ball_rank, dex_catch)){
+                    switch (throw_best_ball(console, context, legendary && (settings.legendary_master || roamer), last_ball_rank, dex_catch)){
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;

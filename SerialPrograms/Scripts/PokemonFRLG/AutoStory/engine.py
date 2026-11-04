@@ -45,6 +45,8 @@ COST_CUT = 12.0
 COST_SURF_START = 10.0
 COST_LEDGE = 2.0
 COST_SPIN = 0.5
+#  Thin ice that breaks: the floor the player falls to (warphole).
+ICE_FALL_BELOW = {"MAP_FOUR_ISLAND_ICEFALL_CAVE_1F": "MAP_FOUR_ISLAND_ICEFALL_CAVE_B1F"}
 COST_ITEM = 20.0               # pick up an item ball that is in the way
 
 DIR_LIST = ["up", "down", "left", "right"]
@@ -322,6 +324,7 @@ class WorldState:
         self.extra_blocked = {}             # map_id -> set((x,y)) (e.g. a trainer that moved)
         self.cut_done = {}                  # map_id -> set((x,y)) trees cut during this visit
         self.smash_done = {}                # map_id -> set((x,y)) rocks smashed during this visit
+        self.ice_cracked = {}               # map_id -> set((x,y)) thin ice walked on during this visit
         self.map_vars = {}                  # map_id -> {VAR_TEMP_x: value} set by ON_TRANSITION
 
     def clone(self):
@@ -775,6 +778,27 @@ class Engine:
             if tbeh in self.jump.values():
                 continue
 
+            #  Waterfalls (HM07, FLAG_BADGE07_GET): surfing north at the
+            #  foot, A (EventScript_Waterfall), FLDEFF_USE_WATERFALL takes
+            #  the player up to the water above. Onto one any other way the
+            #  current pushes back south.
+            if tbeh == self.B.by_name.get("MB_WATERFALL", -1):
+                if surfing and d == "up" and self.state.abilities.get("waterfall"):
+                    cm, cx, cy, tiles = tm, nx, ny, 1
+                    while True:
+                        t2 = self.neighbor_tile(cm, cx, cy, "up")
+                        if t2 is None:
+                            break
+                        cm, cx, cy = t2
+                        if self.view(cm.id).tile(cx, cy)[3] != self.B.by_name.get("MB_WATERFALL", -1):
+                            break
+                        tiles += 1
+                    if self.can_stand(cm.id, cx, cy) or self.is_water(self.view(cm.id).tile(cx, cy)[3]):
+                        yield (cm.id, cx, cy, 1, True), {"kind": "waterfall", "dir": "up", "tiles": tiles,
+                                                         "cost": COST_SURF_START + 2 * COST_STEP * tiles,
+                                                         "risk": set()}
+                continue
+
             if tbeh in self.blocked_dirs[OPPOSITE[d]]:
                 continue
             if (nx, ny) in tv.blocked or (nx, ny) in tv.boulders:
@@ -818,6 +842,35 @@ class Engine:
                             "warp": (tm.id, nx, ny), "arrive_facing": af,
                         }
                 continue
+            #  Ice (MB_ICE, Icefall Cave B1F): ForcedMovement_Slip on and on
+            #  the way the player went, until a tile that is not ice, or
+            #  one in the way (then on the ice, free to turn).
+            if tbeh == self.B.by_name.get("MB_ICE", -1):
+                sm, sx, sy, sdir, tiles = self.ice_slide(tm, nx, ny, d)
+                se = self.view(sm).tile(sx, sy)[2]
+                yield (sm, sx, sy, elev if se in (0, 15) else se, False), {
+                    "kind": "spin", "dir": d, "slide_dir": sdir, "slide_tiles": tiles,
+                    "cost": COST_STEP + COST_SPIN * tiles,
+                    "risk": self.tile_risk(tv, nx, ny, False),
+                }
+                continue
+            #  Thin ice (Icefall Cave 1F, IcefallCaveIcePerStepCallback):
+            #  it cracks when walked on; walked on again it breaks, and the
+            #  player falls through to the floor below at the same place
+            #  (FourIsland_IcefallCave_1F_EventScript_FallDownHole).
+            if tbeh == self.B.by_name.get("MB_THIN_ICE", -1):
+                if (nx, ny) in self.state.ice_cracked.get(tm.id, set()):
+                    below = ICE_FALL_BELOW.get(tm.id)
+                    if below and self.can_stand(below, nx, ny, True):
+                        yield self.node_at(below, nx, ny), {
+                            "kind": "stepwarp", "dir": d, "cost": COST_WARP + 10.0,
+                            "warp": (tm.id, nx, ny), "arrive_facing": d,
+                        }
+                    continue
+                yield (tm.id, nx, ny, elev if telev in (0, 15) else telev, False), dict(
+                    self.walk_edge(tv, nx, ny, d, False, goal), cost=COST_STEP * 3)
+                continue
+
             #  Spinners.
             if tbeh in self.spin:
                 slide = self.slide(tm, nx, ny, self.spin[tbeh])
@@ -864,6 +917,27 @@ class Engine:
         if (x, y) in tv.sight:
             risk.add("trainer")
         return risk
+
+    def ice_slide(self, m, x, y, d):
+        """From the ice tile (x,y) entered going d: on until a tile that is
+        not ice, or the next one is in the way. Returns (map, x, y, d, tiles)."""
+        ice = self.B.by_name.get("MB_ICE", -1)
+        tiles = 0
+        while tiles < 100:
+            v = self.view(m.id)
+            if v.tile(x, y)[3] != ice:
+                break
+            t = self.neighbor_tile(m, x, y, d)
+            if t is None:
+                break
+            tm, nx, ny = t
+            tv = self.view(tm.id)
+            _, col, _, tbeh, _ = tv.tile(nx, ny)
+            if col or (nx, ny) in tv.blocked or (nx, ny) in tv.boulders or tbeh in self.blocked_dirs[OPPOSITE[d]]:
+                break
+            m, x, y = tm, nx, ny
+            tiles += 1
+        return m.id, x, y, d, tiles
 
     def slide(self, m, x, y, d):
         """Follow a spinner slide from (x,y) going d. Returns (map, x, y, last_dir, tiles)."""

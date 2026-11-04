@@ -129,6 +129,10 @@ enum class StepType : uint8_t{
                         //  caught by the program at least p1 species, skip the next p0 steps;
                         //  p2 & 1: fewer stop the program
     STOP,               //  the program stops here: text says why
+    FIELD_MOVE,         //  the field move text (CUT...) from party slot p0's menu, facing dir
+    ROAM,               //  the roaming legendary (text: its species) on the grass line (dir, p4);
+                        //  after p0 battles: legs_b into a building, legs_a back (each warp
+                        //  sends it somewhere else); at most p1 minutes
 };
 
 struct StoryStep{

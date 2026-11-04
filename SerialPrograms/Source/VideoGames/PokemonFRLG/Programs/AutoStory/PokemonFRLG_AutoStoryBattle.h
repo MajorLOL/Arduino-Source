@@ -174,6 +174,10 @@ struct StoryBattleSettings{
     std::set<std::string> dex_species;
     int dex_max_throws = 20;
 
+    //  The roaming legendary (StepType::ROAM): met, it gets the MASTER BALL
+    //  at once (it flees on its first turn; a ball goes before any move).
+    std::set<std::string> roamer_species;
+
     //  Trainer battles: below a third of its HP, the Pokemon that is out
     //  gets the best healing item of the bag (Full Restore, Max Potion,
     //  Hyper/Super Potion...). In the League, played as one gauntlet (the PP

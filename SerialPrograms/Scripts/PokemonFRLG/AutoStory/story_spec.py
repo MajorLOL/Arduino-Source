@@ -1873,6 +1873,247 @@ CHAPTER15 = [
     },
 ]
 
+# ---------------------------------------------------------------- chapter 16
+#  The Ruby (a gem: Celio's Network Machine for trading with the Hoenn games
+#  needs it and the Sapphire). With the National POKeDEX Celio asks for it
+#  (OneIsland_PokemonCenter_1F_EventScript_CelioRequestRuby): the cave of
+#  the Ruby Path opens on Mt. Ember (MtEmber_Exterior_EventScript_OpenCave),
+#  two Rockets in front of it tell the first password of the Rocket
+#  Warehouse and fight. The Ruby lies on B5F. Celio gives the Rainbow Pass
+#  for it (all seven islands) and asks for the Sapphire.
+CHAPTER16 = [
+    {
+        "id": "C16_01_CELIO_RUBY", "chapter": 16,
+        "title": "One Island: Celio asks for the Ruby (a gem of the Sevii Islands)",
+        #  Celio stands where OneIsland_PokemonCenter_1F_EventScript_
+        #  SetBillCelioReadyToLeavePos put him (setobjectxyperm: for good).
+        "state": {"objects": {"MAP_ONE_ISLAND_POKEMON_CENTER_1F": {"LOCALID_CELIO": {"x": 14, "y": 8}}}},
+        "steps": [heal(PC["VERMILION"], "LabToVermilionPC"), save()]
+        + vermilion_ferry(0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioRuby"),
+            cutscene(3000, 60000, "Celio: the Ruby"),
+            setst(vars={"VAR_MAP_SCENE_MT_EMBER_EXTERIOR": 1, "VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 4},
+                  script_tiles=[["MAP_MT_EMBER_EXTERIOR", "MtEmber_Exterior_EventScript_OpenCave"]]),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "CelioToNurse"),
+            save(),
+        ],
+    },
+    {
+        "id": "C16_02_RUBY_PATH", "chapter": 16,
+        "title": "Mt. Ember: the Rockets' password, the Ruby Path, the Ruby",
+        "steps": [
+            #  MtEmber_Exterior_EventScript_RocketPasswordScene (x 37-39, y 43).
+            goto("MAP_MT_EMBER_EXTERIOR", [[37, 43], [38, 43], [39, 43]], "RocketPassword", trigger=True),
+            cutscene(3000, 60000, "The Rockets' password"),
+            setst(vars={"VAR_MAP_SCENE_MT_EMBER_EXTERIOR": 2}),
+            talk("MAP_MT_EMBER_EXTERIOR", "LOCALID_MT_EMBER_GRUNT1", mode="battle", label="MtEmberGrunt1"),
+            cutscene(1500, 30000, "Grunt 1"),
+            talk("MAP_MT_EMBER_EXTERIOR", "LOCALID_MT_EMBER_GRUNT2", mode="battle", label="MtEmberGrunt2"),
+            #  MtEmber_Exterior_EventScript_DefeatedBothGrunts: they go.
+            cutscene(1500, 30000, "Grunt 2, the Rockets leave"),
+            setst(flags=["FLAG_HIDE_MT_EMBER_EXTERIOR_ROCKETS"]),
+            save(),
+            #  Boulders (Strength) and rocks (Rock Smash) on B2F and B3F.
+            goto("MAP_MT_EMBER_RUBY_PATH_B2F", [[2, 7]], "ToRubyPathB2F"),
+            {"boulder": {"open_to": [[13, 8], [14, 9]]}, "label": "RubyPathB2F"},
+            goto("MAP_MT_EMBER_RUBY_PATH_B3F", [[2, 4]], "ToRubyPathB3F"),
+            {"boulder": {"open_to": [[5, 18], [4, 19], [6, 18]]}, "label": "RubyPathB3F"},
+            talk("MAP_MT_EMBER_RUBY_PATH_B5F", "LOCALID_RUBY", mode="talk", label="Ruby"),
+            cutscene(1500, 30000, "The Ruby"),
+            #  B3F and B2F load again on the way up: their boulders are back.
+            setst(flags=["FLAG_GOT_RUBY", "FLAG_HIDE_RUBY"],
+                  reset_objects=["MAP_MT_EMBER_RUBY_PATH_B3F", "MAP_MT_EMBER_RUBY_PATH_B2F", "MAP_MT_EMBER_EXTERIOR"]),
+            #  Up again: B3F from the stairs of B4F, its boulders out of the
+            #  way to the stairs up (19, 19).
+            goto("MAP_MT_EMBER_RUBY_PATH_B3F", [[5, 18]], "BackToRubyPathB3F"),
+            {"boulder": {"open_to": [[19, 18], [20, 19]]}, "label": "RubyPathB3FBack"},
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "RubyToOneIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C16_03_RAINBOW_PASS", "chapter": 16,
+        "title": "Celio: the Ruby in the machine, the Rainbow Pass; the Sapphire next",
+        "steps": [
+            #  OneIsland_PokemonCenter_1F_EventScript_GiveCelioRuby: "May I
+            #  ask one more favor?" YES.
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="yes", label="CelioGiveRuby"),
+            cutscene(3000, 90000, "The Rainbow Pass"),
+            setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 5}, flags=["FLAG_SYS_SEVII_MAP_4567"],
+                  script_tiles=[["MAP_ONE_ISLAND_POKEMON_CENTER_1F", "OneIsland_PokemonCenter_1F_EventScript_SetRubyMetatile"]]),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "CelioToNurse2"),
+            save(),
+        ],
+    },
+]
+
+
+# ---------------------------------------------------------------- chapter 17
+#  The Sapphire (the other gem). The way to it: Four Island, Icefall Cave
+#  (HM07 Waterfall there; Lorelei and the poachers in the back: only then
+#  the scientist steps away from the door of the Dotted Hole), Six Island
+#  (Ruin Valley: Cut on the braille of the door, the Dotted Hole; Gideon
+#  takes the Sapphire to the Rocket Warehouse, his password), Five Island
+#  (the warehouse: spinners, the admins, Gideon), and back to Celio. With
+#  both gems in the Network Machine the roaming legendary starts roaming
+#  (OneIsland_PokemonCenter_1F_EventScript_GiveCelioSapphire, InitRoamer).
+
+
+def rainbow_ferry(harbor_map, page0, page1, dest_harbor, label):
+    """The Seagallop with the Rainbow Pass (DrawSeagallopDestinationMenu):
+    page 0 lists four destinations (Vermilion, One... Four, without the
+    island the ferry leaves from), then "Other"; page 1 three of Four...
+    Seven. page0/page1: the row to pick (page1 None: picked on page 0)."""
+    steps = [talk(harbor_map, xy=[8, 6], mode="plain", label=label),
+             press("A", 1, 2500, label + "_Talk")]
+    if page0:
+        steps.append(press("DOWN", page0, 500, label + "_Menu"))
+    steps.append(press("A", 1, 1500, label + "_Pick"))
+    if page1 is not None:
+        if page1:
+            steps.append(press("DOWN", page1, 500, label + "_Menu2"))
+        steps.append(press("A", 1, 1500, label + "_Pick2"))
+    return steps + [cutscene(8000, 90000, "Ferry"), pos(dest_harbor, 8, 5)]
+
+
+WATERFALL_RANK = {v: 5 + (v in FLY_VARIANTS) for v in STARTERS}
+
+CHAPTER17 = [
+    {
+        "id": "C17_01_ICEFALL_CAVE", "chapter": 17,
+        "title": "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon",
+        "steps": rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 3, None, "MAP_FOUR_ISLAND_HARBOR", "FerryToFourIsland") + [
+            heal("MAP_FOUR_ISLAND_POKEMON_CENTER_1F", "HarborToFourIslandPC"),
+            save(),
+            #  1F: over the thin ice (8, 14), (8, 10), (8, 9) up to the thin
+            #  ice (8, 3), a step back, onto it again: it breaks, the fall
+            #  to B1F (FourIsland_IcefallCave_1F_EventScript_FallDownHole),
+            #  on the strip that leads onto the ice there.
+            goto("MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", [[8, 3]], "ToThinIce"),
+            goto("MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", [[8, 4]], "OffTheThinIce"),
+            #  B1F: the ladder (12, 3) up to the north-east of 1F, the thin
+            #  ice (16, 9) there twice: the fall onto the ice of B1F (16, 9),
+            #  from where it slides to the ladder up to the HM07 corner.
+            goto("MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", [[16, 9]], "ToThinIce2"),
+            goto("MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", [[16, 8]], "OffTheThinIce2"),
+            talk("MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", xy=[12, 16], mode="talk", label="HM07"),
+            cutscene(1000, 20000, "HM07"),
+            setst(flags=["FLAG_HIDE_FOUR_ISLAND_ICEFALL_CAVE_1F_HM07"]),
+        ] + [only([v], [{"teach": {"hm_rank": WATERFALL_RANK[v], "party_slot": EEVEE_SLOT[v],
+                                    "move": "WATERFALL", "forget": -1}, "label": "Teach WATERFALL"}])
+             for v in STARTERS] + [
+            setst(abilities={"waterfall": True}),
+            save(),
+        ],
+    },
+    {
+        "id": "C17_02_LORELEI", "chapter": 17,
+        "title": "Icefall Cave: up the waterfall, Lorelei and the poachers",
+        "steps": [
+            #  FourIsland_IcefallCave_Back_EventScript_LoreleiRocketsScene
+            #  (x 11-13, y 18): from (12, 18) the player walks up 2, right,
+            #  up (PlayerToRockets); a Rocket fights.
+            goto("MAP_FOUR_ISLAND_ICEFALL_CAVE_BACK", [[12, 18]], "LoreleiScene", trigger=True),
+            cutscene(5000, 300000, "Lorelei and the poachers"),
+            setst(flags=["FLAG_HIDE_RUIN_VALLEY_SCIENTIST", "FLAG_HIDE_ICEFALL_CAVE_ROCKETS"],
+                  clear_flags=["FLAG_HIDE_LORELEI_IN_HER_HOUSE"],
+                  vars={"VAR_MAP_SCENE_ICEFALL_CAVE_BACK": 1}),
+            pos("MAP_FOUR_ISLAND_ICEFALL_CAVE_BACK", 13, 15, "left"),
+            heal("MAP_FOUR_ISLAND_POKEMON_CENTER_1F", "IcefallToFourIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C17_03_DOTTED_HOLE", "chapter": 17,
+        "title": "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)",
+        "steps": rainbow_ferry("MAP_FOUR_ISLAND_HARBOR", 4, 1, "MAP_SIX_ISLAND_HARBOR", "FerryToSixIsland") + [
+            heal("MAP_SIX_ISLAND_POKEMON_CENTER_1F", "HarborToSixIslandPC"),
+            save(),
+            #  CutMoveRuinValleyCheck: CUT from the party menu at (24, 25),
+            #  facing north; the door opens (CutMoveOpenDottedHoleDoor).
+            goto("MAP_SIX_ISLAND_RUIN_VALLEY", [[24, 25]], "ToDottedHoleDoor"),
+            {"field_move": "CUT", "slot": 1, "face": "up", "label": "Cut the braille"},
+            cutscene(2000, 20000, "The door opens"),
+            setst(flags=["FLAG_USED_CUT_ON_RUIN_VALLEY_BRAILLE"],
+                  script_tiles=[["MAP_SIX_ISLAND_RUIN_VALLEY", "SixIsland_RuinValley_EventScript_OpenDottedHoleDoor"]]),
+            #  SixIsland_DottedHole_SapphireRoom_EventScript_Sapphire.
+            talk("MAP_SIX_ISLAND_DOTTED_HOLE_SAPPHIRE_ROOM", "LOCALID_SAPPHIRE", mode="talk", label="Sapphire"),
+            cutscene(5000, 120000, "Gideon takes the Sapphire"),
+            setst(flags=["FLAG_HIDE_SAPPHIRE", "FLAG_HIDE_DOTTED_HOLE_SCIENTIST", "FLAG_LEARNED_YES_NAH_CHANSEY"]),
+            heal("MAP_SIX_ISLAND_POKEMON_CENTER_1F", "DottedHoleToSixIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C17_04_ROCKET_WAREHOUSE", "chapter": 17,
+        "title": "Five Island: the Rocket Warehouse, Gideon, the Sapphire back",
+        "steps": rainbow_ferry("MAP_SIX_ISLAND_HARBOR", 4, 1, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland") + [
+            heal("MAP_FIVE_ISLAND_POKEMON_CENTER_1F", "HarborToFiveIslandPC"),
+            save(),
+            #  FiveIsland_Meadow_EventScript_WarehouseDoor: both passwords.
+            talk("MAP_FIVE_ISLAND_MEADOW", xy=[12, 21], mode="talk", label="WarehouseDoor"),
+            cutscene(2000, 20000, "The door opens"),
+            setst(flags=["FLAG_UNLOCKED_ROCKET_WAREHOUSE"],
+                  script_tiles=[["MAP_FIVE_ISLAND_MEADOW", "FiveIsland_Meadow_EventScript_SetWarehouseDoorUnlocked"]]),
+            #  Through the spinners to FiveIsland_RocketWarehouse_EventScript_
+            #  Admin2Trigger (x 22-24, y 11): the admin turns, sees the
+            #  player, fights; then all the Rockets leave
+            #  (FiveIsland_RocketWarehouse_EventScript_DefeatedAdmin2).
+            goto("MAP_FIVE_ISLAND_ROCKET_WAREHOUSE", [[22, 11], [23, 11], [24, 11]], "ToTheAdmins", trigger=True),
+            cutscene(3000, 300000, "The admin fights, the Rockets leave"),
+            setst(flags=["FLAG_HIDE_FIVE_ISLAND_ROCKETS", "FLAG_DEFEATED_ROCKETS_IN_WAREHOUSE"],
+                  vars={"VAR_MAP_SCENE_ROCKET_WAREHOUSE": 1}),
+            #  Gideon (27, 4): FiveIsland_RocketWarehouse_EventScript_DefeatedGideon.
+            talk("MAP_FIVE_ISLAND_ROCKET_WAREHOUSE", xy=[27, 4], mode="battle", label="Gideon"),
+            cutscene(2000, 60000, "The Sapphire"),
+            setst(flags=["FLAG_RECOVERED_SAPPHIRE"]),
+            heal("MAP_FIVE_ISLAND_POKEMON_CENTER_1F", "WarehouseToFiveIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C17_05_NETWORK_MACHINE", "chapter": 17,
+        "title": "One Island: the Sapphire for Celio; the roaming legendary is out",
+        "steps": rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 1, None, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioSapphire"),
+            cutscene(5000, 120000, "The Network Machine works"),
+            setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 6},
+                  flags=["FLAG_SYS_CAN_LINK_WITH_RS", "FLAG_HIDE_CERULEAN_CAVE_GUARD", "FLAG_HIDE_LORELEI_IN_HER_HOUSE"]),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "CelioToNurse3"),
+            save(),
+        ],
+    },
+]
+
+
+# ---------------------------------------------------------------- chapter 18
+#  The roaming legendary (Suicune for the Charmander player; Entei,
+#  Raikou with the other starters): on one of the Kanto routes, it moves to
+#  another one with every map change (RoamerMove), to any of them at every
+#  warp (RoamerMoveToOtherLocationSet). On its route a wild battle is it one
+#  time in four (TryStartRoamerEncounter). It flees on its first turn: the
+#  MASTER BALL at once (a ball goes before any move).
+CHAPTER18 = [
+    {
+        "id": "C18_01_SUICUNE", "chapter": 18,
+        "title": "The roaming Suicune: Route 10, the MASTER BALL",
+        "steps": rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1] + [
+            pos("MAP_VERMILION_CITY", 23, 32),
+            heal(PC["ROUTE10"], "ToRoute10PC"),
+            save(),
+            #  The grass north of the Pokemon Center; in and out of it every
+            #  3 battles.
+            {"roam": {"map": "MAP_ROUTE10", "tiles": rect(6, 6, 16, 10), "species": ["suicune", "entei", "raikou"],
+                      "building": PC["ROUTE10"], "per_cycle": 3, "minutes": 360}, "label": "RoamingLegendary"},
+            heal(PC["ROUTE10"], "SuicuneToRoute10PC"),
+            save(),
+        ],
+    },
+]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with
@@ -1891,7 +2132,7 @@ def fly_only(segments):
 
 
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
-            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12 + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15))
+            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12 + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15 + CHAPTER16 + CHAPTER17 + CHAPTER18))
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),

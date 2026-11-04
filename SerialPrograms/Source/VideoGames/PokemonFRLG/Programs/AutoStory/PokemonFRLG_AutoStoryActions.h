@@ -100,6 +100,15 @@ void story_grind(
 //  Walk back and forth in the grass until one of the species is caught.
 void story_catch(StoryRuntime& rt, const StoryStep& step);
 
+//  A field move from the party menu (CUT on the braille of the Dotted Hole),
+//  facing "facing" first.
+void story_field_move(StoryRuntime& rt, int party_slot, const std::string& move, DpadPosition facing, const std::string& what);
+
+//  The roaming legendary (StepType::ROAM): back and forth in the grass of a
+//  route until it comes (the MASTER BALL), into a building and out now and
+//  then (it moves to another route at each warp).
+void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
+
 //  For the POKeDEX (StepType::DEX): back and forth in the grass (cave,
 //  water) of a place, catching the species of the step not caught yet with
 //  the cheapest balls; the others are run from.

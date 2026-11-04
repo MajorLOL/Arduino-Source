@@ -490,9 +490,10 @@ void story_fix_party_order(StoryRuntime& rt, bool force){
 }
 
 //  In the overworld: the party menu, the actions of "party_slot", the cursor
-//  down the field moves until the one described as Fly. True: the cursor is
-//  on FLY. False: not found, back in the overworld.
-static bool open_fly_action(StoryRuntime& rt, int party_slot){
+//  down the field moves until the one whose description has one of "words"
+//  (Fly: "Fly to a known town."). True: the cursor is on it. False: not
+//  found, back in the overworld.
+static bool open_field_move_action(StoryRuntime& rt, int party_slot, const std::vector<std::string>& words){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     open_party_menu_from_overworld(console, context);
@@ -511,14 +512,61 @@ static bool open_fly_action(StoryRuntime& rt, int party_slot){
             text += " " + read_story_text(console, FIELD_MOVE_DESCRIPTION_BOX, true);
         }
         console.log("Field move " + std::to_string(i + 1) + ": " + text);
-        if (contains(text, "fly") || contains(text, "known town")){
-            return true;
+        for (const std::string& word : words){
+            if (contains(text, word.c_str())){
+                return true;
+            }
         }
     }
     pbf_mash_button(context, BUTTON_B, 2500ms);
     context.wait_for_all_requests();
     story_back_to_overworld(rt, "party menu");
     return false;
+}
+static bool open_fly_action(StoryRuntime& rt, int party_slot){
+    return open_field_move_action(rt, party_slot, {"fly", "known town"});
+}
+
+void story_field_move(StoryRuntime& rt, int party_slot, const std::string& move, DpadPosition facing, const std::string& what){
+    StoryMemoryScope memory_scope("field move");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Field move " + move + " from party slot " + std::to_string(party_slot) + ": " + what);
+    story_fix_party_order(rt, false);
+    story_face(rt, facing);
+    //  The descriptions of the party menu (gText_CutATreeOrGrass...).
+    std::vector<std::string> words;
+    if (move == "CUT"){
+        words = {"cut a", "tree or grass"};
+    }else if (move == "FLY"){
+        words = {"fly", "known town"};
+    }else if (move == "WATERFALL"){
+        words = {"waterfall"};
+    }else{
+        std::string lower;
+        for (char c : move){
+            lower += (char)std::tolower((unsigned char)c);
+        }
+        words = {lower};
+    }
+    for (int attempt = 0; attempt < 3; attempt++){
+        if (!open_field_move_action(rt, party_slot, words)){
+            story_face(rt, facing);
+            continue;
+        }
+        //  A: the menu closes, the move's field effect plays.
+        pbf_press_button(context, BUTTON_A, 200ms, 4000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "field move");
+        rt.facing = facing;
+        console.log("Used " + move + ": " + what, COLOR_BLUE);
+        return;
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "story_field_move(): " + move + " not found in the party menu of slot " + std::to_string(party_slot) + ".",
+        console
+    );
 }
 
 bool story_knows_fly(StoryRuntime& rt, int party_slot){
@@ -1854,6 +1902,97 @@ std::string species_names(const std::set<std::string>& species){
     }
     return out.empty() ? std::string("none") : out;
 }
+}
+
+void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    const std::string label = step.label;
+    const std::set<std::string> roamers = story_species_list(step.text);
+    for (const std::string& slug : roamers){
+        if (rt.caught.count(slug) != 0){
+            console.log(label + ": " + slug + " was caught already.", COLOR_BLUE);
+            return;
+        }
+    }
+    const int per_cycle = std::max(1, (int)step.p0);
+    const std::vector<int32_t> back_to_grass = script.leg_list(step.legs_a);
+    const std::vector<int32_t> to_door = script.leg_list(step.legs_b);
+    console.log(
+        label + ": looking for the roaming " + species_names(roamers) + " (MASTER BALL). In and out of the "
+        "building every " + std::to_string(per_cycle) + " battles: it moves to another route at each warp.",
+        COLOR_BLUE
+    );
+
+    StoryBattleSettings saved = rt.battle;
+    rt.battle.roamer_species = roamers;
+    rt.battle.catch_species.clear();
+    rt.battle.dex_species.clear();
+    GrassSpot spot(rt, step.dir, std::max(2, (int)(step.p4 & 0xff)), StoryBattleKind::CATCH, label);
+    spot.arrived();
+    const WallClock start = current_time();
+    const WallClock deadline = start + std::chrono::minutes(std::max(1, (int)step.p1));
+    int battles = 0;
+    int runs = 0;
+    int cycles = 0;
+    uint64_t total_battles = 0;
+    bool caught = false;
+    auto is_caught = [&](){
+        for (const std::string& slug : roamers){
+            if (rt.caught.count(slug) != 0){
+                return true;
+            }
+        }
+        return false;
+    };
+    try{
+        while (current_time() < deadline){
+            StoryBattleResult result = spot.step(StoryBattleKind::CATCH);
+            runs++;
+            if (is_caught()){
+                caught = true;
+                break;
+            }
+            if (result != StoryBattleResult::NO_BATTLE){
+                battles++;
+                total_battles++;
+                spot.check();
+            }
+            if (battles >= per_cycle || runs >= 40){
+                spot.to_first_tile();
+                for (int32_t leg : to_door){
+                    walk_leg(rt, script, leg);
+                }
+                for (int32_t leg : back_to_grass){
+                    walk_leg(rt, script, leg);
+                }
+                spot.arrived();
+                battles = 0;
+                runs = 0;
+                cycles++;
+                if (cycles % 10 == 0){
+                    const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
+                    console.log(
+                        label + ": not met yet: " + std::to_string(total_battles) + " battles, " +
+                        std::to_string(cycles) + " times in and out, " + std::to_string(minutes) + " minutes.",
+                        COLOR_BLUE
+                    );
+                }
+            }
+        }
+    }catch (...){
+        rt.battle = saved;
+        throw;
+    }
+    rt.battle = saved;
+    if (!caught){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_roam(): The roaming Pokemon was not caught in " + std::to_string(step.p1) + " minutes: " + label,
+            console
+        );
+    }
+    console.log(label + ": caught! (" + std::to_string(total_battles) + " battles)", COLOR_BLUE);
+    spot.to_first_tile();
 }
 
 void story_dex(StoryRuntime& rt, const StoryStep& step){

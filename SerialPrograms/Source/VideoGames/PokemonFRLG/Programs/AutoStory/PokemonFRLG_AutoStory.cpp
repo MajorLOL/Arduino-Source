@@ -49,7 +49,8 @@ AutoStory_Descriptor::AutoStory_Descriptor()
         Pokemon::STRING_POKEMON + " FRLG", "Autostory (beta)",
         "Programs/PokemonFRLG/AutoStory.html",
         "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame and on after it "
-        "(the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX), "
+        "(the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX, the Ruby and the "
+        "Sapphire, the roaming legendary with the Master Ball), "
         "on routes generated from the game's map data.",
         PanelQualityStanding::THIRD_PARTY_UNVETTED,
         ProgramControllerClass::StandardController_RequiresPrecision,
@@ -547,6 +548,12 @@ void AutoStory::run_segment(
             break;
         case StepType::STOP:
             throw UserSetupError(env.console, std::string(step.text) + " (" + label + ")");
+        case StepType::FIELD_MOVE:
+            story_field_move(rt, step.p0, step.text, step.dir, label);
+            break;
+        case StepType::ROAM:
+            story_roam(rt, script, step);
+            break;
         case StepType::SKIP_IF_DEX:{
             std::set<std::string> owned = story_species_list(step.text);
             owned.insert(rt.caught.begin(), rt.caught.end());
