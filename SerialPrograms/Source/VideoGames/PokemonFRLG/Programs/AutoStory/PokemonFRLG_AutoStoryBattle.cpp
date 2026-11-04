@@ -921,10 +921,15 @@ BagUse pick_in_battle_bag(
     return BagUse::USED;
 }
 
-//  At the battle menu: the best ball, thrown.
-BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context){
+//  At the battle menu: the best ball, thrown. Without "master", not the
+//  MASTER BALL (kept for a legendary Pokemon).
+BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bool master){
     int rank = 0;
-    BagUse ret = pick_in_battle_bag(console, context, 2, ball_rank, "POKe BALL", rank);
+    auto value = [master](const std::string& text){
+        const int r = ball_rank(text);
+        return r == 4 && !master ? 0 : r;
+    };
+    BagUse ret = pick_in_battle_bag(console, context, 2, value, "POKe BALL", rank);
     if (ret != BagUse::USED){
         return ret;
     }
@@ -1266,6 +1271,7 @@ StoryBattleResult run_story_battle(
     bool shiny_safari = false;
     bool shiny_wanted = false;
     bool shiny_caught = false;
+    bool legendary = false;
     int balls_thrown = 0;
     int throw_failures = 0;
     int heals_used = 0;
@@ -1325,6 +1331,17 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
+            if (!shiny_checked && wild && settings.catch_legendary){
+                shiny_checked = true;
+                std::string slug;
+                read_opponent(console, slug);
+                memory.shiny_species = slug;
+                legendary = true;
+                shiny_wanted = true;
+                shiny_catching = true;
+                shiny_safari = false;
+                console.log("Catching " + (slug.empty() ? std::string("the legendary Pokemon") : slug) + ".", COLOR_BLUE);
+            }
             if (!shiny_checked){
                 shiny_checked = true;
                 if (wild && settings.shiny_watch != nullptr &&
@@ -1350,7 +1367,7 @@ StoryBattleResult run_story_battle(
             if (shiny_catching){
                 //  The Safari Zone: 20 of the 30 SAFARI BALLs at most (the
                 //  game ends when they run out, and the way goes on there).
-                const int max_throws = shiny_safari ? 20 : 60;
+                const int max_throws = shiny_safari ? 20 : (legendary ? 99 : 60);
                 if (balls_thrown >= max_throws || throw_failures >= 4){
                     console.log("No more balls thrown at the shiny: the battle goes on as usual.", COLOR_ORANGE);
                     shiny_catching = false;
@@ -1365,11 +1382,11 @@ StoryBattleResult run_story_battle(
                     }
                     break;
                 }else{
-                    switch (throw_best_ball(console, context)){
+                    switch (throw_best_ball(console, context, legendary)){
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;
-                        console.log("Ball " + std::to_string(balls_thrown) + " at the shiny.", COLOR_BLUE);
+                        console.log("Ball " + std::to_string(balls_thrown) + (legendary ? "." : " at the shiny."), COLOR_BLUE);
                         break;
                     case BagUse::NONE:
                         console.log("No balls left for the shiny: the battle goes on as usual.", COLOR_ORANGE);
@@ -1678,7 +1695,7 @@ StoryBattleResult run_story_battle(
                     //  is one that broke free.)
                     if (text.find("gotcha") != std::string::npos || text.find("was caught") != std::string::npos){
                         if (!shiny_caught){
-                            console.log("Caught the shiny Pokemon!", COLOR_BLUE);
+                            console.log(legendary ? "Caught it!" : "Caught the shiny Pokemon!", COLOR_BLUE);
                         }
                         shiny_caught = true;
                         shiny_catching = false;

@@ -462,6 +462,24 @@ void AutoStory::run_segment(
             if (came_battle){
                 break;
             }
+            if (step.p1 == 2){
+                //  A legendary Pokemon: caught, or the save before it again.
+                struct Legendary{
+                    StoryRuntime& rt;
+                    Legendary(StoryRuntime& p_rt) : rt(p_rt){ rt.battle.catch_legendary = true; }
+                    ~Legendary(){ rt.battle.catch_legendary = false; }
+                } legendary(rt);
+                StoryBattleResult result = story_battle(rt, StoryBattleKind::CATCH, label);
+                if (result != StoryBattleResult::CAUGHT){
+                    OperationFailedExceptionWithScreenshot::fire(
+                        ErrorReportMode::NO_ERROR_REPORT,
+                        label + " was not caught. Loading the save before it to try again.",
+                        rt.console
+                    );
+                }
+                env.log(label + " caught!", COLOR_BLUE);
+                break;
+            }
             const bool trainer = step.p1 != 1;
             StoryBattleResult result = story_battle(rt, trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD_RUN, label);
             if (result == StoryBattleResult::NO_BATTLE && trainer && rt.last_leg_dark &&
@@ -541,6 +559,27 @@ void AutoStory::run_segment(
         case StepType::USE_ITEM:
             story_use_item(rt, step.p0, step.text, label);
             break;
+        case StepType::RESET:{
+            //  The Hall of Fame saves the game on its own; then the credits,
+            //  and the game resets to the title screen. A gets through the
+            //  texts and the Hall of Fame (and later loads the game, which
+            //  the reset below does again).
+            env.log("Hall of Fame and credits: A now and then, then the save the game made is loaded.", COLOR_BLUE);
+            const WallClock end = current_time() + Milliseconds(step.p0);
+            while (current_time() < end){
+                pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
+                context.wait_for_all_requests();
+            }
+            {
+                StoryMemoryScope memory_scope("soft reset");
+                soft_reset(env.console, context);
+            }
+            rt.facing = DPAD_NONE;
+            rt.arrived_by_warp = false;
+            rt.battle.team.clear();
+            story_saved(rt, i + 1);
+            break;
+        }
         case StepType::TEAM:
             if (step.p0 == 1){
                 story_fix_party_order(rt, false);

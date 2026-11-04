@@ -91,7 +91,8 @@ enum class StepType : uint8_t{
     TALK_NO,            //  A, answer NO
     HEAL,               //  talk to the nurse, heal
     CUTSCENE,           //  p0 = min ms, p1 = max ms, text "YES": answer questions with YES
-    BATTLE,             //  a battle starts (or started on the way); p1 = 1: run away if wild
+    BATTLE,             //  a battle starts (or started on the way); p1 = 1: run away if wild,
+                        //  p1 = 2: a legendary Pokemon, caught with the best ball
     SCRIPTED_BATTLE,    //  the first rival battle
     SAVE,               //  p0 = 1 if the start menu has POKeDEX
     GRIND,              //  p0 = level, p1 = battles between heals, dir = back and forth,
@@ -115,6 +116,9 @@ enum class StepType : uint8_t{
     HEAL_ITEMS,         //  heal the party with items from the bag
     USE_ITEM,           //  use an item on party slot p0; text = a word of its description
     TEAM,               //  p0 = 1: trainer battles are fought by the whole team from now on
+    RESET,              //  The Hall of Fame: A now and then for p0 ms (the game saves on
+                        //  its own, the credits, the title screen), then load the save;
+                        //  the next step goes on from it
 };
 
 struct StoryStep{

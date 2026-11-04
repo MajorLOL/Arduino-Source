@@ -630,7 +630,12 @@ class Builder:
             return
         if "battle" in step:
             out.append({"type": "BATTLE", "label": step.get("label", "Battle"), "p0": step["battle"],
-                        "p1": 1 if step.get("flee") else 0})
+                        "p1": 2 if step.get("legendary") else (1 if step.get("flee") else 0)})
+            return
+        if "hall_of_fame" in step:
+            #  The game saves itself in the Hall of Fame and starts in Pallet
+            #  Town from then on (the next segment says where).
+            out.append({"type": "RESET", "label": step.get("label", "Hall of Fame"), "p0": step["hall_of_fame"]})
             return
         if "rival1" in step:
             out.append({"type": "SCRIPTED_BATTLE", "label": step.get("label", "Rival")})

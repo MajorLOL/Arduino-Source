@@ -148,6 +148,9 @@ struct StoryBattleSettings{
     //  false: only noticed (no room for it in the party yet).
     const StoryShinyWatch* shiny_watch = nullptr;
     bool shiny_catch = true;
+    //  A legendary Pokemon: caught with the best ball in the bag, the Master
+    //  Ball too (a shiny does not get that one), until the balls run out.
+    bool catch_legendary = false;
 
     //  Trainer battles: below a third of its HP, the Pokemon that is out
     //  gets the best healing item of the bag (Full Restore, Max Potion,

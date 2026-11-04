@@ -1217,13 +1217,64 @@ CHAPTER10 = [
             goto("MAP_POKEMON_LEAGUE_CHAMPIONS_ROOM", [[6, 19]], "ToChampion"),
             cutscene(6000, 60000, "Champion intro"),
             battle("Champion (rival)", 60000),
-            cutscene(30000, 1200000, "Oak, Hall of Fame, credits"),
+            #  Oak, the Hall of Fame (the game saves itself there: Continue
+            #  starts in Pallet Town, HEAL_LOCATION_PALLET_TOWN), the credits,
+            #  then the game resets to the title screen. A through it all,
+            #  then load that save.
+            {"hall_of_fame": 600000, "label": "Oak, Hall of Fame, credits"},
+        ],
+    },
+]
+
+
+def legendary(map_id, xy, flags, label):
+    """A legendary Pokemon after the Hall of Fame: A in front of it
+    ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
+    (the Master Ball too) until it is caught. Not caught (it fainted, the
+    balls ran out): the step fails, and the save before it is tried again."""
+    return [talk(map_id, xy=xy, mode="talk", label=label),
+            {"battle": 60000, "label": label, "legendary": True},
+            setst(flags=flags)]
+
+
+#  After the Hall of Fame: the legendary Pokemon. Articuno (Seafoam Islands:
+#  water currents, boulders) and Moltres (Mt. Ember: the boat to the Sevii
+#  Islands) are still to come; Mewtwo needs the whole Sevii Islands story.
+CHAPTER11 = [
+    {
+        "id": "C11_01_MASTER_BALL", "chapter": 11,
+        "title": "After the Hall of Fame: the Master Ball from the Silph Co. president",
+        #  The game was loaded at the Hall of Fame save: Pallet Town, in front
+        #  of the house. PalletTown_EventScript_OakRatingScene (ON_FRAME,
+        #  VAR_MAP_SCENE_PALLET_TOWN_OAK == 2): Oak comes and talks.
+        "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
+        "steps": [
+            pos("MAP_PALLET_TOWN", 6, 8, "down"),
+            cutscene(3000, 90000, "Oak checks the Pokedex"),
+            setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 3}),
+            #  SilphCo_11F_EventScript_President: the Master Ball, any time after Giovanni.
+            talk("MAP_SILPH_CO_11F", xy=[9, 9], mode="talk", label="SilphPresident"),
+            cutscene(1000, 30000, "Master Ball"),
+            setst(flags=["FLAG_GOT_MASTER_BALL_FROM_SILPH"]),
+            heal(PC["SAFFRON"], "SilphToSaffronPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C11_02_ZAPDOS", "chapter": 11,
+        "title": "Zapdos in the Power Plant (Master Ball)",
+        "steps": [
+            heal(PC["ROUTE10"], "SaffronToRoute10PC"),
+            save(),
+        ] + legendary("MAP_POWER_PLANT", [5, 11], ["FLAG_FOUGHT_ZAPDOS", "FLAG_HIDE_ZAPDOS"], "Zapdos") + [
+            heal(PC["ROUTE10"], "PowerPlantToRoute10PC"),
+            save(),
         ],
     },
 ]
 
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
-            + CHAPTER8 + CHAPTER9 + CHAPTER10)
+            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11)
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),
