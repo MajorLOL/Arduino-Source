@@ -41,6 +41,41 @@ CRIT_CHANCE = [16, 8, 4, 3, 2]
 ITEM_HEAL = {"ITEM_POTION": 20, "ITEM_SUPER_POTION": 50, "ITEM_HYPER_POTION": 200,
              "ITEM_MAX_POTION": 9999, "ITEM_FULL_RESTORE": 9999}
 
+#  The player's own items in battle (the Autostory's in-battle item use, in
+#  PokemonFRLG_AutoStoryBattle.cpp): X items at the start of a big fight,
+#  one a turn while the HP is above half, and the best healing item once the
+#  HP is below a third. An item goes before the moves.
+X_ITEMS = {"ITEM_X_ATTACK": "atk", "ITEM_X_DEFEND": "df", "ITEM_X_SPEED": "spe",
+           "ITEM_X_SPECIAL": "spa", "ITEM_X_ACCURACY": "acc"}
+HEAL_ORDER = ["ITEM_FULL_RESTORE", "ITEM_MAX_POTION", "ITEM_HYPER_POTION", "ITEM_SUPER_POTION", "ITEM_POTION"]
+
+
+def player_item(mon, setup, heals):
+    """The item "mon" uses this turn, None to attack. setup: X items still to
+    use (in order); heals: healing item -> count."""
+    if mon.hp * 3 < mon.max_hp:
+        for it in HEAL_ORDER:
+            if heals.get(it, 0) > 0:
+                return it
+    if setup and mon.hp * 2 > mon.max_hp:
+        return setup[0]
+    return None
+
+
+def use_player_item(mon, item, setup, heals):
+    if item in X_ITEMS:
+        setup.remove(item)
+        change_stage(mon, X_ITEMS[item], 1)
+        return
+    heals[item] -= 1
+    amount = ITEM_HEAL[item]
+    mon.hp = mon.max_hp if amount > 1000 else min(mon.max_hp, mon.hp + amount)
+    if item == "ITEM_FULL_RESTORE":
+        mon.status = None
+        mon.sleep = 0
+        mon.toxic = 0
+        mon.confused = 0
+
 
 # ---------------------------------------------------------------- decomp data
 
@@ -311,6 +346,17 @@ class Mon:
         self.status = None      # "slp", "psn", "tox", "brn", "par", "frz"
         self.sleep = 0
         self.toxic = 0
+
+    def new_foe(self):
+        """The foe changed, this one stayed in: its stat stages and the like
+        stay (an X item lasts for the whole battle), what came from the foe
+        ends."""
+        self.flinch = False
+        self.recharge = False
+        self.charging = None
+        self.invulnerable = False
+        self.trapped = 0
+        self.protect = False
 
     def reset_volatile(self):
         self.stage = {s: 0 for s in ["atk", "df", "spe", "spa", "spd", "acc", "eva"]}
@@ -799,12 +845,16 @@ def lead_choice(data, me, foe):
     return best or "MOVE_STRUGGLE"
 
 
-def battle(data, lead, party, items, rng, max_turns=200, smart=True):
-    """lead against the trainer's party. True if the lead wins."""
+def battle(data, lead, party, items, rng, max_turns=200, smart=True, setup=(), heals=None):
+    """lead against the trainer's party. True if the lead wins. setup, heals:
+    the lead's own items (see player_item())."""
     items = list(items)
+    setup = list(setup)
+    heals = dict(heals or {})
+    lead.reset_volatile()
     for spec in party:
         foe = spec
-        lead.reset_volatile()
+        lead.new_foe()
         for turn in range(max_turns):
             # Trainer items: heal when low.
             foe_move = None
@@ -816,11 +866,14 @@ def battle(data, lead, party, items, rng, max_turns=200, smart=True):
                     break
             if heal_item is None:
                 foe_move = foe.charging or trainer_choice(data, foe, lead, rng, smart)
-            lead_move = lead.charging or lead_choice(data, lead, foe)
+            my_item = None if lead.charging or lead.recharge else player_item(lead, setup, heals)
+            lead_move = None if my_item else (lead.charging or lead_choice(data, lead, foe))
             if lead_move == "MOVE_STRUGGLE":
                 lead_move = lead.moves[0]
+            if my_item:
+                use_player_item(lead, my_item, setup, heals)
             # Order.
-            lp = data.moves[lead_move]["priority"]
+            lp = data.moves[lead_move]["priority"] if lead_move else 6
             fp = data.moves[foe_move]["priority"] if foe_move else 6
             if fp != lp:
                 lead_first = lp > fp
@@ -898,7 +951,7 @@ FIGHTS = [
 CUT_AT_KEY = "SURGE"    # Cut is taught right before the Lt. Surge training
 
 
-def win_rate(data, starter, level, trainer, runs, seed, cut):
+def win_rate(data, starter, level, trainer, runs, seed, cut, setup=(), heals=None):
     t = data.trainers[trainer]
     party_specs = data.parties[t["party"]]
     species, moves = lead_moves(data, "SPECIES_" + starter, level, cut_at=level if cut else None)
@@ -907,7 +960,7 @@ def win_rate(data, starter, level, trainer, runs, seed, cut):
     for _ in range(runs):
         lead = Mon(data, species, level, moves, random_ivs(rng), rng.choice(NATURES))
         party = [trainer_mon(data, p) for p in party_specs]
-        if battle(data, lead, party, t["items"], rng, smart=t["smart"]):
+        if battle(data, lead, party, t["items"], rng, smart=t["smart"], setup=setup, heals=heals):
             wins += 1
     return wins / runs, species, moves
 

@@ -9,6 +9,7 @@
 #include <map>
 #include <cctype>
 #include <cstdlib>
+#include <functional>
 #include <string>
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
@@ -833,17 +834,23 @@ const char* ball_name(int rank){
     }
 }
 
-enum class BallThrow{
-    THROWN,
-    NO_BALLS,
-    FAILED,     //  a menu did not come: back at the battle menu
+enum class BagUse{
+    USED,
+    NONE,       //  no such item in the bag: back at the battle menu
+    FAILED,     //  a menu did not come or the item did nothing: back at the battle menu
 };
 
-//  At the battle menu: BAG, the POKe BALLS pocket, the best ball in it, USE.
-BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context){
+//  At the battle menu: BAG, then the item of "pocket" (0 ITEMS, 1 KEY ITEMS,
+//  2 POKe BALLS) that "rank" values most (by its description; 0 = not one
+//  to use). Leaves the bag open with the cursor on it, or (NONE, FAILED)
+//  closes the bag again.
+BagUse pick_in_battle_bag(
+    ConsoleHandle& console, ProControllerContext& context, int pocket,
+    const std::function<int(const std::string&)>& rank, const std::string& what, int& best_rank
+){
     if (!move_cursor_to_option(console, context, BattleMenuOption::BAG)){
         console.log("BAG not selected.", COLOR_ORANGE);
-        return BallThrow::FAILED;
+        return BagUse::FAILED;
     }
     pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
     context.wait_for_all_requests();
@@ -852,27 +859,27 @@ BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context)
         console.log("The bag did not open.", COLOR_ORANGE);
         pbf_mash_button(context, BUTTON_B, 1500ms);
         context.wait_for_all_requests();
-        return BallThrow::FAILED;
+        return BagUse::FAILED;
     }
     //  The pockets do not wrap around: LEFT x3 is ITEMS, then KEY ITEMS,
     //  POKe BALLS. The list does not wrap either: UP to the top.
     for (int i = 0; i < 3; i++){
         pbf_press_dpad(context, DPAD_LEFT, 160ms, 500ms);
     }
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < pocket; i++){
         pbf_press_dpad(context, DPAD_RIGHT, 160ms, 500ms);
     }
-    for (int i = 0; i < 15; i++){
+    for (int i = 0; i < 25; i++){
         pbf_press_dpad(context, DPAD_UP, 80ms, 80ms);
     }
     pbf_wait(context, 500ms);
     context.wait_for_all_requests();
 
     int best = -1;
-    int best_rank = 0;
+    best_rank = 0;
     std::string last;
     int same = 0;
-    for (int row = 0; row < 14; row++){
+    for (int row = 0; row < 24; row++){
         std::string text = read_bag_text(console);
         if (text == last){
             if (++same >= 2){
@@ -880,9 +887,9 @@ BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context)
             }
         }else{
             same = 0;
-            const int rank = ball_rank(text);
-            if (rank > best_rank){
-                best_rank = rank;
+            const int r = rank(text);
+            if (r > best_rank){
+                best_rank = r;
                 best = row;
             }
         }
@@ -891,12 +898,12 @@ BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context)
         context.wait_for_all_requests();
     }
     if (best < 0){
-        console.log("No POKe BALL in the bag.", COLOR_ORANGE);
+        console.log("No " + what + " in the bag.", COLOR_ORANGE);
         pbf_mash_button(context, BUTTON_B, 2000ms);
         context.wait_for_all_requests();
-        return BallThrow::NO_BALLS;
+        return BagUse::NONE;
     }
-    for (int i = 0; i < 15; i++){
+    for (int i = 0; i < 25; i++){
         pbf_press_dpad(context, DPAD_UP, 80ms, 80ms);
     }
     for (int i = 0; i < best; i++){
@@ -905,18 +912,107 @@ BallThrow throw_best_ball(ConsoleHandle& console, ProControllerContext& context)
     pbf_wait(context, 300ms);
     context.wait_for_all_requests();
     std::string text = read_bag_text(console);
-    if (ball_rank(text) != best_rank){
-        console.log("Not on the ball to throw: " + text, COLOR_ORANGE);
+    if (rank(text) != best_rank){
+        console.log("Not on the " + what + " to use: " + text, COLOR_ORANGE);
         pbf_mash_button(context, BUTTON_B, 2000ms);
         context.wait_for_all_requests();
-        return BallThrow::FAILED;
+        return BagUse::FAILED;
     }
-    console.log(std::string("Throwing a ") + ball_name(best_rank) + ".", COLOR_BLUE);
+    return BagUse::USED;
+}
+
+//  At the battle menu: the best ball, thrown.
+BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context){
+    int rank = 0;
+    BagUse ret = pick_in_battle_bag(console, context, 2, ball_rank, "POKe BALL", rank);
+    if (ret != BagUse::USED){
+        return ret;
+    }
+    console.log(std::string("Throwing a ") + ball_name(rank) + ".", COLOR_BLUE);
     //  A: USE / CANCEL (on USE). A: the bag closes and the ball flies.
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
     context.wait_for_all_requests();
-    return BallThrow::THROWN;
+    return BagUse::USED;
+}
+
+//  How much a healing item of the ITEMS pocket heals, by its description
+//  (items.json): HP points, more for the ones that heal it all. 0: not
+//  one (Revive, Ether, status medicine).
+int heal_rank(const std::string& text){
+    auto has = [&](const char* word){
+        return text.find(word) != std::string::npos;
+    };
+    if (has("faint") || has("revive") || has(" pp") || has("level")){
+        return 0;
+    }
+    if (has("fully restores the hp and") || has("heals any status")){
+        return 1000;    //  FULL RESTORE
+    }
+    if (has("fully restores the hp") || has("fully restores hp")){
+        return 999;     //  MAX POTION
+    }
+    //  "It restores the HP of one POKeMON by 200 points." (and the drinks)
+    const size_t by = text.find(" by ");
+    if (by == std::string::npos || !has("point")){
+        return 0;
+    }
+    int value = 0;
+    for (size_t i = by + 4; i < text.size() && i < by + 9; i++){
+        const char c = text[i];
+        if (c >= '0' && c <= '9'){
+            value = value * 10 + (c - '0');
+        }else if (c == 'o' || c == 'O'){
+            value = value * 10;     //  OCR: "2OO"
+        }else if (value > 0){
+            break;
+        }
+    }
+    return value >= 10 && value <= 300 ? value : 0;
+}
+const char* heal_name(int rank){
+    if (rank >= 1000) return "FULL RESTORE";
+    if (rank >= 999) return "MAX POTION";
+    if (rank >= 200) return "HYPER POTION";
+    if (rank >= 50) return "SUPER POTION";
+    return "POTION";
+}
+
+//  At the battle menu: the best healing item on the Pokemon that is out
+//  (the first one in the party menu, which shows the battle order).
+BagUse heal_in_battle(ConsoleHandle& console, ProControllerContext& context){
+    int rank = 0;
+    BagUse ret = pick_in_battle_bag(console, context, 0, heal_rank, "healing item", rank);
+    if (ret != BagUse::USED){
+        return ret;
+    }
+    console.log(std::string("Using a ") + heal_name(rank) + " on the Pokemon that is out.", COLOR_BLUE);
+    //  A: USE / CANCEL (on USE). A: the party menu ("Use on which POKeMON?"),
+    //  the cursor on the first one.
+    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+    pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+    context.wait_for_all_requests();
+    PartyMenuWatcher party(COLOR_RED);
+    if (wait_until(console, context, 3000ms, { party }) != 0){
+        console.log("The party menu did not open.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 2000ms);
+        context.wait_for_all_requests();
+        return BagUse::FAILED;
+    }
+    pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
+    context.wait_for_all_requests();
+    //  "It won't have any effect." goes back to the bag.
+    BagWatcher bag(COLOR_RED);
+    if (wait_until(console, context, 1000ms, { bag }) == 0){
+        console.log("The item had no effect.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 2000ms);
+        context.wait_for_all_requests();
+        return BagUse::FAILED;
+    }
+    //  "X's HP was restored by N points." Then the turn goes on.
+    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+    context.wait_for_all_requests();
+    return BagUse::USED;
 }
 
 
@@ -1172,6 +1268,8 @@ StoryBattleResult run_story_battle(
     bool shiny_caught = false;
     int balls_thrown = 0;
     int throw_failures = 0;
+    int heals_used = 0;
+    int heal_failures = 0;
     //  The battle is over: what it was.
     auto over = [&](){
         if (!shiny_caught){
@@ -1216,6 +1314,9 @@ StoryBattleResult run_story_battle(
                 double hp = read_player_hp(screen);
                 if (hp >= 0){
                     memory.player_hp = hp;
+                    if (team && !order.empty() && order[0] >= 0 && order[0] < 6){
+                        memory.team_hp[order[0]] = hp;
+                    }
                 }
             }
         }
@@ -1265,21 +1366,43 @@ StoryBattleResult run_story_battle(
                     break;
                 }else{
                     switch (throw_best_ball(console, context)){
-                    case BallThrow::THROWN:
+                    case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;
                         console.log("Ball " + std::to_string(balls_thrown) + " at the shiny.", COLOR_BLUE);
                         break;
-                    case BallThrow::NO_BALLS:
+                    case BagUse::NONE:
                         console.log("No balls left for the shiny: the battle goes on as usual.", COLOR_ORANGE);
                         shiny_catching = false;
                         break;
-                    case BallThrow::FAILED:
+                    case BagUse::FAILED:
                         throw_failures++;
                         break;
                     }
                     break;
                 }
+            }
+            //  Low on HP in a trainer battle: a healing item instead of a move.
+            if (kind == StoryBattleKind::TRAINER && settings.heal_in_battle && !memory.no_heal_items &&
+                memory.player_hp >= 0 && memory.player_hp < 1.0 / 3 && heals_used < 10 && heal_failures < 2
+            ){
+                console.log(
+                    "HP " + std::to_string((int)(memory.player_hp * 100 + 0.5)) + "%: healing with an item.",
+                    COLOR_BLUE
+                );
+                switch (heal_in_battle(console, context)){
+                case BagUse::USED:
+                    heals_used++;
+                    memory.player_hp = -1;      //  Seen again on the next turn.
+                    break;
+                case BagUse::NONE:
+                    memory.no_heal_items = true;
+                    break;
+                case BagUse::FAILED:
+                    heal_failures++;
+                    break;
+                }
+                break;
             }
             if ((settings.share_position > 0 || settings.slow_share_position > 0) &&
                 !shared && kind == StoryBattleKind::WILD_FIGHT

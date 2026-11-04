@@ -735,6 +735,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 rt.battle.share_position = 0;
                 rt.memory.member_moves_known = false;
                 rt.memory.no_pp = 0;
+                rt.memory.no_heal_items = false;
+                for (double& hp : rt.memory.team_hp){
+                    hp = -1;
+                }
                 //  Saved here: a reset comes back to this, not to the room.
                 current_segment = league_training;
                 current_step = 0;
@@ -789,6 +793,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.battle.lead_type2 = rt.lead_type2;
             rt.battle.share_position = 0;
             rt.memory.member_moves_known = false;
+            rt.memory.no_heal_items = false;
+            for (double& hp : rt.memory.team_hp){
+                hp = -1;
+            }
             current_segment = resume_segment;
             current_step = resume_step;
         }

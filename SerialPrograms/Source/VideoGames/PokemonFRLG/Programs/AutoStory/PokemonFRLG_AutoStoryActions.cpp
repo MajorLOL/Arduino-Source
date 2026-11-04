@@ -558,6 +558,8 @@ void story_teach_hm(
 void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& what){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
+    //  Maybe healing items: look in the bag again when one is needed.
+    rt.memory.no_heal_items = false;
     console.log("Buying " + std::to_string(quantity) + "x item " + std::to_string(index + 1) + ": " + what);
 
     //  "Hi there! May I help you?" BUY / SELL / SEE YA, cursor on BUY.
@@ -649,12 +651,23 @@ void story_heal_with_items(StoryRuntime& rt){
     ProControllerContext& context = rt.context;
     if (!rt.battle.team.empty()){
         //  The team: revive who fainted in the last battle, then a Full
-        //  Restore for everyone who fought.
+        //  Restore for everyone who fought and is below 60% of its HP (as
+        //  last seen; not seen: healed). The Full Restores are for the
+        //  battles too, and the League is long.
         for (int index : rt.memory.team_used){
             const int slot = index + 1;
+            const bool fainted = rt.memory.team_fainted.count(index) != 0;
+            const double hp = index >= 0 && index < 6 ? rt.memory.team_hp[index] : -1;
+            if (!fainted && hp >= 0.6){
+                console.log(
+                    "Party slot " + std::to_string(slot) + " is at " + std::to_string((int)(hp * 100 + 0.5)) +
+                    "% of its HP: no Full Restore."
+                );
+                continue;
+            }
             for (int round = 0; round < 2; round++){
                 const bool revive = round == 0;
-                if (revive && rt.memory.team_fainted.count(index) == 0){
+                if (revive && !fainted){
                     continue;
                 }
                 console.log((revive ? "Reviving party slot " : "Full Restore on party slot ") + std::to_string(slot) + ".");
@@ -664,6 +677,9 @@ void story_heal_with_items(StoryRuntime& rt){
                     : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
                 if (found){
                     use_item_on(rt, slot, revive ? "REVIVE" : "FULL RESTORE");
+                    if (!revive && index >= 0 && index < 6){
+                        rt.memory.team_hp[index] = 1.0;
+                    }
                 }
                 pbf_mash_button(context, BUTTON_B, 3000ms);
                 context.wait_for_all_requests();

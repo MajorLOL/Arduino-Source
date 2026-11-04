@@ -148,6 +148,13 @@ struct StoryBattleSettings{
     //  false: only noticed (no room for it in the party yet).
     const StoryShinyWatch* shiny_watch = nullptr;
     bool shiny_catch = true;
+
+    //  Trainer battles: below a third of its HP, the Pokemon that is out
+    //  gets the best healing item of the bag (Full Restore, Max Potion,
+    //  Hyper/Super Potion...). In the League, played as one gauntlet (the PP
+    //  do not come back between the rooms), the Champion is beaten far more
+    //  often (team_sim --gauntlet).
+    bool heal_in_battle = true;
 };
 
 //  What the battle logic remembers between battles.
@@ -220,6 +227,12 @@ struct StoryBattleMemory{
     //  battle, and those that fainted.
     std::set<int> team_used;
     std::set<int> team_fainted;
+    //  ... and the HP bar of each the last time it was out (0 to 1, -1 not
+    //  known). Kept from battle to battle (set to 1 when healed).
+    double team_hp[6] = {-1, -1, -1, -1, -1, -1};
+    //  No healing item was found in the bag: not looked for again until
+    //  items are bought.
+    bool no_heal_items = false;
 };
 
 

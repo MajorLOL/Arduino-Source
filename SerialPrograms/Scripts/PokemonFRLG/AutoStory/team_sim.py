@@ -171,8 +171,11 @@ def pick(data, team, foe, exclude=None):
     return max(alive, key=lambda m: matchup(data, m, foe))
 
 
-def team_battle(data, team, foes, items, rng, smart_ai=True, policy="smart", max_turns=300):
+def team_battle(data, team, foes, items, rng, smart_ai=True, policy="smart", max_turns=300, heals=None):
+    """heals: the player's healing items (shared, used up), for the one out
+    when its HP is below a third (battle_sim.player_item())."""
     items = list(items)
+    heals = heals if heals is not None else {}
     if policy == "smart":
         cur = pick(data, team, foes[0])
     else:
@@ -194,10 +197,13 @@ def team_battle(data, team, foes, items, rng, smart_ai=True, policy="smart", max
                     break
             if heal_item is None:
                 foe_move = foe.charging or B.trainer_choice(data, foe, cur, rng, smart_ai)
-            my_move = cur.charging or B.lead_choice(data, cur, foe)
+            my_item = None if cur.charging or cur.recharge else B.player_item(cur, [], heals)
+            my_move = None if my_item else (cur.charging or B.lead_choice(data, cur, foe))
             if my_move == "MOVE_STRUGGLE":
                 my_move = cur.moves[0]
-            lp = data.moves[my_move]["priority"]
+            if my_item:
+                B.use_player_item(cur, my_item, [], heals)
+            lp = data.moves[my_move]["priority"] if my_move else 6
             fp = data.moves[foe_move]["priority"] if foe_move else 6
             if fp != lp:
                 me_first = lp > fp
@@ -248,7 +254,7 @@ E4 = [
 ]
 
 
-def rates(data, starter, members, runs, seed=1, policy="smart", gauntlet=False):
+def rates(data, starter, members, runs, seed=1, policy="smart", gauntlet=False, heals=None):
     """members = [(name, level)]. Win rate per E4 battle (full heal between).
     "gauntlet": the rooms one after the other as in the game, where between
     them only HP and status come back (Full Restore, Revive), not PP; the
@@ -260,11 +266,12 @@ def rates(data, starter, members, runs, seed=1, policy="smart", gauntlet=False):
         rng = random.Random(seed)
         for _ in range(runs):
             team = [make(data, n, l, rng, starter) for n, l in members]
+            bag = dict(heals or {})
             for i, (label, tname) in enumerate(rooms):
                 reached[i] += 1
                 t = data.trainers[tname]
                 foes = [B.trainer_mon(data, p) for p in data.parties[t["party"]]]
-                if not team_battle(data, team, foes, t["items"], rng, t["smart"], policy):
+                if not team_battle(data, team, foes, t["items"], rng, t["smart"], policy, heals=bag):
                     break
                 won[i] += 1
                 for m in team:
