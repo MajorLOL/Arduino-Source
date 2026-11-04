@@ -406,6 +406,27 @@ void story_check_lead(StoryRuntime& rt){
     for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
         story_read_slot(rt, 1, &front);
     }
+    //  The starter's types as it is now: the program starts with the first
+    //  form's (CHARMANDER: FIRE), CHARIZARD is also FLYING (FLY with the
+    //  same-type bonus, the weakest move against Moltres is CUT, not FLY).
+    auto lead_types = [&](const std::string& slug){
+        for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
+            if (slug != info.slug){
+                continue;
+            }
+            if (rt.lead_type1 != info.type1 || rt.lead_type2 != info.type2){
+                console.log("The lead's types: those of " + std::string(info.name) + ".");
+            }
+            rt.lead_type1 = info.type1;
+            rt.lead_type2 = info.type2;
+            rt.battle.lead_type1 = info.type1;
+            rt.battle.lead_type2 = info.type2;
+            return;
+        }
+    };
+    if (!front.empty() && line.count(front) != 0){
+        lead_types(front);
+    }
     if (front.empty() || line.count(front) != 0){
         return;
     }
@@ -421,6 +442,7 @@ void story_check_lead(StoryRuntime& rt){
         if (line.count(species) != 0){
             story_swap_party(rt, 1, slot);
             console.log("The starter was in party slot " + std::to_string(slot) + ": back in slot 1.", COLOR_BLUE);
+            lead_types(species);
             return;
         }
     }

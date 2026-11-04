@@ -1935,6 +1935,17 @@ StoryBattleResult run_story_battle(
                     battle_confirmed = true;
                     last_activity = current_time();
                     unknown_in_row = 0;
+                    if (shiny_catching){
+                        //  Catching: back to the battle menu, where the
+                        //  weakening or the next ball is picked. The best
+                        //  move here made Moltres faint (FLAMETHROWER after
+                        //  an A pressed on a screen not recognized).
+                        console.log("The move list is open while catching: back to the battle menu.", COLOR_ORANGE);
+                        pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                        context.wait_for_all_requests();
+                        pressed_blind = false;
+                        break;
+                    }
                     console.log("The move list is open. Picking a move.", COLOR_ORANGE);
                     if (pressed_blind){
                         memory.list_back = 0;
