@@ -154,6 +154,11 @@ struct StoryBattleSettings{
     //  once.
     bool catch_legendary = false;
     bool legendary_master = false;
+
+    //  A scene follows the battle without the overworld coming back (the
+    //  Champion: Oak, the Hall of Fame, the credits): the battle is over
+    //  once overworld text shows after it. The next step goes through it.
+    bool scene_after = false;
     //  No Master Ball for it: its HP is brought down first with the weakest
     //  move, as long as one more hit surely leaves it some (watched on its
     //  HP bar). Catch rate 3: at full HP an ULTRA BALL catches it about 0.8%

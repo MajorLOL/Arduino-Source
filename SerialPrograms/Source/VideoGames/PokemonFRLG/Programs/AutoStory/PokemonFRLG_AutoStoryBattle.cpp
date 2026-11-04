@@ -869,10 +869,14 @@ enum class BagUse{
 //  At the battle menu: BAG, then the item of "pocket" (0 ITEMS, 1 KEY ITEMS,
 //  2 POKe BALLS) that "rank" values most (by its description; 0 = not one
 //  to use). Leaves the bag open with the cursor on it, or (NONE, FAILED)
-//  closes the bag again.
+//  closes the bag again. "expected": the rank found last time in this
+//  battle; the bag opens on the pocket and the item used last, so when that
+//  one is still under the cursor it is taken without going through the
+//  whole pocket again (some 20 s for each ball at a legendary Pokemon).
 BagUse pick_in_battle_bag(
     ConsoleHandle& console, ProControllerContext& context, int pocket,
-    const std::function<int(const std::string&)>& rank, const std::string& what, int& best_rank
+    const std::function<int(const std::string&)>& rank, const std::string& what, int& best_rank,
+    int expected = 0
 ){
     if (!move_cursor_to_option(console, context, BattleMenuOption::BAG)){
         console.log("BAG not selected.", COLOR_ORANGE);
@@ -886,6 +890,14 @@ BagUse pick_in_battle_bag(
         pbf_mash_button(context, BUTTON_B, 1500ms);
         context.wait_for_all_requests();
         return BagUse::FAILED;
+    }
+    if (expected > 0){
+        pbf_wait(context, 400ms);
+        context.wait_for_all_requests();
+        if (rank(read_bag_text(console)) == expected){
+            best_rank = expected;
+            return BagUse::USED;
+        }
     }
     //  The pockets do not wrap around: LEFT x3 is ITEMS, then KEY ITEMS,
     //  POKe BALLS. The list does not wrap either: UP to the top.
@@ -949,16 +961,19 @@ BagUse pick_in_battle_bag(
 
 //  At the battle menu: the best ball, thrown. Without "master", not the
 //  MASTER BALL (kept for a legendary Pokemon).
-BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bool master){
+//  "last_rank": the ball thrown last in this battle (0: none yet).
+BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bool master, int& last_rank){
     int rank = 0;
     auto value = [master](const std::string& text){
         const int r = ball_rank(text);
         return r == 4 && !master ? 0 : r;
     };
-    BagUse ret = pick_in_battle_bag(console, context, 2, value, "POKe BALL", rank);
+    BagUse ret = pick_in_battle_bag(console, context, 2, value, "POKe BALL", rank, last_rank);
     if (ret != BagUse::USED){
+        last_rank = 0;
         return ret;
     }
+    last_rank = rank;
     console.log(std::string("Throwing a ") + ball_name(rank) + ".", COLOR_BLUE);
     //  A: USE / CANCEL (on USE). A: the bag closes and the ball flies.
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
@@ -1298,6 +1313,7 @@ StoryBattleResult run_story_battle(
     bool shiny_wanted = false;
     bool shiny_caught = false;
     bool legendary = false;
+    int last_ball_rank = 0;
     //  Weakening a legendary Pokemon (settings.weaken_legendary): its HP
     //  before the last hit, the most one hit took, the hits so far.
     bool weakened = false;
@@ -1461,7 +1477,11 @@ StoryBattleResult run_story_battle(
                     }
                     break;
                 }else{
-                    switch (throw_best_ball(console, context, legendary && settings.legendary_master)){
+                    if (legendary && deadline < current_time() + 150min){
+                        //  Up to 99 balls at half a minute each.
+                        deadline = current_time() + 150min;
+                    }
+                    switch (throw_best_ball(console, context, legendary && settings.legendary_master, last_ball_rank)){
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;
@@ -1775,6 +1795,9 @@ StoryBattleResult run_story_battle(
                     if (text.find("gotcha") != std::string::npos || text.find("was caught") != std::string::npos){
                         if (!shiny_caught){
                             console.log(legendary ? "Caught it!" : "Caught the shiny Pokemon!", COLOR_BLUE);
+                            //  Whatever the time: the POKeDEX page and the
+                            //  nickname question still have to go by.
+                            deadline = std::max(deadline, current_time() + 5min);
                         }
                         shiny_caught = true;
                         shiny_catching = false;
@@ -1894,6 +1917,15 @@ StoryBattleResult run_story_battle(
             //  with whoever the player faces once the text is over.
             WhiteDialogDetector white_dialog(COLOR_RED);
             if (white_dialog.detect(screen)){
+                if (settings.scene_after && battle_confirmed){
+                    if (lost){
+                        return StoryBattleResult::LOST;
+                    }
+                    console.log("Battle over: the scene after it has begun.");
+                    return over();
+                }
+                //  The text goes on: that is something happening.
+                last_activity = current_time();
                 pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                 context.wait_for_all_requests();
                 break;

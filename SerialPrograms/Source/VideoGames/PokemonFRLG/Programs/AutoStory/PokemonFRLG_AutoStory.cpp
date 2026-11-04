@@ -491,6 +491,13 @@ void AutoStory::run_segment(
                 break;
             }
             const bool trainer = step.p1 != 1;
+            //  The Champion: Oak, the Hall of Fame and the credits come after
+            //  it (the next step), not the overworld.
+            struct SceneAfter{
+                StoryRuntime& rt;
+                SceneAfter(StoryRuntime& p_rt, bool on) : rt(p_rt){ rt.battle.scene_after = on; }
+                ~SceneAfter(){ rt.battle.scene_after = false; }
+            } scene_after(rt, next != nullptr && next->type == StepType::RESET);
             StoryBattleResult result = story_battle(rt, trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD_RUN, label);
             if (result == StoryBattleResult::NO_BATTLE && trainer && rt.last_leg_dark &&
                 rt.trainer_battles == rt.trainer_battles_before_leg
