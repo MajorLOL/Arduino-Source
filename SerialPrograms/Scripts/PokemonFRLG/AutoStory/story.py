@@ -915,8 +915,9 @@ class Builder:
             #  A team member below the level of the strongest wild Pokemon
             #  here only takes part (shared experience) until it gets there.
             "p3": self.gd.wild_max_level.get(g["map"], 0) if g.get("slot") else 0,
-            #  The grass line walked along: this many tiles from the start.
-            "p4": length,
+            #  The grass line walked along: this many tiles from the start;
+            #  0x100: Rare Candies first.
+            "p4": length | (0x100 if g.get("candies") else 0),
             "legs_to_grass": legs_to_grass, "legs_to_nurse": legs_to_nurse, "legs_back": legs_back,
         })
         #  The grind ends healed at the nurse.

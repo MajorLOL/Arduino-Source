@@ -65,6 +65,11 @@ void story_check_lead(StoryRuntime& rt);
 //  description) on a party slot (1-6): an evolution stone.
 void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what);
 
+//  Use up to "count" Rare Candies from the bag on party slot 1, in the
+//  overworld. A move it wants to learn is not learned. Returns how many
+//  were used.
+int story_use_rare_candies(StoryRuntime& rt, int count);
+
 //  Facing an elevator panel: pick a floor. "from" is where the cursor
 //  starts (the current floor), "to" the floor to pick.
 void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what);

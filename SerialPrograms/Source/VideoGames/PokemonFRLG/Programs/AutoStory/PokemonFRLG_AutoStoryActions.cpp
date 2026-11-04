@@ -720,6 +720,83 @@ void story_heal_with_items(StoryRuntime& rt){
 
 
 
+int story_use_rare_candies(StoryRuntime& rt, int count){
+    if (count <= 0 || rt.no_rare_candies){
+        return 0;
+    }
+    StoryMemoryScope memory_scope("rare candies");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    open_bag_from_overworld(console, context);
+    //  "A candy that is packed with energy. It raises the level of a
+    //  POKeMON by one."
+    if (!select_bag_item(rt, BagPocket::ITEMS, {"raises the level", "level of a", "packed with energy"}, {}, "RARE CANDY")){
+        rt.no_rare_candies = true;
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+        return 0;
+    }
+    console.log("Rare Candies: up to " + std::to_string(count) + " on party slot 1.", COLOR_BLUE);
+    int used = 0;
+    while (used < count){
+        if (used > 0){
+            //  The last one used up moves the cursor on to another item.
+            std::string text = read_bag_description(rt);
+            if (!contains(text, "raises the level") && !contains(text, "level of a") && !contains(text, "packed with energy")){
+                console.log("No Rare Candy left.");
+                break;
+            }
+        }
+        //  A: USE / GIVE / TOSS / CANCEL, on USE. A: the party menu (the
+        //  cursor where the last one left it: LEFT goes to slot 1).
+        press(context, BUTTON_A, 800ms);
+        press(context, BUTTON_A, 2500ms);
+        context.wait_for_all_requests();
+        PartyMenuWatcher party(COLOR_RED);
+        if (wait_until(console, context, 3000ms, { party }) != 0){
+            console.log("The party menu did not open.", COLOR_ORANGE);
+            break;
+        }
+        dpad(context, DPAD_LEFT, 500ms);
+        press(context, BUTTON_A, 1500ms);
+        //  "X was elevated to Lv. N.", the stat window (twice), maybe a new
+        //  move, then the bag again. A goes through it (and through an
+        //  evolution, which B would stop). A move it wants to learn: NO
+        //  (the battles choose the moves), and YES to "Stop trying to
+        //  teach it?".
+        bool back = false;
+        for (int i = 0; i < 30; i++){
+            BagWatcher bag(COLOR_RED);
+            context.wait_for_all_requests();
+            if (wait_until(console, context, 1200ms, { bag }) == 0){
+                back = true;
+                break;
+            }
+            std::string text = read_story_text(console, PARTY_MESSAGE_BOX, false);
+            if (contains(text, "deleted") || contains(text, "replaced") || contains(text, "should a move")){
+                console.log("Not learning the new move: " + text);
+                press(context, BUTTON_B, 1500ms);
+            }else{
+                press(context, BUTTON_A, 800ms);
+            }
+        }
+        if (!back){
+            console.log("Not back in the bag after a Rare Candy.", COLOR_ORANGE);
+            used++;
+            break;
+        }
+        used++;
+    }
+    console.log("Used " + std::to_string(used) + " Rare " + (used == 1 ? "Candy." : "Candies."), COLOR_BLUE);
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "bag");
+    return used;
+}
+
+
+
 void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what){
     ProControllerContext& context = rt.context;
     rt.console.log("Elevator: " + what + " (" + std::to_string(from) + " -> " + std::to_string(to) + ")");
@@ -1252,7 +1329,8 @@ void grind_front(
     const int target = step.p0 + extra_levels;
     const int heal_every = std::max(1, step.p1);
     const DpadPosition forth = step.dir;
-    const int length = std::max(2, (int)step.p4);
+    const int length = std::max(2, (int)(step.p4 & 0xff));
+    const bool candies = (step.p4 & 0x100) != 0;
     std::vector<int32_t> to_grass = script.leg_list(step.legs_a);
     std::vector<int32_t> to_nurse = script.leg_list(step.legs_b);
     std::vector<int32_t> to_grass_again = script.leg_list(step.legs_c);
@@ -1275,6 +1353,20 @@ void grind_front(
         //  put back in its place.)
         console.log(where + ": level " + std::to_string(level) + " reached already.", COLOR_BLUE);
         return;
+    }
+    if (candies && level > 0){
+        //  The Rare Candies picked up on the way: a level each, where a
+        //  level costs the most battles.
+        if (story_use_rare_candies(rt, target - level) > 0){
+            int now = story_read_lead_level(rt);
+            if (now > 0){
+                level = now;
+            }
+            if (level >= target){
+                console.log(where + ": level " + std::to_string(level) + " reached with Rare Candies.", COLOR_BLUE);
+                return;
+            }
+        }
     }
     walk(to_grass);
     //  The last walk to the grass is on the map of the grass.
@@ -1536,7 +1628,7 @@ void story_catch(StoryRuntime& rt, const StoryStep& step){
     rt.battle.catch_balls = (uint16_t)std::max(1, step.p0);
 
     const DpadPosition forth = step.dir;
-    GrassSpot spot(rt, forth, std::max(2, (int)step.p4), StoryBattleKind::WILD_RUN, step.label);
+    GrassSpot spot(rt, forth, std::max(2, (int)(step.p4 & 0xff)), StoryBattleKind::WILD_RUN, step.label);
     spot.arrived();
     bool caught = false;
     WallClock deadline = current_time() + std::chrono::minutes(30);

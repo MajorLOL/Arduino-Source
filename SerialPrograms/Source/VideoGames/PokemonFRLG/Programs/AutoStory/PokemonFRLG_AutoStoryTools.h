@@ -62,6 +62,9 @@ struct StoryRuntime{
     bool verify_walking = true;
     //  Run (B held) with the Running Shoes where a leg allows it.
     bool running = false;
+    //  No Rare Candy was found in the bag: not looked for again until one
+    //  is picked up.
+    bool no_rare_candies = false;
 
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;

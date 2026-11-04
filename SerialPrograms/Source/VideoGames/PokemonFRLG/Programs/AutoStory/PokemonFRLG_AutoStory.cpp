@@ -410,6 +410,9 @@ void AutoStory::run_segment(
             //  Only right after the warp is the facing the game's.
             rt.arrived_by_warp = false;
         }
+        if (label.rfind("RareCandy", 0) == 0){
+            rt.no_rare_candies = false;     //  One is picked up here.
+        }
 
         //  A scene that turned into a battle: run the battle, then finish the scene.
         auto finish_scene = [&](Milliseconds min_time, Milliseconds max_time, bool yes){

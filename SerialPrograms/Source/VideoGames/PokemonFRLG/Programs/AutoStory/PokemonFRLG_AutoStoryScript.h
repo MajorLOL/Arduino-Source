@@ -95,7 +95,8 @@ enum class StepType : uint8_t{
     SCRIPTED_BATTLE,    //  the first rival battle
     SAVE,               //  p0 = 1 if the start menu has POKeDEX
     GRIND,              //  p0 = level, p1 = battles between heals, dir = back and forth,
-                        //  p4 = the length of the grass line walked along (2+),
+                        //  p4 = the length of the grass line walked along (2+, the low
+                        //  byte); 0x100: first the Rare Candies in the bag,
                         //  legs_a = to grass, legs_b = to nurse, legs_c = back to grass;
                         //  a team member: p2 = its party slot, text = its evolution
                         //  line, p3 = the highest wild level there (below it, the

@@ -73,13 +73,16 @@ def only(variants, steps):
     return {"only": {"variants": variants, "steps": steps}}
 
 
-def grind(map_id, tiles, pc, level, label, every=6, slot=None, line=None):
+def grind(map_id, tiles, pc, level, label, every=6, slot=None, line=None, candies=False):
     """Train until a level. slot/line: a team member (party slot, its
-    evolution line as slugs) trains in front instead of the lead."""
+    evolution line as slugs) trains in front instead of the lead. candies:
+    first the Rare Candies in the bag, as many as the level needs."""
     g = {"map": map_id, "tiles": tiles, "pc": pc, "level": level, "every": every}
     if slot is not None:
         g["slot"] = slot
         g["line"] = line
+    if candies:
+        g["candies"] = True
     return {"grind": g, "label": label}
 
 
@@ -103,6 +106,13 @@ def elevator(map_id, panel, from_idx, to_idx, exit_xy, push, dest, label="Elevat
     """Ride an elevator: talk to the panel, pick a floor, walk out."""
     return {"elevator": {"map": map_id, "panel": panel, "from": from_idx, "to": to_idx,
                          "exit": exit_xy, "push": push, "dest": dest}, "label": label}
+
+
+def candy(map_id, xy, flag, label):
+    """Pick up a Rare Candy near the way: an item ball, or a hidden item (A
+    facing its tile). They are used at the League training (grind with
+    candies=True), where a level costs the most battles."""
+    return [talk(map_id, xy=xy, mode="talk", label=label), setst(flags=[flag])]
 
 
 def talk_no(map_id, xy, label):
@@ -263,7 +273,7 @@ LEVELS = {
 }
 
 
-def grind_all(key, map_id, tiles, pc, label, every=5):
+def grind_all(key, map_id, tiles, pc, label, every=5, candies=False):
     """The team members' training (TEAM_TRAINING), then a grind step per
     starter with its own level target, at the same spot. The members first:
     while one is too weak for the wild Pokemon there, the lead fights for it
@@ -272,8 +282,8 @@ def grind_all(key, map_id, tiles, pc, label, every=5):
     for member, level in TEAM_TRAINING.get(key, {}).items():
         slots, lines = TEAM_MEMBERS[member]
         steps += [only([v], [grind(map_id, tiles, pc, level, label + "_" + member.title(), every,
-                                   slot=slots[v], line=lines[v])]) for v in STARTERS]
-    steps += [only([v], [grind(map_id, tiles, pc, LEVELS[key][v], label, every)]) for v in STARTERS]
+                                   slot=slots[v], line=lines[v], candies=candies)]) for v in STARTERS]
+    steps += [only([v], [grind(map_id, tiles, pc, LEVELS[key][v], label, every, candies=candies)]) for v in STARTERS]
     return steps
 
 
@@ -425,6 +435,7 @@ CHAPTER2 = [
         "steps": [
             #  The only way to the fossils passes Miguel's trigger (14,11)
             #  (VAR_MAP_SCENE_MT_MOON_B2F == 0): MtMoon_B2F_EventScript_MiguelTrigger.
+        ] + candy("MAP_MT_MOON_1F", [42, 35], "FLAG_HIDE_MT_MOON_1F_RARE_CANDY", "RareCandyMtMoon") + [
             goto("MAP_MT_MOON_B2F", [[14, 11]], "ToMiguel", trigger=True),
             battle("Super Nerd Miguel", 30000),
             setst(vars={"VAR_MAP_SCENE_MT_MOON_B2F": 1}),
@@ -526,6 +537,7 @@ CHAPTER3 = [
         "steps": [
             #  The only way south leads through the burgled house (back door at
             #  (4,1)) and past the Rocket: CeruleanCity_EventScript_GruntTriggerBottom.
+        ] + candy("MAP_CERULEAN_CITY", [18, 7], "FLAG_HIDDEN_ITEM_CERULEAN_CITY_RARE_CANDY", "RareCandyCerulean") + [
             goto("MAP_CERULEAN_CITY", [[33, 7]], "ToCeruleanRocket", trigger=True),
             cutscene(2000, 30000, "Rocket intro"),
             battle("Rocket (Cerulean)", 30000),
@@ -534,6 +546,7 @@ CHAPTER3 = [
             setst(vars={"VAR_MAP_SCENE_CERULEAN_CITY_ROCKET": 1},
                   flags=["FLAG_HIDE_CERULEAN_ROCKET", "FLAG_GOT_TM28_FROM_ROCKET"]),
             pos("MAP_CERULEAN_CITY", 33, 7, "up"),
+        ] + candy("MAP_ROUTE6", [19, 5], "FLAG_HIDDEN_ITEM_ROUTE6_RARE_CANDY", "RareCandyRoute6") + [
             heal(PC["VERMILION"], "CeruleanToVermilionPC"),
             save(),
         ],
@@ -613,7 +626,7 @@ CHAPTER4 = [
     {
         "id": "C4_01_ROUTE9", "chapter": 4,
         "title": "Back to Cerulean, Route 9 (Cut) to the Pokemon Center at Rock Tunnel",
-        "steps": [
+        "steps": candy("MAP_ROUTE9", [63, 2], "FLAG_HIDDEN_ITEM_ROUTE9_RARE_CANDY", "RareCandyRoute9") + [
             heal(PC["ROUTE10"], "VermilionToRoute10PC"),
             save(),
         ],
@@ -698,6 +711,7 @@ CHAPTER5 = [
             setst(flags=["FLAG_OPENED_ROCKET_HIDEOUT"],
                   script_tiles=[["MAP_CELADON_CITY_GAME_CORNER", "CeladonCity_GameCorner_EventScript_OpenRocketHideout"]]),
             #  RocketHideout_B4F_EventScript_Grunt1 drops the Lift Key.
+        ] + candy("MAP_ROCKET_HIDEOUT_B3F", [12, 12], "FLAG_HIDE_ROCKET_HIDEOUT_B3F_RARE_CANDY", "RareCandyHideout") + [
             talk("MAP_ROCKET_HIDEOUT_B4F", xy=[4, 2], mode="battle", label="LiftKeyRocket"),
             cutscene(1000, 20000, "Lift Key drops"),
             setst(clear_flags=["FLAG_HIDE_LIFT_KEY"]),
@@ -764,6 +778,7 @@ CHAPTER5 = [
             pos("MAP_POKEMON_TOWER_2F", 16, 6, "up"),
             #  PokemonTower_6F_EventScript_MarowakGhost: the only way to the 7F
             #  stairs; it has to be beaten (running away sends you back).
+        ] + candy("MAP_POKEMON_TOWER_6F", [5, 15], "FLAG_HIDE_POKEMON_TOWER_6F_RARE_CANDY", "RareCandyTower") + [
             goto("MAP_POKEMON_TOWER_6F", [[12, 16], [11, 15]], "ToMarowakGhost", trigger=True),
             cutscene(1000, 15000, "Be gone, intruders"),
             battle("Ghost Marowak", 40000),
@@ -799,7 +814,7 @@ CHAPTER6 = [
             battle("Snorlax", 40000, flee=True),
             cutscene(1000, 15000, "Snorlax gone"),
             setst(flags=["FLAG_HIDE_ROUTE_12_SNORLAX", "FLAG_WOKE_UP_ROUTE_12_SNORLAX"]),
-        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 5, "BuyUltraBalls") + [
+        ] + candy("MAP_ROUTE12", [9, 116], "FLAG_HIDDEN_ITEM_ROUTE12_RARE_CANDY", "RareCandyRoute12") + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 5, "BuyUltraBalls") + [
             heal(PC["FUCHSIA"], "Route12ToFuchsiaPC"),
             save(),
         ],
@@ -830,6 +845,7 @@ CHAPTER6 = [
             talk("MAP_FUCHSIA_CITY_WARDENS_HOUSE", xy=[3, 5], mode="talk", label="Warden"),
             cutscene(3000, 40000, "HM04 Strength"),
             setst(flags=["FLAG_GOT_HM04"]),
+            #  (The Rare Candy here is behind boulders: Strength comes later.)
             heal(PC["FUCHSIA"], "WardenToFuchsiaPC"),
             save(),
         ],
@@ -1172,7 +1188,8 @@ CHAPTER10 = [
             ],
         },
         #  Near the way out to Route 23: the barriers shut the rest of 2F off.
-        "steps": grind_all("LEAGUE", "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), PC["INDIGO"], "GrindVictoryRoad") + [save()],
+        "steps": grind_all("LEAGUE", "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), PC["INDIGO"], "GrindVictoryRoad",
+                           candies=True) + [save()],
     },
     {
         "id": "C10_02_ITEMS", "chapter": 10,
