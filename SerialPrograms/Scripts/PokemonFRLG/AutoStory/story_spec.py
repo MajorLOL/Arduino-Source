@@ -1363,8 +1363,182 @@ CHAPTER11.append({
     ],
 })
 
+# ---------------------------------------------------------------- chapter 12
+#  The Sevii Islands with Bill (the first time: Islands 1-3). The way to the
+#  National Pokedex, the Ruby and the Sapphire, and so to the roaming
+#  legendary. On this first visit the ferry only goes between the islands
+#  (EventScript_ChooseDestFromOneIsland: Kanto once VAR_MAP_SCENE_CINNABAR_
+#  ISLAND >= 4), and Fly there only has the islands' map: back to Kanto only
+#  with Bill, once Lostelle is found and the Meteorite delivered.
+
+
+def ferry(harbor_map, option, dest_harbor, label):
+    """The Seagallop from a Sevii harbor: the sailor (8,6), the destination
+    menu (option: its row), the ferry, then the harbor it arrives at (8,5)."""
+    steps = [talk(harbor_map, xy=[8, 6], mode="plain", label=label),
+             press("A", 1, 2500, label + "_Talk")]
+    if option:
+        steps.append(press("DOWN", option, 500, label + "_Menu"))
+    return steps + [press("A", 1, 1500, label + "_Pick"),
+                    cutscene(8000, 90000, "Ferry"),
+                    pos(dest_harbor, 8, 5)]
+
+
+#  HM06 Rock Smash: Lapras learns it in place of HYDRO PUMP (Surf hits as
+#  Water already); Charizard keeps its moves. HMs in the TM Case: 01, (02),
+#  03, 04, 06.
+ROCK_SMASH_RANK = {v: 4 + (v in FLY_VARIANTS) for v in STARTERS}
+
+CHAPTER12 = [
+    {
+        "id": "C12_01_ONE_ISLAND", "chapter": 12,
+        "title": "With Bill to One Island: Celio, the Tri-Pass",
+        "steps": [
+            fly("HEAL_LOCATION_CINNABAR_ISLAND", "ToCinnabar"),
+            #  CinnabarIsland_PokemonCenter_1F_EventScript_Bill: YES. Then one
+            #  scene after the other: out to the harbor, the boat, the ferry,
+            #  One Island (setworldmapflag FLAG_WORLD_MAP_ONE_ISLAND), Bill
+            #  walks to the Pokemon Center, Celio (MeetCelioScene): the
+            #  Meteorite, the Tri-Pass. The player stands at (14,7) then.
+            talk("MAP_CINNABAR_ISLAND_POKEMON_CENTER_1F", xy=[11, 5], mode="yes", label="BillSevii"),
+            cutscene(150000, 480000, "With Bill to One Island, Celio"),
+            setst(flags=["FLAG_HIDE_CINNABAR_POKECENTER_BILL", "FLAG_HIDE_CINNABAR_BILL", "FLAG_HIDE_CINNABAR_SEAGALLOP",
+                         "FLAG_HIDE_ONE_ISLAND_BILL", "FLAG_SYS_SEVII_MAP_123", "FLAG_SYS_PC_STORAGE_DISABLED",
+                         "FLAG_WORLD_MAP_ONE_ISLAND"],
+                  vars={"VAR_MAP_SCENE_CINNABAR_ISLAND_2": 2, "VAR_MAP_SCENE_CINNABAR_ISLAND": 2,
+                        "VAR_MAP_SCENE_ONE_ISLAND_HARBOR": 3, "VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 1}),
+            pos("MAP_ONE_ISLAND_POKEMON_CENTER_1F", 14, 7, "up"),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "OneIslandNurse"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_02_ROCK_SMASH", "chapter": 12,
+        "title": "Kindle Road to the Ember Spa: HM06 Rock Smash for Lapras",
+        "steps": [
+            talk("MAP_ONE_ISLAND_KINDLE_ROAD_EMBER_SPA", xy=[10, 5], mode="talk", label="RockSmashMan"),
+            cutscene(1500, 30000, "HM06"),
+            setst(flags=["FLAG_GOT_HM06"]),
+        ] + [only([v], [{"teach": {"hm_rank": ROCK_SMASH_RANK[v], "party_slot": LAPRAS_SLOT[v],
+                                    "move": "ROCK SMASH|HYDRO PUMP", "forget": -1}, "label": "Teach ROCK SMASH"}])
+             for v in STARTERS] + [
+            setst(abilities={"rock_smash": True}),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "SpaToOneIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_03_TWO_ISLAND", "chapter": 12,
+        "title": "Two Island: Lostelle is missing",
+        "steps": ferry("MAP_ONE_ISLAND_HARBOR", 0, "MAP_TWO_ISLAND_HARBOR", "FerryToTwoIsland") + [
+            #  TwoIsland_JoyfulGameCorner_EventScript_HelpFindLostelleScene
+            #  (on entering): Lostelle's daddy, a biker. The player ends
+            #  next to the door at (4,8), the daddy at (6,8).
+            goto("MAP_TWO_ISLAND_JOYFUL_GAME_CORNER", [[5, 8]], "ToJoyfulGameCorner"),
+            cutscene(5000, 120000, "Lostelle is missing"),
+            setst(vars={"VAR_MAP_SCENE_TWO_ISLAND_JOYFUL_GAME_CORNER": 1, "VAR_MAP_SCENE_THREE_ISLAND": 2},
+                  clear_flags=["FLAG_HIDE_THREE_ISLAND_LONE_BIKER"],
+                  objects={"MAP_TWO_ISLAND_JOYFUL_GAME_CORNER": {"LOCALID_JOYFUL_GAME_CORNER_DADDY": {"x": 6, "y": 8}}}),
+            pos("MAP_TWO_ISLAND_JOYFUL_GAME_CORNER", 4, 8, "right"),
+            heal("MAP_TWO_ISLAND_POKEMON_CENTER_1F", "GameCornerToTwoIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_04_THREE_ISLAND", "chapter": 12,
+        "title": "Three Island: the bikers, Ultra Balls",
+        "steps": ferry("MAP_TWO_ISLAND_HARBOR", 1, "MAP_THREE_ISLAND_HARBOR", "FerryToThreeIsland") + [
+            #  ThreeIsland_EventScript_BikerBossIntroTrigger (row 27), then
+            #  ThreeIsland_EventScript_BattleBikersScene (row 26): YES, three
+            #  bikers and Cue Ball Paxton one after the other.
+            goto("MAP_THREE_ISLAND", [[9, 27]], "BikerBossIntro", trigger=True),
+            cutscene(3000, 120000, "Paxton and the islanders"),
+            setst(vars={"VAR_MAP_SCENE_THREE_ISLAND": 3}),
+            pos("MAP_THREE_ISLAND", 9, 27, "up"),
+            goto("MAP_THREE_ISLAND", [[9, 26]], "BattleBikers", trigger=True),
+            cutscene(3000, 600000, "The bikers", answer="yes"),
+            setst(vars={"VAR_MAP_SCENE_THREE_ISLAND": 4},
+                  flags=["FLAG_HIDE_THREE_ISLAND_BIKERS", "FLAG_HIDE_THREE_ISLAND_LONE_BIKER"]),
+            pos("MAP_THREE_ISLAND", 9, 26, "up"),
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BikersToThreeIslandPC"),
+            #  Ultra Balls for Moltres, as many as the money allows.
+        ] + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "MartToThreeIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_05_LOSTELLE", "chapter": 12,
+        "title": "Bond Bridge, Berry Forest: Lostelle; the Meteorite",
+        "steps": [
+            #  ThreeIsland_BerryForest_EventScript_Lostelle: a wild Hypno
+            #  (run), then everyone is back in the Joyful Game Corner
+            #  (6,6), facing up (OnWarp), Lostelle and her daddy talk.
+            talk("MAP_THREE_ISLAND_BERRY_FOREST", xy=[4, 8], mode="talk", label="Lostelle"),
+            battle("Hypno", 30000, flee=True),
+            cutscene(3000, 120000, "Lostelle found"),
+            setst(flags=["FLAG_RESCUED_LOSTELLE", "FLAG_HIDE_LOSTELLE_IN_BERRY_FOREST"],
+                  clear_flags=["FLAG_HIDE_TWO_ISLAND_GAME_CORNER_LOSTELLE"],
+                  vars={"VAR_MAP_SCENE_TWO_ISLAND_JOYFUL_GAME_CORNER": 3}),
+            pos("MAP_TWO_ISLAND_JOYFUL_GAME_CORNER", 6, 6, "up"),
+            #  TwoIsland_JoyfulGameCorner_EventScript_GiveDaddyMeteorite.
+            talk("MAP_TWO_ISLAND_JOYFUL_GAME_CORNER", xy=[5, 5], mode="talk", label="LostellesDaddy"),
+            cutscene(1500, 60000, "The Meteorite, a Moon Stone"),
+            setst(flags=["FLAG_GOT_MOON_STONE_FROM_JOYFUL_GAME_CORNER"],
+                  vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 2}),
+            heal("MAP_TWO_ISLAND_POKEMON_CENTER_1F", "GameCornerToTwoIslandPC2"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_06_MOLTRES", "chapter": 12,
+        "title": "Mt. Ember: Moltres at the summit (weakened, Ultra Balls)",
+        "steps": ferry("MAP_TWO_ISLAND_HARBOR", 0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
+            #  Mt. Ember: boulders (Strength) and rocks (Rock Smash) on the way
+            #  to the Summit Path (14,24); at the summit four boulders before
+            #  Moltres (9,6).
+            goto("MAP_MT_EMBER_EXTERIOR", [[28, 47]], "ToMtEmber"),
+            {"boulder": {"open_to": [[14, 25]]}, "label": "MtEmberBoulders"},
+            goto("MAP_MT_EMBER_SUMMIT", [[9, 14]], "ToMtEmberSummit"),
+            {"boulder": {"open_to": [[9, 7], [8, 6], [10, 6]]}, "label": "SummitBoulders"},
+            goto("MAP_MT_EMBER_SUMMIT", [[9, 7]], "ToMoltres"),
+            save(),
+        ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
+                      weaken=True) + [
+            #  Caught: saved and loaded again, so the boulders stand where
+            #  the map has them (also after tries that loaded the save in
+            #  front of Moltres), then pushed out of the way down.
+            save(),
+            {"reload": True, "label": "Reload after Moltres"},
+            {"boulder": {"open_to": [[9, 14]]}, "label": "SummitBouldersBack"},
+            #  Mt. Ember loads again on the way down: its boulders are back.
+            setst(reset_objects=["MAP_MT_EMBER_EXTERIOR"]),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "SummitToOneIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C12_07_BACK_TO_KANTO", "chapter": 12,
+        "title": "Back to Kanto with Bill",
+        "steps": [
+            #  OneIsland_PokemonCenter_1F_EventScript_LeaveOneIslandScene
+            #  (x 12, VAR 2): Bill and Celio, the ferry to Cinnabar, then
+            #  CinnabarIsland_EventScript_ReturnFromSeviiIslands. The ferry
+            #  lands at (21,7) (sSeag).
+            goto("MAP_ONE_ISLAND_POKEMON_CENTER_1F", [[12, 8]], "BillLeaves", trigger=True),
+            cutscene(60000, 300000, "Back to Kanto"),
+            setst(flags=["FLAG_HIDE_ONE_ISLAND_POKECENTER_BILL", "FLAG_HIDE_TWO_ISLAND_GAME_CORNER_LOSTELLE"],
+                  clear_flags=["FLAG_HIDE_LOSTELLE_IN_HER_HOME", "FLAG_SYS_PC_STORAGE_DISABLED"],
+                  vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 3, "VAR_MAP_SCENE_CINNABAR_ISLAND": 4}),
+            pos("MAP_CINNABAR_ISLAND", 21, 7),
+            heal(PC["CINNABAR"], "HarborToCinnabarPC"),
+            save(),
+        ],
+    },
+]
+
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
-            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11)
+            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12)
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),

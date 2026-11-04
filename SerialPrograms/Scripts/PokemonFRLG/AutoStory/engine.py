@@ -314,9 +314,10 @@ class WorldState:
         self.defeated = set()               # (map_id, object key)
         self.object_overrides = {}          # map_id -> key -> dict
         self.tile_overrides = {}            # map_id -> (x,y) -> {"collision": 0/1}
-        self.abilities = {"cut": False, "surf": False, "strength": False}
+        self.abilities = {"cut": False, "surf": False, "strength": False, "rock_smash": False}
         self.extra_blocked = {}             # map_id -> set((x,y)) (e.g. a trainer that moved)
         self.cut_done = {}                  # map_id -> set((x,y)) trees cut during this visit
+        self.smash_done = {}                # map_id -> set((x,y)) rocks smashed during this visit
         self.map_vars = {}                  # map_id -> {VAR_TEMP_x: value} set by ON_TRANSITION
 
     def clone(self):
@@ -332,6 +333,9 @@ class WorldState:
             self.vars[k] = int(v)
         for t in change.get("defeated", []):
             self.defeated.add((t[0], t[1]))
+        for mid in change.get("reset_objects", []):
+            #  The map loaded again: its objects are where the map has them.
+            self.object_overrides.pop(mid, None)
         for mid, objs in change.get("objects", {}).items():
             mo = self.object_overrides.setdefault(mid, {})
             for key, ov in objs.items():
@@ -409,6 +413,7 @@ class MapView:
         B = engine.B
         self.blocked = set()
         self.cut_trees = set()
+        self.smash_rocks = set()
         self.boulders = set()
         self.items = {}         # (x,y) -> flag of an item ball
         self.soft = {}
@@ -421,6 +426,10 @@ class MapView:
             if g.endswith("CUT_TREE"):
                 if xy not in st.cut_done.get(m.id, set()):
                     self.cut_trees.add(xy)
+                continue
+            if g.endswith("ROCK_SMASH_ROCK"):
+                if xy not in getattr(st, "smash_done", {}).get(m.id, set()):
+                    self.smash_rocks.add(xy)
                 continue
             if g.endswith("PUSHABLE_BOULDER"):
                 self.boulders.add(xy)
@@ -714,6 +723,15 @@ class Engine:
                 if self.state.abilities.get("cut"):
                     nn = (tm.id, nx, ny, elev, False)
                     yield nn, {"kind": "cut", "dir": d, "cost": COST_CUT + COST_STEP,
+                               "risk": self.tile_risk(tv, nx, ny, False)}
+                continue
+
+            #  Rock Smash rocks (EventScript_RockSmash; a wild battle may
+            #  follow, RockSmashWildEncounter).
+            if (nx, ny) in tv.smash_rocks and not surfing:
+                if self.state.abilities.get("rock_smash"):
+                    nn = (tm.id, nx, ny, elev, False)
+                    yield nn, {"kind": "smash", "dir": d, "cost": COST_CUT + COST_STEP + 6.0,
                                "risk": self.tile_risk(tv, nx, ny, False)}
                 continue
 

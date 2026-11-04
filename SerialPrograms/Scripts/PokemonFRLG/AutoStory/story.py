@@ -225,7 +225,7 @@ class Builder:
         """Index of the first route edge that walks into the sight of a
         fixed-facing, undefeated trainer (the battle will start there)."""
         for i, (edge, node) in enumerate(route):
-            if edge["kind"] not in ("walk", "jump", "dismount", "cut", "spin", "item", "door"):
+            if edge["kind"] not in ("walk", "jump", "dismount", "cut", "smash", "spin", "item", "door"):
                 continue
             mid, x, y = node[0], node[1], node[2]
             v = self.engine.view(mid)
@@ -386,6 +386,21 @@ class Builder:
                 self.close_leg(leg, out)
                 out.append({"type": "TALK_YES", "label": "Cut tree"})
                 out.append({"type": "WAIT", "label": "Cut animation", "p0": 2500})
+                part += 1
+                leg = self.new_leg("%s_%d" % (label, part))
+                self.add_run(leg, d, RUN_CHECKED if "encounter" in risk else RUN_WALK)
+                self.pos = (node[0], node[1], node[2], d)
+                leg["points"].append((node[0], node[1], node[2]))
+            elif k == "smash":
+                self.state.smash_done.setdefault(node[0], set()).add((node[1], node[2]))
+                self.engine.invalidate()
+                leg["face"] = d
+                leg["end"] = "INTERACT"
+                self.close_leg(leg, out)
+                #  "This rock appears to be breakable..." YES. A wild battle
+                #  may come after it: the scene step fights it.
+                out.append({"type": "TALK_YES", "label": "Rock Smash"})
+                out.append({"type": "WAIT", "label": "Rock Smash animation", "p0": 2500})
                 part += 1
                 leg = self.new_leg("%s_%d" % (label, part))
                 self.add_run(leg, d, RUN_CHECKED if "encounter" in risk else RUN_WALK)
@@ -601,6 +616,19 @@ class Builder:
                 return i if flag in self.state.flags else None
         return None
 
+    _kanto_mapsecs = None
+
+    def in_kanto(self, map_id):
+        """The map is in Kanto (its section is on the Kanto region map): the
+        Fly map there is Kanto's. From the Sevii Islands it only shows the
+        islands (REGIONMAP_TYPE_FLY has no SWITCH button)."""
+        if Builder._kanto_mapsecs is None:
+            import os
+            import re
+            p = os.path.join(self.d.root, "src/data/region_map/region_map_layout_kanto.h")
+            Builder._kanto_mapsecs = set(re.findall(r"MAPSEC_\w+", open(p).read())) - {"MAPSEC_NONE"}
+        return self.d.maps[map_id].mapsec in Builder._kanto_mapsecs
+
     def route_cost(self, goals):
         route = self.engine.route(self.node(), goals, start_facing=self.pos[3])
         if route is None:
@@ -611,7 +639,7 @@ class Builder:
         """Fly to KantoFlyLocation 'index' (out of a building first). With
         'goals' (where the walk goes on to): only when it saves time.
         Returns whether it flew."""
-        if self.surfing:
+        if self.surfing or not self.in_kanto(self.pos[0]):
             return False
         h, _ = self.fly_data()[index]
         if self.pos[0] == h["map"]:
@@ -642,6 +670,7 @@ class Builder:
         """Temporary changes of a map end when we leave it (map reload)."""
         self.state.extra_blocked.pop(map_id, None)
         self.state.cut_done.pop(map_id, None)
+        self.state.smash_done.pop(map_id, None)
         self.maybe_came.pop(map_id, None)
         self.maybe_at.pop(map_id, None)
         self.engine.invalidate()
@@ -796,6 +825,16 @@ class Builder:
             #  The game saves itself in the Hall of Fame and starts in Pallet
             #  Town from then on (the next segment says where).
             out.append({"type": "RESET", "label": step.get("label", "Hall of Fame"), "p0": step["hall_of_fame"]})
+            return
+        if "reload" in step:
+            #  Load the save just made: the map loads again, so what was
+            #  pushed or smashed on it is back where the map has it, the same
+            #  whether the step before needed one try or several.
+            out.append({"type": "RESET", "label": step.get("label", "Reload"), "p0": 0})
+            mid = self.pos[0]
+            self.state.object_overrides.pop(mid, None)
+            self.leave_map(mid)
+            self.strength_used = None
             return
         if "rival1" in step:
             out.append({"type": "SCRIPTED_BATTLE", "label": step.get("label", "Rival")})
@@ -1206,13 +1245,16 @@ class Builder:
         step["boulder"] = {target: [x,y], hole: bool, from: [x,y]}
         "from": the boulder that must get there (the one at that position
         when the step starts); the others may be pushed out of its way.
-        Without it, any boulder."""
+        Without it, any boulder.
+        {open_to: [[x,y], ...]} instead of target: push boulders until the
+        player can walk to one of those tiles."""
         from collections import deque
         bp = step["boulder"]
         label = step.get("label", "Boulder")
         mid = self.pos[0]
         m = self.d.maps[mid]
-        tx, ty = bp["target"]
+        open_goals = set(tuple(p) for p in bp.get("open_to", []))
+        tx, ty = bp["target"] if "target" in bp else (None, None)
         hole = bool(bp.get("hole"))
         goal_origin = tuple(bp["from"]) if bp.get("from") else None
         v0 = self.engine.view(mid)
@@ -1233,7 +1275,8 @@ class Builder:
             n = todo.popleft()
             lst = []
             for nn, ed in self.engine.edges(n, set()):
-                if nn[0] != mid or ed["kind"] not in ("walk", "jump"):
+                #  (Rock Smash rocks are walked through: the walk smashes them.)
+                if nn[0] != mid or ed["kind"] not in ("walk", "jump", "smash", "cut"):
                     continue
                 lst.append(nn)
                 if nn not in graph_seen:
@@ -1282,6 +1325,8 @@ class Builder:
             position in 'movable' may be pushed. With goal_origin, only that
             boulder counts at the target."""
             def dist(fz, origin):
+                if open_goals:
+                    return 0
                 return min((abs(x - tx) + abs(y - ty) for (x, y) in fz
                             if (origin.get((x, y)) == goal_origin if goal_origin else origin.get((x, y)) in movable)),
                            default=99)
@@ -1292,6 +1337,8 @@ class Builder:
             while heap:
                 _, g, _, cfg, pnode, plan, origin_map = heapq.heappop(heap)
                 reg = region(cfg, pnode)
+                if open_goals and any((n[1], n[2]) in open_goals for n in reg):
+                    return plan
                 gpos = next((p for p, o in origin_map if o == goal_origin), None) if goal_origin else None
                 sig = (cfg, min((n[1], n[2], n[3]) for n in reg), gpos)
                 if sig in seen:
@@ -1320,7 +1367,7 @@ class Builder:
                         if not fell:
                             ncfg.add(nb)
                         nplan = plan + [(b, d, nb)]
-                        if nb == (tx, ty) and (goal_origin is None or origin.get(b) == goal_origin):
+                        if tx is not None and nb == (tx, ty) and (goal_origin is None or origin.get(b) == goal_origin):
                             return nplan
                         if fell:
                             continue
@@ -1334,7 +1381,9 @@ class Builder:
             return None
 
         found = None
-        if goal_origin is not None:
+        if open_goals:
+            found = search(set(start_cfg), 60000)
+        elif goal_origin is not None:
             if goal_origin not in start_cfg:
                 raise StoryError("No boulder at %s for %s on %s" % (goal_origin, label, mid))
             found = search({goal_origin}, 20000) or search(set(start_cfg), 200000)

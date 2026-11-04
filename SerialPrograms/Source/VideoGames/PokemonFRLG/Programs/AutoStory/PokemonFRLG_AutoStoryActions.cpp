@@ -150,19 +150,28 @@ int move_in_text(const std::string& text){
 }
 
 //  On the summary's move list: the weakest of the 4 moves that is not an
-//  HM, by the names on the screen. -1: not all read.
-int weakest_move_on_summary(StoryRuntime& rt){
+//  HM, by the names on the screen ("prefer": that move if it is there).
+//  -1: not all read. "lead": the moves are the lead's (remembered).
+int weakest_move_on_summary(StoryRuntime& rt, int prefer, bool lead){
     int worst = -1;
     double worst_value = 1e9;
+    int preferred = -1;
+    bool all_read = true;
     for (int i = 0; i < 4; i++){
         const std::string text = read_story_text(rt.console, summary_move_box(i), false);
         const int move = move_in_text(text);
         rt.console.log("Move " + std::to_string(i + 1) + ": " + text +
                        (move < 0 ? std::string(" (not known)") : " = " + std::string(AutoStoryDex::moves()[(size_t)move].name)));
-        if (move < 0){
-            return -1;
+        if (move >= 0 && move == prefer){
+            preferred = i;
         }
-        rt.memory.moves[i] = move;
+        if (move < 0){
+            all_read = false;
+            continue;
+        }
+        if (lead){
+            rt.memory.moves[i] = move;
+        }
         if (AutoStoryDex::moves()[(size_t)move].hm){
             continue;
         }
@@ -172,7 +181,10 @@ int weakest_move_on_summary(StoryRuntime& rt){
             worst = i;
         }
     }
-    return worst;
+    if (preferred >= 0){
+        return preferred;
+    }
+    return all_read ? worst : -1;
 }
 
 
@@ -592,8 +604,16 @@ void story_swap_party(StoryRuntime& rt, int a, int b){
 void story_teach_hm(
     StoryRuntime& rt,
     int hm_rank, int party_slot, int forget_slot,
-    const std::string& move
+    const std::string& move_and_forget
 ){
+    //  "MOVE|FORGET": the move to replace if the Pokemon knows it.
+    std::string move = move_and_forget;
+    std::string prefer_name;
+    const size_t bar = move_and_forget.find('|');
+    if (bar != std::string::npos){
+        move = move_and_forget.substr(0, bar);
+        prefer_name = move_and_forget.substr(bar + 1);
+    }
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     console.log("Teaching " + move + " to party slot " + std::to_string(party_slot) + ".");
@@ -671,13 +691,20 @@ void story_teach_hm(
         //  summary opens on the move list (cursor on move 1).
         press(context, BUTTON_A, 3500ms);
         context.wait_for_all_requests();
+        if (slot < 0){
+            //  The moves as the screen shows them (for the lead, the ones
+            //  last seen in a battle may be another team member's).
+            slot = weakest_move_on_summary(rt, prefer_name.empty() ? -1 : find_move(prefer_name), party_slot == 1);
+        }
         if (slot < 0 && party_slot == 1){
-            //  The lead's moves as the screen shows them (the ones last seen
-            //  in a battle may be another team member's).
-            slot = weakest_move_on_summary(rt);
+            slot = forget_for_hm(rt);
         }
         if (slot < 0){
-            slot = forget_for_hm(rt);
+            //  Not the lead, and its moves not read: Lapras got Surf in
+            //  place of move 1 and Strength in place of move 4, so moves 2
+            //  and 3 are its own; move 2 is the safer guess.
+            console.log("The moves were not read: replacing move 2.", COLOR_ORANGE);
+            slot = 1;
         }
         console.log("Replacing move " + std::to_string(slot + 1) + " with " + move + ".");
         for (int i = 0; i < slot; i++){
