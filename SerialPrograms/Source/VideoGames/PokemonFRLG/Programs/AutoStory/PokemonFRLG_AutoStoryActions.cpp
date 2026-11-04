@@ -1846,6 +1846,109 @@ void story_catch(StoryRuntime& rt, const StoryStep& step){
 
 
 
+namespace{
+std::string species_names(const std::set<std::string>& species){
+    std::string out;
+    for (const std::string& slug : species){
+        out += (out.empty() ? "" : ", ") + slug;
+    }
+    return out.empty() ? std::string("none") : out;
+}
+}
+
+void story_dex(StoryRuntime& rt, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    const bool safari = step.p2 > 0 && (step.p2 & 1) != 0;
+    const std::string label = step.label;
+    std::set<std::string> wanted;
+    for (const std::string& slug : story_species_list(step.text)){
+        if (rt.caught.count(slug) == 0){
+            wanted.insert(slug);
+        }
+    }
+    const int idle_limit = std::max(1, (int)step.p0);
+    console.log(
+        label + ": for the POKeDEX, catching " + species_names(wanted) +
+        (safari ? " (the Safari Game, until it is over)." :
+            " (until " + std::to_string(idle_limit) + " battles in a row bring none, at most " +
+            std::to_string(std::max(1, (int)step.p1)) + " minutes)."),
+        COLOR_BLUE
+    );
+    if (wanted.empty() && !safari){
+        console.log(label + ": all of them were caught already.", COLOR_BLUE);
+        return;
+    }
+
+    StoryBattleSettings saved = rt.battle;
+    rt.battle.dex_species = wanted;
+    rt.battle.catch_species.clear();
+    rt.in_safari = safari;
+    rt.safari_over = false;
+    rt.safari_balls_used = 0;
+    rt.no_balls = false;
+    const uint64_t new_before = rt.dex_new;
+
+    GrassSpot spot(rt, step.dir, std::max(2, (int)(step.p4 & 0xff)), StoryBattleKind::CATCH, label);
+    spot.arrived();
+    int idle = 0;
+    int battles = 0;
+    size_t caught_here = 0;
+    const WallClock start = current_time();
+    const WallClock deadline = start + (safari ? std::chrono::minutes(30) : std::chrono::minutes(std::max(1, (int)step.p1)));
+    try{
+        while (current_time() < deadline && !rt.safari_over){
+            if (!safari && (rt.battle.dex_species.empty() || idle >= idle_limit || rt.no_balls)){
+                break;
+            }
+            const size_t left = rt.battle.dex_species.size();
+            StoryBattleResult result = spot.step(StoryBattleKind::CATCH);
+            if (rt.safari_over){
+                break;
+            }
+            if (result == StoryBattleResult::NO_BATTLE){
+                continue;
+            }
+            battles++;
+            if (rt.battle.dex_species.size() < left){
+                caught_here += left - rt.battle.dex_species.size();
+                idle = 0;
+            }else{
+                idle++;
+            }
+            spot.check();
+        }
+    }catch (...){
+        rt.in_safari = false;
+        rt.battle = saved;
+        throw;
+    }
+    const std::set<std::string> left = rt.battle.dex_species;
+    rt.in_safari = false;
+    rt.battle = saved;
+    const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
+    console.log(
+        label + ": " + std::to_string(caught_here) + " caught (" + std::to_string(rt.dex_new - new_before) +
+        " new to the POKeDEX) in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
+        " minutes. Not caught: " + species_names(left) + "." +
+        (rt.no_balls ? " No balls left." : ""),
+        COLOR_BLUE
+    );
+    if (safari){
+        if (!rt.safari_over){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_dex(): The Safari Game did not end in 30 minutes: " + label,
+                console
+            );
+        }
+        //  The PA's text and the walk out to the gate: the next steps.
+        return;
+    }
+    spot.to_first_tile();
+}
+
+
+
 }
 }
 }

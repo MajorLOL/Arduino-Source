@@ -602,11 +602,51 @@ StoryBattleResult story_battle(
             rt.console.log("The shiny " + name + " was not caught. Going on.", COLOR_ORANGE);
         }
     }
+    if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty() &&
+        rt.memory.caught.rfind("nidoran", 0) == 0 &&
+        (rt.battle.dex_species.count("nidoran-f") != 0 || rt.battle.dex_species.count("nidoran-m") != 0)
+    ){
+        //  The two NIDORANs read alike: only the POKeDEX page tells that
+        //  the one caught was a wanted one (not the other, caught before).
+        std::string other = rt.memory.caught == "nidoran-f" ? "nidoran-m" : "nidoran-f";
+        if (!rt.memory.dex_registered){
+            rt.console.log("Caught a NIDORAN that was in the POKeDEX already: the other one is still wanted.", COLOR_ORANGE);
+            rt.memory.caught.clear();
+            if (!rt.memory.shiny_to_pc && !rt.memory.shiny){
+                rt.party_extras++;
+            }
+        }else if (rt.battle.dex_species.count(rt.memory.caught) == 0){
+            rt.memory.caught = other;
+        }
+    }
     if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty()){
         rt.caught.insert(rt.memory.caught);
-        rt.console.log("Caught for the team: " + rt.memory.caught, COLOR_BLUE);
-        //  Wanted no more on the way.
-        rt.battle.catch_species.clear();
+        if (rt.battle.dex_species.erase(rt.memory.caught) != 0){
+            if (rt.memory.dex_registered){
+                rt.dex_new++;
+            }
+            rt.console.log(
+                "Caught for the POKeDEX: " + rt.memory.caught +
+                (rt.memory.dex_registered ? " (new)." : " (it was in the POKeDEX already)."),
+                COLOR_BLUE
+            );
+            if (!rt.memory.shiny_to_pc && !rt.memory.shiny){
+                rt.party_extras++;
+            }
+        }else{
+            rt.console.log("Caught for the team: " + rt.memory.caught, COLOR_BLUE);
+            //  Wanted no more on the way.
+            rt.battle.catch_species.clear();
+        }
+    }
+    rt.safari_balls_used += rt.memory.safari_balls;
+    if (rt.memory.safari_over || (rt.in_safari && rt.safari_balls_used >= 30)){
+        //  The last SAFARI BALL: the game is over, whether it caught or
+        //  not (SafariZone_EventScript_OutOfBalls after the battle).
+        rt.safari_over = true;
+    }
+    if (rt.memory.no_balls){
+        rt.no_balls = true;
     }
     if (result == StoryBattleResult::NO_BATTLE){
         rt.console.log("No battle started: " + where, COLOR_ORANGE);
@@ -705,6 +745,12 @@ StoryBattleResult story_grass_run(
         result = story_battle(rt, wild_kind, label, throw_on_loss);
         break;
     case RunEvent::DIALOG:
+        if (rt.in_safari){
+            //  No trainers there: the PA, the Safari Game is over.
+            rt.console.log("Text in the Safari Zone: the Safari Game is over.", COLOR_BLUE);
+            rt.safari_over = true;
+            break;
+        }
         result = story_battle(rt, StoryBattleKind::TRAINER, label, throw_on_loss);
         break;
     case RunEvent::SCREEN_CHANGED:{
@@ -794,6 +840,11 @@ StoryBattleResult story_checked_step(
         };
         if (ret < 0){
             step_back();
+            return StoryBattleResult::NO_BATTLE;
+        }
+        if (ret == 2 && rt.in_safari){
+            rt.console.log("Text in the Safari Zone: the Safari Game is over.", COLOR_BLUE);
+            rt.safari_over = true;
             return StoryBattleResult::NO_BATTLE;
         }
         StoryBattleKind kind = (ret == 2 || trainer) ? StoryBattleKind::TRAINER : wild_kind;

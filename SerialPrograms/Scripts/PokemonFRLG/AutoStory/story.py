@@ -655,7 +655,9 @@ class Builder:
             self.pos = (h["map"], h["x"], h["y"], "down")
             after = self.route_cost(goals)
             self.pos = saved
-            if walk is None or after is None or walk <= exit_cost + Builder.COST_FLY + after + Builder.FLY_MARGIN:
+            #  (No way on foot at all: Fly. The Indigo Plateau after Victory
+            #  Road was reset.)
+            if after is None or (walk is not None and walk <= exit_cost + Builder.COST_FLY + after + Builder.FLY_MARGIN):
                 return False
         if not here:
             self.walk_to(MapGoals(outdoor), label + "_Out", out)
@@ -729,6 +731,29 @@ class Builder:
                 h, _ = self.fly_data()[index]
                 if self.pos[0] != h["map"]:
                     self.walk_to({(h["map"], h["x"], h["y"])}, step.get("label", "Fly") + "_Walk", out)
+            return
+        if "unless_dex" in step:
+            #  Steps the program skips when it has caught enough species
+            #  (text: the ones caught for sure). They end where they start.
+            u = step["unless_dex"]
+            sub = []
+            start = self.pos
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if self.pos[:3] != start[:3]:
+                raise StoryError("unless_dex: the steps end at %s, not %s" % (self.pos, start))
+            out.append({"type": "SKIP_IF_DEX", "label": step.get("label", "Enough species?"), "p0": len(sub),
+                        "p1": u["count"], "text": ",".join(u["owned"])})
+            out.extend(sub)
+            return
+        if "stop" in step:
+            out.append({"type": "STOP", "label": step.get("label", "Stop"), "text": step["stop"]})
+            return
+        if "require_dex" in step:
+            #  Enough species for what comes next, or the program stops.
+            r = step["require_dex"]
+            out.append({"type": "SKIP_IF_DEX", "label": step.get("label", "Enough species"), "p0": 0,
+                        "p1": r["count"], "p2": 1, "text": ",".join(r["owned"])})
             return
         if "unless_fly" in step:
             #  Steps the program skips when the Fly user knows FLY already
@@ -865,6 +890,9 @@ class Builder:
             return
         if "catch" in step:
             self.catch(step, out)
+            return
+        if "dex" in step:
+            self.dex(step, out)
             return
         if "elevator" in step:
             e = step["elevator"]
@@ -1426,6 +1454,26 @@ class Builder:
                 self.set_state({"objects": {mid: {key: {"x": nb[0], "y": nb[1]}}}})
                 cur[nb] = key
             self.pos = (self.pos[0], self.pos[1], self.pos[2], d)
+
+    def dex(self, step, out):
+        """For the POKeDEX: to grass (a cave) of the place, then a DEX step
+        that walks back and forth there catching the species listed (the
+        program skips those it caught already)."""
+        c = step["dex"]
+        label = step.get("label", "Dex")
+        have = self.gd.land_slugs.get(c["map"], set())
+        missing = [s for s in c["species"] if s not in have]
+        if missing:
+            raise StoryError("%s: not in the grass of %s: %s" % (label, c["map"], missing))
+        goal, strips = self.strip_goal(c["map"], c["tiles"])
+        self.walk_to(goal, label + "_ToGrass", out)
+        if tuple(self.pos[:3]) in strips:
+            osc, length = strips[tuple(self.pos[:3])]
+        else:
+            osc, length = self.osc_dir(self.grass_tiles(c["map"], c["tiles"]), label), 2
+        out.append({"type": "DEX", "label": label, "text": ",".join(c["species"]),
+                    "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
+                    "p2": 1 if c.get("safari") else 0, "dir": osc, "p4": length})
 
     def catch(self, step, out):
         c = step["catch"]

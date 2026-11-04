@@ -165,6 +165,15 @@ struct StoryBattleSettings{
     //  of the time, at a fifth of its HP about 2%.
     bool weaken_legendary = false;
 
+    //  For the POKeDEX: a wild Pokemon of these species (slugs; not caught
+    //  yet) is caught with the cheapest ball in the bag (POKe BALL first,
+    //  then GREAT, then ULTRA; never the Master Ball), up to
+    //  "dex_max_throws" balls a battle, at full HP (the team would knock it
+    //  out). In the Safari Zone: SAFARI BALLs until it is caught or flees.
+    //  The others are run from (StoryBattleKind::CATCH).
+    std::set<std::string> dex_species;
+    int dex_max_throws = 20;
+
     //  Trainer battles: below a third of its HP, the Pokemon that is out
     //  gets the best healing item of the bag (Full Restore, Max Potion,
     //  Hyper/Super Potion...). In the League, played as one gauntlet (the PP
@@ -228,6 +237,15 @@ struct StoryBattleMemory{
     std::string shiny_species;
     bool shiny_caught = false;
     bool shiny_to_pc = false;
+    //  The last battle: a ball caught a species new to the POKeDEX (its
+    //  page came up), the Safari Game ended in it (the last SAFARI BALL
+    //  missed: "You're out of SAFARI BALLS! Game over!"), no ball was left
+    //  in the bag for a species wanted for the POKeDEX.
+    bool dex_registered = false;
+    bool safari_over = false;
+    bool no_balls = false;
+    //  SAFARI BALLs thrown in the last battle.
+    int safari_balls = 0;
     //  Shared experience: the moves of the member that stayed out, and the
     //  last "X is trying to learn Y." text (who learns).
     int member_moves[4] = {-1, -1, -1, -1};

@@ -100,6 +100,11 @@ void story_grind(
 //  Walk back and forth in the grass until one of the species is caught.
 void story_catch(StoryRuntime& rt, const StoryStep& step);
 
+//  For the POKeDEX (StepType::DEX): back and forth in the grass (cave,
+//  water) of a place, catching the species of the step not caught yet with
+//  the cheapest balls; the others are run from.
+void story_dex(StoryRuntime& rt, const StoryStep& step);
+
 
 }
 }

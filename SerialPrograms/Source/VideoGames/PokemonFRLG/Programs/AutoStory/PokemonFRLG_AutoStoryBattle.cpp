@@ -960,13 +960,18 @@ BagUse pick_in_battle_bag(
 }
 
 //  At the battle menu: the best ball, thrown. Without "master", not the
-//  MASTER BALL (kept for a legendary Pokemon).
+//  MASTER BALL (kept for a legendary Pokemon). "cheapest": the cheapest
+//  ball instead (POKe BALL, GREAT BALL, ULTRA BALL; for the POKeDEX, where
+//  a POKe BALL catches the most for the money).
 //  "last_rank": the ball thrown last in this battle (0: none yet).
-BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bool master, int& last_rank){
+BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bool master, int& last_rank, bool cheapest = false){
     int rank = 0;
-    auto value = [master](const std::string& text){
+    auto value = [master, cheapest](const std::string& text){
         const int r = ball_rank(text);
-        return r == 4 && !master ? 0 : r;
+        if (r == 4){
+            return master && !cheapest ? 4 : 0;
+        }
+        return cheapest && r > 0 ? 4 - r : r;
     };
     BagUse ret = pick_in_battle_bag(console, context, 2, value, "POKe BALL", rank, last_rank);
     if (ret != BagUse::USED){
@@ -974,7 +979,7 @@ BagUse throw_best_ball(ConsoleHandle& console, ProControllerContext& context, bo
         return ret;
     }
     last_rank = rank;
-    console.log(std::string("Throwing a ") + ball_name(rank) + ".", COLOR_BLUE);
+    console.log(std::string("Throwing a ") + ball_name(cheapest && rank > 0 && rank < 4 ? 4 - rank : rank) + ".", COLOR_BLUE);
     //  A: USE / CANCEL (on USE). A: the bag closes and the ball flies.
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
@@ -1207,6 +1212,10 @@ StoryBattleResult run_story_battle(
     memory.shiny_species.clear();
     memory.shiny_caught = false;
     memory.shiny_to_pc = false;
+    memory.dex_registered = false;
+    memory.safari_over = false;
+    memory.no_balls = false;
+    memory.safari_balls = 0;
 
     //  The active Pokemon's types count for the moves (same-type bonus).
     StoryBattleSettings settings = base_settings;
@@ -1313,6 +1322,7 @@ StoryBattleResult run_story_battle(
     bool shiny_wanted = false;
     bool shiny_caught = false;
     bool legendary = false;
+    bool dex_catch = false;     //  a species wanted for the POKeDEX
     int last_ball_rank = 0;
     //  Weakening a legendary Pokemon (settings.weaken_legendary): its HP
     //  before the last hit, the most one hit took, the hits so far.
@@ -1400,7 +1410,8 @@ StoryBattleResult run_story_battle(
                     std::string slug;
                     read_opponent(console, slug);
                     memory.shiny_species = slug;
-                    shiny_wanted = !slug.empty() && settings.catch_species.count(slug) != 0;
+                    shiny_wanted = !slug.empty() &&
+                        (settings.catch_species.count(slug) != 0 || settings.dex_species.count(slug) != 0);
                     console.log("A shiny Pokemon: " + (slug.empty() ? std::string("(not read)") : slug) + "!", COLOR_BLUE);
                     if (settings.shiny_catch || shiny_wanted){
                         shiny_catching = true;
@@ -1411,13 +1422,35 @@ StoryBattleResult run_story_battle(
                         );
                     }
                 }
+                //  For the POKeDEX: a species not caught yet. (The two
+                //  NIDORANs read alike: either, while one is wanted.)
+                if (!shiny_catching && wild && !settings.dex_species.empty()){
+                    std::string slug;
+                    read_opponent(console, slug);
+                    const bool nidoran = slug.rfind("nidoran", 0) == 0 &&
+                        (settings.dex_species.count("nidoran-f") != 0 || settings.dex_species.count("nidoran-m") != 0);
+                    if (!slug.empty() && (nidoran || settings.dex_species.count(slug) != 0)){
+                        dex_catch = true;
+                        shiny_catching = true;
+                        shiny_wanted = true;
+                        shiny_safari = menu_is_safari(console);
+                        memory.shiny_species = slug;
+                        console.log("Catching " + slug + " for the POKeDEX.", COLOR_BLUE);
+                    }
+                }
             }
             if (shiny_catching){
                 //  The Safari Zone: 20 of the 30 SAFARI BALLs at most (the
                 //  game ends when they run out, and the way goes on there).
-                const int max_throws = shiny_safari ? 20 : (legendary ? 99 : 60);
+                //  For the POKeDEX: all of them there (the game ends when
+                //  they run out), elsewhere up to dex_max_throws.
+                const int max_throws = shiny_safari ? (dex_catch ? 30 : 20)
+                    : (legendary ? 99 : (dex_catch ? std::max(1, settings.dex_max_throws) : 60));
                 if (balls_thrown >= max_throws || throw_failures >= 4){
-                    console.log("No more balls thrown at the shiny: the battle goes on as usual.", COLOR_ORANGE);
+                    console.log(
+                        dex_catch ? "No more balls thrown at it: running." : "No more balls thrown at the shiny: the battle goes on as usual.",
+                        COLOR_ORANGE
+                    );
                     shiny_catching = false;
                 }else if (legendary && settings.weaken_legendary && !weakened && [&](){
                     //  Its HP down first: the weakest move, as long as one
@@ -1469,7 +1502,8 @@ StoryBattleResult run_story_battle(
                 }else if (shiny_safari){
                     if (move_cursor_to_option(console, context, SafariBattleMenuOption::BALL)){
                         balls_thrown++;
-                        console.log("SAFARI BALL " + std::to_string(balls_thrown) + " at the shiny.", COLOR_BLUE);
+                        memory.safari_balls++;
+                        console.log("SAFARI BALL " + std::to_string(balls_thrown) + (dex_catch ? "." : " at the shiny."), COLOR_BLUE);
                         pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
                         context.wait_for_all_requests();
                     }else{
@@ -1481,15 +1515,21 @@ StoryBattleResult run_story_battle(
                         //  Up to 99 balls at half a minute each.
                         deadline = current_time() + 150min;
                     }
-                    switch (throw_best_ball(console, context, legendary && settings.legendary_master, last_ball_rank)){
+                    switch (throw_best_ball(console, context, legendary && settings.legendary_master, last_ball_rank, dex_catch)){
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;
-                        console.log("Ball " + std::to_string(balls_thrown) + (legendary ? "." : " at the shiny."), COLOR_BLUE);
+                        console.log("Ball " + std::to_string(balls_thrown) + (legendary || dex_catch ? "." : " at the shiny."), COLOR_BLUE);
                         break;
                     case BagUse::NONE:
-                        console.log("No balls left for the shiny: the battle goes on as usual.", COLOR_ORANGE);
+                        console.log(
+                            dex_catch ? "No balls left: running." : "No balls left for the shiny: the battle goes on as usual.",
+                            COLOR_ORANGE
+                        );
                         shiny_catching = false;
+                        if (dex_catch){
+                            memory.no_balls = true;
+                        }
                         break;
                     case BagUse::FAILED:
                         throw_failures++;
@@ -1794,7 +1834,7 @@ StoryBattleResult run_story_battle(
                     //  is one that broke free.)
                     if (text.find("gotcha") != std::string::npos || text.find("was caught") != std::string::npos){
                         if (!shiny_caught){
-                            console.log(legendary ? "Caught it!" : "Caught the shiny Pokemon!", COLOR_BLUE);
+                            console.log(legendary || (dex_catch && !memory.shiny) ? "Caught it!" : "Caught the shiny Pokemon!", COLOR_BLUE);
                             //  Whatever the time: the POKeDEX page and the
                             //  nickname question still have to go by.
                             deadline = std::max(deadline, current_time() + 5min);
@@ -1811,6 +1851,15 @@ StoryBattleResult run_story_battle(
                         shiny_catching = false;
                     }
                 }
+                //  "ANNOUNCER: You're out of SAFARI BALLS! Game over!": the
+                //  battle ends, then the game takes the player out to the
+                //  gate.
+                if (text.find("game over") != std::string::npos ||
+                    (text.find("out of") != std::string::npos && text.find("safari") != std::string::npos)
+                ){
+                    console.log("The Safari Game is over: no SAFARI BALLs left.", COLOR_BLUE);
+                    memory.safari_over = true;
+                }
             }
             //  A advances the text. (B would cancel an evolution.)
             pbf_press_button(context, BUTTON_A, 160ms, 340ms);
@@ -1818,6 +1867,10 @@ StoryBattleResult run_story_battle(
         case 4:
             //  The POKeDEX page of the caught species: B closes it.
             last_activity = current_time();
+            if (!memory.dex_registered){
+                console.log("A new species in the POKeDEX.", COLOR_BLUE);
+            }
+            memory.dex_registered = true;
             pbf_press_button(context, BUTTON_B, 160ms, 840ms);
             context.wait_for_all_requests();
             break;

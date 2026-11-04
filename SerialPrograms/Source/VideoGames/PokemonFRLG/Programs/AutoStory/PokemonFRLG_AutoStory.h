@@ -17,6 +17,7 @@
 #include "Common/Cpp/Options/EnumDropdownOption.h"
 #include "Common/Cpp/Options/SimpleIntegerOption.h"
 #include "Common/Cpp/Options/StaticTextOption.h"
+#include "Common/Cpp/Options/StringOption.h"
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
@@ -83,6 +84,7 @@ private:
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;
     BooleanCheckBoxOption VERIFY_WALKING;
     BooleanCheckBoxOption RUNNING;
+    StringOption DEX_CAUGHT;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;

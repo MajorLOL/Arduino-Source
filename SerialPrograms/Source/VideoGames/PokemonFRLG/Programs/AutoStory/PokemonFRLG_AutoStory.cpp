@@ -48,7 +48,8 @@ AutoStory_Descriptor::AutoStory_Descriptor()
         "PokemonFRLG:AutoStory",
         Pokemon::STRING_POKEMON + " FRLG", "Autostory (beta)",
         "Programs/PokemonFRLG/AutoStory.html",
-        "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame, "
+        "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame and on after it "
+        "(the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX), "
         "on routes generated from the game's map data.",
         PanelQualityStanding::THIRD_PARTY_UNVETTED,
         ProgramControllerClass::StandardController_RequiresPrecision,
@@ -272,6 +273,15 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         false
     )
+    , DEX_CAUGHT(
+        false,
+        "<b>Caught by the program (set by it):</b><br>The species the program caught, as of the last save. "
+        "After the Hall of Fame the story catches Pokemon for the POKeDEX (60 Kanto species for the National "
+        "POKeDEX): a later run starting there knows from this which ones it has already. Leave it as it is; "
+        "clear it only for a new game.",
+        LockMode::LOCK_WHILE_RUNNING,
+        "", ""
+    )
     , GO_HOME_WHEN_DONE(false)
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
@@ -295,6 +305,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
     PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(RUNNING);
+    PA_ADD_OPTION(DEX_CAUGHT);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
 }
@@ -531,6 +542,33 @@ void AutoStory::run_segment(
         case StepType::CATCH:
             story_catch(rt, step);
             break;
+        case StepType::DEX:
+            story_dex(rt, step);
+            break;
+        case StepType::STOP:
+            throw UserSetupError(env.console, std::string(step.text) + " (" + label + ")");
+        case StepType::SKIP_IF_DEX:{
+            std::set<std::string> owned = story_species_list(step.text);
+            owned.insert(rt.caught.begin(), rt.caught.end());
+            const bool enough = (int)owned.size() >= step.p1;
+            env.log(
+                "Species caught (as the program knows): " + std::to_string(owned.size()) + " of the " +
+                std::to_string(step.p1) + " wanted here" +
+                (enough ? ": the next " + std::to_string(step.p0) + " steps are skipped." : "."),
+                COLOR_BLUE
+            );
+            if (enough){
+                i += (size_t)std::max(0, (int)step.p0);
+            }else if (step.p2 > 0 && (step.p2 & 1) != 0){
+                throw UserSetupError(
+                    env.console,
+                    "Only " + std::to_string(owned.size()) + " species caught (as the program knows), " +
+                    std::to_string(step.p1) + " are needed here: " + label +
+                    ". Catch more (with the catching segments before this one) and start this segment again."
+                );
+            }
+            break;
+        }
         case StepType::WAIT:
             pbf_wait(context, Milliseconds(step.p0));
             context.wait_for_all_requests();
@@ -673,6 +711,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  The start options follow the saves: the next run goes on from the
     //  last save without setting them by hand.
     rt.on_saved = [&](const std::string& segment_id, size_t step){
+        {
+            std::string list;
+            for (const std::string& slug : rt.caught_at_save){
+                list += (list.empty() ? "" : ",") + slug;
+            }
+            DEX_CAUGHT.set(list);
+        }
         for (size_t i = 0; i < script.segment_count; i++){
             if (segment_id == script.segments[i].id){
                 START_SEGMENT.set_value(i);
@@ -693,6 +738,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
 
     //  The catches before the start are done (the game was played up to
     //  there).
+    bool dex_before = false;
     for (size_t s = 0; s <= first; s++){
         const StorySegment& segment = script.segments[s];
         const size_t end = s == first ? first_step : segment.step_count;
@@ -702,7 +748,18 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 std::set<std::string> species = story_species_list(step.text);
                 rt.caught.insert(species.begin(), species.end());
             }
+            if (step.type == StepType::DEX){
+                dex_before = true;
+            }
         }
+    }
+    //  ... and those for the POKeDEX, as the last run left them.
+    if (dex_before){
+        std::set<std::string> species = story_species_list(((std::string)DEX_CAUGHT).c_str());
+        rt.caught.insert(species.begin(), species.end());
+        env.log("Caught by the program before (as of the last save): " + std::to_string(species.size()) + " species.", COLOR_BLUE);
+    }else{
+        DEX_CAUGHT.set("");
     }
     rt.caught_at_save = rt.caught;
 

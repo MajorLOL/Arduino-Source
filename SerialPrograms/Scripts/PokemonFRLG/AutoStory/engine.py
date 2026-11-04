@@ -170,6 +170,9 @@ class GameData:
         self.land_encounters = set()
         self.water_encounters = set()
         self.wild_species = {}
+        #  The Kanto species in the grass (cave) of a map, FireRed and
+        #  LeafGreen together (slugs as the program reads them: nidoran-f).
+        self.land_slugs = {}
         #  The highest level of a wild Pokemon in the grass (or cave) of a map.
         self.wild_max_level = {}
         for g in groups:
@@ -179,6 +182,7 @@ class GameData:
                     sp = self.wild_species.setdefault((e["map"], e.get("base_label", "")), [])
                     for mon in e["land_mons"]["mons"]:
                         sp.append(mon["species"])
+                        self.land_slugs.setdefault(e["map"], set()).add(mon["species"][8:].lower().replace("_", "-"))
                         self.wild_max_level[e["map"]] = max(self.wild_max_level.get(e["map"], 0), mon["max_level"])
                 if "water_mons" in e:
                     self.water_encounters.add(e["map"])

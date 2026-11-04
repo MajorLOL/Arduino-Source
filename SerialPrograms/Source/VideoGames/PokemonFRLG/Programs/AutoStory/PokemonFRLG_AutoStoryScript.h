@@ -122,6 +122,13 @@ enum class StepType : uint8_t{
     FLY,                //  outdoors: Fly from party slot p1 to KantoFlyLocation p0; lands
                         //  in front of that town's Pokemon Center, facing down
     SKIP_IF_FLY,        //  the Pokemon in party slot p1 knows FLY: skip the next p0 steps
+    DEX,                //  for the POKeDEX: back and forth (dir, p4 = line length) catching the
+                        //  species of text not caught yet, until p0 battles in a row bring none
+                        //  or p1 minutes are over; p2 & 1: the Safari Zone (until the game ends)
+    SKIP_IF_DEX,        //  text = species surely caught (the team...): with those and the ones
+                        //  caught by the program at least p1 species, skip the next p0 steps;
+                        //  p2 & 1: fewer stop the program
+    STOP,               //  the program stops here: text says why
 };
 
 struct StoryStep{

@@ -1539,8 +1539,359 @@ CHAPTER12 = [
     },
 ]
 
+
+# ---------------------------------------------------------------- chapter 13
+#  The National POKeDEX: Oak gives it in Pallet Town after a Hall of Fame
+#  (PalletTown_EventScript_OakRatingScene, VAR_MAP_SCENE_PALLET_TOWN_OAK 2)
+#  once 60 Kanto species are caught (GetKantoPokedexCount) and One Island
+#  was visited. Celio asks for the Ruby only then; with the Ruby and the
+#  Sapphire (two gems, the key items of the Sevii Islands story) in his
+#  Network Machine, the roaming legendary (Suicune for the Charmander
+#  player) starts roaming Kanto.
+#  The balls for some 50 species cost more than the story leaves: the Elite
+#  Four twice more first, for the prize money (some 30000 each); Oak's
+#  rating after each Hall of Fame says it is not 60 yet.
+
+#  Species caught for sure by the program in the story: the starter's line,
+#  the team (Voltorb -> Electrode, Eevee and its evolution, Lapras) and the
+#  three legendary birds.
+STARTER_LINE = {"BULBASAUR": ["bulbasaur", "ivysaur", "venusaur"],
+                "SQUIRTLE": ["squirtle", "wartortle", "blastoise"],
+                "CHARMANDER": ["charmander", "charmeleon", "charizard"]}
+
+
+def dex_owned(v):
+    owned = list(STARTER_LINE[v])
+    for slots, lines in TEAM_MEMBERS.values():
+        owned += lines[v].split(",")
+    return owned + ["zapdos", "articuno", "moltres"]
+
+
+LEAGUE_FLAGS = ["FLAG_DEFEATED_LORELEI", "FLAG_DEFEATED_BRUNO", "FLAG_DEFEATED_AGATHA",
+                "FLAG_DEFEATED_LANCE", "FLAG_DEFEATED_CHAMP"]
+
+
+def league_again(prefix, chapter, why):
+    """The Elite Four and the Champion again (EventScript_ResetEliteFour at
+    each Hall of Fame), from the Indigo Plateau, then Oak's rating in Pallet
+    Town."""
+    return [
+        {
+            "id": prefix + "_ELITE_FOUR", "chapter": chapter,
+            "title": "Elite Four again: Lorelei, Bruno, Agatha, Lance (" + why + ")",
+            "state": {"clear_flags": LEAGUE_FLAGS, "vars": {"VAR_MAP_SCENE_POKEMON_LEAGUE": 0}},
+            "steps": [heal(PC["INDIGO"], "ToIndigoPlateau"), save(), team()] + league_room_steps(),
+        },
+        {
+            "id": prefix + "_CHAMPION", "chapter": chapter,
+            "title": "Champion again, Hall of Fame",
+            "steps": [
+                team(),
+                goto("MAP_POKEMON_LEAGUE_CHAMPIONS_ROOM", [[6, 19]], "ToChampion"),
+                cutscene(6000, 60000, "Champion intro"),
+                battle("Champion (rival)", 60000),
+                {"hall_of_fame": 600000, "label": "Oak, Hall of Fame, credits"},
+            ],
+        },
+    ]
+
+
+def oak_rating(label):
+    """In front of the house after the Hall of Fame: Oak comes, looks at the
+    POKeDEX (OakRatingScene)."""
+    return [pos("MAP_PALLET_TOWN", 6, 8, "down"),
+            cutscene(3000, 90000, label),
+            setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 3})]
+
+
+CHAPTER13 = league_again("C13_01", 13, "prize money for Poke Balls") + [
+    {
+        "id": "C13_01_OAK", "chapter": 13,
+        "title": "Oak's POKeDEX rating (not 60 species yet)",
+        "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
+        "steps": oak_rating("Oak: not 60 species yet") + [save()],
+    },
+] + league_again("C13_02", 13, "more prize money") + [
+    {
+        "id": "C13_02_OAK", "chapter": 13,
+        "title": "Oak's POKeDEX rating (not 60 species yet)",
+        "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
+        "steps": oak_rating("Oak: not 60 species yet") + [save()],
+    },
+]
+
+
+# ---------------------------------------------------------------- chapter 14
+#  Catching for the POKeDEX. Each place: back and forth on its grass (cave
+#  floor), every species of its list not caught yet gets POKe BALLs (the
+#  cheapest catch for the money: at full HP, the team would knock it out),
+#  up to 20 a battle; the others are run from. A place is left once all are
+#  caught, 25 battles in a row brought none, or its time is up. Species of
+#  both games are listed (FireRed and LeafGreen differ in some).
+
+
+def dex(map_id, tiles, species, label, idle=25, minutes=30, safari=False):
+    return {"dex": {"map": map_id, "tiles": tiles, "species": species, "idle": idle,
+                    "minutes": minutes, "safari": safari}, "label": label}
+
+
+def safari_game(area_map, tiles, species, label):
+    """One Safari Game (500): SAFARI BALLs at every species of the list until
+    it is caught or flees, until the 30 balls or the 600 steps run out; the
+    PA's text, then the gate (FuchsiaCity_SafariZone_Entrance_EventScript_
+    ExitWarpIn / ExitWalkIn: both end at (4, 4))."""
+    return [
+        goto("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", [[4, 3]], label + "_Desk", trigger=True),
+        cutscene(4000, 40000, "Join the Safari Game", answer="yes"),
+        setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 2}),
+        pos("MAP_SAFARI_ZONE_CENTER", 26, 30, "up"),
+        dex(area_map, tiles, species, label, safari=True),
+        cutscene(3000, 40000, "The Safari Game is over"),
+        setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 0}),
+        pos("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", 4, 4, "down"),
+    ]
+
+
+def vermilion_ferry(option, dest_harbor, label):
+    """The Seagallop from Vermilion: the ticket check by the pier (x 22-23,
+    y 33) shows the Tri-Pass destinations at once (One, Two, Three Island)."""
+    steps = [goto("MAP_VERMILION_CITY", [[23, 33]], label, trigger=True),
+             wait(2500, label + "_Menu")]
+    if option:
+        steps.append(press("DOWN", option, 500, label + "_Down"))
+    return steps + [press("A", 1, 1500, label + "_Pick"),
+                    cutscene(8000, 90000, "Ferry"),
+                    pos(dest_harbor, 8, 5)]
+
+
+def sevii_ferry_home(harbor_map, label):
+    """Back to Vermilion from a Sevii harbor: Vermilion is the first of the
+    destinations now (EventScript_ChooseDest*VermilionAllowed). The ferry
+    lands by the pier (23, 32)."""
+    return [talk(harbor_map, xy=[8, 6], mode="plain", label=label),
+            press("A", 1, 2500, label + "_Talk"),
+            press("A", 1, 1500, label + "_Pick"),
+            cutscene(8000, 90000, "Ferry"),
+            pos("MAP_VERMILION_CITY", 23, 32)]
+
+
+def poke_balls(mart, label):
+    """As many POKe BALLs as the money allows (99 at most)."""
+    return buy(mart, [2, 3], 0, 0, label)
+
+
+WHOLE = rect(0, 0, 120, 120)
+
+CHAPTER14 = [
+    {
+        "id": "C14_01_VIRIDIAN_FOREST", "chapter": 14,
+        "title": "POKeDEX: Poke Balls in Viridian City, Viridian Forest",
+        "steps": [heal(PC["VIRIDIAN"], "ToViridianPC")] + poke_balls("MAP_VIRIDIAN_CITY_MART", "BuyPokeBalls") + [
+            dex("MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), ["caterpie", "weedle", "kakuna", "metapod", "pikachu"],
+                "DexViridianForest"),
+            heal(PC["PEWTER"], "ForestToPewterPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_02_ROUTE3_MT_MOON", "chapter": 14,
+        "title": "POKeDEX: more Poke Balls in Pewter City, Route 3, a Magikarp, Mt. Moon",
+        "steps": poke_balls("MAP_PEWTER_CITY_MART", "BuyPokeBalls") + [
+            dex("MAP_ROUTE3", WHOLE, ["spearow", "pidgey", "nidoran-m", "nidoran-f", "mankey", "jigglypuff"],
+                "DexRoute3"),
+            heal(PC["ROUTE4"], "Route3ToMtMoonPC"),
+            save(),
+            #  Route4_PokemonCenter_1F_EventScript_MagikarpSalesman: YES
+            #  (500), NO to the nickname.
+            talk(PC["ROUTE4"], xy=[1, 3], mode="yes", label="MagikarpSalesman"),
+            cutscene(2000, 30000, "Magikarp"),
+            setst(flags=["FLAG_BOUGHT_MAGIKARP"]),
+            #  B2F: CLEFAIRY there 6% of the time (1F: 1%).
+            dex("MAP_MT_MOON_B2F", WHOLE, ["zubat", "geodude", "paras", "clefairy"], "DexMtMoon"),
+            heal(PC["ROUTE4"], "MtMoonToPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_03_POKEMON_TOWER", "chapter": 14,
+        "title": "POKeDEX: Pokemon Tower",
+        "steps": [
+            heal(PC["LAVENDER"], "ToLavenderPC"),
+            dex("MAP_POKEMON_TOWER_7F", WHOLE, ["gastly", "haunter", "cubone"], "DexPokemonTower"),
+            heal(PC["LAVENDER"], "TowerToLavenderPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_04_POWER_PLANT", "chapter": 14,
+        "title": "POKeDEX: Power Plant",
+        "steps": [
+            heal(PC["ROUTE10"], "ToRoute10PC"),
+            dex("MAP_POWER_PLANT", WHOLE, ["magnemite", "pikachu", "magneton"], "DexPowerPlant"),
+            heal(PC["ROUTE10"], "PowerPlantToRoute10PC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_05_SAFARI_ZONE", "chapter": 14,
+        "title": "POKeDEX: two Safari Games (center, east)",
+        "steps": [heal(PC["FUCHSIA"], "ToFuchsiaPC"), save()]
+        + safari_game("MAP_SAFARI_ZONE_CENTER", WHOLE,
+                      ["rhyhorn", "nidoran-m", "nidoran-f", "exeggcute", "venonat", "nidorino", "nidorina",
+                       "parasect", "scyther", "chansey", "pinsir"], "DexSafariCenter")
+        + [heal(PC["FUCHSIA"], "SafariToFuchsiaPC"), save()]
+        + safari_game("MAP_SAFARI_ZONE_EAST", WHOLE,
+                      ["doduo", "paras", "nidoran-f", "nidoran-m", "exeggcute", "nidorino", "nidorina",
+                       "parasect", "kangaskhan", "scyther", "pinsir"], "DexSafariEast")
+        + [heal(PC["FUCHSIA"], "SafariToFuchsiaPC2"), save()],
+    },
+    {
+        "id": "C14_06_SEAFOAM", "chapter": 14,
+        "title": "POKeDEX: Seafoam Islands",
+        "steps": [
+            dex("MAP_SEAFOAM_ISLANDS_B3F", WHOLE, ["seel", "psyduck", "golbat", "golduck", "dewgong", "zubat",
+                                                  "slowpoke", "slowbro"], "DexSeafoam"),
+            heal(PC["FUCHSIA"], "SeafoamToFuchsiaPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_07_MANSION", "chapter": 14,
+        "title": "POKeDEX: Pokemon Mansion",
+        "steps": [
+            heal(PC["CINNABAR"], "ToCinnabarPC"),
+            #  1F, where the story trained (B1F is behind the switches).
+            dex("MAP_POKEMON_MANSION_1F", rect(1, 27, 15, 32), ["koffing", "raticate", "growlithe", "grimer", "rattata",
+                                                               "weezing", "vulpix"], "DexMansion"),
+            heal(PC["CINNABAR"], "MansionToCinnabarPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_08_ROUTE11_DIGLETT", "chapter": 14,
+        "title": "POKeDEX: Poke Balls in Vermilion City, Route 11, Diglett's Cave",
+        "steps": [heal(PC["VERMILION"], "ToVermilionPC")] + poke_balls("MAP_VERMILION_CITY_MART", "BuyPokeBalls") + [
+            dex("MAP_ROUTE11", WHOLE, ["ekans", "drowzee", "spearow", "sandshrew"], "DexRoute11"),
+            dex("MAP_DIGLETTS_CAVE_B1F", WHOLE, ["diglett", "dugtrio"], "DexDiglettsCave"),
+            heal(PC["VERMILION"], "DiglettToVermilionPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_09_VICTORY_ROAD", "chapter": 14,
+        "title": "POKeDEX: Victory Road",
+        #  Route23_OnTransition resets the Victory Road puzzles (see C10_01).
+        "state": {
+            "flags": ["FLAG_HIDE_VICTORY_ROAD_2F_BOULDER"],
+            "clear_flags": ["FLAG_HIDE_VICTORY_ROAD_3F_BOULDER"],
+            "vars": {"VAR_MAP_SCENE_VICTORY_ROAD_1F": 0, "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER1": 0,
+                     "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER2": 0, "VAR_MAP_SCENE_VICTORY_ROAD_3F": 0},
+            "script_tiles": [
+                ["MAP_VICTORY_ROAD_1F", "VictoryRoad_1F_EventScript_SetRockBarrier"],
+                ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier1"],
+                ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier2"],
+                ["MAP_VICTORY_ROAD_3F", "VictoryRoad_3F_EventScript_SetRockBarrier"],
+            ],
+        },
+        "steps": [
+            heal(PC["INDIGO"], "ToIndigoPC"),
+            dex("MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), ["machop", "machoke", "onix", "marowak", "primeape",
+                                                             "arbok", "golbat", "geodude", "zubat", "sandslash"],
+                "DexVictoryRoad"),
+            heal(PC["INDIGO"], "VictoryRoadToIndigoPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_10_KINDLE_ROAD", "chapter": 14,
+        "title": "POKeDEX: Poke Balls, the ferry to One Island, Kindle Road",
+        "steps": [heal(PC["VERMILION"], "ToVermilionPC")] + poke_balls("MAP_VERMILION_CITY_MART", "BuyPokeBalls")
+        + vermilion_ferry(0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
+            dex("MAP_ONE_ISLAND_KINDLE_ROAD", WHOLE, ["ponyta", "meowth", "fearow", "persian", "rapidash", "psyduck",
+                                                     "geodude", "spearow", "slowpoke"], "DexKindleRoad"),
+            heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "KindleRoadToOneIslandPC"),
+            save(),
+        ],
+    },
+    {
+        "id": "C14_11_BOND_BRIDGE", "chapter": 14,
+        "title": "POKeDEX: Three Island, Bond Bridge (Berry Forest if still short)",
+        "steps": ferry("MAP_ONE_ISLAND_HARBOR", 2, "MAP_THREE_ISLAND_HARBOR", "FerryToThreeIsland") + [
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "HarborToThreeIslandPC"),
+            save(),
+            dex("MAP_THREE_ISLAND_BOND_BRIDGE", WHOLE, ["pidgeotto", "gloom", "oddish", "meowth", "persian", "venonat",
+                                                       "psyduck", "pidgey", "bellsprout", "weepinbell", "slowpoke"],
+                "DexBondBridge"),
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BondBridgeToThreeIslandPC"),
+            save(),
+        ] + [only([v], [{"unless_dex": {"count": 64, "owned": dex_owned(v), "steps": [
+            dex("MAP_THREE_ISLAND_BERRY_FOREST", WHOLE, ["hypno", "drowzee", "exeggcute", "venomoth", "gloom",
+                                                        "pidgeotto", "oddish", "venonat", "weepinbell"],
+                "DexBerryForest"),
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BerryForestToThreeIslandPC"),
+            save(),
+        ]}, "label": "Enough species?"}]) for v in STARTERS] + [
+        ] + sevii_ferry_home("MAP_THREE_ISLAND_HARBOR", "FerryToVermilion") + [
+            heal(PC["VERMILION"], "PierToVermilionPC"),
+            save(),
+        ],
+    },
+]
+
+
+# ---------------------------------------------------------------- chapter 15
+#  The League once more: then Oak takes the player to the lab
+#  (OakRatingScene with 60 or more: "follow me"), the National POKeDEX.
+CHAPTER15 = [
+    {
+        "id": "C15_01_ENOUGH", "chapter": 15,
+        "title": "60 species? Full Restores for the Elite Four",
+        "steps": [only([v], [{"require_dex": {"count": 60, "owned": dex_owned(v)}, "label": "60 species caught"}])
+                  for v in STARTERS] + [heal(PC["INDIGO"], "ToIndigoPC")]
+        + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 2, 6, "BuyFullRestore")
+        + [heal(PC["INDIGO"], "ShopToIndigoNurse"), save()],
+    },
+] + league_again("C15_02", 15, "for the National POKeDEX") + [
+    {
+        "id": "C15_03_NATIONAL_DEX", "chapter": 15,
+        "title": "Oak: 60 species, the National POKeDEX",
+        #  OakRatingScene with 60 or more ("Impressive! Follow me!"): to the
+        #  lab, PalletTown_ProfessorOaksLab_EventScript_EnterForNationalDexScene
+        #  (8 steps up to (6, 4), Oak at (6, 3)), the rival, the upgrade
+        #  (EnableNationalPokedex).
+        "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
+        "steps": [
+            pos("MAP_PALLET_TOWN", 6, 8, "down"),
+            cutscene(15000, 300000, "Oak: the National POKeDEX"),
+            setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 3, "VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB": 8},
+                  flags=["FLAG_HIDE_OAK_IN_PALLET_TOWN", "FLAG_SYS_NATIONAL_DEX"],
+                  clear_flags=["FLAG_HIDE_OAK_IN_HIS_LAB"],
+                  objects={"MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB": {"LOCALID_OAKS_LAB_PROF_OAK": {"x": 6, "y": 3}}}),
+            pos("MAP_PALLET_TOWN_PROFESSOR_OAKS_LAB", 6, 4, "up"),
+            save(),
+        ],
+    },
+]
+
+def fly_only(segments):
+    """From here on the story flies (the Indigo Plateau is out of reach on
+    foot once Victory Road is reset, the places are far apart): with
+    another starter (no Pokemon of its team learns FLY) these segments only
+    stop the program."""
+    others = [v for v in STARTERS if v not in FLY_VARIANTS]
+    out = []
+    for seg in segments:
+        seg = dict(seg)
+        seg["steps"] = [only(FLY_VARIANTS, seg["steps"]),
+                        only(others, [{"stop": "The story after the Sevii Islands (the National POKeDEX) is only "
+                                               "played with Charmander so far (it needs FLY).",
+                                       "label": "Not with this starter"}])]
+        out.append(seg)
+    return out
+
+
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
-            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12)
+            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12 + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15))
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),

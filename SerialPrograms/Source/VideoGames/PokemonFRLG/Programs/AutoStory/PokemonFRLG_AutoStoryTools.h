@@ -96,6 +96,16 @@ struct StoryRuntime{
     std::set<std::string> caught;
     std::set<std::string> caught_at_save;
 
+    //  For the POKeDEX (StepType::DEX): the step is in the Safari Zone; the
+    //  Safari Game ended (the PA's "Time's up!", or out of SAFARI BALLs);
+    //  no ball was left for a wanted species. Species caught that were new
+    //  to the POKeDEX.
+    bool in_safari = false;
+    bool safari_over = false;
+    int safari_balls_used = 0;      //  of the 30 SAFARI BALLs
+    bool no_balls = false;
+    uint64_t dex_new = 0;
+
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
     //  The last battle was lost: the player whited out and is at the last
