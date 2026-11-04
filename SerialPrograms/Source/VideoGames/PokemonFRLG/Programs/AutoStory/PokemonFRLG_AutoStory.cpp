@@ -428,14 +428,20 @@ void AutoStory::run_segment(
 
         //  A scene that turned into a battle: run the battle, then finish the scene.
         auto finish_scene = [&](Milliseconds min_time, Milliseconds max_time, bool yes){
+            int battles = 0;
             for (int round = 0; round < 10; round++){
                 bool battle = story_cutscene(rt, min_time, max_time, yes, label);
-                if (!battle || next_battle){
-                    return;
+                if (!battle){
+                    break;
+                }
+                battles++;
+                if (next_battle){
+                    break;
                 }
                 story_battle(rt, StoryBattleKind::TRAINER, label);
                 min_time = 0ms;
             }
+            return battles;
         };
 
         switch (step.type){
@@ -464,12 +470,24 @@ void AutoStory::run_segment(
         case StepType::HEAL:
             story_heal(rt, label);
             break;
-        case StepType::CUTSCENE:
-            finish_scene(
+        case StepType::CUTSCENE:{
+            int battles = finish_scene(
                 Milliseconds(step.p0), Milliseconds(step.p1),
                 std::string(step.text) == "YES"
             );
+            if (step.p2 > 0 && battles < step.p2){
+                //  The scene goes on to a battle only after a YES: without
+                //  one the question got a NO (and the game is not where the
+                //  route expects). The save before the scene again.
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "The scene ended without its battle: " + label +
+                    ". The question was probably answered NO.",
+                    rt.console
+                );
+            }
             break;
+        }
         case StepType::BATTLE:{
             if (came_battle){
                 break;

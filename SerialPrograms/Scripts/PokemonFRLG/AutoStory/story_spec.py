@@ -34,10 +34,13 @@ def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=
     return s
 
 
-def cutscene(min_ms, max_ms, label=None, answer=None):
+def cutscene(min_ms, max_ms, label=None, answer=None, battles=0):
     s = {"cutscene": [min_ms, max_ms]}
     if answer:
         s["answer"] = answer
+    if battles:
+        #  The scene is a failure with fewer battles (a NO to its question).
+        s["battles"] = battles
     if label:
         s["label"] = label
     return s
@@ -1455,8 +1458,14 @@ CHAPTER12 = [
             cutscene(3000, 120000, "Paxton and the islanders"),
             setst(vars={"VAR_MAP_SCENE_THREE_ISLAND": 3}),
             pos("MAP_THREE_ISLAND", 9, 27, "up"),
+            #  Healed and saved before the bikers: a NO to "You wanna make
+            #  something of it" (ThreeIsland_EventScript_LeaveBikersAlone)
+            #  steps the player back and the bikers stay. The scene then
+            #  fails (no battle) and goes again from this save.
+            heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "ToThreeIslandPC"),
+            save(),
             goto("MAP_THREE_ISLAND", [[9, 26]], "BattleBikers", trigger=True),
-            cutscene(3000, 600000, "The bikers", answer="yes"),
+            cutscene(3000, 600000, "The bikers", answer="yes", battles=1),
             setst(vars={"VAR_MAP_SCENE_THREE_ISLAND": 4},
                   flags=["FLAG_HIDE_THREE_ISLAND_BIKERS", "FLAG_HIDE_THREE_ISLAND_LONE_BIKER"]),
             pos("MAP_THREE_ISLAND", 9, 26, "up"),

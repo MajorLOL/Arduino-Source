@@ -1538,6 +1538,8 @@ bool story_cutscene(
     //  the S.S. Anne corridors): after a few presses on one, check whether
     //  the player is free to move.
     int dialog_in_row = 0;
+    //  Answering YES: since when a text box without the advance arrow is up.
+    WallClock no_arrow_since = WallClock::max();
     while (current_time() < deadline){
         SelectionDialogWatcher yes_no(COLOR_RED);
         WhiteDialogWatcher dialog(COLOR_RED);
@@ -1565,16 +1567,51 @@ bool story_cutscene(
             pbf_press_button(rt.context, yes ? BUTTON_A : BUTTON_B, 160ms, 840ms);
             break;
         }
-        case 1:
+        case 1:{
             if (++dialog_in_row % 5 == 0 && current_time() - start >= min_time &&
                 in_overworld(rt.console, rt.context)
             ){
                 rt.console.log("Cutscene over: " + what);
                 return false;
             }
-            //  B advances the text (and never says YES to anything).
-            pbf_press_button(rt.context, BUTTON_B, 160ms, 340ms);
+            if (!answer_yes){
+                //  B advances the text (and never says YES to anything).
+                pbf_press_button(rt.context, BUTTON_B, 160ms, 340ms);
+                break;
+            }
+            //  A question to say YES to may come: B on its YES/NO box is a NO
+            //  (the bikers on Three Island: no battles, and they stay). The
+            //  box comes up the moment the text is printed, so B only goes
+            //  to a page that waits with its advance arrow.
+            VideoSnapshot screen = rt.console.video().snapshot();
+            SelectionDialogDetector yes_no_now(COLOR_RED);
+            AdvanceWhiteDialogDetector arrow(COLOR_RED);
+            if (screen && yes_no_now.detect(screen)){
+                //  The YES/NO box: the next round answers it.
+                pbf_wait(rt.context, 100ms);
+                break;
+            }
+            if (screen && arrow.detect(screen)){
+                no_arrow_since = WallClock::max();
+                pbf_press_button(rt.context, BUTTON_B, 160ms, 340ms);
+                break;
+            }
+            WallClock now = current_time();
+            if (no_arrow_since == WallClock::max()){
+                no_arrow_since = now;
+            }
+            if (now - no_arrow_since >= 8s){
+                //  A box that never shows the arrow: A advances it too (and
+                //  says YES to a box the detector does not see).
+                rt.console.log("Text without the advance arrow: A.", COLOR_ORANGE);
+                no_arrow_since = WallClock::max();
+                pbf_press_button(rt.context, BUTTON_A, 160ms, 340ms);
+                break;
+            }
+            //  The text is still printing.
+            pbf_wait(rt.context, 200ms);
             break;
+        }
         case 3:
         case 4:
             //  The battle text detectors also take some overworld places

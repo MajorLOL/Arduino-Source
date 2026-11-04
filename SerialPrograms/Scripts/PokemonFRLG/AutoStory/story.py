@@ -862,8 +862,11 @@ class Builder:
             return
         if "cutscene" in step:
             c = step["cutscene"]
-            out.append({"type": "CUTSCENE", "label": step.get("label", "Cutscene"), "p0": c[0], "p1": c[1],
-                        "text": "YES" if step.get("answer") == "yes" else ""})
+            cs = {"type": "CUTSCENE", "label": step.get("label", "Cutscene"), "p0": c[0], "p1": c[1],
+                  "text": "YES" if step.get("answer") == "yes" else ""}
+            if step.get("battles"):
+                cs["p2"] = step["battles"]
+            out.append(cs)
             return
         if "battle" in step:
             b = {"type": "BATTLE", "label": step.get("label", "Battle"), "p0": step["battle"],
