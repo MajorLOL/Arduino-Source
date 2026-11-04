@@ -171,7 +171,26 @@ class Builder:
         if kind in (RUN_CHECKED_TRAINER, RUN_APPROACH):
             leg["trainer_steps"] += count
 
+    def can_run(self, leg):
+        """The leg may be run (B held, twice as fast): the Running Shoes are
+        in the bag, every map of it allows running, none is dark (the video
+        cannot follow the steps there) and no tile on the way stops running
+        (rock stairs slow it down, MB_RUNNING_DISALLOWED)."""
+        if "FLAG_SYS_B_DASH" not in self.state.flags:
+            return False
+        for mid, x, y in leg["points"]:
+            m = self.d.maps[mid]
+            if not m.allow_running or mid in self.gd.dark_maps:
+                return False
+            if not m.in_bounds(x, y):
+                continue
+            name = self.d.behaviors.name(self.engine.view(mid).tile(x, y)[3])
+            if name in ("MB_ROCK_STAIRS", "MB_RUNNING_DISALLOWED"):
+                return False
+        return True
+
     def close_leg(self, leg, out):
+        leg["run"] = self.can_run(leg)
         if leg["runs"] or leg["push"] or leg["face"] or leg["end"] != "STOP":
             self.legs.append(leg)
             out.append({"type": "WALK", "label": leg["name"], "leg": leg["id"]})

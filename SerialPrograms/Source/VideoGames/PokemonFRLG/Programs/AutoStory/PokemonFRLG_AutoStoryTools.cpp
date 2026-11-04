@@ -58,6 +58,7 @@ namespace{
 constexpr double FRAME_MS = 16.74;
 constexpr double TURN_FRAMES = 8;
 constexpr double WALK_FRAMES = 16;
+constexpr double RUN_FRAMES = 8;        //  With the Running Shoes (B held).
 constexpr double JUMP_FRAMES = 32;
 constexpr double SURF_FRAMES = 8;
 constexpr double SPIN_FRAMES = 8;
@@ -346,8 +347,15 @@ struct RunAttempt{
 RunAttempt attempt_moves(
     StoryRuntime& rt, DpadPosition direction, int moves,
     double frames, int tiles_per_move, bool surf, bool dark, bool track,
-    bool battles = false, Milliseconds trainer_watch = Milliseconds(0)
+    bool battles = false, Milliseconds trainer_watch = Milliseconds(0),
+    bool run = false
 ){
+    //  Running: B held with the d-pad, 8-frame steps. Single moves walk
+    //  (their presses are timed for walking).
+    const bool running = run && moves > 1 && !surf && tiles_per_move == 1;
+    if (running){
+        frames = RUN_FRAMES;
+    }
     BlackScreenWatcher battle_starting(COLOR_RED);
     WalkTracker tracker(direction, frames / tiles_per_move);
     //  Text boxes count when they appear with the player standing, not when
@@ -438,7 +446,12 @@ RunAttempt attempt_moves(
                 //  half a turn: within the last move either way.
                 double turn = direction == facing ? 0 : (facing == DPAD_NONE ? TURN_FRAMES / 2 : TURN_FRAMES);
                 double hold = turn + frames * moves - frames / 2;
-                pbf_press_dpad(context, direction, frames_to_ms(hold), frames_to_ms(frames / 2 + 6));
+                if (running){
+                    pbf_controller_state(context, BUTTON_B, direction, {0, 0}, {0, 0}, frames_to_ms(hold));
+                    pbf_wait(context, frames_to_ms(frames / 2 + 6));
+                }else{
+                    pbf_press_dpad(context, direction, frames_to_ms(hold), frames_to_ms(frames / 2 + 6));
+                }
             }
         },
         callbacks
@@ -512,8 +525,9 @@ RunAttempt attempt_moves(
     result.frames = t.frames();
     result.unsure = t.unsure_frames();
     result.lost = t.lost();
-    //  A step takes 16 frames (267 ms) from the press.
-    result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 && tracker.lost_at_ms() < 200;
+    //  A step takes 16 frames (267 ms) from the press, running 8.
+    result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 &&
+        tracker.lost_at_ms() < (running ? 100 : 200);
     int tiles = t.tiles();
     result.video_moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
     if (result.event != RunEvent::NONE){
@@ -640,13 +654,16 @@ void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf){
 StoryBattleResult story_grass_run(
     StoryRuntime& rt, DpadPosition direction, int moves,
     StoryBattleKind wild_kind, const std::string& where, bool throw_on_loss,
-    int& made, bool& sure
+    int& made, bool& sure, bool run
 ){
     StoryMemoryScope memory_scope("grass runs");
     const std::string label = where + " (going " + dpad_name(direction) + ")";
     //  Walking, not running: the video counts the tiles, and a battle on
     //  the way stops the player at the end of the step that started it.
-    RunAttempt a = attempt_moves(rt, direction, moves, WALK_FRAMES, 1, false, false, rt.verify_walking, true);
+    RunAttempt a = attempt_moves(
+        rt, direction, moves, WALK_FRAMES, 1, false, false, rt.verify_walking, true,
+        Milliseconds(0), run && rt.running && rt.verify_walking
+    );
     rt.facing = direction;
     made = a.moves;
     sure = rt.verify_walking && a.measured && !a.lost && a.event == RunEvent::NONE;
@@ -1002,13 +1019,17 @@ bool walk_run(
         //  After a try that did not move at all, one move at a time: if the
         //  video is wrong about it, little harm is done.
         const int moves = not_moving > 0 || one_by_one ? 1 : remaining;
+        //  Running: only with the video check (it measures the run), on the
+        //  plain and the encounter tiles of a leg that allows it.
+        const bool running = rt.running && track && leg.run && moves > 1 &&
+            (run.kind == RunKind::WALK || run.kind == RunKind::CHECKED);
         RunAttempt a = attempt_moves(
             rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track, encounters,
-            trainer ? rt.trainer_check : Milliseconds(0)
+            trainer ? rt.trainer_check : Milliseconds(0), running
         );
         if (track){
             rt.console.log(
-                std::string("Walked ") + dpad_name(run.direction) + ": " +
+                std::string(running ? "Ran " : "Walked ") + dpad_name(run.direction) + ": " +
                 std::to_string(a.moves) + " of " + std::to_string(moves) +
                 (a.measured ? "" : " (video unsure)") + " - " + a.video
             );

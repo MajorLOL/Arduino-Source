@@ -79,11 +79,11 @@ def write_cpp(results, path):
         #  Legs
         L.append("inline constexpr StoryLeg LEGS[] = {")
         for i, leg in enumerate(legs):
-            L.append("    {%s, %d, %d, %s, %s, %s, LegEnd::%s, %s, %s, MapPreview::%s},  //  %d" % (
+            L.append("    {%s, %d, %d, %s, %s, %s, LegEnd::%s, %s, %s, MapPreview::%s, %s},  //  %d" % (
                 cstr(leg["name"]), run_index[i], len(leg["runs"]),
                 DPAD[leg["start_facing"]], DPAD[leg["push"]], DPAD[leg["face"]],
                 leg["end"], "true" if leg["dark"] else "false", "true" if leg["dest_dark"] else "false",
-                leg.get("preview") or "NONE", i))
+                leg.get("preview") or "NONE", "true" if leg.get("run") else "false", i))
         L.append("};")
         L.append("")
         #  Leg lists and steps

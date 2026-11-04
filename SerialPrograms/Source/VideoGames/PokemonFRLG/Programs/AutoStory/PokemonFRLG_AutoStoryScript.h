@@ -81,6 +81,7 @@ struct StoryLeg{
     bool dark;                  //  The leg starts on a map that is dark without Flash.
     bool dest_dark;             //  The warp at the end leads to a dark map.
     MapPreview preview;         //  Shown after the warp at the end.
+    bool run;                   //  May be run (Running Shoes; maps that allow it, not dark).
 };
 
 enum class StepType : uint8_t{

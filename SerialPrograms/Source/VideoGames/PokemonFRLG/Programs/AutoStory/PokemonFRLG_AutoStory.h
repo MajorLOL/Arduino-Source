@@ -82,6 +82,7 @@ private:
     SimpleIntegerOption<uint16_t> RETRIES;
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;
     BooleanCheckBoxOption VERIFY_WALKING;
+    BooleanCheckBoxOption RUNNING;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;

@@ -999,15 +999,21 @@ public:
     //  time. A battle on the way stops the player somewhere on it: the
     //  picture taken on the first tile tells where (up to "length" tiles
     //  away), and the next run goes on from there.
-    GrassSpot(StoryRuntime& rt, DpadPosition forth, int length, StoryBattleKind kind, const std::string& where)
+    //  "run": the walks along it may be run (Running Shoes, a map that
+    //  allows it).
+    GrassSpot(StoryRuntime& rt, DpadPosition forth, int length, StoryBattleKind kind, const std::string& where, bool run = false)
         : m_rt(rt)
         , m_forth(forth)
         , m_length(std::max(2, std::min(length, 5)))
         , m_kind(kind)
         , m_where(where)
+        , m_run(run && rt.running)
     {
         if (m_length > 2){
-            rt.console.log(where + ": training along " + std::to_string(m_length) + " grass tiles.");
+            rt.console.log(
+                where + ": training along " + std::to_string(m_length) + " grass tiles" +
+                (m_run ? ", running." : ".")
+            );
         }
     }
 
@@ -1106,7 +1112,7 @@ public:
             }else{
                 int made = 0;
                 bool sure = false;
-                story_grass_run(m_rt, opposite(m_forth), moves, m_kind, m_where, true, made, sure);
+                story_grass_run(m_rt, opposite(m_forth), moves, m_kind, m_where, true, made, sure, m_run);
                 m_pos = std::max(0, m_pos - std::max(0, made));
             }
             m_forward = true;
@@ -1146,7 +1152,7 @@ public:
             }
         }else{
             int made = 0;
-            result = story_grass_run(m_rt, direction, moves, kind, m_where, throw_on_loss, made, sure);
+            result = story_grass_run(m_rt, direction, moves, kind, m_where, throw_on_loss, made, sure, m_run);
             moved = made > 0 || result != StoryBattleResult::NO_BATTLE;
             if (made > moves){
                 //  Past the end of the line (the input lasted too long):
@@ -1221,6 +1227,7 @@ private:
     int m_length;
     StoryBattleKind m_kind;
     std::string m_where;
+    bool m_run;
     bool m_has_picture = false;
     AutoStoryScroll::Screen m_picture;
     int m_pos = 0;              //  0 = the first tile, m_length - 1 = the far end
@@ -1270,7 +1277,10 @@ void grind_front(
         return;
     }
     walk(to_grass);
-    GrassSpot spot(rt, forth, length, StoryBattleKind::WILD_FIGHT, where);
+    //  The last walk to the grass is on the map of the grass.
+    const bool run = !to_grass.empty() && to_grass.back() >= 0 && (size_t)to_grass.back() < script.leg_count &&
+        script.legs[(size_t)to_grass.back()].run;
+    GrassSpot spot(rt, forth, length, StoryBattleKind::WILD_FIGHT, where, run);
     spot.arrived();
 
     //  If the level cannot be read, stop after a fixed number of battles.

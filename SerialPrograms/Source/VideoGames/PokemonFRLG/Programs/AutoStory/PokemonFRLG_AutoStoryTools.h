@@ -60,6 +60,8 @@ struct StoryRuntime{
     //  Check on the video how far the player really walked, and make up
     //  for missing steps.
     bool verify_walking = true;
+    //  Run (B held) with the Running Shoes where a leg allows it.
+    bool running = false;
 
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;
@@ -176,7 +178,7 @@ void story_single_step(StoryRuntime& rt, DpadPosition direction, bool surf = fal
 StoryBattleResult story_grass_run(
     StoryRuntime& rt, DpadPosition direction, int moves,
     StoryBattleKind wild_kind, const std::string& where, bool throw_on_loss,
-    int& made, bool& sure
+    int& made, bool& sure, bool run = false
 );
 
 //  One step on a wild-encounter tile, then watch for a battle (and run it).

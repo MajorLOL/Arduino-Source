@@ -263,6 +263,15 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         true
     )
+    , RUNNING(
+        "<b>Running (experimental):</b><br>Hold B while walking, twice as fast, once the Running Shoes are "
+        "in the bag (Pewter City). Only with \"Check walking on the video\" on, on maps that allow running "
+        "and are not dark, and not on rock stairs. A battle on the way still stops the player on a whole "
+        "tile; after it the program compares the screen with the one before the run to know where it is. "
+        "Not tested much yet: turn it off if the player gets lost on the way.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
     , GO_HOME_WHEN_DONE(false)
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
@@ -285,6 +294,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(RETRIES);
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
     PA_ADD_OPTION(VERIFY_WALKING);
+    PA_ADD_OPTION(RUNNING);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
 }
@@ -586,6 +596,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.encounter_check = Milliseconds((int64_t)(uint16_t)GRASS_STEP_CHECK_MS);
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
+    rt.running = RUNNING && VERIFY_WALKING;
     rt.save_after_heal = SAVE_AFTER_HEAL;
     if (CATCH_SHINIES){
         rt.shiny_watch.reset(new StoryShinyWatch(env.console, context));
