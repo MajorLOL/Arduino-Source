@@ -93,6 +93,9 @@ struct StoryRuntime{
 
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
+    //  The last battle was lost: the player whited out and is at the last
+    //  Pokemon Center, healed (set before the reload exception).
+    bool whited_out = false;
 
     //  Shiny Pokemon are caught: listens for the shiny sound (null: off).
     std::unique_ptr<StoryShinyWatch> shiny_watch;

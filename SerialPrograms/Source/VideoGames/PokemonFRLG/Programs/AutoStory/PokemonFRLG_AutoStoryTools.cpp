@@ -543,6 +543,7 @@ StoryBattleResult story_battle(
     bool throw_on_loss
 ){
     rt.console.log("Battle: " + where);
+    rt.whited_out = false;
     rt.battle.shiny_watch = rt.shiny_watch.get();
     //  A shiny takes the next free party slot. Until the whole team is in,
     //  keep the slots the team still needs.
@@ -612,6 +613,7 @@ StoryBattleResult story_battle(
         rt.lead_fainted = false;
         rt.memory.no_pp = 0;
         rt.facing = DPAD_UP;
+        rt.whited_out = true;
         if (throw_on_loss){
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::NO_ERROR_REPORT,

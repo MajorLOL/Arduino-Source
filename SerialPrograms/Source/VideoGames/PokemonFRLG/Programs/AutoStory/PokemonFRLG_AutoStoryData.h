@@ -4618,9 +4618,9 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VictoryRoadToIndigoPC_4", 750, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 53, 5, 2, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
-    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 53, 5, 3, 48, 5, DPAD_LEFT, "eevee,jolteon", 276, 280, 284},
-    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 53, 5, 4, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
+    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 58, 5, 2, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
+    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 58, 5, 3, 48, 5, DPAD_LEFT, "eevee,jolteon", 276, 280, 284},
+    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 58, 5, 4, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
     {StepType::GRIND, "GrindVictoryRoad", -1, 70, 5, -1, 0, 5, DPAD_LEFT, "", 300, 304, 308},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyFullRestore", 787, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -9359,9 +9359,9 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VictoryRoadToIndigoPC_4", 751, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 53, 5, 3, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
-    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 53, 5, 4, 48, 5, DPAD_LEFT, "eevee,flareon", 276, 280, 284},
-    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 53, 5, 5, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
+    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 58, 5, 3, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
+    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 58, 5, 4, 48, 5, DPAD_LEFT, "eevee,flareon", 276, 280, 284},
+    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 58, 5, 5, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
     {StepType::GRIND, "GrindVictoryRoad", -1, 70, 5, -1, 0, 5, DPAD_LEFT, "", 300, 304, 308},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyFullRestore", 788, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -14085,9 +14085,9 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "VictoryRoadToIndigoPC_4", 750, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 53, 5, 2, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
-    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 53, 5, 3, 48, 5, DPAD_LEFT, "eevee,vaporeon", 276, 280, 284},
-    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 53, 5, 4, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
+    {StepType::GRIND, "GrindVictoryRoad_Voltorb", -1, 58, 5, 2, 48, 5, DPAD_LEFT, "voltorb,electrode", 264, 268, 272},
+    {StepType::GRIND, "GrindVictoryRoad_Eevee", -1, 58, 5, 3, 48, 5, DPAD_LEFT, "eevee,vaporeon", 276, 280, 284},
+    {StepType::GRIND, "GrindVictoryRoad_Lapras", -1, 58, 5, 4, 48, 5, DPAD_LEFT, "lapras", 288, 292, 296},
     {StepType::GRIND, "GrindVictoryRoad", -1, 74, 5, -1, 0, 5, DPAD_LEFT, "", 300, 304, 308},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyFullRestore", 787, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -14208,7 +14208,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "85b100320e";
+inline constexpr const char* DATA_ID = "6519208bc4";
 
 }
 }

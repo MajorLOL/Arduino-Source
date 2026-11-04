@@ -633,6 +633,10 @@ void use_best_move(
         BattleOutOfPpWatcher no_pp(COLOR_RED);
         if (wait_until(console, context, 400ms, { no_pp }) == 0){
             console.log("That move is out of PP.", COLOR_ORANGE);
+            //  Not again in this battle (until another Pokemon comes in):
+            //  picking it just brings the list back, and the turn would
+            //  count as the move doing nothing to the foe.
+            memory.no_pp |= (uint8_t)(1 << slot);
             excluded |= (uint8_t)(1 << slot);
             if (excluded == 0x0f){
                 break;      //  Struggle: any move.

@@ -311,16 +311,19 @@ TEAM_MEMBERS = {
     "EEVEE": (EEVEE_SLOT, {"BULBASAUR": "eevee,jolteon", "SQUIRTLE": "eevee,flareon", "CHARMANDER": "eevee,vaporeon"}),
     "LAPRAS": (LAPRAS_SLOT, {v: "lapras" for v in ["BULBASAUR", "SQUIRTLE", "CHARMANDER"]}),
 }
-#  Levels the members train to, after the lead, at the lead's training spots
-#  (team_sim.py: ~55 for the Elite Four; each room is saved, so a loss is
-#  retried from there).
+#  Levels the members train to, after the lead, at the lead's training spots.
+#  The League: the rooms come one after the other, and between them only HP
+#  comes back (Full Restore, Revive), not PP. Played that way (a gauntlet in
+#  team_sim's battles), Charizard 74 with the members at 53 beats the
+#  Champion one time in three; with the members at 58 three times in four.
+#  A loss in the League starts it over with more training (AutoStory.cpp).
 TEAM_TRAINING = {
     "ERIKA":    {"VOLTORB": 25, "EEVEE": 30},
     "KOGA":     {"VOLTORB": 33, "EEVEE": 35},
     "SABRINA":  {"LAPRAS": 32},
     "BLAINE":   {"VOLTORB": 42, "EEVEE": 42, "LAPRAS": 42},
     "GIOVANNI": {"VOLTORB": 47, "EEVEE": 47, "LAPRAS": 47},
-    "LEAGUE":   {"VOLTORB": 53, "EEVEE": 53, "LAPRAS": 53},
+    "LEAGUE":   {"VOLTORB": 58, "EEVEE": 58, "LAPRAS": 58},
 }
 #  Eevee's evolution has no attack of its type until late (Water Gun and
 #  Thunder Shock come at 16, before it joins at 25): a TM right away.

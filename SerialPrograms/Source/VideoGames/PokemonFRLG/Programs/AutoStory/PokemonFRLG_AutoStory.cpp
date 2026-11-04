@@ -224,8 +224,10 @@ AutoStory::AutoStory()
         true
     )
     , EXTRA_LEVELS(
-        "<b>Extra levels:</b><br>Train the lead this many levels above the planned level at every "
-        "training spot. Raise this if battles are lost.",
+        "<b>Extra levels:</b><br>Train the lead and the team members this many levels above the planned "
+        "level at every training spot. Raise this if battles are lost. A loss in the Elite Four or against "
+        "the Champion raises it by 3 by itself: the team trains again, then the League starts over. "
+        "Set it back to 0 for a new game.",
         LockMode::LOCK_WHILE_RUNNING,
         0, 0, 30
     )
@@ -655,6 +657,14 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     uint16_t failures = 0;
     size_t failed_segment = (size_t)-1;     //  the save the last failure went back to
     size_t failed_step = (size_t)-1;
+    //  A loss in the League: the training for it, and how often it was lost.
+    size_t league_training = (size_t)-1;
+    for (size_t i = 0; i < script.segment_count; i++){
+        if (std::string(script.segments[i].id).rfind("C10_01", 0) == 0){
+            league_training = i;
+        }
+    }
+    int league_losses = 0;
 
     while (current_segment <= last){
         const StorySegment& segment = script.segments[current_segment];
@@ -695,6 +705,53 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             take_resume();
             stats.errors++;
             env.update_stats();
+            const std::string id = segment.id;
+            const bool league = id.rfind("C10_03", 0) == 0 || id.rfind("C10_04", 0) == 0;
+            if (rt.whited_out && league && league_training != (size_t)-1 && league_losses < 6){
+                //  The save before this room has the PP the rooms before it
+                //  used up (only HP comes back between them): a retry from
+                //  there starts the same way, and loses the same way. The
+                //  loss has put the player in front of the nurse of the
+                //  Indigo Plateau, everyone healed, and the Elite Four start
+                //  over: where the League training starts. Train more, then
+                //  the whole League again.
+                rt.whited_out = false;
+                league_losses++;
+                const uint16_t extra = (uint16_t)std::min(30, (int)(uint16_t)EXTRA_LEVELS + 3);
+                EXTRA_LEVELS.set(extra);
+                env.log(
+                    "Lost in " + segment_name(segment) + ". Not reloading: the save before this room has "
+                    "the PP of the rooms before used up. The team is healed at the Indigo Plateau and the "
+                    "Elite Four start over. Training " + std::to_string(extra) + " levels above the plan "
+                    "(\"Extra levels\"), then the League again.",
+                    COLOR_RED
+                );
+                rt.facing = DPAD_UP;
+                rt.arrived_by_warp = false;
+                rt.lead_fainted = false;
+                rt.battle.team.clear();
+                rt.battle.lead_type1 = rt.lead_type1;
+                rt.battle.lead_type2 = rt.lead_type2;
+                rt.battle.share_position = 0;
+                rt.memory.member_moves_known = false;
+                rt.memory.no_pp = 0;
+                //  Saved here: a reset comes back to this, not to the room.
+                current_segment = league_training;
+                current_step = 0;
+                rt.segment_id = script.segments[current_segment].id;
+                rt.segment_steps = script.segments[current_segment].step_count;
+                rt.next_segment_id = current_segment + 1 < script.segment_count ? script.segments[current_segment + 1].id : "";
+                rt.has_dex = script.segments[current_segment].has_dex;
+                story_save(rt, rt.has_dex);
+                story_saved(rt, 0);
+                resume_segment = current_segment;
+                resume_step = 0;
+                failures = 0;
+                failed_segment = (size_t)-1;
+                failed_step = (size_t)-1;
+                continue;
+            }
+            rt.whited_out = false;
             //  Retries count in a row from the same save: once a later save
             //  was reached (an Elite Four room won), counting starts over.
             if (resume_segment != failed_segment || resume_step != failed_step){

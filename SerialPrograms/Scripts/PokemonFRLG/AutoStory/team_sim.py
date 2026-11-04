@@ -248,8 +248,31 @@ E4 = [
 ]
 
 
-def rates(data, starter, members, runs, seed=1, policy="smart"):
-    """members = [(name, level)]. Win rate per E4 battle (full heal between)."""
+def rates(data, starter, members, runs, seed=1, policy="smart", gauntlet=False):
+    """members = [(name, level)]. Win rate per E4 battle (full heal between).
+    "gauntlet": the rooms one after the other as in the game, where between
+    them only HP and status come back (Full Restore, Revive), not PP; the
+    rate of a room is among the runs that got there."""
+    if gauntlet:
+        rooms = [(label, tname.format(rival=RIVAL[starter])) for label, tname in E4]
+        reached = [0] * len(rooms)
+        won = [0] * len(rooms)
+        rng = random.Random(seed)
+        for _ in range(runs):
+            team = [make(data, n, l, rng, starter) for n, l in members]
+            for i, (label, tname) in enumerate(rooms):
+                reached[i] += 1
+                t = data.trainers[tname]
+                foes = [B.trainer_mon(data, p) for p in data.parties[t["party"]]]
+                if not team_battle(data, team, foes, t["items"], rng, t["smart"], policy):
+                    break
+                won[i] += 1
+                for m in team:
+                    m.hp = m.max_hp
+                    m.status = None
+                    m.sleep = 0
+                    m.toxic = 0
+        return [won[i] / reached[i] if reached[i] else 0.0 for i in range(len(rooms))]
     out = []
     for label, tname in E4:
         tname = tname.format(rival=RIVAL[starter])
@@ -277,12 +300,13 @@ def main():
     ap.add_argument("--level", type=int, default=55)
     ap.add_argument("--lead", type=int, default=70)
     ap.add_argument("--size", type=int, default=2)
+    ap.add_argument("--gauntlet", action="store_true", help="PP carried from room to room, as in the game")
     ap.add_argument("--pool", default="VAPOREON,JOLTEON,FLAREON,ONIX_VR,MACHOKE_VR,MAROWAK_VR,GOLBAT_VR,ARBOK,FEAROW,PRIMEAPE,ELECTRODE,KADABRA")
     args = ap.parse_args()
     data = B.Data(args.decomp)
 
     def show(members):
-        r = rates(data, args.starter, members, args.runs, policy=args.policy)
+        r = rates(data, args.starter, members, args.runs, policy=args.policy, gauntlet=args.gauntlet)
         total = 1.0
         for x in r:
             total *= x
