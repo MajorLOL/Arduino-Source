@@ -466,11 +466,18 @@ void AutoStory::run_segment(
                 //  A legendary Pokemon: caught, or the save before it again.
                 struct Legendary{
                     StoryRuntime& rt;
-                    Legendary(StoryRuntime& p_rt) : rt(p_rt){ rt.battle.catch_legendary = true; }
-                    ~Legendary(){ rt.battle.catch_legendary = false; }
-                } legendary(rt);
+                    Legendary(StoryRuntime& p_rt, bool weaken) : rt(p_rt){
+                        rt.battle.catch_legendary = true;
+                        rt.battle.weaken_legendary = weaken;
+                    }
+                    ~Legendary(){
+                        rt.battle.catch_legendary = false;
+                        rt.battle.weaken_legendary = false;
+                    }
+                } legendary(rt, step.p2 == 1);
                 StoryBattleResult result = story_battle(rt, StoryBattleKind::CATCH, label);
                 if (result != StoryBattleResult::CAUGHT){
+                    rt.legendary_missed = true;
                     OperationFailedExceptionWithScreenshot::fire(
                         ErrorReportMode::NO_ERROR_REPORT,
                         label + " was not caught. Loading the save before it to try again.",
@@ -708,6 +715,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     size_t current_segment = first;
     size_t current_step = first_step;
     uint16_t failures = 0;
+    uint16_t legendary_misses = 0;          //  a legendary Pokemon not caught, from the same save
     size_t failed_segment = (size_t)-1;     //  the save the last failure went back to
     size_t failed_step = (size_t)-1;
     //  A loss in the League: the training for it, and how often it was lost.
@@ -813,12 +821,24 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             //  was reached (an Elite Four room won), counting starts over.
             if (resume_segment != failed_segment || resume_step != failed_step){
                 failures = 0;
+                legendary_misses = 0;
                 failed_segment = resume_segment;
                 failed_step = resume_step;
             }
-            failures++;
-            if (failures > RETRIES){
-                throw;
+            if (rt.legendary_missed){
+                //  Without the Master Ball a legendary Pokemon takes a few
+                //  tries (the save is right in front of it).
+                rt.legendary_missed = false;
+                legendary_misses++;
+                if (legendary_misses > std::max<uint16_t>(RETRIES, 25)){
+                    throw;
+                }
+                env.log("Try " + std::to_string(legendary_misses + 1) + " at " + segment_name(segment) + ".", COLOR_BLUE);
+            }else{
+                failures++;
+                if (failures > RETRIES){
+                    throw;
+                }
             }
             env.log(
                 "Segment " + segment_name(segment) + " failed. Soft resetting to the last save and "

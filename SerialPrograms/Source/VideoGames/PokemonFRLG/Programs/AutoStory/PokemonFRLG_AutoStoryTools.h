@@ -101,6 +101,9 @@ struct StoryRuntime{
     //  The last battle was lost: the player whited out and is at the last
     //  Pokemon Center, healed (set before the reload exception).
     bool whited_out = false;
+    //  A legendary Pokemon was not caught (the step fails, the save before
+    //  it is loaded): such a failure counts against its own limit.
+    bool legendary_missed = false;
 
     //  Shiny Pokemon are caught: listens for the shiny sound (null: off).
     std::unique_ptr<StoryShinyWatch> shiny_watch;

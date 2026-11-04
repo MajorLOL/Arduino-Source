@@ -79,8 +79,32 @@ class Builder:
         self.segment_id = None
 
     # ------------------------------------------------------------ helpers
+    def layout_tiles(self, map_id, layout_id):
+        """Tile overrides for a map whose layout a script switches
+        (setmaplayoutindex): every tile that differs from the map's own
+        layout, {"x,y": {collision, elevation, behavior, encounter}}."""
+        m = self.d.maps[map_id]
+        old, new = m.layout, self.d.layouts[layout_id]
+        if (old.width, old.height) != (new.width, new.height):
+            raise StoryError("Layout %s does not fit %s" % (layout_id, map_id))
+        out = {}
+        for y in range(new.height):
+            for x in range(new.width):
+                b = new.block(x, y)
+                if b == old.block(x, y):
+                    continue
+                attrs = self.d.metatile_attributes(new, b & 0x3FF)
+                out["%d,%d" % (x, y)] = {"collision": (b >> 10) & 3, "elevation": (b >> 12) & 15,
+                                         "behavior": attrs & 0x1FF, "encounter": (attrs >> 24) & 7}
+        return out
+
     def set_state(self, change):
         change = dict(change)
+        if "layouts" in change:
+            tiles = {k: dict(v) for k, v in change.get("tiles", {}).items()}
+            for map_id, layout_id in change.pop("layouts").items():
+                tiles.setdefault(map_id, {}).update(self.layout_tiles(map_id, layout_id))
+            change["tiles"] = tiles
         if "script_tiles" in change:
             tiles = {k: dict(v) for k, v in change.get("tiles", {}).items()}
             for map_id, label in change.pop("script_tiles"):
@@ -629,8 +653,11 @@ class Builder:
                         "text": "YES" if step.get("answer") == "yes" else ""})
             return
         if "battle" in step:
-            out.append({"type": "BATTLE", "label": step.get("label", "Battle"), "p0": step["battle"],
-                        "p1": 2 if step.get("legendary") else (1 if step.get("flee") else 0)})
+            b = {"type": "BATTLE", "label": step.get("label", "Battle"), "p0": step["battle"],
+                 "p1": 2 if step.get("legendary") else (1 if step.get("flee") else 0)}
+            if step.get("weaken"):
+                b["p2"] = 1
+            out.append(b)
             return
         if "hall_of_fame" in step:
             #  The game saves itself in the Hall of Fame and starts in Pallet
@@ -1040,8 +1067,10 @@ class Builder:
         Strength puzzle on the current map: push a boulder onto a target
         tile (a floor switch, or a hole it falls through). BFS over boulder
         positions; the player walks with the normal movement rules.
-        step["boulder"] = {target: [x,y], hole: bool}
-        """
+        step["boulder"] = {target: [x,y], hole: bool, from: [x,y]}
+        "from": the boulder that must get there (the one at that position
+        when the step starts); the others may be pushed out of its way.
+        Without it, any boulder."""
         from collections import deque
         bp = step["boulder"]
         label = step.get("label", "Boulder")
@@ -1049,6 +1078,7 @@ class Builder:
         m = self.d.maps[mid]
         tx, ty = bp["target"]
         hole = bool(bp.get("hole"))
+        goal_origin = tuple(bp["from"]) if bp.get("from") else None
         v0 = self.engine.view(mid)
         keys = {}
         for o in self.state.objects(m):
@@ -1113,7 +1143,12 @@ class Builder:
 
         def search(movable, limit):
             """A* over boulder positions; only the boulders that started at a
-            position in 'movable' may be pushed."""
+            position in 'movable' may be pushed. With goal_origin, only that
+            boulder counts at the target."""
+            def dist(fz, origin):
+                return min((abs(x - tx) + abs(y - ty) for (x, y) in fz
+                            if (origin.get((x, y)) == goal_origin if goal_origin else origin.get((x, y)) in movable)),
+                           default=99)
             counter = 0
             heap = [(0, 0, counter, start_cfg, self.node(), [], tuple(sorted((b, b) for b in start_cfg)))]
             seen = set()
@@ -1121,7 +1156,8 @@ class Builder:
             while heap:
                 _, g, _, cfg, pnode, plan, origin_map = heapq.heappop(heap)
                 reg = region(cfg, pnode)
-                sig = (cfg, min((n[1], n[2], n[3]) for n in reg))
+                gpos = next((p for p, o in origin_map if o == goal_origin), None) if goal_origin else None
+                sig = (cfg, min((n[1], n[2], n[3]) for n in reg), gpos)
                 if sig in seen:
                     continue
                 seen.add(sig)
@@ -1148,26 +1184,31 @@ class Builder:
                         if not fell:
                             ncfg.add(nb)
                         nplan = plan + [(b, d, nb)]
-                        if nb == (tx, ty):
+                        if nb == (tx, ty) and (goal_origin is None or origin.get(b) == goal_origin):
                             return nplan
                         if fell:
                             continue
                         no = dict(origin)
                         no[nb] = no.pop(b)
                         fz = frozenset(ncfg)
-                        hh = min(abs(x - tx) + abs(y - ty) for (x, y) in fz if no.get((x, y)) in movable)
+                        hh = dist(fz, no)
                         counter += 1
                         heapq.heappush(heap, (g + 1 + hh, g + 1, counter, fz, reg_xy[pxy], nplan,
                                               tuple(sorted(no.items()))))
             return None
 
         found = None
-        for b in sorted(start_cfg, key=lambda q: abs(q[0] - tx) + abs(q[1] - ty)):
-            found = search({b}, 20000)
-            if found:
-                break
-        if found is None:
-            found = search(set(start_cfg), 60000)
+        if goal_origin is not None:
+            if goal_origin not in start_cfg:
+                raise StoryError("No boulder at %s for %s on %s" % (goal_origin, label, mid))
+            found = search({goal_origin}, 20000) or search(set(start_cfg), 200000)
+        else:
+            for b in sorted(start_cfg, key=lambda q: abs(q[0] - tx) + abs(q[1] - ty)):
+                found = search({b}, 20000)
+                if found:
+                    break
+            if found is None:
+                found = search(set(start_cfg), 60000)
         if found is None:
             raise StoryError("No boulder solution for %s on %s" % (label, mid))
         #  Emit: walk behind the boulder, (first time) use Strength, push.

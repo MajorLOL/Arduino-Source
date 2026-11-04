@@ -151,6 +151,11 @@ struct StoryBattleSettings{
     //  A legendary Pokemon: caught with the best ball in the bag, the Master
     //  Ball too (a shiny does not get that one), until the balls run out.
     bool catch_legendary = false;
+    //  No Master Ball for it: its HP is brought down first with the weakest
+    //  move, as long as one more hit surely leaves it some (watched on its
+    //  HP bar). Catch rate 3: at full HP an ULTRA BALL catches it about 0.8%
+    //  of the time, at a fifth of its HP about 2%.
+    bool weaken_legendary = false;
 
     //  Trainer battles: below a third of its HP, the Pokemon that is out
     //  gets the best healing item of the bag (Full Restore, Max Potion,

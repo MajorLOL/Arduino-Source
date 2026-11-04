@@ -543,6 +543,25 @@ int best_move_slot(const StoryBattleMemory& memory, const StoryBattleSettings& s
     return best < 0 ? 0 : best;
 }
 
+//  Weakest move that does damage, skipping "excluded" (bit mask): to bring a
+//  Pokemon's HP down without making it faint. -1: none that does damage.
+int weakest_move_slot(const StoryBattleMemory& memory, const StoryBattleSettings& settings,
+                      const SpeciesInfo* opponent, uint8_t excluded){
+    int best = -1;
+    double best_score = 0;
+    for (int i = 0; i < 4; i++){
+        if ((excluded & (1 << i)) || memory.moves[i] < 0){
+            continue;
+        }
+        const double score = move_score(memory.moves[i], settings, opponent);
+        if (score > 0 && (best < 0 || score < best_score)){
+            best_score = score;
+            best = i;
+        }
+    }
+    return best;
+}
+
 BattleMoveOption slot_option(int slot){
     switch (slot){
     case 0: return BattleMoveOption::MOVE_1;
@@ -553,11 +572,12 @@ BattleMoveOption slot_option(int slot){
 }
 
 
-//  The move list is open: pick the best move and use it.
+//  The move list is open: pick the best move and use it. "weakest": the
+//  weakest move that does damage instead (to weaken a Pokemon to catch).
 void use_best_move(
     ConsoleHandle& console, ProControllerContext& context,
     const StoryBattleSettings& settings, StoryBattleMemory& memory,
-    const SpeciesInfo* opponent
+    const SpeciesInfo* opponent, bool weakest = false
 ){
     //  Did the move picked last turn take any of the foe's HP? (The move
     //  list leaves both HP bars in view.)
@@ -620,7 +640,13 @@ void use_best_move(
     memory.probe = 0;
     int cursor_slot = 0;
     for (int attempt = 0; attempt < 4; attempt++){
-        int slot = best_move_slot(memory, settings, opponent, excluded);
+        int slot = -1;
+        if (weakest){
+            slot = weakest_move_slot(memory, settings, opponent, excluded);
+        }
+        if (slot < 0){
+            slot = best_move_slot(memory, settings, opponent, excluded);
+        }
         cursor_slot = slot;
         if (memory.moves[slot] >= 0){
             console.log(std::string("Using ") + AutoStoryDex::moves()[(size_t)memory.moves[slot]].name);
@@ -1272,6 +1298,12 @@ StoryBattleResult run_story_battle(
     bool shiny_wanted = false;
     bool shiny_caught = false;
     bool legendary = false;
+    //  Weakening a legendary Pokemon (settings.weaken_legendary): its HP
+    //  before the last hit, the most one hit took, the hits so far.
+    bool weakened = false;
+    double weaken_hp_before = -1;
+    double weaken_max_drop = -1;
+    int weaken_turns = 0;
     int balls_thrown = 0;
     int throw_failures = 0;
     int heals_used = 0;
@@ -1371,6 +1403,53 @@ StoryBattleResult run_story_battle(
                 if (balls_thrown >= max_throws || throw_failures >= 4){
                     console.log("No more balls thrown at the shiny: the battle goes on as usual.", COLOR_ORANGE);
                     shiny_catching = false;
+                }else if (legendary && settings.weaken_legendary && !weakened && [&](){
+                    //  Its HP down first: the weakest move, as long as one
+                    //  more hit (the most one took so far, a quarter more for
+                    //  the random factor) still leaves it 6%. A critical hit
+                    //  can still make it faint: then the save before it.
+                    double foe_hp = -1;
+                    {
+                        VideoSnapshot screen = console.video().snapshot();
+                        if (screen){
+                            foe_hp = read_foe_hp(screen);
+                        }
+                    }
+                    if (foe_hp >= 0 && weaken_hp_before >= 0 && weaken_hp_before - foe_hp > 0.005){
+                        weaken_max_drop = std::max(weaken_max_drop, weaken_hp_before - foe_hp);
+                    }
+                    const bool safe = weaken_max_drop < 0 || foe_hp - weaken_max_drop * 1.25 > 0.06;
+                    if (foe_hp > 0.2 && safe && weaken_turns < 15){
+                        std::string slug;
+                        const SpeciesInfo* opponent = read_opponent(console, slug);
+                        if (move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
+                            pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+                            context.wait_for_all_requests();
+                            BattleSelectionArrowWatcher move_list(COLOR_RED, &console.overlay(), BATTLE_MOVE_ARROW_BOX);
+                            if (wait_until(console, context, 3000ms, { move_list }) == 0){
+                                console.log(
+                                    "Its HP: " + std::to_string((int)(foe_hp * 100 + 0.5)) + "%. Weakening it.",
+                                    COLOR_BLUE
+                                );
+                                use_best_move(console, context, settings, memory, opponent, true);
+                                weaken_turns++;
+                                weaken_hp_before = foe_hp;
+                                return true;
+                            }
+                            pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                            context.wait_for_all_requests();
+                        }
+                    }
+                    weakened = true;
+                    console.log(
+                        foe_hp < 0
+                            ? std::string("Its HP not read: the balls now.")
+                            : "Its HP: " + std::to_string((int)(foe_hp * 100 + 0.5)) + "%. The balls now.",
+                        COLOR_BLUE
+                    );
+                    return false;
+                }()){
+                    break;
                 }else if (shiny_safari){
                     if (move_cursor_to_option(console, context, SafariBattleMenuOption::BALL)){
                         balls_thrown++;

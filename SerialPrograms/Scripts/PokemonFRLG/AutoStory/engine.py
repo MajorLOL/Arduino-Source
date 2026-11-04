@@ -527,6 +527,8 @@ class MapView:
             if "behavior" in ov:
                 b = ov["behavior"]
                 t[3] = self.B.by_name[b] if isinstance(b, str) else int(b)
+            if "encounter" in ov:
+                t[4] = int(ov["encounter"])
         return tuple(t)
 
 

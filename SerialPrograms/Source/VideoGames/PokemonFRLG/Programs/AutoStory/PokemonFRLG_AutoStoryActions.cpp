@@ -573,6 +573,11 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
         dpad(context, DPAD_DOWN);
     }
     press(context, BUTTON_A, 1500ms);       //  "How many would you like?"
+    if (quantity <= 0){
+        //  As many as the money allows: DOWN from 1 goes round to the most
+        //  (AdjustQuantityAccordingToDPadInput, up to 99).
+        dpad(context, DPAD_DOWN, 200ms);
+    }
     //  UP adds one (up to what the money allows).
     for (int i = 1; i < quantity; i++){
         dpad(context, DPAD_UP, 200ms);

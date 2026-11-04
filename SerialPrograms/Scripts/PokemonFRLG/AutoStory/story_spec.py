@@ -1227,19 +1227,33 @@ CHAPTER10 = [
 ]
 
 
-def legendary(map_id, xy, flags, label):
+def legendary(map_id, xy, flags, label, weaken=False):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
     (the Master Ball too) until it is caught. Not caught (it fainted, the
-    balls ran out): the step fails, and the save before it is tried again."""
+    balls ran out): the step fails, and the save before it is tried again.
+    weaken: no Master Ball left; its HP is brought down first (catch rate
+    3: a ball catches it about three times as often in the red)."""
     return [talk(map_id, xy=xy, mode="talk", label=label),
-            {"battle": 60000, "label": label, "legendary": True},
+            {"battle": 60000, "label": label, "legendary": True, "weaken": weaken},
             setst(flags=flags)]
 
 
-#  After the Hall of Fame: the legendary Pokemon. Articuno (Seafoam Islands:
-#  water currents, boulders) and Moltres (Mt. Ember: the boat to the Sevii
-#  Islands) are still to come; Mewtwo needs the whole Sevii Islands story.
+#  Seafoam Islands: the holes. A boulder pushed into one falls to the floor
+#  below; the player is kept off them (the floor below has currents: falling
+#  on B3F rides the current to B4F, SeafoamIslands_B3F_EventScript_EnterByFalling).
+SEAFOAM_HOLES = {
+    "MAP_SEAFOAM_ISLANDS_1F": [[21, 8], [30, 8]],
+    "MAP_SEAFOAM_ISLANDS_B1F": [[23, 8], [28, 8]],
+    "MAP_SEAFOAM_ISLANDS_B2F": [[24, 8], [27, 8]],
+    "MAP_SEAFOAM_ISLANDS_B3F": [[6, 18], [9, 18]],
+}
+
+
+#  After the Hall of Fame: the legendary Pokemon. Zapdos gets the Master
+#  Ball; Articuno (Seafoam Islands: boulders stop the current) Ultra Balls,
+#  weakened first. Moltres (Mt. Ember: the boat to the Sevii Islands) is
+#  still to come; Mewtwo needs the whole Sevii Islands story.
 CHAPTER11 = [
     {
         "id": "C11_01_MASTER_BALL", "chapter": 11,
@@ -1272,6 +1286,43 @@ CHAPTER11 = [
         ],
     },
 ]
+
+CHAPTER11.append({
+    "id": "C11_03_ARTICUNO", "chapter": 11,
+    "title": "Articuno in the Seafoam Islands: two boulders stop the current on B4F (Ultra Balls)",
+    #  Route20_OnTransition puts every boulder back while the currents are
+    #  not stopped: as at the start of the game.
+    "state": {
+        "tiles": {mid: {"%d,%d" % (x, y): {"collision": 1} for x, y in holes} for mid, holes in SEAFOAM_HOLES.items()},
+    },
+    "steps": [
+        #  Fuchsia City: Route 19 and 20 by Surf to the east entrance.
+        heal(PC["FUCHSIA"], "Route10ToFuchsiaPC"),
+    #  Ultra Balls, as many as the money allows (quantity 0).
+    ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+        save(),
+        #  B3F: boulders 3 and 5 into the holes. Each comes down on B4F in
+        #  front of the current there (the flag in its trainer_type field,
+        #  HandleBoulderFallThroughHole). Boulders 4 and 6 only stand in the way.
+        goto("MAP_SEAFOAM_ISLANDS_B3F", [[8, 17]], "ToSeafoamB3F"),
+        {"boulder": {"target": [6, 18], "hole": True, "from": [6, 17]}, "label": "SeafoamB3F_Boulder3"},
+        setst(flags=["FLAG_HIDE_SEAFOAM_B3F_BOULDER_3"], clear_flags=["FLAG_HIDE_SEAFOAM_B4F_BOULDER_1"]),
+        {"boulder": {"target": [9, 18], "hole": True, "from": [12, 16]}, "label": "SeafoamB3F_Boulder5"},
+        setst(flags=["FLAG_HIDE_SEAFOAM_B3F_BOULDER_5"], clear_flags=["FLAG_HIDE_SEAFOAM_B4F_BOULDER_2"]),
+        #  SeafoamIslands_B4F_OnTransition: two boulders there, the current
+        #  stops (setmaplayoutindex LAYOUT_SEAFOAM_ISLANDS_B4F_CURRENT_STOPPED).
+        setst(flags=["FLAG_STOPPED_SEAFOAM_B4F_CURRENT"],
+              layouts={"MAP_SEAFOAM_ISLANDS_B4F": "LAYOUT_SEAFOAM_ISLANDS_B4F_CURRENT_STOPPED"}),
+        talk("MAP_SEAFOAM_ISLANDS_B4F", xy=[22, 19], mode="talk", label="SeafoamUltraBall"),
+        setst(flags=["FLAG_HIDE_SEAFOAM_ISLANDS_B4F_ULTRA_BALL"]),
+        goto("MAP_SEAFOAM_ISLANDS_B4F", [[9, 3]], "ToArticuno"),
+        save(),
+    ] + legendary("MAP_SEAFOAM_ISLANDS_B4F", [9, 2], ["FLAG_FOUGHT_ARTICUNO", "FLAG_HIDE_ARTICUNO"], "Articuno",
+                  weaken=True) + [
+        heal(PC["FUCHSIA"], "SeafoamToFuchsiaPC"),
+        save(),
+    ],
+})
 
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
             + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11)
