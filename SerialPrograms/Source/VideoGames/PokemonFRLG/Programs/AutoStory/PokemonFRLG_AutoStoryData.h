@@ -6650,7 +6650,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "BuyUltraBalls", 989, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_1", 990, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_2", 991, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::BUY, "BuyUltraBalls", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::BUY, "BuyUltraBalls", -1, 0, 10, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC", 992, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_1", 993, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_2", 994, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -13524,7 +13524,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "BuyUltraBalls", 990, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_1", 991, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_2", 992, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::BUY, "BuyUltraBalls", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::BUY, "BuyUltraBalls", -1, 0, 10, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC", 993, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_1", 994, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_2", 995, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -19361,7 +19361,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "BuyUltraBalls", 913, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_1", 914, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "BuyUltraBalls_2", 915, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::BUY, "BuyUltraBalls", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::BUY, "BuyUltraBalls", -1, 0, 10, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC", 916, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_1", 917, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "MartToThreeIslandPC_2", 918, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -19585,7 +19585,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "b7507a14ce";
+inline constexpr const char* DATA_ID = "da369ca450";
 
 }
 }

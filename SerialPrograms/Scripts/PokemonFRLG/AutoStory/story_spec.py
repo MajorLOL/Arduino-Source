@@ -1461,8 +1461,10 @@ CHAPTER12 = [
                   flags=["FLAG_HIDE_THREE_ISLAND_BIKERS", "FLAG_HIDE_THREE_ISLAND_LONE_BIKER"]),
             pos("MAP_THREE_ISLAND", 9, 26, "up"),
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BikersToThreeIslandPC"),
-            #  Ultra Balls for Moltres, as many as the money allows.
-        ] + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            #  10 Ultra Balls for Moltres (with those left from Articuno and
+            #  the one on Mt. Ember); the rest of the money is for the Poke
+            #  Balls of the National Pokedex.
+        ] + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 10, "BuyUltraBalls") + [
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "MartToThreeIslandPC"),
             save(),
         ],
