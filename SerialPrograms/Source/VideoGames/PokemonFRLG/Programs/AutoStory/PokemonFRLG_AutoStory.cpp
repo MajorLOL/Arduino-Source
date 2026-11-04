@@ -214,8 +214,8 @@ AutoStory::AutoStory()
     )
     , CATCH_SHINIES(
         "<b>Catch shiny Pokemon:</b><br>When a wild Pokemon is shiny (its shiny sound plays as it "
-        "appears), throw the best ball in the bag at it until it is caught, it gets away or the balls "
-        "run out, then go on with the story. The story buys Great Balls in Lavender Town and Ultra Balls "
+        "appears), throw the best ball in the bag at it (Ultra, Great, then Poke Ball; never the "
+        "Master Ball) until it is caught, it gets away or the balls run out, then go on with the story. The story buys Great Balls in Lavender Town and Ultra Balls "
         "in Fuchsia City and at the Indigo Plateau.<br>"
         "<b>Needs the game's sound:</b> set the audio input of the capture card, game volume on. "
         "A shiny that joins the party stays behind the team; it is safe once the game is saved "
@@ -466,15 +466,18 @@ void AutoStory::run_segment(
                 //  A legendary Pokemon: caught, or the save before it again.
                 struct Legendary{
                     StoryRuntime& rt;
-                    Legendary(StoryRuntime& p_rt, bool weaken) : rt(p_rt){
+                    //  p2: 1 = weaken it first, 2 = the Master Ball may be used.
+                    Legendary(StoryRuntime& p_rt, int flags) : rt(p_rt){
                         rt.battle.catch_legendary = true;
-                        rt.battle.weaken_legendary = weaken;
+                        rt.battle.weaken_legendary = (flags & 1) != 0;
+                        rt.battle.legendary_master = (flags & 2) != 0;
                     }
                     ~Legendary(){
                         rt.battle.catch_legendary = false;
                         rt.battle.weaken_legendary = false;
+                        rt.battle.legendary_master = false;
                     }
-                } legendary(rt, step.p2 == 1);
+                } legendary(rt, step.p2 < 0 ? 0 : step.p2);
                 StoryBattleResult result = story_battle(rt, StoryBattleKind::CATCH, label);
                 if (result != StoryBattleResult::CAUGHT){
                     rt.legendary_missed = true;
@@ -565,6 +568,15 @@ void AutoStory::run_segment(
             break;
         case StepType::USE_ITEM:
             story_use_item(rt, step.p0, step.text, label);
+            break;
+        case StepType::FLY:
+            story_fly(rt, step.p1, step.p0, label);
+            break;
+        case StepType::SKIP_IF_FLY:
+            if (story_knows_fly(rt, step.p1)){
+                env.log("FLY known: the next " + std::to_string(step.p0) + " steps (getting HM02) are skipped.", COLOR_BLUE);
+                i += (size_t)std::max(0, (int)step.p0);
+            }
             break;
         case StepType::RESET:{
             //  The Hall of Fame saves the game on its own; then the credits,

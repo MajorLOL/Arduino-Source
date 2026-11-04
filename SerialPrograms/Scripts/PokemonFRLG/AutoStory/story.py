@@ -29,7 +29,7 @@ and plans trainer battles that the route cannot avoid.
 import copy
 
 from frlg_data import DIRS, OPPOSITE
-from engine import Engine, WorldState, fixed_facing, EngineError
+from engine import MapGoals, Engine, WorldState, fixed_facing, EngineError
 
 #  Battle-check windows are in the C++; here we only classify runs.
 RUN_WALK = "WALK"
@@ -214,6 +214,7 @@ class Builder:
         return True
 
     def close_leg(self, leg, out):
+        self.note_visited(leg)
         leg["run"] = self.can_run(leg)
         if leg["runs"] or leg["push"] or leg["face"] or leg["end"] != "STOP":
             self.legs.append(leg)
@@ -528,6 +529,115 @@ class Builder:
             blocked.add((p[1] + dx * k, p[2] + dy * k))
         self.engine.invalidate()
 
+    # ------------------------------------------------------------ fly
+    #  KantoFlyLocation (PokemonFRLG_Navigation.h) in its order: the heal
+    #  location Fly lands on, and the flag that makes it a destination on
+    #  the Fly map (region_map.c, GetMapsecType()).
+    KANTO_FLY = [
+        ("HEAL_LOCATION_PALLET_TOWN", "FLAG_WORLD_MAP_PALLET_TOWN"),
+        ("HEAL_LOCATION_VIRIDIAN_CITY", "FLAG_WORLD_MAP_VIRIDIAN_CITY"),
+        ("HEAL_LOCATION_PEWTER_CITY", "FLAG_WORLD_MAP_PEWTER_CITY"),
+        ("HEAL_LOCATION_ROUTE4", "FLAG_WORLD_MAP_ROUTE4_POKEMON_CENTER_1F"),
+        ("HEAL_LOCATION_CERULEAN_CITY", "FLAG_WORLD_MAP_CERULEAN_CITY"),
+        ("HEAL_LOCATION_VERMILION_CITY", "FLAG_WORLD_MAP_VERMILION_CITY"),
+        ("HEAL_LOCATION_ROUTE10", "FLAG_WORLD_MAP_ROUTE10_POKEMON_CENTER_1F"),
+        ("HEAL_LOCATION_LAVENDER_TOWN", "FLAG_WORLD_MAP_LAVENDER_TOWN"),
+        ("HEAL_LOCATION_CELADON_CITY", "FLAG_WORLD_MAP_CELADON_CITY"),
+        ("HEAL_LOCATION_SAFFRON_CITY", "FLAG_WORLD_MAP_SAFFRON_CITY"),
+        ("HEAL_LOCATION_FUCHSIA_CITY", "FLAG_WORLD_MAP_FUCHSIA_CITY"),
+        ("HEAL_LOCATION_CINNABAR_ISLAND", "FLAG_WORLD_MAP_CINNABAR_ISLAND"),
+        ("HEAL_LOCATION_INDIGO_PLATEAU", "FLAG_WORLD_MAP_INDIGO_PLATEAU_EXTERIOR"),
+    ]
+    #  Opening the Fly map, the flight and the landing: about 22 s, a step
+    #  takes about a quarter of a second.
+    COST_FLY = 90.0
+    #  Fly only when it saves clearly more than that.
+    FLY_MARGIN = 40.0
+    FLY_MAP_TYPES = ("MAP_TYPE_TOWN", "MAP_TYPE_CITY", "MAP_TYPE_ROUTE", "MAP_TYPE_OCEAN_ROUTE")
+    _fly_data = None
+    _worldmap_flags = None
+
+    def fly_data(self):
+        """[(heal location dict, flag)] in KantoFlyLocation order."""
+        if Builder._fly_data is None:
+            import json
+            import os
+            with open(os.path.join(self.d.root, "src/data/heal_locations.json")) as f:
+                hl = {h["id"]: h for h in json.load(f)["heal_locations"]}
+            Builder._fly_data = [(hl[h], flag) for h, flag in Builder.KANTO_FLY]
+        return Builder._fly_data
+
+    def worldmap_flags(self):
+        """map id -> the FLAG_WORLD_MAP_* its scripts set when entered
+        (setworldmapflag, a destination on the Fly map from then on)."""
+        if Builder._worldmap_flags is None:
+            import os
+            import re
+            out = {}
+            for mid, m in self.d.maps.items():
+                p = os.path.join(self.d.root, "data/maps", m.folder, "scripts.inc")
+                if not os.path.exists(p):
+                    continue
+                mm = re.search(r"setworldmapflag\s+(FLAG_WORLD_MAP_\w+)", open(p).read())
+                if mm:
+                    out[mid] = mm.group(1)
+            Builder._worldmap_flags = out
+        return Builder._worldmap_flags
+
+    def note_visited(self, leg):
+        flags = self.worldmap_flags()
+        for mid, _, _ in leg["points"]:
+            f = flags.get(mid)
+            if f is not None:
+                self.state.flags.add(f)
+
+    def fly_destination(self, pc_map_id=None, index=None):
+        """Index (KantoFlyLocation) of the Fly destination for a Pokemon
+        Center, if Fly can go there now."""
+        if not self.state.abilities.get("fly") or "FLAG_BADGE03_GET" not in self.state.flags:
+            return None
+        for i, (h, flag) in enumerate(self.fly_data()):
+            if (index is not None and i == index) or (pc_map_id is not None and h["respawn_map"] == pc_map_id):
+                return i if flag in self.state.flags else None
+        return None
+
+    def route_cost(self, goals):
+        route = self.engine.route(self.node(), goals, start_facing=self.pos[3])
+        if route is None:
+            return None
+        return sum(e["cost"] for e, _ in route)
+
+    def fly(self, index, label, out, goals=None):
+        """Fly to KantoFlyLocation 'index' (out of a building first). With
+        'goals' (where the walk goes on to): only when it saves time.
+        Returns whether it flew."""
+        if self.surfing:
+            return False
+        h, _ = self.fly_data()[index]
+        if self.pos[0] == h["map"]:
+            return False
+        outdoor = [mid for mid, m in self.d.maps.items() if m.map_type in Builder.FLY_MAP_TYPES]
+        here = self.d.maps[self.pos[0]].map_type in Builder.FLY_MAP_TYPES
+        exit_cost = 0.0 if here else self.route_cost(MapGoals(outdoor))
+        if exit_cost is None:
+            return False
+        if goals is not None:
+            walk = self.route_cost(goals)
+            saved = self.pos
+            self.pos = (h["map"], h["x"], h["y"], "down")
+            after = self.route_cost(goals)
+            self.pos = saved
+            if walk is None or after is None or walk <= exit_cost + Builder.COST_FLY + after + Builder.FLY_MARGIN:
+                return False
+        if not here:
+            self.walk_to(MapGoals(outdoor), label + "_Out", out)
+        out.append({"type": "FLY", "label": label + "_Fly", "p0": index, "p1": 1,
+                    "text": h["map"]})
+        self.leave_map(self.pos[0])
+        self.pos = (h["map"], h["x"], h["y"], "down")
+        self.surfing = False
+        return True
+
     def leave_map(self, map_id):
         """Temporary changes of a map end when we leave it (map reload)."""
         self.state.extra_blocked.pop(map_id, None)
@@ -581,6 +691,29 @@ class Builder:
 
     # ------------------------------------------------------------ steps
     def run_step(self, step, out):
+        if "fly" in step:
+            #  Fly there (where the Fly map has it); without Fly, walk.
+            f = step["fly"]
+            index = [h for h, _ in Builder.KANTO_FLY].index(f)
+            fi = self.fly_destination(index=index)
+            if fi is None or not self.fly(fi, step.get("label", "Fly"), out):
+                h, _ = self.fly_data()[index]
+                if self.pos[0] != h["map"]:
+                    self.walk_to({(h["map"], h["x"], h["y"])}, step.get("label", "Fly") + "_Walk", out)
+            return
+        if "unless_fly" in step:
+            #  Steps the program skips when the Fly user knows FLY already
+            #  (a save from before this was in the story). They end where
+            #  they start.
+            sub = []
+            start = self.pos
+            for s in step["unless_fly"]:
+                self.run_step(s, sub)
+            if self.pos[:3] != start[:3]:
+                raise StoryError("unless_fly: the steps end at %s, not %s" % (self.pos, start))
+            out.append({"type": "SKIP_IF_FLY", "label": step.get("label", "Fly known?"), "p0": len(sub), "p1": 1})
+            out.extend(sub)
+            return
         if "only" in step:
             if self.variant in step["only"]["variants"]:
                 for s in step["only"]["steps"]:
@@ -673,6 +806,9 @@ class Builder:
             nx, ny = self.nurse_xy(pc)
             goals_face = self.interact_goals(pc, nx, ny, ["up"], counter=True)
             goals = set(goals_face.keys())
+            fi = self.fly_destination(pc_map_id=pc.id)
+            if fi is not None:
+                self.fly(fi, step.get("label", "To nurse"), out, goals)
             self.walk_to(goals, step.get("label", "To nurse"), out)
             out.append({"type": "HEAL", "label": "Heal at " + pc.name})
             self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")

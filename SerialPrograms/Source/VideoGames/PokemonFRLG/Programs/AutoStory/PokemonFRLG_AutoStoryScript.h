@@ -119,6 +119,9 @@ enum class StepType : uint8_t{
     RESET,              //  The Hall of Fame: A now and then for p0 ms (the game saves on
                         //  its own, the credits, the title screen), then load the save;
                         //  the next step goes on from it
+    FLY,                //  outdoors: Fly from party slot p1 to KantoFlyLocation p0; lands
+                        //  in front of that town's Pokemon Center, facing down
+    SKIP_IF_FLY,        //  the Pokemon in party slot p1 knows FLY: skip the next p0 steps
 };
 
 struct StoryStep{

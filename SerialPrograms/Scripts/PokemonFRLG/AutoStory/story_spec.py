@@ -347,6 +347,27 @@ EEVEE_STONE = {"BULBASAUR": (3, "Thunder Stone"), "SQUIRTLE": (2, "Fire Stone"),
 #  Party slot that learns Cut (Squirtle cannot: its helper in slot 2 does).
 CUT_SLOT = {"BULBASAUR": 1, "SQUIRTLE": 2, "CHARMANDER": 1}
 
+#  Fly (HM02, the house on Route 16): only Charizard in these teams can
+#  learn it, the starter in party slot 1. From then on a trip to a Pokemon
+#  Center flies when that is clearly faster (story.py, Builder.fly), and the
+#  HMs after it in the TM Case move down one.
+FLY_VARIANTS = ["CHARMANDER"]
+
+
+def get_fly(label="Fly"):
+    """HM02 from the woman in the Route 16 house (Route16_House_EventScript_Woman),
+    taught to the starter (party slot 1) in place of its weakest move."""
+    return [talk("MAP_ROUTE16_HOUSE", xy=[4, 2], mode="talk", label=label + "HM02"),
+            cutscene(1500, 30000, "HM02"),
+            setst(flags=["FLAG_GOT_HM02"]),
+            teach(2, 1, "FLY", label="Teach FLY"),
+            setst(abilities={"fly": True})]
+
+
+def fly(heal_location, label=None):
+    """Fly to a town (HEAL_LOCATION_*): where the Fly map has it now; else walk there."""
+    return {"fly": heal_location, "label": label or "Fly"}
+
 
 # ---------------------------------------------------------------- chapter 1
 #  Pokedex -> Viridian Forest -> Pewter City -> Boulder Badge.
@@ -690,6 +711,8 @@ CHAPTER4 = [
             setst(flags=["FLAG_DEFEATED_ERIKA", "FLAG_BADGE04_GET", "FLAG_GOT_TM19_FROM_ERIKA"]),
             heal(PC["CELADON"], "ErikaToCeladonPC"),
             save(),
+            #  Charizard (Lv. 36 for Erika) learns Fly.
+            only(FLY_VARIANTS, get_fly("Route16House") + [save()]),
         ],
     },
 ]
@@ -883,6 +906,7 @@ CHAPTER7 = [
             #  and walks up one tile to him (Route8_WestEntrance_Movement_
             #  WalkToGuardMid): the scene ends at (6, 4) facing up. Only
             #  (1, 5) of the west doorway is the exit (an arrow warp).
+            only(FLY_VARIANTS, [fly("HEAL_LOCATION_LAVENDER_TOWN", "ToLavender")]),
             goto("MAP_ROUTE8_WEST_ENTRANCE", [[6, 5]], "ToSaffronGate", trigger=True),
             cutscene(4000, 40000, "The guard drinks the tea"),
             setst(vars={"VAR_MAP_SCENE_ROUTE5_ROUTE6_ROUTE7_ROUTE8_GATES": 1}),
@@ -932,7 +956,9 @@ CHAPTER7 = [
         "title": "Teach Surf and Strength to Lapras, train for Sabrina",
         "steps": [only([v], [
             #  Lapras (Lv. 25) knows Mist, Body Slam, Confuse Ray, Perish Song.
-            teach(2, LAPRAS_SLOT[v], "SURF", forget=0), teach(3, LAPRAS_SLOT[v], "STRENGTH", forget=3)]) for v in STARTERS]
+            #  (With HM02 Fly in the TM Case the HMs after it move down one.)
+            teach(2 + (v in FLY_VARIANTS), LAPRAS_SLOT[v], "SURF", forget=0),
+            teach(3 + (v in FLY_VARIANTS), LAPRAS_SLOT[v], "STRENGTH", forget=3)]) for v in STARTERS]
         + [setst(abilities={"surf": True, "strength": True})]
         + grind_all("SABRINA", "MAP_ROUTE7", rect(11, 2, 18, 6), PC["CELADON"], "GrindRoute7Sabrina") + [save()],
     },
@@ -977,6 +1003,7 @@ CHAPTER8 = [
         "id": "C8_01_TO_CINNABAR", "chapter": 8,
         "title": "Via Pallet Town, surf Route 21 to Cinnabar Island",
         "steps": [
+            only(FLY_VARIANTS, [fly("HEAL_LOCATION_PALLET_TOWN", "ToPallet")]),
             heal(PC["CINNABAR"], "SaffronToCinnabarPC"),
             save(),
         ],
@@ -1230,10 +1257,11 @@ CHAPTER10 = [
 def legendary(map_id, xy, flags, label, weaken=False):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
-    (the Master Ball too) until it is caught. Not caught (it fainted, the
-    balls ran out): the step fails, and the save before it is tried again.
-    weaken: no Master Ball left; its HP is brought down first (catch rate
-    3: a ball catches it about three times as often in the red)."""
+    (not the Master Ball: that is kept for the roaming legendary) until it
+    is caught. Not caught (it fainted, the balls ran out): the step fails,
+    and the save before it is tried again. weaken: its HP is brought down
+    first (catch rate 3: a ball catches it about three times as often in
+    the red)."""
     return [talk(map_id, xy=xy, mode="talk", label=label),
             {"battle": 60000, "label": label, "legendary": True, "weaken": weaken},
             setst(flags=flags)]
@@ -1250,10 +1278,12 @@ SEAFOAM_HOLES = {
 }
 
 
-#  After the Hall of Fame: the legendary Pokemon. Zapdos gets the Master
-#  Ball; Articuno (Seafoam Islands: boulders stop the current) Ultra Balls,
-#  weakened first. Moltres (Mt. Ember: the boat to the Sevii Islands) is
-#  still to come; Mewtwo needs the whole Sevii Islands story.
+#  After the Hall of Fame: the legendary Pokemon. Zapdos and Articuno
+#  (Seafoam Islands: boulders stop the current) are weakened, then Ultra
+#  Balls; the Master Ball is kept for the roaming legendary (it flees at
+#  once; it only starts roaming after the Sapphire is given to Celio, the end
+#  of the Sevii Islands story). Moltres (Mt. Ember: the boat to the Sevii
+#  Islands) is still to come; Mewtwo needs the whole Sevii Islands story.
 CHAPTER11 = [
     {
         "id": "C11_01_MASTER_BALL", "chapter": 11,
@@ -1266,6 +1296,11 @@ CHAPTER11 = [
             pos("MAP_PALLET_TOWN", 6, 8, "down"),
             cutscene(3000, 90000, "Oak checks the Pokedex"),
             setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 3}),
+            #  A save from a build before Fly was in the story: HM02 now (the
+            #  program skips this when the starter knows FLY), then back here.
+            only(FLY_VARIANTS, [{"unless_fly": get_fly("PostgameRoute16House") + [
+                fly("HEAL_LOCATION_PALLET_TOWN", "BackToPallet")], "label": "Knows FLY?"}]),
+            fly("HEAL_LOCATION_SAFFRON_CITY", "ToSaffron"),
             #  SilphCo_11F_EventScript_President: the Master Ball, any time after Giovanni.
             talk("MAP_SILPH_CO_11F", xy=[9, 9], mode="talk", label="SilphPresident"),
             cutscene(1000, 30000, "Master Ball"),
@@ -1276,11 +1311,16 @@ CHAPTER11 = [
     },
     {
         "id": "C11_02_ZAPDOS", "chapter": 11,
-        "title": "Zapdos in the Power Plant (Master Ball)",
+        "title": "Zapdos in the Power Plant (Ultra Balls; the Master Ball is kept for the roaming legendary)",
         "steps": [
-            heal(PC["ROUTE10"], "SaffronToRoute10PC"),
+            #  Ultra Balls in Fuchsia City, as many as the money allows
+            #  (quantity 0): for Zapdos, what is left for Articuno.
+            heal(PC["FUCHSIA"], "SaffronToFuchsiaPC"),
+        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            heal(PC["ROUTE10"], "FuchsiaToRoute10PC"),
             save(),
-        ] + legendary("MAP_POWER_PLANT", [5, 11], ["FLAG_FOUGHT_ZAPDOS", "FLAG_HIDE_ZAPDOS"], "Zapdos") + [
+        ] + legendary("MAP_POWER_PLANT", [5, 11], ["FLAG_FOUGHT_ZAPDOS", "FLAG_HIDE_ZAPDOS"], "Zapdos",
+                      weaken=True) + [
             heal(PC["ROUTE10"], "PowerPlantToRoute10PC"),
             save(),
         ],
@@ -1296,10 +1336,9 @@ CHAPTER11.append({
         "tiles": {mid: {"%d,%d" % (x, y): {"collision": 1} for x, y in holes} for mid, holes in SEAFOAM_HOLES.items()},
     },
     "steps": [
-        #  Fuchsia City: Route 19 and 20 by Surf to the east entrance.
+        #  Fuchsia City: Route 19 and 20 by Surf to the east entrance. The
+        #  Ultra Balls were bought before Zapdos.
         heal(PC["FUCHSIA"], "Route10ToFuchsiaPC"),
-    #  Ultra Balls, as many as the money allows (quantity 0).
-    ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
         save(),
         #  B3F: boulders 3 and 5 into the holes. Each comes down on B4F in
         #  front of the current there (the flag in its trainer_type field,

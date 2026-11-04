@@ -18,6 +18,7 @@
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/Map/PokemonFRLG_MapDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_BagDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_SummaryDetector.h"
@@ -43,6 +44,11 @@ const ImageFloatBox PARTY_MESSAGE_BOX(0.040, 0.755, 0.920, 0.190);
 //  Item description in the bag. Window 1 of sDefaultBagWindowsStd:
 //  tiles (5,14) 25x6.
 const ImageFloatBox BAG_DESCRIPTION_BOX(0.170, 0.705, 0.810, 0.280);
+
+//  Party menu, the actions of a Pokemon: with the cursor on a field move its
+//  description shows ("Fly to a known town."). sFieldMoveDescriptionWindowTemplate:
+//  tiles (0,13) 18x3.
+const ImageFloatBox FIELD_MOVE_DESCRIPTION_BOX(0.010, 0.660, 0.580, 0.130);
 
 
 DpadPosition opposite(DpadPosition direction){
@@ -107,6 +113,66 @@ int forget_for_hm(const StoryRuntime& rt){
         }
     }
     return worst < 0 ? 0 : worst;
+}
+
+
+//  The summary's move list (choosing a move to forget): the name of move
+//  "i" (0-3). POKESUM_WIN_RIGHT_PANE of the moves page: tiles (20,2) 10x18,
+//  names at x 3, y 28 i + 5 (PokeSum_PrintMoveName).
+ImageFloatBox summary_move_box(int i){
+    return ImageFloatBox(0.675, (19.0 + 28.0 * i) / 160.0, 0.310, 0.100);
+}
+
+//  The move whose name (the longest one) is in "text". -1: none.
+int move_in_text(const std::string& text){
+    std::string squeezed;
+    for (char c : text){
+        if (c != ' '){
+            squeezed += (char)std::tolower((unsigned char)c);
+        }
+    }
+    int best = -1;
+    size_t best_length = 0;
+    const std::vector<AutoStoryDex::MoveInfo>& moves = AutoStoryDex::moves();
+    for (size_t i = 0; i < moves.size(); i++){
+        std::string name;
+        for (const char* c = moves[i].name; *c; c++){
+            if (*c != ' '){
+                name += (char)std::tolower((unsigned char)*c);
+            }
+        }
+        if (name.size() >= 3 && name.size() > best_length && squeezed.find(name) != std::string::npos){
+            best = (int)i;
+            best_length = name.size();
+        }
+    }
+    return best;
+}
+
+//  On the summary's move list: the weakest of the 4 moves that is not an
+//  HM, by the names on the screen. -1: not all read.
+int weakest_move_on_summary(StoryRuntime& rt){
+    int worst = -1;
+    double worst_value = 1e9;
+    for (int i = 0; i < 4; i++){
+        const std::string text = read_story_text(rt.console, summary_move_box(i), false);
+        const int move = move_in_text(text);
+        rt.console.log("Move " + std::to_string(i + 1) + ": " + text +
+                       (move < 0 ? std::string(" (not known)") : " = " + std::string(AutoStoryDex::moves()[(size_t)move].name)));
+        if (move < 0){
+            return -1;
+        }
+        rt.memory.moves[i] = move;
+        if (AutoStoryDex::moves()[(size_t)move].hm){
+            continue;
+        }
+        const double value = move_value(move, rt.battle);
+        if (value < worst_value){
+            worst_value = value;
+            worst = i;
+        }
+    }
+    return worst;
 }
 
 
@@ -411,6 +477,92 @@ void story_fix_party_order(StoryRuntime& rt, bool force){
     }
 }
 
+//  In the overworld: the party menu, the actions of "party_slot", the cursor
+//  down the field moves until the one described as Fly. True: the cursor is
+//  on FLY. False: not found, back in the overworld.
+static bool open_fly_action(StoryRuntime& rt, int party_slot){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    open_party_menu_from_overworld(console, context);
+    dpad(context, DPAD_LEFT, 500ms);
+    for (int i = 1; i < party_slot; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    //  A: the actions, cursor on SUMMARY; the field moves come next, in
+    //  the order of the moves (SetPartyMonFieldSelectionActions).
+    press(context, BUTTON_A, 1000ms);
+    for (int i = 0; i < 4; i++){
+        dpad(context, DPAD_DOWN, 600ms);
+        context.wait_for_all_requests();
+        std::string text = read_story_text(console, FIELD_MOVE_DESCRIPTION_BOX, false);
+        if (text.size() < 6){
+            text += " " + read_story_text(console, FIELD_MOVE_DESCRIPTION_BOX, true);
+        }
+        console.log("Field move " + std::to_string(i + 1) + ": " + text);
+        if (contains(text, "fly") || contains(text, "known town")){
+            return true;
+        }
+    }
+    pbf_mash_button(context, BUTTON_B, 2500ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "party menu");
+    return false;
+}
+
+bool story_knows_fly(StoryRuntime& rt, int party_slot){
+    StoryMemoryScope memory_scope("fly");
+    rt.console.log("Does party slot " + std::to_string(party_slot) + " know FLY?");
+    for (int attempt = 0; attempt < 2; attempt++){
+        if (open_fly_action(rt, party_slot)){
+            pbf_mash_button(rt.context, BUTTON_B, 2500ms);
+            rt.context.wait_for_all_requests();
+            story_back_to_overworld(rt, "party menu");
+            rt.console.log("It knows FLY.", COLOR_BLUE);
+            return true;
+        }
+    }
+    rt.console.log("It does not know FLY.", COLOR_BLUE);
+    return false;
+}
+
+void story_fly(StoryRuntime& rt, int party_slot, int destination, const std::string& what){
+    StoryMemoryScope memory_scope("fly");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Flying: " + what);
+    story_fix_party_order(rt, false);
+    for (int attempt = 0; attempt < 3; attempt++){
+        if (!open_fly_action(rt, party_slot)){
+            continue;
+        }
+        KantoMapWatcher map(COLOR_RED);
+        context.wait_for_all_requests();
+        pbf_press_button(context, BUTTON_A, 200ms, 0ms);
+        if (wait_until(console, context, 10000ms, { map }) != 0){
+            console.log("The Fly map did not open.", COLOR_ORANGE);
+            pbf_mash_button(context, BUTTON_B, 4000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "Fly map");
+            continue;
+        }
+        pbf_wait(context, 1000ms);
+        context.wait_for_all_requests();
+        //  The cursor to the town (from the top left corner), A until the
+        //  screen goes black, then the flight and the landing.
+        fly_from_kanto_map(console, context, (KantoFlyLocation)destination);
+        rt.facing = DPAD_DOWN;      //  FlyInFieldEffect_End: DIR_SOUTH.
+        rt.arrived_by_warp = true;
+        console.log("Landed: " + what, COLOR_BLUE);
+        return;
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "story_fly(): FLY not found in the actions of party slot " + std::to_string(party_slot) +
+        ", or the Fly map did not open: " + what,
+        console
+    );
+}
+
 void story_swap_party(StoryRuntime& rt, int a, int b){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -507,10 +659,6 @@ void story_teach_hm(
     int new_move = find_move(move);
     if (contains(text, "four") || contains(text, "delete") || contains(text, "replace") || contains(text, "wants")){
         int slot = forget_slot;
-        if (slot < 0){
-            slot = forget_for_hm(rt);
-        }
-        console.log("Replacing move " + std::to_string(slot + 1) + " with " + move + ".");
         //  "... wants to learn the move X." / "However, ... already knows
         //  four moves." / "Should a move be deleted and replaced with X?"
         std::string question = wait_party_message(rt, {"should", "deleted", "replaced with"}, 5, true);
@@ -522,6 +670,16 @@ void story_teach_hm(
         //  "Which move should be forgotten?" waits for a press, then the
         //  summary opens on the move list (cursor on move 1).
         press(context, BUTTON_A, 3500ms);
+        context.wait_for_all_requests();
+        if (slot < 0 && party_slot == 1){
+            //  The lead's moves as the screen shows them (the ones last seen
+            //  in a battle may be another team member's).
+            slot = weakest_move_on_summary(rt);
+        }
+        if (slot < 0){
+            slot = forget_for_hm(rt);
+        }
+        console.log("Replacing move " + std::to_string(slot + 1) + " with " + move + ".");
         for (int i = 0; i < slot; i++){
             dpad(context, DPAD_DOWN, 500ms);
         }

@@ -1461,7 +1461,7 @@ StoryBattleResult run_story_battle(
                     }
                     break;
                 }else{
-                    switch (throw_best_ball(console, context, legendary)){
+                    switch (throw_best_ball(console, context, legendary && settings.legendary_master)){
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;

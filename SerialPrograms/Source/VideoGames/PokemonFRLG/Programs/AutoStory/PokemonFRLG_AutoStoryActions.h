@@ -70,6 +70,13 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
 //  were used.
 int story_use_rare_candies(StoryRuntime& rt, int count);
 
+//  Party slot "party_slot" knows FLY (looked up in its party menu actions).
+bool story_knows_fly(StoryRuntime& rt, int party_slot);
+
+//  Outdoors: Fly with the Pokemon in "party_slot" to "destination"
+//  (KantoFlyLocation). Lands in front of that town's Pokemon Center.
+void story_fly(StoryRuntime& rt, int party_slot, int destination, const std::string& what);
+
 //  Facing an elevator panel: pick a floor. "from" is where the cursor
 //  starts (the current floor), "to" the floor to pick.
 void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what);

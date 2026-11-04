@@ -532,6 +532,16 @@ class MapView:
         return tuple(t)
 
 
+class MapGoals:
+    """Route goal: any tile of these maps (the first one reached)."""
+
+    def __init__(self, maps):
+        self.maps = set(maps)
+
+    def __contains__(self, t):
+        return t[0] in self.maps
+
+
 #  ----------------------------------------------------------------- engine
 class Engine:
     def __init__(self, decomp, gamedata, state):
@@ -885,7 +895,8 @@ class Engine:
         goals may also contain (map,x,y,"surf") for goals that need surfing.
         Returns a list of (edge, node_after).
         """
-        goal_set = set((g[0], g[1], g[2]) for g in goals)
+        #  A goal test of its own (MapGoals: any tile of some maps), or a set.
+        goal_set = goals if isinstance(goals, MapGoals) else set((g[0], g[1], g[2]) for g in goals)
         start_state = (start, start_facing)
         dist = {start_state: 0.0}
         prev = {}

@@ -148,9 +148,12 @@ struct StoryBattleSettings{
     //  false: only noticed (no room for it in the party yet).
     const StoryShinyWatch* shiny_watch = nullptr;
     bool shiny_catch = true;
-    //  A legendary Pokemon: caught with the best ball in the bag, the Master
-    //  Ball too (a shiny does not get that one), until the balls run out.
+    //  A legendary Pokemon: caught with the best ball in the bag until the
+    //  balls run out. The Master Ball only with "legendary_master" (a shiny
+    //  never gets it): it is kept for the roaming legendary, which flees at
+    //  once.
     bool catch_legendary = false;
+    bool legendary_master = false;
     //  No Master Ball for it: its HP is brought down first with the weakest
     //  move, as long as one more hit surely leaves it some (watched on its
     //  HP bar). Catch rate 3: at full HP an ULTRA BALL catches it about 0.8%
