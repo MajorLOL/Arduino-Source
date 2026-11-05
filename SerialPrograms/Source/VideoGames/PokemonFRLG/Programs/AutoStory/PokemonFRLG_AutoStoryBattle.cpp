@@ -1308,6 +1308,8 @@ StoryBattleResult run_story_battle(
     //  Turns with only a white text box seen, one after the other.
     int white_in_row = 0;
     bool white_last = false;
+    //  The POKeDEX page seen again and again after it was closed.
+    int dex_page_in_row = 0;
     WallClock deadline = current_time() + 20min;
     WallClock last_activity = current_time();
 
@@ -1374,6 +1376,9 @@ StoryBattleResult run_story_battle(
         }
         const bool white_before = white_last;
         white_last = false;
+        if (ret != 4){
+            dex_page_in_row = 0;
+        }
         if (ret == 0 || ret == 1 || ret == 2){
             battle_confirmed = true;
         }
@@ -1887,6 +1892,19 @@ StoryBattleResult run_story_battle(
         case 4:
             //  The POKeDEX page of the caught species: B closes it.
             last_activity = current_time();
+            if (memory.dex_registered && ++dex_page_in_row >= 3 && in_overworld(console, context)){
+                //  Pokemon Tower 7F after a HAUNTER went to the PC: the
+                //  floor looked like the POKeDEX page, and B went on for
+                //  19 minutes until the 20-minute limit.
+                if (lost){
+                    return StoryBattleResult::LOST;
+                }
+                if (!seen_battle){
+                    return StoryBattleResult::NO_BATTLE;
+                }
+                console.log("Battle over: the POKeDEX page was only the look of the place.");
+                return over();
+            }
             if (!memory.dex_registered){
                 console.log("A new species in the POKeDEX.", COLOR_BLUE);
             }
