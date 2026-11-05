@@ -917,6 +917,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 failed_step = (size_t)-1;
                 continue;
             }
+            const bool whited_out = rt.whited_out;
             rt.whited_out = false;
             //  Retries count in a row from the same save: once a later save
             //  was reached (an Elite Four room won), counting starts over.
@@ -926,12 +927,19 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 failed_segment = resume_segment;
                 failed_step = resume_step;
             }
-            if (rt.legendary_missed){
+            //  The League again for prize money (C13, C15): a loss costs no
+            //  money when the save in front of the room is loaded again, and
+            //  the next try goes another way (the Champion was won at the
+            //  4th try, and lost 4 times in a row the next time).
+            const bool league_again = whited_out &&
+                (id.rfind("C13_", 0) == 0 || id.rfind("C15_", 0) == 0) &&
+                (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos);
+            if (rt.legendary_missed || league_again){
                 //  Without the Master Ball a legendary Pokemon takes a few
                 //  tries (the save is right in front of it).
                 rt.legendary_missed = false;
                 legendary_misses++;
-                if (legendary_misses > std::max<uint16_t>(RETRIES, 25)){
+                if (legendary_misses > std::max<uint16_t>(RETRIES, league_again ? 20 : 25)){
                     throw;
                 }
                 env.log("Try " + std::to_string(legendary_misses + 1) + " at " + segment_name(segment) + ".", COLOR_BLUE);
