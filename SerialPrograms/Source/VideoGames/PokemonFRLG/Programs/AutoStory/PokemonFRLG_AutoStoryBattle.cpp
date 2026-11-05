@@ -1305,6 +1305,9 @@ StoryBattleResult run_story_battle(
     //  on the S.S. Anne, for a text box.)
     bool battle_confirmed = false;
     int text_only_in_row = 0;   //  turns with only a text box (no arrow) seen
+    //  Turns with only a white text box seen, one after the other.
+    int white_in_row = 0;
+    bool white_last = false;
     WallClock deadline = current_time() + 20min;
     WallClock last_activity = current_time();
 
@@ -1369,6 +1372,8 @@ StoryBattleResult run_story_battle(
             text_only_in_row = 0;
             pressed_blind = false;
         }
+        const bool white_before = white_last;
+        white_last = false;
         if (ret == 0 || ret == 1 || ret == 2){
             battle_confirmed = true;
         }
@@ -2001,6 +2006,21 @@ StoryBattleResult run_story_battle(
                         return StoryBattleResult::LOST;
                     }
                     console.log("Battle over: the scene after it has begun.");
+                    return over();
+                }
+                //  Again and again: some places look like a text box all the
+                //  time (Pokemon Tower 7F after a HAUNTER was caught: B for
+                //  14 minutes). Look whether the player is free to move.
+                white_last = true;
+                white_in_row = white_before ? white_in_row + 1 : 1;
+                if (white_in_row % 4 == 0 && in_overworld(console, context)){
+                    if (lost){
+                        return StoryBattleResult::LOST;
+                    }
+                    if (!seen_battle){
+                        return StoryBattleResult::NO_BATTLE;
+                    }
+                    console.log("Battle over: only the look of a text box was left.");
                     return over();
                 }
                 //  The text goes on: that is something happening.

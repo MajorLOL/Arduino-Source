@@ -1418,7 +1418,20 @@ public:
                 " tiles from the first grass tile, off the line. A step " + direction_word(toward) + " back toward it.",
                 COLOR_ORANGE
             );
-            story_checked_step(m_rt, toward, false, false, m_kind, m_where);
+            bool moved = true;
+            story_checked_step(m_rt, toward, false, false, m_kind, m_where, true, &moved);
+            if (!moved){
+                //  In the way: the video took the player for somewhere
+                //  else (Pokemon Tower 7F, a floor that looks the same
+                //  everywhere: "-1, -2 tiles", and the step right ran into
+                //  the wall six times).
+                m_rt.console.log(
+                    m_where + ": the step " + direction_word(toward) +
+                    " does not happen, so the player is not where the video says. Going by the count.",
+                    COLOR_ORANGE
+                );
+                return false;
+            }
         }
         m_rt.console.log(m_where + ": could not get back onto the grass line. Going on.", COLOR_RED);
         return false;
