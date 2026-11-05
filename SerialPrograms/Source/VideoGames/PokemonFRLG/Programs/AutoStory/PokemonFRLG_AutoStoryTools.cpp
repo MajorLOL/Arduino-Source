@@ -1011,11 +1011,64 @@ int walk_around(
     return 0;
 }
 
+//  The run before stopped by a battle where the video could not tell how far
+//  it got, and this one does not move from its first tile: the player is
+//  likely one tile off along the run before (Pokemon Tower 6F, in the fog:
+//  "2 of 5" counted when a GASTLY came, one more taken after it, and the run
+//  down hit a grave). A step back along it, or one more, and this run's way:
+//  the one that moves puts the player back on the route. Returns whether it
+//  did (one move of this run made).
+bool step_back_onto_route(StoryRuntime& rt, DpadPosition direction){
+    const DpadPosition before = rt.last_run_direction;
+    auto went = [](const RunAttempt& a){
+        return a.event == RunEvent::NONE && !a.lost && a.moves == 1;
+    };
+    for (DpadPosition way : {opposite(before), before}){
+        RunAttempt aside = attempt_moves(rt, way, 1, WALK_FRAMES, 1, false, false, true);
+        if (!went(aside)){
+            if (aside.event != RunEvent::NONE || aside.lost){
+                return false;
+            }
+            continue;
+        }
+        RunAttempt on = attempt_moves(rt, direction, 1, WALK_FRAMES, 1, false, false, true);
+        if (went(on)){
+            rt.console.log(
+                std::string("The run before was one tile off: one step ") + dpad_name(way) +
+                ", and now " + dpad_name(direction) + " goes.",
+                COLOR_ORANGE
+            );
+            rt.steps++;
+            return true;
+        }
+        if (on.event != RunEvent::NONE || on.lost){
+            return false;
+        }
+        attempt_moves(rt, opposite(way), 1, WALK_FRAMES, 1, false, false, true);
+    }
+    return false;
+}
+
 bool walk_run(
     StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, uint16_t count,
     bool track, bool scene_at_end, bool warp_at_end, const std::string& where,
     DpadPosition next_direction, uint16_t& next_reduce
 ){
+    //  For the next run: this one, and whether a battle stopped it where
+    //  the video could not tell how far it got.
+    const bool unsure_before = rt.last_run_unsure;
+    const DpadPosition direction_before = rt.last_run_direction;
+    bool unsure_stop = false;
+    struct LastRun{
+        StoryRuntime& rt;
+        DpadPosition direction;
+        bool& unsure;
+        ~LastRun(){
+            rt.last_run_direction = direction;
+            rt.last_run_unsure = unsure;
+        }
+    } last_run{rt, run.direction, unsure_stop};
+    bool stepped_back = false;
     const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
     const double frames = run.kind == RunKind::JUMP ? JUMP_FRAMES : (surf ? SURF_FRAMES : WALK_FRAMES);
     const int tiles_per_move = run.kind == RunKind::JUMP ? 2 : 1;
@@ -1216,6 +1269,9 @@ bool walk_run(
         //  Something stopped the run. The video saw up to that moment, but
         //  the step under way then was still finished. Now that the player
         //  stands still again, compare with the screen before the run.
+        if (a.event != RunEvent::NONE && !a.measured){
+            unsure_stop = true;
+        }
         if (a.event != RunEvent::NONE && a.has_start && !leg.dark){
             const int dx = run.direction == DPAD_LEFT ? -1 : (run.direction == DPAD_RIGHT ? 1 : 0);
             const int dy = run.direction == DPAD_UP ? -1 : (run.direction == DPAD_DOWN ? 1 : 0);
@@ -1225,6 +1281,9 @@ bool walk_run(
                 AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset_along(a.start, now, dx, dy, reach);
                 rt.console.log("After the stop, the run got: " + offset.summary());
                 const int tiles = offset.x * dx + offset.y * dy;
+                if (offset.clear){
+                    unsure_stop = false;
+                }
                 if (offset.clear && tiles >= 0 && tiles % tiles_per_move == 0 && tiles / tiles_per_move <= moves){
                     const int real = tiles / tiles_per_move;
                     if (real != made){
@@ -1295,6 +1354,20 @@ bool walk_run(
                 continue;
             }
             not_moving++;
+            if (!stepped_back && not_moving >= 2 && remaining == count && unsure_before &&
+                direction_before != DPAD_NONE && direction_before != run.direction &&
+                direction_before != opposite(run.direction) &&
+                track && !leg.dark && !surf && run.kind != RunKind::JUMP
+            ){
+                stepped_back = true;
+                if (step_back_onto_route(rt, run.direction)){
+                    remaining--;
+                    rt.steps++;
+                    not_moving = 0;
+                    no_progress = 0;
+                    continue;
+                }
+            }
             if (!walked_around && not_moving >= 2 &&
                 rt.trainer_battles + rt.wild_battles > battles_at_start &&
                 track && !leg.dark && !surf && run.kind != RunKind::JUMP
@@ -1388,6 +1461,8 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     rt.trainer_battles_before_leg = rt.trainer_battles;
 
     rt.trainer_came = false;
+    rt.last_run_direction = DPAD_NONE;
+    rt.last_run_unsure = false;
     uint16_t approach_total = 0;
     for (const StoryRun& run : runs){
         if (run.kind == RunKind::APPROACH){

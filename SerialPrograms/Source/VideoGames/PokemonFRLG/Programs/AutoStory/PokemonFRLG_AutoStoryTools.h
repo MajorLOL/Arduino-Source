@@ -83,6 +83,11 @@ struct StoryRuntime{
     //  Moves of the APPROACH runs: in the leg, and really made.
     uint16_t approach_total = 0;
     uint16_t approach_made = 0;
+    //  The last run walked in this leg, and whether a battle stopped it
+    //  while the video could not tell how far it got (the fog on Pokemon
+    //  Tower 6F and 7F): it may be one tile off.
+    DpadPosition last_run_direction = DPAD_NONE;
+    bool last_run_unsure = false;
 
     //  The team for the Elite Four (party slot order), by starter. Copied
     //  into "battle.team" for the battles the whole team fights.
