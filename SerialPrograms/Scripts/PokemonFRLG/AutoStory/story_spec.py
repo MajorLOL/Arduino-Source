@@ -1516,9 +1516,10 @@ CHAPTER12 = [
             save(),
         ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
                       weaken=True) + [
-            #  Caught: saved and loaded again, so the boulders stand where
-            #  the map has them (also after tries that loaded the save in
-            #  front of Moltres), then pushed out of the way down.
+            #  Caught: saved and loaded again, so Strength is off whether it
+            #  took one try or several. The boulders stay where they were
+            #  pushed on the way up (loading a save keeps them there): the
+            #  way down is through them again.
             save(),
             {"reload": True, "label": "Reload after Moltres"},
             {"boulder": {"open_to": [[9, 14]]}, "label": "SummitBouldersBack"},

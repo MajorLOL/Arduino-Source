@@ -881,13 +881,14 @@ class Builder:
             out.append({"type": "RESET", "label": step.get("label", "Hall of Fame"), "p0": step["hall_of_fame"]})
             return
         if "reload" in step:
-            #  Load the save just made: the map loads again, so what was
-            #  pushed or smashed on it is back where the map has it, the same
-            #  whether the step before needed one try or several.
+            #  Load the save just made, the same whether the step before
+            #  needed one try (Strength still on) or several (loaded again).
+            #  Loading a save ends Strength (Overworld_ResetStateOnContinue),
+            #  but the map's objects come back where the save has them
+            #  (SpawnObjectEventsOnReturnToField): pushed boulders stay
+            #  pushed, smashed rocks smashed (their temporary flags are only
+            #  cleared by a warp).
             out.append({"type": "RESET", "label": step.get("label", "Reload"), "p0": 0})
-            mid = self.pos[0]
-            self.state.object_overrides.pop(mid, None)
-            self.leave_map(mid)
             self.strength_used = None
             return
         if "rival1" in step:
