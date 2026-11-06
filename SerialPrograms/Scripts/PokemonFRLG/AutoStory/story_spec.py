@@ -1286,7 +1286,8 @@ SEAFOAM_HOLES = {
 #  Balls; the Master Ball is kept for the roaming legendary (it flees at
 #  once; it only starts roaming after the Sapphire is given to Celio, the end
 #  of the Sevii Islands story). Moltres (Mt. Ember: the boat to the Sevii
-#  Islands) is still to come; Mewtwo needs the whole Sevii Islands story.
+#  Islands) comes in chapter 12; Mewtwo needs the whole Sevii Islands story
+#  (chapter 19).
 CHAPTER11 = [
     {
         "id": "C11_01_MASTER_BALL", "chapter": 11,
@@ -1886,6 +1887,22 @@ CHAPTER15 = [
             save(),
         ],
     },
+    {
+        "id": "C15_04_EXP_SHARE", "chapter": 15,
+        "title": "The EXP. SHARE from Oak's aide on Route 15 (50 species caught)",
+        #  Route15_WestEntrance_2F_EventScript_Aide: "...if you've caught at
+        #  least 50 kinds of POKeMON" (YES/NO), GetPokedexCount, then the
+        #  EXP. SHARE (FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE). It stays in the bag.
+        "steps": [
+            heal(PC["FUCHSIA"], "LabToFuchsiaPC"),
+            save(),
+            talk("MAP_ROUTE15_WEST_ENTRANCE_2F", xy=[5, 5], mode="talk", label="OaksAideExpShare"),
+            cutscene(3000, 60000, "The EXP. SHARE", answer="yes"),
+            setst(flags=["FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE"]),
+            heal(PC["FUCHSIA"], "Route15ToFuchsiaPC"),
+            save(),
+        ],
+    },
 ]
 
 # ---------------------------------------------------------------- chapter 16
@@ -2128,6 +2145,31 @@ CHAPTER18 = [
     },
 ]
 
+# ---------------------------------------------------------------- chapter 19
+#  Mewtwo. Cerulean Cave opens when Celio has the Sapphire (C17_05:
+#  FLAG_HIDE_CERULEAN_CAVE_GUARD). Level 70, catch rate 3, the Master Ball
+#  went to Suicune: weakened, then Ultra Balls (Fuchsia City, as many as the
+#  money allows); not caught, or the team fainted: the save in front of it
+#  again (CeruleanCave_B1F_EventScript_Mewtwo).
+CHAPTER19 = [
+    {
+        "id": "C19_01_MEWTWO", "chapter": 19,
+        "title": "Mewtwo in Cerulean Cave (weakened, Ultra Balls)",
+        "steps": [
+            heal(PC["FUCHSIA"], "ToFuchsiaPC"),
+        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            heal(PC["CERULEAN"], "FuchsiaToCeruleanPC"),
+            save(),
+            goto("MAP_CERULEAN_CAVE_B1F", [[7, 13]], "ToMewtwo"),
+            save(),
+        ] + legendary("MAP_CERULEAN_CAVE_B1F", [7, 12], ["FLAG_FOUGHT_MEWTWO", "FLAG_HIDE_MEWTWO"], "Mewtwo",
+                      weaken=True) + [
+            heal(PC["CERULEAN"], "CaveToCeruleanPC"),
+            save(),
+        ],
+    },
+]
+
 
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
@@ -2147,7 +2189,8 @@ def fly_only(segments):
 
 
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
-            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12 + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15 + CHAPTER16 + CHAPTER17 + CHAPTER18))
+            + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12
+            + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15 + CHAPTER16 + CHAPTER17 + CHAPTER18 + CHAPTER19))
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),
