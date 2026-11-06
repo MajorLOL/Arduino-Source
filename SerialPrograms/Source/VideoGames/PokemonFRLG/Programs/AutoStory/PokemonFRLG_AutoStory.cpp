@@ -21,6 +21,8 @@
 #include <cctype>
 #include <string>
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/Filesystem/FileIO.h"
+#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
@@ -735,6 +737,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     //  The start options follow the saves: the next run goes on from the
     //  last save without setting them by hand.
+    //  The settings file is written only when the program window closes,
+    //  so the list goes to a file of its own at each save too (in
+    //  UserSettings, next to PA-Stats).
+    const std::string caught_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Caught.txt";
     rt.on_saved = [&](const std::string& segment_id, size_t step){
         {
             std::string list;
@@ -742,6 +748,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 list += (list.empty() ? "" : ",") + slug;
             }
             DEX_CAUGHT.set(list);
+            try{
+                string_to_file(caught_file, list + "\n");
+            }catch (...){
+                env.log("Could not write " + caught_file + ".", COLOR_ORANGE);
+            }
         }
         for (size_t i = 0; i < script.segment_count; i++){
             if (segment_id == script.segments[i].id){
@@ -780,7 +791,22 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     //  ... and those for the POKeDEX, as the last run left them.
     if (dex_before){
-        const std::string known = DEX_CAUGHT;
+        std::string known = DEX_CAUGHT;
+        if (known.empty()){
+            //  The settings file was not written (the window was not
+            //  closed), or is from before: the list of the last save.
+            std::string from_file;
+            if (file_to_string(caught_file, from_file)){
+                while (!from_file.empty() && std::isspace((unsigned char)from_file.back())){
+                    from_file.pop_back();
+                }
+                if (!from_file.empty()){
+                    known = from_file;
+                    DEX_CAUGHT.set(known);
+                    env.log("\"Caught by the program\" from " + caught_file + ".", COLOR_BLUE);
+                }
+            }
+        }
         if (known.empty()){
             //  A new build in a new folder starts without the UserSettings
             //  of the last one: the catches of the runs before are not
