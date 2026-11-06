@@ -173,6 +173,9 @@ struct StoryBattleSettings{
     //  The others are run from (StoryBattleKind::CATCH).
     std::set<std::string> dex_species;
     int dex_max_throws = 20;
+    //  All species of the DEX step, caught or not as the program knows: the
+    //  game's ball mark decides for those met (StoryBattleMemory::foe_mark).
+    std::set<std::string> dex_all;
 
     //  The roaming legendary (StepType::ROAM): met, it gets the MASTER BALL
     //  at once (it flees on its first turn; a ball goes before any move).
@@ -248,6 +251,14 @@ struct StoryBattleMemory{
     bool dex_registered = false;
     bool safari_over = false;
     bool no_balls = false;
+    //  The ball mark of the foe's box in the last (wild) battle: the game
+    //  shows it for a species caught before. 1: there, 0: not there, -1:
+    //  not seen (a trainer battle, the box not found). A species the
+    //  program wanted that had the mark (not caught again), and one it had
+    //  as caught that had none (caught for the POKeDEX).
+    int foe_mark = -1;
+    std::string owned_by_mark;
+    std::string dex_by_mark;
     //  SAFARI BALLs thrown in the last battle.
     int safari_balls = 0;
     //  Shared experience: the moves of the member that stayed out, and the

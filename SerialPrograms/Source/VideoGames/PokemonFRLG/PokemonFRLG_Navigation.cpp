@@ -98,7 +98,10 @@ void home_black_border_check(ConsoleHandle& console, ProControllerContext& conte
 
 
 
-bool try_soft_reset(ConsoleHandle& console, ProControllerContext& context){
+bool try_soft_reset(
+    ConsoleHandle& console, ProControllerContext& context,
+    const std::function<void(ConsoleHandle& console, ProControllerContext& context)>& on_load_menu
+){
     // A + B + Select + Start
     pbf_press_button(context, BUTTON_B | BUTTON_A | BUTTON_MINUS | BUTTON_PLUS, 360ms, 1440ms);
 
@@ -137,6 +140,10 @@ bool try_soft_reset(ConsoleHandle& console, ProControllerContext& context){
     pbf_wait(context, 500ms);
     context.wait_for_all_requests();
 
+    if (on_load_menu){
+        on_load_menu(console, context);
+    }
+
     //Load game
     pbf_press_button(context, BUTTON_A, 160ms, 320ms);
 
@@ -167,10 +174,13 @@ bool try_soft_reset(ConsoleHandle& console, ProControllerContext& context){
     return true;
 }
 
-uint64_t soft_reset(ConsoleHandle& console, ProControllerContext& context){
+uint64_t soft_reset(
+    ConsoleHandle& console, ProControllerContext& context,
+    const std::function<void(ConsoleHandle& console, ProControllerContext& context)>& on_load_menu
+){
     uint64_t errors = 0;
     for (; errors < 5; errors++){
-        if (try_soft_reset(console, context)){
+        if (try_soft_reset(console, context, on_load_menu)){
             console.log("Soft reset completed.");
             return errors;
         }

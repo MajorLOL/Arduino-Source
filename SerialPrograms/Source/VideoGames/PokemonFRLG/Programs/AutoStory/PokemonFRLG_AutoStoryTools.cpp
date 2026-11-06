@@ -602,14 +602,25 @@ StoryBattleResult story_battle(
             rt.console.log("The shiny " + name + " was not caught. Going on.", COLOR_ORANGE);
         }
     }
+    //  New to the POKeDEX: the foe's box had no ball mark (the game's
+    //  word), or, the mark not read, the POKeDEX page came up.
+    const bool new_to_dex = rt.memory.foe_mark == 0 || (rt.memory.foe_mark < 0 && rt.memory.dex_registered);
+    if (!rt.memory.owned_by_mark.empty()){
+        //  The game had it caught already: wanted no more.
+        rt.caught.insert(rt.memory.owned_by_mark);
+        if (rt.battle.dex_species.erase(rt.memory.owned_by_mark) != 0){
+            rt.dex_owned_by_mark++;
+        }
+    }
     if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty() &&
         rt.memory.caught.rfind("nidoran", 0) == 0 &&
         (rt.battle.dex_species.count("nidoran-f") != 0 || rt.battle.dex_species.count("nidoran-m") != 0)
     ){
-        //  The two NIDORANs read alike: only the POKeDEX page tells that
-        //  the one caught was a wanted one (not the other, caught before).
+        //  The two NIDORANs read alike: only the ball mark (or the POKeDEX
+        //  page) tells that the one caught was a wanted one (not the other,
+        //  caught before).
         std::string other = rt.memory.caught == "nidoran-f" ? "nidoran-m" : "nidoran-f";
-        if (!rt.memory.dex_registered){
+        if (!new_to_dex){
             rt.console.log("Caught a NIDORAN that was in the POKeDEX already: the other one is still wanted.", COLOR_ORANGE);
             rt.memory.caught.clear();
             if (!rt.memory.shiny_to_pc && !rt.memory.shiny){
@@ -620,14 +631,19 @@ StoryBattleResult story_battle(
         }
     }
     if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty()){
+        if (new_to_dex){
+            rt.dex_new_since_load.insert(rt.memory.caught);
+        }
         rt.caught.insert(rt.memory.caught);
-        if (rt.battle.dex_species.erase(rt.memory.caught) != 0){
-            if (rt.memory.dex_registered){
+        const bool for_dex = rt.battle.dex_species.erase(rt.memory.caught) != 0 ||
+            rt.memory.caught == rt.memory.dex_by_mark;
+        if (for_dex){
+            if (new_to_dex){
                 rt.dex_new++;
             }
             rt.console.log(
                 "Caught for the POKeDEX: " + rt.memory.caught +
-                (rt.memory.dex_registered ? " (new)." : " (it was in the POKeDEX already)."),
+                (new_to_dex ? " (new)." : " (it was in the POKeDEX already)."),
                 COLOR_BLUE
             );
             if (!rt.memory.shiny_to_pc && !rt.memory.shiny){
@@ -2055,6 +2071,148 @@ void story_save(StoryRuntime& rt, bool has_pokedex){
         context.wait_for_all_requests();
     }
     story_back_to_overworld(rt, "after saving");
+}
+
+
+namespace{
+
+//  The digits of the game's normal font (FONT_NORMAL, latin_normal.png):
+//  the main color of glyph rows 2 to 10, 5 pixels (bit 4 = the left one).
+//  A digit takes 6 pixels.
+const uint8_t LOAD_MENU_DIGITS[10][9] = {
+    {14, 17, 17, 17, 17, 17, 17, 17, 14},
+    { 4, 12,  4,  4,  4,  4,  4,  4, 14},
+    {14, 17, 17,  1,  2,  4,  8, 16, 31},
+    {14, 17,  1,  1,  6,  1,  1, 17, 14},
+    { 6, 10, 10, 18, 18, 18, 31,  2,  2},
+    {31, 16, 16, 16, 30,  1,  1, 17, 14},
+    {14, 17, 16, 16, 30, 17, 17, 17, 14},
+    {31,  1,  1,  1,  2,  2,  4,  4,  4},
+    {14, 17, 17, 17, 14, 17, 17, 17, 14},
+    {14, 17, 17, 17, 15,  1,  1, 17, 14},
+};
+
+}
+
+int read_load_menu_dex_count(const ImageViewRGB32& screen){
+    //  The load menu (main_menu.c): the CONTINUE window at tile (3, 1).
+    //  PrintDexCount prints "POKeDEX" at (2, 50) in it and the number at
+    //  (62, 50): on the game screen from x = 86, y = 58. Blue text with a
+    //  light blue shadow on white; the main color of the glyphs is matched
+    //  pixel by pixel (at the centers of the game's pixels).
+    ImageViewRGB32 game = extract_box_reference(screen, GameSettings::instance().GAME_BOX);
+    const size_t width = game.width();
+    const size_t height = game.height();
+    if (width < 240 || height < 160){
+        return -1;
+    }
+    const double sx = (double)width / 240.0;
+    const double sy = (double)height / 160.0;
+    auto pixel = [&](int x, int y){
+        const size_t px = std::min(width - 1, (size_t)((x + 0.5) * sx));
+        const size_t py = std::min(height - 1, (size_t)((y + 0.5) * sy));
+        return game.pixel(px, py);
+    };
+    auto ink = [&](int x, int y){
+        const uint32_t p = pixel(x, y);
+        const int r = (p >> 16) & 0xff;
+        const int b = p & 0xff;
+        return r < 160 && b > r + 50;
+    };
+    auto white = [&](int x, int y){
+        const uint32_t p = pixel(x, y);
+        return ((p >> 16) & 0xff) > 200 && ((p >> 8) & 0xff) > 200 && (p & 0xff) > 200;
+    };
+
+    //  The window: white right above and below the line.
+    int white_count = 0;
+    for (int x = 24; x < 120; x += 2){
+        white_count += white(x, 57) ? 1 : 0;
+        white_count += white(x, 71) ? 1 : 0;
+    }
+    if (white_count < 90){
+        return -1;
+    }
+    //  The label "POKeDEX" is there (it shows only with a POKeDEX).
+    int label_ink = 0;
+    for (int y = 60; y <= 68; y++){
+        for (int x = 26; x < 70; x++){
+            label_ink += ink(x, y) ? 1 : 0;
+        }
+    }
+    if (label_ink < 40){
+        return -1;
+    }
+
+    int value = 0;
+    int digits = 0;
+    for (int k = 0; k < 3; k++){
+        const int x0 = 86 + 6 * k;
+        int cell_ink = 0;
+        for (int y = 58; y < 72; y++){
+            for (int x = x0; x < x0 + 6; x++){
+                cell_ink += ink(x, y) ? 1 : 0;
+            }
+        }
+        if (cell_ink <= 1){
+            break;      //  The end of the number.
+        }
+        int best = -1;
+        int best_miss = 1000;
+        int second_miss = 1000;
+        for (int d = 0; d < 10; d++){
+            int miss = 0;
+            for (int y = 58; y < 72; y++){
+                const int row = y - 60;
+                const uint8_t bits = row >= 0 && row < 9 ? LOAD_MENU_DIGITS[d][row] : 0;
+                for (int c = 0; c < 6; c++){
+                    const bool on = c < 5 && ((bits >> (4 - c)) & 1) != 0;
+                    miss += on != ink(x0 + c, y) ? 1 : 0;
+                }
+            }
+            if (miss < best_miss){
+                second_miss = best_miss;
+                best_miss = miss;
+                best = d;
+            }else if (miss < second_miss){
+                second_miss = miss;
+            }
+        }
+        if (best < 0 || best_miss > 4 || second_miss - best_miss < 3){
+            return -1;
+        }
+        value = value * 10 + best;
+        digits++;
+    }
+    return digits == 0 ? -1 : value;
+}
+
+void story_soft_reset(StoryRuntime& rt){
+    StoryMemoryScope memory_scope("soft reset");
+    int count = -1;
+    soft_reset(
+        rt.console, rt.context,
+        [&](ConsoleHandle& console, ProControllerContext& context){
+            //  The menu may still be fading in: a few looks.
+            for (int attempt = 0; attempt < 6 && count < 0; attempt++){
+                if (attempt > 0){
+                    pbf_wait(context, 100ms);
+                    context.wait_for_all_requests();
+                }
+                VideoSnapshot screen = console.video().snapshot();
+                if (screen){
+                    count = read_load_menu_dex_count(screen);
+                }
+            }
+        }
+    );
+    rt.dex_count_at_load = count;
+    rt.dex_new_since_load.clear();
+    if (count >= 0){
+        rt.console.log("The game's POKeDEX in this save: " + std::to_string(count) + " species caught.", COLOR_BLUE);
+    }else{
+        rt.console.log("The POKeDEX number of the load menu was not read (no POKeDEX yet?).");
+    }
 }
 
 

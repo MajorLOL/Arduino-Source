@@ -149,6 +149,59 @@ double read_foe_hp(const ImageViewRGB32& frame){
     return read_hp_bar(frame, 52, 33.8, 36.2);
 }
 
+//  The ball mark in the foe's box (wild battles): the game draws it when the
+//  species is caught already (TryAddPokeballIconToHealthbox: tile 8 of the
+//  HP bar sprite, an 8x8 subsprite 32 pixels left of the bar sprite's
+//  center, so x = 20 to 27, rows 30 to 37; the bar is at x = 52 to 99 of
+//  the same rows). The box is cream there, the ball has a dark outline and
+//  a red top. Returns 1 (the mark), 0 (the box without it), -1 (no box
+//  there). Only at the start of a battle: a status (PSN...) clears it.
+int read_caught_mark(const ImageViewRGB32& frame){
+    ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
+    const size_t width = game.width();
+    const size_t height = game.height();
+    if (width < 240 || height < 160){
+        return -1;
+    }
+    const double sx = (double)width / 240.0;
+    const double sy = (double)height / 160.0;
+    auto cream = [&](int x, int y){
+        const size_t px = std::min(width - 1, (size_t)((x + 0.5) * sx));
+        const size_t py = std::min(height - 1, (size_t)((y + 0.5) * sy));
+        const uint32_t p = game.pixel(px, py);
+        return ((p >> 16) & 0xff) > 200 && ((p >> 8) & 0xff) > 200 && (p & 0xff) > 150;
+    };
+    //  The box around it: cream left and right of the mark.
+    int box = 0;
+    int box_total = 0;
+    for (int y = 31; y <= 37; y++){
+        for (int x = 15; x <= 34; x++){
+            if (x >= 20 && x <= 27){
+                continue;
+            }
+            box_total++;
+            box += cream(x, y) ? 1 : 0;
+        }
+    }
+    if (box * 10 < box_total * 9){
+        return -1;
+    }
+    //  The mark: 7 x 7 pixels, about 25 of them not cream.
+    int marked = 0;
+    for (int y = 31; y <= 37; y++){
+        for (int x = 20; x <= 26; x++){
+            marked += cream(x, y) ? 0 : 1;
+        }
+    }
+    if (marked >= 15){
+        return 1;
+    }
+    if (marked <= 2){
+        return 0;
+    }
+    return -1;
+}
+
 
 //  Dictionary of all move names (English). Tokens are "m<index>".
 const OCR::SmallDictionaryMatcher& move_matcher(){
@@ -1216,6 +1269,9 @@ StoryBattleResult run_story_battle(
     memory.safari_over = false;
     memory.no_balls = false;
     memory.safari_balls = 0;
+    memory.foe_mark = -1;
+    memory.owned_by_mark.clear();
+    memory.dex_by_mark.clear();
 
     //  The active Pokemon's types count for the moves (same-type bonus).
     StoryBattleSettings settings = base_settings;
@@ -1322,6 +1378,7 @@ StoryBattleResult run_story_battle(
     WallClock intro_seen = WallClock::max();
     const bool wild = kind != StoryBattleKind::TRAINER;
     bool shiny_checked = false;
+    bool mark_checked = false;
     bool shiny_catching = false;
     bool shiny_safari = false;
     bool shiny_wanted = false;
@@ -1400,6 +1457,20 @@ StoryBattleResult run_story_battle(
             seen_battle = true;
             last_activity = current_time();
             memory.list_back = 0;   //  The last pick went through.
+            if (wild && !mark_checked){
+                //  The game's own word on the species: the ball mark of the
+                //  foe's box (at the first menu: a status would clear it).
+                mark_checked = true;
+                VideoSnapshot screen = console.video().snapshot();
+                if (screen){
+                    memory.foe_mark = read_caught_mark(screen);
+                    console.log(
+                        memory.foe_mark == 1 ? "The foe's box has the ball mark: its species is caught already." :
+                        memory.foe_mark == 0 ? "The foe's box has no ball mark: its species is not caught yet." :
+                        "The ball mark of the foe's box was not read."
+                    );
+                }
+            }
             if (!shiny_checked && wild && settings.catch_legendary){
                 shiny_checked = true;
                 std::string slug;
@@ -1448,13 +1519,32 @@ StoryBattleResult run_story_battle(
                     }
                 }
                 //  For the POKeDEX: a species not caught yet. (The two
-                //  NIDORANs read alike: either, while one is wanted.)
-                if (!shiny_catching && wild && !settings.dex_species.empty()){
+                //  NIDORANs read alike: either, while one is wanted.) The
+                //  game's ball mark decides over the program's list: with
+                //  it, not caught again; without it, caught even if the
+                //  list has it.
+                if (!shiny_catching && wild && (!settings.dex_species.empty() || !settings.dex_all.empty())){
                     std::string slug;
                     read_opponent(console, slug);
                     const bool nidoran = slug.rfind("nidoran", 0) == 0 &&
                         (settings.dex_species.count("nidoran-f") != 0 || settings.dex_species.count("nidoran-m") != 0);
-                    if (!slug.empty() && (nidoran || settings.dex_species.count(slug) != 0)){
+                    bool wanted = !slug.empty() && (nidoran || settings.dex_species.count(slug) != 0);
+                    if (wanted && memory.foe_mark == 1){
+                        console.log("The game shows " + slug + " as caught (the ball mark): not caught again.", COLOR_BLUE);
+                        wanted = false;
+                        if (!nidoran){
+                            memory.owned_by_mark = slug;
+                        }
+                    }else if (!wanted && memory.foe_mark == 0 && !slug.empty() && settings.dex_all.count(slug) != 0){
+                        console.log(
+                            "The game shows " + slug + " as not caught (no ball mark), though the program's list has it: "
+                            "caught for the POKeDEX.",
+                            COLOR_BLUE
+                        );
+                        wanted = true;
+                        memory.dex_by_mark = slug;
+                    }
+                    if (wanted){
                         dex_catch = true;
                         shiny_catching = true;
                         shiny_wanted = true;

@@ -2068,12 +2068,14 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
 
     StoryBattleSettings saved = rt.battle;
     rt.battle.dex_species = wanted;
+    rt.battle.dex_all = story_species_list(step.text);
     rt.battle.catch_species.clear();
     rt.in_safari = safari;
     rt.safari_over = false;
     rt.safari_balls_used = 0;
     rt.no_balls = false;
     const uint64_t new_before = rt.dex_new;
+    const uint64_t marked_before = rt.dex_owned_by_mark;
 
     GrassSpot spot(rt, step.dir, std::max(2, (int)(step.p4 & 0xff)), StoryBattleKind::CATCH, label);
     spot.arrived();
@@ -2099,6 +2101,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
             if (rt.battle.dex_species.size() < left){
                 caught_here += left - rt.battle.dex_species.size();
                 idle = 0;
+            }else if (!rt.memory.dex_by_mark.empty() && rt.memory.caught == rt.memory.dex_by_mark){
+                caught_here++;      //  Not on the list, but new to the game.
+                idle = 0;
             }else{
                 idle++;
             }
@@ -2113,9 +2118,12 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     rt.in_safari = false;
     rt.battle = saved;
     const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
+    const uint64_t marked = rt.dex_owned_by_mark - marked_before;
     console.log(
-        label + ": " + std::to_string(caught_here) + " caught (" + std::to_string(rt.dex_new - new_before) +
-        " new to the POKeDEX) in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
+        label + ": " + std::to_string(caught_here - std::min<size_t>(caught_here, (size_t)marked)) + " caught (" +
+        std::to_string(rt.dex_new - new_before) + " new to the POKeDEX)" +
+        (marked > 0 ? ", " + std::to_string(marked) + " found caught before (the ball mark)" : std::string()) +
+        " in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
         " minutes. Not caught: " + species_names(left) + "." +
         (rt.no_balls ? " No balls left." : ""),
         COLOR_BLUE

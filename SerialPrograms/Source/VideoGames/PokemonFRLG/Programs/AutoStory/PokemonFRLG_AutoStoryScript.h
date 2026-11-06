@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <iterator>
+#include <string>
 #include <vector>
 #include "NintendoSwitch/Controllers/NintendoSwitch_ControllerButtons.h"
 
@@ -82,6 +83,9 @@ struct StoryLeg{
     bool dest_dark;             //  The warp at the end leads to a dark map.
     MapPreview preview;         //  Shown after the warp at the end.
     bool run;                   //  May be run (Running Shoes; maps that allow it, not dark).
+    uint16_t start_map;         //  Where the leg starts: StoryScript::map_names, x, y.
+    uint8_t start_x;
+    uint8_t start_y;
 };
 
 enum class StepType : uint8_t{
@@ -171,9 +175,16 @@ struct StoryScript{
     size_t step_count;
     const StorySegment* segments;
     size_t segment_count;
+    const char* const* map_names;
+    size_t map_name_count;
 
     const StoryLeg& leg(int32_t index) const{
         return legs[(size_t)index];
+    }
+    //  Where a leg starts, as "Vermilion City Pokemon Center 1F (7, 4)".
+    std::string leg_start(const StoryLeg& leg) const{
+        std::string map = leg.start_map < map_name_count ? map_names[leg.start_map] : "?";
+        return map + " (" + std::to_string(leg.start_x) + ", " + std::to_string(leg.start_y) + ")";
     }
     const StoryRun* leg_runs(const StoryLeg& leg) const{
         return runs + leg.first_run;

@@ -16,6 +16,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +36,16 @@ def cstr(s):
 DIR_STEPS = ("GRIND", "OSCILLATE", "PUSH")
 
 
-def write_cpp(results, path):
+def readable_map_name(name):
+    """VermilionCity_PokemonCenter_1F -> Vermilion City Pokemon Center 1F."""
+    words = []
+    for part in name.split("_"):
+        part = re.sub(r"(?<=[a-z])(?=[A-Z0-9])|(?<=[A-Z])(?=[A-Z][a-z])", " ", part)
+        words.append(part)
+    return " ".join(words)
+
+
+def write_cpp(results, path, decomp):
     """Flat constexpr arrays (fast to compile, no dynamic initialization).
     Leg lists (legs_a/b/c of a step) are offsets into LEG_LISTS, where the
     entry at the offset is the count, followed by the leg indexes."""
@@ -76,14 +86,24 @@ def write_cpp(results, path):
             L.append("    {DPAD_NONE, 0, RunKind::WALK},")
         L.append("};")
         L.append("")
+        #  The maps the legs start on (for the messages: where a step
+        #  expects the player).
+        map_ids = sorted({leg["start"][0] for leg in legs})
+        map_index = {mid: i for i, mid in enumerate(map_ids)}
+        L.append("inline constexpr const char* MAP_NAMES[] = {")
+        for mid in map_ids:
+            L.append("    %s," % cstr(readable_map_name(decomp.maps[mid].name)))
+        L.append("};")
+        L.append("")
         #  Legs
         L.append("inline constexpr StoryLeg LEGS[] = {")
         for i, leg in enumerate(legs):
-            L.append("    {%s, %d, %d, %s, %s, %s, LegEnd::%s, %s, %s, MapPreview::%s, %s},  //  %d" % (
+            L.append("    {%s, %d, %d, %s, %s, %s, LegEnd::%s, %s, %s, MapPreview::%s, %s, %d, %d, %d},  //  %d" % (
                 cstr(leg["name"]), run_index[i], len(leg["runs"]),
                 DPAD[leg["start_facing"]], DPAD[leg["push"]], DPAD[leg["face"]],
                 leg["end"], "true" if leg["dark"] else "false", "true" if leg["dest_dark"] else "false",
-                leg.get("preview") or "NONE", "true" if leg.get("run") else "false", i))
+                leg.get("preview") or "NONE", "true" if leg.get("run") else "false",
+                map_index[leg["start"][0]], leg["start"][1], leg["start"][2], i))
         L.append("};")
         L.append("")
         #  Leg lists and steps
@@ -135,6 +155,7 @@ def write_cpp(results, path):
         L.append("        %s::LEG_LISTS, std::size(%s::LEG_LISTS)," % (ns, ns))
         L.append("        %s::STEPS, std::size(%s::STEPS)," % (ns, ns))
         L.append("        %s::SEGMENTS, std::size(%s::SEGMENTS)," % (ns, ns))
+        L.append("        %s::MAP_NAMES, std::size(%s::MAP_NAMES)," % (ns, ns))
         L.append("    };")
         L.append("    return script;")
         L.append("}")
@@ -283,7 +304,7 @@ def main():
     with open(os.path.join(args.out, "story.json"), "w") as f:
         json.dump({v: {"legs": [{k: val for k, val in l.items() if k != "points"} for l in legs], "segments": segs}
                    for v, (legs, segs) in results.items()}, f, indent=1)
-    write_cpp(results, os.path.join(args.out, "PokemonFRLG_AutoStoryData.h"))
+    write_cpp(results, os.path.join(args.out, "PokemonFRLG_AutoStoryData.h"), decomp)
     images = {} if args.no_images else render_images(decomp, results, args.out)
     if "BULBASAUR" in results:
         write_markdown(results, os.path.join(args.out, "STORY.md"), images)

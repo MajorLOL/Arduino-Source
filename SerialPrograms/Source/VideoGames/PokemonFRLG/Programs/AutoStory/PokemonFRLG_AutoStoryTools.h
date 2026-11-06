@@ -26,6 +26,7 @@
 
 namespace PokemonAutomation{
 
+class ImageViewRGB32;
 template <typename Type> class ControllerContext;
 
 namespace NintendoSwitch{
@@ -112,6 +113,21 @@ struct StoryRuntime{
     int safari_balls_used = 0;      //  of the 30 SAFARI BALLs
     bool no_balls = false;
     uint64_t dex_new = 0;
+    //  Species dropped from the list of a DEX step because the game showed
+    //  the ball mark (caught before, the program did not know).
+    uint64_t dex_owned_by_mark = 0;
+
+    //  The POKeDEX as the game counts it: the caught species on the load
+    //  menu ("POKeDEX", read at each soft reset; -1: not read), and the
+    //  species caught since that load that were new to the POKeDEX.
+    int dex_count_at_load = -1;
+    std::set<std::string> dex_new_since_load;
+
+    //  Walks done since the program started, and the leg of the walk going
+    //  on (-1: none). The first walk failing tells that the save is
+    //  probably not where the start step expects the player.
+    uint64_t walks_done = 0;
+    int32_t walking_leg = -1;
 
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
@@ -272,6 +288,15 @@ void story_log_memory(StoryRuntime& rt, bool force = false);
 
 //  Save from the overworld. "has_pokedex" picks the start menu layout.
 void story_save(StoryRuntime& rt, bool has_pokedex);
+
+//  Soft reset to the last save. On the load menu, the number of species
+//  caught ("POKeDEX") is read into rt.dex_count_at_load.
+void story_soft_reset(StoryRuntime& rt);
+
+//  The "POKeDEX" number of the load menu (the species caught: Kanto, or
+//  National once the National POKeDEX is on). -1 if it does not show (no
+//  POKeDEX yet, not the load menu) or is not read for sure.
+int read_load_menu_dex_count(const ImageViewRGB32& screen);
 
 //  The first rival battle (Oak explains the battle, so most detectors are
 //  confused): use the first move until someone faints.

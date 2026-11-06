@@ -9,6 +9,7 @@
 #ifndef PokemonAutomation_PokemonFRLG_Navigation_H
 #define PokemonAutomation_PokemonFRLG_Navigation_H
 
+#include <functional>
 #include "Common/Cpp/Logging/AbstractLogger.h"
 #include "CommonFramework/Language.h"
 #include "CommonFramework/Tools/VideoStream.h"
@@ -52,7 +53,12 @@ enum class KantoFlyLocation{
 // Press A+B+Select+Start at the same time to soft reset, then re-enters the game.
 // There are two random waits, one before pressing start and another after loading in the game.
 // This is to prevent repeatedly getting the same pokemon, due to FRLG's RNG.
-uint64_t soft_reset(ConsoleHandle& console, ProControllerContext &context);
+// on_load_menu (optional): called on the load menu (CONTINUE, PLAYER, TIME,
+// POKeDEX, BADGES), right before the save is loaded.
+uint64_t soft_reset(
+    ConsoleHandle& console, ProControllerContext &context,
+    const std::function<void(ConsoleHandle& console, ProControllerContext& context)>& on_load_menu = nullptr
+);
 
 // From the overworld, open the summary of the Pokemon in slot 6. This assumes the menu cursor is in the top slot (POKEDEX)
 uint64_t open_slot_six(ConsoleHandle& console, ProControllerContext& context);

@@ -72,6 +72,7 @@ private:
     StaticTextOption SETUP_TEXT;
     DeferredStopButtonOption STOP_AFTER_CURRENT;
     EnumDropdownOption<Starter> STARTER;
+    BooleanCheckBoxOption CONTINUE_FROM_SAVE;
     IntegerEnumDropdownOption START_SEGMENT;
     SimpleIntegerOption<uint16_t> START_STEP;
     IntegerEnumDropdownOption END_SEGMENT;

@@ -19,7 +19,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <string>
+#include <vector>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "CommonFramework/GlobalAutoPaths.h"
@@ -185,6 +187,15 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         Starter::BULBASAUR
     )
+    , CONTINUE_FROM_SAVE(
+        "<b>Go on from the program's last save:</b><br>At each save the program writes where to go on "
+        "into a file of its own (UserSettings/PokemonFRLG-AutoStory-Save.txt; with a new build, copy the "
+        "UserSettings folder into its folder). With this on, a run goes on from there, whatever the "
+        "segment and step below say. Turn it off to start somewhere else: a new game, or a save made by "
+        "hand (the game must then be saved where that segment and step start).",
+        LockMode::LOCK_WHILE_RUNNING,
+        true
+    )
     , START_SEGMENT(
         "<b>Start at segment:</b><br>The game must be saved at the start of this segment "
         "(where the previous segment saved). After each save, the program sets this and the "
@@ -296,6 +307,7 @@ AutoStory::AutoStory()
     PA_ADD_STATIC(SETUP_TEXT);
     PA_ADD_OPTION(STOP_AFTER_CURRENT);
     PA_ADD_OPTION(STARTER);
+    PA_ADD_OPTION(CONTINUE_FROM_SAVE);
     PA_ADD_OPTION(START_SEGMENT);
     PA_ADD_OPTION(START_STEP);
     PA_ADD_OPTION(END_SEGMENT);
@@ -448,7 +460,10 @@ void AutoStory::run_segment(
 
         switch (step.type){
         case StepType::WALK:
+            rt.walking_leg = step.leg;
             walk_leg(rt, script, step.leg);
+            rt.walking_leg = -1;
+            rt.walks_done++;
             skip_talk = rt.trainer_came;
             break;
         case StepType::TALK:
@@ -577,9 +592,20 @@ void AutoStory::run_segment(
         case StepType::SKIP_IF_DEX:{
             std::set<std::string> owned = story_species_list(step.text);
             owned.insert(rt.caught.begin(), rt.caught.end());
-            const bool enough = (int)owned.size() >= step.p1;
+            int count = (int)owned.size();
+            std::string how = "as the program knows";
+            if (rt.dex_count_at_load >= 0){
+                //  The game's own count: the load menu at the last load,
+                //  and the species new to the POKeDEX caught since.
+                count = rt.dex_count_at_load + (int)rt.dex_new_since_load.size();
+                how = "as the game counts them: " + std::to_string(rt.dex_count_at_load) + " in the save" +
+                    (rt.dex_new_since_load.empty() ? std::string() :
+                        " + " + std::to_string(rt.dex_new_since_load.size()) + " new since") +
+                    "; the program's list has " + std::to_string(owned.size());
+            }
+            const bool enough = count >= step.p1;
             env.log(
-                "Species caught (as the program knows): " + std::to_string(owned.size()) + " of the " +
+                "Species caught (" + how + "): " + std::to_string(count) + " of the " +
                 std::to_string(step.p1) + " wanted here" +
                 (enough ? ": the next " + std::to_string(step.p0) + " steps are skipped." : "."),
                 COLOR_BLUE
@@ -589,7 +615,7 @@ void AutoStory::run_segment(
             }else if (step.p2 > 0 && (step.p2 & 1) != 0){
                 throw UserSetupError(
                     env.console,
-                    "Only " + std::to_string(owned.size()) + " species caught (as the program knows), " +
+                    "Only " + std::to_string(count) + " species caught (" + how + "), " +
                     std::to_string(step.p1) + " are needed here: " + label +
                     ". Catch more (with the catching segments before this one) and start this segment again."
                 );
@@ -661,10 +687,7 @@ void AutoStory::run_segment(
                 pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
                 context.wait_for_all_requests();
             }
-            {
-                StoryMemoryScope memory_scope("soft reset");
-                soft_reset(env.console, context);
-            }
+            story_soft_reset(rt);
             rt.facing = DPAD_NONE;
             rt.arrived_by_warp = false;
             rt.battle.team.clear();
@@ -696,6 +719,58 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
 
     const Starter starter = STARTER;
     const StoryScript& script = script_for(starter);
+
+    //  Where the program's last save was (written at each save): the start
+    //  options can lag behind it (the settings file is written only when
+    //  the window closes; a new build's folder; a settings file from
+    //  elsewhere: C15_01 was started on a save in One Island).
+    const std::string save_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Save.txt";
+    if (CONTINUE_FROM_SAVE){
+        std::string text;
+        if (file_to_string(save_file, text)){
+            //  "<starter> <segment id> <step>"
+            std::vector<std::string> words;
+            std::string word;
+            for (char c : text){
+                if (std::isspace((unsigned char)c)){
+                    if (!word.empty()){
+                        words.push_back(word);
+                        word.clear();
+                    }
+                }else{
+                    word += c;
+                }
+            }
+            if (!word.empty()){
+                words.push_back(word);
+            }
+            size_t segment = (size_t)-1;
+            for (size_t i = 0; words.size() == 3 && i < script.segment_count; i++){
+                if (words[1] == script.segments[i].id){
+                    segment = i;
+                }
+            }
+            const int step = words.size() == 3 ? std::atoi(words[2].c_str()) : 0;
+            if (segment == (size_t)-1 || step < 1 || words[0] != starter_name(starter)){
+                env.log("The program's last save (" + save_file + ") is not for this story: \"" + text + "\". Starting at the segment and step chosen.", COLOR_ORANGE);
+            }else{
+                if (segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP){
+                    env.log(
+                        "Going on from the program's last save: segment " + std::string(script.segments[segment].id) +
+                        ", step " + std::to_string(step) + " (the start options said " +
+                        script.segments[START_SEGMENT.current_value()].id + ", step " +
+                        std::to_string((uint16_t)START_STEP) + ").",
+                        COLOR_BLUE
+                    );
+                }
+                START_SEGMENT.set_value(segment);
+                START_STEP.set((uint16_t)std::min(step, 999));
+            }
+        }else{
+            env.log("No save of the program's yet (" + save_file + "): starting at the segment and step chosen.");
+        }
+    }
+
     const size_t first = START_SEGMENT.current_value();
     const size_t last = END_SEGMENT.current_value();
     if (last < first){
@@ -754,6 +829,14 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 env.log("Could not write " + caught_file + ".", COLOR_ORANGE);
             }
         }
+        try{
+            string_to_file(
+                save_file,
+                std::string(starter_name(starter)) + " " + segment_id + " " + std::to_string(step) + "\n"
+            );
+        }catch (...){
+            env.log("Could not write " + save_file + ".", COLOR_ORANGE);
+        }
         for (size_t i = 0; i < script.segment_count; i++){
             if (segment_id == script.segments[i].id){
                 START_SEGMENT.set_value(i);
@@ -807,16 +890,24 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 }
             }
         }
-        if (known.empty()){
+        if (known.empty() && RESET_AT_START){
+            //  The game tells: the POKeDEX number of the load menu (the
+            //  count), the ball mark in wild battles (each species met).
+            env.log(
+                "\"Caught by the program\" is empty: the species caught before are learned from the game "
+                "(the POKeDEX number when the save is loaded, the ball mark in wild battles).",
+                COLOR_ORANGE
+            );
+        }else if (known.empty()){
             //  A new build in a new folder starts without the UserSettings
             //  of the last one: the catches of the runs before are not
             //  known (C15_01 counted 26 of some 61).
             throw UserSetupError(
                 env.console,
                 "\"Caught by the program\" is empty, but the start is after catching for the POKeDEX: the "
-                "catches of the runs before are not known. Copy the UserSettings folder of the build you used "
-                "before into this one (or enter the species there, separated by commas), or enter - to go on "
-                "without them."
+                "catches of the runs before are not known. Turn on the soft reset at the start (the game's "
+                "POKeDEX number is read then), copy the UserSettings folder of the build you used before into "
+                "this one (or enter the species there, separated by commas), or enter - to go on without them."
             );
         }
         std::set<std::string> species = story_species_list(known == "-" ? "" : known.c_str());
@@ -833,10 +924,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
 
     if (RESET_AT_START){
         env.log("Soft resetting to load the save.");
-        {
-            StoryMemoryScope memory_scope("soft reset");
-            soft_reset(env.console, context);
-        }
+        story_soft_reset(rt);
         stats.resets++;
         env.update_stats();
     }
@@ -855,6 +943,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     size_t current_segment = first;
     size_t current_step = first_step;
     uint16_t failures = 0;
+    uint16_t first_walk_failures = 0;       //  the first walk since the start failed
     uint16_t legendary_misses = 0;          //  a legendary Pokemon not caught, from the same save
     size_t failed_segment = (size_t)-1;     //  the save the last failure went back to
     size_t failed_step = (size_t)-1;
@@ -958,6 +1047,36 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
             const bool whited_out = rt.whited_out;
             rt.whited_out = false;
+            //  The first walk since the start failed: the save is probably
+            //  not where the start step expects the player (C15_01, made
+            //  for Vermilion's Pokemon Center, started in One Island's: 4
+            //  steps down from the nurse were no door there). Twice in a
+            //  row: stop and say where the walk starts.
+            if (rt.walks_done == 0 && rt.walking_leg >= 0){
+                const StoryLeg& leg = script.leg(rt.walking_leg);
+                const char* facing =
+                    leg.start_facing == DPAD_UP ? "up" :
+                    leg.start_facing == DPAD_DOWN ? "down" :
+                    leg.start_facing == DPAD_LEFT ? "left" :
+                    leg.start_facing == DPAD_RIGHT ? "right" : nullptr;
+                const std::string where = script.leg_start(leg) +
+                    (facing != nullptr ? std::string(", facing ") + facing : std::string());
+                first_walk_failures++;
+                env.log(
+                    "The first walk, " + std::string(leg.name) + ", failed. It starts at " + where +
+                    ": is the save there?",
+                    COLOR_RED
+                );
+                if (first_walk_failures >= 2){
+                    throw UserSetupError(
+                        env.console,
+                        "The first walk, " + std::string(leg.name) + " (" + segment_name(segment) + "), failed "
+                        "twice. It starts at " + where + ": the save is probably somewhere else. Load a save "
+                        "made there, or pick the segment and step that start where the save is."
+                    );
+                }
+            }
+            rt.walking_leg = -1;
             //  Retries count in a row from the same save: once a later save
             //  was reached (an Elite Four room won), counting starts over.
             if (resume_segment != failed_segment || resume_step != failed_step){
@@ -993,10 +1112,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 "continuing from " + script.segments[resume_segment].id + " step " + std::to_string(resume_step + 1) + ".",
                 COLOR_RED
             );
-            {
-                StoryMemoryScope memory_scope("soft reset");
-                soft_reset(env.console, context);
-            }
+            story_soft_reset(rt);
             stats.resets++;
             env.update_stats();
             rt.facing = DPAD_NONE;
