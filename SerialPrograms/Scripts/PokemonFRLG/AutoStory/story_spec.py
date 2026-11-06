@@ -1664,9 +1664,14 @@ def safari_game(area_map, tiles, species, label):
 
 def vermilion_ferry(option, dest_harbor, label):
     """The Seagallop from Vermilion: the ticket check by the pier (x 22-23,
-    y 33) shows the Tri-Pass destinations at once (One, Two, Three Island)."""
+    y 33). VermilionCity_EventScript_ChooseSeagallopDestTriPass (and
+    ...RainbowPass): "Ah, you have a TRI-PASS." first, A to the next page,
+    then "Would you like to board a SEAGALLOP ferry?" with the destinations
+    (One, Two, Three Island). The cutscene's B on that menu is a cancel: the
+    player walks back up the pier (the first try of C14_10)."""
     steps = [goto("MAP_VERMILION_CITY", [[23, 33]], label, trigger=True),
-             wait(2500, label + "_Menu")]
+             wait(2500, label + "_Pass"),
+             press("A", 1, 2000, label + "_Menu")]
     if option:
         steps.append(press("DOWN", option, 500, label + "_Down"))
     return steps + [press("A", 1, 1500, label + "_Pick"),

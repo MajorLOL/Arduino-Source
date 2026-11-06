@@ -21558,7 +21558,8 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::BUY, "BuyPokeBalls", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "FerryToOneIsland", 1140, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "FerryToOneIsland_1", 1141, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WAIT, "FerryToOneIsland_Menu", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "FerryToOneIsland_Pass", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "FerryToOneIsland_Menu", -1, 1, 2000, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToOneIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "DexKindleRoad_ToGrass", 1142, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -21689,7 +21690,8 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "FerryToOneIsland_2", 1192, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WAIT, "FerryToOneIsland_Menu", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "FerryToOneIsland_Pass", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "FerryToOneIsland_Menu", -1, 1, 2000, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToOneIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "HarborToOneIslandPC", 1193, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -22083,21 +22085,21 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C14_07_MANSION", "POKeDEX: Pokemon Mansion", 14, true, 1690, 14},
     {"C14_08_ROUTE11_DIGLETT", "POKeDEX: Poke Balls in Vermilion City, Route 11, Diglett's Cave", 14, true, 1704, 22},
     {"C14_09_VICTORY_ROAD", "POKeDEX: Victory Road", 14, true, 1726, 14},
-    {"C14_10_KINDLE_ROAD", "POKeDEX: Poke Balls, the ferry to One Island, Kindle Road", 14, true, 1740, 27},
-    {"C14_11_BOND_BRIDGE", "POKeDEX: Three Island, Bond Bridge (Berry Forest if still short)", 14, true, 1767, 51},
-    {"C15_01_ENOUGH", "60 species? Full Restores for the Elite Four", 15, true, 1818, 11},
-    {"C15_02_ELITE_FOUR", "Elite Four again: Lorelei, Bruno, Agatha, Lance (for the National POKeDEX)", 15, true, 1829, 35},
-    {"C15_02_CHAMPION", "Champion again, Hall of Fame", 15, true, 1864, 5},
-    {"C15_03_NATIONAL_DEX", "Oak: 60 species, the National POKeDEX", 15, true, 1869, 2},
-    {"C16_01_CELIO_RUBY", "One Island: Celio asks for the Ruby (a gem of the Sevii Islands)", 16, true, 1871, 24},
-    {"C16_02_RUBY_PATH", "Mt. Ember: the Rockets' password, the Ruby Path, the Ruby", 16, true, 1895, 109},
-    {"C16_03_RAINBOW_PASS", "Celio: the Ruby in the machine, the Rainbow Pass; the Sapphire next", 16, true, 2004, 6},
-    {"C17_01_ICEFALL_CAVE", "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon", 17, true, 2010, 34},
-    {"C17_02_LORELEI", "Icefall Cave: up the waterfall, Lorelei and the poachers", 17, true, 2044, 24},
-    {"C17_03_DOTTED_HOLE", "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)", 17, true, 2068, 45},
-    {"C17_04_ROCKET_WAREHOUSE", "Five Island: the Rocket Warehouse, Gideon, the Sapphire back", 17, true, 2113, 48},
-    {"C17_05_NETWORK_MACHINE", "One Island: the Sapphire for Celio; the roaming legendary is out", 17, true, 2161, 17},
-    {"C18_01_SUICUNE", "The roaming Suicune: Route 10, the MASTER BALL", 18, true, 2178, 18},
+    {"C14_10_KINDLE_ROAD", "POKeDEX: Poke Balls, the ferry to One Island, Kindle Road", 14, true, 1740, 28},
+    {"C14_11_BOND_BRIDGE", "POKeDEX: Three Island, Bond Bridge (Berry Forest if still short)", 14, true, 1768, 51},
+    {"C15_01_ENOUGH", "60 species? Full Restores for the Elite Four", 15, true, 1819, 11},
+    {"C15_02_ELITE_FOUR", "Elite Four again: Lorelei, Bruno, Agatha, Lance (for the National POKeDEX)", 15, true, 1830, 35},
+    {"C15_02_CHAMPION", "Champion again, Hall of Fame", 15, true, 1865, 5},
+    {"C15_03_NATIONAL_DEX", "Oak: 60 species, the National POKeDEX", 15, true, 1870, 2},
+    {"C16_01_CELIO_RUBY", "One Island: Celio asks for the Ruby (a gem of the Sevii Islands)", 16, true, 1872, 25},
+    {"C16_02_RUBY_PATH", "Mt. Ember: the Rockets' password, the Ruby Path, the Ruby", 16, true, 1897, 109},
+    {"C16_03_RAINBOW_PASS", "Celio: the Ruby in the machine, the Rainbow Pass; the Sapphire next", 16, true, 2006, 6},
+    {"C17_01_ICEFALL_CAVE", "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon", 17, true, 2012, 34},
+    {"C17_02_LORELEI", "Icefall Cave: up the waterfall, Lorelei and the poachers", 17, true, 2046, 24},
+    {"C17_03_DOTTED_HOLE", "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)", 17, true, 2070, 45},
+    {"C17_04_ROCKET_WAREHOUSE", "Five Island: the Rocket Warehouse, Gideon, the Sapphire back", 17, true, 2115, 48},
+    {"C17_05_NETWORK_MACHINE", "One Island: the Sapphire for Celio; the roaming legendary is out", 17, true, 2163, 17},
+    {"C18_01_SUICUNE", "The roaming Suicune: Route 10, the MASTER BALL", 18, true, 2180, 18},
 };
 
 }
@@ -22114,7 +22116,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "bf117fec24";
+inline constexpr const char* DATA_ID = "1aa3ccc504";
 
 }
 }
