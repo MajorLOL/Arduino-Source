@@ -1648,9 +1648,14 @@ CHAPTER13 = league_again("C13_01", 13, "prize money for Poke Balls") + [
 #  both games are listed (FireRed and LeafGreen differ in some).
 
 
+#  Species the National POKeDEX needs (OakRatingScene): a DEX step catches
+#  nothing once the game counts that many (the load menu's POKeDEX number).
+DEX_NEEDED = 60
+
+
 def dex(map_id, tiles, species, label, idle=25, minutes=30, safari=False):
     return {"dex": {"map": map_id, "tiles": tiles, "species": species, "idle": idle,
-                    "minutes": minutes, "safari": safari}, "label": label}
+                    "minutes": minutes, "safari": safari, "enough": DEX_NEEDED}, "label": label}
 
 
 def safari_game(area_map, tiles, species, label):
@@ -1842,12 +1847,14 @@ CHAPTER14 = [
         "steps": ferry("MAP_ONE_ISLAND_HARBOR", 2, "MAP_THREE_ISLAND_HARBOR", "FerryToThreeIsland") + [
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "HarborToThreeIslandPC"),
             save(),
+        ] + [only([v], [{"unless_dex": {"count": 64, "game_count": DEX_NEEDED, "owned": dex_owned(v), "steps": [
             dex("MAP_THREE_ISLAND_BOND_BRIDGE", WHOLE, ["pidgeotto", "gloom", "oddish", "meowth", "persian", "venonat",
                                                        "psyduck", "pidgey", "bellsprout", "weepinbell", "slowpoke"],
                 "DexBondBridge"),
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BondBridgeToThreeIslandPC"),
             save(),
-        ] + [only([v], [{"unless_dex": {"count": 64, "owned": dex_owned(v), "steps": [
+        ]}, "label": "Enough species?"}]) for v in STARTERS] + [
+        ] + [only([v], [{"unless_dex": {"count": 64, "game_count": DEX_NEEDED, "owned": dex_owned(v), "steps": [
             dex("MAP_THREE_ISLAND_BERRY_FOREST", WHOLE, ["hypno", "drowzee", "exeggcute", "venomoth", "gloom",
                                                         "pidgeotto", "oddish", "venonat", "weepinbell"],
                 "DexBerryForest"),

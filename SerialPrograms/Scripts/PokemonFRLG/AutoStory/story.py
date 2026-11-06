@@ -760,8 +760,10 @@ class Builder:
                 self.run_step(s, sub)
             if self.pos[:3] != start[:3]:
                 raise StoryError("unless_dex: the steps end at %s, not %s" % (self.pos, start))
+            #  p3: the count when the game's own count is known (no margin
+            #  for species the program's list may have wrong).
             out.append({"type": "SKIP_IF_DEX", "label": step.get("label", "Enough species?"), "p0": len(sub),
-                        "p1": u["count"], "text": ",".join(u["owned"])})
+                        "p1": u["count"], "p3": u.get("game_count", u["count"]), "text": ",".join(u["owned"])})
             out.extend(sub)
             return
         if "field_move" in step:
@@ -1539,9 +1541,10 @@ class Builder:
             osc, length = strips[tuple(self.pos[:3])]
         else:
             osc, length = self.osc_dir(self.grass_tiles(c["map"], c["tiles"]), label), 2
+        #  p3: no catching here once the game counts that many species.
         out.append({"type": "DEX", "label": label, "text": ",".join(c["species"]),
                     "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
-                    "p2": 1 if c.get("safari") else 0, "dir": osc, "p4": length})
+                    "p2": 1 if c.get("safari") else 0, "p3": c.get("enough", 0), "dir": osc, "p4": length})
 
     def catch(self, step, out):
         c = step["catch"]

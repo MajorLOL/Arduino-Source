@@ -2065,6 +2065,19 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         console.log(label + ": all of them were caught already.", COLOR_BLUE);
         return;
     }
+    //  Enough for what the POKeDEX is caught for (the National POKeDEX),
+    //  as the game counts them: nothing to catch here.
+    const int game_count = rt.dex_count_at_load >= 0
+        ? rt.dex_count_at_load + (int)rt.dex_new_since_load.size()
+        : -1;
+    if (!safari && step.p3 > 0 && game_count >= step.p3){
+        console.log(
+            label + ": " + std::to_string(game_count) + " species caught as the game counts them, " +
+            std::to_string(step.p3) + " are needed: nothing caught here.",
+            COLOR_BLUE
+        );
+        return;
+    }
 
     StoryBattleSettings saved = rt.battle;
     rt.battle.dex_species = wanted;
@@ -2087,6 +2100,12 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     try{
         while (current_time() < deadline && !rt.safari_over){
             if (!safari && (rt.battle.dex_species.empty() || idle >= idle_limit || rt.no_balls)){
+                break;
+            }
+            if (!safari && step.p3 > 0 && rt.dex_count_at_load >= 0 &&
+                rt.dex_count_at_load + (int)rt.dex_new_since_load.size() >= step.p3
+            ){
+                console.log(label + ": " + std::to_string(step.p3) + " species caught as the game counts them: enough.", COLOR_BLUE);
                 break;
             }
             const size_t left = rt.battle.dex_species.size();
