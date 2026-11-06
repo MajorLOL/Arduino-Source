@@ -780,7 +780,20 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     //  ... and those for the POKeDEX, as the last run left them.
     if (dex_before){
-        std::set<std::string> species = story_species_list(((std::string)DEX_CAUGHT).c_str());
+        const std::string known = DEX_CAUGHT;
+        if (known.empty()){
+            //  A new build in a new folder starts without the UserSettings
+            //  of the last one: the catches of the runs before are not
+            //  known (C15_01 counted 26 of some 61).
+            throw UserSetupError(
+                env.console,
+                "\"Caught by the program\" is empty, but the start is after catching for the POKeDEX: the "
+                "catches of the runs before are not known. Copy the UserSettings folder of the build you used "
+                "before into this one (or enter the species there, separated by commas), or enter - to go on "
+                "without them."
+            );
+        }
+        std::set<std::string> species = story_species_list(known == "-" ? "" : known.c_str());
         rt.caught.insert(species.begin(), species.end());
         env.log("Caught by the program before (as of the last save): " + std::to_string(species.size()) + " species.", COLOR_BLUE);
     }else{
