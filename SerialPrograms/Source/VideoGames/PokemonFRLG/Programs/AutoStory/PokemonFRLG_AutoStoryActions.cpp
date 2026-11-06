@@ -848,11 +848,18 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 
 
 
-void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what){
+void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
-    console.log("Using an item on party slot " + std::to_string(party_slot) + ": " + what);
+    console.log(
+        std::string(give ? "Giving an item to hold to party slot " : "Using an item on party slot ") +
+        std::to_string(party_slot) + ": " + what
+    );
     story_fix_party_order(rt, false);
+    if (give && party_slot == 1){
+        //  The starter (Charizard and the EXP. SHARE): in slot 1.
+        story_check_lead(rt);
+    }
     open_bag_from_overworld(console, context);
     if (!select_bag_item(rt, BagPocket::ITEMS, {words.c_str()}, {}, what)){
         pbf_mash_button(context, BUTTON_B, 3000ms);
@@ -864,8 +871,12 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
             console
         );
     }
-    //  A: USE / GIVE / TOSS / CANCEL, cursor on USE. A: the party menu.
+    //  A: USE / GIVE / TOSS / CANCEL (sContextMenuItems_Field, the ITEMS
+    //  pocket), cursor on USE. A: the party menu.
     press(context, BUTTON_A, 800ms);
+    if (give){
+        dpad(context, DPAD_DOWN, 500ms);
+    }
     press(context, BUTTON_A, 2500ms);
     context.wait_for_all_requests();
     PartyMenuWatcher party(COLOR_RED);
@@ -886,7 +897,9 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
     press(context, BUTTON_A, 3000ms);
     //  An evolution stone: "What? X is evolving!", the evolution (an item
     //  evolution cannot be stopped), "Congratulations! ...", then the bag.
-    //  A goes through the text.
+    //  A goes through the text. GIVE: "X was given the Y to hold.", or "X is
+    //  already holding Z. Would you like to switch the two items?" (A: YES),
+    //  then the bag.
     WallClock deadline = current_time() + 40s;
     bool back = false;
     while (current_time() < deadline){

@@ -21949,6 +21949,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "OaksAideExpShare_3", 1193, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK, "OaksAideExpShare", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "The EXP. SHARE", -1, 3000, 60000, -1, 0, 0, DPAD_NONE, "YES", 0, 0, 0},
+    {StepType::USE_ITEM, "ExpShareToCharizard", -1, 1, 1, -1, 0, 0, DPAD_NONE, "share of", 0, 0, 0},
     {StepType::WALK, "Route15ToFuchsiaPC", 1194, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "Route15ToFuchsiaPC_1", 1195, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "Route15ToFuchsiaPC_2", 1196, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -22418,17 +22419,17 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C15_02_ELITE_FOUR", "Elite Four again: Lorelei, Bruno, Agatha, Lance (for the National POKeDEX)", 15, true, 1830, 35},
     {"C15_02_CHAMPION", "Champion again, Hall of Fame", 15, true, 1865, 5},
     {"C15_03_NATIONAL_DEX", "Oak: 60 species, the National POKeDEX", 15, true, 1870, 2},
-    {"C15_04_EXP_SHARE", "The EXP. SHARE from Oak's aide on Route 15 (50 species caught)", 15, true, 1872, 18},
-    {"C16_01_CELIO_RUBY", "One Island: Celio asks for the Ruby (a gem of the Sevii Islands)", 16, true, 1890, 25},
-    {"C16_02_RUBY_PATH", "Mt. Ember: the Rockets' password, the Ruby Path, the Ruby", 16, true, 1915, 109},
-    {"C16_03_RAINBOW_PASS", "Celio: the Ruby in the machine, the Rainbow Pass; the Sapphire next", 16, true, 2024, 6},
-    {"C17_01_ICEFALL_CAVE", "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon", 17, true, 2030, 34},
-    {"C17_02_LORELEI", "Icefall Cave: up the waterfall, Lorelei and the poachers", 17, true, 2064, 24},
-    {"C17_03_DOTTED_HOLE", "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)", 17, true, 2088, 45},
-    {"C17_04_ROCKET_WAREHOUSE", "Five Island: the Rocket Warehouse, Gideon, the Sapphire back", 17, true, 2133, 48},
-    {"C17_05_NETWORK_MACHINE", "One Island: the Sapphire for Celio; the roaming legendary is out", 17, true, 2181, 17},
-    {"C18_01_SUICUNE", "The roaming Suicune: Route 10, the MASTER BALL", 18, true, 2198, 18},
-    {"C19_01_MEWTWO", "Mewtwo in Cerulean Cave (weakened, Ultra Balls)", 19, true, 2216, 51},
+    {"C15_04_EXP_SHARE", "The EXP. SHARE from Oak's aide on Route 15 (50 species caught)", 15, true, 1872, 19},
+    {"C16_01_CELIO_RUBY", "One Island: Celio asks for the Ruby (a gem of the Sevii Islands)", 16, true, 1891, 25},
+    {"C16_02_RUBY_PATH", "Mt. Ember: the Rockets' password, the Ruby Path, the Ruby", 16, true, 1916, 109},
+    {"C16_03_RAINBOW_PASS", "Celio: the Ruby in the machine, the Rainbow Pass; the Sapphire next", 16, true, 2025, 6},
+    {"C17_01_ICEFALL_CAVE", "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon", 17, true, 2031, 34},
+    {"C17_02_LORELEI", "Icefall Cave: up the waterfall, Lorelei and the poachers", 17, true, 2065, 24},
+    {"C17_03_DOTTED_HOLE", "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)", 17, true, 2089, 45},
+    {"C17_04_ROCKET_WAREHOUSE", "Five Island: the Rocket Warehouse, Gideon, the Sapphire back", 17, true, 2134, 48},
+    {"C17_05_NETWORK_MACHINE", "One Island: the Sapphire for Celio; the roaming legendary is out", 17, true, 2182, 17},
+    {"C18_01_SUICUNE", "The roaming Suicune: Route 10, the MASTER BALL", 18, true, 2199, 18},
+    {"C19_01_MEWTWO", "Mewtwo in Cerulean Cave (weakened, Ultra Balls)", 19, true, 2217, 51},
 };
 
 }
@@ -22445,7 +22446,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "dbca6adbf7";
+inline constexpr const char* DATA_ID = "0e8f2d10a5";
 
 }
 }

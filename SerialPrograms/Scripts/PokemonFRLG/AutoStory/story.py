@@ -964,7 +964,11 @@ class Builder:
             return
         if "use_item" in step:
             u = step["use_item"]
-            out.append({"type": "USE_ITEM", "label": step.get("label", "Use item"), "p0": u["slot"], "text": u["words"]})
+            ui = {"type": "USE_ITEM", "label": step.get("label", "Use item"), "p0": u["slot"], "text": u["words"]}
+            if u.get("give"):
+                #  GIVE (to hold) in place of USE.
+                ui["p1"] = 1
+            out.append(ui)
             return
         if "buy" in step:
             b = step["buy"]

@@ -639,7 +639,7 @@ void AutoStory::run_segment(
             story_heal_with_items(rt);
             break;
         case StepType::USE_ITEM:
-            story_use_item(rt, step.p0, step.text, label);
+            story_use_item(rt, step.p0, step.text, label, step.p1 == 1);
             break;
         case StepType::FLY:
             story_fly(rt, step.p1, step.p0, label);

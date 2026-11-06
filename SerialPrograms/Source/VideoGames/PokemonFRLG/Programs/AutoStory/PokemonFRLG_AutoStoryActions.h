@@ -63,7 +63,8 @@ void story_check_lead(StoryRuntime& rt);
 
 //  Use an item from the bag's ITEMS pocket (found by a word of its
 //  description) on a party slot (1-6): an evolution stone.
-void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what);
+//  give: GIVE (to hold) in place of USE; party slot 1 is the starter then.
+void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give = false);
 
 //  Use up to "count" Rare Candies from the bag on party slot 1, in the
 //  overworld. A move it wants to learn is not learned. Returns how many

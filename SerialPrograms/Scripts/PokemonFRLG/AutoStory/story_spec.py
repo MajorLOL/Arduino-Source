@@ -134,6 +134,13 @@ def use_item(words, party_slot, label):
     return {"use_item": {"words": words, "slot": party_slot}, "label": label}
 
 
+def give_item(words, party_slot, label):
+    """Give an item from the bag's ITEMS pocket (found by words of its
+    description) to a party slot to hold. If it holds one already, YES: the
+    two are switched (the old one goes to the bag)."""
+    return {"use_item": {"words": words, "slot": party_slot, "give": True}, "label": label}
+
+
 def team(on=True):
     """From now on trainer battles are fought by the whole team (the best
     answer to each opponent comes in)."""
@@ -1892,13 +1899,15 @@ CHAPTER15 = [
         "title": "The EXP. SHARE from Oak's aide on Route 15 (50 species caught)",
         #  Route15_WestEntrance_2F_EventScript_Aide: "...if you've caught at
         #  least 50 kinds of POKeMON" (YES/NO), GetPokedexCount, then the
-        #  EXP. SHARE (FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE). It stays in the bag.
+        #  EXP. SHARE (FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE). Charizard holds it
+        #  ("...a share of EXP. points without having to battle").
         "steps": [
             heal(PC["FUCHSIA"], "LabToFuchsiaPC"),
             save(),
             talk("MAP_ROUTE15_WEST_ENTRANCE_2F", xy=[5, 5], mode="talk", label="OaksAideExpShare"),
             cutscene(3000, 60000, "The EXP. SHARE", answer="yes"),
             setst(flags=["FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE"]),
+            give_item("share of", 1, "ExpShareToCharizard"),
             heal(PC["FUCHSIA"], "Route15ToFuchsiaPC"),
             save(),
         ],
