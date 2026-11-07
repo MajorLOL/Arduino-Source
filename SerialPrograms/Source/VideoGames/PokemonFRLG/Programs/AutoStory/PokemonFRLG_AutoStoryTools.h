@@ -129,6 +129,11 @@ struct StoryRuntime{
     uint64_t walks_done = 0;
     int32_t walking_leg = -1;
 
+    //  A talk went to where the one talked to may stand instead, one step
+    //  aside: the step to take back before the route goes on (DPAD_NONE:
+    //  none).
+    DpadPosition talk_alt_back = DPAD_NONE;
+
     //  Set when the lead fainted since the last heal.
     bool lead_fainted = false;
     //  The last battle was lost: the player whited out and is at the last
@@ -261,10 +266,18 @@ bool story_cutscene(
 
 //  Press A to talk to whatever the player faces, until a text box (or a
 //  battle) shows up.
-void story_talk_start(StoryRuntime& rt, const std::string& what);
+//  Where the one talked to may stand instead (a TALK step with p2 = 1):
+//  without a text box, one step "move" (none: from here), turn to "face",
+//  talk again.
+struct StoryTalkAlt{
+    bool on = false;
+    DpadPosition move = DPAD_NONE;
+    DpadPosition face = DPAD_NONE;
+};
+void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt());
 
 //  Press A to talk, read until the YES/NO box and answer it.
-void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what);
+void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt());
 
 //  Talk to the nurse in front of the player (across the counter) and heal.
 //  Then save (unless the next step saves anyway). "mid_step": the running

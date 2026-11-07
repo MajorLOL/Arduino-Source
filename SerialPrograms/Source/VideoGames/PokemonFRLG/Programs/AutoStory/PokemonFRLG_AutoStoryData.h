@@ -22531,7 +22531,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "HarborToOneIslandPC_2", 1206, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioRuby", 1207, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK, "CelioRuby", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "CelioRuby", -1, 0, 0, 1, 4, 0, DPAD_UP, "", 0, 0, 0},
     {StepType::CUTSCENE, "Celio: the Ruby", -1, 3000, 60000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioToNurse", 1208, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -22646,7 +22646,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioGiveRuby", 1262, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK_YES, "CelioGiveRuby", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "CelioGiveRuby", -1, 0, 0, 1, 4, 0, DPAD_UP, "", 0, 0, 0},
     {StepType::CUTSCENE, "The Rainbow Pass", -1, 3000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioToNurse2", 1263, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -22814,7 +22814,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "HarborToOneIslandPC_2", 1346, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioSapphire", 1347, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK, "CelioSapphire", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "CelioSapphire", -1, 0, 0, 1, 4, 0, DPAD_UP, "", 0, 0, 0},
     {StepType::CUTSCENE, "The Network Machine works", -1, 5000, 120000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "CelioToNurse3", 1348, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -23002,7 +23002,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "2915885a9c";
+inline constexpr const char* DATA_ID = "cad7d0f09b";
 
 }
 }

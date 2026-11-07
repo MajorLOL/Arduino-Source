@@ -103,6 +103,23 @@ std::unique_ptr<StatsTracker> AutoStory_Descriptor::make_stats() const{
 namespace{
 
 
+//  A TALK step's other spot (p2 = 1; dir = the step there, p3 = the
+//  facing: 1 up, 2 down, 3 left, 4 right).
+StoryTalkAlt talk_alt(const StoryStep& step){
+    StoryTalkAlt alt;
+    if (step.p2 != 1){
+        return alt;
+    }
+    alt.on = true;
+    alt.move = step.dir;
+    alt.face =
+        step.p3 == 1 ? DPAD_UP :
+        step.p3 == 2 ? DPAD_DOWN :
+        step.p3 == 3 ? DPAD_LEFT :
+        step.p3 == 4 ? DPAD_RIGHT : DPAD_NONE;
+    return alt;
+}
+
 //  A text file the program wrote with string_to_file(): that puts a UTF-8
 //  BOM in front (build 76 read "Charmander" as another starter).
 bool read_text_file(const std::string& path, std::string& text){
@@ -451,6 +468,17 @@ void AutoStory::run_segment(
         if (label.rfind("RareCandy", 0) == 0){
             rt.no_rare_candies = false;     //  One is picked up here.
         }
+        if (rt.talk_alt_back != DPAD_NONE && (
+            step.type == StepType::WALK || step.type == StepType::HEAL ||
+            step.type == StepType::SAVE || step.type == StepType::FLY
+        )){
+            //  A talk went one step aside (the one talked to stood
+            //  elsewhere): back to where the route goes on.
+            const DpadPosition back = rt.talk_alt_back;
+            rt.talk_alt_back = DPAD_NONE;
+            env.log("One step back to where the route goes on: " + label);
+            story_checked_step(rt, back, false, false, StoryBattleKind::WILD, label + " (back)");
+        }
 
         //  A scene that turned into a battle: run the battle, then finish the scene.
         auto finish_scene = [&](Milliseconds min_time, Milliseconds max_time, bool yes){
@@ -484,14 +512,14 @@ void AutoStory::run_segment(
                 skip_battle = next_battle;
                 break;
             }
-            story_talk_start(rt, label);
+            story_talk_start(rt, label, talk_alt(step));
             if (!next_scene){
                 finish_scene(0ms, 60s, false);
             }
             break;
         case StepType::TALK_YES:
         case StepType::TALK_NO:
-            story_talk_answer(rt, step.type == StepType::TALK_YES, label);
+            story_talk_answer(rt, step.type == StepType::TALK_YES, label, talk_alt(step));
             if (!next_scene){
                 finish_scene(0ms, 60s, false);
             }
@@ -1078,6 +1106,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
             const bool whited_out = rt.whited_out;
             rt.whited_out = false;
+            rt.talk_alt_back = DPAD_NONE;      //  The save is loaded again.
             //  The first walk since the start failed: the save is probably
             //  not where the start step expects the player (C15_01, made
             //  for Vermilion's Pokemon Center, started in One Island's: 4

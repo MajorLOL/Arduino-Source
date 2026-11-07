@@ -720,6 +720,37 @@ class Builder:
                     return [d]
         return None
 
+    def talk_alt(self, m, main_xy, alt_xy, label):
+        """Where the one talked to may stand instead (some saves have it
+        there: Celio at his machine or by the stools). Without a text box
+        the program tries from there: one step ("dir", stepped back before
+        the next step that moves) to a tile next to alt_xy, facing it (p3: 1
+        up, 2 down, 3 left, 4 right; p2 = 1 marks the step)."""
+        mid, px, py, _ = self.pos
+        codes = {"up": 1, "down": 2, "left": 3, "right": 4}
+        ax, ay = alt_xy
+
+        def facing_to(x, y):
+            for d, (dx, dy) in DIRS.items():
+                if (x + dx, y + dy) == (ax, ay):
+                    return d
+            return None
+        f = facing_to(px, py)
+        if f is not None:
+            return {"p2": 1, "p3": codes[f]}
+        start = self.node()
+        for d, (dx, dy) in DIRS.items():
+            nx, ny = px + dx, py + dy
+            if (nx, ny) in (main_xy, alt_xy) or not m.in_bounds(nx, ny):
+                continue
+            f = facing_to(nx, ny)
+            if f is None:
+                continue
+            route = self.engine.route(start, {(mid, nx, ny)}, start_facing=self.pos[3])
+            if route is not None and len(route) == 1:
+                return {"p2": 1, "p3": codes[f], "dir": d}
+        raise StoryError("%s: no tile next to %s one step from %s" % (label, alt_xy, (px, py)))
+
     def interact_goals(self, m, tx, ty, only_dirs=None, counter=False):
         """Tiles next to (tx,ty) to stand on, and the facing for each.
         counter=True: also stand 2 tiles away across a counter (nurse, clerk)."""
@@ -856,7 +887,10 @@ class Builder:
             kind = {"talk": "TALK", "yes": "TALK_YES", "no": "TALK_NO", "battle": "TALK", "heal": "HEAL",
                     "plain": None}[mode]
             if kind:
-                out.append({"type": kind, "label": label})
+                ts = {"type": kind, "label": label}
+                if t.get("alt_xy") is not None and kind in ("TALK", "TALK_YES", "TALK_NO"):
+                    ts.update(self.talk_alt(m, (tx, ty), tuple(t["alt_xy"]), label))
+                out.append(ts)
             if mode == "battle":
                 out.append({"type": "BATTLE", "label": label, "p0": 30000})
             if approach is not None:

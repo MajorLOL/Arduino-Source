@@ -20,7 +20,7 @@ def goto(map_id, tiles, label=None, trigger=False):
     return s
 
 
-def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=False):
+def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=False, alt_xy=None):
     t = {"map": map_id, "mode": mode, "counter": counter}
     if obj is not None:
         t["object"] = obj
@@ -28,6 +28,9 @@ def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=
         t["xy"] = xy
     if dirs:
         t["dirs"] = dirs
+    if alt_xy is not None:
+        #  Where it may stand instead: tried when no text box comes up.
+        t["alt_xy"] = alt_xy
     s = {"talk": t}
     if label:
         s["label"] = label
@@ -1939,7 +1942,11 @@ CHAPTER16 = [
         "steps": [heal(PC["VERMILION"], "LabToVermilionPC"), save()]
         + vermilion_ferry(0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
             heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioRuby"),
+            #  Celio may still stand at his machine (15, 6): seen in a game
+            #  that came this way (SetBillCelioReadyToLeavePos had not put
+            #  him by the stools).
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioRuby",
+                 alt_xy=[15, 6]),
             cutscene(3000, 60000, "Celio: the Ruby"),
             setst(vars={"VAR_MAP_SCENE_MT_EMBER_EXTERIOR": 1, "VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 4},
                   script_tiles=[["MAP_MT_EMBER_EXTERIOR", "MtEmber_Exterior_EventScript_OpenCave"]]),
@@ -1986,7 +1993,8 @@ CHAPTER16 = [
         "steps": [
             #  OneIsland_PokemonCenter_1F_EventScript_GiveCelioRuby: "May I
             #  ask one more favor?" YES.
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="yes", label="CelioGiveRuby"),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="yes", label="CelioGiveRuby",
+                 alt_xy=[15, 6]),
             cutscene(3000, 90000, "The Rainbow Pass"),
             setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 5}, flags=["FLAG_SYS_SEVII_MAP_4567"],
                   script_tiles=[["MAP_ONE_ISLAND_POKEMON_CENTER_1F", "OneIsland_PokemonCenter_1F_EventScript_SetRubyMetatile"]]),
@@ -2125,7 +2133,8 @@ CHAPTER17 = [
         "title": "One Island: the Sapphire for Celio; the roaming legendary is out",
         "steps": rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 1, None, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
             heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioSapphire"),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioSapphire",
+                 alt_xy=[15, 6]),
             cutscene(5000, 120000, "The Network Machine works"),
             setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 6},
                   flags=["FLAG_SYS_CAN_LINK_WITH_RS", "FLAG_HIDE_CERULEAN_CAVE_GUARD", "FLAG_HIDE_LORELEI_IN_HER_HOUSE"]),
