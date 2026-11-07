@@ -1842,7 +1842,11 @@ void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalk
         if (spot == 1){
             go_to_talk_alt(rt, alt, what);
         }
-        for (int attempt = 0; attempt < 3 && ret < 0; attempt++){
+        //  With another spot, one try here: turning again is a step when
+        //  no one is there (Celio: two steps down, then the other spot
+        //  was tried from the wrong tile).
+        const int attempts = alt.on && spot == 0 ? 1 : 3;
+        for (int attempt = 0; attempt < attempts && ret < 0; attempt++){
             if (attempt > 0){
                 face_again(rt, what);
             }
@@ -1881,7 +1885,10 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, cons
         if (spot == 1){
             go_to_talk_alt(rt, alt, what);
         }
-        for (int attempt = 0; attempt < 3; attempt++){
+        //  With another spot, one try here (turning again is a step when
+        //  no one is there).
+        const int attempts = alt.on && spot == 0 ? 1 : 3;
+        for (int attempt = 0; attempt < attempts; attempt++){
             if (attempt > 0){
                 face_again(rt, what);
             }
