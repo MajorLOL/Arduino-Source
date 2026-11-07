@@ -200,11 +200,11 @@ AutoStory::AutoStory()
         Starter::BULBASAUR
     )
     , CONTINUE_FROM_SAVE(
-        "<b>Go on from the program's last save:</b><br>At each save the program writes where to go on "
-        "into a file of its own (UserSettings/PokemonFRLG-AutoStory-Save.txt; with a new build, copy the "
-        "UserSettings folder into its folder). With this on, a run goes on from there, whatever the "
-        "segment and step below say. Turn it off to start somewhere else: a new game, or a save made by "
-        "hand (the game must then be saved where that segment and step start).",
+        "<b>Check the start against the program's last save:</b><br>At each save the program writes where "
+        "to go on into a file of its own (UserSettings/PokemonFRLG-AutoStory-Save.txt; with a new build, copy "
+        "the UserSettings folder into its folder). With this on, a run whose segment and step below are not "
+        "that place stops at once and names it. Turn it off to start somewhere else: a new game, or a save "
+        "made by hand (the game must then be saved where that segment and step start).",
         LockMode::LOCK_WHILE_RUNNING,
         true
     )
@@ -770,18 +770,22 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             const int step = words.size() == 3 ? std::atoi(words[2].c_str()) : 0;
             if (segment == (size_t)-1 || step < 1 || words[0] != starter_name(starter)){
                 env.log("The program's last save (" + save_file + ") is not for this story: \"" + text + "\". Starting at the segment and step chosen.", COLOR_ORANGE);
+            }else if (segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP){
+                //  Not taken over without a word: a start chosen by hand for
+                //  a save made by hand (C15_04 step 7 in Fuchsia) went to
+                //  the program's last save instead, and the start options
+                //  shown were changed with it.
+                throw UserSetupError(
+                    env.console,
+                    "The start (segment " + std::string(script.segments[START_SEGMENT.current_value()].id) +
+                    ", step " + std::to_string((uint16_t)START_STEP) + ") is not where the program last saved "
+                    "(segment " + script.segments[segment].id + ", step " + std::to_string(step) + "). "
+                    "To go on from that save, choose segment " + script.segments[segment].id + ", step " +
+                    std::to_string(step) + ". If the game was saved by hand where the chosen step starts, "
+                    "turn off \"Check the start against the program's last save\"."
+                );
             }else{
-                if (segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP){
-                    env.log(
-                        "Going on from the program's last save: segment " + std::string(script.segments[segment].id) +
-                        ", step " + std::to_string(step) + " (the start options said " +
-                        script.segments[START_SEGMENT.current_value()].id + ", step " +
-                        std::to_string((uint16_t)START_STEP) + ").",
-                        COLOR_BLUE
-                    );
-                }
-                START_SEGMENT.set_value(segment);
-                START_STEP.set((uint16_t)std::min(step, 999));
+                env.log("The start is where the program last saved.", COLOR_BLUE);
             }
         }else{
             env.log("No save of the program's yet (" + save_file + "): starting at the segment and step chosen.");
@@ -1139,7 +1143,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                             "Nothing was saved since the start: is the save where " +
                             std::string(script.segments[first].id) + " step " + std::to_string(first_step + 1) +
                             " starts (" + start_where + ")?" +
-                            (CONTINUE_FROM_SAVE ? std::string() : std::string(" Turn on \"Go on from the program's last save\".")),
+                            (CONTINUE_FROM_SAVE ? std::string() : std::string(" Turn on \"Check the start against the program's last save\".")),
                             COLOR_RED
                         );
                     }
