@@ -556,14 +556,24 @@ void story_field_move(StoryRuntime& rt, int party_slot, const std::string& move,
     console.log("Field move " + move + " from party slot " + std::to_string(party_slot) + ": " + what);
     story_fix_party_order(rt, false);
     story_face(rt, facing);
-    //  The descriptions of the party menu (gText_CutATreeOrGrass...).
+    //  The descriptions of the party menu (gText_CutATreeOrGrass...), in
+    //  parts: the small text reads badly ("Cut a tree or grass." came out
+    //  as "cut o trae or grgbs,"). No other description has these words.
     std::vector<std::string> words;
     if (move == "CUT"){
-        words = {"cut a", "tree or grass"};
+        words = {"cut", "tree", "grass"};
     }else if (move == "FLY"){
         words = {"fly", "known town"};
+    }else if (move == "SURF"){
+        words = {"travel", "on water"};
+    }else if (move == "STRENGTH"){
+        words = {"boulder", "heavy"};
+    }else if (move == "FLASH"){
+        words = {"light up", "darkness"};
+    }else if (move == "ROCK SMASH"){
+        words = {"shatter", "cracked"};
     }else if (move == "WATERFALL"){
-        words = {"waterfall"};
+        words = {"waterfall", "climb"};
     }else{
         std::string lower;
         for (char c : move){
