@@ -447,14 +447,23 @@ class MapView:
             self.blocked.add(xy)
             mv = o["movement"]
             if "WANDER" in mv or "WALK_" in mv:
-                horiz = "AROUND" in mv or "LEFT_AND_RIGHT" in mv or "LEFT_RIGHT" in mv
-                vert = "AROUND" in mv or "UP_AND_DOWN" in mv or "UP_DOWN" in mv
+                #  Both orders: WALK_RIGHT_AND_LEFT (Hugh on Kindle Road) had
+                #  no range at all.
+                horiz = "AROUND" in mv or any(s in mv for s in ("LEFT_AND_RIGHT", "RIGHT_AND_LEFT", "LEFT_RIGHT", "RIGHT_LEFT"))
+                vert = "AROUND" in mv or any(s in mv for s in ("UP_AND_DOWN", "DOWN_AND_UP", "UP_DOWN", "DOWN_UP"))
                 xs = range(o["x"] - o["rx"], o["x"] + o["rx"] + 1) if horiz else [o["x"]]
                 ys = range(o["y"] - o["ry"], o["y"] + o["ry"] + 1) if vert else [o["y"]]
+                #  One that walks back and forth (not around) passes the
+                #  tiles inside its line both ways, the two ends once: an
+                #  end is half as often in the way (Kindle Road: the two
+                #  BLACK BELTs on row 64, crossed at the middle of the path).
+                back_and_forth = "AROUND" not in mv and (horiz != vert)
                 for tx in xs:
                     for ty in ys:
                         if (tx, ty) != xy:
-                            self.soft[(tx, ty)] = self.soft.get((tx, ty), 0) + COST_NPC_RANGE
+                            end = (horiz and abs(tx - o["x"]) == o["rx"]) or (vert and abs(ty - o["y"]) == o["ry"])
+                            cost = COST_NPC_RANGE if (end or not back_and_forth) else 2 * COST_NPC_RANGE
+                            self.soft[(tx, ty)] = self.soft.get((tx, ty), 0) + cost
             if o["trainer"] and o["sight"] > 0:
                 walk_area = trainer_walk_area(
                     m, o, lambda x, y: m.tile(x, y)[1] == 0 or (x, y) in st.tile_overrides.get(m.id, {})

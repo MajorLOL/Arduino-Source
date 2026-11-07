@@ -20,6 +20,11 @@ def goto(map_id, tiles, label=None, trigger=False):
     return s
 
 
+#  Where Celio stands in One Island's Pokemon Center from the Ruby on.
+CELIO_AT_MACHINE = [15, 6]
+CELIO_BY_STOOLS = [14, 8]
+
+
 def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=False, alt_xy=None):
     t = {"map": map_id, "mode": mode, "counter": counter}
     if obj is not None:
@@ -1942,11 +1947,12 @@ CHAPTER16 = [
         "steps": [heal(PC["VERMILION"], "LabToVermilionPC"), save()]
         + vermilion_ferry(0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
             heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
-            #  Celio may still stand at his machine (15, 6): seen in a game
-            #  that came this way (SetBillCelioReadyToLeavePos had not put
-            #  him by the stools).
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioRuby",
-                 alt_xy=[15, 6]),
+            #  Celio stood at his machine (15, 6) in the game tested, not by
+            #  the stools (14, 8) where SetBillCelioReadyToLeavePos puts him:
+            #  talked to at the machine first (no step down to the stools),
+            #  by the stools if no text box comes up.
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", xy=CELIO_AT_MACHINE, mode="talk", label="CelioRuby",
+                 alt_xy=CELIO_BY_STOOLS),
             cutscene(3000, 60000, "Celio: the Ruby"),
             setst(vars={"VAR_MAP_SCENE_MT_EMBER_EXTERIOR": 1, "VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 4},
                   script_tiles=[["MAP_MT_EMBER_EXTERIOR", "MtEmber_Exterior_EventScript_OpenCave"]]),
@@ -1993,8 +1999,8 @@ CHAPTER16 = [
         "steps": [
             #  OneIsland_PokemonCenter_1F_EventScript_GiveCelioRuby: "May I
             #  ask one more favor?" YES.
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="yes", label="CelioGiveRuby",
-                 alt_xy=[15, 6]),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", xy=CELIO_AT_MACHINE, mode="yes", label="CelioGiveRuby",
+                 alt_xy=CELIO_BY_STOOLS),
             cutscene(3000, 90000, "The Rainbow Pass"),
             setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 5}, flags=["FLAG_SYS_SEVII_MAP_4567"],
                   script_tiles=[["MAP_ONE_ISLAND_POKEMON_CENTER_1F", "OneIsland_PokemonCenter_1F_EventScript_SetRubyMetatile"]]),
@@ -2040,6 +2046,15 @@ CHAPTER17 = [
         "id": "C17_01_ICEFALL_CAVE", "chapter": 17,
         "title": "Four Island, Icefall Cave: thin ice, HM07 Waterfall for Vaporeon",
         "steps": rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 3, None, "MAP_FOUR_ISLAND_HARBOR", "FerryToFourIsland") + [
+            #  The first step on Four Island: the rival comes, talks and
+            #  leaves (FourIsland_EventScript_RivalScene, VAR 0), the player
+            #  steps left to watch him go (PlayerWatchRivalExit): one tile
+            #  left of the arrival (10, 28), facing right. Unmodelled, the
+            #  walk to the Pokemon Center ended a tile left of its door.
+            goto("MAP_FOUR_ISLAND", [[10, 28]], "HarborToFourIsland"),
+            cutscene(3000, 60000, "The rival on Four Island"),
+            pos("MAP_FOUR_ISLAND", 9, 28, "right"),
+            setst(vars={"VAR_MAP_SCENE_FOUR_ISLAND": 1}, flags=["FLAG_HIDE_FOUR_ISLAND_RIVAL"]),
             heal("MAP_FOUR_ISLAND_POKEMON_CENTER_1F", "HarborToFourIslandPC"),
             save(),
             #  1F: over the thin ice (8, 14), (8, 10), (8, 9) up to the thin
@@ -2133,8 +2148,8 @@ CHAPTER17 = [
         "title": "One Island: the Sapphire for Celio; the roaming legendary is out",
         "steps": rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 1, None, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
             heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
-            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "LOCALID_CELIO", mode="talk", label="CelioSapphire",
-                 alt_xy=[15, 6]),
+            talk("MAP_ONE_ISLAND_POKEMON_CENTER_1F", xy=CELIO_AT_MACHINE, mode="talk", label="CelioSapphire",
+                 alt_xy=CELIO_BY_STOOLS),
             cutscene(5000, 120000, "The Network Machine works"),
             setst(vars={"VAR_MAP_SCENE_ONE_ISLAND_POKEMON_CENTER_1F": 6},
                   flags=["FLAG_SYS_CAN_LINK_WITH_RS", "FLAG_HIDE_CERULEAN_CAVE_GUARD", "FLAG_HIDE_LORELEI_IN_HER_HOUSE"]),
