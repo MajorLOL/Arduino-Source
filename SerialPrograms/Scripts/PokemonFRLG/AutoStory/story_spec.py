@@ -2099,7 +2099,16 @@ CHAPTER17 = [
         "id": "C17_03_DOTTED_HOLE", "chapter": 17,
         "title": "Six Island: Ruin Valley, the Dotted Hole, the Sapphire (Gideon takes it)",
         "steps": rainbow_ferry("MAP_FOUR_ISLAND_HARBOR", 4, 1, "MAP_SIX_ISLAND_HARBOR", "FerryToSixIsland") + [
-            heal("MAP_SIX_ISLAND_POKEMON_CENTER_1F", "HarborToSixIslandPC"),
+            #  The first step into Six Island's Pokemon Center: the rival
+            #  again (SixIsland_PokemonCenter_1F_EventScript_RivalScene, VAR
+            #  0), the player steps left to let him go: (6, 8), facing
+            #  right. Unmodelled, the walk to the nurse ended a tile left.
+            goto("MAP_SIX_ISLAND_POKEMON_CENTER_1F", [[7, 8]], "HarborToSixIslandPC"),
+            cutscene(3000, 60000, "The rival in Six Island's Pokemon Center"),
+            pos("MAP_SIX_ISLAND_POKEMON_CENTER_1F", 6, 8, "right"),
+            setst(vars={"VAR_MAP_SCENE_SIX_ISLAND_POKEMON_CENTER_1F": 1, "VAR_MAP_SCENE_FOUR_ISLAND": 1},
+                  flags=["FLAG_HIDE_SIX_ISLAND_POKECENTER_RIVAL"]),
+            heal("MAP_SIX_ISLAND_POKEMON_CENTER_1F", "ToSixIslandNurse"),
             save(),
             #  CutMoveRuinValleyCheck: CUT from the party menu at (24, 25),
             #  facing north; the door opens (CutMoveOpenDottedHoleDoor).

@@ -27,6 +27,8 @@ and plans trainer battles that the route cannot avoid.
 """
 
 import copy
+import json
+import os
 
 from frlg_data import DIRS, OPPOSITE
 from engine import MapGoals, Engine, WorldState, fixed_facing, EngineError
@@ -47,6 +49,41 @@ RUN_APPROACH = "APPROACH"
 #  Back out of that line to where the approach started: as many moves as
 #  the approach really made (none if the trainer came all the way).
 RUN_BACK = "BACK"
+
+
+_FRAME_SCENES = None
+
+
+def frame_scenes(decomp):
+    """{map id: [(var, value, script)]}: frame scripts that move the player
+    a step (not only turn it), outside temporary variables."""
+    global _FRAME_SCENES
+    if _FRAME_SCENES is not None:
+        return _FRAME_SCENES
+    import re
+    out = {}
+    root = os.path.join(decomp.root, "data", "maps")
+    steps = re.compile(r"\b(walk|jump|slide|walk_slow|walk_fast|player_run)_(up|down|left|right)\b")
+    for name in os.listdir(root):
+        path = os.path.join(root, name, "scripts.inc")
+        mj = os.path.join(root, name, "map.json")
+        if not os.path.exists(path) or not os.path.exists(mj):
+            continue
+        text = open(path).read()
+        labels = {}
+        for m in re.finditer(r"^(\w+)::\n(.*?)(?=^\w+::|\Z)", text, re.S | re.M):
+            labels[m.group(1)] = m.group(2)
+        map_id = json.load(open(mj))["id"]
+        for m in re.finditer(r"map_script_2 (\w+), (\d+), (\w+)", text):
+            var, value, script = m.group(1), int(m.group(2)), m.group(3)
+            if var.startswith("VAR_TEMP"):
+                continue
+            body = labels.get(script, "")
+            moves = re.findall(r"applymovement (?:LOCALID_PLAYER|OBJ_EVENT_ID_PLAYER), (\w+)", body)
+            if any(steps.search(labels.get(mv, "")) for mv in moves):
+                out.setdefault(map_id, []).append((var, value, script))
+    _FRAME_SCENES = out
+    return out
 
 
 class StoryError(Exception):
@@ -292,6 +329,24 @@ class Builder:
                 self.segment_id, c[0], c[1], c[2]))
         return route
 
+    def check_scenes_on_the_way(self, start, route, label):
+        """A map entered on the way whose frame script moves the player
+        (map_script_2 with the state's variable at its value): the rival on
+        Four Island and in Six Island's Pokemon Center made the player step
+        aside, and the route went on a tile off. Such a scene is modelled by
+        a walk that ends where it starts, then cutscene() and pos()."""
+        scenes = frame_scenes(self.d)
+        prev = start[0]
+        for i, item in enumerate(route):
+            node = item[1]
+            if node[0] != prev:
+                for var, value, script in scenes.get(node[0], []):
+                    have = self.state.vars.get(var, 0)
+                    if have == value and i + 1 < len(route):
+                        self.warnings.append("%s: %s: entering %s starts %s (%s == %d), which moves the player" % (
+                            self.segment_id, label, node[0], script, var, value))
+                prev = node[0]
+
     def walk_to(self, goals, label, out, end_mode="STOP", face=None, allow_trigger=False, face_map=None):
         """Route to any of goals [(map,x,y)], emitting legs and actions."""
         guard = 0
@@ -331,6 +386,7 @@ class Builder:
             if face_map:
                 end = route[-1][1] if route else self.node()
                 face = face_map[(end[0], end[1], end[2])]
+            self.check_scenes_on_the_way(start, route, label)
             self.emit_route(route, label, out, end_mode, face)
             return
 
