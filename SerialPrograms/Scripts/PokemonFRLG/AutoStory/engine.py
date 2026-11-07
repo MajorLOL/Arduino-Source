@@ -761,8 +761,12 @@ class Engine:
                                "risk": set()}
                     continue
 
-            #  Item balls in the way: pick them up.
-            if (nx, ny) in tv.items and not surfing:
+            #  Item balls in the way: pick them up. Not from the water: no
+            #  landing on one either (Cerulean Cave 1F: the FULL RESTORE at
+            #  (11, 16) was taken for free shore, and the dismount stopped).
+            if (nx, ny) in tv.items and surfing:
+                continue
+            if (nx, ny) in tv.items:
                 nn = (tm.id, nx, ny, elev if telev in (0, 15) else telev, False)
                 yield nn, {"kind": "item", "dir": d, "cost": COST_ITEM + COST_STEP,
                            "flag": tv.items[(nx, ny)], "risk": self.tile_risk(tv, nx, ny, False)}

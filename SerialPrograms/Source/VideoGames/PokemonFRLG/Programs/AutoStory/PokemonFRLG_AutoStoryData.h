@@ -18914,11 +18914,11 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_UP, 2, RunKind::SURF_CHECKED},
     {DPAD_LEFT, 15, RunKind::SURF_CHECKED},
     {DPAD_DOWN, 11, RunKind::SURF_CHECKED},
-    {DPAD_LEFT, 3, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 4, RunKind::SURF_CHECKED},
     {DPAD_DOWN, 1, RunKind::SURF_CHECKED},
     {DPAD_DOWN, 1, RunKind::DISMOUNT},
     {DPAD_DOWN, 3, RunKind::CHECKED},
-    {DPAD_RIGHT, 3, RunKind::CHECKED},
+    {DPAD_RIGHT, 4, RunKind::CHECKED},
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_UP, 1, RunKind::CHECKED},
     {DPAD_RIGHT, 14, RunKind::CHECKED},
@@ -23072,7 +23072,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "2967bff0ce";
+inline constexpr const char* DATA_ID = "44565ad2f4";
 
 }
 }
