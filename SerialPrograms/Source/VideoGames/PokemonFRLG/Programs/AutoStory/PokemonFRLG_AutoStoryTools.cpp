@@ -1668,8 +1668,10 @@ bool story_cutscene(
     //  the S.S. Anne corridors): after a few presses on one, check whether
     //  the player is free to move.
     int dialog_in_row = 0;
-    //  Answering YES: since when a text box without the advance arrow is up.
+    //  Answering YES: since when a text box without the advance arrow is up,
+    //  and how many times such a box stayed (A pressed on it).
     WallClock no_arrow_since = WallClock::max();
+    int no_arrow_times = 0;
     while (current_time() < deadline){
         SelectionDialogWatcher yes_no(COLOR_RED);
         WhiteDialogWatcher dialog(COLOR_RED);
@@ -1698,7 +1700,11 @@ bool story_cutscene(
             break;
         }
         case 1:{
-            if (++dialog_in_row % 5 == 0 && current_time() - start >= min_time &&
+            //  Answering YES, not this check: it presses START and then B,
+            //  and B goes to the text (Oak's aide on Route 15: five pages,
+            //  the B's of the check went through them and said NO).
+            if (!answer_yes &&
+                ++dialog_in_row % 5 == 0 && current_time() - start >= min_time &&
                 in_overworld(rt.console, rt.context)
             ){
                 rt.console.log("Cutscene over: " + what);
@@ -1732,7 +1738,15 @@ bool story_cutscene(
             }
             if (now - no_arrow_since >= 8s){
                 //  A box that never shows the arrow: A advances it too (and
-                //  says YES to a box the detector does not see).
+                //  says YES to a box the detector does not see). One that
+                //  stays after a few A's may be a place that only looks
+                //  like a text box: is the player free?
+                if (++no_arrow_times >= 3 && current_time() - start >= min_time &&
+                    in_overworld(rt.console, rt.context)
+                ){
+                    rt.console.log("Cutscene over: " + what);
+                    return false;
+                }
                 rt.console.log("Text without the advance arrow: A.", COLOR_ORANGE);
                 no_arrow_since = WallClock::max();
                 pbf_press_button(rt.context, BUTTON_A, 160ms, 340ms);
