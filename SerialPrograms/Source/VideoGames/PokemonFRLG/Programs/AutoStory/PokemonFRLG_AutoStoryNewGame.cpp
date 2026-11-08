@@ -362,7 +362,8 @@ bool try_new_game(StoryRuntime& rt, const std::string& player, const std::string
     WallClock rival_time = WallClock::min();
     std::string last_text;
     int checks = 0;
-    const WallClock deadline = current_time() + 8min;
+    const WallClock intro_start = current_time();
+    const WallClock deadline = intro_start + 8min;
     while (current_time() < deadline){
         context.wait_for_all_requests();
         VideoSnapshot screen = console.video().snapshot();
@@ -425,6 +426,24 @@ bool try_new_game(StoryRuntime& rt, const std::string& player, const std::string
             }
             continue;
         }
+        if (has(text, "played with") || has(text, "time to go")){
+            //  "ASH played with the NES. ...Okay! It's time to go!": A in the
+            //  bedroom, facing the NES. The intro is over.
+            console.log("The NES in the bedroom: the intro is over.");
+            for (int i = 0; i < 3; i++){
+                tap(context, BUTTON_B, 800ms);
+            }
+            context.wait_for_all_requests();
+            if (in_overworld(console, context)){
+                if (player_typed == 0 || rival_typed == 0){
+                    console.log("In the bedroom, but the naming screens were not recognized: the new game again.", COLOR_RED);
+                    return false;
+                }
+                console.log("In the bedroom.", COLOR_BLUE);
+                return true;
+            }
+            continue;
+        }
         if (rival_typed > 0 && (has(text, "let's go") || has(text, "lets go") || has(text, "adventures"))){
             //  The last page needs no A: the picture shrinks, the bedroom.
             console.log("Oak's last words: waiting for the bedroom.");
@@ -438,6 +457,14 @@ bool try_new_game(StoryRuntime& rt, const std::string& player, const std::string
             }
             console.log("Not in the bedroom after the intro.", COLOR_RED);
             return false;
+        }
+        if (player_typed == 0 && current_time() > intro_start + 4min && ++checks % 6 == 0){
+            //  No naming screen recognized in four minutes: the A presses
+            //  may have got through the names and into the bedroom.
+            if (in_overworld(console, context)){
+                console.log("In the bedroom, but the naming screens were not recognized: the new game again.", COLOR_RED);
+                return false;
+            }
         }
         if (rival_typed > 0 && current_time() > rival_time + 12s && ++checks % 3 == 0){
             //  Oak's last words not read: the bedroom yet? (START does
