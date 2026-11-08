@@ -1368,6 +1368,7 @@ StoryBattleResult run_story_battle(
     bool lost = false;
     int next_slot = 1;
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
+    int list_only_in_row = 0;   //  of those, how many showed the move list
     //  The last press was a blind one ("Nothing recognized"): a move list
     //  open now may be its doing (A on FIGHT), not a pick that did not go
     //  through.
@@ -1446,6 +1447,7 @@ StoryBattleResult run_story_battle(
         }
         if (ret >= 0){
             unknown_in_row = 0;
+            list_only_in_row = 0;
             text_only_in_row = 0;
             pressed_blind = false;
         }
@@ -2084,6 +2086,24 @@ StoryBattleResult run_story_battle(
                     list_open = false;
                 }
                 if (list_open){
+                    //  The overworld can look like the move list (Cerulean
+                    //  Cave 1F after running away: "BOUNCE" and "SNATCH"
+                    //  read from the floor, and moves picked there for 20
+                    //  minutes). Without the foe's box at the top left, or
+                    //  twice in a row with nothing else between: look
+                    //  whether the player is free to move.
+                    list_only_in_row++;
+                    const bool foe_box = screen && read_caught_mark(screen) >= 0;
+                    if ((!foe_box || list_only_in_row >= 2) && in_overworld(console, context)){
+                        if (lost){
+                            return StoryBattleResult::LOST;
+                        }
+                        if (!seen_battle){
+                            return StoryBattleResult::NO_BATTLE;
+                        }
+                        console.log("Battle over: the move list was only the look of the place.");
+                        return over();
+                    }
                     seen_battle = true;
                     battle_confirmed = true;
                     last_activity = current_time();
