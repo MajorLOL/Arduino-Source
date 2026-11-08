@@ -1233,15 +1233,17 @@ class Builder:
             goals_face = self.interact_goals(pc, nx, ny, ["up"], counter=True)
             goals = set(goals_face.keys())
             self.walk_to(goals, step.get("label", "To nurse"), out, shortcuts=True)
-            out.append({"type": "HEAL", "label": "Heal at " + pc.name})
             self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")
+            out.append({"type": "HEAL", "label": "Heal at " + pc.name, "at": list(self.pos)})
             return
         if "grind" in step:
             self.no_repel_here("grind")
             self.grind(step, out)
             return
         if "save" in step:
-            out.append({"type": "SAVE", "label": "Save", "p0": 1 if step["save"].get("dex") else 0})
+            #  "at": where the player stands (for the guide of start positions).
+            out.append({"type": "SAVE", "label": "Save", "p0": 1 if step["save"].get("dex") else 0,
+                        "at": list(self.pos)})
             self.saved_consumables = (dict(self.state.items), self.state.repel_left)
             return
         if "teach" in step:
@@ -1294,7 +1296,8 @@ class Builder:
             self.walk_to(set(tiles), step.get("label", "Trigger"), out, end_mode="TRIGGER")
             return
         if "team" in step:
-            out.append({"type": "TEAM", "label": step.get("label", "Team"), "p0": step["team"]})
+            out.append({"type": "TEAM", "label": step.get("label", "Team"), "p0": step["team"],
+                        "at": list(self.pos)})
             return
         if "use_item" in step:
             u = step["use_item"]
@@ -1489,7 +1492,8 @@ class Builder:
 
         if self.pos[:3] not in nurse_goals:
             self.walk_to(nurse_goals, label + "_FirstToNurse", out)
-            out.append({"type": "HEAL", "label": "Heal at " + pc.name})
+            out.append({"type": "HEAL", "label": "Heal at " + pc.name,
+                        "at": [self.pos[0], self.pos[1], self.pos[2], "up"]})
         self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")
 
         sub = []
@@ -1530,6 +1534,7 @@ class Builder:
             #  0x100: Rare Candies first.
             "p4": length | (0x100 if g.get("candies") else 0),
             "legs_to_grass": legs_to_grass, "legs_to_nurse": legs_to_nurse, "legs_back": legs_back,
+            "at": list(nurse_pos),
         })
         #  The grind ends healed at the nurse.
         self.pos = nurse_pos
