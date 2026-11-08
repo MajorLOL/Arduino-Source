@@ -1272,7 +1272,7 @@ CHAPTER10 = [
 ]
 
 
-def legendary(map_id, xy, flags, label, weaken=False):
+def legendary(map_id, xy, flags, label, weaken=False, heal=True):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
     (not the Master Ball: that is kept for the roaming legendary) until it
@@ -1282,11 +1282,18 @@ def legendary(map_id, xy, flags, label, weaken=False):
     the red). Caught: saved on the spot, so that nothing on the way back
     (a walk that goes wrong, the tired team fainting) loses it again
     (Cerulean Cave: Mewtwo caught eleven times, lost on the way out each
-    time)."""
+    time). heal: then the tired team is healed from the bag (REVIVE, FULL
+    RESTORE on the first two), after the save, so that every try of the way
+    back starts with it (Cerulean Cave: a WOBBUFFET, which cannot be run
+    from, made the team faint)."""
     return [talk(map_id, xy=xy, mode="talk", label=label),
             {"battle": 60000, "label": label, "legendary": True, "weaken": weaken},
             setst(flags=flags),
-            save()]
+            save()] + ([heal_after_legendary(label)] if heal else [])
+
+
+def heal_after_legendary(label):
+    return {"heal_items": "after_legendary", "label": "Heal with items after " + label}
 
 
 #  Seafoam Islands: the holes. A boulder pushed into one falls to the floor
@@ -1535,12 +1542,13 @@ CHAPTER12 = [
             goto("MAP_MT_EMBER_SUMMIT", [[9, 7]], "ToMoltres"),
             save(),
         ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
-                      weaken=True) + [
+                      weaken=True, heal=False) + [
             #  Caught (and saved): loaded again, so Strength is off whether
             #  it took one try or several. The boulders stay where they were
             #  pushed on the way up (loading a save keeps them there): the
             #  way down is through them again.
             {"reload": True, "label": "Reload after Moltres"},
+            heal_after_legendary("Moltres"),
             {"boulder": {"open_to": [[9, 14]]}, "label": "SummitBouldersBack"},
             #  Mt. Ember loads again on the way down: its boulders are back.
             setst(reset_objects=["MAP_MT_EMBER_EXTERIOR"]),

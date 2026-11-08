@@ -1003,6 +1003,43 @@ void story_heal_with_items(StoryRuntime& rt){
 
 
 
+void story_heal_after_legendary(StoryRuntime& rt){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("Healing the first two of the team with items (worn out from the legendary Pokemon).", COLOR_BLUE);
+    struct Use{
+        int slot;
+        bool revive;
+    };
+    const Use uses[] = {{1, true}, {2, true}, {1, false}, {2, false}};
+    bool no_revive = false;
+    bool no_restore = false;
+    for (const Use& use : uses){
+        if (use.revive ? no_revive : no_restore){
+            continue;
+        }
+        open_bag_from_overworld(console, context);
+        //  REVIVE or MAX REVIVE ("Revives a fainted POKeMON..."); FULL
+        //  RESTORE or MAX POTION ("Fully restores the HP...").
+        const bool found = use.revive
+            ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {}, "REVIVE")
+            : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
+        if (found){
+            use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
+        }else if (use.revive){
+            no_revive = true;
+        }else{
+            no_restore = true;
+        }
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+    }
+    rt.lead_fainted = false;
+}
+
+
+
 int story_use_rare_candies(StoryRuntime& rt, int count){
     if (count <= 0 || rt.no_rare_candies){
         return 0;

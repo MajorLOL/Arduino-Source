@@ -725,7 +725,11 @@ void AutoStory::run_segment(
             story_buy(rt, step.p0, step.p1, label);
             break;
         case StepType::HEAL_ITEMS:
-            story_heal_with_items(rt);
+            if (step.p0 == 1){
+                story_heal_after_legendary(rt);
+            }else{
+                story_heal_with_items(rt);
+            }
             break;
         case StepType::USE_ITEM:
             story_use_item(rt, step.p0, step.text, label, step.p1 == 1);

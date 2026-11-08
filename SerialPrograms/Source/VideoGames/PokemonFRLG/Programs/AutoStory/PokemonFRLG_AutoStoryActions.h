@@ -42,6 +42,12 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 //  Full Restore on the second one too).
 void story_heal_with_items(StoryRuntime& rt);
 
+//  After a legendary Pokemon (the save right after it): REVIVE on party
+//  slots 1 and 2, then FULL RESTORE on both, as far as the bag has them.
+//  Who fainted is not known after a reload; on one who did not, a REVIVE
+//  has no effect and is not used up.
+void story_heal_after_legendary(StoryRuntime& rt);
+
 //  The level of a party slot (1-6), from its summary (-1 if not read), and
 //  its species (slug, "" if not read).
 int story_read_slot(StoryRuntime& rt, int slot, std::string* species);

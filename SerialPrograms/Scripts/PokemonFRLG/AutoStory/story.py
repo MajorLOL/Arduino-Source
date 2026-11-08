@@ -1067,7 +1067,10 @@ class Builder:
             out.append({"type": "BUY", "label": step.get("label", "Buy"), "p0": b["index"], "p1": b["quantity"]})
             return
         if "heal_items" in step:
-            out.append({"type": "HEAL_ITEMS", "label": step.get("label", "Heal with items")})
+            #  p0 1: after a legendary Pokemon (REVIVE and FULL RESTORE on
+            #  party slots 1 and 2, whatever is known of them).
+            out.append({"type": "HEAL_ITEMS", "label": step.get("label", "Heal with items"),
+                        "p0": 1 if step["heal_items"] == "after_legendary" else 0})
             return
         if "boulder" in step:
             self.boulder_puzzle(step, out)
