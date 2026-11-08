@@ -5,6 +5,7 @@
  */
 
 #include <algorithm>
+#include <cstdlib>
 #include <cctype>
 #include <string>
 #include <vector>
@@ -12,6 +13,10 @@
 #include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonTools/Async/InferenceRoutines.h"
+#include "CommonTools/Images/ImageFilter.h"
+#include "CommonTools/OCR/OCR_Routines.h"
+#include "CommonFramework/Language.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
@@ -223,34 +228,95 @@ void type_name(StoryRuntime& rt, const std::string& name){
     context.wait_for_all_requests();
 }
 
-//  After A on Oak's question: the fade to black, the naming screen.
-void to_naming_screen(StoryRuntime& rt){
-    ConsoleHandle& console = rt.console;
-    ProControllerContext& context = rt.context;
-    BlackScreenWatcher black(COLOR_RED);
-    context.wait_for_all_requests();
-    if (wait_until(console, context, 3000ms, { black }) == 0){
-        BlackScreenOverWatcher over(COLOR_RED);
-        wait_until(console, context, 5000ms, { over });
+//  The naming screen (naming_screen.c): the keyboard on its light blue
+//  panel (123, 173, 198) under the white box with the title, as on the
+//  Switch (build 89: "RIVAL's NAME?" with AAAAAAA, typed by the A presses
+//  that were meant for Oak's text).
+bool is_naming_screen(const ImageViewRGB32& screen){
+    ImageViewRGB32 game = extract_box_reference(screen, GameSettings::instance().GAME_BOX);
+    const size_t width = game.width();
+    const size_t height = game.height();
+    if (width < 240 || height < 160){
+        return false;
     }
-    pbf_wait(context, 1200ms);
-    context.wait_for_all_requests();
+    const double sx = (double)width / 240.0;
+    const double sy = (double)height / 160.0;
+    auto pixel = [&](int x, int y){
+        const size_t px = std::min(width - 1, (size_t)((x + 0.5) * sx));
+        const size_t py = std::min(height - 1, (size_t)((y + 0.5) * sy));
+        return game.pixel(px, py);
+    };
+    //  (Close: Oak's backdrop has (115, 180, 197).)
+    int blue = 0;
+    int total = 0;
+    for (int y = 80; y < 140; y += 2){
+        for (int x = 40; x < 160; x += 2){
+            const uint32_t p = pixel(x, y);
+            const int r = (p >> 16) & 0xff;
+            const int g = (p >> 8) & 0xff;
+            const int b = p & 0xff;
+            total++;
+            blue += std::abs(r - 123) < 6 && std::abs(g - 173) < 6 && std::abs(b - 198) < 8 ? 1 : 0;
+        }
+    }
+    if (blue * 10 < total * 6){
+        return false;
+    }
+    //  The yellow stripes of the background left and right of the panels.
+    int yellow = 0;
+    total = 0;
+    for (int y = 60; y < 150; y++){
+        for (int x : {2, 6, 10, 14, 226, 230, 234, 237}){
+            const uint32_t p = pixel(x, y);
+            total++;
+            yellow += ((p >> 16) & 0xff) > 190 && ((p >> 8) & 0xff) > 180 && (p & 0xff) < 160 ? 1 : 0;
+        }
+    }
+    if (yellow * 100 < total * 8){
+        return false;
+    }
+    int white = 0;
+    total = 0;
+    for (int y = 18; y < 52; y += 2){
+        for (int x = 50; x < 190; x += 2){
+            const uint32_t p = pixel(x, y);
+            total++;
+            white += ((p >> 16) & 0xff) > 225 && ((p >> 8) & 0xff) > 225 && (p & 0xff) > 225 ? 1 : 0;
+        }
+    }
+    return white * 100 >= total * 45;
 }
 
-//  The dialog text, once it stays the same (fully printed).
-std::string read_settled(StoryRuntime& rt){
-    std::string last = story_read_dialog(rt);
-    for (int i = 0; i < 6; i++){
-        pbf_wait(rt.context, 500ms);
-        rt.context.wait_for_all_requests();
-        std::string now = story_read_dialog(rt);
-        if (now == last){
-            return now;
-        }
-        last = now;
+std::string ocr_box(ConsoleHandle& console, const ImageFloatBox& box, uint32_t mins, uint32_t maxs){
+    VideoSnapshot screen = console.video().snapshot();
+    if (!screen){
+        return "";
     }
-    return last;
+    ImageViewRGB32 game = extract_box_reference(screen, GameSettings::instance().GAME_BOX);
+    ImageViewRGB32 image = extract_box_reference(game, box);
+    ImageRGB32 bw = to_blackwhite_rgb32_range(image, true, mins, maxs);
+    std::string text = OCR::ocr_read(Language::English, bw, OCR::PageSegMode::SINGLE_BLOCK);
+    std::string lower;
+    for (char c : text){
+        lower += c == '\n' ? ' ' : (char)std::tolower((unsigned char)c);
+    }
+    return lower;
 }
+
+//  Oak's text box (the standard one at the bottom): dark grey text, and
+//  in case the intro's font is coloured, blue text.
+const ImageFloatBox INTRO_TEXT_BOX(0.080, 0.765, 0.840, 0.175);
+std::string read_intro_text(StoryRuntime& rt){
+    std::string text = ocr_box(rt.console, INTRO_TEXT_BOX, combine_rgb(0, 0, 0), combine_rgb(128, 128, 128));
+    if (simple(text).size() >= 6){
+        return text;
+    }
+    std::string blue = ocr_box(rt.console, INTRO_TEXT_BOX, combine_rgb(0, 0, 100), combine_rgb(140, 170, 255));
+    return simple(blue).size() > simple(text).size() ? blue : text;
+}
+
+//  The naming screen's title: "YOUR NAME?" or "RIVAL's NAME?".
+const ImageFloatBox NAMING_TITLE_BOX(0.25, 0.075, 0.60, 0.125);
 
 
 bool try_new_game(StoryRuntime& rt, const std::string& player, const std::string& rival, bool& had_save){
@@ -281,125 +347,109 @@ bool try_new_game(StoryRuntime& rt, const std::string& player, const std::string
     );
     console.log("NEW GAME: the intro.", COLOR_BLUE);
 
-    //  The intro (oak_speech.c): the controls guide and the Pikachu pages,
-    //  Oak's talk (A on each page), "Are you a boy or a girl?" (A: BOY,
-    //  the cursor is on it), "Let's begin with your name. What is it?"
-    //  (A: the naming screen), "Right... So your name is X." (YES), "...Erm,
-    //  what was his name now?" (A: NEW NAME, the first in the list), the
-    //  naming screen, "...Er, was it Y?" (YES), "That's right! I remember
-    //  now! ...", "...Let's go!", the bedroom.
-    bool player_named = false;
-    bool rival_named = false;
-    int player_tries = 0;
-    int rival_tries = 0;
-    int quiet = 0;
+    //  The intro (oak_speech.c): A through the controls guide, the Pikachu
+    //  pages and Oak's talk; "Are you a boy or a girl?": A, BOY. The naming
+    //  screen comes for the player ("Let's begin with your name...") and,
+    //  after "...Erm, what was his name now?" and A on NEW NAME (the first
+    //  in the list), for the rival: it is told by its picture, not by Oak's
+    //  text (A went on typing AAAAAAA there in build 89). Oak's questions
+    //  "So your name is X." and "...Er, was it Y?" (YES/NO, the cursor on
+    //  YES): A; NO when the name reads wrong. Then the bedroom.
+    int player_typed = 0;
+    int rival_typed = 0;
+    bool player_checked = false;
+    bool rival_checked = false;
+    WallClock rival_time = WallClock::min();
+    std::string last_text;
+    int checks = 0;
     const WallClock deadline = current_time() + 8min;
     while (current_time() < deadline){
         context.wait_for_all_requests();
-        const std::string text = story_read_dialog(rt);
+        VideoSnapshot screen = console.video().snapshot();
+        if (screen && is_naming_screen(screen)){
+            pbf_wait(context, 600ms);       //  (the screen fading in)
+            context.wait_for_all_requests();
+            const std::string title = ocr_box(console, NAMING_TITLE_BOX, combine_rgb(0, 0, 0), combine_rgb(150, 150, 150));
+            bool for_rival = title.find("rival") != std::string::npos;
+            if (title.find("rival") == std::string::npos && title.find("your") == std::string::npos){
+                //  Title not read: the first naming screen is the player's.
+                for_rival = player_typed > 0;
+            }
+            console.log("Naming screen (title read as \"" + title + "\"): the " + (for_rival ? "rival's" : "player's") + " name.");
+            type_name(rt, for_rival ? rival : player);
+            if (for_rival){
+                rival_typed++;
+                rival_checked = false;
+                rival_time = current_time();
+            }else{
+                player_typed++;
+                player_checked = false;
+            }
+            pbf_wait(context, 2500ms);
+            continue;
+        }
 
-        if (!player_named && has(text, "your name is")){
-            const std::string full = read_settled(rt);
+        const std::string text = read_intro_text(rt);
+        if (text != last_text && simple(text).size() >= 4){
+            console.log("Intro text: \"" + text + "\"");
+        }
+        last_text = text;
+
+        if (player_typed > 0 && !player_checked && has(text, "your name is")){
+            const std::string full = read_intro_text(rt);
             pbf_wait(context, 800ms);       //  the YES/NO box
             context.wait_for_all_requests();
-            if (name_in_text(full, "your name is", player) || player_tries >= 2){
-                if (!name_in_text(full, "your name is", player)){
-                    console.log("The name was read as \"" + full + "\": taken anyway (typed twice).", COLOR_ORANGE);
-                }
+            player_checked = true;
+            if (!name_in_text(full, "your name is", player) && player_typed < 2){
+                console.log("The player's name read as \"" + full + "\": NO, typing it again.", COLOR_ORANGE);
+                tap(context, DPAD_DOWN, 400ms);
+                tap(context, BUTTON_A, 1500ms);
+            }else{
                 console.log("The player's name: YES.");
                 tap(context, BUTTON_A, 1500ms);
-                player_named = true;
-            }else{
-                console.log("The name was read as \"" + full + "\": NO, typing it again.", COLOR_ORANGE);
-                tap(context, DPAD_DOWN, 400ms);
-                tap(context, BUTTON_A, 300ms);
-                to_naming_screen(rt);
-                type_name(rt, player);
-                player_tries++;
-                pbf_wait(context, 2000ms);
             }
             continue;
         }
-        if (!player_named && has(text, "your name") && has(text, "what is")){
-            tap(context, BUTTON_A, 300ms);
-            to_naming_screen(rt);
-            type_name(rt, player);
-            player_tries++;
-            pbf_wait(context, 2000ms);
-            continue;
-        }
-        if (player_named && !rival_named && has(text, "rival") && has(text, "what was")){
-            //  "Your rival's name, what was it now?" (after NO): the list
-            //  again.
-            pbf_wait(context, 1500ms);
-            tap(context, BUTTON_A, 300ms);
-            to_naming_screen(rt);
-            type_name(rt, rival);
-            rival_tries++;
-            pbf_wait(context, 2000ms);
-            continue;
-        }
-        if (player_named && !rival_named && has(text, "what was his name")){
-            //  Oak's picture slides aside, the list of names: NEW NAME.
-            pbf_wait(context, 1500ms);
-            tap(context, BUTTON_A, 300ms);
-            to_naming_screen(rt);
-            type_name(rt, rival);
-            rival_tries++;
-            pbf_wait(context, 2000ms);
-            continue;
-        }
-        if (player_named && !rival_named && has(text, "was it")){
-            const std::string full = read_settled(rt);
+        if (rival_typed > 0 && !rival_checked && has(text, "was it") && !has(text, "rival")){
+            const std::string full = read_intro_text(rt);
             pbf_wait(context, 800ms);
             context.wait_for_all_requests();
-            if (name_in_text(full, "was it", rival) || rival_tries >= 2){
-                if (!name_in_text(full, "was it", rival)){
-                    console.log("The name was read as \"" + full + "\": taken anyway (typed twice).", COLOR_ORANGE);
-                }
-                console.log("The rival's name: YES.");
-                tap(context, BUTTON_A, 1500ms);
-                rival_named = true;
-            }else{
-                console.log("The name was read as \"" + full + "\": NO, typing it again.", COLOR_ORANGE);
+            rival_checked = true;
+            if (!name_in_text(full, "was it", rival) && rival_typed < 2){
+                console.log("The rival's name read as \"" + full + "\": NO, typing it again.", COLOR_ORANGE);
                 tap(context, DPAD_DOWN, 400ms);
+                tap(context, BUTTON_A, 1500ms);
+            }else{
+                console.log("The rival's name: YES.");
                 tap(context, BUTTON_A, 1500ms);
             }
             continue;
         }
-        if (rival_named && (has(text, "let's go") || has(text, "lets go") || has(text, "adventures"))){
+        if (rival_typed > 0 && (has(text, "let's go") || has(text, "lets go") || has(text, "adventures"))){
             //  The last page needs no A: the picture shrinks, the bedroom.
             console.log("Oak's last words: waiting for the bedroom.");
-            break;
-        }
-        if (rival_named && simple(text).size() < 4){
-            //  No text: the bedroom yet? (A there would talk to the NES.)
-            if (++quiet >= 3){
+            for (int i = 0; i < 15; i++){
+                pbf_wait(context, 2000ms);
+                context.wait_for_all_requests();
                 if (in_overworld(console, context)){
                     console.log("In the bedroom.", COLOR_BLUE);
                     return true;
                 }
-                quiet = 0;
             }
-            pbf_wait(context, 1000ms);
-            continue;
+            console.log("Not in the bedroom after the intro.", COLOR_RED);
+            return false;
         }
-        quiet = 0;
+        if (rival_typed > 0 && current_time() > rival_time + 12s && ++checks % 3 == 0){
+            //  Oak's last words not read: the bedroom yet? (START does
+            //  nothing in the intro.)
+            if (in_overworld(console, context)){
+                console.log("In the bedroom.", COLOR_BLUE);
+                return true;
+            }
+        }
         tap(context, BUTTON_A, 1000ms);
     }
-    if (!rival_named){
-        console.log("The intro did not get through the names in time.", COLOR_RED);
-        return false;
-    }
-    for (int i = 0; i < 15; i++){
-        pbf_wait(context, 2000ms);
-        context.wait_for_all_requests();
-        if (in_overworld(console, context)){
-            console.log("In the bedroom.", COLOR_BLUE);
-            return true;
-        }
-    }
-    console.log("Not in the bedroom after the intro.", COLOR_RED);
+    console.log("The intro did not get to the bedroom in time.", COLOR_RED);
     return false;
 }
 
