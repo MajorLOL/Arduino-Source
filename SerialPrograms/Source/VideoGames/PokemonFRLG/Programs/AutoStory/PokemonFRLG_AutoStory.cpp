@@ -512,7 +512,9 @@ void AutoStory::run_segment(
                 skip_battle = next_battle;
                 break;
             }
-            story_talk_start(rt, label, talk_alt(step));
+            if (!story_talk_start(rt, label, talk_alt(step), label.rfind("Pick up item", 0) == 0)){
+                break;
+            }
             if (!next_scene){
                 finish_scene(0ms, 60s, false);
             }
@@ -526,6 +528,10 @@ void AutoStory::run_segment(
             break;
         case StepType::HEAL:
             story_heal(rt, label);
+            if (rt.flee_until_heal){
+                rt.flee_until_heal = false;
+                rt.battle.wild_run = WILD_BATTLES == WildBattles::FLEE;
+            }
             break;
         case StepType::CUTSCENE:{
             int battles = finish_scene(
@@ -554,17 +560,22 @@ void AutoStory::run_segment(
                 struct Legendary{
                     StoryRuntime& rt;
                     //  p2: 1 = weaken it first, 2 = the Master Ball may be used.
-                    Legendary(StoryRuntime& p_rt, int flags) : rt(p_rt){
+                    Legendary(StoryRuntime& p_rt, int flags, const std::string& name) : rt(p_rt){
+                        rt.battle.legendary_species.clear();
+                        for (char c : name){
+                            rt.battle.legendary_species += (char)std::tolower((unsigned char)c);
+                        }
                         rt.battle.catch_legendary = true;
                         rt.battle.weaken_legendary = (flags & 1) != 0;
                         rt.battle.legendary_master = (flags & 2) != 0;
                     }
                     ~Legendary(){
+                        rt.battle.legendary_species.clear();
                         rt.battle.catch_legendary = false;
                         rt.battle.weaken_legendary = false;
                         rt.battle.legendary_master = false;
                     }
-                } legendary(rt, step.p2 < 0 ? 0 : step.p2);
+                } legendary(rt, step.p2 < 0 ? 0 : step.p2, label);
                 StoryBattleResult result = story_battle(rt, StoryBattleKind::CATCH, label);
                 if (result != StoryBattleResult::CAUGHT){
                     rt.legendary_missed = true;
@@ -575,6 +586,13 @@ void AutoStory::run_segment(
                     );
                 }
                 env.log(label + " caught!", COLOR_BLUE);
+                if (!rt.battle.wild_run){
+                    //  The team is worn out from it (some fainted): no
+                    //  fights on the way back.
+                    rt.flee_until_heal = true;
+                    rt.battle.wild_run = true;
+                    env.log("Until the next Pokemon Center: running from wild battles.");
+                }
                 break;
             }
             const bool trainer = step.p1 != 1;

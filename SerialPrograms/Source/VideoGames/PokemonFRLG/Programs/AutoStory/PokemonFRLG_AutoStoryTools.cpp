@@ -684,6 +684,13 @@ StoryBattleResult story_battle(
         rt.memory.no_pp = 0;
         rt.facing = DPAD_UP;
         rt.whited_out = true;
+        if (rt.battle.catch_legendary){
+            //  The team fainted against the legendary Pokemon: one more try
+            //  at it (the save is in front of it), not an error of the
+            //  route (Mewtwo: 13 of 29 tries ended so, and the program
+            //  stopped after too many "errors").
+            rt.legendary_missed = true;
+        }
         if (throw_on_loss){
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::NO_ERROR_REPORT,
@@ -1306,7 +1313,12 @@ bool walk_run(
         if (a.event != RunEvent::NONE && a.has_start && !leg.dark){
             const int dx = run.direction == DPAD_LEFT ? -1 : (run.direction == DPAD_RIGHT ? 1 : 0);
             const int dy = run.direction == DPAD_UP ? -1 : (run.direction == DPAD_DOWN ? 1 : 0);
-            const int reach = (moves + 1) * tiles_per_move;
+            //  The run stopped after "made" moves as seen: the real count
+            //  is at most one more, so the check looks only that far. (A
+            //  long run stopped early, up or down, was never checked: "2 of
+            //  14" on Cerulean Cave B1F was really 1, and the route went on
+            //  a row too low into a wall.)
+            const int reach = (std::min(moves, made + 1) + 1) * tiles_per_move;
             AutoStoryScroll::Screen now;
             if (reach <= (dx != 0 ? 10 : 6) && story_take_picture(rt, now)){
                 AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset_along(a.start, now, dx, dy, reach);
@@ -1835,7 +1847,7 @@ void go_to_talk_alt(StoryRuntime& rt, const StoryTalkAlt& alt, const std::string
 
 }
 
-void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt){
+bool story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt, bool may_be_gone){
     rt.console.log("Talking: " + what);
     int ret = -1;
     for (int spot = 0; spot < (alt.on ? 2 : 1) && ret < 0; spot++){
@@ -1845,7 +1857,9 @@ void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalk
         //  With another spot, one try here: turning again is a step when
         //  no one is there (Celio: two steps down, then the other spot
         //  was tried from the wrong tile).
-        const int attempts = alt.on && spot == 0 ? 1 : 3;
+        //  An item that may be gone: one try (turning again would be a
+        //  step onto its tile).
+        const int attempts = (alt.on && spot == 0) || may_be_gone ? 1 : 3;
         for (int attempt = 0; attempt < attempts && ret < 0; attempt++){
             if (attempt > 0){
                 face_again(rt, what);
@@ -1864,6 +1878,10 @@ void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalk
             );
         }
     }
+    if (ret < 0 && may_be_gone){
+        rt.console.log("No text: the item is not there (picked up before). Walking on.", COLOR_ORANGE);
+        return false;
+    }
     if (ret < 0){
         OperationFailedExceptionWithScreenshot::fire(
             ErrorReportMode::SEND_ERROR_REPORT,
@@ -1872,6 +1890,7 @@ void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalk
             rt.console
         );
     }
+    return true;
 }
 
 

@@ -300,7 +300,7 @@ const Pokemon::PokemonNameReader& species_name_reader(){
 }
 
 //  Read the opponent's species from its HP box (top left).
-const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug){
+const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug, const std::string& known = std::string()){
     StoryMemoryScope memory_scope("reading species");
     VideoSnapshot screen = console.video().snapshot();
     WildEncounterReader reader(COLOR_RED);
@@ -308,6 +308,19 @@ const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug){
         console.logger(), Language::English, screen, species_name_reader()
     );
     slug = encounter.name;
+    if (!known.empty() && slug != known){
+        //  A legendary step: the scene says which Pokemon it is. The name
+        //  can read as another one (Mewtwo: "MEHTHO", MEOWTH as likely).
+        const SpeciesInfo* legendary = find_species(known);
+        if (legendary != nullptr){
+            console.log(
+                std::string("Opponent: ") + legendary->name + " (the legendary Pokemon of this step; the name read as \"" +
+                slug + "\")."
+            );
+            slug = known;
+            return legendary;
+        }
+    }
     const SpeciesInfo* info = find_species(slug);
     if (info != nullptr){
         console.log(std::string("Opponent: ") + info->name);
@@ -653,6 +666,10 @@ void use_best_move(
             if (foe_hp < memory.foe_hp - 0.01){
                 memory.damage_turns++;
                 memory.no_damage[slot] = 0;
+            }else if (foe_hp > memory.foe_hp + 0.05){
+                //  Its HP went up: it healed itself after the hit (Mewtwo:
+                //  RECOVER). Nothing to tell about the move from that.
+                console.log("The foe's HP went up (it healed): " + name + " not judged by it.");
             }else if (memory.no_damage[slot] > 0 && memory.damage_turns > memory.damage_turns_at[slot]){
                 //  Again nothing, and since the first time another move did
                 //  damage: the player's Pokemon can attack, this move does
@@ -737,7 +754,7 @@ void fight_one_turn(
     const StoryBattleSettings& settings, StoryBattleMemory& memory
 ){
     std::string slug;
-    const SpeciesInfo* opponent = read_opponent(console, slug);
+    const SpeciesInfo* opponent = read_opponent(console, slug, settings.legendary_species);
 
     if (!move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
         console.log("FIGHT not selected. Pressing A anyway.", COLOR_ORANGE);
@@ -1393,6 +1410,7 @@ StoryBattleResult run_story_battle(
     double weaken_hp_before = -1;
     double weaken_max_drop = -1;
     int weaken_turns = 0;
+    double balls_from_hp = -1;      //  its HP when the balls began
     int balls_thrown = 0;
     int throw_failures = 0;
     int heals_used = 0;
@@ -1474,7 +1492,7 @@ StoryBattleResult run_story_battle(
             if (!shiny_checked && wild && settings.catch_legendary){
                 shiny_checked = true;
                 std::string slug;
-                read_opponent(console, slug);
+                read_opponent(console, slug, settings.legendary_species);
                 memory.shiny_species = slug;
                 legendary = true;
                 shiny_wanted = true;
@@ -1484,7 +1502,7 @@ StoryBattleResult run_story_battle(
             }
             if (!shiny_checked && wild && !settings.roamer_species.empty()){
                 std::string slug;
-                read_opponent(console, slug);
+                read_opponent(console, slug, settings.legendary_species);
                 if (!slug.empty() && settings.roamer_species.count(slug) != 0){
                     shiny_checked = true;
                     roamer = true;
@@ -1504,7 +1522,7 @@ StoryBattleResult run_story_battle(
                     memory.shiny = true;
                     shiny_safari = menu_is_safari(console);
                     std::string slug;
-                    read_opponent(console, slug);
+                    read_opponent(console, slug, settings.legendary_species);
                     memory.shiny_species = slug;
                     shiny_wanted = !slug.empty() &&
                         (settings.catch_species.count(slug) != 0 || settings.dex_species.count(slug) != 0);
@@ -1525,7 +1543,7 @@ StoryBattleResult run_story_battle(
                 //  list has it.
                 if (!shiny_catching && wild && (!settings.dex_species.empty() || !settings.dex_all.empty())){
                     std::string slug;
-                    read_opponent(console, slug);
+                    read_opponent(console, slug, settings.legendary_species);
                     const bool nidoran = slug.rfind("nidoran", 0) == 0 &&
                         (settings.dex_species.count("nidoran-f") != 0 || settings.dex_species.count("nidoran-m") != 0);
                     bool wanted = !slug.empty() && (nidoran || settings.dex_species.count(slug) != 0);
@@ -1552,6 +1570,27 @@ StoryBattleResult run_story_battle(
                         memory.shiny_species = slug;
                         console.log("Catching " + slug + " for the POKeDEX.", COLOR_BLUE);
                     }
+                }
+            }
+            if (shiny_catching && legendary && settings.weaken_legendary && weakened && weaken_turns < 40){
+                //  It healed itself while the balls came (Mewtwo: RECOVER,
+                //  half its HP a time): at full HP a ball catches it half as
+                //  often as in the red. Its HP down again first.
+                double foe_hp = -1;
+                {
+                    VideoSnapshot screen = console.video().snapshot();
+                    if (screen){
+                        foe_hp = read_foe_hp(screen);
+                    }
+                }
+                if (foe_hp >= 0.5 && foe_hp > balls_from_hp + 0.1){
+                    console.log(
+                        "Its HP is up again (" + std::to_string((int)(foe_hp * 100 + 0.5)) + "%): weakening it again.",
+                        COLOR_BLUE
+                    );
+                    weakened = false;
+                    //  Its HP since the last hit: its healing, not a hit.
+                    weaken_hp_before = -1;
                 }
             }
             if (shiny_catching){
@@ -1583,9 +1622,9 @@ StoryBattleResult run_story_battle(
                         weaken_max_drop = std::max(weaken_max_drop, weaken_hp_before - foe_hp);
                     }
                     const bool safe = weaken_max_drop < 0 || foe_hp - weaken_max_drop * 1.25 > 0.06;
-                    if (foe_hp > 0.2 && safe && weaken_turns < 15){
+                    if (foe_hp > 0.2 && safe && weaken_turns < 40){
                         std::string slug;
-                        const SpeciesInfo* opponent = read_opponent(console, slug);
+                        const SpeciesInfo* opponent = read_opponent(console, slug, settings.legendary_species);
                         if (move_cursor_to_option(console, context, BattleMenuOption::FIGHT)){
                             pbf_press_button(context, BUTTON_A, 160ms, 640ms);
                             context.wait_for_all_requests();
@@ -1605,6 +1644,7 @@ StoryBattleResult run_story_battle(
                         }
                     }
                     weakened = true;
+                    balls_from_hp = foe_hp;
                     console.log(
                         foe_hp < 0
                             ? std::string("Its HP not read: the balls now.")
@@ -1709,7 +1749,7 @@ StoryBattleResult run_story_battle(
                 if (position <= 0){
                     //  The member fights alone, unless this foe takes it long.
                     std::string slug;
-                    const SpeciesInfo* seen = read_opponent(console, slug);
+                    const SpeciesInfo* seen = read_opponent(console, slug, settings.legendary_species);
                     const int turns = turns_to_win(memory.moves, settings, seen);
                     if (turns >= 4){
                         console.log(
@@ -1756,7 +1796,7 @@ StoryBattleResult run_story_battle(
                 //  A new foe: the best answer comes in, if much better than
                 //  the active (the switch costs the turn).
                 std::string slug;
-                const SpeciesInfo* seen = read_opponent(console, slug);
+                const SpeciesInfo* seen = read_opponent(console, slug, settings.legendary_species);
                 if (seen != nullptr){
                     foe = seen;
                 }
@@ -1791,7 +1831,7 @@ StoryBattleResult run_story_battle(
                 bool wanted = false;
                 if (catching){
                     std::string slug;
-                    read_opponent(console, slug);
+                    read_opponent(console, slug, settings.legendary_species);
                     wanted = settings.catch_species.count(slug) != 0;
                     if (wanted){
                         console.log("Catching " + slug + ".");
@@ -2071,7 +2111,7 @@ StoryBattleResult run_story_battle(
                         memory.list_back = 0;
                     }
                     std::string slug;
-                    const SpeciesInfo* opponent = read_opponent(console, slug);
+                    const SpeciesInfo* opponent = read_opponent(console, slug, settings.legendary_species);
                     use_best_move(console, context, settings, memory, opponent);
                     pressed_blind = false;
                     break;

@@ -834,8 +834,13 @@ class Engine:
 
             if col:
                 continue
-            #  Starting to surf: facing water from land.
+            #  Starting to surf: facing water from land, and only from
+            #  elevation 3 (IsPlayerFacingSurfableFishableWater:
+            #  PlayerGetElevation() == 3). Cerulean Cave 1F: from the raised
+            #  floor (elevation 4) A in front of the water does nothing.
             if water and telev == 1 and elev != 1:
+                if elev != 3:
+                    continue
                 if self.state.abilities.get("surf"):
                     yield (tm.id, nx, ny, 1, True), {"kind": "surf_start", "dir": d, "cost": COST_SURF_START,
                                                     "risk": self.tile_risk(tv, nx, ny, True)}

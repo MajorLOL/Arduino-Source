@@ -1279,10 +1279,14 @@ def legendary(map_id, xy, flags, label, weaken=False):
     is caught. Not caught (it fainted, the balls ran out): the step fails,
     and the save before it is tried again. weaken: its HP is brought down
     first (catch rate 3: a ball catches it about three times as often in
-    the red)."""
+    the red). Caught: saved on the spot, so that nothing on the way back
+    (a walk that goes wrong, the tired team fainting) loses it again
+    (Cerulean Cave: Mewtwo caught eleven times, lost on the way out each
+    time)."""
     return [talk(map_id, xy=xy, mode="talk", label=label),
             {"battle": 60000, "label": label, "legendary": True, "weaken": weaken},
-            setst(flags=flags)]
+            setst(flags=flags),
+            save()]
 
 
 #  Seafoam Islands: the holes. A boulder pushed into one falls to the floor
@@ -1532,11 +1536,10 @@ CHAPTER12 = [
             save(),
         ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
                       weaken=True) + [
-            #  Caught: saved and loaded again, so Strength is off whether it
-            #  took one try or several. The boulders stay where they were
+            #  Caught (and saved): loaded again, so Strength is off whether
+            #  it took one try or several. The boulders stay where they were
             #  pushed on the way up (loading a save keeps them there): the
             #  way down is through them again.
-            save(),
             {"reload": True, "label": "Reload after Moltres"},
             {"boulder": {"open_to": [[9, 14]]}, "label": "SummitBouldersBack"},
             #  Mt. Ember loads again on the way down: its boulders are back.

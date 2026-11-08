@@ -105,6 +105,10 @@ struct StoryTeamMember{
 
 struct StoryBattleSettings{
     bool wild_run = false;
+    //  The legendary Pokemon of a legendary step (its slug): the scene says
+    //  which it is, whatever the name reads as ("MEHTHO": MEOWTH as likely
+    //  as MEWTWO).
+    std::string legendary_species;
 
     //  Types of the lead (same-type attack bonus).
     AutoStoryDex::Type lead_type1 = AutoStoryDex::Type::NORMAL;

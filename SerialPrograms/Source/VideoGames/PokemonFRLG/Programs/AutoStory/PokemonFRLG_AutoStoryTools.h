@@ -142,6 +142,9 @@ struct StoryRuntime{
     //  A legendary Pokemon was not caught (the step fails, the save before
     //  it is loaded): such a failure counts against its own limit.
     bool legendary_missed = false;
+    //  A legendary Pokemon was caught: the team is worn out from it, so
+    //  wild battles are run from until the next Pokemon Center.
+    bool flee_until_heal = false;
 
     //  Shiny Pokemon are caught: listens for the shiny sound (null: off).
     std::unique_ptr<StoryShinyWatch> shiny_watch;
@@ -274,7 +277,12 @@ struct StoryTalkAlt{
     DpadPosition move = DPAD_NONE;
     DpadPosition face = DPAD_NONE;
 };
-void story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt());
+//  "may_be_gone": an item ball on the way that the player may have picked
+//  up by hand: one A, and no text is fine (false, the player stays put).
+bool story_talk_start(
+    StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt(),
+    bool may_be_gone = false
+);
 
 //  Press A to talk, read until the YES/NO box and answer it.
 void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt());
