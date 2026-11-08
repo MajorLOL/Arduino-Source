@@ -137,6 +137,10 @@ enum class StepType : uint8_t{
     ROAM,               //  the roaming legendary (text: its species) on the grass line (dir, p4);
                         //  after p0 battles: legs_b into a building, legs_a back (each warp
                         //  sends it somewhere else); at most p1 minutes
+    ESCAPE_ROPE,        //  an ESCAPE ROPE from the bag: out to where the cave or building was
+                        //  entered from outdoors, facing down; then skip the next p0 steps
+                        //  (the way out on foot, for a bag without one)
+    USE_REPEL,          //  a MAX REPEL from the bag (250 steps without weaker wild Pokemon)
 };
 
 struct StoryStep{

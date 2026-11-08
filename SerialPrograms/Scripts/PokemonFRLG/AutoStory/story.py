@@ -31,7 +31,7 @@ import json
 import os
 
 from frlg_data import DIRS, OPPOSITE
-from engine import MapGoals, Engine, WorldState, fixed_facing, EngineError
+from engine import MapGoals, Engine, WorldState, fixed_facing, EngineError, REPEL_MARGIN
 
 #  Battle-check windows are in the C++; here we only classify runs.
 RUN_WALK = "WALK"
@@ -114,6 +114,13 @@ class Builder:
         #  map -> {tile: trainer} where such a trainer would stand then.
         self.maybe_at = {}
         self.segment_id = None
+        #  After the Hall of Fame (REPEL from then on).
+        self.postgame = False
+        #  (items, repel steps) as the last save has them: a reload goes back to it.
+        self.saved_consumables = None
+        #  Where the shortcuts were taken (for the report).
+        self.shortcut_log = []
+        self.segment_no_repel = False
 
     # ------------------------------------------------------------ helpers
     def layout_tiles(self, map_id, layout_id):
@@ -347,8 +354,14 @@ class Builder:
                             self.segment_id, label, node[0], script, var, value))
                 prev = node[0]
 
-    def walk_to(self, goals, label, out, end_mode="STOP", face=None, allow_trigger=False, face_map=None):
-        """Route to any of goals [(map,x,y)], emitting legs and actions."""
+    def walk_to(self, goals, label, out, end_mode="STOP", face=None, allow_trigger=False, face_map=None,
+                shortcuts=False):
+        """Route to any of goals [(map,x,y)], emitting legs and actions.
+        shortcuts: first an ESCAPE ROPE out of a cave or building, Fly, a
+        REPEL, where they pay (not in legs the program walks again and
+        again)."""
+        if shortcuts:
+            self.shortcuts(goals, label, out)
         guard = 0
         while True:
             guard += 1
@@ -406,6 +419,16 @@ class Builder:
             if at is not None and k not in ("warp",):
                 self.warnings.append("%s: %s walks where trainer %s may stand (%d,%d)" % (
                     self.segment_id, label, at, node[1], node[2]))
+            if k in ("walk", "surf", "jump", "spin", "dismount", "stepwarp") and self.state.repel_left > 0:
+                #  "REPEL's effect wore off..." where it gets to 0 (the
+                #  program closes the text); wild battles from then on.
+                self.state.repel_left -= 1
+                if self.state.repel_left == REPEL_MARGIN:
+                    self.engine.invalidate()
+            if k in ("walk", "surf") and self.state.repel_left <= REPEL_MARGIN and "encounter" not in risk:
+                #  Planned with the REPEL, which has worn off by now.
+                if self.engine.tile_risk(self.engine.view(node[0]), node[1], node[2], k == "surf", repel=False) & {"encounter"}:
+                    risk = set(risk) | {"encounter"}
             if k in ("walk", "surf"):
                 if k == "surf":
                     kind = RUN_SURF_CHECKED if ("encounter" in risk or "trainer" in risk) else RUN_SURF
@@ -527,6 +550,15 @@ class Builder:
                     leg["end"] = "WARP_STEP"
                 leg["dest_dark"] = node[0] in self.gd.dark_maps
                 leg["warp_to"] = node[0]
+                #  From outdoors into a building or a cave: where an ESCAPE
+                #  ROPE goes from now on (UpdateEscapeWarp(): the warp tile,
+                #  one below it unless the player faced down; not out of
+                #  Viridian Forest).
+                src = edge["warp"][0]
+                if (self.d.maps[src].map_type in Builder.OUTDOOR_TYPES
+                        and self.d.maps[node[0]].map_type not in Builder.OUTDOOR_TYPES
+                        and src != "MAP_VIRIDIAN_FOREST"):
+                    self.state.escape = (src, edge["warp"][1], edge["warp"][2] + (0 if d == "down" else 1))
                 leg["preview"] = self.d.warp_preview(edge["warp"][0], node[0])
                 self.close_leg(leg, out)
                 self.pos = (node[0], node[1], node[2], edge.get("arrive_facing") or d)
@@ -636,11 +668,14 @@ class Builder:
         ("HEAL_LOCATION_CINNABAR_ISLAND", "FLAG_WORLD_MAP_CINNABAR_ISLAND"),
         ("HEAL_LOCATION_INDIGO_PLATEAU", "FLAG_WORLD_MAP_INDIGO_PLATEAU_EXTERIOR"),
     ]
-    #  Opening the Fly map, the flight and the landing: about 22 s, a step
-    #  takes about a quarter of a second.
-    COST_FLY = 90.0
-    #  Fly only when it saves clearly more than that.
-    FLY_MARGIN = 40.0
+    #  Opening the Fly map, the flight and the landing: about 27 s on the
+    #  Switch, where a tile of the route costs about half a second (the runs
+    #  measured on the video, the turns, the doors: 69 tiles running out of
+    #  Cerulean Cave took 35 s). Too dear before: the program walked where
+    #  flying is faster.
+    COST_FLY = 60.0
+    #  Fly only when it saves more than that.
+    FLY_MARGIN = 20.0
     FLY_MAP_TYPES = ("MAP_TYPE_TOWN", "MAP_TYPE_CITY", "MAP_TYPE_ROUTE", "MAP_TYPE_OCEAN_ROUTE")
     _fly_data = None
     _worldmap_flags = None
@@ -741,6 +776,205 @@ class Builder:
         self.surfing = False
         return True
 
+    # ------------------------------------------------------------ shortcuts
+    OUTDOOR_TYPES = ("MAP_TYPE_TOWN", "MAP_TYPE_CITY", "MAP_TYPE_ROUTE", "MAP_TYPE_UNDERWATER", "MAP_TYPE_OCEAN_ROUTE")
+    #  The bag (the rope looked for by its description), the spin out and
+    #  in: about 25 s.
+    COST_ROPE = 60.0
+    ROPE_MARGIN = 30.0
+    #  A MAX REPEL (250 steps) when the walk has at least this many tiles
+    #  with wild Pokemon (after the Hall of Fame).
+    REPEL_MIN_ENCOUNTER_TILES = 60
+    REPEL_STEPS = 250
+
+    def cost_from(self, pos, goals, surfing=False):
+        saved = (self.pos, self.surfing)
+        self.pos = pos
+        self.surfing = surfing
+        try:
+            return self.route_cost(goals)
+        finally:
+            self.pos, self.surfing = saved
+
+    def fly_option(self, goals):
+        """(cost, KantoFlyLocation) of the best Fly from here to the goals:
+        out of the building, the flight, the walk from the landing."""
+        if (self.surfing or not self.state.abilities.get("fly") or "FLAG_BADGE03_GET" not in self.state.flags
+                or not self.in_kanto(self.pos[0])):
+            return None
+        if self.d.maps[self.pos[0]].map_type in Builder.FLY_MAP_TYPES:
+            exit_cost = 0.0
+        else:
+            outdoor = [mid for mid, m in self.d.maps.items() if m.map_type in Builder.FLY_MAP_TYPES]
+            exit_cost = self.route_cost(MapGoals(outdoor))
+            if exit_cost is None:
+                return None
+        #  Only the towns nearest the goals (in maps on the way: the routes
+        #  from all thirteen took minutes per walk).
+        hops = self.map_hops(goals)
+        candidates = [(hops.get(h["map"], 99), i) for i, (h, flag) in enumerate(self.fly_data())
+                      if flag in self.state.flags and h["map"] != self.pos[0]]
+        if not candidates:
+            return None
+        nearest = min(c[0] for c in candidates)
+        candidates = sorted(c for c in candidates if c[0] <= nearest + 1)[:3]
+        best = None
+        for _, i in candidates:
+            h, _flag = self.fly_data()[i]
+            after = self.cost_from((h["map"], h["x"], h["y"], "down"), goals)
+            if after is None:
+                continue
+            total = exit_cost + Builder.COST_FLY + after
+            if best is None or total < best[0]:
+                best = (total, i)
+        return best
+
+    def rope_option(self, goals):
+        """Cost of an ESCAPE ROPE from here (the walk, or Fly, after it)."""
+        import os
+        if self.state.items.get("ESCAPE_ROPE", 0) <= 0 and not os.environ.get("STORY_ROPES_UNLIMITED"):
+            return None
+        if not self.d.maps[self.pos[0]].allow_escaping or self.state.escape is None:
+            return None
+        #  Only to leave: not to a goal in a cave or building of that kind
+        #  (back to the entrance and in again).
+        goal_maps = goals.maps if isinstance(goals, MapGoals) else {g[0] for g in goals}
+        if any(self.d.maps[m].allow_escaping for m in goal_maps if m in self.d.maps):
+            return None
+        em, ex, ey = self.state.escape
+        landing = (em, ex, ey, "down")
+        walk = self.cost_from(landing, goals)
+        saved = (self.pos, self.surfing)
+        self.pos, self.surfing = landing, False
+        try:
+            fo = self.fly_option(goals)
+        finally:
+            self.pos, self.surfing = saved
+        options = [c for c in (walk, fo[0] + Builder.FLY_MARGIN if fo else None) if c is not None]
+        if not options:
+            return None
+        return Builder.COST_ROPE + min(options)
+
+    def shortcuts(self, goals, label, out):
+        """Before a walk: an ESCAPE ROPE out of a cave or a building, Fly
+        (from anywhere in Kanto, to the town nearest the goal), and after
+        the Hall of Fame a MAX REPEL for a walk through wild Pokemon; each
+        only where it pays clearly."""
+        walk = self.route_cost(goals)
+        least = min(Builder.COST_FLY + Builder.FLY_MARGIN, Builder.COST_ROPE + Builder.ROPE_MARGIN)
+        if walk is None or walk > least:
+            fo = self.fly_option(goals)
+            ro = self.rope_option(goals)
+            inf = float("inf")
+            w = walk if walk is not None else inf
+            fly_total = fo[0] + Builder.FLY_MARGIN if fo else inf
+            rope_total = ro + Builder.ROPE_MARGIN if ro is not None else inf
+            if rope_total < w and rope_total <= fly_total:
+                self.use_rope(label, out)
+                self.shortcut_log.append((self.segment_id, label, "ESCAPE ROPE", w - ro))
+                #  Fly from where it went?
+                self.shortcuts(goals, label, out)
+                return
+            if fly_total < w:
+                before = self.pos
+                if self.fly(fo[1], label, out):
+                    self.shortcut_log.append((self.segment_id, label, "FLY from %s" % before[0], w - fo[0]))
+        self.maybe_repel(goals, label, out)
+
+    _map_graph = None
+
+    def map_hops(self, goals):
+        """map -> how many maps away from the goals' maps (connections and
+        warps both ways)."""
+        if Builder._map_graph is None:
+            g = {}
+            for mid, m in self.d.maps.items():
+                for c in m.connections:
+                    other = c.get("map")
+                    if other in self.d.maps:
+                        g.setdefault(mid, set()).add(other)
+                        g.setdefault(other, set()).add(mid)
+                for w in m.warps:
+                    other = w.get("dest_map")
+                    if other in self.d.maps:
+                        g.setdefault(mid, set()).add(other)
+                        g.setdefault(other, set()).add(mid)
+            Builder._map_graph = g
+        if isinstance(goals, MapGoals):
+            start = set(goals.maps) if hasattr(goals, "maps") else set()
+        else:
+            start = {gl[0] for gl in goals}
+        dist = {m: 0 for m in start}
+        frontier = list(start)
+        while frontier:
+            nxt = []
+            for m in frontier:
+                for o in Builder._map_graph.get(m, ()):
+                    if o not in dist:
+                        dist[o] = dist[m] + 1
+                        nxt.append(o)
+            frontier = nxt
+        return dist
+
+    #  Steps the way out on foot may have (no battles: the story must go
+    #  on the same after the rope).
+    WALK_OUT_STEPS = ("WALK", "WAIT", "TALK_YES", "TALK")
+
+    def use_rope(self, label, out):
+        em, ex, ey = self.state.escape
+        #  The way out on foot to where the rope goes, for a bag without an
+        #  ESCAPE ROPE (not enough money at the Poke Mart): the program
+        #  walks it then, else skips it. Planned on a copy of the state: the
+        #  story goes on as after the rope.
+        alt = []
+        saved = (self.state, self.pos, self.surfing, copy.deepcopy(self.maybe_came),
+                 copy.deepcopy(self.maybe_at), self.strength_used)
+        self.state = self.state.clone()
+        self.engine.state = self.state
+        self.engine.invalidate()
+        try:
+            self.walk_to({(em, ex, ey)}, label + "_WalkOut", alt)
+            ok = all(s["type"] in Builder.WALK_OUT_STEPS and
+                     (s["type"] != "TALK" or s["label"].startswith(("Pick up item", "Card Key door"))) for s in alt)
+        except (StoryError, EngineError):
+            ok = False
+        (self.state, self.pos, self.surfing, self.maybe_came, self.maybe_at, self.strength_used) = saved
+        self.engine.state = self.state
+        self.engine.invalidate()
+        if not ok:
+            alt = []
+        out.append({"type": "ESCAPE_ROPE", "label": label + "_EscapeRope", "p0": len(alt)})
+        out.extend(alt)
+        self.state.items["ESCAPE_ROPE"] = self.state.items.get("ESCAPE_ROPE", 0) - 1
+        self.leave_map(self.pos[0])
+        em, ex, ey = self.state.escape
+        #  The spin in ends facing down (ResetInitialPlayerAvatarState()).
+        self.pos = (em, ex, ey, "down")
+        self.surfing = False
+
+    def maybe_repel(self, goals, label, out):
+        import os
+        if (not self.postgame or self.segment_no_repel or self.state.repel_left > 0
+                or (self.state.items.get("MAX_REPEL", 0) <= 0 and not os.environ.get("STORY_REPELS_UNLIMITED"))):
+            return
+        route = self.engine.route(self.node(), goals, start_facing=self.pos[3])
+        if route is None:
+            return
+        tiles = sum(1 for e, _ in route if "encounter" in e.get("risk", ()))
+        if tiles < Builder.REPEL_MIN_ENCOUNTER_TILES:
+            return
+        out.append({"type": "USE_REPEL", "label": label + "_MaxRepel"})
+        self.state.items["MAX_REPEL"] = self.state.items.get("MAX_REPEL", 0) - 1
+        self.state.repel_left = Builder.REPEL_STEPS
+        self.engine.invalidate()
+        self.shortcut_log.append((self.segment_id, label, "MAX REPEL", tiles))
+
+    def no_repel_here(self, what):
+        """Catching needs the wild Pokemon: no REPEL may still be on."""
+        if self.state.repel_left > 0:
+            raise StoryError("A REPEL is still on (%d steps) at a %s step: no REPEL in the segment(s) "
+                             "before it (\"no_repel\")" % (self.state.repel_left, what))
+
     def leave_map(self, map_id):
         """Temporary changes of a map end when we leave it (map reload)."""
         self.state.extra_blocked.pop(map_id, None)
@@ -835,7 +1069,7 @@ class Builder:
             if fi is None or not self.fly(fi, step.get("label", "Fly"), out):
                 h, _ = self.fly_data()[index]
                 if self.pos[0] != h["map"]:
-                    self.walk_to({(h["map"], h["x"], h["y"])}, step.get("label", "Fly") + "_Walk", out)
+                    self.walk_to({(h["map"], h["x"], h["y"])}, step.get("label", "Fly") + "_Walk", out, shortcuts=True)
             return
         if "unless_dex" in step:
             #  Steps the program skips when it has caught enough species
@@ -900,7 +1134,7 @@ class Builder:
             g = step["goto"]
             goals = {(g["map"], x, y) for x, y in g["tiles"]}
             self.walk_to(goals, step.get("label", "Goto"), out,
-                         end_mode="TRIGGER" if g.get("trigger") else "STOP")
+                         end_mode="TRIGGER" if g.get("trigger") else "STOP", shortcuts=True)
             if g.get("trigger"):
                 #  Mark the last emitted leg as ending on a trigger.
                 pass
@@ -930,7 +1164,7 @@ class Builder:
             if turning is not None and target_key in self.maybe_came.get(m.id, set()):
                 self.warnings.append("%s: %s may have come to the player earlier on this map" % (self.segment_id, label))
             #  Route to the adjacent tile, then face the target.
-            self.walk_to(goals, label, out, face_map=goals_face)
+            self.walk_to(goals, label, out, face_map=goals_face, shortcuts=True)
             approach = None
             if mode == "battle" and target_key is not None:
                 if not was_defeated and self.state.is_defeated(m, target_key):
@@ -971,6 +1205,8 @@ class Builder:
             #  The game saves itself in the Hall of Fame and starts in Pallet
             #  Town from then on (the next segment says where).
             out.append({"type": "RESET", "label": step.get("label", "Hall of Fame"), "p0": step["hall_of_fame"]})
+            self.postgame = True
+            self.saved_consumables = (dict(self.state.items), self.state.repel_left)
             return
         if "reload" in step:
             #  Load the save just made, the same whether the step before
@@ -982,6 +1218,10 @@ class Builder:
             #  cleared by a warp).
             out.append({"type": "RESET", "label": step.get("label", "Reload"), "p0": 0})
             self.strength_used = None
+            if self.saved_consumables is not None:
+                self.state.items = dict(self.saved_consumables[0])
+                self.state.repel_left = self.saved_consumables[1]
+                self.engine.invalidate()
             return
         if "rival1" in step:
             out.append({"type": "SCRIPTED_BATTLE", "label": step.get("label", "Rival")})
@@ -992,18 +1232,17 @@ class Builder:
             nx, ny = self.nurse_xy(pc)
             goals_face = self.interact_goals(pc, nx, ny, ["up"], counter=True)
             goals = set(goals_face.keys())
-            fi = self.fly_destination(pc_map_id=pc.id)
-            if fi is not None:
-                self.fly(fi, step.get("label", "To nurse"), out, goals)
-            self.walk_to(goals, step.get("label", "To nurse"), out)
+            self.walk_to(goals, step.get("label", "To nurse"), out, shortcuts=True)
             out.append({"type": "HEAL", "label": "Heal at " + pc.name})
             self.pos = (self.pos[0], self.pos[1], self.pos[2], "up")
             return
         if "grind" in step:
+            self.no_repel_here("grind")
             self.grind(step, out)
             return
         if "save" in step:
             out.append({"type": "SAVE", "label": "Save", "p0": 1 if step["save"].get("dex") else 0})
+            self.saved_consumables = (dict(self.state.items), self.state.repel_left)
             return
         if "teach" in step:
             t = step["teach"]
@@ -1011,12 +1250,15 @@ class Builder:
                         "p1": t["party_slot"], "p2": t.get("forget", -1), "text": t["move"]})
             return
         if "catch" in step:
+            self.no_repel_here("catch")
             self.catch(step, out)
             return
         if "dex" in step:
+            self.no_repel_here("dex")
             self.dex(step, out)
             return
         if "roam" in step:
+            self.no_repel_here("roam")
             self.roam(step, out)
             return
         if "elevator" in step:
@@ -1065,6 +1307,8 @@ class Builder:
         if "buy" in step:
             b = step["buy"]
             out.append({"type": "BUY", "label": step.get("label", "Buy"), "p0": b["index"], "p1": b["quantity"]})
+            if b.get("item"):
+                self.state.items[b["item"]] = self.state.items.get(b["item"], 0) + b["quantity"]
             return
         if "heal_items" in step:
             #  p0 1: after a legendary Pokemon (REVIVE and FULL RESTORE on
@@ -1670,6 +1914,7 @@ class Builder:
             out = []
             start_pos = self.pos
             self.segment_id = seg["id"]
+            self.segment_no_repel = bool(seg.get("no_repel"))
             import os as _os
             import time as _time
             _t0 = _time.time()

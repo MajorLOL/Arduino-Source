@@ -1040,6 +1040,70 @@ void story_heal_after_legendary(StoryRuntime& rt){
 
 
 
+bool story_escape_rope(StoryRuntime& rt){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("ESCAPE ROPE: out to the entrance.", COLOR_BLUE);
+    for (int attempt = 0; attempt < 2; attempt++){
+        open_bag_from_overworld(console, context);
+        //  "A long, durable rope. Use it to escape instantly from a cave or a dungeon."
+        if (!select_bag_item(rt, BagPocket::ITEMS, {"escape instantly", "durable rope", "or a dungeon"}, {}, "ESCAPE ROPE")){
+            pbf_mash_button(context, BUTTON_B, 3000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "bag");
+            console.log("No ESCAPE ROPE in the bag (not enough money at the Poke Mart?): walking out.", COLOR_ORANGE);
+            return false;
+        }
+        //  USE / GIVE / TOSS / CANCEL, the cursor on USE. The bag closes,
+        //  "... used the ESCAPE ROPE.", the spin out, black, the spin in.
+        press(context, BUTTON_A, 800ms);
+        press(context, BUTTON_A, 300ms);
+        context.wait_for_all_requests();
+        BlackScreenWatcher black(COLOR_RED);
+        if (wait_until(console, context, 12000ms, { black }) == 0){
+            BlackScreenOverWatcher over(COLOR_RED);
+            wait_until(console, context, 10000ms, { over });
+            pbf_wait(context, 3000ms);
+            context.wait_for_all_requests();
+            rt.facing = DPAD_DOWN;
+            rt.arrived_by_warp = true;
+            console.log("Out by the ESCAPE ROPE.", COLOR_BLUE);
+            return true;
+        }
+        console.log("No warp after the ESCAPE ROPE.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "story_escape_rope(): The ESCAPE ROPE did not take the player out.",
+        console
+    );
+}
+
+void story_use_repel(StoryRuntime& rt){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log("MAX REPEL: no weaker wild Pokemon for 250 steps.", COLOR_BLUE);
+    open_bag_from_overworld(console, context);
+    //  "Prevents weak wild POKeMON from appearing for 250 steps."
+    if (!select_bag_item(rt, BagPocket::ITEMS, {"prevents weak", "weak wild", "from appearing"}, {}, "MAX REPEL")){
+        console.log("No REPEL in the bag: walking with the wild Pokemon.", COLOR_ORANGE);
+    }else{
+        //  USE: "... used the MAX REPEL." (or "...the effects of a REPEL
+        //  lingered from earlier.") in the bag; B closes it and the bag.
+        press(context, BUTTON_A, 800ms);
+        press(context, BUTTON_A, 2000ms);
+        press(context, BUTTON_B, 800ms);
+    }
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "bag");
+}
+
+
+
 int story_use_rare_candies(StoryRuntime& rt, int count){
     if (count <= 0 || rt.no_rare_candies){
         return 0;

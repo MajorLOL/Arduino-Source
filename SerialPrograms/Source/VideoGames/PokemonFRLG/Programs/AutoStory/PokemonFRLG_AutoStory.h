@@ -72,6 +72,9 @@ private:
     StaticTextOption SETUP_TEXT;
     DeferredStopButtonOption STOP_AFTER_CURRENT;
     EnumDropdownOption<Starter> STARTER;
+    BooleanCheckBoxOption NEW_GAME;
+    StringOption PLAYER_NAME;
+    StringOption RIVAL_NAME;
     BooleanCheckBoxOption CONTINUE_FROM_SAVE;
     IntegerEnumDropdownOption START_SEGMENT;
     SimpleIntegerOption<uint16_t> START_STEP;

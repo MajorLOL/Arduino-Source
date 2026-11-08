@@ -106,6 +106,8 @@ class MapData:
         self.mapsec = info.get("region_map_section")
         self.show_map_name = info.get("show_map_name")
         self.allow_running = info.get("allow_running")
+        #  An ESCAPE ROPE works here (CanUseEscapeRopeOnCurrMap()).
+        self.allow_escaping = bool(info.get("allow_escaping", False))
 
     def in_bounds(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height

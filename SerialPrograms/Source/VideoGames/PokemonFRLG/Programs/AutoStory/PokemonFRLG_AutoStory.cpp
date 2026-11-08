@@ -27,6 +27,7 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
+#include "CommonFramework/Exceptions/ProgramFinishedException.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
@@ -38,6 +39,7 @@
 #include "PokemonFRLG_AutoStoryTools.h"
 #include "PokemonFRLG_AutoStoryActions.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
+#include "PokemonFRLG_AutoStoryNewGame.h"
 #include "PokemonFRLG_AutoStory.h"
 
 namespace PokemonAutomation{
@@ -196,7 +198,8 @@ AutoStory::AutoStory()
         "<b>Setup:</b><br>"
         "In the game options: Text Speed: Fast. Battle Scene: Off. Battle Style: Set. Button Mode: not L=A.<br>"
         "Each segment starts where the previous one saved. To start at the very beginning (C0_01), "
-        "start a new game, finish the intro (names), and save in the bedroom <b>without moving</b>.<br>"
+        "turn on \"Start a new game\" below (or start a new game by hand, finish the intro (names), and save "
+        "in the bedroom <b>without moving</b>).<br>"
         "<b>The game must be in English:</b> battle text, move names, menus and item "
         "descriptions are read with English OCR.<br>"
         "This is a beta, not tested on every segment: please report where it goes wrong "
@@ -215,6 +218,27 @@ AutoStory::AutoStory()
         },
         LockMode::LOCK_WHILE_RUNNING,
         Starter::BULBASAUR
+    )
+    , NEW_GAME(
+        "<b>Start a new game:</b><br>From the title screen: NEW GAME, Professor Oak's intro with the two "
+        "names below, and the first save in the bedroom (<b>over the save on the cartridge</b>), then the "
+        "story from the very beginning (C0_01), whatever start is chosen below. Turns itself off once the "
+        "new game is saved. The game options of the old save are kept; without a save on the cartridge "
+        "the program stops after the first save, to set them (see Setup above).",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
+    , PLAYER_NAME(
+        false,
+        "<b>Player name (new game):</b><br>Up to 7 of A-Z a-z 0-9 space . , ! ? / - '. Empty: Ash.",
+        LockMode::LOCK_WHILE_RUNNING,
+        "Ash", "Ash"
+    )
+    , RIVAL_NAME(
+        false,
+        "<b>Rival name (new game):</b><br>Up to 7 of the same. Empty: Gary.",
+        LockMode::LOCK_WHILE_RUNNING,
+        "Gary", "Gary"
     )
     , CONTINUE_FROM_SAVE(
         "<b>Check the start against the program's last save:</b><br>At each save the program writes where "
@@ -336,6 +360,9 @@ AutoStory::AutoStory()
     PA_ADD_STATIC(SETUP_TEXT);
     PA_ADD_OPTION(STOP_AFTER_CURRENT);
     PA_ADD_OPTION(STARTER);
+    PA_ADD_OPTION(NEW_GAME);
+    PA_ADD_OPTION(PLAYER_NAME);
+    PA_ADD_OPTION(RIVAL_NAME);
     PA_ADD_OPTION(CONTINUE_FROM_SAVE);
     PA_ADD_OPTION(START_SEGMENT);
     PA_ADD_OPTION(START_STEP);
@@ -724,6 +751,21 @@ void AutoStory::run_segment(
         case StepType::BUY:
             story_buy(rt, step.p0, step.p1, label);
             break;
+        case StepType::ESCAPE_ROPE:
+            //  The next p0 steps walk out instead (when the bag has none).
+            if (story_escape_rope(rt)){
+                i += (size_t)std::max(0, (int)step.p0);
+            }else if (step.p0 <= 0){
+                throw UserSetupError(
+                    env.console,
+                    "No ESCAPE ROPE in the bag here (" + label + "), and the route has no way out on foot "
+                    "planned. Put one in the bag (Poke Marts sell them) and start again from the last save."
+                );
+            }
+            break;
+        case StepType::USE_REPEL:
+            story_use_repel(rt);
+            break;
         case StepType::HEAL_ITEMS:
             if (step.p0 == 1){
                 story_heal_after_legendary(rt);
@@ -792,7 +834,63 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  the window closes; a new build's folder; a settings file from
     //  elsewhere: C15_01 was started on a save in One Island).
     const std::string save_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Save.txt";
-    if (CONTINUE_FROM_SAVE){
+
+    //  A new game: the names checked before anything, the start is C0_01.
+    const bool new_game = NEW_GAME;
+    std::string player_name;
+    std::string rival_name;
+    //  Where the program's save file pointed right after the last new game
+    //  it made.
+    const std::string new_game_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-NewGame.txt";
+    if (new_game){
+        auto trimmed = [](std::string s){
+            while (!s.empty() && std::isspace((unsigned char)s.back())){
+                s.pop_back();
+            }
+            size_t i = 0;
+            while (i < s.size() && std::isspace((unsigned char)s[i])){
+                i++;
+            }
+            return s.substr(i);
+        };
+        player_name = trimmed(PLAYER_NAME);
+        rival_name = trimmed(RIVAL_NAME);
+        if (player_name.empty()){
+            player_name = "Ash";
+        }
+        if (rival_name.empty()){
+            rival_name = "Gary";
+        }
+        const std::string player_problem = story_name_problem(player_name);
+        if (!player_problem.empty()){
+            throw UserSetupError(env.console, "The player name \"" + player_name + "\" " + player_problem + ".");
+        }
+        const std::string rival_problem = story_name_problem(rival_name);
+        if (!rival_problem.empty()){
+            throw UserSetupError(env.console, "The rival name \"" + rival_name + "\" " + rival_problem + ".");
+        }
+        //  The settings file is written only when the window closes: after
+        //  a crash, "Start a new game" can still be on in it although the
+        //  new game was made and played on. The program saved since then:
+        //  ask for a second word before the save is overwritten.
+        std::string marker;
+        std::string last;
+        if (CONTINUE_FROM_SAVE && read_text_file(new_game_file, marker) && read_text_file(save_file, last) &&
+            trimmed(marker) != trimmed(last)
+        ){
+            throw UserSetupError(
+                env.console,
+                "\"Start a new game\" is on, but the program has saved since the last new game it made "
+                "(it is at " + trimmed(last) + "): the setting may be left over from then. To really start "
+                "over (the save on the cartridge is overwritten), turn off \"Check the start against the "
+                "program's last save\" as well."
+            );
+        }
+        START_SEGMENT.set_value(0);
+        START_STEP.set(1);
+    }
+
+    if (CONTINUE_FROM_SAVE && !new_game){
         std::string text;
         if (read_text_file(save_file, text)){
             //  "<starter> <segment id> <step>"
@@ -1003,7 +1101,33 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     story_memory_reset();
     home_black_border_check(env.console, context);
 
-    if (RESET_AT_START){
+    if (new_game){
+        const bool had_save = story_new_game(rt, player_name, rival_name);
+        stats.resets++;
+        env.update_stats();
+        NEW_GAME = false;
+        CONTINUE_FROM_SAVE = true;
+        DEX_CAUGHT.set("");
+        rt.caught.clear();
+        rt.caught_at_save.clear();
+        const std::string where = std::string(starter_name(starter)) + " " + script.segments[0].id + " 1\n";
+        try{
+            string_to_file(save_file, where);
+            string_to_file(new_game_file, where);
+            string_to_file(caught_file, "\n");
+        }catch (...){
+            env.log("Could not write the program's files in " + SETTINGS_PATH() + ".", COLOR_ORANGE);
+        }
+        env.log("New game saved in the bedroom: the story from " + std::string(script.segments[0].id) + ", step 1.", COLOR_BLUE);
+        if (!had_save){
+            throw ProgramFinishedException(
+                "New game made and saved in the bedroom. There was no save on the cartridge before, so the "
+                "game has its default options: in the game's OPTION set Text Speed: Fast, Battle Scene: Off, "
+                "Battle Style: Set, save again in the bedroom without moving, and start the program again "
+                "(segment " + std::string(script.segments[0].id) + ", step 1)."
+            );
+        }
+    }else if (RESET_AT_START){
         env.log("Soft resetting to load the save.");
         story_soft_reset(rt);
         stats.resets++;

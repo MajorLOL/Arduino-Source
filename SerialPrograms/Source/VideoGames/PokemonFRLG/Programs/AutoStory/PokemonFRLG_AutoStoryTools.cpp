@@ -768,6 +768,9 @@ StoryBattleResult story_grass_run(
         result = story_battle(rt, wild_kind, label, throw_on_loss);
         break;
     case RunEvent::DIALOG:
+        if (story_close_repel_text(rt)){
+            break;
+        }
         if (rt.in_safari){
             //  No trainers there: the PA, the Safari Game is over.
             rt.console.log("Text in the Safari Zone: the Safari Game is over.", COLOR_BLUE);
@@ -1277,6 +1280,10 @@ bool walk_run(
             battle = story_battle(rt, battle_kind, label);
             break;
         case RunEvent::DIALOG:
+            //  The REPEL wore off: the walk goes on.
+            if (story_close_repel_text(rt)){
+                break;
+            }
             //  A trainer saw the player (or a sign or person talks). In
             //  FRLG the player does not turn to the trainer
             //  (TrainerSeeFunc_PrepareToEngage()).
@@ -1293,7 +1300,9 @@ bool walk_run(
                 callbacks.emplace_back(battle_starting);
             }
             int ret = wait_until(rt.console, rt.context, 3000ms, callbacks);
-            if (ret == 2){
+            if (ret == 2 && story_close_repel_text(rt)){
+                //  (The REPEL wore off.)
+            }else if (ret == 2){
                 battle = story_battle(rt, StoryBattleKind::TRAINER, label);
             }else if (ret >= 0){
                 battle = story_battle(rt, battle_kind, label);
@@ -2359,6 +2368,17 @@ bool story_scripted_battle(StoryRuntime& rt, const std::string& opponent){
 
 std::string story_read_dialog(StoryRuntime& rt){
     return read_story_text(rt.console, DIALOG_TEXT_BOX, false);
+}
+
+bool story_close_repel_text(StoryRuntime& rt){
+    const std::string text = story_read_dialog(rt);
+    if (text.find("wore off") == std::string::npos && text.find("effect wore") == std::string::npos){
+        return false;
+    }
+    rt.console.log("\"REPEL's effect wore off...\": wild Pokemon again from here.", COLOR_BLUE);
+    pbf_press_button(rt.context, BUTTON_B, 160ms, 800ms);
+    rt.context.wait_for_all_requests();
+    return true;
 }
 
 

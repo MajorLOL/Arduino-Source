@@ -48,6 +48,15 @@ void story_heal_with_items(StoryRuntime& rt);
 //  has no effect and is not used up.
 void story_heal_after_legendary(StoryRuntime& rt);
 
+//  An ESCAPE ROPE from the bag: out of the cave or building, to where it was
+//  entered from outdoors (the spin in ends facing down). False if the bag
+//  has none (the story walks out instead).
+bool story_escape_rope(StoryRuntime& rt);
+
+//  A MAX REPEL (or any REPEL) from the bag. Without one: a warning, the walk
+//  goes on with the wild Pokemon.
+void story_use_repel(StoryRuntime& rt);
+
 //  The level of a party slot (1-6), from its summary (-1 if not read), and
 //  its species (slug, "" if not read).
 int story_read_slot(StoryRuntime& rt, int slot, std::string* species);

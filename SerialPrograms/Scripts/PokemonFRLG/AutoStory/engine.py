@@ -33,6 +33,7 @@ from frlg_data import DIRS, OPPOSITE
 COST_STEP = 1.0
 COST_TURN = 0.35
 COST_LAND_ENCOUNTER = 18.0     # ~1.5 s check per step plus the odds of a wild battle
+REPEL_MARGIN = 10              # the last steps of a REPEL count as without it
 COST_WATER_ENCOUNTER = 3.0
 COST_NPC_RANGE = 25.0
 COST_TRAINER_SIGHT = 400.0     # an unplanned trainer battle
@@ -326,6 +327,15 @@ class WorldState:
         self.smash_done = {}                # map_id -> set((x,y)) rocks smashed during this visit
         self.ice_cracked = {}               # map_id -> set((x,y)) thin ice walked on during this visit
         self.map_vars = {}                  # map_id -> {VAR_TEMP_x: value} set by ON_TRANSITION
+        #  Consumables the story bought: item -> count (ESCAPE_ROPE,
+        #  MAX_REPEL); used by the router.
+        self.items = {}
+        #  Where an ESCAPE ROPE goes (UpdateEscapeWarp(): the last warp from
+        #  outdoors into a building or a cave): (map, x, y).
+        self.escape = None
+        #  Steps the REPEL used still lasts (VAR_REPEL_STEP_COUNT): no wild
+        #  battles meanwhile (the team leads by far after the Hall of Fame).
+        self.repel_left = 0
 
     def clone(self):
         return copy.deepcopy(self)
@@ -923,10 +933,15 @@ class Engine:
             cost += COST_TRAINER_SIGHT
         return {"kind": "surf" if surfing else "walk", "dir": d, "cost": cost, "risk": risk}
 
-    def tile_risk(self, tv, x, y, surfing):
+    def tile_risk(self, tv, x, y, surfing, repel=None):
         risk = set()
         enc = tv.tile(x, y)[4]
-        if surfing:
+        if repel is None:
+            #  (The last steps of it as without: the count may be off a bit.)
+            repel = self.state.repel_left > REPEL_MARGIN
+        if repel:
+            pass
+        elif surfing:
             if enc == 2 and tv.water_enc:
                 risk.add("encounter")
         else:

@@ -130,10 +130,31 @@ def talk_no(map_id, xy, label):
     return talk(map_id, xy=xy, mode="no", label=label)
 
 
-def buy(map_id, clerk_xy, item_index, quantity, label):
-    """Buy from a Poke Mart clerk: item_index in the mart's list (decomp)."""
+def buy(map_id, clerk_xy, item_index, quantity, label, item=None):
+    """Buy from a Poke Mart clerk: item_index in the mart's list (decomp).
+    item: ESCAPE_ROPE or MAX_REPEL, counted for the router (story.py,
+    Builder.shortcuts). Bought before the balls "as many as the money
+    allows" of the same visit."""
+    b = {"index": item_index, "quantity": quantity}
+    if item:
+        b["item"] = item
     return [talk(map_id, xy=clerk_xy, mode="plain", label=label, counter=True),
-            {"buy": {"index": item_index, "quantity": quantity}, "label": label}]
+            {"buy": b, "label": label}]
+
+
+#  ESCAPE ROPEs and MAX REPELs (story.py, Builder.shortcuts: the router uses
+#  them where they pay). Their place in each Poke Mart's list.
+ROPE_INDEX = {"MAP_LAVENDER_TOWN_MART": 7, "MAP_SAFFRON_CITY_MART": 4, "MAP_PEWTER_CITY_MART": 6,
+              "MAP_FOUR_ISLAND_MART": 6}
+MAX_REPEL_INDEX = {"MAP_FUCHSIA_CITY_MART": 5, "MAP_THREE_ISLAND_MART": 5, "MAP_FOUR_ISLAND_MART": 7}
+
+
+def ropes(mart, count, label="BuyEscapeRopes"):
+    return buy(mart, [2, 3], ROPE_INDEX[mart], count, label, item="ESCAPE_ROPE")
+
+
+def max_repels(mart, count, label="BuyMaxRepels"):
+    return buy(mart, [2, 3], MAX_REPEL_INDEX[mart], count, label, item="MAX_REPEL")
 
 
 def use_item(words, party_slot, label):
@@ -801,7 +822,9 @@ CHAPTER5 = [
         "title": "Back to Lavender Town",
         #  Balls for a shiny (the option "Catch shiny Pokemon"): the best on
         #  sale on the way, as many as the money allows (LavenderTown_Mart_Items).
-        "steps": buy("MAP_LAVENDER_TOWN_MART", [2, 3], 0, 5, "BuyGreatBalls") + [
+        #  Three ESCAPE ROPEs first: out of Silph Co. (twice) and the Pokemon
+        #  Mansion.
+        "steps": ropes("MAP_LAVENDER_TOWN_MART", 3) + buy("MAP_LAVENDER_TOWN_MART", [2, 3], 0, 5, "BuyGreatBalls") + [
             heal(PC["LAVENDER"], "CeladonToLavenderPC"),
             save(),
         ],
@@ -1335,6 +1358,8 @@ CHAPTER11 = [
             talk("MAP_SILPH_CO_11F", xy=[9, 9], mode="talk", label="SilphPresident"),
             cutscene(1000, 30000, "Master Ball"),
             setst(flags=["FLAG_GOT_MASTER_BALL_FROM_SILPH"]),
+            #  An ESCAPE ROPE: out of the Seafoam Islands after Articuno.
+        ] + ropes("MAP_SAFFRON_CITY_MART", 1) + [
             heal(PC["SAFFRON"], "SilphToSaffronPC"),
             save(),
         ],
@@ -1346,7 +1371,8 @@ CHAPTER11 = [
             #  Ultra Balls in Fuchsia City, as many as the money allows
             #  (quantity 0): for Zapdos, what is left for Articuno.
             heal(PC["FUCHSIA"], "SaffronToFuchsiaPC"),
-        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            #  MAX REPELs first: the Power Plant, the Seafoam Islands.
+        ] + max_repels("MAP_FUCHSIA_CITY_MART", 2) + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
             heal(PC["ROUTE10"], "FuchsiaToRoute10PC"),
             save(),
         ] + legendary("MAP_POWER_PLANT", [5, 11], ["FLAG_FOUGHT_ZAPDOS", "FLAG_HIDE_ZAPDOS"], "Zapdos",
@@ -1500,7 +1526,7 @@ CHAPTER12 = [
             #  10 Ultra Balls for Moltres (with those left from Articuno and
             #  the one on Mt. Ember); the rest of the money is for the Poke
             #  Balls of the National Pokedex.
-        ] + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 10, "BuyUltraBalls") + [
+        ] + max_repels("MAP_THREE_ISLAND_MART", 2) + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 10, "BuyUltraBalls") + [
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "MartToThreeIslandPC"),
             save(),
         ],
@@ -1733,7 +1759,9 @@ CHAPTER14 = [
     {
         "id": "C14_01_VIRIDIAN_FOREST", "chapter": 14,
         "title": "POKeDEX: Poke Balls in Viridian City, Viridian Forest",
-        "steps": [heal(PC["VIRIDIAN"], "ToViridianPC")] + poke_balls("MAP_VIRIDIAN_CITY_MART", "BuyPokeBalls") + [
+        #  80 POKe BALLs, not as many as the money allows: the ESCAPE ROPEs
+        #  in Pewter City come first there.
+        "steps": [heal(PC["VIRIDIAN"], "ToViridianPC")] + buy("MAP_VIRIDIAN_CITY_MART", [2, 3], 0, 80, "BuyPokeBalls") + [
             dex("MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), ["caterpie", "weedle", "kakuna", "metapod", "pikachu"],
                 "DexViridianForest"),
             heal(PC["PEWTER"], "ForestToPewterPC"),
@@ -1743,7 +1771,9 @@ CHAPTER14 = [
     {
         "id": "C14_02_ROUTE3_MT_MOON", "chapter": 14,
         "title": "POKeDEX: more Poke Balls in Pewter City, Route 3, a Magikarp, Mt. Moon",
-        "steps": poke_balls("MAP_PEWTER_CITY_MART", "BuyPokeBalls") + [
+        #  ESCAPE ROPEs first: out of Mt. Moon, the Pokemon Tower, the
+        #  Seafoam Islands, Berry Forest and Ruby Path.
+        "steps": ropes("MAP_PEWTER_CITY_MART", 5) + poke_balls("MAP_PEWTER_CITY_MART", "BuyPokeBalls") + [
             dex("MAP_ROUTE3", WHOLE, ["spearow", "pidgey", "nidoran-m", "nidoran-f", "mankey", "jigglypuff"],
                 "DexRoute3"),
             heal(PC["ROUTE4"], "Route3ToMtMoonPC"),
@@ -1930,6 +1960,8 @@ CHAPTER15 = [
         "steps": [
             heal(PC["FUCHSIA"], "LabToFuchsiaPC"),
             save(),
+            #  MAX REPELs for Ruby Path (Mt. Ember).
+        ] + max_repels("MAP_FUCHSIA_CITY_MART", 2) + [
             talk("MAP_ROUTE15_WEST_ENTRANCE_2F", xy=[5, 5], mode="talk", label="OaksAideExpShare"),
             cutscene(3000, 60000, "The EXP. SHARE", answer="yes"),
             setst(flags=["FLAG_GOT_EXP_SHARE_FROM_OAKS_AIDE"]),
@@ -2066,6 +2098,8 @@ CHAPTER17 = [
             cutscene(3000, 60000, "The rival on Four Island"),
             pos("MAP_FOUR_ISLAND", 9, 28, "right"),
             setst(vars={"VAR_MAP_SCENE_FOUR_ISLAND": 1}, flags=["FLAG_HIDE_FOUR_ISLAND_RIVAL"]),
+            #  ESCAPE ROPEs: out of Icefall Cave and Cerulean Cave.
+        ] + ropes("MAP_FOUR_ISLAND_MART", 2) + [
             heal("MAP_FOUR_ISLAND_POKEMON_CENTER_1F", "HarborToFourIslandPC"),
             save(),
             #  1F: over the thin ice (8, 14), (8, 10), (8, 9) up to the thin
@@ -2217,7 +2251,8 @@ CHAPTER19 = [
         "title": "Mewtwo in Cerulean Cave (weakened, Ultra Balls)",
         "steps": [
             heal(PC["FUCHSIA"], "ToFuchsiaPC"),
-        ] + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            #  A MAX REPEL first: the way to Mewtwo.
+        ] + max_repels("MAP_FUCHSIA_CITY_MART", 1) + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
             heal(PC["CERULEAN"], "FuchsiaToCeruleanPC"),
             save(),
             goto("MAP_CERULEAN_CAVE_B1F", [[7, 13]], "ToMewtwo"),
