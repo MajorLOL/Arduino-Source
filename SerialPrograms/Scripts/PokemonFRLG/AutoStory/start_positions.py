@@ -1,8 +1,10 @@
 """Guide of start positions: for every segment and every step the program can
 resume at (after a save), where the player stands, with a picture.
 
-python3 start_positions.py <out>/story.json <pokefirered> <guide_dir> [CHARMANDER]
-(story.json from generate.py; it writes START-POSITIONS.md and images/.)
+python3 start_positions.py <out>/story.json <pokefirered> <guide_dir> [CHARMANDER] [--images-url URL]
+(story.json from generate.py; it writes START-POSITIONS.md and images/. With
+--images-url the page links the pictures there, e.g. the assets of a release,
+so the page is one file that works on a wiki.)
 """
 import json
 import os
@@ -16,8 +18,14 @@ from frlg_data import Decomp          # noqa: E402
 from render import Renderer           # noqa: E402
 from PIL import Image, ImageDraw      # noqa: E402
 
-story_path, decomp_root, out_dir = sys.argv[1:4]
-variant = sys.argv[4] if len(sys.argv) > 4 else "CHARMANDER"
+args = list(sys.argv[1:])
+images_url = "images/"
+if "--images-url" in args:
+    k = args.index("--images-url")
+    images_url = args[k + 1].rstrip("/") + "/"
+    del args[k:k + 2]
+story_path, decomp_root, out_dir = args[0:3]
+variant = args[3] if len(args) > 3 else "CHARMANDER"
 
 d = Decomp(decomp_root)
 r = Renderer(d)
@@ -280,7 +288,7 @@ for si, step, pos, why in uniq:
     mid, x, y, f = pos[0], pos[1], pos[2], pos[3] if len(pos) > 3 else None
     key = (mid, x, y, f)
     if key not in images:
-        name = "%03d_%s_%d_%d_%s.png" % (len(images), d.maps[mid].name, x, y, f or "none")
+        name = "%s_%d_%d_%s.png" % (d.maps[mid].name, x, y, f or "none")
         picture(mid, x, y, f, os.path.join(out_dir, "images", name),
                 "%s (%d, %d), facing %s" % (readable(d.maps[mid].name), x, y, FACING_EN[f]))
         images[key] = name
@@ -337,7 +345,7 @@ for si, step, pos, why in uniq:
             L.append("**Step %s:** %s (%d, %d), facing %s" % (
                 ", ".join(steps_here), readable(d.maps[ps[0]].name), ps[1], ps[2], FACING_EN[f]))
             L.append("")
-            L.append("![%s step %s](images/%s)" % (seg["id"], ", ".join(steps_here), images[k]))
+            L.append("![%s step %s](%s%s)" % (seg["id"], ", ".join(steps_here), images_url, images[k]))
             L.append("")
 open(os.path.join(out_dir, "START-POSITIONS.md"), "w").write("\n".join(L) + "\n")
 print("%d start points, %d pictures" % (len(uniq), len(images)))
