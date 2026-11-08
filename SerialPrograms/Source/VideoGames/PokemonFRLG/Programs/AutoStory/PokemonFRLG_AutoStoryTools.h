@@ -308,7 +308,9 @@ void story_check_memory_at_start(StoryRuntime& rt);
 void story_log_memory(StoryRuntime& rt, bool force = false);
 
 //  Save from the overworld. "has_pokedex" picks the start menu layout.
-void story_save(StoryRuntime& rt, bool has_pokedex);
+//  has_pokemon: false only before the first Pokemon (the start menu then
+//  has no POKeMON entry either).
+void story_save(StoryRuntime& rt, bool has_pokedex, bool has_pokemon = true);
 
 //  Soft reset to the last save. On the load menu, the number of species
 //  caught ("POKeDEX") is read into rt.dex_count_at_load.

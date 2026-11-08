@@ -513,8 +513,9 @@ bool story_new_game(StoryRuntime& rt, const std::string& player, const std::stri
         }
         if (try_new_game(rt, player, rival, had_save)){
             //  The bedroom, where C0_01 starts: saved there (YES to "There
-            //  is already a saved file...").
-            story_save(rt, false);
+            //  is already a saved file..."). No Pokemon yet: a start menu
+            //  without POKeMON.
+            story_save(rt, false, false);
             rt.facing = DPAD_UP;
             return had_save;
         }

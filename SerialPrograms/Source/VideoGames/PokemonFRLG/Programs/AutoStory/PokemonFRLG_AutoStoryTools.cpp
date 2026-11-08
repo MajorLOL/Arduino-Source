@@ -2098,11 +2098,22 @@ void story_check_memory_at_start(StoryRuntime& rt){
 }
 
 
-void story_save(StoryRuntime& rt, bool has_pokedex){
+void story_save(StoryRuntime& rt, bool has_pokedex, bool has_pokemon){
     StoryMemoryScope memory_scope("saving");
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
-    console.log(has_pokedex ? "Saving the game." : "Saving the game (no Pokedex yet).");
+    console.log(
+        has_pokedex ? "Saving the game." :
+        has_pokemon ? "Saving the game (no Pokedex yet)." :
+        "Saving the game (no Pokemon yet)."
+    );
+    //  The start menu without POKeDEX: POKeMON, BAG, the player, SAVE, OPTION,
+    //  EXIT. Before the first Pokemon also without POKeMON: BAG, the player,
+    //  SAVE, ... where SAVE is the third entry (the player's place in the
+    //  menu with POKeMON; moving to the fourth opened OPTION).
+    const SelectionArrowPositionNoDexMenu save_entry = has_pokemon
+        ? SelectionArrowPositionNoDexMenu::SAVE
+        : SelectionArrowPositionNoDexMenu::TRAINER;
     if (has_pokedex){
         save_game_to_overworld(console, context);
     }else{
@@ -2123,7 +2134,7 @@ void story_save(StoryRuntime& rt, bool has_pokedex){
                 pbf_press_button(context, BUTTON_PLUS, 200ms, 800ms);
                 continue;
             }
-            if (!move_cursor_to_position(console, context, SelectionArrowPositionNoDexMenu::SAVE)){
+            if (!move_cursor_to_position(console, context, save_entry)){
                 pbf_mash_button(context, BUTTON_B, 500ms);
                 continue;
             }
