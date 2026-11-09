@@ -505,11 +505,15 @@ RunAttempt attempt_moves(
             if (late >= 0){
                 result.event = late == 0 ? RunEvent::BATTLE_START : (late == 1 ? RunEvent::BATTLE_TEXT : RunEvent::DIALOG);
             }
-        }else if (wait_until(rt.console, rt.context, 5000ms, { text }) == 0){
-            //  Only the battle text tells: a warp's fade looks like a battle
-            //  starting.
-            rt.console.log("A wild battle after the turn, before the first step.", COLOR_ORANGE);
-            result.event = RunEvent::BATTLE_TEXT;
+        }else{
+            //  Only the battle text or menu tells: a warp's fade looks like a
+            //  battle starting. (5 seconds of looking for the text were not
+            //  enough on Route 1: the battle came in the next run.)
+            BattleMenuWatcher menu(COLOR_RED);
+            if (wait_until(rt.console, rt.context, 8000ms, { text, menu }) >= 0){
+                rt.console.log("A wild battle after the turn, before the first step.", COLOR_ORANGE);
+                result.event = RunEvent::BATTLE_TEXT;
+            }
         }
     }
     if (!track){
@@ -1253,7 +1257,20 @@ bool walk_run(
             rt.console.log("The screen changed in the dark: a battle?", COLOR_ORANGE);
             a.event = RunEvent::BATTLE_START;
         }
-        if (a.event == RunEvent::NONE && a.lost && encounters && track && !leg.dark &&
+        //  The picture changed before the video saw any move (on frames that
+        //  showed the map well): no step was made, on a run without grass
+        //  too. A battle or a trainer only starts at a tile's center, after
+        //  a whole step or after the turn in place (Gen 3 looks for a wild
+        //  battle then too, FieldGetPlayerInput()), and a step scrolls the
+        //  map from its first frames. (Route 1: "left: 1 of 1 (video
+        //  unsure) - 0 px, 7 frames, screen changed" counted as made, then
+        //  a battle; a tile off from there, the route went up the wrong
+        //  column into a wall in Viridian City. Earlier logs: the same 17
+        //  times, each time a battle or a trainer right after.)
+        const bool no_step_at_all = a.lost && a.video_moves == 0 &&
+            std::abs(a.pixels) < AutoStoryScroll::TILE_PIXELS / 2 &&
+            a.unsure * 2 < a.frames;
+        if (a.event == RunEvent::NONE && a.lost && (encounters || no_step_at_all) && track && !leg.dark &&
             !(warp_at_end && remaining == 0) && !(scene_at_end && remaining == 0)
         ){
             //  The picture changed where wild battles start, but no battle
