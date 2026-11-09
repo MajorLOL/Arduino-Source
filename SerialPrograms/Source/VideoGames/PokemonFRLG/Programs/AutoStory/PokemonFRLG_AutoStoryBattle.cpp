@@ -723,7 +723,22 @@ void use_best_move(
         }else{
             console.log("Using move " + std::to_string(slot + 1));
         }
-        move_cursor_to_option(console, context, slot_option(slot));
+        if (!move_cursor_to_option(console, context, slot_option(slot))){
+            //  The arrow not seen: the cursor would stay on the move used
+            //  last (20 minutes of FLAMETHROWER against a GROWLITHE with
+            //  FLASH FIRE, the moves not read). The move list does not wrap
+            //  (HandleInputChooseMove()): up and left reach move 1 from
+            //  anywhere, then on to the move.
+            console.log("Moving to move " + std::to_string(slot + 1) + " without seeing the cursor.", COLOR_ORANGE);
+            pbf_press_dpad(context, DPAD_UP, 160ms, 240ms);
+            pbf_press_dpad(context, DPAD_LEFT, 160ms, 240ms);
+            if (slot % 2 == 1){
+                pbf_press_dpad(context, DPAD_RIGHT, 160ms, 240ms);
+            }
+            if (slot / 2 == 1){
+                pbf_press_dpad(context, DPAD_DOWN, 160ms, 240ms);
+            }
+        }
         context.wait_for_all_requests();
 
         //  A move without PP shows its PP in red.

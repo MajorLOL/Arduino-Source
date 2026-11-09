@@ -2098,6 +2098,63 @@ void story_check_memory_at_start(StoryRuntime& rt){
 }
 
 
+namespace{
+
+//  After YES to "Would you like to save the game?" (start_menu.c): the game
+//  asks to overwrite the save there is, "There is already a saved file. Is
+//  it okay to overwrite it?" with YES first, or, the first time after NEW
+//  GAME over another game's save (new_game.c: gDifferentSaveFile), "WARNING!
+//  There is a different game file that is already saved. ... Are you sure
+//  you want to save now and overwrite the other save file?" over four pages
+//  and then YES/NO with NO first. B there is NO: nothing saved. Then
+//  "SAVING... DON'T TURN OFF THE POWER." and "{PLAYER} saved the game."
+//  Returns whether the game saves.
+bool story_confirm_save(StoryRuntime& rt){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    auto has = [](const std::string& text, const char* part){
+        return text.find(part) != std::string::npos;
+    };
+    const WallClock deadline = current_time() + 25s;
+    bool warned = false;
+    while (current_time() < deadline){
+        context.wait_for_all_requests();
+        const std::string text = story_read_dialog(rt);
+        if (has(text, "saving") || has(text, "turn off") || has(text, "saved the game")){
+            return true;
+        }
+        SelectionArrowWatcher yes_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::YES);
+        SelectionArrowWatcher no_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::NO);
+        const int ret = wait_until(console, context, 500ms, { yes_arrow, no_arrow });
+        if (ret == 0){
+            //  Overwrite: YES.
+            pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+            continue;
+        }
+        if (ret == 1){
+            //  NO first: the question after the WARNING. Up to YES.
+            console.log("Overwriting the other game's save (the old game is lost): YES.", COLOR_ORANGE);
+            pbf_press_dpad(context, DPAD_UP, 160ms, 340ms);
+            continue;
+        }
+        if (!has(text, "are you sure") && (
+            has(text, "warning") || has(text, "different game") ||
+            has(text, "if you save now") || has(text, "entirely lost")
+        )){
+            if (!warned){
+                console.log("The game warns of another game's save (the first save after NEW GAME).", COLOR_ORANGE);
+                warned = true;
+            }
+            //  The next page.
+            pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+            continue;
+        }
+    }
+    return false;
+}
+
+}
+
 void story_save(StoryRuntime& rt, bool has_pokedex, bool has_pokemon){
     StoryMemoryScope memory_scope("saving");
     ConsoleHandle& console = rt.console;
@@ -2114,54 +2171,58 @@ void story_save(StoryRuntime& rt, bool has_pokedex, bool has_pokemon){
     const SelectionArrowPositionNoDexMenu save_entry = has_pokemon
         ? SelectionArrowPositionNoDexMenu::SAVE
         : SelectionArrowPositionNoDexMenu::TRAINER;
-    if (has_pokedex){
-        save_game_to_overworld(console, context);
-    }else{
-        //  Same as save_game_to_overworld(), with the start menu that has no
-        //  POKeDEX entry.
-        WallClock deadline = current_time() + 120s;
-        while (true){
-            context.wait_for_all_requests();
-            if (current_time() > deadline){
-                OperationFailedExceptionWithScreenshot::fire(
-                    ErrorReportMode::SEND_ERROR_REPORT,
-                    "story_save(): Unable to save the game after 2 minutes.",
-                    console
-                );
-            }
-            StartMenuWatcher start_menu(COLOR_RED);
-            if (wait_until(console, context, 1000ms, { start_menu }) != 0){
-                pbf_press_button(context, BUTTON_PLUS, 200ms, 800ms);
-                continue;
-            }
-            if (!move_cursor_to_position(console, context, save_entry)){
-                pbf_mash_button(context, BUTTON_B, 500ms);
-                continue;
-            }
-            pbf_press_button(context, BUTTON_A, 320ms, 400ms);
-            context.wait_for_all_requests();
+    //  As save_game_to_overworld(), with both start menus, the game's
+    //  questions after YES answered (story_confirm_save()), and only done
+    //  once the game saves: "SAVING..." or "saved the game" seen. (Before,
+    //  a save that did not happen went on as saved: after NEW GAME over
+    //  another game's save not one of a whole night's saves happened.)
+    WallClock deadline = current_time() + 150s;
+    int tries = 0;
+    while (true){
+        context.wait_for_all_requests();
+        if (current_time() > deadline){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_save(): The game did not save (tried for 2 minutes, " + std::to_string(tries) + " times).",
+                console
+            );
+        }
+        StartMenuWatcher start_menu(COLOR_RED);
+        if (wait_until(console, context, 1000ms, { start_menu }) != 0){
+            pbf_press_button(context, BUTTON_PLUS, 200ms, 800ms);
+            continue;
+        }
+        const bool at_save = has_pokedex
+            ? move_cursor_to_position(console, context, SelectionArrowPositionStartMenu::SAVE)
+            : move_cursor_to_position(console, context, save_entry);
+        if (!at_save){
+            pbf_mash_button(context, BUTTON_B, 500ms);
+            continue;
+        }
+        pbf_press_button(context, BUTTON_A, 320ms, 400ms);
+        context.wait_for_all_requests();
 
-            SelectionArrowWatcher save_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::YES);
-            if (wait_until(console, context, 2000ms, { save_arrow }) != 0){
-                pbf_mash_button(context, BUTTON_B, 500ms);
-                continue;
-            }
-            pbf_press_button(context, BUTTON_A, 320ms, 200ms);
-            context.wait_for_all_requests();
-
-            //  "There is already a saved file. Is it okay to overwrite it?"
-            SelectionArrowWatcher overwrite_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::YES);
-            if (wait_until(console, context, 2000ms, { overwrite_arrow }) == 0){
-                pbf_press_button(context, BUTTON_A, 320ms, 200ms);
-            }
+        //  "Would you like to save the game?"
+        SelectionArrowWatcher save_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::YES);
+        if (wait_until(console, context, 2000ms, { save_arrow }) != 0){
+            console.log("Unable to detect Save Arrow. Attempting to open start menu again.");
+            pbf_mash_button(context, BUTTON_B, 500ms);
+            continue;
+        }
+        console.log("Detected Save Arrow. Saving game.");
+        pbf_press_button(context, BUTTON_A, 320ms, 200ms);
+        tries++;
+        if (story_confirm_save(rt)){
             break;
         }
-        //  Let "SAVING... DON'T TURN OFF THE POWER." finish, then close the
-        //  "saved the game" text.
-        pbf_wait(context, 4000ms);
+        console.log("The game did not save (no \"SAVING...\" seen). Again.", COLOR_ORANGE);
         pbf_mash_button(context, BUTTON_B, 1500ms);
-        context.wait_for_all_requests();
     }
+    //  Let "SAVING... DON'T TURN OFF THE POWER." finish, then close the
+    //  "saved the game" text.
+    pbf_wait(context, 4000ms);
+    pbf_mash_button(context, BUTTON_B, 1500ms);
+    context.wait_for_all_requests();
     story_back_to_overworld(rt, "after saving");
 }
 
