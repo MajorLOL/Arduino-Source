@@ -305,7 +305,8 @@ std::string ocr_box(ConsoleHandle& console, const ImageFloatBox& box, uint32_t m
 
 //  Oak's text box (the standard one at the bottom): dark grey text, and
 //  in case the intro's font is coloured, blue text.
-const ImageFloatBox INTRO_TEXT_BOX(0.080, 0.765, 0.840, 0.175);
+//  (The inside of the frame: see DIALOG_TEXT_BOX.)
+const ImageFloatBox INTRO_TEXT_BOX(0.040, 0.745, 0.910, 0.205);
 std::string read_intro_text(StoryRuntime& rt){
     std::string text = ocr_box(rt.console, INTRO_TEXT_BOX, combine_rgb(0, 0, 0), combine_rgb(128, 128, 128));
     if (simple(text).size() >= 6){

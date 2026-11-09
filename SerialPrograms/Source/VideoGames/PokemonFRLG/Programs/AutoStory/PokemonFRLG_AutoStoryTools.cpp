@@ -63,8 +63,11 @@ constexpr double JUMP_FRAMES = 32;
 constexpr double SURF_FRAMES = 8;
 constexpr double SPIN_FRAMES = 8;
 
-//  The text of the overworld text box.
-const ImageFloatBox DIALOG_TEXT_BOX(0.080, 0.765, 0.840, 0.175);
+//  The text of the overworld text box: the inside of its frame, with a
+//  margin around the text. (It was 0.080, 0.765, 0.840, 0.175: the first
+//  letter and the top of the first line cut off, "WARNING!" not read. The
+//  text starts at GBA x = 16, y = 121 of 240 x 160.)
+const ImageFloatBox DIALOG_TEXT_BOX(0.040, 0.745, 0.910, 0.205);
 
 
 Milliseconds frames_to_ms(double frames){
@@ -2117,10 +2120,11 @@ bool story_confirm_save(StoryRuntime& rt){
     };
     const WallClock deadline = current_time() + 25s;
     bool warned = false;
+    int idle = 0;
     while (current_time() < deadline){
         context.wait_for_all_requests();
         const std::string text = story_read_dialog(rt);
-        if (has(text, "saving") || has(text, "turn off") || has(text, "saved the game")){
+        if (has(text, "saving") || has(text, "turn off") || has(text, "the power") || has(text, "saved the")){
             return true;
         }
         SelectionArrowWatcher yes_arrow(COLOR_RED, &console.overlay(), SelectionArrowPositionConfirmationMenu::YES);
@@ -2137,9 +2141,12 @@ bool story_confirm_save(StoryRuntime& rt){
             pbf_press_dpad(context, DPAD_UP, 160ms, 340ms);
             continue;
         }
-        if (!has(text, "are you sure") && (
-            has(text, "warning") || has(text, "different game") ||
-            has(text, "if you save now") || has(text, "entirely lost")
+        //  Never A on the last question: NO is first there.
+        const bool question = has(text, "sure") || has(text, "overwrite");
+        if (!question && (
+            has(text, "arning") || has(text, "different") || has(text, "game file") ||
+            has(text, "other file") || has(text, "adventure") || has(text, "entirely") ||
+            has(text, "will be")
         )){
             if (!warned){
                 console.log("The game warns of another game's save (the first save after NEW GAME).", COLOR_ORANGE);
@@ -2147,7 +2154,15 @@ bool story_confirm_save(StoryRuntime& rt){
             }
             //  The next page.
             pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+            idle = 0;
             continue;
+        }
+        //  Text not read (as "WARNING!" before): after some time without a
+        //  YES/NO box, the next page.
+        if (++idle >= 3 && !question){
+            console.log("Save text not read (\"" + text + "\"): A for the next page.", COLOR_ORANGE);
+            pbf_press_button(context, BUTTON_A, 160ms, 640ms);
+            idle = 0;
         }
     }
     return false;
