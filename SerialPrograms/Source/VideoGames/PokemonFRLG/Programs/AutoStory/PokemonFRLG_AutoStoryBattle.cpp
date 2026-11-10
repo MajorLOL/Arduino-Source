@@ -2147,8 +2147,13 @@ StoryBattleResult run_story_battle(
                     //  twice in a row with nothing else between: look
                     //  whether the player is free to move.
                     list_only_in_row++;
-                    const bool foe_box = screen && read_caught_mark(screen) >= 0;
-                    if ((!foe_box || list_only_in_row >= 2) && in_overworld(console, context)){
+                    //  The foe's box: where the ball mark goes, or its HP
+                    //  bar. (The mark's place alone is no box once the foe
+                    //  has a status: PAR, BRN... cover it. Route 7: every
+                    //  paralyzed Meowth and Growlithe was "no box".)
+                    const bool foe_box = screen && (read_caught_mark(screen) >= 0 || read_foe_hp(screen) >= 0);
+                    const bool check_overworld = !foe_box || list_only_in_row >= 2;
+                    if (check_overworld && in_overworld(console, context)){
                         if (lost){
                             return StoryBattleResult::LOST;
                         }
@@ -2157,6 +2162,21 @@ StoryBattleResult run_story_battle(
                         }
                         console.log("Battle over: the move list was only the look of the place.");
                         return over();
+                    }
+                    if (check_overworld){
+                        //  in_overworld() pressed B: that closed the move
+                        //  list, the battle menu is back. The next turn of
+                        //  the loop sees it and picks the move from there.
+                        //  (Picking here pressed on the battle menu, opened
+                        //  the list again, and round it went: 20 minutes of
+                        //  "Moves: [-] [-] [-] [-]", three times a night.)
+                        console.log("Not the overworld: B closed the move list, back to the battle menu.", COLOR_ORANGE);
+                        seen_battle = true;
+                        battle_confirmed = true;
+                        last_activity = current_time();
+                        unknown_in_row = 0;
+                        pressed_blind = false;
+                        break;
                     }
                     seen_battle = true;
                     battle_confirmed = true;
