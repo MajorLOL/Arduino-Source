@@ -1384,6 +1384,10 @@ StoryBattleResult run_story_battle(
     int next_slot = 1;
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
     int list_only_in_row = 0;   //  of those, how many showed the move list
+    //  "Move lists" in a row with no move name read: then not taken for the
+    //  move list (Route 7, three times in a night: 20 minutes each of
+    //  "Moves: [-] [-] [-] [-]", A, + and B changing nothing).
+    int unreadable_lists_in_row = 0;
     //  The last press was a blind one ("Nothing recognized"): a move list
     //  open now may be its doing (A on FIGHT), not a pick that did not go
     //  through.
@@ -1463,6 +1467,7 @@ StoryBattleResult run_story_battle(
         if (ret >= 0){
             unknown_in_row = 0;
             list_only_in_row = 0;
+            unreadable_lists_in_row = 0;
             text_only_in_row = 0;
             pressed_blind = false;
         }
@@ -2099,6 +2104,40 @@ StoryBattleResult run_story_battle(
                 if (list_open && !move_names_readable(console)){
                     console.log("Looked like the move list, but no move name is there.", COLOR_ORANGE);
                     list_open = false;
+                }
+                if (list_open){
+                    //  move_names_readable() can match a name by chance in
+                    //  what is no move list. Not one of the four read, again:
+                    //  not the move list. Then nothing here counts as the
+                    //  battle going on, and after 3 minutes the program
+                    //  stops with a report (picture and video) instead of
+                    //  picking moves blindly for 20 minutes.
+                    StoryBattleMemory names;
+                    read_fight_menu(console, names);
+                    bool any = false;
+                    for (int i = 0; i < 4; i++){
+                        any |= names.moves[i] >= 0;
+                    }
+                    unreadable_lists_in_row = any ? 0 : unreadable_lists_in_row + 1;
+                    if (unreadable_lists_in_row >= 2){
+                        console.log(
+                            "Looked like the move list " + std::to_string(unreadable_lists_in_row) +
+                            " times in a row, but no move name was read: not the move list.",
+                            COLOR_ORANGE
+                        );
+                        list_open = false;
+                    }
+                    if (unreadable_lists_in_row >= 12){
+                        //  A couple of minutes of it, nothing else seen:
+                        //  stuck. The report's picture and video show what
+                        //  this screen is.
+                        OperationFailedExceptionWithScreenshot::fire(
+                            ErrorReportMode::SEND_ERROR_REPORT,
+                            "run_story_battle(): A screen like the move list without move names, " +
+                            std::to_string(unreadable_lists_in_row) + " times in a row.",
+                            console
+                        );
+                    }
                 }
                 if (list_open){
                     //  The overworld can look like the move list (Cerulean
