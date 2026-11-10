@@ -10,6 +10,7 @@
 #include <mutex>
 #include <utility>
 #include <vector>
+#include "Common/Cpp/Time.h"
 #include "Common/Cpp/Concurrency/Mutex.h"
 #include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
@@ -29,6 +30,7 @@ struct LedgerEntry{
 struct Ledger{
     Mutex lock;
     int64_t start = 0;
+    WallClock start_time = current_time();
     std::map<std::string, LedgerEntry> entries;
     //  The scopes now open, the innermost last, with the memory when each
     //  last started counting.
@@ -94,6 +96,7 @@ void story_memory_reset(){
     const int64_t now = memory_now();
     std::lock_guard<Mutex> lg(ledger_.lock);
     ledger_.start = now;
+    ledger_.start_time = current_time();
     ledger_.entries.clear();
     ledger_.open.clear();
 }
@@ -103,9 +106,11 @@ std::string story_memory_summary(){
     const int64_t now = memory_now();
     std::vector<std::pair<std::string, LedgerEntry>> entries;
     int64_t start;
+    WallClock start_time;
     {
         std::lock_guard<Mutex> lg(ledger_.lock);
         start = ledger_.start;
+        start_time = ledger_.start_time;
         entries.assign(ledger_.entries.begin(), ledger_.entries.end());
         //  What the open scopes counted so far.
         if (!ledger_.open.empty()){
@@ -127,7 +132,15 @@ std::string story_memory_summary(){
         list += ", " + item.first + " " + megabytes(item.second.bytes) +
             " (" + std::to_string(item.second.count) + ")";
     }
-    return "Memory growth since the start: " + megabytes(now - start) +
+    //  The rate per hour compares runs (a change against the growth shows
+    //  there); the activities only say what was going on (other threads
+    //  allocate and free all the time, so a short scope swings both ways).
+    const double hours = std::chrono::duration_cast<std::chrono::seconds>(current_time() - start_time).count() / 3600.0;
+    char rate[64] = "";
+    if (hours >= 0.1){
+        snprintf(rate, sizeof(rate), " in %.1f h (%+.0f MB an hour)", hours, (double)(now - start) / (1024.0 * 1024.0) / hours);
+    }
+    return "Memory growth since the start: " + megabytes(now - start) + rate +
         ". By activity: other " + megabytes(now - start - counted) + list + ".";
 }
 

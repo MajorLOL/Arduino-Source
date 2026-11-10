@@ -205,6 +205,14 @@ Ort::Session create_session(
         
         Ort::SessionOptions cpu_options = create_session_options(model_cache_path, false);
         cpu_options.DisablePerSessionThreads();
+        //  The OCR models (PaddleOCR detection and recognition) get a new
+        //  input size with nearly every call (the width of the text). With
+        //  the CPU memory arena and the memory patterns (one per input
+        //  shape) the process memory keeps growing over hours of calls
+        //  (FRLG Autostory: about 1 GB an hour, on a 12 GB computer).
+        //  Without them each run allocates what it needs and frees it.
+        cpu_options.DisableCpuMemArena();
+        cpu_options.DisableMemPattern();
         
         Ort::Session session{global_ort_env(), onnx_path.c_str(), cpu_options};
         logger.log("Ort::Session created");
