@@ -892,8 +892,9 @@ CHAPTER6 = [
         "title": "Safari Zone: HM03 Surf and the Gold Teeth, the Warden gives HM04 Strength",
         "steps": [
             #  FuchsiaCity_SafariZone_Entrance_EventScript_EntryTriggerMid: YES, 500.
+            #  Three of its pages end a message (no advance arrow): 90 s.
             goto("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", [[4, 3]], "ToSafariDesk", trigger=True),
-            cutscene(4000, 40000, "Join the Safari Game", answer="yes"),
+            cutscene(4000, 90000, "Join the Safari Game", answer="yes"),
             setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 2}),
             pos("MAP_SAFARI_ZONE_CENTER", 26, 30, "up"),
             talk("MAP_SAFARI_ZONE_WEST", xy=[28, 14], mode="talk", label="GoldTeeth"),
@@ -1714,7 +1715,7 @@ def safari_game(area_map, tiles, species, label):
     ExitWarpIn / ExitWalkIn: both end at (4, 4))."""
     return [
         goto("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", [[4, 3]], label + "_Desk", trigger=True),
-        cutscene(4000, 40000, "Join the Safari Game", answer="yes"),
+        cutscene(4000, 90000, "Join the Safari Game", answer="yes"),
         setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 2}),
         pos("MAP_SAFARI_ZONE_CENTER", 26, 30, "up"),
         dex(area_map, tiles, species, label, safari=True),

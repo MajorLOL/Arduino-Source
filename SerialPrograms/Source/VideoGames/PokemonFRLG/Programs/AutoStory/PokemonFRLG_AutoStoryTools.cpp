@@ -4,6 +4,7 @@
  *
  */
 
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
@@ -1230,6 +1231,17 @@ bool walk_run(
             //  beside the door).
             rt.console.log("The video says one too far, but it was often unsure on the way. Not stepping back.", COLOR_ORANGE);
             made = moves;
+        }else if (too_far && made - moves > 1){
+            //  More than one tile too many cannot come from an input held a
+            //  little too long (a tile is a quarter of a second): the video
+            //  is off (Route 7 into Celadon City: "22 of 18", and four steps
+            //  back put the player beside the Pokemon Center's door).
+            rt.console.log(
+                "The video says " + std::to_string(made - moves) + " too far, more than an input held too long can "
+                "make: the video is off. Not stepping back.",
+                COLOR_ORANGE
+            );
+            made = moves;
         }else if (too_far){
             //  One too many (the input lasted too long): step back. Only
             //  when the video saw most of that extra step: 89 px for a run
@@ -1803,6 +1815,25 @@ bool story_cutscene(
             WallClock now = current_time();
             if (no_arrow_since == WallClock::max()){
                 no_arrow_since = now;
+            }
+            if (now - no_arrow_since >= 2500ms && now - no_arrow_since < 8s){
+                //  The last page of a message has no advance arrow (only
+                //  the pages before it do): it waits for A all the same.
+                //  Real text there (not a floor that looks like a text
+                //  box): A now, not after 8 seconds. (The Safari Zone's
+                //  desk: three such pages, the 40 seconds of the scene ran
+                //  out.) A YES/NO box is answered in its own round.
+                const std::string text = story_read_dialog(rt);
+                int letters = 0;
+                for (char ch : text){
+                    letters += std::isalpha((unsigned char)ch) ? 1 : 0;
+                }
+                if (letters >= 8){
+                    rt.console.log("Last page of a text (no advance arrow): A. \"" + text + "\"");
+                    no_arrow_since = WallClock::max();
+                    pbf_press_button(rt.context, BUTTON_A, 160ms, 340ms);
+                    break;
+                }
             }
             if (now - no_arrow_since >= 8s){
                 //  A box that never shows the arrow: A advances it too (and
