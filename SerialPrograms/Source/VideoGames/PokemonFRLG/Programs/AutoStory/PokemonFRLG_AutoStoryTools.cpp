@@ -569,7 +569,7 @@ StoryBattleResult story_battle(
     rt.battle.shiny_watch = rt.shiny_watch.get();
     //  A shiny takes the next free party slot. Until the whole team is in,
     //  keep the slots the team still needs.
-    rt.battle.shiny_catch = rt.party_order_final || (int)rt.team.size() + rt.party_extras < 6;
+    rt.battle.shiny_catch = rt.catch_shinies && (rt.party_order_final || (int)rt.team.size() + rt.party_extras < 6);
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
     if (rt.shiny_watch){
         StoryShinyWatch& watch = *rt.shiny_watch;
@@ -596,7 +596,7 @@ StoryBattleResult story_battle(
             rt.shiny_unsaved = true;
             if (rt.collection != nullptr && rt.memory.caught.empty() && !rt.memory.shiny_species.empty()){
                 //  Not one the step wanted: the table counts it all the same.
-                rt.collection->add_caught(rt.memory.shiny_species, rt.memory.foe_mark == 1);
+                rt.collection->add_caught(rt.memory.shiny_species, rt.memory.foe_mark == 1, true);
             }
             if (!rt.memory.caught.empty()){
                 rt.console.log("The shiny " + name + " is the team member to catch here.", COLOR_BLUE);
@@ -655,11 +655,11 @@ StoryBattleResult story_battle(
         std::string table;
         if (rt.collection != nullptr){
             //  The game's ball mark: one was caught before.
-            rt.collection->add_caught(rt.memory.caught, rt.memory.foe_mark == 1);
+            rt.collection->add_caught(rt.memory.caught, rt.memory.foe_mark == 1, rt.memory.shiny);
             const int needed = rt.collection->needed(rt.memory.caught);
             if (needed > 0){
-                table = " The POKeDEX table: " + std::to_string(rt.collection->caught(rt.memory.caught)) +
-                    " of " + std::to_string(needed) + ".";
+                table = " The POKeDEX table: " + std::to_string(rt.collection->have(rt.memory.caught)) +
+                    " of " + std::to_string(needed) + (rt.collection->shiny_only() ? " shiny." : ".");
             }
             if (for_dex && rt.collecting){
                 if (rt.collection->wants(rt.memory.caught)){

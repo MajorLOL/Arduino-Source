@@ -29,6 +29,13 @@ namespace NintendoSwitch{
 namespace PokemonFRLG{
 
 
+//  How many of a species the program caught, and how many of them shiny.
+struct StoryCollectionCount{
+    int caught = 0;
+    int shiny = 0;
+};
+
+
 class StoryCollectionRow : public EditableTableRow{
 public:
     StoryCollectionRow(EditableTableOption& parent_table);
@@ -43,6 +50,7 @@ public:
     LabelCellOption number;
     LabelCellOption pokemon;
     SimpleIntegerCell<uint8_t> caught;
+    SimpleIntegerCell<uint8_t> shiny;
     LabelCellOption needed;
     LabelCellOption when;
     LabelCellOption how;
@@ -68,12 +76,20 @@ public:
     int starter() const{ return m_starter.load(std::memory_order_relaxed); }
     std::string game_name() const;
 
+    //  Only shiny ones count (the option "shiny only"): what is wanted is
+    //  what has fewer shiny ones than needed.
+    void set_shiny_only(bool shiny_only);
+    bool shiny_only() const{ return m_shiny_only.load(std::memory_order_relaxed); }
+
     //  How many of the species to catch in this game with this starter (1,
     //  or more to evolve the others; 0: only by evolving). -1: it cannot be
     //  registered (not in this game, or a slug the table does not know).
     int needed(const std::string& slug) const;
     int caught(const std::string& slug) const;
-    //  Still to catch: needed > caught.
+    int shinies(const std::string& slug) const;
+    //  The count that matters: the shiny ones with "shiny only", else all.
+    int have(const std::string& slug) const;
+    //  Still to catch: needed > have.
     bool wants(const std::string& slug) const;
     std::set<std::string> wanted(const std::set<std::string>& species) const;
     //  More than one wanted: the game's ball mark (caught before) does not
@@ -81,29 +97,30 @@ public:
     bool wants_more_than_one(const std::string& slug) const;
 
     //  One more caught. registered: the game showed it as caught before
-    //  (the ball mark), so there was one already.
-    void add_caught(const std::string& slug, bool registered);
+    //  (the ball mark), so there was one already. shiny: a shiny one.
+    void add_caught(const std::string& slug, bool registered, bool shiny);
     //  The program knows there is at least that many (the ball mark, the
     //  team, a catch of an earlier run).
     void at_least(const std::string& slug, int count);
     void clear_counts();
     //  The counts (at a save), and back to them (a reset to that save).
-    std::map<std::string, int> snapshot() const{ return counts(); }
-    void restore(const std::map<std::string, int>& counts);
+    std::map<std::string, StoryCollectionCount> snapshot() const{ return counts(); }
+    void restore(const std::map<std::string, StoryCollectionCount>& counts);
 
-    //  Species with at least one, species in the table, catches still to
-    //  make.
+    //  Species with at least one (with "shiny only": one shiny), species in
+    //  the table, catches still to make.
     void counts_summary(size_t& registered, size_t& total, size_t& to_catch) const;
     void update_summary();
 
 private:
-    std::map<std::string, int> counts() const;
-    void rebuild(const std::map<std::string, int>& counts);
+    std::map<std::string, StoryCollectionCount> counts() const;
+    void rebuild(const std::map<std::string, StoryCollectionCount>& counts);
     std::shared_ptr<StoryCollectionRow> find(const std::string& slug) const;
 
     StaticTextOption& m_summary;
     std::atomic<int> m_game;
     std::atomic<int> m_starter;
+    std::atomic<bool> m_shiny_only;
     mutable std::mutex m_lock;
 };
 

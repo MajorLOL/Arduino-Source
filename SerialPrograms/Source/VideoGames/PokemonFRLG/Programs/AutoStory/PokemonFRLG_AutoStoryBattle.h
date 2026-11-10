@@ -183,6 +183,9 @@ struct StoryBattleSettings{
     //  Of dex_species: more than one wanted (the others to evolve): caught
     //  even when the game shows the ball mark (one is caught already).
     std::set<std::string> dex_extra;
+    //  Only shiny ones of dex_species (the collection's "Shiny only"): the
+    //  others are run from, the ball mark does not matter.
+    bool dex_shiny_only = false;
 
     //  The roaming legendary (StepType::ROAM): met, it gets the MASTER BALL
     //  at once (it flees on its first turn; a ball goes before any move).

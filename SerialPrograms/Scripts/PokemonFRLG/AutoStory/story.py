@@ -743,14 +743,15 @@ class Builder:
             return None
         return sum(e["cost"] for e, _ in route)
 
-    def fly(self, index, label, out, goals=None):
+    def fly(self, index, label, out, goals=None, force=False):
         """Fly to KantoFlyLocation 'index' (out of a building first). With
         'goals' (where the walk goes on to): only when it saves time.
+        force: also to the town the player is in (the Fly map takes it).
         Returns whether it flew."""
         if self.surfing or not self.in_kanto(self.pos[0]):
             return False
         h, _ = self.fly_data()[index]
-        if self.pos[0] == h["map"]:
+        if self.pos[0] == h["map"] and not force:
             return False
         outdoor = [mid for mid, m in self.d.maps.items() if m.map_type in Builder.FLY_MAP_TYPES]
         here = self.d.maps[self.pos[0]].map_type in Builder.FLY_MAP_TYPES
@@ -1066,7 +1067,10 @@ class Builder:
             f = step["fly"]
             index = [h for h, _ in Builder.KANTO_FLY].index(f)
             fi = self.fly_destination(index=index)
-            if fi is None or not self.fly(fi, step.get("label", "Fly"), out):
+            #  force: also from the town itself (the player may be elsewhere:
+            #  the POKeDEX collection's segments start from wherever the
+            #  segment before ended, or chapter 20 goes round again).
+            if fi is None or not self.fly(fi, step.get("label", "Fly"), out, force=bool(step.get("force"))):
                 h, _ = self.fly_data()[index]
                 if self.pos[0] != h["map"]:
                     self.walk_to({(h["map"], h["x"], h["y"])}, step.get("label", "Fly") + "_Walk", out, shortcuts=True)

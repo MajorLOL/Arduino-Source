@@ -403,9 +403,13 @@ def get_fly(label="Fly"):
             setst(abilities={"fly": True})]
 
 
-def fly(heal_location, label=None):
-    """Fly to a town (HEAL_LOCATION_*): where the Fly map has it now; else walk there."""
-    return {"fly": heal_location, "label": label or "Fly"}
+def fly(heal_location, label=None, force=False):
+    """Fly to a town (HEAL_LOCATION_*): where the Fly map has it now; else walk there.
+    force: also from that town itself."""
+    s = {"fly": heal_location, "label": label or "Fly"}
+    if force:
+        s["force"] = True
+    return s
 
 
 # ---------------------------------------------------------------- chapter 1
@@ -2279,10 +2283,11 @@ CHAPTER19 = [
 #
 #  Each place is a round trip from the town's Pokemon Center (from the nurse
 #  back to the nurse, then a save). Each town is a segment of its own that
-#  starts with FLY (from anywhere outdoors in Kanto) and ends outdoors in
-#  front of the Pokemon Center: a town skipped leaves the player where the
-#  town before ended, and the next FLY starts from there. No town comes
-#  twice (FLY to the town the player is in is not needed then).
+#  starts with FLY (from anywhere outdoors in Kanto, also from that town:
+#  the Fly map takes the town the player is in) and ends outdoors in front
+#  of the Pokemon Center: a town skipped leaves the player where the town
+#  before ended, and the next FLY starts from there. With "shiny only" the
+#  program goes round the towns again and again (C20_02 after the last).
 #  Surfing, fishing, Rock Smash, gifts, trades and breeding: later. Not yet
 #  either: Mt. Ember's grass (behind Rock Smash rocks and Strength boulders
 #  the routes do not move: MAGMAR in LeafGreen), the Tanoby Chambers (UNOWN
@@ -2327,25 +2332,18 @@ def collect_safari(area_map, label):
     return collect_trip(PC["FUCHSIA"], steps, label)
 
 
-def collect_town(seg_id, title, pc_map, places, fly_to=None, mart=None, state=None):
+def collect_town(seg_id, title, pc_map, places, fly_to, mart=None, state=None):
     """One town: FLY there, the nurse, POKe BALLs (mart), the places, out of
     the Pokemon Center. Skipped as a whole when the table wants none of the
     species of its places."""
-    steps = []
-    if fly_to:
-        steps.append(fly(fly_to, seg_id + "_Fly"))
+    steps = [fly(fly_to, seg_id + "_Fly", force=True)]
     steps.append(heal(pc_map, seg_id + "_ToNurse"))
     if mart:
         steps += poke_balls(mart, seg_id + "_BuyPokeBalls") + [heal(pc_map, seg_id + "_MartToNurse")]
     for place in places:
         steps += place if isinstance(place, list) else [place]
     out = {"outside": True, "label": seg_id + "_Out"}
-    if fly_to:
-        body = [{"collect_segment": {"steps": steps + [out]}, "label": "Anything to catch here?"}]
-    else:
-        #  The first town (no FLY: the segment before ended at its nurse):
-        #  skipped, the player is still at the nurse; out in any case.
-        body = [{"unless_collected": {"steps": steps}, "label": "Anything to catch here?"}, out]
+    body = [{"collect_segment": {"steps": steps + [out]}, "label": "Anything to catch here?"}]
     seg = {"id": seg_id, "chapter": 20, "title": "POKeDEX collection: " + title, "no_repel": True,
            "steps": body}
     if state:
@@ -2439,41 +2437,48 @@ def sevii_tour():
 
 
 CHAPTER20 = [
-    #  Mewtwo's segment ends at the nurse in Cerulean City: no FLY first.
-    collect_town("C20_01_CERULEAN", "Route 24, Route 4, Cerulean Cave", PC["CERULEAN"], [
+    #  Mewtwo's segment ends at the nurse in Cerulean City: out first, so that
+    #  every town segment starts outdoors (and the loop of "shiny only"
+    #  comes back to C20_02 from anywhere).
+    {
+        "id": "C20_01_START", "chapter": 20, "no_repel": True,
+        "title": "POKeDEX collection: out of the Cerulean City Pokemon Center",
+        "steps": [{"outside": True, "label": "C20_01_Out"}],
+    },
+    collect_town("C20_02_CERULEAN", "Route 24, Route 4, Cerulean Cave", PC["CERULEAN"], [
         collect_place(PC["CERULEAN"], "MAP_ROUTE24", WHOLE, "CollectRoute24"),
         collect_place(PC["CERULEAN"], "MAP_ROUTE4", WHOLE, "CollectRoute4"),
         collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_B1F", WHOLE, "CollectCeruleanCaveB1F", visits=3),
         collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_1F", WHOLE, "CollectCeruleanCave1F"),
-    ], mart="MAP_CERULEAN_CITY_MART"),
-    collect_town("C20_02_MT_MOON", "Mt. Moon, Route 3", PC["ROUTE4"], [
+    ], fly_to="HEAL_LOCATION_CERULEAN_CITY", mart="MAP_CERULEAN_CITY_MART"),
+    collect_town("C20_03_MT_MOON", "Mt. Moon, Route 3", PC["ROUTE4"], [
         collect_place(PC["ROUTE4"], "MAP_MT_MOON_B2F", WHOLE, "CollectMtMoon"),
         collect_place(PC["ROUTE4"], "MAP_ROUTE3", WHOLE, "CollectRoute3"),
     ], fly_to="HEAL_LOCATION_ROUTE4"),
-    collect_town("C20_03_VIRIDIAN", "Viridian Forest, Route 22, Route 23", PC["VIRIDIAN"], [
+    collect_town("C20_04_VIRIDIAN", "Viridian Forest, Route 22, Route 23", PC["VIRIDIAN"], [
         collect_place(PC["VIRIDIAN"], "MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), "CollectViridianForest"),
         collect_place(PC["VIRIDIAN"], "MAP_ROUTE22", WHOLE, "CollectRoute22"),
         collect_place(PC["VIRIDIAN"], "MAP_ROUTE23", WHOLE, "CollectRoute23"),
     ], fly_to="HEAL_LOCATION_VIRIDIAN_CITY", mart="MAP_VIRIDIAN_CITY_MART"),
-    collect_town("C20_04_VICTORY_ROAD", "Victory Road", PC["INDIGO"], [
+    collect_town("C20_05_VICTORY_ROAD", "Victory Road", PC["INDIGO"], [
         collect_place(PC["INDIGO"], "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), "CollectVictoryRoad"),
     ], fly_to="HEAL_LOCATION_INDIGO_PLATEAU", state=VICTORY_ROAD_RESET),
-    collect_town("C20_05_ROUTE10", "Power Plant, Rock Tunnel", PC["ROUTE10"], [
+    collect_town("C20_06_ROUTE10", "Power Plant, Rock Tunnel", PC["ROUTE10"], [
         collect_place(PC["ROUTE10"], "MAP_POWER_PLANT", WHOLE, "CollectPowerPlant"),
         collect_place(PC["ROUTE10"], "MAP_ROCK_TUNNEL_1F", WHOLE, "CollectRockTunnel"),
     ], fly_to="HEAL_LOCATION_ROUTE10"),
-    collect_town("C20_06_LAVENDER", "Pokemon Tower, Route 8, Route 12", PC["LAVENDER"], [
+    collect_town("C20_07_LAVENDER", "Pokemon Tower, Route 8, Route 12", PC["LAVENDER"], [
         collect_place(PC["LAVENDER"], "MAP_POKEMON_TOWER_7F", WHOLE, "CollectPokemonTower"),
         collect_place(PC["LAVENDER"], "MAP_ROUTE8", WHOLE, "CollectRoute8"),
         collect_place(PC["LAVENDER"], "MAP_ROUTE12", WHOLE, "CollectRoute12"),
     ], fly_to="HEAL_LOCATION_LAVENDER_TOWN"),
-    collect_town("C20_07_CELADON", "Route 16", PC["CELADON"], [
+    collect_town("C20_08_CELADON", "Route 16", PC["CELADON"], [
         collect_place(PC["CELADON"], "MAP_ROUTE16", WHOLE, "CollectRoute16"),
     ], fly_to="HEAL_LOCATION_CELADON_CITY"),
     #  The Safari Zone: each area twice (its rare ones: CHANSEY, TAUROS,
     #  KANGASKHAN, SCYTHER/PINSIR 1-4%); the second game only when the
     #  first left some.
-    collect_town("C20_08_FUCHSIA", "Safari Zone, Routes 14, 15, 18, Seafoam Islands", PC["FUCHSIA"], [
+    collect_town("C20_09_FUCHSIA", "Safari Zone, Routes 14, 15, 18, Seafoam Islands", PC["FUCHSIA"], [
         collect_safari("MAP_SAFARI_ZONE_CENTER", "CollectSafariCenter"),
         collect_safari("MAP_SAFARI_ZONE_EAST", "CollectSafariEast"),
         collect_safari("MAP_SAFARI_ZONE_NORTH", "CollectSafariNorth"),
@@ -2487,11 +2492,11 @@ CHAPTER20 = [
         collect_place(PC["FUCHSIA"], "MAP_ROUTE18", WHOLE, "CollectRoute18"),
         collect_place(PC["FUCHSIA"], "MAP_SEAFOAM_ISLANDS_B3F", WHOLE, "CollectSeafoam"),
     ], fly_to="HEAL_LOCATION_FUCHSIA_CITY"),
-    collect_town("C20_09_CINNABAR", "Pokemon Mansion, Route 21", PC["CINNABAR"], [
+    collect_town("C20_10_CINNABAR", "Pokemon Mansion, Route 21", PC["CINNABAR"], [
         collect_place(PC["CINNABAR"], "MAP_POKEMON_MANSION_1F", rect(1, 27, 15, 32), "CollectMansion"),
         collect_place(PC["CINNABAR"], "MAP_ROUTE21_NORTH", WHOLE, "CollectRoute21"),
     ], fly_to="HEAL_LOCATION_CINNABAR_ISLAND"),
-    collect_town("C20_10_VERMILION_SEVII", "Route 11, Diglett's Cave, Route 6, the Sevii Islands", PC["VERMILION"], [
+    collect_town("C20_11_VERMILION_SEVII", "Route 11, Diglett's Cave, Route 6, the Sevii Islands", PC["VERMILION"], [
         collect_place(PC["VERMILION"], "MAP_ROUTE11", WHOLE, "CollectRoute11"),
         collect_place(PC["VERMILION"], "MAP_DIGLETTS_CAVE_B1F", WHOLE, "CollectDiglettsCave"),
         collect_place(PC["VERMILION"], "MAP_ROUTE6", WHOLE, "CollectRoute6"),

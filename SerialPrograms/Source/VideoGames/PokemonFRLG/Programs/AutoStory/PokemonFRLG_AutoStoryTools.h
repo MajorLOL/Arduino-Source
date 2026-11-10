@@ -24,6 +24,7 @@
 #include "PokemonFRLG_AutoStoryScript.h"
 #include "PokemonFRLG_AutoStoryBattle.h"
 #include "PokemonFRLG_AutoStoryScroll.h"
+#include "PokemonFRLG_AutoStoryCollection.h"
 
 namespace PokemonAutomation{
 
@@ -37,8 +38,6 @@ class ProController;
 using ProControllerContext = ControllerContext<ProController>;
 
 namespace PokemonFRLG{
-
-class StoryCollectionTable;
 
 
 //  Everything the story steps share while the program runs.
@@ -126,7 +125,15 @@ struct StoryRuntime{
     //  still wanted in the chosen game. Not null while the program runs.
     StoryCollectionTable* collection = nullptr;
     //  Its counts at the last save (a reset goes back to them).
-    std::map<std::string, int> collection_at_save;
+    std::map<std::string, StoryCollectionCount> collection_at_save;
+    //  The option "Shiny only" of the collection (chapter 20): only shiny
+    //  Pokemon of the species the table wants are caught, and a visit of a
+    //  place lasts "collect_shiny_minutes".
+    bool collect_shiny = false;
+    int collect_shiny_minutes = 60;
+    //  The option "Catch shiny Pokemon": shiny Pokemon of any species. (The
+    //  shiny watch also listens for "Shiny only".)
+    bool catch_shinies = true;
     //  A DEX step catching for the table (StepType::DEX, p2 & 2).
     bool collecting = false;
 

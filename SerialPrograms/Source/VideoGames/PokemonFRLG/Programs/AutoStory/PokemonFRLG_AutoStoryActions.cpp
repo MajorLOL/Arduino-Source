@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Language.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
@@ -2188,13 +2189,22 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
             }
         }
     }
-    const int idle_limit = std::max(1, (int)step.p0);
+    //  "Shiny only": only shiny ones of the wanted species, for a while at
+    //  each place (one wild Pokemon in 8192 is shiny): no limit of battles
+    //  in a row without a catch.
+    const bool shiny_only = collect && rt.collect_shiny;
+    const int idle_limit = shiny_only ? 1000000 : std::max(1, (int)step.p0);
+    const int minutes_limit = shiny_only ? std::max(1, rt.collect_shiny_minutes) : std::max(1, (int)step.p1);
+    if (shiny_only && !rt.shiny_watch){
+        throw UserSetupError(console, "\"Shiny only\" needs the shiny sound: the program could not listen to the game.");
+    }
     console.log(
-        label + ": for the POKeDEX, catching " + species_names(wanted) +
+        label + ": for the POKeDEX, catching " + (shiny_only ? "shiny " : "") + species_names(wanted) +
         (collect ? " (" + rt.collection->game_name() + ", the table: " + counts + ")" : std::string()) +
         (safari ? " (the Safari Game, until it is over)." :
+            shiny_only ? " (all others are run from; at most " + std::to_string(minutes_limit) + " minutes)." :
             " (until " + std::to_string(idle_limit) + " battles in a row bring none, at most " +
-            std::to_string(std::max(1, (int)step.p1)) + " minutes)."),
+            std::to_string(minutes_limit) + " minutes)."),
         COLOR_BLUE
     );
     if (wanted.empty() && !safari){
@@ -2219,6 +2229,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     rt.battle.dex_species = wanted;
     rt.battle.dex_all = listed;
     rt.battle.dex_extra = extra;
+    rt.battle.dex_shiny_only = shiny_only;
     rt.collecting = collect;
     rt.battle.catch_species.clear();
     rt.in_safari = safari;
@@ -2234,7 +2245,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     int battles = 0;
     size_t caught_here = 0;
     const WallClock start = current_time();
-    const WallClock deadline = start + (safari ? std::chrono::minutes(30) : std::chrono::minutes(std::max(1, (int)step.p1)));
+    const WallClock deadline = start + (safari ? std::chrono::minutes(30) : std::chrono::minutes(minutes_limit));
     try{
         while (current_time() < deadline && !rt.safari_over){
             if (!safari && (rt.battle.dex_species.empty() || idle >= idle_limit || rt.no_balls)){
@@ -2266,6 +2277,19 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 idle = 0;           //  Found caught before (the ball mark).
             }else{
                 idle++;
+            }
+            if (shiny_only && rt.warned_no_sound){
+                throw UserSetupError(
+                    console,
+                    "\"Shiny only\" needs the game's sound, and none comes in from the capture card: set its "
+                    "audio input and turn the game's sound on."
+                );
+            }
+            if (collect && !safari && rt.shiny_unsaved){
+                //  Not to be lost to a reset: saved at the nurse first. The
+                //  next visit of the place goes on.
+                console.log(label + ": a shiny Pokemon is caught: back to the nurse to save it.", COLOR_BLUE);
+                break;
             }
             if (collect && !safari && !rt.battle.dex_species.empty() &&
                 (rt.lead_fainted || (rt.memory.player_hp >= 0 && rt.memory.player_hp < 0.35))

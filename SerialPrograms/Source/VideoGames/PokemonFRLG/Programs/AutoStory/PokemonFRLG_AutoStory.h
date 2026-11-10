@@ -100,6 +100,8 @@ private:
     BooleanCheckBoxOption VERIFY_WALKING;
     BooleanCheckBoxOption RUNNING;
     StringOption DEX_CAUGHT;
+    BooleanCheckBoxOption COLLECTION_SHINY;
+    SimpleIntegerOption<uint16_t> COLLECTION_SHINY_MINUTES;
     StaticTextOption COLLECTION_SUMMARY;
     StoryCollectionTable COLLECTION;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;

@@ -1553,7 +1553,8 @@ StoryBattleResult run_story_battle(
                         shiny_catching = true;
                     }else{
                         console.log(
-                            "Not caught: it would take a party slot one of the team still has to join in.",
+                            "Not caught: \"Catch shiny Pokemon\" is off, or the party slot is still needed for "
+                            "the team.",
                             COLOR_ORANGE
                         );
                     }
@@ -1563,7 +1564,9 @@ StoryBattleResult run_story_battle(
                 //  game's ball mark decides over the program's list: with
                 //  it, not caught again; without it, caught even if the
                 //  list has it.
-                if (!shiny_catching && wild && (!settings.dex_species.empty() || !settings.dex_all.empty())){
+                if (!shiny_catching && wild && !settings.dex_shiny_only &&
+                    (!settings.dex_species.empty() || !settings.dex_all.empty())
+                ){
                     std::string slug;
                     read_opponent(console, slug, settings.legendary_species);
                     const bool nidoran = slug.rfind("nidoran", 0) == 0 &&

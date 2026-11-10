@@ -360,6 +360,24 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         "", ""
     )
+    , COLLECTION_SHINY(
+        "<b>Pokedex collection: shiny only:</b><br>In the POKeDEX collection after Mewtwo (chapter 20) only "
+        "<b>shiny</b> Pokemon of the species the table still needs are caught; all others are run from. The "
+        "table then counts the shiny ones (its column Shiny), and chapter 20 goes round its towns again and "
+        "again until every species of its places has its shiny ones, or the program is stopped. "
+        "<b>Needs the game's sound</b> (the shiny sound: the capture card's audio input, game volume on); "
+        "without it the program stops. One wild Pokemon in 8192 is shiny: at about two battles a minute that "
+        "is some 70 hours per shiny, and a species found in 5% of the battles takes 20 times that. "
+        "Only for chapter 20; the story before is played as usual.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
+    , COLLECTION_SHINY_MINUTES(
+        "<b>Shiny only: minutes per place:</b><br>How long each visit of a place hunts for shiny Pokemon "
+        "before the program goes on to the next place (each place is visited twice per round).",
+        LockMode::LOCK_WHILE_RUNNING,
+        60, 5, 1440
+    )
     , COLLECTION_SUMMARY("")
     , COLLECTION(COLLECTION_SUMMARY)
     , GO_HOME_WHEN_DONE(false)
@@ -391,6 +409,8 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(RUNNING);
     PA_ADD_OPTION(DEX_CAUGHT);
+    PA_ADD_OPTION(COLLECTION_SHINY);
+    PA_ADD_OPTION(COLLECTION_SHINY_MINUTES);
     PA_ADD_STATIC(COLLECTION_SUMMARY);
     PA_ADD_OPTION(COLLECTION);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
@@ -399,13 +419,16 @@ AutoStory::AutoStory()
     AutoStory::on_config_value_changed(this);
     STARTER.add_listener(*this);
     GAME_VERSION.add_listener(*this);
+    COLLECTION_SHINY.add_listener(*this);
 }
 AutoStory::~AutoStory(){
+    COLLECTION_SHINY.remove_listener(*this);
     GAME_VERSION.remove_listener(*this);
     STARTER.remove_listener(*this);
 }
 void AutoStory::on_config_value_changed(void* object){
     COLLECTION.set_game(GAME_VERSION == GameVersion::LEAFGREEN ? 1 : 0, (int)(Starter)STARTER);
+    COLLECTION.set_shiny_only(COLLECTION_SHINY);
 }
 
 
@@ -1029,9 +1052,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.verify_walking = VERIFY_WALKING;
     rt.running = RUNNING && VERIFY_WALKING;
     rt.save_after_heal = SAVE_AFTER_HEAL;
-    if (CATCH_SHINIES){
+    rt.catch_shinies = CATCH_SHINIES;
+    rt.collect_shiny = COLLECTION_SHINY;
+    rt.collect_shiny_minutes = (uint16_t)COLLECTION_SHINY_MINUTES;
+    if (CATCH_SHINIES || COLLECTION_SHINY){
         rt.shiny_watch.reset(new StoryShinyWatch(env.console, context));
-        env.log("Listening for the shiny sound: shiny Pokemon are caught.", COLOR_BLUE);
+        env.log(
+            CATCH_SHINIES
+                ? "Listening for the shiny sound: shiny Pokemon are caught."
+                : "Listening for the shiny sound: for \"Shiny only\" in the POKeDEX collection.",
+            COLOR_BLUE
+        );
     }
     //  The start options follow the saves: the next run goes on from the
     //  last save without setting them by hand.
@@ -1155,6 +1186,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  to be caught by the start (the team, the legendary Pokemon, the
     //  catches of the runs before).
     COLLECTION.set_game(GAME_VERSION == GameVersion::LEAFGREEN ? 1 : 0, (int)starter);
+    COLLECTION.set_shiny_only(COLLECTION_SHINY);
     rt.collection = &COLLECTION;
     if (new_game || (first == 0 && first_step == 0)){
         COLLECTION.clear_counts();
@@ -1259,6 +1291,30 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
     int league_losses = 0;
+    //  "Shiny only": chapter 20 goes round its towns again (from the first
+    //  town, after the way out of the Cerulean City Pokemon Center) as long
+    //  as the table wants a shiny of a species of its places.
+    size_t collect_first = (size_t)-1;
+    size_t collect_last = (size_t)-1;
+    std::set<std::string> collect_species;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const std::string id = script.segments[s].id;
+        if (id.rfind("C20_", 0) != 0){
+            continue;
+        }
+        if (collect_first == (size_t)-1 && id.rfind("C20_01", 0) != 0){
+            collect_first = s;
+        }
+        collect_last = s;
+        for (size_t k = 0; k < script.segments[s].step_count; k++){
+            const StoryStep& step = script.step(script.segments[s], k);
+            if (step.type == StepType::DEX && step.p2 > 0 && (step.p2 & 2) != 0){
+                std::set<std::string> species = story_species_list(step.text);
+                collect_species.insert(species.begin(), species.end());
+            }
+        }
+    }
+    int collect_rounds = 1;
 
     while (current_segment <= last){
         const StorySegment& segment = script.segments[current_segment];
@@ -1292,6 +1348,27 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             take_resume();
             current_segment++;
             current_step = 0;
+            if (rt.collect_shiny && current_segment - 1 == collect_last && collect_first < collect_last &&
+                !collect_species.empty()
+            ){
+                const std::set<std::string> still = COLLECTION.wanted(collect_species);
+                if (!still.empty()){
+                    collect_rounds++;
+                    std::string names;
+                    for (const std::string& slug : still){
+                        names += (names.empty() ? "" : ", ") + slug;
+                    }
+                    env.log(
+                        "Shiny only: " + std::to_string(still.size()) + " species of chapter 20's places still "
+                        "want shiny ones (" + names + "): round " + std::to_string(collect_rounds) + " from " +
+                        script.segments[collect_first].id + ".",
+                        COLOR_BLUE
+                    );
+                    current_segment = collect_first;
+                }else{
+                    env.log("Shiny only: every species of chapter 20's places has its shiny ones.", COLOR_BLUE);
+                }
+            }
             if (STOP_AFTER_CURRENT.should_stop()){
                 break;
             }
