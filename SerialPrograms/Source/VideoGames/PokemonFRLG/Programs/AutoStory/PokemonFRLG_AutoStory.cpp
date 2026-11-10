@@ -820,7 +820,7 @@ void AutoStory::run_segment(
             story_elevator(rt, step.p0, step.p1, label);
             break;
         case StepType::OSCILLATE:
-            story_oscillate(rt, step.dir, Milliseconds(step.p0), label);
+            story_oscillate(rt, step.dir, step.p1, Milliseconds(step.p0), label);
             break;
         case StepType::PUSH:
             story_push_boulder(rt, step.dir);

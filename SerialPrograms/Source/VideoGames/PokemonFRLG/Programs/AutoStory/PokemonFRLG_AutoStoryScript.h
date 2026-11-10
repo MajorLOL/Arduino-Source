@@ -114,7 +114,8 @@ enum class StepType : uint8_t{
     PUZZLE,             //  text = name; legs_a = hub->targets, legs_b = targets->hub
     PRESS,              //  text = button, p0 = times, p1 = ms between
     ELEVATOR,           //  p0 = floor cursor now, p1 = floor to pick
-    OSCILLATE,          //  walk back and forth (dir) until a scene starts; p0 = max ms
+    OSCILLATE,          //  walk back and forth (dir) until a scene starts; p0 = max ms; p1 >= 3: a
+                        //  line of p1 tiles with a wall at both ends, run along (B held)
     PUSH,               //  push a Strength boulder toward dir
     BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity
     HEAL_ITEMS,         //  heal the party with items from the bag

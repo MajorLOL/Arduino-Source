@@ -101,7 +101,9 @@ void story_elevator(StoryRuntime& rt, int from, int to, const std::string& what)
 void story_push_boulder(StoryRuntime& rt, DpadPosition direction);
 
 //  Walk back and forth until a scene starts (Safari Zone: time's up).
-void story_oscillate(StoryRuntime& rt, DpadPosition direction, Milliseconds max_time, const std::string& what);
+//  length >= 3: a line of that many tiles with a wall at both ends, run
+//  along (B held) each way until bumping into the wall.
+void story_oscillate(StoryRuntime& rt, DpadPosition direction, int length, Milliseconds max_time, const std::string& what);
 
 //  The Vermilion Gym trash cans. Starts and ends at the hub tile.
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);

@@ -1310,12 +1310,21 @@ void story_push_boulder(StoryRuntime& rt, DpadPosition direction){
 
 
 
-void story_oscillate(StoryRuntime& rt, DpadPosition direction, Milliseconds max_time, const std::string& what){
-    rt.console.log("Walking back and forth until a scene starts: " + what);
+void story_oscillate(StoryRuntime& rt, DpadPosition direction, int length, Milliseconds max_time, const std::string& what){
     DpadPosition back = opposite(direction);
     WhiteDialogWatcher dialog(COLOR_RED);
     BlackScreenWatcher black(COLOR_RED);
     WallClock deadline = current_time() + max_time;
+    //  A line of "length" tiles with a wall at both ends: run along it (B
+    //  held, 8 frames a tile), each way a little longer than the line, so
+    //  it ends bumping into the wall (no drift). The Safari Zone counts
+    //  every tile: about 5 steps a second instead of 2.
+    const bool line = length >= 3;
+    const Milliseconds leg = Milliseconds((int64_t)((8 + 8 * (length - 1) + 12) * 1000 / 60));
+    rt.console.log(
+        "Walking back and forth until a scene starts: " + what +
+        (line ? " (running along " + std::to_string(length) + " tiles between two walls)" : std::string())
+    );
     rt.context.wait_for_all_requests();
     int ret = run_until<ProControllerContext>(
         rt.console, rt.context,
@@ -1323,8 +1332,13 @@ void story_oscillate(StoryRuntime& rt, DpadPosition direction, Milliseconds max_
             while (current_time() < deadline){
                 for (int i = 0; i < 10; i++){
                     DpadPosition d = (i % 2 == 0) ? direction : back;
-                    //  Same timing as a single walking step.
-                    pbf_press_dpad(context, d, 200ms, 300ms);
+                    if (line){
+                        pbf_controller_state(context, BUTTON_B, d, {0, 0}, {0, 0}, leg);
+                        pbf_wait(context, 50ms);
+                    }else{
+                        //  Same timing as a single walking step.
+                        pbf_press_dpad(context, d, 200ms, 300ms);
+                    }
                 }
                 context.wait_for_all_requests();
             }

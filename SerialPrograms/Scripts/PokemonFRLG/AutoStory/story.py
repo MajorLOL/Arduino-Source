@@ -1368,29 +1368,84 @@ class Builder:
             self.switch_puzzle(step, out)
             return
         if "oscillate" in step:
-            #  Walk back and forth on two plain tiles until a script starts
-            #  (e.g. the Safari Zone step counter runs out).
+            #  Walk back and forth until a script starts (the Safari Zone
+            #  step counter runs out). The longest straight line of plain
+            #  tiles there with a wall at both ends: run along it holding
+            #  the direction a little longer than the line, so each way ends
+            #  bumping into the wall (no drift, many steps per second). No
+            #  such line: two tiles, one step at a time.
             o = step["oscillate"]
             m = self.d.map(o["map"])
             v = self.engine.view(m.id)
-            spots = {}
-            for x, y in o["tiles"]:
+
+            def plain(x, y):
+                if not m.in_bounds(x, y):
+                    return False
                 t = v.tile(x, y)
                 if t[1] or t[4] or (x, y) in v.blocked or (x, y) in v.sight or (x, y) in v.triggers:
-                    continue
-                near_warp = False
+                    return False
                 for ddx, ddy in [(0, 0), (0, 1), (0, -1), (1, 0), (-1, 0), (0, 2), (0, -2), (2, 0), (-2, 0)]:
                     if m.warp_at(x + ddx, y + ddy)[0] is not None:
-                        near_warp = True
-                if near_warp:
+                        return False
+                return True
+
+            def wall(x, y):
+                #  Collision, not a ledge or another floor: walking into it
+                #  only bumps.
+                if not m.in_bounds(x, y):
+                    return True
+                return bool(v.tile(x, y)[1]) and (x, y) not in v.triggers
+
+            max_len = o.get("max_len", 16)
+            best = None
+            seen = set()
+            for tx, ty in o["tiles"]:
+                if not plain(tx, ty):
                     continue
+                t0 = v.tile(tx, ty)
+
+                def same(x, y):
+                    if not plain(x, y):
+                        return False
+                    tn = v.tile(x, y)
+                    return tn[2] == t0[2] and tn[3] == t0[3]
+
+                for dname in ("right", "down"):
+                    dx, dy = DIRS[dname]
+                    #  The whole line through this tile (also beyond the area).
+                    x, y = tx, ty
+                    while same(x - dx, y - dy):
+                        x, y = x - dx, y - dy
+                    if (x, y, dname) in seen:
+                        continue
+                    seen.add((x, y, dname))
+                    n = 1
+                    while same(x + dx * n, y + dy * n):
+                        n += 1
+                    if n < 3 or n > max_len or not wall(x - dx, y - dy) or not wall(x + dx * n, y + dy * n):
+                        continue
+                    ends = {(m.id, x, y): dname, (m.id, x + dx * (n - 1), y + dy * (n - 1)): OPPOSITE[dname]}
+                    if self.route_cost(set(ends.keys())) is None:
+                        continue
+                    if best is None or n > best[0]:
+                        best = (n, ends)
+            if best is not None:
+                n, ends = best
+                self.walk_to(set(ends.keys()), step.get("label", "Oscillate") + "_ToLine", out)
+                here = (self.pos[0], self.pos[1], self.pos[2])
+                out.append({"type": "OSCILLATE", "label": step.get("label", "Oscillate"), "dir": ends[here],
+                            "p0": o.get("max_ms", 600000), "p1": n})
+                return
+            spots = {}
+            for x, y in o["tiles"]:
+                if not plain(x, y):
+                    continue
+                t = v.tile(x, y)
                 for dname, (dx, dy) in DIRS.items():
                     nx, ny = x + dx, y + dy
-                    if not m.in_bounds(nx, ny):
+                    if not plain(nx, ny):
                         continue
                     tn = v.tile(nx, ny)
-                    if tn[1] or tn[4] or (nx, ny) in v.blocked or (nx, ny) in v.sight or (nx, ny) in v.triggers:
-                        continue
                     if tn[3] != t[3] or tn[2] != t[2]:
                         continue
                     spots[(m.id, x, y)] = dname
