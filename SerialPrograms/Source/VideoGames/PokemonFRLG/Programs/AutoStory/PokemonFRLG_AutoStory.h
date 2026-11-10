@@ -21,6 +21,7 @@
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
+#include "PokemonFRLG_AutoStoryCollection.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -39,10 +40,11 @@ public:
 };
 
 
-class AutoStory : public SingleSwitchProgramInstance{
+class AutoStory : public SingleSwitchProgramInstance, private ConfigOption::Listener{
 public:
     using Descriptor = AutoStory_Descriptor;
     AutoStory();
+    ~AutoStory();
     virtual void program(SingleSwitchProgramEnvironment& env, ProControllerContext& context) override;
     virtual void start_program_border_check(
         VideoStream& stream,
@@ -60,7 +62,15 @@ public:
         FLEE,
     };
 
+    enum class GameVersion{
+        FIRERED,
+        LEAFGREEN,
+    };
+
 private:
+    //  The game or the starter changed: the POKeDEX table follows.
+    virtual void on_config_value_changed(void* object) override;
+
     //  Run the steps of a segment from "first_step". Saves in the segment
     //  set "rt.resume_at" (where to continue after a reset).
     void run_segment(
@@ -72,6 +82,7 @@ private:
     StaticTextOption SETUP_TEXT;
     DeferredStopButtonOption STOP_AFTER_CURRENT;
     EnumDropdownOption<Starter> STARTER;
+    EnumDropdownOption<GameVersion> GAME_VERSION;
     BooleanCheckBoxOption NEW_GAME;
     StringOption PLAYER_NAME;
     StringOption RIVAL_NAME;
@@ -89,6 +100,8 @@ private:
     BooleanCheckBoxOption VERIFY_WALKING;
     BooleanCheckBoxOption RUNNING;
     StringOption DEX_CAUGHT;
+    StaticTextOption COLLECTION_SUMMARY;
+    StoryCollectionTable COLLECTION;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;

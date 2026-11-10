@@ -180,6 +180,9 @@ struct StoryBattleSettings{
     //  All species of the DEX step, caught or not as the program knows: the
     //  game's ball mark decides for those met (StoryBattleMemory::foe_mark).
     std::set<std::string> dex_all;
+    //  Of dex_species: more than one wanted (the others to evolve): caught
+    //  even when the game shows the ball mark (one is caught already).
+    std::set<std::string> dex_extra;
 
     //  The roaming legendary (StepType::ROAM): met, it gets the MASTER BALL
     //  at once (it flees on its first turn; a ball goes before any move).

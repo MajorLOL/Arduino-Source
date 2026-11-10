@@ -128,7 +128,8 @@ enum class StepType : uint8_t{
     SKIP_IF_FLY,        //  the Pokemon in party slot p1 knows FLY: skip the next p0 steps
     DEX,                //  for the POKeDEX: back and forth (dir, p4 = line length) catching the
                         //  species of text not caught yet, until p0 battles in a row bring none
-                        //  or p1 minutes are over; p2 & 1: the Safari Zone (until the game ends)
+                        //  or p1 minutes are over; p2 & 1: the Safari Zone (until the game ends);
+                        //  p2 & 2: what the POKeDEX table still wants of text (extra ones to evolve)
     SKIP_IF_DEX,        //  text = species surely caught (the team...): with those and the ones
                         //  caught by the program at least p1 species, skip the next p0 steps;
                         //  p2 & 1: fewer stop the program
@@ -141,6 +142,11 @@ enum class StepType : uint8_t{
                         //  entered from outdoors, facing down; then skip the next p0 steps
                         //  (the way out on foot, for a bag without one)
     USE_REPEL,          //  a MAX REPEL from the bag (250 steps without weaker wild Pokemon)
+    SKIP_IF_COLLECTED,  //  text = the species of the places of the next p0 steps: the program's
+                        //  POKeDEX table wants none of them (in its game, with its starter):
+                        //  skip those steps
+    SEAGALLOP,          //  on the pier's trigger in Vermilion City: through the sailor's text and
+                        //  menus (the tickets' menu first) to row p0 of the Sevii Islands list
 };
 
 struct StoryStep{

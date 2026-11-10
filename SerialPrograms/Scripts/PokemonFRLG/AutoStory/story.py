@@ -1087,6 +1087,44 @@ class Builder:
                         "p1": u["count"], "p3": u.get("game_count", u["count"]), "text": ",".join(u["owned"])})
             out.extend(sub)
             return
+        if "unless_collected" in step or "collect_segment" in step:
+            #  Steps the program skips when its POKeDEX table wants none of
+            #  the species of their places (text). unless_collected: they
+            #  end where they start. collect_segment: a whole segment, which
+            #  starts with FLY and ends outdoors (skipped, the player stays
+            #  where the segment before ended: the next FLY starts there).
+            whole = "collect_segment" in step
+            u = step["collect_segment"] if whole else step["unless_collected"]
+            sub = []
+            start = self.pos
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if not whole and self.pos[:3] != start[:3]:
+                raise StoryError("unless_collected: the steps end at %s, not %s" % (self.pos, start))
+            species = []
+            for s in sub:
+                if s["type"] == "DEX" and (s.get("p2", 0) & 2):
+                    for slug in s["text"].split(","):
+                        if slug not in species:
+                            species.append(slug)
+            if not species:
+                raise StoryError("%s: no place to catch at in these steps" % step.get("label", "?"))
+            out.append({"type": "SKIP_IF_COLLECTED", "label": step.get("label", "Anything to catch?"),
+                        "p0": len(sub), "text": ",".join(species)})
+            out.extend(sub)
+            return
+        if "outside" in step:
+            #  Out of the building, onto the first tile outdoors.
+            outdoor = [mid for mid, m in self.d.maps.items() if m.map_type in Builder.FLY_MAP_TYPES]
+            if self.d.maps[self.pos[0]].map_type not in Builder.FLY_MAP_TYPES:
+                self.walk_to(MapGoals(outdoor), step.get("label", "Out"), out)
+            return
+        if "seagallop" in step:
+            #  On the pier's trigger in Vermilion: the sailor's text, the
+            #  menus (the tickets first, on the Switch), the row p0 of the
+            #  Sevii Islands list.
+            out.append({"type": "SEAGALLOP", "label": step.get("label", "Seagallop"), "p0": step["seagallop"]})
+            return
         if "field_move" in step:
             #  A field move from the party menu, facing "face" (Cut on the
             #  braille of the Dotted Hole: CutMoveRuinValleyCheck).
@@ -1874,19 +1912,34 @@ class Builder:
         c = step["dex"]
         label = step.get("label", "Dex")
         have = self.gd.land_slugs.get(c["map"], set())
-        missing = [s for s in c["species"] if s not in have]
+        #  No list (the POKeDEX collection): every species of the place,
+        #  both games.
+        species = c["species"] if c["species"] is not None else sorted(have)
+        if not species:
+            raise StoryError("%s: no wild Pokemon in the grass of %s" % (label, c["map"]))
+        missing = [s for s in species if s not in have]
         if missing:
             raise StoryError("%s: not in the grass of %s: %s" % (label, c["map"], missing))
         goal, strips = self.strip_goal(c["map"], c["tiles"])
+        if c.get("collect") and self.route_cost(goal) is None:
+            #  The longest grass lines out of reach (behind ledges, water):
+            #  the shorter ones, any grass.
+            for other in (set(strips.keys()), self.grass_tiles(c["map"], c["tiles"])):
+                if other and self.route_cost(other) is not None:
+                    goal = other
+                    break
         self.walk_to(goal, label + "_ToGrass", out)
         if tuple(self.pos[:3]) in strips:
             osc, length = strips[tuple(self.pos[:3])]
         else:
             osc, length = self.osc_dir(self.grass_tiles(c["map"], c["tiles"]), label), 2
         #  p3: no catching here once the game counts that many species.
-        out.append({"type": "DEX", "label": label, "text": ",".join(c["species"]),
+        #  p2 & 2: what the program's POKeDEX table still wants of the list
+        #  (the game and starter chosen, extra ones to evolve).
+        out.append({"type": "DEX", "label": label, "text": ",".join(species),
                     "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
-                    "p2": 1 if c.get("safari") else 0, "p3": c.get("enough", 0), "dir": osc, "p4": length})
+                    "p2": (1 if c.get("safari") else 0) | (2 if c.get("collect") else 0),
+                    "p3": c.get("enough", 0), "dir": osc, "p4": length})
 
     def catch(self, step, out):
         c = step["catch"]

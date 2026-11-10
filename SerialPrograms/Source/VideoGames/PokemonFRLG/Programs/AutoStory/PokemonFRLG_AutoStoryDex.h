@@ -443,6 +443,7 @@ inline const std::vector<MoveInfo>& moves(){
 
 inline const std::vector<SpeciesInfo>& species(){
     static const std::vector<SpeciesInfo> data{
+        {"bulbasaur", "BULBASAUR", Type::GRASS, Type::POISON, 45, 49, 49, 65, 65, 45},
         {"ivysaur", "IVYSAUR", Type::GRASS, Type::POISON, 60, 62, 63, 80, 80, 60},
         {"venusaur", "VENUSAUR", Type::GRASS, Type::POISON, 80, 82, 83, 100, 100, 80},
         {"charmander", "CHARMANDER", Type::FIRE, Type::FIRE, 39, 52, 43, 60, 50, 65},

@@ -56,7 +56,8 @@ AutoStory_Descriptor::AutoStory_Descriptor()
         "Programs/PokemonFRLG/AutoStory.html",
         "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame and on after it "
         "(the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX, the Ruby and the "
-        "Sapphire, the roaming legendary with the Master Ball), "
+        "Sapphire, the roaming legendary with the Master Ball, Mewtwo, then the Pokedex collection: "
+        "what the chosen game can still register in the grass, caves and Safari Zone), "
         "on routes generated from the game's map data.",
         PanelQualityStanding::THIRD_PARTY_UNVETTED,
         ProgramControllerClass::StandardController_RequiresPrecision,
@@ -219,6 +220,16 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         Starter::BULBASAUR
     )
+    , GAME_VERSION(
+        "<b>Game:</b><br>FireRed or LeafGreen. The story is the same; the wild Pokemon differ in places, "
+        "and with them what the POKeDEX collection below can catch.",
+        {
+            {GameVersion::FIRERED,   "firered",   "FireRed"},
+            {GameVersion::LEAFGREEN, "leafgreen", "LeafGreen"},
+        },
+        LockMode::LOCK_WHILE_RUNNING,
+        GameVersion::FIRERED
+    )
     , NEW_GAME(
         "<b>Start a new game:</b><br>From the title screen: NEW GAME, Professor Oak's intro with the two "
         "names below, and the first save in the bedroom (<b>over the save on the cartridge</b>), then the "
@@ -349,6 +360,8 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         "", ""
     )
+    , COLLECTION_SUMMARY("")
+    , COLLECTION(COLLECTION_SUMMARY)
     , GO_HOME_WHEN_DONE(false)
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
@@ -360,6 +373,7 @@ AutoStory::AutoStory()
     PA_ADD_STATIC(SETUP_TEXT);
     PA_ADD_OPTION(STOP_AFTER_CURRENT);
     PA_ADD_OPTION(STARTER);
+    PA_ADD_OPTION(GAME_VERSION);
     PA_ADD_OPTION(NEW_GAME);
     PA_ADD_OPTION(PLAYER_NAME);
     PA_ADD_OPTION(RIVAL_NAME);
@@ -377,8 +391,21 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(RUNNING);
     PA_ADD_OPTION(DEX_CAUGHT);
+    PA_ADD_STATIC(COLLECTION_SUMMARY);
+    PA_ADD_OPTION(COLLECTION);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
+
+    AutoStory::on_config_value_changed(this);
+    STARTER.add_listener(*this);
+    GAME_VERSION.add_listener(*this);
+}
+AutoStory::~AutoStory(){
+    GAME_VERSION.remove_listener(*this);
+    STARTER.remove_listener(*this);
+}
+void AutoStory::on_config_value_changed(void* object){
+    COLLECTION.set_game(GAME_VERSION == GameVersion::LEAFGREEN ? 1 : 0, (int)(Starter)STARTER);
 }
 
 
@@ -665,6 +692,33 @@ void AutoStory::run_segment(
             break;
         case StepType::DEX:
             story_dex(rt, step);
+            break;
+        case StepType::SKIP_IF_COLLECTED:{
+            //  The places of the next p0 steps: is any species there that
+            //  the POKeDEX table still wants?
+            const std::set<std::string> here = story_species_list(step.text);
+            std::set<std::string> wanted;
+            if (rt.collection != nullptr){
+                wanted = rt.collection->wanted(here);
+            }
+            if (wanted.empty()){
+                env.log(
+                    label + ": the POKeDEX table wants none of the " + std::to_string(here.size()) +
+                    " species here: the next " + std::to_string(step.p0) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
+            }else{
+                std::string names;
+                for (const std::string& slug : wanted){
+                    names += (names.empty() ? "" : ", ") + slug;
+                }
+                env.log(label + ": still wanted here: " + names + ".", COLOR_BLUE);
+            }
+            break;
+        }
+        case StepType::SEAGALLOP:
+            story_seagallop(rt, step.p0, label);
             break;
         case StepType::STOP:
             throw UserSetupError(env.console, std::string(step.text) + " (" + label + ")");
@@ -1097,6 +1151,50 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     rt.caught_at_save = rt.caught;
 
+    //  The POKeDEX table: its game and starter, and what the program knows
+    //  to be caught by the start (the team, the legendary Pokemon, the
+    //  catches of the runs before).
+    COLLECTION.set_game(GAME_VERSION == GameVersion::LEAFGREEN ? 1 : 0, (int)starter);
+    rt.collection = &COLLECTION;
+    if (new_game || (first == 0 && first_step == 0)){
+        COLLECTION.clear_counts();
+        env.log("A new game: the POKeDEX table starts from 0.", COLOR_BLUE);
+    }else{
+        for (size_t s = 0; s <= first; s++){
+            const StorySegment& segment = script.segments[s];
+            const size_t end = s == first ? first_step : segment.step_count;
+            for (size_t k = 0; k < end; k++){
+                const StoryStep& step = script.step(segment, k);
+                std::set<std::string> species;
+                if (step.type == StepType::CATCH || step.type == StepType::SKIP_IF_DEX || step.type == StepType::ROAM){
+                    species = story_species_list(step.text);
+                }else if (step.type == StepType::BATTLE && step.p1 == 2){
+                    std::string slug;
+                    for (const char* p = step.label; *p; p++){
+                        slug += (char)std::tolower((unsigned char)*p);
+                    }
+                    species.insert(slug);
+                }
+                for (const std::string& slug : species){
+                    COLLECTION.at_least(slug, 1);
+                }
+            }
+        }
+        for (const std::string& slug : rt.caught){
+            COLLECTION.at_least(slug, 1);
+        }
+    }
+    rt.collection_at_save = COLLECTION.snapshot();
+    {
+        size_t registered, total, to_catch;
+        COLLECTION.counts_summary(registered, total, to_catch);
+        env.log(
+            "POKeDEX table (" + COLLECTION.game_name() + "): " + std::to_string(registered) + " of " +
+            std::to_string(total) + " species with at least one, " + std::to_string(to_catch) + " catches to make.",
+            COLOR_BLUE
+        );
+    }
+
     story_check_memory_at_start(rt);
     story_memory_reset();
     home_black_border_check(env.console, context);
@@ -1110,6 +1208,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         DEX_CAUGHT.set("");
         rt.caught.clear();
         rt.caught_at_save.clear();
+        COLLECTION.clear_counts();
         const std::string where = std::string(starter_name(starter)) + " " + script.segments[0].id + " 1\n";
         try{
             string_to_file(save_file, where);
@@ -1337,6 +1436,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.arrived_by_warp = false;
             rt.lead_fainted = false;
             rt.caught = rt.caught_at_save;
+            if (rt.collection != nullptr){
+                //  The catches since the save are lost with it.
+                rt.collection->restore(rt.collection_at_save);
+            }
             if (rt.shiny_unsaved){
                 env.log("The shiny Pokemon caught after the last save is lost with this reset.", COLOR_RED);
                 rt.shiny_unsaved = false;

@@ -33,6 +33,7 @@
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_AutoStoryWalkTracker.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
+#include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
 namespace PokemonAutomation{
@@ -593,6 +594,10 @@ StoryBattleResult story_battle(
         if (rt.memory.shiny_caught){
             rt.shinies_caught++;
             rt.shiny_unsaved = true;
+            if (rt.collection != nullptr && rt.memory.caught.empty() && !rt.memory.shiny_species.empty()){
+                //  Not one the step wanted: the table counts it all the same.
+                rt.collection->add_caught(rt.memory.shiny_species, rt.memory.foe_mark == 1);
+            }
             if (!rt.memory.caught.empty()){
                 rt.console.log("The shiny " + name + " is the team member to catch here.", COLOR_BLUE);
             }else if (rt.memory.shiny_to_pc){
@@ -615,6 +620,9 @@ StoryBattleResult story_battle(
     if (!rt.memory.owned_by_mark.empty()){
         //  The game had it caught already: wanted no more.
         rt.caught.insert(rt.memory.owned_by_mark);
+        if (rt.collection != nullptr){
+            rt.collection->at_least(rt.memory.owned_by_mark, 1);
+        }
         if (rt.battle.dex_species.erase(rt.memory.owned_by_mark) != 0){
             rt.dex_owned_by_mark++;
         }
@@ -644,20 +652,39 @@ StoryBattleResult story_battle(
         rt.caught.insert(rt.memory.caught);
         const bool for_dex = rt.battle.dex_species.erase(rt.memory.caught) != 0 ||
             rt.memory.caught == rt.memory.dex_by_mark;
+        std::string table;
+        if (rt.collection != nullptr){
+            //  The game's ball mark: one was caught before.
+            rt.collection->add_caught(rt.memory.caught, rt.memory.foe_mark == 1);
+            const int needed = rt.collection->needed(rt.memory.caught);
+            if (needed > 0){
+                table = " The POKeDEX table: " + std::to_string(rt.collection->caught(rt.memory.caught)) +
+                    " of " + std::to_string(needed) + ".";
+            }
+            if (for_dex && rt.collecting){
+                if (rt.collection->wants(rt.memory.caught)){
+                    //  More of it wanted (to evolve): on the list again.
+                    rt.battle.dex_species.insert(rt.memory.caught);
+                }else{
+                    rt.battle.dex_extra.erase(rt.memory.caught);
+                }
+            }
+        }
         if (for_dex){
+            rt.dex_catches++;
             if (new_to_dex){
                 rt.dex_new++;
             }
             rt.console.log(
                 "Caught for the POKeDEX: " + rt.memory.caught +
-                (new_to_dex ? " (new)." : " (it was in the POKeDEX already)."),
+                (new_to_dex ? " (new)." : " (it was in the POKeDEX already).") + table,
                 COLOR_BLUE
             );
             if (!rt.memory.shiny_to_pc && !rt.memory.shiny){
                 rt.party_extras++;
             }
         }else{
-            rt.console.log("Caught for the team: " + rt.memory.caught, COLOR_BLUE);
+            rt.console.log("Caught for the team: " + rt.memory.caught + table, COLOR_BLUE);
             //  Wanted no more on the way.
             rt.battle.catch_species.clear();
         }
@@ -2058,6 +2085,9 @@ std::set<std::string> story_species_list(const char* text){
 void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.resume_at = resume_at;
     rt.caught_at_save = rt.caught;
+    if (rt.collection != nullptr){
+        rt.collection_at_save = rt.collection->snapshot();
+    }
     rt.party_extras_at_save = rt.party_extras;
     rt.party_order_final_at_save = rt.party_order_final;
     if (rt.shiny_unsaved){

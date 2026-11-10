@@ -2266,6 +2266,240 @@ CHAPTER19 = [
 ]
 
 
+
+# ---------------------------------------------------------------- chapter 20
+#  The POKeDEX collection, after Mewtwo: every place with grass, a cave floor
+#  or the Safari Zone where a species lives that the program's POKeDEX table
+#  (the option "Pokedex collection", for the game and the starter chosen)
+#  still wants: one of each species that can be registered, and a second
+#  (third) one of those whose evolution cannot be caught (to evolve). The
+#  lists here are of both games (all species of the place, story.py): the
+#  program only catches what the table wants of its game, and skips a place
+#  (a town) where it wants nothing.
+#
+#  Each place is a round trip from the town's Pokemon Center (from the nurse
+#  back to the nurse, then a save). Each town is a segment of its own that
+#  starts with FLY (from anywhere outdoors in Kanto) and ends outdoors in
+#  front of the Pokemon Center: a town skipped leaves the player where the
+#  town before ended, and the next FLY starts from there. No town comes
+#  twice (FLY to the town the player is in is not needed then).
+#  Surfing, fishing, Rock Smash, gifts, trades and breeding: later. Not yet
+#  either: Mt. Ember's grass (behind Rock Smash rocks and Strength boulders
+#  the routes do not move: MAGMAR in LeafGreen), the Tanoby Chambers (UNOWN
+#  only once the Tanoby Key puzzle is solved), Three Isle Port (DUNSPARCE:
+#  through the Dunsparce Tunnel, which the routes do not pass).
+
+COLLECT_IDLE = 30       # Battles in a row without a catch: the visit ends.
+COLLECT_MINUTES = 30    # The longest visit.
+#  Visits of each place (the later ones skipped when nothing is wanted
+#  there any more): a visit also ends when the lead is low on HP (catching
+#  at full HP, the wild Pokemon hit back) or fainted.
+COLLECT_VISITS = 2
+
+
+def collect(map_id, tiles, label, species=None, safari=False):
+    """For the POKeDEX table: back and forth there catching what the table
+    still wants (species None: every species of the place, both games)."""
+    return {"dex": {"map": map_id, "tiles": tiles, "species": species, "idle": COLLECT_IDLE,
+                    "minutes": COLLECT_MINUTES, "safari": safari, "enough": 0, "collect": True}, "label": label}
+
+
+def collect_trip(pc_map, steps, label):
+    """A round trip from the nurse of pc_map, skipped when the table wants
+    none of the species of its places."""
+    return {"unless_collected": {"steps": steps + [heal(pc_map, label + "_BackToNurse"), save()]},
+            "label": label + "?"}
+
+
+def collect_place(pc_map, map_id, tiles, label, species=None, visits=COLLECT_VISITS):
+    """The place's visits: each a round trip from the nurse, skipped when
+    nothing of the place is wanted (any more)."""
+    return [collect_trip(pc_map, [collect(map_id, tiles, label + ("" if v == 0 else "_Visit%d" % (v + 1)), species)],
+                         label + ("" if v == 0 else "_Visit%d" % (v + 1)))
+            for v in range(visits)]
+
+
+def collect_safari(area_map, label):
+    """A Safari Game in one area (C14_05: the walk in, the PA's text at the
+    end, the gate)."""
+    steps = safari_game(area_map, WHOLE, None, label)
+    steps = [collect(area_map, WHOLE, label, safari=True) if "dex" in s else s for s in steps]
+    return collect_trip(PC["FUCHSIA"], steps, label)
+
+
+def collect_town(seg_id, title, pc_map, places, fly_to=None, mart=None, state=None):
+    """One town: FLY there, the nurse, POKe BALLs (mart), the places, out of
+    the Pokemon Center. Skipped as a whole when the table wants none of the
+    species of its places."""
+    steps = []
+    if fly_to:
+        steps.append(fly(fly_to, seg_id + "_Fly"))
+    steps.append(heal(pc_map, seg_id + "_ToNurse"))
+    if mart:
+        steps += poke_balls(mart, seg_id + "_BuyPokeBalls") + [heal(pc_map, seg_id + "_MartToNurse")]
+    for place in places:
+        steps += place if isinstance(place, list) else [place]
+    out = {"outside": True, "label": seg_id + "_Out"}
+    if fly_to:
+        body = [{"collect_segment": {"steps": steps + [out]}, "label": "Anything to catch here?"}]
+    else:
+        #  The first town (no FLY: the segment before ended at its nurse):
+        #  skipped, the player is still at the nurse; out in any case.
+        body = [{"unless_collected": {"steps": steps}, "label": "Anything to catch here?"}, out]
+    seg = {"id": seg_id, "chapter": 20, "title": "POKeDEX collection: " + title, "no_repel": True,
+           "steps": body}
+    if state:
+        seg["state"] = state
+    return seg
+
+
+def sevii_island(harbor, pc_map, places, label):
+    """One island: from the harbor to the nurse, the places, back to the
+    harbor (where the ferry leaves). Skipped when nothing of it is wanted."""
+    steps = [heal(pc_map, label + "_ToNurse")]
+    for place in places:
+        steps += place if isinstance(place, list) else [place]
+    return {"unless_collected": {"steps": steps + [goto(harbor, [[8, 5]], label + "_ToHarbor")]},
+            "label": label + "?"}
+
+
+ONE_PC = "MAP_ONE_ISLAND_POKEMON_CENTER_1F"
+TWO_PC = "MAP_TWO_ISLAND_POKEMON_CENTER_1F"
+THREE_PC = "MAP_THREE_ISLAND_POKEMON_CENTER_1F"
+FOUR_PC = "MAP_FOUR_ISLAND_POKEMON_CENTER_1F"
+FIVE_PC = "MAP_FIVE_ISLAND_POKEMON_CENTER_1F"
+SIX_PC = "MAP_SIX_ISLAND_POKEMON_CENTER_1F"
+SEVEN_PC = "MAP_SEVEN_ISLAND_POKEMON_CENTER_1F"
+
+VICTORY_ROAD_RESET = {
+    "flags": ["FLAG_HIDE_VICTORY_ROAD_2F_BOULDER"],
+    "clear_flags": ["FLAG_HIDE_VICTORY_ROAD_3F_BOULDER"],
+    "vars": {"VAR_MAP_SCENE_VICTORY_ROAD_1F": 0, "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER1": 0,
+             "VAR_MAP_SCENE_VICTORY_ROAD_2F_BOULDER2": 0, "VAR_MAP_SCENE_VICTORY_ROAD_3F": 0},
+    "script_tiles": [
+        ["MAP_VICTORY_ROAD_1F", "VictoryRoad_1F_EventScript_SetRockBarrier"],
+        ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier1"],
+        ["MAP_VICTORY_ROAD_2F", "VictoryRoad_2F_EventScript_SetRockBarrier2"],
+        ["MAP_VICTORY_ROAD_3F", "VictoryRoad_3F_EventScript_SetRockBarrier"],
+    ],
+}
+
+
+def sevii_tour():
+    """Vermilion -> One ... Seven Island -> Vermilion (the Seagallop with the
+    Rainbow Pass), the places of each island. Starts and ends at the nurse
+    of the Vermilion Pokemon Center."""
+    return [
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        #  The Switch version puts the MYSTIC and AURORA TICKETs in the bag
+        #  after the Hall of Fame: the sailor talks about them (the first
+        #  time) and asks SEVII ISLANDS / NAVEL ROCK / BIRTH ISLAND first.
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+        sevii_island("MAP_ONE_ISLAND_HARBOR", ONE_PC, [
+            collect_place(ONE_PC, "MAP_ONE_ISLAND_KINDLE_ROAD", WHOLE, "CollectKindleRoad"),
+            collect_place(ONE_PC, "MAP_ONE_ISLAND_TREASURE_BEACH", WHOLE, "CollectTreasureBeach"),
+            collect_place(ONE_PC, "MAP_MT_EMBER_RUBY_PATH_B1F", WHOLE, "CollectRubyPath"),
+        ], "OneIsland"),
+    ] + rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 1, None, "MAP_TWO_ISLAND_HARBOR", "FerryToTwoIsland") + [
+        sevii_island("MAP_TWO_ISLAND_HARBOR", TWO_PC, [
+            collect_place(TWO_PC, "MAP_TWO_ISLAND_CAPE_BRINK", WHOLE, "CollectCapeBrink"),
+        ], "TwoIsland"),
+    ] + rainbow_ferry("MAP_TWO_ISLAND_HARBOR", 2, None, "MAP_THREE_ISLAND_HARBOR", "FerryToThreeIsland") + [
+        sevii_island("MAP_THREE_ISLAND_HARBOR", THREE_PC, [
+            collect_place(THREE_PC, "MAP_THREE_ISLAND_BOND_BRIDGE", WHOLE, "CollectBondBridge"),
+            collect_place(THREE_PC, "MAP_THREE_ISLAND_BERRY_FOREST", WHOLE, "CollectBerryForest"),
+        ], "ThreeIsland"),
+    ] + rainbow_ferry("MAP_THREE_ISLAND_HARBOR", 3, None, "MAP_FOUR_ISLAND_HARBOR", "FerryToFourIsland") + [
+        sevii_island("MAP_FOUR_ISLAND_HARBOR", FOUR_PC, [
+            collect_place(FOUR_PC, "MAP_FOUR_ISLAND_ICEFALL_CAVE_1F", WHOLE, "CollectIcefallCave"),
+        ], "FourIsland"),
+    ] + rainbow_ferry("MAP_FOUR_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland") + [
+        sevii_island("MAP_FIVE_ISLAND_HARBOR", FIVE_PC, [
+            collect_place(FIVE_PC, "MAP_FIVE_ISLAND_MEADOW", WHOLE, "CollectFiveIsleMeadow"),
+            collect_place(FIVE_PC, "MAP_FIVE_ISLAND_LOST_CAVE_ROOM1", WHOLE, "CollectLostCave"),
+        ], "FiveIsland"),
+    ] + rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 4, 1, "MAP_SIX_ISLAND_HARBOR", "FerryToSixIsland") + [
+        sevii_island("MAP_SIX_ISLAND_HARBOR", SIX_PC, [
+            collect_place(SIX_PC, "MAP_SIX_ISLAND_RUIN_VALLEY", WHOLE, "CollectRuinValley"),
+            collect_place(SIX_PC, "MAP_SIX_ISLAND_PATTERN_BUSH", WHOLE, "CollectPatternBush"),
+            collect_place(SIX_PC, "MAP_SIX_ISLAND_WATER_PATH", WHOLE, "CollectWaterPath"),
+        ], "SixIsland"),
+    ] + rainbow_ferry("MAP_SIX_ISLAND_HARBOR", 4, 2, "MAP_SEVEN_ISLAND_HARBOR", "FerryToSevenIsland") + [
+        sevii_island("MAP_SEVEN_ISLAND_HARBOR", SEVEN_PC, [
+            collect_place(SEVEN_PC, "MAP_SEVEN_ISLAND_SEVAULT_CANYON_ENTRANCE", WHOLE, "CollectCanyonEntrance"),
+            collect_place(SEVEN_PC, "MAP_SEVEN_ISLAND_SEVAULT_CANYON", WHOLE, "CollectSevaultCanyon"),
+        ], "SevenIsland"),
+    ] + rainbow_ferry("MAP_SEVEN_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1] + [
+        pos("MAP_VERMILION_CITY", 23, 32),
+        heal(PC["VERMILION"], "PierToVermilionNurse"),
+        save(),
+    ]
+
+
+CHAPTER20 = [
+    #  Mewtwo's segment ends at the nurse in Cerulean City: no FLY first.
+    collect_town("C20_01_CERULEAN", "Route 24, Route 4, Cerulean Cave", PC["CERULEAN"], [
+        collect_place(PC["CERULEAN"], "MAP_ROUTE24", WHOLE, "CollectRoute24"),
+        collect_place(PC["CERULEAN"], "MAP_ROUTE4", WHOLE, "CollectRoute4"),
+        collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_B1F", WHOLE, "CollectCeruleanCaveB1F", visits=3),
+        collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_1F", WHOLE, "CollectCeruleanCave1F"),
+    ], mart="MAP_CERULEAN_CITY_MART"),
+    collect_town("C20_02_MT_MOON", "Mt. Moon, Route 3", PC["ROUTE4"], [
+        collect_place(PC["ROUTE4"], "MAP_MT_MOON_B2F", WHOLE, "CollectMtMoon"),
+        collect_place(PC["ROUTE4"], "MAP_ROUTE3", WHOLE, "CollectRoute3"),
+    ], fly_to="HEAL_LOCATION_ROUTE4"),
+    collect_town("C20_03_VIRIDIAN", "Viridian Forest, Route 22, Route 23", PC["VIRIDIAN"], [
+        collect_place(PC["VIRIDIAN"], "MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), "CollectViridianForest"),
+        collect_place(PC["VIRIDIAN"], "MAP_ROUTE22", WHOLE, "CollectRoute22"),
+        collect_place(PC["VIRIDIAN"], "MAP_ROUTE23", WHOLE, "CollectRoute23"),
+    ], fly_to="HEAL_LOCATION_VIRIDIAN_CITY", mart="MAP_VIRIDIAN_CITY_MART"),
+    collect_town("C20_04_VICTORY_ROAD", "Victory Road", PC["INDIGO"], [
+        collect_place(PC["INDIGO"], "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), "CollectVictoryRoad"),
+    ], fly_to="HEAL_LOCATION_INDIGO_PLATEAU", state=VICTORY_ROAD_RESET),
+    collect_town("C20_05_ROUTE10", "Power Plant, Rock Tunnel", PC["ROUTE10"], [
+        collect_place(PC["ROUTE10"], "MAP_POWER_PLANT", WHOLE, "CollectPowerPlant"),
+        collect_place(PC["ROUTE10"], "MAP_ROCK_TUNNEL_1F", WHOLE, "CollectRockTunnel"),
+    ], fly_to="HEAL_LOCATION_ROUTE10"),
+    collect_town("C20_06_LAVENDER", "Pokemon Tower, Route 8, Route 12", PC["LAVENDER"], [
+        collect_place(PC["LAVENDER"], "MAP_POKEMON_TOWER_7F", WHOLE, "CollectPokemonTower"),
+        collect_place(PC["LAVENDER"], "MAP_ROUTE8", WHOLE, "CollectRoute8"),
+        collect_place(PC["LAVENDER"], "MAP_ROUTE12", WHOLE, "CollectRoute12"),
+    ], fly_to="HEAL_LOCATION_LAVENDER_TOWN"),
+    collect_town("C20_07_CELADON", "Route 16", PC["CELADON"], [
+        collect_place(PC["CELADON"], "MAP_ROUTE16", WHOLE, "CollectRoute16"),
+    ], fly_to="HEAL_LOCATION_CELADON_CITY"),
+    #  The Safari Zone: each area twice (its rare ones: CHANSEY, TAUROS,
+    #  KANGASKHAN, SCYTHER/PINSIR 1-4%); the second game only when the
+    #  first left some.
+    collect_town("C20_08_FUCHSIA", "Safari Zone, Routes 14, 15, 18, Seafoam Islands", PC["FUCHSIA"], [
+        collect_safari("MAP_SAFARI_ZONE_CENTER", "CollectSafariCenter"),
+        collect_safari("MAP_SAFARI_ZONE_EAST", "CollectSafariEast"),
+        collect_safari("MAP_SAFARI_ZONE_NORTH", "CollectSafariNorth"),
+        collect_safari("MAP_SAFARI_ZONE_WEST", "CollectSafariWest"),
+        collect_safari("MAP_SAFARI_ZONE_CENTER", "CollectSafariCenter2"),
+        collect_safari("MAP_SAFARI_ZONE_EAST", "CollectSafariEast2"),
+        collect_safari("MAP_SAFARI_ZONE_NORTH", "CollectSafariNorth2"),
+        collect_safari("MAP_SAFARI_ZONE_WEST", "CollectSafariWest2"),
+        collect_place(PC["FUCHSIA"], "MAP_ROUTE14", WHOLE, "CollectRoute14"),
+        collect_place(PC["FUCHSIA"], "MAP_ROUTE15", WHOLE, "CollectRoute15"),
+        collect_place(PC["FUCHSIA"], "MAP_ROUTE18", WHOLE, "CollectRoute18"),
+        collect_place(PC["FUCHSIA"], "MAP_SEAFOAM_ISLANDS_B3F", WHOLE, "CollectSeafoam"),
+    ], fly_to="HEAL_LOCATION_FUCHSIA_CITY"),
+    collect_town("C20_09_CINNABAR", "Pokemon Mansion, Route 21", PC["CINNABAR"], [
+        collect_place(PC["CINNABAR"], "MAP_POKEMON_MANSION_1F", rect(1, 27, 15, 32), "CollectMansion"),
+        collect_place(PC["CINNABAR"], "MAP_ROUTE21_NORTH", WHOLE, "CollectRoute21"),
+    ], fly_to="HEAL_LOCATION_CINNABAR_ISLAND"),
+    collect_town("C20_10_VERMILION_SEVII", "Route 11, Diglett's Cave, Route 6, the Sevii Islands", PC["VERMILION"], [
+        collect_place(PC["VERMILION"], "MAP_ROUTE11", WHOLE, "CollectRoute11"),
+        collect_place(PC["VERMILION"], "MAP_DIGLETTS_CAVE_B1F", WHOLE, "CollectDiglettsCave"),
+        collect_place(PC["VERMILION"], "MAP_ROUTE6", WHOLE, "CollectRoute6"),
+        {"unless_collected": {"steps": sevii_tour()}, "label": "The Sevii Islands?"},
+    ], fly_to="HEAL_LOCATION_VERMILION_CITY", mart="MAP_VERMILION_CITY_MART"),
+]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with
@@ -2285,7 +2519,8 @@ def fly_only(segments):
 
 SEGMENTS = (list(CHAPTER0) + CHAPTER1 + CHAPTER2 + CHAPTER3 + CHAPTER4 + CHAPTER5 + CHAPTER6 + CHAPTER7
             + CHAPTER8 + CHAPTER9 + CHAPTER10 + CHAPTER11 + CHAPTER12
-            + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15 + CHAPTER16 + CHAPTER17 + CHAPTER18 + CHAPTER19))
+            + fly_only(CHAPTER13 + CHAPTER14 + CHAPTER15 + CHAPTER16 + CHAPTER17 + CHAPTER18 + CHAPTER19
+                       + CHAPTER20))
 
 
 #  Metatiles that map scripts change when a map loads (ON_LOAD setmetatile),

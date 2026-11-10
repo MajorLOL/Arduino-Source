@@ -128,7 +128,9 @@ def main():
     sp_names_text = open(os.path.join(root, "src/data/text/species_names.h"), encoding="utf-8").read()
     sp_names = dict(re.findall(r"\[(SPECIES_\w+)\]\s*=\s*_\(\"([^\"]*)\"\)", sp_names_text))
     species = []
-    for m in re.finditer(r"\[(SPECIES_\w+)\]\s*=\s*\{(.*?)\.types\s*=\s*\{\s*TYPE_(\w+)\s*,\s*TYPE_(\w+)\s*\}", species_text, re.S):
+    #  The body may not run into the next species: SPECIES_NONE has no types,
+    #  and its match took BULBASAUR's (Bulbasaur was missing).
+    for m in re.finditer(r"\[(SPECIES_\w+)\]\s*=\s*\{((?:(?!\[SPECIES_).)*?)\.types\s*=\s*\{\s*TYPE_(\w+)\s*,\s*TYPE_(\w+)\s*\}", species_text, re.S):
         key, t1, t2 = m.group(1), m.group(3), m.group(4)
         if key not in sp_names or key == "SPECIES_NONE" or key.startswith("SPECIES_OLD_UNOWN"):
             continue

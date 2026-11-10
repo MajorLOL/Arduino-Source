@@ -25,6 +25,7 @@
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_StatsReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
+#include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStoryActions.h"
 
 namespace PokemonAutomation{
@@ -2157,16 +2158,40 @@ void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& st
 void story_dex(StoryRuntime& rt, const StoryStep& step){
     ConsoleHandle& console = rt.console;
     const bool safari = step.p2 > 0 && (step.p2 & 1) != 0;
+    //  For the POKeDEX table: what it still wants of the list, in its game.
+    const bool collect = step.p2 > 0 && (step.p2 & 2) != 0 && rt.collection != nullptr;
     const std::string label = step.label;
+    std::set<std::string> listed = story_species_list(step.text);
     std::set<std::string> wanted;
-    for (const std::string& slug : story_species_list(step.text)){
-        if (rt.caught.count(slug) == 0){
-            wanted.insert(slug);
+    std::set<std::string> extra;
+    std::string counts;
+    if (collect){
+        wanted = rt.collection->wanted(listed);
+        std::set<std::string> in_game;
+        for (const std::string& slug : listed){
+            if (rt.collection->needed(slug) > 0){
+                in_game.insert(slug);
+            }
+        }
+        listed = in_game;
+        for (const std::string& slug : wanted){
+            if (rt.collection->wants_more_than_one(slug)){
+                extra.insert(slug);
+            }
+            counts += (counts.empty() ? "" : ", ") + slug + " " +
+                std::to_string(rt.collection->caught(slug)) + "/" + std::to_string(rt.collection->needed(slug));
+        }
+    }else{
+        for (const std::string& slug : listed){
+            if (rt.caught.count(slug) == 0){
+                wanted.insert(slug);
+            }
         }
     }
     const int idle_limit = std::max(1, (int)step.p0);
     console.log(
         label + ": for the POKeDEX, catching " + species_names(wanted) +
+        (collect ? " (" + rt.collection->game_name() + ", the table: " + counts + ")" : std::string()) +
         (safari ? " (the Safari Game, until it is over)." :
             " (until " + std::to_string(idle_limit) + " battles in a row bring none, at most " +
             std::to_string(std::max(1, (int)step.p1)) + " minutes)."),
@@ -2192,7 +2217,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
 
     StoryBattleSettings saved = rt.battle;
     rt.battle.dex_species = wanted;
-    rt.battle.dex_all = story_species_list(step.text);
+    rt.battle.dex_all = listed;
+    rt.battle.dex_extra = extra;
+    rt.collecting = collect;
     rt.battle.catch_species.clear();
     rt.in_safari = safari;
     rt.safari_over = false;
@@ -2220,37 +2247,56 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 break;
             }
             const size_t left = rt.battle.dex_species.size();
+            const uint64_t catches_before = rt.dex_catches;
             StoryBattleResult result = spot.step(StoryBattleKind::CATCH);
             if (rt.safari_over){
+                caught_here += (size_t)(rt.dex_catches - catches_before);
                 break;
             }
             if (result == StoryBattleResult::NO_BATTLE){
                 continue;
             }
             battles++;
-            if (rt.battle.dex_species.size() < left){
-                caught_here += left - rt.battle.dex_species.size();
+            if (rt.dex_catches > catches_before){
+                //  On the list (also an extra one to evolve), or not on it
+                //  but new to the game (no ball mark).
+                caught_here += (size_t)(rt.dex_catches - catches_before);
                 idle = 0;
-            }else if (!rt.memory.dex_by_mark.empty() && rt.memory.caught == rt.memory.dex_by_mark){
-                caught_here++;      //  Not on the list, but new to the game.
-                idle = 0;
+            }else if (rt.battle.dex_species.size() < left){
+                idle = 0;           //  Found caught before (the ball mark).
             }else{
                 idle++;
+            }
+            if (collect && !safari && !rt.battle.dex_species.empty() &&
+                (rt.lead_fainted || (rt.memory.player_hp >= 0 && rt.memory.player_hp < 0.35))
+            ){
+                //  Catching at full HP lets the wild Pokemon hit back (Cerulean
+                //  Cave: level 46 to 67). The visit ends at the nurse; the next
+                //  visit of the place goes on with what is still wanted.
+                console.log(
+                    label + ": the lead is " + (rt.lead_fainted ? std::string("fainted") :
+                        "at " + std::to_string((int)(rt.memory.player_hp * 100 + 0.5)) + "% HP") +
+                    ": back to the nurse.",
+                    COLOR_ORANGE
+                );
+                break;
             }
             spot.check();
         }
     }catch (...){
         rt.in_safari = false;
+        rt.collecting = false;
         rt.battle = saved;
         throw;
     }
     const std::set<std::string> left = rt.battle.dex_species;
     rt.in_safari = false;
+    rt.collecting = false;
     rt.battle = saved;
     const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
     const uint64_t marked = rt.dex_owned_by_mark - marked_before;
     console.log(
-        label + ": " + std::to_string(caught_here - std::min<size_t>(caught_here, (size_t)marked)) + " caught (" +
+        label + ": " + std::to_string(caught_here) + " caught (" +
         std::to_string(rt.dex_new - new_before) + " new to the POKeDEX)" +
         (marked > 0 ? ", " + std::to_string(marked) + " found caught before (the ball mark)" : std::string()) +
         " in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
@@ -2270,6 +2316,90 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         return;
     }
     spot.to_first_tile();
+}
+
+
+
+void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    //  The menus, in the game's screen: the tickets' (MULTICHOICE_SEVII_
+    //  NAVEL_BIRTH, window at tile 13,5: SEVII ISLANDS, NAVEL ROCK, BIRTH
+    //  ISLAND, EXIT), and the Sevii Islands list (DrawSeagallopDestination
+    //  Menu, window at tile 17,0: ONE ... FOUR ISLAND, OTHER, EXIT).
+    const ImageFloatBox TICKET_MENU(0.45, 0.27, 0.52, 0.45);
+    const ImageFloatBox ISLAND_MENU(0.58, 0.02, 0.40, 0.58);
+    auto has = [](const std::string& text, const char* part){
+        return text.find(part) != std::string::npos;
+    };
+    console.log("The Seagallop from Vermilion City: row " + std::to_string(row) + " of the Sevii Islands list (" + what + ").");
+    bool picked = false;
+    int quiet = 0;
+    const WallClock deadline = current_time() + 90s;
+    while (current_time() < deadline){
+        context.wait_for_all_requests();
+        const std::string tickets = read_story_text(console, TICKET_MENU, false);
+        if (!picked && has(tickets, "sevii")){
+            console.log("The tickets' menu: SEVII ISLANDS.", COLOR_BLUE);
+            pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+            quiet = 0;
+            continue;
+        }
+        const std::string islands = read_story_text(console, ISLAND_MENU, false);
+        if (!picked && has(islands, "island") && (has(islands, "other") || has(islands, "exit"))){
+            console.log("The Sevii Islands list: row " + std::to_string(row) + ".", COLOR_BLUE);
+            for (int i = 0; i < row; i++){
+                pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+            }
+            pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+            picked = true;
+            quiet = 0;
+            continue;
+        }
+        const std::string text = story_read_dialog(rt);
+        if (!text.empty()){
+            //  The sailor's pages (the tickets, "Would you like to board a
+            //  SEAGALLOP ferry?", "...departing immediately."). A menu not
+            //  read: A picks its first row (SEVII ISLANDS, ONE ISLAND),
+            //  right for row 0 only.
+            if (!picked && row != 0 && has(text, "board")){
+                pbf_wait(context, 500ms);
+                if (++quiet < 8){
+                    continue;
+                }
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_seagallop(): The Seagallop's destination list was not read: " + what,
+                    console
+                );
+            }
+            if (has(text, "depart") || has(text, "in order")){
+                picked = true;
+            }
+            pbf_press_button(context, BUTTON_A, 160ms, 1040ms);
+            quiet = 0;
+            continue;
+        }
+        //  No text: the screen going black for the ferry (after the pick),
+        //  or a page still printing.
+        if (picked && ++quiet >= 2){
+            console.log("The Seagallop leaves.", COLOR_BLUE);
+            return;
+        }
+        if (!picked && ++quiet >= 20){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_seagallop(): The sailor's text did not come up: " + what,
+                console
+            );
+        }
+        pbf_wait(context, 500ms);
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "story_seagallop(): Not on the Seagallop after 90 seconds: " + what,
+        console
+    );
 }
 
 

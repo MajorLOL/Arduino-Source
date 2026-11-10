@@ -130,6 +130,13 @@ void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& st
 //  the cheapest balls; the others are run from.
 void story_dex(StoryRuntime& rt, const StoryStep& step);
 
+//  The Seagallop from Vermilion City (StepType::SEAGALLOP), the player on
+//  the pier's trigger: through the sailor's text (on the Switch the MYSTIC
+//  and AURORA TICKETs first, and their menu: SEVII ISLANDS) to row "row"
+//  of the Sevii Islands list (0: One Island). The ferry scene is the next
+//  step.
+void story_seagallop(StoryRuntime& rt, int row, const std::string& what);
+
 
 }
 }

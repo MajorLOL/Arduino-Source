@@ -1569,7 +1569,12 @@ StoryBattleResult run_story_battle(
                     const bool nidoran = slug.rfind("nidoran", 0) == 0 &&
                         (settings.dex_species.count("nidoran-f") != 0 || settings.dex_species.count("nidoran-m") != 0);
                     bool wanted = !slug.empty() && (nidoran || settings.dex_species.count(slug) != 0);
-                    if (wanted && memory.foe_mark == 1){
+                    if (wanted && memory.foe_mark == 1 && !nidoran && settings.dex_extra.count(slug) != 0){
+                        console.log(
+                            "The game shows " + slug + " as caught (the ball mark): another one, to evolve.",
+                            COLOR_BLUE
+                        );
+                    }else if (wanted && memory.foe_mark == 1){
                         console.log("The game shows " + slug + " as caught (the ball mark): not caught again.", COLOR_BLUE);
                         wanted = false;
                         if (!nidoran){

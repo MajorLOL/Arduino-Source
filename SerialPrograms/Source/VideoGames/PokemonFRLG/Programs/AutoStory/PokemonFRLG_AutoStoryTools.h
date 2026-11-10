@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <functional>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -36,6 +37,8 @@ class ProController;
 using ProControllerContext = ControllerContext<ProController>;
 
 namespace PokemonFRLG{
+
+class StoryCollectionTable;
 
 
 //  Everything the story steps share while the program runs.
@@ -116,6 +119,16 @@ struct StoryRuntime{
     //  Species dropped from the list of a DEX step because the game showed
     //  the ball mark (caught before, the program did not know).
     uint64_t dex_owned_by_mark = 0;
+    //  Pokemon caught for the POKeDEX (a DEX step's list, extra ones to
+    //  evolve included).
+    uint64_t dex_catches = 0;
+    //  The POKeDEX table (the program's option): what is caught, what is
+    //  still wanted in the chosen game. Not null while the program runs.
+    StoryCollectionTable* collection = nullptr;
+    //  Its counts at the last save (a reset goes back to them).
+    std::map<std::string, int> collection_at_save;
+    //  A DEX step catching for the table (StepType::DEX, p2 & 2).
+    bool collecting = false;
 
     //  The POKeDEX as the game counts it: the caught species on the load
     //  menu ("POKeDEX", read at each soft reset; -1: not read), and the

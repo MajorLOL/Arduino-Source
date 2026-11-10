@@ -1,14 +1,15 @@
 # FRLG Autostory generator
 
-These scripts write the two data headers of the FireRed/LeafGreen Autostory
+These scripts write the data headers of the FireRed/LeafGreen Autostory
 program (`SerialPrograms/Source/VideoGames/PokemonFRLG/Programs/AutoStory/`):
 
 | Header | Made by | What is in it |
 |---|---|---|
 | `PokemonFRLG_AutoStoryData.h` | `generate.py` | The story for each starter: segments, steps, and every walk as straight runs |
 | `PokemonFRLG_AutoStoryDex.h` | `gen_dex.py` | Moves, species and the type chart, for the battle logic |
+| `PokemonFRLG_AutoStoryDexCollection.h` | `dex_availability.py`, `dex_report.py` | Every species one save can register per game and starter (no trading), how many to catch, where and how: the program's Pokedex collection table |
 
-Both headers are generated output. Do not edit them by hand: change the
+The headers are generated output. Do not edit them by hand: change the
 scripts and generate them again.
 
 ## What to read
@@ -53,6 +54,8 @@ git -C /path/to/pokefirered checkout ce6406d
 
 python3 generate.py --decomp /path/to/pokefirered --out out --no-images
 python3 gen_dex.py --decomp /path/to/pokefirered --out out/PokemonFRLG_AutoStoryDex.h
+python3 dex_availability.py /path/to/pokefirered out/dex.json
+python3 dex_report.py out/dex.json out/Pokedex-Availability.md out/PokemonFRLG_AutoStoryDexCollection.h
 ```
 
 `generate.py` takes about 3 minutes. Leave out `--no-images` to also draw
