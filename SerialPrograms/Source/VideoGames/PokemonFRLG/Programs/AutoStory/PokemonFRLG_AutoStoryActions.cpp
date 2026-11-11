@@ -1056,13 +1056,47 @@ bool story_escape_rope(StoryRuntime& rt){
             console.log("No ESCAPE ROPE in the bag (not enough money at the Poke Mart?): walking out.", COLOR_ORANGE);
             return false;
         }
-        //  USE / GIVE / TOSS / CANCEL, the cursor on USE. The bag closes,
-        //  "... used the ESCAPE ROPE.", the spin out, black, the spin in.
+        //  USE / GIVE / TOSS / CANCEL, the cursor on USE. The bag fades out
+        //  (black for a moment), "... used the ESCAPE ROPE." in the field,
+        //  which waits for a button (DisplayItemMessageOnField), then the
+        //  spin out, black, the spin in. Before build 103 the black looked
+        //  for was the bag's (seen once in Silph Co., missed the other
+        //  times) and nothing pressed that button: the B's after "no warp"
+        //  did, the player went out unseen, and the second try outdoors got
+        //  "This isn't the time to use that!". Now the watch for black only
+        //  starts in the field, with A for the message.
         press(context, BUTTON_A, 800ms);
-        press(context, BUTTON_A, 300ms);
+        press(context, BUTTON_A, 1500ms);
         context.wait_for_all_requests();
+        const std::string said = story_read_dialog(rt);
+        if (contains(said, "time to use") || contains(said, "isn't the time") || contains(said, "the time to")){
+            pbf_mash_button(context, BUTTON_B, 3000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "bag");
+            if (attempt > 0){
+                //  The rope of the try before did take the player out.
+                console.log("\"This isn't the time to use that!\": out already, by the ESCAPE ROPE of the try before.", COLOR_ORANGE);
+                rt.facing = DPAD_DOWN;
+                rt.arrived_by_warp = true;
+                return true;
+            }
+            console.log("\"This isn't the time to use that!\": no ESCAPE ROPE here: walking out.", COLOR_ORANGE);
+            return false;
+        }
         BlackScreenWatcher black(COLOR_RED);
-        if (wait_until(console, context, 12000ms, { black }) == 0){
+        const int ret = run_until<ProControllerContext>(
+            console, context,
+            [](ProControllerContext& context){
+                for (int i = 0; i < 8; i++){
+                    //  The message, then the spin: A only until the screen
+                    //  goes black (the watcher stops these presses).
+                    pbf_press_button(context, BUTTON_A, 160ms, 1240ms);
+                }
+                pbf_wait(context, 3000ms);
+            },
+            { black }
+        );
+        if (ret == 0){
             BlackScreenOverWatcher over(COLOR_RED);
             wait_until(console, context, 10000ms, { over });
             pbf_wait(context, 3000ms);
