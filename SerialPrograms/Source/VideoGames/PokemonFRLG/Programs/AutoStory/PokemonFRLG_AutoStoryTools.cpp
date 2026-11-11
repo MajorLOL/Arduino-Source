@@ -538,6 +538,17 @@ RunAttempt attempt_moves(
     result.lost_early = t.lost() && tracker.lost_at_ms() >= 0 &&
         tracker.lost_at_ms() < (running ? 100 : 200);
     int tiles = t.tiles();
+    if (t.lost()){
+        //  A battle or a trainer starts after a whole step, but the frames
+        //  of its first flash read as half a tile more ("264 px (17 tiles)"
+        //  after 16 steps; 35 px after 2, 132 after 8): there, a tile is
+        //  counted from 10 px on.
+        const int counted = (int)std::floor((t.pixels() + 6) / (double)AutoStoryScroll::TILE_PIXELS);
+        if (counted != tiles){
+            result.video += ", counted as " + std::to_string(counted) + " tiles (screen changed)";
+            tiles = counted;
+        }
+    }
     result.video_moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
     if (result.event != RunEvent::NONE){
         //  A battle or a trainer stopped the player. The video saw up to
