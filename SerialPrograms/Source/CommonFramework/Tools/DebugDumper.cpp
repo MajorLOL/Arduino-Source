@@ -4,12 +4,12 @@
  *
  */
 
-#include "DebugDumper.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/PrettyPrint.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
+#include "DebugDumper.h"
 
 namespace PokemonAutomation{
 

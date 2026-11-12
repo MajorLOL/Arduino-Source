@@ -4,18 +4,17 @@
  *
  */
 
+//#include <iostream>
+#include <sstream>
 #include "CommonTools/StartupChecks/VideoResolutionCheck.h"
-#include "CommonFramework/VideoPipeline/VideoFeed.h"
-#include "Pokemon/Pokemon_Strings.h"
 #include "CommonTools/Async/InferenceRoutines.h"
+#include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonLZA/Inference/Boxes/PokemonLZA_BoxDetection.h"
 #include "VideoGames/PokemonLZA/Inference/Boxes/PokemonLZA_BoxInfoDetector.h"
 #include "PokemonLZA_TestBoxCellInfo.h"
 
-#include <iostream>
-#include <sstream>
-using std::cout;
-using std::endl;
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

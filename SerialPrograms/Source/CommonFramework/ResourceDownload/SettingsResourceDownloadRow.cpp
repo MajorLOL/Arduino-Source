@@ -17,16 +17,7 @@
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/ResourceDownload/GlobalResourceDownloadManager.h"
 #include "ResourceDownloadHelpers.h"
-// #include "SettingsResourceDownloadTable.h"
 #include "SettingsResourceDownloadRow.h"
-
-// #include <thread>
-// #include <fstream>
-#include <filesystem>
-
-//#include <iostream>
-//using std::cout;
-//using std::endl;
 
 namespace PokemonAutomation{
 

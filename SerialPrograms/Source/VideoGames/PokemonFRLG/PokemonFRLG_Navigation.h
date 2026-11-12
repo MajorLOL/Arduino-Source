@@ -81,57 +81,6 @@ void flee_battle(ConsoleHandle& console, ProControllerContext& context);
 // Returns true if a move was learned (even if it was rejected) and false otherwise.
 bool exit_wild_battle(ConsoleHandle& console, ProControllerContext& context, bool stop_on_move_learn, bool prevent_evolution);
 
-// What a step of exit_wild_battle() saw.
-enum class WildBattleExitEvent{
-    BattleExited,       // The screen went black as the battle ended.
-    AdvanceDialog,      // A battle dialog is waiting for a button.
-    MoveLearnPrompt,    // A Pokemon is trying to learn a move.
-    None,               // Nothing was seen before the step timed out.
-};
-
-// The game steps that exit_wild_battle() takes. They are injected so that its decisions (what to
-// press after each dialog, when to give up) run in tests without a Switch.
-class WildBattleExitActions{
-public:
-    virtual ~WildBattleExitActions() = default;
-
-    // Mash B for up to 20 seconds, until the battle ends.
-    virtual WildBattleExitEvent mash_b_until_battle_exited() = 0;
-
-    // Press `button` every 2 seconds for up to 30 seconds, until the battle ends, a battle dialog
-    // waits for a button, or a move-learn prompt opens.
-    virtual WildBattleExitEvent press_until_dialog(Button button) = 0;
-
-    // Right after the battle ends, check for a dialog, which means a Pokemon is evolving.
-    virtual bool evolution_started() = 0;
-
-    // Wait for an evolution to finish without pressing B, which would cancel it.
-    virtual void wait_for_evolution() = 0;
-
-    // Close a battle dialog that is waiting for a button.
-    virtual void advance_dialog() = 0;
-
-    // Answer a move-learn prompt with `button`.
-    virtual void answer_move_prompt(Button button) = 0;
-
-    // Close any open screen, then check for the overworld by opening the start menu. Returns true
-    // if it opened; it is closed again.
-    virtual bool return_to_overworld() = 0;
-};
-
-enum class WildBattleExitResult{
-    Exited,
-    ExitedAfterMoveLearn,   // A move-learn prompt came up and the move was declined.
-    StoppedOnMoveLearn,     // Stopped at a move-learn prompt, as stop_on_move_learn asks.
-    Failed,
-};
-
-// The decisions of exit_wild_battle(), taking its game steps from `actions`.
-WildBattleExitResult exit_wild_battle(
-    Logger& logger, WildBattleExitActions& actions,
-    bool stop_on_move_learn, bool prevent_evolution
-);
-
 // Starting from the start menu, a sub-screen of the start menu, or the overworld, navigate to the party screen
 enum class StartMenuContext {
     STANDARD,
@@ -174,6 +123,7 @@ void heal_at_pokecenter(ConsoleHandle& console, ProControllerContext& context);
 // Can be used to alternate left/right and up/down. It is important that the player is not facing
 // the same direction as the first thumbstick press.
 // returns -1 if no encounter is triggered, 0 if a non-shiny is encounter, and 1 if a shiny is encountered
+// A spin that stops without starting a battle also returns -1, as long as the player is still in the overworld.
 int grass_spin(ConsoleHandle& console, ProControllerContext& context, bool leftright, Seconds timeout = 60s);
 
 // Trigger encounters by fishing with a registered rod. The player must be facing water.

@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include "Common/Cpp/Exceptions.h"
-#include "Common/Cpp/Color.h"
 #include "Common/Cpp/Rectangle.tpp"
 #include "Kernels/Waterfill/Kernels_Waterfill_Types.h"
 #include "CommonFramework/ImageTypes/ImageViewHSV32.h"
@@ -14,9 +13,8 @@
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "ImageBoxes.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 

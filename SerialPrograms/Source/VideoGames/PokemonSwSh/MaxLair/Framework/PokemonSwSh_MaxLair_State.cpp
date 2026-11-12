@@ -3,10 +3,9 @@
  *  From: https://github.com/PokemonAutomation/
  *
  */
-
-#include <map>
 #include "Common/Cpp/PrettyPrint.h"
 #include "Pokemon/Pokemon_Types.h"
+#include "VideoGames/PokemonSwSh/Resources/PokemonSwSh_MaxLairDatabase.h"
 #include "PokemonSwSh_MaxLair_State.h"
 
 namespace PokemonAutomation{
@@ -14,6 +13,36 @@ namespace NintendoSwitch{
 namespace PokemonSwSh{
 namespace MaxLairInternal{
 
+
+namespace{
+
+//  wins is incremented after each battle is won: battles 1-3 (wins < 3) are
+//  against rental Pokemon, and battle 4 (wins == 3) is against the legendary boss.
+bool is_boss_battle(const GlobalState& state){
+    return state.wins == 3;
+}
+
+} // namespace
+
+bool GlobalState::accept_opponent(){
+    const std::string opponent_slug = opponent.empty() ? "" : *opponent.begin();
+    //  A boss before the end means something is out-of-sync.
+    if (!is_boss_battle(*this) && is_boss(opponent_slug)){
+        return false;
+    }
+    //  Infer the boss if we don't know it. Only a single boss species counts:
+    //  a rental read here is a misread (Kyurem read as Mimikyu, 2026-11-02)
+    //  and must not become the boss. A later turn's read can still record it.
+    if (is_boss_battle(*this) && boss.empty() && opponent.size() == 1 && is_boss(opponent_slug)){
+        boss = opponent_slug;
+    }
+    return true;
+}
+
+std::string GlobalState::boss_if_caught() const{
+    //  The identified boss is reported whether or not it was caught.
+    return boss;
+}
 
 std::string PlayerState::dump() const{
     std::string str;

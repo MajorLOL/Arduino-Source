@@ -10,9 +10,9 @@
 #include "CommonTools/Images/SolidColorTest.h"
 #include "PokemonLA_BattleMoveSelectionDetector.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

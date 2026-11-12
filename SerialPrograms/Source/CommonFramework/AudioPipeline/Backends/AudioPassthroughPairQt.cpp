@@ -4,21 +4,20 @@
  *
  */
 
+#include <QAudioFormat>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Containers/Pimpl.tpp"
 #include "Common/Cpp/Logging/AbstractLogger.h"
 #include "Common/Cpp/PrettyPrint.h"
-#include "CommonFramework/GlobalSettingsPanel.h"
-#include "CommonFramework/AudioPipeline/AudioPipelineOptions.h"
-#include "CommonFramework/AudioPipeline/Tools/AudioFormatUtils.h"
-#include "CommonFramework/AudioPipeline/ChannelMixer.h"
-#include "CommonFramework/AudioPipeline/IO/AudioSource.h"
-#include "CommonFramework/AudioPipeline/IO/AudioOutputDevice.h"
-#include "CommonFramework/AudioPipeline/Spectrum/FFTStreamer.h"
 #include "Kernels/AudioPipeline/Kernels_RawAudio2WorkingAudio.h"
 #include "Kernels/AudioPipeline/Kernels_WorkingAudio2RawAudio.h"
 #include "Kernels/AudioPipeline/Kernels_WorkingAudio2WorkingAudio.h"
-#include <QAudioFormat>
+#include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/AudioPipeline/Tools/AudioFormatUtils.h"
+#include "CommonFramework/AudioPipeline/Tools/ChannelMixer.h"
+#include "CommonFramework/AudioPipeline/AudioSource.h"
+#include "CommonFramework/AudioPipeline/IO/AudioOutputDevice.h"
+#include "CommonFramework/AudioPipeline/Spectrum/FFTStreamer.h"
 #include "AudioPassthroughPairQt.h"
 
 //#include <iostream>
@@ -29,18 +28,6 @@ namespace PokemonAutomation{
 
 
 namespace{
-
-
-Kernels::AudioPipeline::SampleFormat to_sample_format(AudioSampleFormat format){
-    switch (format){
-    case AudioSampleFormat::UINT8:   return Kernels::AudioPipeline::SampleFormat::UINT8;
-    case AudioSampleFormat::SINT16:  return Kernels::AudioPipeline::SampleFormat::SINT16;
-    case AudioSampleFormat::SINT32:  return Kernels::AudioPipeline::SampleFormat::SINT32;
-    case AudioSampleFormat::FLOAT32: return Kernels::AudioPipeline::SampleFormat::FLOAT32;
-    default:
-        throw InternalProgramError(nullptr, PA_CURRENT_FUNCTION, "Unsupported audio sample format.");
-    }
-}
 
 
 //  QAudioFormat with a channel count and, for 1 and 2 channels, the
@@ -108,14 +95,6 @@ private:
 };
 
 
-void AudioPassthroughPairQt::add_listener(FFTListener& listener){
-    auto scope_check = m_sanitizer.check_scope();
-    m_fft_listeners.add(listener);
-}
-void AudioPassthroughPairQt::remove_listener(FFTListener& listener){
-    auto scope_check = m_sanitizer.check_scope();
-    m_fft_listeners.remove(listener);
-}
 void AudioPassthroughPairQt::add_listener(
     const AudioFormat& format, WorkingAudioStreamListener& listener
 ){
@@ -134,6 +113,14 @@ void AudioPassthroughPairQt::remove_listener(WorkingAudioStreamListener& listene
     }
     detach_working_entry(iter->second);
     m_working_entries.erase(iter);
+}
+void AudioPassthroughPairQt::add_listener(FFTListener& listener){
+    auto scope_check = m_sanitizer.check_scope();
+    m_fft_listeners.add(listener);
+}
+void AudioPassthroughPairQt::remove_listener(FFTListener& listener){
+    auto scope_check = m_sanitizer.check_scope();
+    m_fft_listeners.remove(listener);
 }
 
 
@@ -285,7 +272,7 @@ void AudioPassthroughPairQt::build_tree(float input_volume){
     size_t raw_channels = m_reader->raw_channels();
 
     m_source_decoder.reset(new Kernels::AudioPipeline::RawAudio2WorkingAudio(
-        to_sample_format(m_reader->raw_sample_format()),
+        m_reader->raw_sample_format(),
         raw_rate, raw_channels, input_volume
     ));
     m_reader->add_raw_listener(*m_source_decoder);
@@ -408,23 +395,20 @@ AudioPassthroughPairQt::~AudioPassthroughPairQt(){
 
 AudioPassthroughPairQt::AudioPassthroughPairQt(Logger& logger)
     : m_logger(logger)
-    , m_file_input_multiplier((float)GlobalSettings::instance().AUDIO_PIPELINE->FILE_VOLUME_SCALE)
-    , m_device_input_multiplier((float)GlobalSettings::instance().AUDIO_PIPELINE->DEVICE_VOLUME_SCALE)
 {}
 
 void AudioPassthroughPairQt::reset(
-    const std::string& file,
-    const AudioDeviceInfo& output, double output_volume
+    const std::shared_ptr<AudioSourceDescriptor>& descriptor,
+    const AudioInputChoice& format,
+    const AudioDeviceInfo& output,
+    double output_volume
 ){
     auto scope_check = m_sanitizer.check_scope();
-    QMetaObject::invokeMethod(this, [this, file, output, output_volume]{
+    QMetaObject::invokeMethod(this, [this, format, descriptor, output, output_volume]{
         auto scope_check = m_sanitizer.check_scope();
         std::unique_ptr<AudioSource> source;
-        if (!file.empty()){
-            source.reset(new AudioSource(
-                m_logger,
-                file
-            ));
+        if (descriptor){
+            source = descriptor->make_AudioSource(m_logger, format);
         }
         WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
         if (m_reader){
@@ -432,46 +416,13 @@ void AudioPassthroughPairQt::reset(
             m_sink_device.reset();
             m_reader.reset();
         }
-        m_input_choice = AudioInputChoice();
-        if (source){
-            m_reader = std::move(source);
-            m_output_device = output;
-            m_output_volume = output_volume;
-            init_audio_sink();
-            build_tree(m_file_input_multiplier);
-            m_fft_listener.reset(new InternalFFTListener(*this));
-        }
-    });
-}
-void AudioPassthroughPairQt::reset(
-    const AudioDeviceInfo& input, const AudioInputChoice& choice,
-    const AudioDeviceInfo& output, double output_volume
-){
-    auto scope_check = m_sanitizer.check_scope();
-//    cout << "AudioPassthroughPairQt::reset(): " << output.display_name() << endl;
-    QMetaObject::invokeMethod(this, [this, choice, output, output_volume, input]{
-        auto scope_check = m_sanitizer.check_scope();
-        std::unique_ptr<AudioSource> source;
-        if (input && choice){
-            source.reset(new AudioSource(
-                m_logger,
-                input,
-                choice
-            ));
-        }
-        WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
-        if (m_reader){
-            teardown_tree();
-            m_sink_device.reset();
-            m_reader.reset();
-        }
-        m_input_choice = choice;
+        m_input_choice = format;
         m_output_device = output;
         m_output_volume = output_volume;
         if (source){
             m_reader = std::move(source);
             init_audio_sink();
-            build_tree(m_device_input_multiplier);
+            build_tree(m_reader->volume_multiplier());
             m_fft_listener.reset(new InternalFFTListener(*this));
         }
     });
@@ -488,16 +439,17 @@ void AudioPassthroughPairQt::clear_audio_source(){
         }
     });
 }
-void AudioPassthroughPairQt::set_audio_source(const std::string& file){
+void AudioPassthroughPairQt::set_audio_source(
+    const std::shared_ptr<AudioSourceDescriptor>& descriptor,
+    const AudioInputChoice& format
+){
+//    cout << "descriptor = " << descriptor->display_name() << endl;
     auto scope_check = m_sanitizer.check_scope();
-    QMetaObject::invokeMethod(this, [this, file]{
+    QMetaObject::invokeMethod(this, [this, descriptor, format]{
         auto scope_check = m_sanitizer.check_scope();
         std::unique_ptr<AudioSource> source;
-        if (!file.empty()){
-            source.reset(new AudioSource(
-                m_logger,
-                file
-            ));
+        if (descriptor){
+            source = descriptor->make_AudioSource(m_logger, format);
         }
         WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
         if (m_reader){
@@ -505,38 +457,11 @@ void AudioPassthroughPairQt::set_audio_source(const std::string& file){
             m_sink_device.reset();
             m_reader.reset();
         }
-        m_input_choice = AudioInputChoice();
+        m_input_choice = format;
         if (source){
             m_reader = std::move(source);
             init_audio_sink();
-            build_tree(m_file_input_multiplier);
-            m_fft_listener.reset(new InternalFFTListener(*this));
-        }
-    });
-}
-void AudioPassthroughPairQt::set_audio_source(const AudioDeviceInfo& device, const AudioInputChoice& choice){
-    auto scope_check = m_sanitizer.check_scope();
-    QMetaObject::invokeMethod(this, [this, choice, device]{
-        auto scope_check = m_sanitizer.check_scope();
-        std::unique_ptr<AudioSource> source;
-        if (device && choice){
-            source.reset(new AudioSource(
-                m_logger,
-                device,
-                choice
-            ));
-        }
-        WriteSpinLock lg(m_lock, PA_CURRENT_FUNCTION);
-        if (m_reader){
-            teardown_tree();
-            m_sink_device.reset();
-            m_reader.reset();
-        }
-        m_input_choice = choice;
-        if (source){
-            m_reader = std::move(source);
-            init_audio_sink();
-            build_tree(m_device_input_multiplier);
+            build_tree(m_reader->volume_multiplier());
             m_fft_listener.reset(new InternalFFTListener(*this));
         }
     });
@@ -583,21 +508,18 @@ void AudioPassthroughPairQt::init_audio_sink(){
     //  the device stays at full volume.
     NativeAudioInfo native_info = m_output_device.native_info();
     QAudioFormat target_format = native_info.preferredFormat();
-    AudioSampleFormat sample_format = get_sample_format(target_format);
-    if (sample_format == AudioSampleFormat::INVALID){
+    if (target_format.sampleFormat() == QAudioFormat::SampleFormat::Unknown){
         //  The native sample format isn't one we can convert to; fall
         //  back to a supported one we can.
         QAudioFormat float_format = target_format;
         set_sample_format_to_float(float_format);
         if (native_info.isFormatSupported(float_format)){
             target_format = float_format;
-            sample_format = AudioSampleFormat::FLOAT32;
         }else{
             QAudioFormat sint16_format = target_format;
             sint16_format.setSampleFormat(QAudioFormat::SampleFormat::Int16);
             if (native_info.isFormatSupported(sint16_format)){
                 target_format = sint16_format;
-                sample_format = AudioSampleFormat::SINT16;
             }else{
                 m_logger.log(
                     "Audio output device's native sample format is not supported, "
@@ -612,7 +534,7 @@ void AudioPassthroughPairQt::init_audio_sink(){
     m_logger.log("AudioOutputDevice(): Native: " + dump_audio_format(native_info.preferredFormat()));
     m_sink_device.reset(new AudioOutputDevice(
         m_logger, native_info, target_format,
-        to_sample_format(sample_format),
+        sample_format_of(target_format),
         (size_t)target_format.sampleRate(),
         (size_t)target_format.channelCount()
     ));

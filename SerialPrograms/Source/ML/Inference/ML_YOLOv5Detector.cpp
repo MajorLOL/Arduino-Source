@@ -5,9 +5,7 @@
  */
 
 #include <iostream>
-#include <QMessageBox>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/PrettyPrint.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
@@ -18,7 +16,6 @@
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/ImageTypes/ImageRGB32_OpenCV.h"
 #include "CommonFramework/VideoPipeline/VideoOverlay.h"
-#include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
 #include "ML_YOLOv5Detector.h"
 
 //#include <iostream>

@@ -7,12 +7,12 @@
 #ifndef PokemonAutomation_SerialConnectionPOSIX_H
 #define PokemonAutomation_SerialConnectionPOSIX_H
 
+#include <errno.h>
 #include <string>
 #include <atomic>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
-#include <errno.h>
 #include <sys/ioctl.h>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/PanicDump.h"

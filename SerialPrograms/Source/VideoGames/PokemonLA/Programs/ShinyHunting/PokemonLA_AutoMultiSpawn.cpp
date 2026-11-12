@@ -35,9 +35,9 @@
 #include "VideoGames/PokemonLA/PokemonLA_WeatherAndTime.h"
 #include "PokemonLA_AutoMultiSpawn.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

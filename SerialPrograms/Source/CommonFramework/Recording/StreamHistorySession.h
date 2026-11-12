@@ -11,9 +11,9 @@
 
 #include "Common/Cpp/Logging/AbstractLogger.h"
 #include "Common/Cpp/Containers/Pimpl.h"
+#include "Kernels/AudioPipeline/Kernels_AudioPipeline.h"
 #include "CommonFramework/AudioPipeline/AudioSession.h"
 #include "CommonFramework/VideoPipeline/VideoSession.h"
-#include "Kernels/AudioPipeline/Kernels_AudioPipeline.h"
 
 namespace PokemonAutomation{
 
@@ -46,7 +46,10 @@ public:
 
 public:
     virtual void pre_input_change() override;
-    virtual void post_input_change(const std::string& file, const AudioDeviceInfo& device, const AudioInputChoice& choice) override;
+    virtual void post_input_change(
+        const std::shared_ptr<const AudioSourceDescriptor>& source,
+        const AudioInputChoice& choice
+    ) override;
 
     virtual void pre_shutdown() override;
     virtual void post_shutdown() override;

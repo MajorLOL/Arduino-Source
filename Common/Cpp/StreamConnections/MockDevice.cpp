@@ -5,11 +5,11 @@
  */
 
 #include <string.h>
+#include <iostream>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/PABotBase2/ReliableConnectionLayer/PABotBase2_ConnectionDebug.h"
 #include "MockDevice.h"
 
-#include <iostream>
 using std::cout;
 using std::endl;
 
@@ -23,7 +23,7 @@ using std::endl;
 
 namespace PokemonAutomation{
 
-//extern std::mutex print_lock;
+//extern Mutex print_lock;
 
 
 

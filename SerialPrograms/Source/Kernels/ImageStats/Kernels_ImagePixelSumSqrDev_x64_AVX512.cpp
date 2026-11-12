@@ -8,14 +8,14 @@
 
 #include <immintrin.h>
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/TestRunners/UnitTestDatabase.h"
 #include "Kernels/Kernels_x64_AVX512.h"
 #include "Kernels_ImagePixelSumSqrDev.h"
-#include "Common/Cpp/TestRunners/UnitTestDatabase.h"
 #include "Kernels_ImagePixelSumSqrDev_TestInfra.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace Kernels{

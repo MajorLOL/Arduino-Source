@@ -3,12 +3,10 @@
  *  From: https://github.com/PokemonAutomation/
  *
  */
-
-#include "Common/CRC32/pabb_CRC32.h"
 //#include "Common/Cpp/PrettyPrint.h"
 //#include "Common/Cpp/Exceptions.h"
-#include "Common/PABotBase2/ConnectionLayer/PABotBase2_ConnectionDebug.h"
 #include "Common/Cpp/StreamConnections/PABotBase2_MessageDumper.h"
+#include "Common/PABotBase2/ConnectionLayer/PABotBase2_ConnectionDebug.h"
 #include "ReliableStreamConnection.h"
 
 //#include <iostream>
@@ -260,7 +258,7 @@ void ReliableStreamConnection::on_packet(const PacketHeader* packet){
     uint8_t status = packet->magic_number;
 
 //    {
-//        std::lock_guard<std::mutex> lg(PokemonAutomation::print_lock);
+//        std::lock_guard<Mutex> lg(PokemonAutomation::print_lock);
 //        cout << "on_packet(): seqnum = [" << (int)packet->seqnum << "], opcode = " << (int)packet->opcode << endl;
 //    }
 

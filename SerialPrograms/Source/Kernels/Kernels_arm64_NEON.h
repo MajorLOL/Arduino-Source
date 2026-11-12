@@ -8,10 +8,9 @@
 #define PokemonAutomation_Kernels_arm64_NEON_H
 
 #include <stdint.h>
+#include <iostream>
 #include <arm_neon.h>
 #include "Common/Compiler.h"
-
-#include <iostream>
 
 namespace PokemonAutomation{
 namespace Kernels{

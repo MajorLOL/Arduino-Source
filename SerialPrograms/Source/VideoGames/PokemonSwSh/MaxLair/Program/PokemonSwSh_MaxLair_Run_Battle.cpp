@@ -106,23 +106,14 @@ bool read_battle_menu(
             }
             state.opponent = {state.boss};
         }
-
-        opponent = state.opponent.empty()
-            ? ""
-            : *state.opponent.begin();
     }
     context.wait_for_all_requests();
 
 
-    if (state.wins != 3 && is_boss(opponent)){
+    if (!state.accept_opponent()){
         stream.log("Boss found before 3 wins. Something is seriously out-of-sync.", COLOR_RED);
         dump_image(stream.logger(), MODULE_NAME, "BossBeforeEnd", snapshot);
         return false;
-    }
-
-    //  Infer the boss if we don't know it.
-    if (state.boss.empty() && state.wins == 3){
-        state.boss = opponent;
     }
 
     //  Read misc.
@@ -248,7 +239,7 @@ StateMachineAction run_move_select(
 
     bool all_moves_blocked = false;
 
-    while (true){
+    for (size_t attempts = 0;; attempts++){
         stream.log("Selecting move...");
 
         if (cheer_only){
@@ -263,7 +254,10 @@ StateMachineAction run_move_select(
             inferred,
             player_index
         );
-        stream.log("Choosing move " + std::to_string((int)move.first) + (move.second ? " (dmax)." : "."), COLOR_PURPLE);
+        stream.log(
+            "Choosing move " + std::to_string((int)move.first) + (move.second ? " (dmax)." : "."),
+            COLOR_PURPLE
+        );
 
         if (player.can_dmax && move.second){
             pbf_press_dpad(context, DPAD_LEFT, 80ms, 400ms);
@@ -327,6 +321,14 @@ StateMachineAction run_move_select(
 
         //  Reset position.
         pbf_mash_button(context, BUTTON_B, 2000ms);
+        if (attempts >= 5){
+            stream.log(
+                "Failed to select a move after 5 attempts. Performing full cursor reset...",
+                COLOR_RED
+            );
+            pbf_press_dpad(context, DPAD_RIGHT, 2000ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 2000ms, 0ms);
+        }
         pbf_press_button(context, BUTTON_A, 160ms, 1000ms);
         pbf_press_dpad(context, DPAD_RIGHT, 2000ms, 0ms);
         pbf_press_dpad(context, DPAD_UP, 2000ms, 0ms);

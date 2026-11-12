@@ -4,9 +4,9 @@
  *
  */
 
+#include<vector>
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Tools/ErrorDumper.h"
-#include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/Exceptions/ProgramFinishedException.h"
 #include "CommonTools/Images/ImageFilter.h"
 #include "CommonTools/OCR/OCR_NumberReader.h"
@@ -24,7 +24,6 @@
 #include "VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "VideoGames/PokemonSV/Inference/Battles/PokemonSV_NormalBattleMenus.h"
 #include "VideoGames/PokemonSV/Inference/Battles/PokemonSV_EncounterWatcher.h"
-#include "VideoGames/PokemonSV/Inference/PokemonSV_MainMenuDetector.h"
 #include "VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "VideoGames/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
 #include "VideoGames/PokemonSV/Inference/Overworld/PokemonSV_OverworldSensors.h"
@@ -33,6 +32,7 @@
 #include "VideoGames/PokemonSV/Programs/PokemonSV_MenuNavigation.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_WorldNavigation.h"
 #include "VideoGames/PokemonSV/Inference/PokemonSV_BlueberryQuestDetector.h"
+#include "VideoGames/PokemonSV/Inference/PokemonSV_BlueberryPointsReader.h"
 #include "VideoGames/PokemonSV/Programs/Eggs/PokemonSV_EggRoutines.h"
 #include "VideoGames/PokemonSV/Programs/Boxes/PokemonSV_BoxRelease.h"
 #include "VideoGames/PokemonSV/Inference/Boxes/PokemonSV_BoxEggDetector.h"
@@ -42,103 +42,12 @@
 #include "VideoGames/PokemonSV/Programs/TeraRaids/PokemonSV_TeraBattler.h"
 #include "VideoGames/PokemonSV/Programs/Farming/PokemonSV_BlueberryCatchPhoto.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_Terarium.h"
-#include "PokemonSV_BlueberryQuests.h"
 
-#include<vector>
+#include "PokemonSV_BlueberryQuests.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
-
-const std::map<std::string, BBQuests>& BBQuests_TOKEN_TO_ENUM(){
-    static std::map<std::string, BBQuests> data{
-        {"auto-10",             BBQuests::auto_10},
-        {"make-tm",             BBQuests::make_tm },
-        {"pickup-10",           BBQuests::pickup_10},
-        {"sneak-up",            BBQuests::sneak_up},
-        {"photo-fly",           BBQuests::photo_fly},
-        {"photo-swim",          BBQuests::photo_swim},
-        {"photo-canyon",        BBQuests::photo_canyon},
-        {"photo-coastal",       BBQuests::photo_coastal},
-        {"photo-polar",         BBQuests::photo_polar},
-        {"photo-savanna",       BBQuests::photo_savanna},
-        {"tera-self-defeat",    BBQuests::tera_self_defeat},
-        {"travel-500",          BBQuests::travel_500},
-        {"catch-any",           BBQuests::catch_any},
-        {"catch-normal",        BBQuests::catch_normal},
-        {"catch-fighting",      BBQuests::catch_fighting},
-        {"catch-flying",        BBQuests::catch_flying},
-        {"catch-poison",        BBQuests::catch_poison},
-        {"catch-ground",        BBQuests::catch_ground},
-        {"catch-rock",          BBQuests::catch_rock},
-        {"catch-bug",           BBQuests::catch_bug},
-        {"catch-ghost",         BBQuests::catch_ghost},
-        {"catch-steel",         BBQuests::catch_steel},
-        {"catch-fire",          BBQuests::catch_fire},
-        {"catch-water",         BBQuests::catch_water},
-        {"catch-grass",         BBQuests::catch_grass},
-        {"catch-electric",      BBQuests::catch_electric},
-        {"catch-psychic",       BBQuests::catch_psychic},
-        {"catch-ice",           BBQuests::catch_ice},
-        {"catch-dragon",        BBQuests::catch_dragon},
-        {"catch-dark",          BBQuests::catch_dark},
-        {"catch-fairy",         BBQuests::catch_fairy},
-        {"wash-pokemon",        BBQuests::wash_pokemon},
-        {"wild-tera",           BBQuests::wild_tera},
-        {"auto-30",             BBQuests::auto_30},
-        {"tera-raid",           BBQuests::tera_raid},
-        {"sandwich-three",      BBQuests::sandwich_three},
-        {"bitter-sandwich",     BBQuests::bitter_sandwich},
-        {"sweet-sandwich",      BBQuests::sweet_sandwich},
-        {"salty-sandwich",      BBQuests::salty_sandwich},
-        {"sour-sandwich",       BBQuests::sour_sandwich},
-        {"spicy-sandwich",      BBQuests::spicy_sandwich},
-        {"hatch-egg",           BBQuests::hatch_egg},
-        {"photo-normal",        BBQuests::photo_normal},
-        {"photo-fighting",      BBQuests::photo_fighting},
-        {"photo-flying",        BBQuests::photo_flying},
-        {"photo-poison",        BBQuests::photo_poison},
-        {"photo-ground",        BBQuests::photo_ground},
-        {"photo-rock",          BBQuests::photo_rock},
-        {"photo-bug",           BBQuests::photo_bug},
-        {"photo-ghost",         BBQuests::photo_ghost},
-        {"photo-steel",         BBQuests::photo_steel},
-        {"photo-fire",          BBQuests::photo_fire},
-        {"photo-water",         BBQuests::photo_water},
-        {"photo-grass",         BBQuests::photo_grass},
-        {"photo-electric",      BBQuests::photo_electric},
-        {"photo-psychic",       BBQuests::photo_psychic},
-        {"photo-ice",           BBQuests::photo_ice},
-        {"photo-dragon",        BBQuests::photo_dragon},
-        {"photo-dark",          BBQuests::photo_dark},
-        {"photo-fairy",         BBQuests::photo_fairy},
-        {"ditto-central",       BBQuests::ditto_central},
-        {"ditto-canyon",        BBQuests::ditto_canyon},
-        {"ditto-coastal",       BBQuests::ditto_coastal},
-        {"ditto-polar",         BBQuests::ditto_polar},
-        {"ditto-savanna",       BBQuests::ditto_savanna},
-        {"group-canyon",        BBQuests::group_canyon},
-        {"group-coastal",       BBQuests::group_coastal},
-        {"group-polar",         BBQuests::group_polar},
-        {"group-savanna",       BBQuests::group_savanna},
-        {"group-eyewear",       BBQuests::group_eyewear},
-        {"group-nonuniform",    BBQuests::group_nonuniform},
-        {"group-masks",         BBQuests::group_masks},
-        {"sandwich-four",       BBQuests::sandwich_four},
-        {"catch-hint",          BBQuests::catch_hint},
-        {"catch-hint2",         BBQuests::catch_hint2},
-        {"",                    BBQuests::UnableToDetect},
-    };
-    return data;
-}
-
-BBQuests BBQuests_string_to_enum(const std::string& token){
-    auto iter = BBQuests_TOKEN_TO_ENUM().find(token);
-    if (iter == BBQuests_TOKEN_TO_ENUM().end()){
-        return BBQuests::UnableToDetect;
-    }
-    return iter->second;
-}
 
 int read_BP(const ProgramInfo& info, VideoStream& stream, ProControllerContext& context){
     WhiteButtonWatcher right_panel(COLOR_BLUE, WhiteButton::ButtonB, {0.484, 0.117, 0.022, 0.037});
@@ -159,17 +68,12 @@ int read_BP(const ProgramInfo& info, VideoStream& stream, ProControllerContext& 
     context.wait_for_all_requests();
     
     VideoSnapshot screen = stream.video().snapshot();
-    ImageRGB32 BP_value = to_blackwhite_rgb32_range(
-        extract_box_reference(screen, ImageFloatBox(0.866, 0.019, 0.091, 0.041)),
-        true,
-        combine_rgb(198, 198, 198), combine_rgb(255, 255, 255)
-    );
 
     //Close panel
     pbf_mash_button(context, BUTTON_B, 800ms);
     context.wait_for_all_requests();
 
-    return OCR::read_number(stream.logger(), BP_value);
+    return read_BP_from_image(stream.logger(), screen);
 }
 
 std::vector<BBQuests> read_quests(
@@ -643,12 +547,26 @@ void quest_travel_500(const ProgramInfo& info, VideoStream& stream, ProControlle
     context.wait_for_all_requests();
 }
 
+TeraEncounterAction tera_encounter_action(
+    bool shiny, int encounter_watcher_result, bool battle_menu_detected
+){
+    if (shiny){
+        return TeraEncounterAction::StopForShiny;
+    }
+    //Callback 1 is the audio side of the encounter watcher. It does not see the battle menu.
+    if (encounter_watcher_result == 0 || battle_menu_detected){
+        return TeraEncounterAction::Battle;
+    }
+    return TeraEncounterAction::Recover;
+}
+
 void quest_tera_self_defeat(
     const ProgramInfo& info,
     ConsoleHandle& console, ProControllerContext& context,
     const BBQOption& BBQ_OPTIONS
 ){
     EncounterWatcher encounter_watcher(console, COLOR_RED);
+    bool battle_menu_detected = false;
     console.log("Quest: Tera-self and defeat any wild.");
     //Navigate to target and start battle
     int ret = run_until<ProControllerContext>(
@@ -679,7 +597,8 @@ void quest_tera_self_defeat(
                 std::chrono::seconds(15),
                 { battle_menu }
             );
-            if (ret2 != 0){
+            battle_menu_detected = ret2 == 0;
+            if (!battle_menu_detected){
                 console.log("Did not enter battle. Did Kleavor spawn?");
             }
         },
@@ -690,18 +609,20 @@ void quest_tera_self_defeat(
         );
     encounter_watcher.throw_if_no_sound();
 
-    if (ret >= 0){
-        console.log("Battle menu detected.");
-    }
-
-    bool is_shiny = (bool)encounter_watcher.shiny_screenshot();
-    if (is_shiny){
+    switch (tera_encounter_action((bool)encounter_watcher.shiny_screenshot(), ret, battle_menu_detected)){
+    case TeraEncounterAction::StopForShiny:
         console.log("Shiny detected!");
         pbf_press_button(context, BUTTON_CAPTURE, 2000ms, 5000ms);
         throw ProgramFinishedException();
-    }else{
+    case TeraEncounterAction::Battle:{
+        console.log("Battle menu detected.");
         bool tera_self = true;
         wild_battle_tera(info, console, context, tera_self);
+        break;
+    }
+    case TeraEncounterAction::Recover:
+        console.log("Battle entry not confirmed. Skipping battle handling.");
+        break;
     }
     pbf_press_button(context, BUTTON_PLUS, 160ms, 840ms);
     return_to_plaza(info, console, context);
@@ -861,6 +782,7 @@ void quest_wild_tera(
     const BBQOption& BBQ_OPTIONS
 ){
     EncounterWatcher encounter_watcher(console, COLOR_RED);
+    bool battle_menu_detected = false;
     console.log("Quest: Defeat a wild tera.");
     //Navigate to target and start battle
     int ret = run_until<ProControllerContext>(
@@ -899,7 +821,8 @@ void quest_wild_tera(
                 std::chrono::seconds(15),
                 { battle_menu }
             );
-            if (ret2 != 0){
+            battle_menu_detected = ret2 == 0;
+            if (!battle_menu_detected){
                 console.log("Did not enter battle.");
             }
         },
@@ -910,18 +833,20 @@ void quest_wild_tera(
     );
     encounter_watcher.throw_if_no_sound();
 
-    if (ret >= 0){
-        console.log("Battle menu detected.");
-    }
-
-    bool is_shiny = (bool)encounter_watcher.shiny_screenshot();
-    if (is_shiny){
+    switch (tera_encounter_action((bool)encounter_watcher.shiny_screenshot(), ret, battle_menu_detected)){
+    case TeraEncounterAction::StopForShiny:
         console.log("Shiny detected!");
         pbf_press_button(context, BUTTON_CAPTURE, 2000ms, 5000ms);
         throw ProgramFinishedException();
-    }else{
+    case TeraEncounterAction::Battle:{
+        console.log("Battle menu detected.");
         bool tera_self = false;
         wild_battle_tera(info, console, context, tera_self);
+        break;
+    }
+    case TeraEncounterAction::Recover:
+        console.log("Battle entry not confirmed. Skipping battle handling.");
+        break;
     }
     return_to_plaza(info, console, context);
 

@@ -13,9 +13,9 @@
 #include "VideoGames/PokemonSwSh/MaxLair/AI/PokemonSwSh_MaxLair_AI.h"
 #include "PokemonSwSh_MaxLair_Run_PathSelect.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

@@ -4,21 +4,15 @@
  *
  */
 
-#include "CommonTools/ImageMatch/WaterfillTemplateMatcher.h"
-#include "CommonTools/Images/SolidColorTest.h"
-#include "CommonTools/Images/ImageFilter.h"
-#include "CommonTools/Images/WaterfillUtilities.h"
+#include "Kernels/Waterfill/Kernels_Waterfill_Types.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
-#include "CommonFramework/ImageTypes/ImageRGB32.h"
-#include "CommonFramework/ImageTools/ImageStats.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
-#include "Kernels/Waterfill/Kernels_Waterfill_Types.h"
+#include "CommonTools/ImageMatch/WaterfillTemplateMatcher.h"
+#include "CommonTools/Images/ImageFilter.h"
+#include "CommonTools/Images/WaterfillUtilities.h"
 #include "VideoGames/PokemonRSE/PokemonRSE_Settings.h"
 #include "PokemonRSE_SelectionDetector.h"
-
-#include <iostream>
-
 //using std::cout;
 //using std::endl;
 

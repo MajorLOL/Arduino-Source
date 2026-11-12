@@ -5,13 +5,13 @@
  */
 
 #include <string.h>
-#include "Exceptions.h"
+#include <iostream>
 #include "Containers/AlignedVector.tpp"
+#include "Exceptions.h"
 #include "StreamConverters.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 

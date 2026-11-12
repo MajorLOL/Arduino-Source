@@ -3,12 +3,9 @@
  *  From: https://github.com/PokemonAutomation/
  *
  */
-
-#include "Common/Compiler.h"
 #include "CommonFramework/ImageTools/ImageStats.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
 #include "CommonTools/Images/SolidColorTest.h"
-#include "CommonTools/VisualDetectors/BlackScreenDetector.h"
 #include "PokemonBDSP_EndBattleDetector.h"
 
 //#include <iostream>

@@ -5,7 +5,10 @@
  */
 
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/TestRunners/UnitTestDatabase.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonTools/Images/SolidColorTest.h"
+#include "Tests/ImageUnitTest.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_PartyEmptySlotDetector.h"
 
@@ -50,6 +53,51 @@ bool PartyEmptySlotDetector::detect(const ImageViewRGB32& screen){
     const auto stats = image_stats(extract_box_reference(game_screen, m_box));
     return stats.stddev.sum() > 20.0;
 }
+
+
+class Test_PartyEmptySlotDetector : public ImageUnitTest{
+public:
+    Test_PartyEmptySlotDetector(const std::string& image, PartySlot slot, bool expected)
+        : ImageUnitTest("PokemonFRLG::PartyEmptySlotDetector - " + image + " - slot " + std::to_string(static_cast<unsigned>(slot) + 1), {image})
+        , m_slot(slot)
+        , m_expected(expected)
+    {}
+
+    virtual UnitTestResult run_on_images(
+        Logger&, CancellableScope&,
+        const std::vector<ImageRGB32>& images
+    ) const override{
+        PartyEmptySlotDetector detector(COLOR_RED, m_slot);
+        const ImageRGB32& image = images[0];
+        bool result = detector.detect(image);
+        if (result != m_expected){
+            return std::string("Expected empty slot = ") + (m_expected ? "true" : "false") +
+                ", got " + (result ? "true" : "false");
+        }
+        return true;
+    }
+
+private:
+    PartySlot m_slot;
+    bool m_expected;
+};
+
+void add_tests_PartyEmptySlotDetector(UnitTestDatabase& database){
+    // Slot 1 is always occupied and is not supported by PartyEmptySlotDetector.
+    for (unsigned c = 1; c < 6; c++){
+        PartySlot slot = static_cast<PartySlot>(c);
+        for (unsigned occupied = 1; occupied <= 6; occupied++){
+            database.add<Test_PartyEmptySlotDetector>(
+                "PokemonFRLG/Party/Party_" + std::to_string(occupied) + ".png", slot, c >= occupied
+            );
+        }
+        database.add<Test_PartyEmptySlotDetector>("PokemonFRLG/Party/JPN_HeldItem.png", slot, false);
+        database.add<Test_PartyEmptySlotDetector>("PokemonFRLG/Party/JPN_Party.png", slot, c >= 4);
+        database.add<Test_PartyEmptySlotDetector>("PokemonFRLG/Party/Party_6_With_Held_Items.png", slot, false);
+        database.add<Test_PartyEmptySlotDetector>("PokemonFRLG/Party/SPA_HeldItem.png", slot, false);
+    }
+}
+
 }
 }
 }

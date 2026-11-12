@@ -18,10 +18,10 @@
 
 #include "Common/Cpp/ListenerSet.h"
 #include "Common/Cpp/Concurrency/Watchdog.h"
-#include "AudioFeed.h"
-#include "AudioPassthroughPair.h"
 #include "Spectrum/FFTStreamer.h"
 #include "Spectrum/AudioSpectrumHolder.h"
+#include "AudioFeed.h"
+#include "AudioPassthroughPair.h"
 #include "AudioOption.h"
 
 namespace PokemonAutomation{
@@ -35,7 +35,10 @@ public:
 
     struct StateListener{
         virtual void pre_input_change(){}
-        virtual void post_input_change(const std::string& file, const AudioDeviceInfo& device, const AudioInputChoice& choice){}
+        virtual void post_input_change(
+            const std::shared_ptr<const AudioSourceDescriptor>& source,
+            const AudioInputChoice& choice
+        ){}
         virtual void post_output_change(const AudioDeviceInfo& device){}
         virtual void post_volume_change(double volume){}
         virtual void post_display_change(AudioOption::AudioDisplayType display){}
@@ -59,7 +62,9 @@ public:
     void save(AudioOption& option) const;
     void load(const AudioOption& option);
 
-    std::pair<std::string, AudioDeviceInfo> input_device() const;
+    Logger& logger(){ return m_logger; }
+
+    std::shared_ptr<AudioSourceDescriptor> input_source() const;
     AudioInputChoice input_choice() const;
 
     AudioDeviceInfo output_device() const;
@@ -69,8 +74,7 @@ public:
     AudioSpectrumHolder& spectrums(){ return m_spectrum_holder; }
 
     void clear_audio_input();
-    void set_audio_input(std::string file);
-    void set_audio_input(AudioDeviceInfo info);
+    void set_audio_input(const std::shared_ptr<AudioSourceDescriptor>& source);
     void set_input_choice(const AudioInputChoice& choice);
 
     void clear_audio_output();

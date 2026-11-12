@@ -11,9 +11,9 @@
 #include "VideoGames/PokemonLA/Inference/Objects/PokemonLA_DialogYellowArrowDetector.h"
 #include "PokemonLA_TimeOfDayChange.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

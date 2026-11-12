@@ -20,16 +20,12 @@
 #include "VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "VideoGames/PokemonSV/Inference/Battles/PokemonSV_NormalBattleMenus.h"
 #include "VideoGames/PokemonSV/Inference/Battles/PokemonSV_EncounterWatcher.h"
-#include "VideoGames/PokemonSV/Inference/PokemonSV_MainMenuDetector.h"
 #include "VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "VideoGames/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_MenuNavigation.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_WorldNavigation.h"
 #include "VideoGames/PokemonSV/Programs/Battles/PokemonSV_BasicCatcher.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_Terarium.h"
-#include "PokemonSV_BlueberryQuests.h"
-
-#include<vector>
 #include "PokemonSV_BlueberryCatchPhoto.h"
 
 namespace PokemonAutomation{

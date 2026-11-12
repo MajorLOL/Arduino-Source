@@ -4,20 +4,20 @@
  *
  */
 
-#include "Common/Cpp/Filesystem/Filesystem.h"
+#include <fstream>
+#include <sstream>
+#include "Common/Cpp/Filesystem/FilePath.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTools/ImageStats.h"
 #include "CommonFramework/Logging/Logger.h"
-#include "CommonFramework/StaticGlobals.h"
-#include "CommonTools/Images/SolidColorTest.h"
 //#include "CommonFramework/VideoPipeline/VideoOverlay.h"
+#include "CommonFramework/StaticGlobals.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
+#include "CommonTools/Images/SolidColorTest.h"
+#include "Tests/ImageUnitTest.h"
+#include "Tests/TestUtils.h"
 #include "PokemonLZA_FlavorPowerDetector.h"
 #include "PokemonLZA_FlavorPowerScreenDetector.h"
-#include "Tests/TestUtils.h"
-
-#include <fstream>
-#include <sstream>
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -55,15 +55,20 @@ bool FlavorPowerScreenDetector::detect(const ImageViewRGB32& screen){
 }
 
 
-class Test_FlavorPowerScreenDetector : public UnitTest{
+class Test_FlavorPowerScreenDetector : public ImageUnitTest{
 public:
     Test_FlavorPowerScreenDetector(const std::string& image)
-        : UnitTest("PokemonPLZA::FlavorPowerScreenDetector - " + image)
-        , m_image(UNIT_TEST_RESOURCE_PATH() + image)
-    {}
+        : ImageUnitTest("PokemonPLZA::FlavorPowerScreenDetector - " + image, {image})
+    {
+        //  Plus the PaddleOCR (ONNX) recognition session and its working set.
+        m_memory += PADDLE_OCR_SINGLE_LINE_MEMORY_ESTIMATE;
+    }
 
-    virtual UnitTestResult run(Logger& logger, CancellableScope& scope) const override{
-        Filesystem::Path file_path(m_image);
+    virtual UnitTestResult run_on_images(
+        Logger& logger, CancellableScope& scope,
+        const std::vector<ImageRGB32>& images
+    ) const override{
+        Filesystem::Path file_path(UNIT_TEST_RESOURCE_PATH() + image_paths()[0]);
         Filesystem::Path parent_dir = file_path.parent_path();
         std::string base_name = file_path.stem().string();
 
@@ -83,7 +88,7 @@ public:
             return "Error: invalid language word in filename.";
         }
 
-        ImageRGB32 image(m_image);
+        const ImageRGB32& image = images[0];
         FlavorPowerScreenDetector screen_detector;
         if (!screen_detector.detect(image)){
             return "Error: FlavorPowerScreenDetector did not detect flavor power screen.";
@@ -146,9 +151,6 @@ public:
 
         return true;
     }
-
-private:
-    std::string m_image;
 };
 
 

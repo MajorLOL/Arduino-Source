@@ -6,6 +6,7 @@
 
 //#include <iostream>
 #include <unordered_map>
+#include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
 #include "CommonFramework/StaticGlobals.h"
 #include "CommonFramework/Exceptions/FatalProgramException.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
@@ -19,18 +20,17 @@
 #include "CommonTools/OCR/OCR_NumberReader.h"
 #include "CommonTools/Async/InferenceRoutines.h"
 #include "CommonTools/StartupChecks/VideoResolutionCheck.h"
-#include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
-#include "Pokemon/Pokemon_Strings.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
+#include "Pokemon/Pokemon_Strings.h"
 //#include "VideoGames/PokemonSV/PokemonSV_Settings.h"
+#include "VideoGames/PokemonSwSh/Commands/PokemonSwSh_Commands_DateSpam.h"
 #include "VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "VideoGames/PokemonSV/Inference/PokemonSV_AuctionItemNameReader.h"
 #include "VideoGames/PokemonSV/Inference/Overworld/PokemonSV_OverworldDetector.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_GameEntry.h"
 #include "VideoGames/PokemonSV/Programs/PokemonSV_SaveGame.h"
 #include "VideoGames/PokemonSV/Resources/PokemonSV_AuctionItemNames.h"
-#include "VideoGames/PokemonSwSh/Commands/PokemonSwSh_Commands_DateSpam.h"
 #include "PokemonSV_AuctionFarmer.h"
 
 

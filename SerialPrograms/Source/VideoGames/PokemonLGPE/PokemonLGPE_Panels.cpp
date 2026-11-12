@@ -8,9 +8,11 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonLGPE_Panels.h"
+
 #include "PokemonLGPE_Settings.h"
 
 #include "Programs/Farming/PokemonLGPE_DailyItemFarmer.h"
+
 #include "Programs/ShinyHunting/PokemonLGPE_AlolanTrade.h"
 #include "Programs/ShinyHunting/PokemonLGPE_FossilRevival.h"
 #include "Programs/ShinyHunting/PokemonLGPE_GiftReset.h"

@@ -37,9 +37,6 @@ extern const std::string COMPILER_VERSION;
 
 extern const size_t LOG_HISTORY_LINES;
 
-extern bool USE_QT_UI;
-
-
 
 enum class ProgramState{
     NOT_READY,

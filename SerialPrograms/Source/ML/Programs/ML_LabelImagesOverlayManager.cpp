@@ -9,9 +9,9 @@
 #include "ML_LabelImagesOverlayManager.h"
 #include "ML_LabelImages.h"
 
-#include <iostream>
-using std::cout, std::endl;
-
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace ML{

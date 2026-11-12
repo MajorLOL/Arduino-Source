@@ -14,7 +14,9 @@
 #include "Common/Cpp/ListenerSet.h"
 #include "Common/Cpp/LifetimeSanitizer.h"
 #include "Common/Cpp/Concurrency/SpinLock.h"
+#include "CommonFramework/AudioPipeline/AudioInputChoice.h"
 #include "CommonFramework/AudioPipeline/AudioPassthroughPair.h"
+#include "CommonFramework/AudioPipeline/Backends/AudioDeviceInfo.h"
 
 namespace PokemonAutomation{
 
@@ -40,11 +42,11 @@ public:
     using WorkingAudio2WorkingAudio = Kernels::AudioPipeline::WorkingAudio2WorkingAudio;
     using WorkingAudioStreamListener = Kernels::AudioPipeline::WorkingAudioStreamListener;
 
-    virtual void add_listener(FFTListener& listener) override;
-    virtual void remove_listener(FFTListener& listener) override;
-
     virtual void add_listener(const AudioFormat& format, WorkingAudioStreamListener& listener) override;
     virtual void remove_listener(WorkingAudioStreamListener& listener) override;
+
+    virtual void add_listener(FFTListener& listener) override;
+    virtual void remove_listener(FFTListener& listener) override;
 
 
 public:
@@ -52,17 +54,17 @@ public:
     AudioPassthroughPairQt(Logger& logger);
 
     virtual void reset(
-        const std::string& file,
-        const AudioDeviceInfo& output, double output_volume
-    ) override;
-    virtual void reset(
-        const AudioDeviceInfo& input, const AudioInputChoice& choice,
-        const AudioDeviceInfo& output, double output_volume
+        const std::shared_ptr<AudioSourceDescriptor>& descriptor,
+        const AudioInputChoice& format,
+        const AudioDeviceInfo& output,
+        double output_volume
     ) override;
 
     virtual void clear_audio_source() override;
-    virtual void set_audio_source(const std::string& file) override;
-    virtual void set_audio_source(const AudioDeviceInfo& device, const AudioInputChoice& choice) override;
+    virtual void set_audio_source(
+        const std::shared_ptr<AudioSourceDescriptor>& descriptor,
+        const AudioInputChoice& format
+    ) override;
 
     virtual void clear_audio_sink() override;
     virtual void set_audio_sink(const AudioDeviceInfo& device, double volume) override;
@@ -137,8 +139,6 @@ private:
     std::map<WorkingAudioStreamListener*, WorkingListenerEntry> m_working_entries;
 
     AudioDeviceInfo m_output_device;
-    float m_file_input_multiplier = 1.0;
-    float m_device_input_multiplier = 1.0;
     double m_output_volume = 1.0;
     std::unique_ptr<AudioOutputDevice> m_sink_device;       //  Attaches to m_sink_encoder.
 

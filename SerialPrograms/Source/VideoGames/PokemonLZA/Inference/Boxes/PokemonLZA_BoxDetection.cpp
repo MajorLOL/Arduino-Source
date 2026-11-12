@@ -4,9 +4,11 @@
  *
  */
 
+#include <iostream>
 #include "Common/Cpp/Exceptions.h"
+#include "Kernels/Waterfill/Kernels_Waterfill.h"
+#include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
 #include "CommonFramework/StaticGlobals.h"
-#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Exceptions/FatalProgramException.h"
 #include "CommonFramework/ImageTools/ImageStats.h"
 #include "CommonFramework/ImageTypes/ImageHSV32.h"
@@ -20,15 +22,13 @@
 #include "CommonTools/ImageMatch/WaterfillTemplateMatcher.h"
 #include "CommonTools/Images/BinaryImage_FilterRgb32.h"
 #include "CommonTools/Images/WaterfillUtilities.h"
-#include "Kernels/Waterfill/Kernels_Waterfill.h"
-#include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
+#include "Tests/ImageUnitTest.h"
+#include "Tests/TestUtils.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "VideoGames/PokemonLZA/Inference/Boxes/PokemonLZA_BoxInfoDetector.h"
-#include "PokemonLZA_BoxDetection.h"
-#include "Tests/TestUtils.h"
 
-#include <iostream>
+#include "PokemonLZA_BoxDetection.h"
  //#include <sstream>
 using std::cout;
 using std::endl;
@@ -499,18 +499,24 @@ bool SomethingInBoxCellDetector::detect(const ImageViewRGB32& screen){
 
 
 
-class Test_BoxCellInfoDetector : public UnitTest{
+class Test_BoxCellInfoDetector : public ImageUnitTest{
 public:
     Test_BoxCellInfoDetector(
         const std::string& image,
         std::vector<std::string> words
     )
-        : UnitTest("PokemonPLZA::BoxCellInfoDetector - " + image)
-        , m_image(UNIT_TEST_RESOURCE_PATH() + image)
+        : ImageUnitTest("PokemonPLZA::BoxCellInfoDetector - " + image, {image})
         , m_words(std::move(words))
-    {}
+    {
+        //  Plus the PaddleOCR (ONNX) recognition session and its working set, for the
+        //  dex-number read.
+        m_memory += PADDLE_OCR_SINGLE_LINE_MEMORY_ESTIMATE;
+    }
 
-    virtual UnitTestResult run(Logger& logger, CancellableScope& scope) const override{
+    virtual UnitTestResult run_on_images(
+        Logger& logger, CancellableScope& scope,
+        const std::vector<ImageRGB32>& images
+    ) const override{
         // Expected filename format: <...>_<row>_<col>_<status>_<dex_info>.png
     // Where status is one of: Empty, Shiny, Alpha, ShinyAlpha and can be followed by "Held"
     // Where dex_info is one of: "None", "L<number>" (Lumiose dex), or "H<number>" (Hyperspace dex)
@@ -618,7 +624,7 @@ public:
 
         // Run detectors
         auto overlay = DummyVideoOverlay();
-        ImageRGB32 image(m_image);
+        const ImageRGB32& image = images[0];
 
         // Test BoxDetector for row and col
         BoxDetector box_detector(COLOR_RED, &overlay);
@@ -710,7 +716,6 @@ public:
     };
 
 private:
-    std::string m_image;
     std::vector<std::string> m_words;
 
 };

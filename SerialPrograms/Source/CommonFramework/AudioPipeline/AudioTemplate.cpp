@@ -7,16 +7,16 @@
 #include <sstream>
 #include "Common/Cpp/Containers/AlignedVector.tpp"
 #include "Common/Qt/GlobalThreadPoolsQt.h"
-#include "CommonFramework/GlobalSettingsPanel.h"
-#include "CommonFramework/Logging/Logger.h"
-#include "CommonFramework/AudioPipeline/AudioPipelineOptions.h"
 #include "Kernels/Kernels_Alignment.h"
 #include "Kernels/KaiserWindow/Kernels_KaiserWindow.h"
 #include "Kernels/AbsFFT/Kernels_AbsFFT.h"
-#include "AudioConstants.h"
-#include "AudioTemplate.h"
+#include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/Logging/Logger.h"
+#include "CommonFramework/AudioPipeline/AudioPipelineOptions.h"
 #include "Tools/AudioFormatUtils.h"
 #include "IO/AudioFileLoader.h"
+#include "AudioConstants.h"
+#include "AudioTemplate.h"
 
 //#include <iostream>
 //using std::cout;

@@ -4,6 +4,7 @@
  *
  */
 
+#include <iostream>
 #include "Common/Cpp/Exceptions.h"
 #include "Kernels/Waterfill/Kernels_Waterfill_Session.h"
 #include "CommonFramework/GlobalAutoPaths.h"
@@ -16,7 +17,6 @@
 #include "VideoGames/PokemonLA/Inference/Objects/PokemonLA_ButtonDetector.h"
 #include "PokemonLA_MountDetector.h"
 
-#include <iostream>
 using std::cout;
 using std::endl;
 

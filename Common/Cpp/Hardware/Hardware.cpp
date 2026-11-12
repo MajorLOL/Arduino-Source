@@ -3,10 +3,7 @@
  *  From: https://github.com/PokemonAutomation/
  *
  */
-
-#include <algorithm>
 #include "Common/Cpp/CpuId/CpuId.h"
-#include "Hardware.h"
 
 #if _M_IX86 || _M_X64 || __i386__ || __x86_64__
 #include "Hardware_x86.tpp"

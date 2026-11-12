@@ -28,9 +28,9 @@
 #include "CommonFramework/VideoPipeline/VideoSession.h"
 #include "CommonFramework/VideoPipeline/VideoOverlaySession.h"
 #include "CommonFramework/Recording/StreamHistorySession.h"
-#include "Integrations/ProgramTrackerInterfaces.h"
 #include "ControllerInput/ControllerInput.h"
 #include "Controllers/ControllerSession.h"
+#include "Integrations/ProgramTrackerInterfaces.h"
 #include "ConsoleSystemOption.h"
 
 namespace PokemonAutomation{

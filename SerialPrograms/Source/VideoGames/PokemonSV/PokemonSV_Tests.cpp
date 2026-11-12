@@ -15,6 +15,7 @@
 #include "Inference/Tera/PokemonSV_TeraCardDetector.h"
 #include "Inference/Tera/PokemonSV_TeraSilhouetteReader.h"
 #include "Inference/Tera/PokemonSV_TeraTypeReader.h"
+#include "Inference/Dialogs/PokemonSV_DialogArrowDetector.h"
 #include "Inference/Dialogs/PokemonSV_DialogDetector.h"
 #include "Inference/Map/PokemonSV_FastTravelDetector.h"
 #include "Inference/Map/PokemonSV_MapMenuDetector.h"
@@ -25,18 +26,19 @@
 #include "Inference/Overworld/PokemonSV_LetsGoKillDetector.h"
 #include "Inference/Picnics/PokemonSV_SandwichRecipeDetector.h"
 #include "Inference/Picnics/PokemonSV_SandwichHandDetector.h"
+#include "Inference/ItemPrinter/PokemonSV_ItemPrinterJobsDetector.h"
+#include "Programs/Farming/PokemonSV_BBQTests.h"
 #include "PokemonSV_Tests.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
-
-
 void add_tests(UnitTestDatabase& database){
     add_tests_WhiteButtonDetector(database);
     add_tests_BoxInfoDetector(database);
     add_tests_BoxEggDetector(database);
+    add_tests_DialogArrowDetector(database);
     add_tests_DialogDetector(database);
     add_tests_ESPEmotionDetector(database);
     add_tests_FastTravelDetector(database);
@@ -52,8 +54,10 @@ void add_tests(UnitTestDatabase& database){
     add_tests_TeraCardDetector(database);
     add_tests_TeraSilhouetteReader(database);
     add_tests_TeraTypeReader(database);
+    add_tests_ItemPrinterJobsDetector(database);
     add_tests_NormalBattleMenus(database);
     add_tests_LetsGoKillDetector(database);
+    add_tests_BBQ(database);
 }
 
 

@@ -9,9 +9,9 @@
 #include "CommonTools/Images/SolidColorTest.h"
 #include "PokemonSwSh_ExperienceGainDetector.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

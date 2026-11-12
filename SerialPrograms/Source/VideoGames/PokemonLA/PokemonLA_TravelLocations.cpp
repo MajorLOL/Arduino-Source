@@ -3,11 +3,8 @@
  *  From: https://github.com/PokemonAutomation/
  *
  */
-
-#include <map>
 #include "Common/Cpp/Exceptions.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
-#include "VideoGames/PokemonLA/Inference/PokemonLA_MountDetector.h"
 #include "VideoGames/PokemonLA/Programs/PokemonLA_MountChange.h"
 #include "PokemonLA_TravelLocations.h"
 

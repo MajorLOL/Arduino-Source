@@ -4,10 +4,10 @@
  *
  */
 
-#include <QCoreApplication>
 #include <QTimer>
 #include <QMenuBar>
 #include "Common/Cpp/Logging/LastLogTracker.h"
+#include "Common/Cpp/Logging/GlobalLogger.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Windows/DpiScaler.h"

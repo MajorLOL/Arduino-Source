@@ -8,6 +8,7 @@
 #include <array>
 #include <fstream>
 #include <limits>
+#include <iostream>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/Hardware/FloatingPointMode.h"
@@ -20,7 +21,6 @@
 #include "ML/Models/ML_ONNXRuntimeHelpers.h"
 #include "ML_PaddleOCRPipeline.h"
 
-#include <iostream>
 using std::cout;
 using std::endl;
 

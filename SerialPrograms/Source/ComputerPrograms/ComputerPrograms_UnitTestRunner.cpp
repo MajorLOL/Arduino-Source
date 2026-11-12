@@ -1,0 +1,466 @@
+/*  Unit Test Runner
+ *
+ *  From: https://github.com/PokemonAutomation/
+ *
+ */
+
+#include "Common/Cpp/ListenerSet.h"
+#include "Common/Cpp/MoveOnlyFunction_Tests.h"
+#include "Common/Cpp/ScopeExit.h"
+#include "Common/Cpp/PrettyPrint.h"
+#include "Common/Cpp/Sockets/Sockets_Tests.h"
+#include "Common/Cpp/TestRunners/TestImageDistortionManager.h"
+#include "Common/Cpp/TestRunners/UnitTestDatabase.h"
+#include "Common/Qt/QtThreadPool_Tests.h"
+#include "Kernels/Kernels_Tests.h"
+#include "Pokemon/AutoStory/Pokemon_AutoStorySelect_Tests.h"
+#include "CommonFramework/AudioPipeline/AudioInfo_Tests.h"
+#include "CommonFramework/AudioPipeline/Tools/ChannelMixer.h"
+#include "CommonFramework/AudioPipeline/SinkPipeline_Tests.h"
+#include "CommonFramework/AudioPipeline/IO/AudioFileLoader_Tests.h"
+#include "CommonFramework/AudioPipeline/Spectrum/FFTStreamer.h"
+#include "CommonFramework/GlobalAutoPaths.h"
+#include "CommonFramework/ProgramStats/StatsTracking.h"
+#include "CommonFramework/Tools/GlobalThreadPools.h"
+#include "CommonTools/VisualDetectors/BlackBorderDetector.h"
+#include "CommonTools/OCR/OCR_Tests.h"
+
+#include "NintendoSwitch/Inference/NintendoSwitch_CheckOnlineDetector.h"
+#include "NintendoSwitch/Inference/NintendoSwitch_FailedToConnectDetector.h"
+#include "NintendoSwitch/Inference/NintendoSwitch_UpdatePopupDetector.h"
+#include "NintendoSwitch/Programs/Typewriter/NintendoSwitch_Typewriter_Tests.h"
+#include "NintendoSwitch/Controllers/SysbotBase/SysbotBase_Connection.h"
+#include "PokemonBDSP/Inference/PokemonBDSP_DialogDetector.h"
+#include "PokemonBDSP/Inference/PokemonBDSP_MenuDetector.h"
+
+#include "VideoGames/PokemonHome/PokemonHome_Tests.h"
+#include "VideoGames/PokemonSwSh/PokemonSwSh_Tests.h"
+#include "VideoGames/PokemonLA/PokemonLA_Tests.h"
+#include "VideoGames/PokemonSV/PokemonSV_Tests.h"
+#include "VideoGames/PokemonLZA/PokemonLZA_Tests.h"
+#include "VideoGames/PokemonFRLG/PokemonFRLG_Tests.h"
+#include "VideoGames/PokemonRSE/PokemonRSE_Tests.h"
+
+#include "ComputerPrograms_UnitTestRunner.h"
+
+namespace PokemonAutomation{
+namespace ComputerPrograms{
+
+
+
+
+
+
+UnitTestDatabase make_UNIT_TESTS_ALL(){
+    UnitTestDatabase ret;
+
+    add_tests_QtEventThreadPool(ret, GlobalThreadPools::computation_normal());
+    add_tests_Sockets(ret, GlobalThreadPools::unlimited_normal());
+    add_tests_BlackBorderDetector(ret);
+    add_tests_ListenerSet(ret);
+    add_tests_MoveOnlyFunction(ret);
+    SysbotBase::add_tests_SysbotBasePing(ret);
+    SysbotBase::add_tests_SysbotBaseReceiveLine(ret);
+    SysbotBase::add_tests_SysbotBaseShutdown(ret);
+    add_tests_AudioInfo(ret);
+    add_tests_ChannelMixerMatrix(ret);
+    add_tests_FFTStreamer(ret);
+    add_tests_SinkPipeline(ret);
+    add_tests_AudioFileLoader(ret);
+    OCR::add_tests(ret);
+    Kernels::add_tests(ret);
+    Pokemon::add_tests_AutoStorySelect(ret);
+    NintendoSwitch::add_tests_CheckOnlineDetector(ret);
+    NintendoSwitch::add_tests_FailedToConnectDetector(ret);
+    NintendoSwitch::add_tests_UpdatePopupDetector(ret);
+    NintendoSwitch::Typewriter::add_tests_TypewriterTextMapping(ret);
+    NintendoSwitch::PokemonBDSP::add_tests_DialogDetector(ret);
+    NintendoSwitch::PokemonBDSP::add_tests_MenuDetector(ret);
+    NintendoSwitch::PokemonFRLG::add_tests(ret);
+    NintendoSwitch::PokemonRSE::add_tests(ret);
+    NintendoSwitch::PokemonHome::add_tests(ret);
+    NintendoSwitch::PokemonSwSh::add_tests(ret);
+    NintendoSwitch::PokemonLA::add_tests(ret);
+    NintendoSwitch::PokemonSV::add_tests(ret);
+    NintendoSwitch::PokemonLZA::add_tests(ret);
+
+    return ret;
+}
+
+
+
+
+const UnitTestDatabase& UNIT_TESTS_ALL(){
+    static UnitTestDatabase database = make_UNIT_TESTS_ALL();
+    return database;
+}
+StringSelectDatabase make_TEST_DATABASE(){
+    StringSelectDatabase database;
+    for (auto& test : UNIT_TESTS_ALL()){
+        database.add_entry(StringSelectEntry(test.first, test.first));
+    }
+    return database;
+}
+const StringSelectDatabase& TEST_DATABASE(){
+    static StringSelectDatabase DATABASE = make_TEST_DATABASE();
+    return DATABASE;
+}
+
+
+namespace{
+
+//  For each test in `UNIT_TESTS_ALL()` whose name contains `filter`, in name order, call
+//  `add_test(test)`. An empty `filter` matches all the tests. Return the number of tests
+//  visited.
+template <class AddTest>
+size_t add_tests_matching(const std::string& filter, AddTest&& add_test){
+    size_t count = 0;
+    for (const auto& test : UNIT_TESTS_ALL()){
+        if (filter.empty() || test.first.contains(filter)){
+            count++;
+            add_test(test.second);
+        }
+    }
+    return count;
+}
+
+}
+
+
+
+UnitTestRunner_Descriptor::UnitTestRunner_Descriptor()
+    : ComputerProgramDescriptor(
+        "UnitTestRunner",
+        "Nintendo Switch",
+        "Unit Test Runner",
+        "",
+        "UI to run unit tests.",
+        PanelQualityStanding::DEVELOPER
+    )
+{}
+class UnitTestRunner_Descriptor::Stats : public StatsTracker{
+public:
+    Stats()
+        : tests(m_stats["Tests"])
+        , passed(m_stats["Passed"])
+        , failed(m_stats["Failed"])
+        , skipped(m_stats["Skipped"])
+        , oom(m_stats["OOM"])
+    {
+        m_display_order.emplace_back("Tests");
+        m_display_order.emplace_back("Passed");
+        m_display_order.emplace_back("Failed");
+        m_display_order.emplace_back("Skipped");
+        m_display_order.emplace_back("OOM");
+    }
+
+    std::atomic<uint64_t>& tests;
+    std::atomic<uint64_t>& passed;
+    std::atomic<uint64_t>& failed;
+    std::atomic<uint64_t>& skipped;
+    std::atomic<uint64_t>& oom;
+};
+std::unique_ptr<StatsTracker> UnitTestRunner_Descriptor::make_stats() const{
+    return std::unique_ptr<StatsTracker>(new Stats());
+}
+
+
+
+
+
+UnitTestRunner::~UnitTestRunner(){
+    SUBSTRING_TEST.remove_listener(*this);
+    RUN_MODE.remove_listener(*this);
+}
+UnitTestRunner::UnitTestRunner()
+    : RESOURCE_LABEL("<b>Test Resources Path:</b>")
+    , RESOURCE_PATH(
+        false,
+        LockMode::READ_ONLY,
+        UNIT_TEST_RESOURCE_PATH(),
+        ""
+    )
+    , RUN_MODE(
+        "<b>Run Mode:</b>",
+        {
+            {RunMode::RUN_ONE,              "run-one",              "Run One Test"},
+            {RunMode::RUN_SUBSTRING_MATCH,  "run-substring-match",  "Run Matching Substrings"},
+            {RunMode::RUN_ALL,              "run-all",              "Run All Tests"},
+        },
+        LockMode::LOCK_WHILE_RUNNING,
+        RunMode::RUN_SUBSTRING_MATCH
+    )
+    , SINGLE_TEST_LABEL("<b>Test Name:</b>")
+    , SINGLE_TEST(
+        TEST_DATABASE(),
+        LockMode::LOCK_WHILE_RUNNING,
+        0
+    )
+    , SUBSTRING_TEST_LABEL("<b>Run All Tests Containing This Substring:</b>")
+    , SUBSTRING_TEST(false, LockMode::LOCK_WHILE_RUNNING, "", "PokemonSwSh")
+    , TESTS_TO_RUN(
+        "<b>Tests to Run:</b>",
+        LockMode::READ_ONLY,
+        "", ""
+    )
+    , PASSED_TESTS(
+        "<b>Passing Tests:</b>",
+        LockMode::READ_ONLY,
+        "", ""
+    )
+    , FAILED_TESTS(
+        "<b>Failing Tests:</b>",
+        LockMode::READ_ONLY,
+        "", ""
+    )
+{
+    PA_ADD_STATIC(RESOURCE_LABEL);
+    PA_ADD_STATIC(RESOURCE_PATH);
+    PA_ADD_OPTION(RUN_MODE);
+    PA_ADD_STATIC(SINGLE_TEST_LABEL);
+    PA_ADD_OPTION(SINGLE_TEST);
+    PA_ADD_STATIC(SUBSTRING_TEST_LABEL);
+    PA_ADD_OPTION(SUBSTRING_TEST);
+    PA_ADD_STATIC(TESTS_TO_RUN);
+    PA_ADD_OPTION(PASSED_TESTS);
+    PA_ADD_OPTION(FAILED_TESTS);
+
+    UnitTestRunner::on_config_value_changed(this);
+
+    RUN_MODE.add_listener(*this);
+    SUBSTRING_TEST.add_listener(*this);
+}
+void UnitTestRunner::on_config_value_changed(void* object){
+    if (object == &RUN_MODE){
+        SINGLE_TEST_LABEL.set_visibility(ConfigOptionState::HIDDEN);
+        SINGLE_TEST.set_visibility(ConfigOptionState::HIDDEN);
+        SUBSTRING_TEST_LABEL.set_visibility(ConfigOptionState::HIDDEN);
+        SUBSTRING_TEST.set_visibility(ConfigOptionState::HIDDEN);
+        TESTS_TO_RUN.set_visibility(ConfigOptionState::HIDDEN);
+
+        switch ((RunMode)RUN_MODE){
+        case RunMode::RUN_ONE:
+            SINGLE_TEST_LABEL.set_visibility(ConfigOptionState::ENABLED);
+            SINGLE_TEST.set_visibility(ConfigOptionState::ENABLED);
+            break;
+        case RunMode::RUN_SUBSTRING_MATCH:
+            SUBSTRING_TEST_LABEL.set_visibility(ConfigOptionState::ENABLED);
+            SUBSTRING_TEST.set_visibility(ConfigOptionState::ENABLED);
+            TESTS_TO_RUN.set_visibility(ConfigOptionState::ENABLED);
+            break;
+        case RunMode::RUN_ALL:
+            break;
+        }
+        return;
+    }
+    if (object == &SUBSTRING_TEST){
+        std::string name = SUBSTRING_TEST;
+        TESTS_TO_RUN.set("");
+        size_t num_shown = 0;
+        size_t count = add_tests_matching(name, [&](std::shared_ptr<const UnitTest> test){
+            if (++num_shown <= 1000){
+                TESTS_TO_RUN.append(test->name() + "\n");
+            }
+        });
+        if (count > 1000){
+            TESTS_TO_RUN.append("<" + tostr_u_commas(count - 1000) + " more...>\n");
+        }
+        TESTS_TO_RUN.set_label("<b>Tests to Run: " + tostr_u_commas(count) + "</b>");
+    }
+}
+
+
+void UnitTestRunner::program(ProgramEnvironment& env, CancellableScope& scope){
+    m_total_failed.store(0, std::memory_order_release);
+    PASSED_TESTS.set("");
+    FAILED_TESTS.set("");
+
+    m_env = &env;
+    ScopeExit run_on_exit([this]{
+        m_env = nullptr;
+    });
+
+    //  Uncapped pool: the runner caps the # of concurrently running tests itself, and
+    //  dispatch_now_blocking() would stall the dispatcher once a capped pool saturates.
+    PokemonAutomation::UnitTestRunner runner(
+        &scope,
+        env.logger(),
+        GlobalThreadPools::unlimited_normal()
+    );
+    runner.add_listener(*this);
+
+
+    const UnitTestDatabase& all_tests = UNIT_TESTS_ALL();
+
+    auto add_matching = [&](const std::string& filter){
+        add_tests_matching(filter, [&](std::shared_ptr<const UnitTest> test){
+            runner.add_test(test);
+        });
+    };
+
+    switch ((RunMode)RUN_MODE){
+    case RunMode::RUN_ONE:{
+        auto iter = all_tests.find(SINGLE_TEST.slug());
+        if (iter == all_tests.end()){
+            throw InternalProgramError(
+                &env.logger(),
+                PA_CURRENT_FUNCTION,
+                "Test does not exist: " + SINGLE_TEST.display_name()
+            );
+        }
+        runner.add_test(iter->second);
+        break;
+    }
+    case RunMode::RUN_SUBSTRING_MATCH:
+        add_matching(SUBSTRING_TEST);
+        break;
+    case RunMode::RUN_ALL:
+        add_matching("");
+        break;
+    }
+
+    runner.run();
+}
+
+
+
+void UnitTestRunner::on_test_finished(
+    std::shared_ptr<const UnitTest> test,
+    UnitTestResult result
+){
+    if (m_env == nullptr){
+        return;
+    }
+    UnitTestRunner_Descriptor::Stats& stats = m_env->current_stats<UnitTestRunner_Descriptor::Stats>();
+    stats.tests++;
+    switch (result.result){
+    case UnitTestResult::NOT_RUN:
+        stats.skipped++;
+        break;
+    case UnitTestResult::PASSED:{
+        uint64_t passed = stats.passed.fetch_add(1) + 1;
+        if (passed <= 1000){
+            PASSED_TESTS.append(test->name() + "\n");
+        }else if (passed == 1001){
+            PASSED_TESTS.append("<more not shown...>\n");
+        }
+        break;
+    }
+    case UnitTestResult::FAILED:{
+        uint64_t failed = m_total_failed.fetch_add(1) + 1;
+        stats.failed++;
+        if (failed <= 1000){
+            FAILED_TESTS.append("FAILED: " + test->name() + "\n");
+        }else if (failed == 1001){
+            FAILED_TESTS.append("<more not shown...>\n");
+        }
+        break;
+    }
+    case UnitTestResult::SKIPPED:
+        stats.skipped++;
+        break;
+    case UnitTestResult::OOM:{
+        uint64_t failed = m_total_failed.fetch_add(1) + 1;
+        stats.oom++;
+        if (failed <= 1000){
+            FAILED_TESTS.append("OOM: " + test->name() + "\n");
+        }else if (failed == 1001){
+            FAILED_TESTS.append("<more not shown...>\n");
+        }
+        break;
+    }
+    }
+    m_env->update_stats();
+}
+
+
+
+
+
+
+bool CommandLineUnitTestRunner::run(bool augment_color_distortions, const std::string& test_substring){
+    if (augment_color_distortions){
+        //  Load the distortion data before any test runs. Each `ImageUnitTest` checks the global
+        //  manager when it runs, and only runs with distortions if it is loaded.
+        try{
+            initialize_test_image_distortions(UNIT_TEST_RESOURCE_PATH());
+        }catch (Exception& e){
+            m_logger.log("Unable to load the test image distortions: " + e.to_str(), COLOR_RED);
+            return true;
+        }
+        const TestImageDistortionManager& manager = *test_image_distortion_manager();
+        std::string labels;
+        for (size_t c = 0; c < manager.num_test_distortions(); c++){
+            labels += c == 0 ? "" : ", ";
+            labels += manager.test_distortion_label(c);
+        }
+        m_logger.log("Color distortion augmentation enabled. Image tests with labeled images also run with: " + labels);
+    }
+
+    //  Uncapped pool: the runner caps the # of concurrently running tests itself, and
+    //  dispatch_now_blocking() would stall the dispatcher once a capped pool saturates.
+    PokemonAutomation::UnitTestRunner runner(
+        m_logger,
+        GlobalThreadPools::unlimited_normal()
+    );
+    runner.add_listener(*this);
+    size_t num_matching = add_tests_matching(test_substring, [&](std::shared_ptr<const UnitTest> test){
+        runner.add_test(test);
+    });
+    if (!test_substring.empty()){
+        if (num_matching == 0){
+            m_logger.log("No test name contains \"" + test_substring + "\". No tests will be run.", COLOR_ORANGE);
+        }else{
+            m_logger.log("Running the " + tostr_u_commas(num_matching) + " tests whose name contains \"" + test_substring + "\"");
+        }
+    }
+    runner.run();
+
+    m_logger.log(
+        "Tests Finished:"
+        "\n    Passed:  " + tostr_u_commas(m_passed_tests.load(std::memory_order_acquire)) +
+        "\n    Failed:  " + tostr_u_commas(m_failed_tests.load(std::memory_order_acquire)) +
+        "\n    Skipped: " + tostr_u_commas(m_skipped_tests.load(std::memory_order_acquire))
+    );
+    return m_failed_tests.load(std::memory_order_acquire) > 0;
+}
+void CommandLineUnitTestRunner::on_test_finished(
+    std::shared_ptr<const UnitTest> test,
+    UnitTestResult result
+){
+    switch (result.result){
+    case UnitTestResult::NOT_RUN:
+        m_logger.log("NOT RUN: " + test->name(), COLOR_ORANGE);
+        m_skipped_tests++;
+        break;
+    case UnitTestResult::PASSED:
+        m_logger.log("PASSED: " + test->name(), COLOR_BLUE);
+        m_passed_tests++;
+        break;
+    case UnitTestResult::FAILED:
+        m_logger.log("FAILED: " + test->name(), COLOR_RED);
+        m_failed_tests++;
+        break;
+    case UnitTestResult::SKIPPED:
+        m_logger.log("SKIPPED: " + test->name(), COLOR_ORANGE);
+        m_skipped_tests++;
+        break;
+    case UnitTestResult::OOM:
+        m_logger.log("OOM: " + test->name(), COLOR_RED);
+        m_failed_tests++;
+        break;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+}
+}

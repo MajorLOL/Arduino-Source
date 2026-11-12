@@ -8,6 +8,7 @@
 #include "Inference/PokemonHome_AlphaDetector.h"
 #include "Inference/PokemonHome_BallReader.h"
 #include "Inference/PokemonHome_BoxGenderDetector.h"
+#include "Inference/PokemonHome_BoxNumberReader.h"
 #include "Inference/PokemonHome_BoxViewDetector.h"
 #include "Inference/PokemonHome_ButtonDetector.h"
 #include "Inference/PokemonHome_GigantamaxDetector.h"
@@ -17,6 +18,7 @@
 #include "Inference/PokemonHome_SummaryReader.h"
 #include "Inference/PokemonHome_SummaryScreenDetector.h"
 #include "Inference/PokemonHome_TeraTypeReader.h"
+#include "Programs/PokemonHome_BoxSorterLivingDex_Tests.h"
 #include "PokemonHome_Tests.h"
 
 namespace PokemonAutomation{
@@ -28,9 +30,11 @@ void add_tests(UnitTestDatabase& database){
     add_tests_AlphaDetector(database);
     add_tests_BallReader(database);
     add_tests_BoxGenderDetector(database);
+    add_tests_BoxNumberReader(database);
     add_tests_BoxViewDetector(database);
     add_tests_ButtonDetector(database);
     add_tests_GigantamaxDetector(database);
+    add_tests_LivingDexTemplate(database);
     add_tests_OriginMarkReader(database);
     add_tests_SelectionArrowDetector(database);
     add_tests_ShinyDetector(database);

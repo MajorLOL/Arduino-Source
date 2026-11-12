@@ -4,14 +4,14 @@
  *
  */
 
-#include "CommonFramework/GlobalSettingsPanel.h"
 #include "Common/Cpp/Options/ButtonOption.h"
+#include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
-#include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "CommonFramework/Language.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
+#include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
 #include "CommonTools/Async/InferenceRoutines.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
@@ -21,15 +21,11 @@
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyHeldItemDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_StartMenuDetector.h"
-#include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_BattleSelectionArrowDetector.h"
-#include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_PokedexRegisteredDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_WildEncounterReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
-#include "PokemonFRLG_HeldItemFarmer-SafariZone.h"
-#include "Common/Cpp/Exceptions.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_SafariOptimalAction.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_BattleMenuNavigation.h"
-#include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
+#include "PokemonFRLG_HeldItemFarmer-SafariZone.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -398,7 +394,7 @@ bool HeldItemFarmerSafariZone::check_for_held_item(ConsoleHandle& console, ProCo
         open_party_menu_from_overworld(console, context, StartMenuContext::SAFARI_ZONE);
     }
 
-    PartyHeldItemDetector held_item_detector(COLOR_RED, &console.overlay(), static_cast<PartySlot>(party_count - 1));
+    PartyHeldItemDetector held_item_detector(COLOR_RED, &console.overlay(), static_cast<PartySlot>(party_count - 1), LANGUAGE);
     if (held_item_detector.detect(console.video().snapshot())){
         return true;
     }

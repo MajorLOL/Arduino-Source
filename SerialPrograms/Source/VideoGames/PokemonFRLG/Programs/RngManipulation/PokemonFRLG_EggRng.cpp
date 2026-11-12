@@ -7,7 +7,6 @@
 #include <cmath>
 #include <algorithm>
 #include "Common/Cpp/Strings/StringTools.h"
-#include "CommonTools/Random.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
@@ -15,8 +14,8 @@
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonFramework/Language.h"
 #include "CommonTools/Async/InferenceRoutines.h"
-#include "Pokemon/Pokemon_Strings.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
+#include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_DaycareManDetector.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_StartMenuNavigation.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
@@ -189,7 +188,7 @@ EggRng::EggRng()
     , HELD_ADVANCES(
         "<b>Held Advances:</b><br>The total number of RNG advances for your held target.",
         LockMode::LOCK_WHILE_RUNNING,
-        10000, 700, 1000000000 // default, min
+        10000, 500, 1000000000 // default, min
         )
     , m_pickup_settings("Pickup Frame Settings")
     , PICKUP_SEED(

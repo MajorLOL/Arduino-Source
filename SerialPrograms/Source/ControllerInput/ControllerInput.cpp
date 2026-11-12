@@ -5,9 +5,11 @@
  */
 
 #include <vector>
-#include "ControllerInput.h"
-
+#ifdef PA_SDL
+#include "Gamepad/GlobalGamepadTracker.h"
+#endif
 #include "Keyboard/GlobalKeyboardHidTracker.h"
+#include "ControllerInput.h"
 
 namespace PokemonAutomation{
 
@@ -21,6 +23,9 @@ public:
         //
 
         m_input_sources.emplace_back(&global_keyboard_tracker());
+#ifdef PA_SDL
+        m_input_sources.emplace_back(&global_gamepad_tracker());
+#endif
 
     }
 

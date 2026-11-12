@@ -7,15 +7,17 @@
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Controllers/ControllerTypeStrings.h"
 #ifdef QT_CORE_LIB
+#include "CommonFramework/Options/DeviceDropdownAliases.h"
 #include "Controllers/SerialPort/SerialPortPollerQt.h"
 #endif
-#include "SerialPABotBase2_Connection.h"
-#include "SerialPABotBase2_Descriptor.h"
 
 #include "Controllers/StandardHid/StandardHid_Keyboard_PABotBase2.h"
 #include "NintendoSwitch/Controllers/PABotBase2/NintendoSwitch_PABotBase2_ProController.h"
 #include "NintendoSwitch/Controllers/PABotBase2/NintendoSwitch_PABotBase2_Joycon.h"
 #include "NintendoSwitch/Controllers/PABotBase2/NintendoSwitch_PABotBase2_WiredController.h"
+
+#include "SerialPABotBase2_Connection.h"
+#include "SerialPABotBase2_Descriptor.h"
 
 //#include <iostream>
 //using std::cout;
@@ -42,6 +44,11 @@ std::string SerialPABotBase2_Descriptor::display_name() const{
     if (m_name.empty()){
         return "(none)";
     }
+#ifdef QT_CORE_LIB
+    if (auto alias = device_dropdown_name(DeviceAliasType::SERIAL, m_name)){
+        return *alias;
+    }
+#endif
     return m_name;
 }
 JsonValue SerialPABotBase2_Descriptor::to_json() const{

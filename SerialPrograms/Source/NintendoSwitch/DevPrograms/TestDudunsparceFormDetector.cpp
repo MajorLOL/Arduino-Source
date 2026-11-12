@@ -5,28 +5,24 @@
  */
 
 #include <atomic>
+#include <limits>
+#include <iostream>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <onnxruntime_cxx_api.h>
 #include "3rdParty/ONNX/OnnxToolsPA.h"
 #include "Common/Cpp/Time.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
-//#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/ImageTypes/ImageRGB32_OpenCV.h"
 #include "CommonFramework/VideoPipeline/VideoOverlay.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
 #include "CommonTools/Async/InferenceRoutines.h"
-//#include "CommonTools/Async/InferenceSession.h"
 #include "CommonTools/InferenceCallbacks/VisualInferenceCallback.h"
 #include "TestDudunsparceFormDetector.h"
 
-#include <opencv2/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
-
-#include <onnxruntime_cxx_api.h>
-
-#include <limits>
-//#include <vector>
-#include <iostream>
-using std::cout, std::endl;
+using std::cout;
+using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

@@ -26,6 +26,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# Compile through ccache when it is installed. See cmake/Ccache.cmake for the options.
+include(cmake/Ccache.cmake)
+
 # Set these three on globally so all intermediate Qt targets can get processed automatically
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -63,6 +66,30 @@ find_package(Threads REQUIRED)
 # Define a toggle option (ON by default)
 option(COMMAND_LINE_EXE "Build the optional executable" ON)
 
+# Build the _pa_core Python (pybind11) module; see Source/PythonBindings/README.md.
+# OFF by default because it needs a Python interpreter with development headers
+# and pybind11 (a system package or `pip install pybind11`).
+option(PA_PYTHON_BINDINGS "Build the _pa_core Python module (Switch controller)" OFF)
+
+# miniz is a third-party library compiled into every target that uses
+# CORE_LIBRARY_SOURCES (CoreLib in both build modes, SerialProgramsLib in the
+# full build): compile it with warnings off so its own code (and its header,
+# which it includes from its own directory, so no SYSTEM include directory can
+# shield it) can never trip -Werror / /WX, regardless of compiler or compiler
+# version. Must run before the PA_CORE_ONLY early return below; source
+# properties are global, so setting it once covers every target.
+if (MSVC)
+    set_source_files_properties(
+        ../3rdParty-Core/miniz-3.1.1/miniz.c
+        PROPERTIES COMPILE_OPTIONS "/W0"
+    )
+else()
+    set_source_files_properties(
+        ../3rdParty-Core/miniz-3.1.1/miniz.c
+        PROPERTIES COMPILE_OPTIONS "-w"
+    )
+endif()
+
 # Build only the GUI-free core: CoreLib and SerialProgramsCommandLine. This needs
 # no Qt, OpenCV, ONNX Runtime, Tesseract, DPP or Discord SDK, so none of them are
 # searched for.
@@ -74,6 +101,9 @@ option(PA_CORE_ONLY "Build only the GUI-free core (basic microcontroller functio
 # listing, so every file would be recompiled on every run.
 option(PA_ASSEMBLY_LISTINGS "Write an assembly listing of every source file to Assembly/ (MSVC and clang-cl only)" ON)
 
+# Enable SDL by giving -DPA_SDL=ON on the CMake command line
+option(PA_SDL "Enable SDL library" OFF)
+
 if(PA_CORE_ONLY)
     message(STATUS "PA_CORE_ONLY: building only the GUI-free core")
     set(CMAKE_AUTOMOC OFF)
@@ -83,6 +113,9 @@ if(PA_CORE_ONLY)
     include(cmake/CoreLib.cmake)
     if(COMMAND_LINE_EXE)
         include(Source/CommandLine/CommandLineExecutable.cmake)
+    endif()
+    if(PA_PYTHON_BINDINGS)
+        include(Source/PythonBindings/PythonBindings.cmake)
     endif()
     return()
 endif()
@@ -224,6 +257,12 @@ target_link_libraries(
     $<LINK_LIBRARY:WHOLE_ARCHIVE,SerialProgramsLib>
 )
 
+if (PA_SDL)
+    message(STATUS "Compiling with gamepad (via SDL) integration enabled")
+    target_compile_definitions(SerialProgramsLib PRIVATE PA_SDL)
+    target_compile_definitions(SerialPrograms PRIVATE PA_SDL)
+endif()
+
 # Add source code exclusive to the internal repo and add C++ macro of official release
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../Internal/SerialPrograms/Internal0.cpp")
     message(STATUS "Building internal SerialPrograms")
@@ -283,13 +322,6 @@ endfunction()
 apply_common_target_properties(SerialProgramsLib)
 apply_common_target_properties(SerialPrograms)
 
-if(MSVC)
-    set_source_files_properties("../3rdParty-Core/miniz-3.1.1/miniz.c" PROPERTIES COMPILE_FLAGS "/W0")
-else()
-    # For GCC/Clang
-    set_source_files_properties("../3rdParty-Core/miniz-3.1.1/miniz.c" PROPERTIES COMPILE_FLAGS "-w")
-endif()
-
 # REPO_ROOT_DIR: the root folder of the git repository, "Arduino-Source/"
 set(PACKAGES_DIR "${REPO_ROOT_DIR}/Packages")
 set(FIRMWARE_DIR "${PACKAGES_DIR}/Firmware")
@@ -337,6 +369,14 @@ if(NOT EXISTS "${DEST_DIR}/Scripts")
 endif()
 
 if (WIN32)
+    if (PA_SDL)
+        add_library(SDL3_lib IMPORTED UNKNOWN)
+        set_target_properties(SDL3_lib PROPERTIES
+            IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/SDL3.lib
+        )
+        target_link_libraries(SerialProgramsLib PRIVATE SDL3_lib)
+    endif()
+
     add_library(OpenCV_lib IMPORTED UNKNOWN)
     target_include_directories(SerialProgramsLib SYSTEM PRIVATE ../3rdParty/opencv-4.12.0/)
     set_target_properties(OpenCV_lib PROPERTIES
@@ -433,6 +473,18 @@ if (WIN32)
 #    target_compile_options(SerialProgramsLib PRIVATE /arch:AVX512 /DPA_Arch_x64_AVX512GF)
 else() # macOS and Linux
     find_package(PkgConfig REQUIRED)  # required to execute `pkg_search_module()` below
+    if (PA_SDL)
+        # Resolve Homebrew's config symlinks so SDL uses its own include directory,
+        # not the shared include root that also exposes incompatible Qt headers.
+        set(PA_SAVED_FIND_PACKAGE_RESOLVE_SYMLINKS "${CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS}")
+        set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
+        find_package(SDL3 3.2 REQUIRED CONFIG)
+        set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS "${PA_SAVED_FIND_PACKAGE_RESOLVE_SYMLINKS}")
+        get_target_property(SDL3_INCLUDE_DIRS SDL3::Headers INTERFACE_INCLUDE_DIRECTORIES)
+        # BEFORE to prefer the packaged SDL headers over the bundled Windows headers.
+        target_include_directories(SerialProgramsLib SYSTEM BEFORE PRIVATE ${SDL3_INCLUDE_DIRS})
+        target_link_libraries(SerialProgramsLib PRIVATE SDL3::SDL3)
+    endif()
     if (APPLE)
         # prepare onnxruntime if needed
         set(ONNXRUNTIME_VERSION "1.23.2")
@@ -597,7 +649,7 @@ else() # macOS and Linux
         target_link_libraries(SerialProgramsLib PUBLIC ${LEPTONICA_LINK_LIBRARIES})
     endif()
 
-    pkg_search_module(DPP dpp=10.1.5)
+    pkg_search_module(DPP dpp=10.1.6)
     if (DPP_FOUND) # enable dpp integration
         message(STATUS "Compiling with DPP integration enabled")
         target_compile_definitions(SerialProgramsLib PUBLIC PA_DPP)
@@ -642,8 +694,9 @@ else() # macOS and Linux
 
     if(APPLE)
         target_compile_options(SerialProgramsLib PRIVATE -Wall -Wextra -Wpedantic -Werror -Wshorten-64-to-32)
-        # on macOS, need this framework to query OS API to control display sleep and system sleep behavior
-        target_link_libraries(SerialProgramsLib PRIVATE "-framework IOKit -framework CoreFoundation")
+        # on macOS, need these frameworks to query OS APIs: IOKit to control display sleep and system
+        # sleep behavior, CoreAudio to read the formats audio devices natively run in
+        target_link_libraries(SerialProgramsLib PRIVATE "-framework IOKit -framework CoreFoundation -framework CoreAudio")
     else() # Linux
         # Assume GCC
         target_compile_options(SerialProgramsLib PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-strict-aliasing)
@@ -844,6 +897,9 @@ if (WIN32)
 
     # Copy 3rd party DLLs if missing/different
     file(GLOB THIRD_PARTY_DLLS "${REPO_ROOT_DIR}/3rdPartyBinaries/*.dll")
+    if (NOT PA_SDL)
+        list(REMOVE_ITEM THIRD_PARTY_DLLS "${REPO_ROOT_DIR}/3rdPartyBinaries/SDL3.dll")
+    endif()
     foreach(DLL IN LISTS THIRD_PARTY_DLLS)
         get_filename_component(DLL_NAME "${DLL}" NAME)
         add_custom_command(
@@ -860,6 +916,22 @@ if (WIN32)
     )
 endif() # end WIN32
 
+if (WIN32 OR DPP_FOUND)
+    # Deploy the CA bundle beside the executable for DPP certificate verification.
+    if (WIN32)
+        set(DPP_CERT_DIR "${WIN_DEPLOY_DIR}")
+    else()
+        set(DPP_CERT_DIR "$<TARGET_FILE_DIR:SerialPrograms>")
+    endif()
+    add_custom_command(
+        TARGET SerialPrograms POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${REPO_ROOT_DIR}/3rdPartyBinaries/dpp-cacert.pem"
+            "${DPP_CERT_DIR}/dpp-cacert.pem"
+        VERBATIM
+    )
+endif()
+
 set_target_properties(SerialPrograms PROPERTIES QT_QML_IMPORT_DEPENDENCIES "QtMultimedia")
 
 if (QT_MAJOR GREATER_EQUAL 6)
@@ -870,4 +942,9 @@ endif()
 if(COMMAND_LINE_EXE)
     # Add command-line executable (GUI-free) from subdirectory
     include(Source/CommandLine/CommandLineExecutable.cmake)
+endif()
+
+if(PA_PYTHON_BINDINGS)
+    # Python bindings (GUI-free) from subdirectory
+    include(Source/PythonBindings/PythonBindings.cmake)
 endif()

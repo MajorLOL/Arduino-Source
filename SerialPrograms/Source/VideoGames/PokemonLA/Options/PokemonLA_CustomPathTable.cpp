@@ -4,25 +4,13 @@
  *
  */
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QMessageBox>
-
-//#include "Common/Compiler.h"
-#include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonObject.h"
-//#include "Common/Cpp/Json/JsonTools.h"
-#include "Common/Qt/Options/ConfigWidget.h"
-//#include "CommonFramework/Globals.h"
 #include "PokemonLA_CustomPathTable.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

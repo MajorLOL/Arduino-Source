@@ -10,7 +10,8 @@
 #include "Common/Cpp/Containers/Pimpl.tpp"   //  Pimpl<QAudioFormat> (AudioFormat) instantiations
 #include "Common/Cpp/Concurrency/SpinLock.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
-#include "CommonFramework/AudioPipeline/AudioInfo.h"
+#include "CommonFramework/AudioPipeline/AudioFormat.h"
+#include "CommonFramework/AudioPipeline/AudioInputChoice.h"
 #include "CommonFramework/VideoPipeline/Backends/VideoFrameQt.h"
 #include "CommonFramework/Recording/StreamHistoryOption.h"
 
@@ -185,7 +186,10 @@ void StreamHistorySession::pre_input_change(){
     WriteSpinLock lg(data.m_lock);
     clear();
 }
-void StreamHistorySession::post_input_change(const std::string& file, const AudioDeviceInfo& device, const AudioInputChoice& choice){
+void StreamHistorySession::post_input_change(
+    const std::shared_ptr<const AudioSourceDescriptor>& source,
+    const AudioInputChoice& choice
+){
 //    cout << "post_input_change()" << endl;
     Data& data = *m_data;
     AudioSession* audio_session;

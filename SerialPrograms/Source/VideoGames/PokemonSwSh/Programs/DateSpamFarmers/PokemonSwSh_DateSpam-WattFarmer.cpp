@@ -6,16 +6,11 @@
 
 #include "Common/Cpp/PrettyPrint.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
-#include "Controllers/ControllerTypes.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
-#include "NintendoSwitch/Programs/DateSpam/NintendoSwitch_HomeToDateTime.h"
-#include "NintendoSwitch/Programs/DateSpam/NintendoSwitch_RollDateForward1.h"
 #include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
-#include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonSwSh/PokemonSwSh_Settings.h"
 #include "VideoGames/PokemonSwSh/Commands/PokemonSwSh_Commands_DateSpam.h"
-#include "VideoGames/PokemonSwSh/Options/PokemonSwSh_Catchability.h"
 #include "VideoGames/PokemonSwSh/Programs/Hosting/PokemonSwSh_DenTools.h"
 #include "PokemonSwSh_DateSpam-WattFarmer.h"
 

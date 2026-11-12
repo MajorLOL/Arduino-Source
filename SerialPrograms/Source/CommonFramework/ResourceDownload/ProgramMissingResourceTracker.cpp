@@ -6,11 +6,12 @@
 
 
 // #include "Common/Cpp/Exceptions.h"
+#include <iostream>
 #include "CommonFramework/ProgramSession.h"
+
+
 #include "ProgramMissingResourceTracker.h"
 
-
-#include <iostream>
 using std::cout;
 using std::endl;
 

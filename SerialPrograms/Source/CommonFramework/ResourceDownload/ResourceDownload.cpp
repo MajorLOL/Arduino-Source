@@ -5,11 +5,12 @@
  */
 
 
+#include <iostream>
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "GlobalResourceDownloadManager.h"
+
 #include "ResourceDownload.h"
 
-#include <iostream>
 using std::cout;
 using std::endl;
 

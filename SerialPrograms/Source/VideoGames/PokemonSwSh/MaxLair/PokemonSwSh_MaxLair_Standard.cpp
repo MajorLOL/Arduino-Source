@@ -16,9 +16,9 @@
 #include "Program/PokemonSwSh_MaxLair_Run_Adventure.h"
 #include "PokemonSwSh_MaxLair_Standard.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

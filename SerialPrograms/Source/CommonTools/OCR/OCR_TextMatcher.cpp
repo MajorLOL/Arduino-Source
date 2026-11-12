@@ -9,17 +9,17 @@
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Concurrency/SpinLock.h"
-#include "Common/Qt/StringToolsQt.h"
 #include "OCR_StringNormalization.h"
 #include "OCR_TextMatcher.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace OCR{
 
+#if 0
 void print(const std::vector<size_t>& v){
     std::string str = "{";
     bool first = true;
@@ -33,6 +33,7 @@ void print(const std::vector<size_t>& v){
     str += "}";
     cout << str << endl;
 }
+#endif
 
 
 template <typename StringType>

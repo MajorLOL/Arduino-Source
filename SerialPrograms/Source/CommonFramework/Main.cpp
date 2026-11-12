@@ -1,17 +1,17 @@
 
-#include <QApplication>
+#include <iostream>
 //#include <QTextStream>
-#include <QMessageBox>
+#include <QApplication>
 #include "Common/Cpp/Logging/LastLogTracker.h"
 #include "Common/Cpp/Logging/FileLogger.h"
 #include "Common/Cpp/Logging/GlobalLogger.h"
 #include "Common/Cpp/Logging/MultiOutputLogger.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
+#include "Common/Cpp/Filesystem/FileIO.h"
 #include "Common/Cpp/Concurrency/Qt6.9ThreadBugWorkaround.h"
 #include "Common/Cpp/Concurrency/AsyncTask.h"
 #include "Common/Cpp/Concurrency/FireForgetDispatcher.h"
 #include "Common/Cpp/Concurrency/Watchdog.h"
-#include "Common/Cpp/Concurrency/PeriodicRunner.h"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/ImageResolution.h"
 #include "Common/Cpp/ScopeExit.h"
@@ -19,41 +19,36 @@
 #include "StaticRegistration.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Tools/GlobalThreadPools.h"
-#include "VideoPipeline/Backends/MediaServicesQt6.h"
-#include "Globals.h"
-#include "GlobalSettingsPanel.h"
-#include "GlobalServices.h"
-#include "PersistentSettings.h"
+#include "CommonFramework/Panels/OptionsPanel.h"
+#include "CommonFramework/VideoPipeline/Backends/CameraImplementations.h"
+#include "CommonTools/OCR/OCR_Routines.h"
 #include "Tests/CommandLineTests.h"
-#include "ErrorReports/ProgramDumper.h"
-#include "ErrorReports/ErrorReports.h"
-#include "Environment/HardwareValidation.h"
+#include "ControllerInput/ControllerInput.h"
+#ifdef PA_SDL
+#include "ControllerInput/Gamepad/GlobalGamepadTracker.h"
+#endif
+#include "Controllers/SerialPort/SerialPortPollerQt.h"
 #include "Integrations/DiscordSettingsOption.h"
 #include "Integrations/DiscordSocial/DiscordSocial.h"
 #include "Integrations/DppIntegration/DppClient.h"
-#include "Logging/Logger.h"
-#include "Logging/OutputRedirector.h"
+#include "Integrations/DiscordWebhook.h"
+#include "VideoPipeline/Backends/MediaServicesQt6.h"
+#include "ErrorReports/ProgramDumper.h"
+#include "ErrorReports/ErrorReports.h"
+#include "Environment/HardwareValidation.h"
 //#include "Tools/StatsDatabase.h"
 //#include "Windows/DpiScaler.h"
+#include "Logging/Logger.h"
+#include "Logging/OutputRedirector.h"
 #include "Startup/SetupSettings.h"
 #include "Startup/NewVersionCheck.h"
-#include "CommonFramework/VideoPipeline/Backends/CameraImplementations.h"
-#include "CommonTools/OCR/OCR_Routines.h"
-#include "ControllerInput/ControllerInput.h"
-#include "Controllers/SerialPort/SerialPortPollerQt.h"
-#include "Integrations/DiscordWebhook.h"
 #include "Windows/MainWindow.h"
-
-#include <iostream>
-using std::cout;
-using std::endl;
-
+#include "GlobalSettingsPanel.h"
+#include "GlobalServices.h"
+#include "PersistentSettings.h"
+#include "NintendoSwitch/NintendoSwitch_SettingsPanel.h"
 
 using namespace PokemonAutomation;
-
-namespace PokemonAutomation{
-    bool USE_QT_UI = true;
-}
 
 Q_DECLARE_METATYPE(std::string)
 
@@ -99,6 +94,49 @@ int run_program(int argc, char *argv[]){
     QApplication application(argc, argv);
 #endif
 
+#ifdef PA_DPP
+    // Configure OpenSSL before DPP or background tasks create a TLS context.
+    std::string dpp_cert_message;
+    bool dpp_cert_error = false;
+    {
+        const std::string cert_env = qgetenv("SSL_CERT_FILE").toStdString();
+        const bool use_bundled_cert = cert_env.empty();
+        const std::string cert_path = use_bundled_cert
+            ? (Filesystem::application_binary_directory() / Filesystem::Path("dpp-cacert.pem")).string_slash_normalized()
+            : cert_env;
+        FileIO cert_file;
+        if (!cert_file.open(Filesystem::Path(cert_path), FileMode::READ | FileMode::BINARY)){
+            const std::string error = std::error_code(errno, std::generic_category()).message();
+            dpp_cert_error = true;
+            dpp_cert_message = "DPP CA certificate bundle cannot be read: " + cert_path +
+                " (" + error + "). Discord bot connections may fail.";
+        }else{
+            if (use_bundled_cert){
+                dpp_cert_error = !qputenv("SSL_CERT_FILE", cert_path.c_str());
+#ifdef _WIN32
+                // OpenSSL uses the release CRT even when Qt uses the debug CRT.
+                // Set both environment copies so OpenSSL can find the bundle.
+                const HMODULE crt = LoadLibraryExW(L"ucrtbase.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+                ScopeExit unload_crt([crt]{
+                    if (crt){
+                        FreeLibrary(crt);
+                    }
+                });
+                using PutEnv = int (__cdecl *)(const char*, const char*);
+                const PutEnv openssl_putenv = crt
+                    ? reinterpret_cast<PutEnv>(GetProcAddress(crt, "_putenv_s"))
+                    : nullptr;
+                dpp_cert_error = dpp_cert_error ||
+                    !openssl_putenv || openssl_putenv("SSL_CERT_FILE", cert_path.c_str()) != 0;
+#endif
+            }
+            dpp_cert_message = dpp_cert_error
+                ? "Failed to set SSL_CERT_FILE for DPP: " + cert_path
+                : "DPP CA certificate bundle: " + cert_path;
+        }
+    }
+#endif
+
     {
         const std::string qml_import_path =
             (Filesystem::application_binary_directory() / Filesystem::Path("qml")).string_slash_normalized();
@@ -122,6 +160,9 @@ int run_program(int argc, char *argv[]){
     logger.log("Executable path: " + Filesystem::application_binary_directory().string_slash_normalized());
     logger.log("Program setting folder: " + SETTINGS_PATH());
     logger.log("Program resources folder: " + RESOURCE_PATH());
+#ifdef PA_DPP
+    logger.log(dpp_cert_message, dpp_cert_error ? COLOR_RED : Color());
+#endif
 
     qRegisterMetaType<size_t>("size_t");
     qRegisterMetaType<uint8_t>("uint8_t");
@@ -145,6 +186,9 @@ int run_program(int argc, char *argv[]){
 
 
     ScopeExit cleanup([]{
+#ifdef PA_SDL
+        global_gamepad_tracker().stop();
+#endif
         SerialPortPoller::instance().stop();
         GlobalMediaServices::instance().stop();
     });
@@ -164,6 +208,9 @@ int run_program(int argc, char *argv[]){
         logger.log(error.message(), COLOR_RED);
     }
 
+    //  Load the Switch framework settings now, not only when their panel is opened.
+    OptionsPanelWrapper<NintendoSwitch::ConsoleSettingsPanel>().make_panel()->load_json_from_global();
+
     //  Preload a bunch of stuff now so they are ready later.
     SerialPortPoller::instance().ports();
     get_all_cameras();
@@ -172,16 +219,35 @@ int run_program(int argc, char *argv[]){
     GlobalThreadPools::qt_worker_threadpool();
     GlobalThreadPools::qt_event_threadpool();
 
+    bool augment_test_color_distortions = false;
+    std::string test_substring;
+    bool test_substring_missing_value = false;
     for (size_t i = 0; i < argc; i++){
         constexpr const char* force_run_tests = "--command-line-test-mode";
+        constexpr const char* distort_test_images = "--augment-color-distortions";
+        constexpr const char* filter_tests_substring = "--test-substring";
 
         if (strcmp(argv[i], force_run_tests) == 0){
             GlobalSettings::instance().COMMAND_LINE_TEST_MODE = true;
         }
+        if (strcmp(argv[i], distort_test_images) == 0){
+            augment_test_color_distortions = true;
+        }
+        if (strcmp(argv[i], filter_tests_substring) == 0){
+            if (i + 1 < argc){
+                test_substring = argv[++i];
+            }else{
+                test_substring_missing_value = true;
+            }
+        }
+    }
+    if (test_substring_missing_value){
+        global_logger_command_line().log("--test-substring requires a value", COLOR_RED);
+        return 1;
     }
 
     if (GlobalSettings::instance().COMMAND_LINE_TEST_MODE){
-        return run_command_line_tests();
+        return run_command_line_tests(augment_test_color_distortions, test_substring);
     }
 
     //  Check whether the hardware is powerful enough to run this program.
@@ -213,6 +279,9 @@ int run_program(int argc, char *argv[]){
 #endif
 
 
+#ifdef PA_SDL
+    global_gamepad_tracker().start();
+#endif
     MainWindow w;
     w.show();
     w.raise(); // bring the window to front on macOS
@@ -281,7 +350,7 @@ int main(int argc, char *argv[]){
 //  Joining threads on Qt 6.9+ Windows will hang!
 //
 #ifdef PA_ENABLE_QT_ADOPTION_WORKAROUND
-    cout << "Qt6.9 bug workaround: std::quick_exit() to avoid thread join hangs." << endl;
+    std::cout << "Qt6.9 bug workaround: std::quick_exit() to avoid thread join hangs." << std::endl;
     std::quick_exit(ret);
 #endif
 
@@ -296,7 +365,7 @@ int main(int argc, char *argv[]){
     GlobalThreadPools::qt_worker_threadpool().stop();
     GlobalThreadPools::qt_event_threadpool().stop();
 
-    cout << "Exiting main()..." << endl;
+    std::cout << "Exiting main()..." << std::endl;
 
     return ret;
 }

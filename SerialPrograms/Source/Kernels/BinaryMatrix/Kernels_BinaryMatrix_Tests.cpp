@@ -12,15 +12,15 @@
 #include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/CpuId/CpuId.h"
 #include "Common/Cpp/TestRunners/UnitTestDatabase.h"
-#include "CommonFramework/GlobalAutoPaths.h"
-#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "Kernels/BinaryImageFilters/Kernels_BinaryImage_BasicFilters.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "Kernels_BinaryMatrixTile_64x4_Default.h"
 #ifdef PA_AutoDispatch_arm64_20_M1
 #include "Kernels/PartialWordAccess/Kernels_PartialWordAccess_arm64_NEON.h"
 #include "Kernels_BinaryMatrixTile_64x8_arm64_NEON.h"
 #endif
 #include "Tests/GuardPageImage.h"
+#include "Tests/ImageUnitTest.h"
 #include "Kernels_BinaryMatrix_Tests.h"
 
 namespace PokemonAutomation{
@@ -381,16 +381,21 @@ struct SubmatrixBox{
 //     edge or inside a tile, and that go past the edge of the matrix.
 //  The image is a guard-page image, so the test also crashes if a compress function reads
 //  past the last pixel.
-class Test_BinaryMatrix : public UnitTest{
+class Test_BinaryMatrix : public ImageUnitTest{
 public:
     Test_BinaryMatrix(const std::string& type_name, BinaryMatrixType type, const std::string& image)
-        : UnitTest("Kernels::BinaryMatrix - " + type_name + " - " + image)
+        : ImageUnitTest("Kernels::BinaryMatrix - " + type_name + " - " + image, {image})
         , m_type(type)
-        , m_image(UNIT_TEST_RESOURCE_PATH() + image)
-    {}
+    {
+        //  Plus a guard-page copy of the image and a handful of packed binary matrices.
+        m_memory += MAX_TEST_IMAGE_RGB32_BYTES + MAX_TEST_IMAGE_RGB32_BYTES / 16;
+    }
 
-    virtual UnitTestResult run(Logger& logger, CancellableScope& scope) const override{
-        const ImageRGB32 file_image(m_image);
+    virtual UnitTestResult run_on_images(
+        Logger& logger, CancellableScope& scope,
+        const std::vector<ImageRGB32>& images
+    ) const override{
+        const ImageRGB32& file_image = images[0];
         const GuardPageImageRGB32 image(file_image);
         const size_t width = image.width();
         const size_t height = image.height();
@@ -503,7 +508,6 @@ public:
 
 private:
     BinaryMatrixType m_type;
-    std::string m_image;
 };
 
 }

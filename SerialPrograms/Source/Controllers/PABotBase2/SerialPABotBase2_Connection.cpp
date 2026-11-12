@@ -13,10 +13,10 @@
 #include "Common/Cpp/PrettyPrint.h"
 #include "Common/Cpp/PanicDump.h"
 #include "Common/Cpp/Options/BooleanCheckBoxOption.h"
+#include "Common/Cpp/ColoredText.h"
 #include "Common/PABotBase2/ReliableConnectionLayer/PABotBase2_PacketProtocol.h"
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/Logging/Logger.h"
-#include "Common/Cpp/ColoredText.h"
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "SerialPABotBase2_Connection.h"
 
@@ -123,38 +123,32 @@ bool SerialPABotBase2_Connection::open_serial_port(){
 
     //  Validate the serial port.
 #ifdef QT_CORE_LIB
-    QSerialPortInfo info;
-    if(USE_QT_UI){
-        info = SerialPortPoller::instance().get_port(m_device_name);
-    }else{
-        info = QSerialPortInfo(QString::fromStdString(m_device_name));
+    //  This only compiles into the Qt-enabled SerialProgramsLib, which is only ever
+    //  linked into the GUI app, so the port poller and message boxes are always available.
+    QSerialPortInfo info = SerialPortPoller::instance().get_port(m_device_name);
+
+    //  Port is invalid.
+    if (info.isNull()){
+        std::string text = "Serial port " + m_device_name + " is invalid or not loaded.";
+        m_logger.log(text, COLOR_RED);
+        set_status_line0(text, COLOR_RED);
+        return false;
     }
 
-
-    if(USE_QT_UI){
-        //  Port is invalid.
-        if (info.isNull()){
-            std::string text = "Serial port " + m_device_name + " is invalid or not loaded.";
-            m_logger.log(text, COLOR_RED);
-            set_status_line0(text, COLOR_RED);
-            return false;
-        }
-
-        //  Prolific is banned
-        if (info.description().indexOf("Prolific") != -1){
-            QMessageBox box;
-            box.critical(
-                nullptr,
-                "Error",
-                "Cannot select Prolific controller.<br><br>"
-                "Prolific controllers do not work for Arduino and similar microcontrollers.<br>"
-                "You were warned of this in the setup instructions. Please buy a CP210x controller instead."
-            );
-            std::string text = "Cannot connect to Prolific controller.";
-            m_logger.log(text, COLOR_RED);
-            set_status_line0(text, COLOR_RED);
-            return false;
-        }
+    //  Prolific is banned
+    if (info.description().indexOf("Prolific") != -1){
+        QMessageBox box;
+        box.critical(
+            nullptr,
+            "Error",
+            "Cannot select Prolific controller.<br><br>"
+            "Prolific controllers do not work for Arduino and similar microcontrollers.<br>"
+            "You were warned of this in the setup instructions. Please buy a CP210x controller instead."
+        );
+        std::string text = "Cannot connect to Prolific controller.";
+        m_logger.log(text, COLOR_RED);
+        set_status_line0(text, COLOR_RED);
+        return false;
     }
 #endif
 
@@ -240,8 +234,7 @@ bool SerialPABotBase2_Connection::connect_to_device(){
 
     std::string str =
         "Unable to connect to controller.<br>"
-        "Please make sure your microcontroller is flashed properly and<br>"
-        "you are using the correct mode (PABotBase vs. PABotBase2).<br>" +
+        "Please make sure your microcontroller is flashed properly.<br>" +
         make_text_url(ONLINE_DOC_URL_BASE + "SetupGuide/Reflash.html", "See documentation for more details.");
     set_status_line0(str, COLOR_RED);
     return false;

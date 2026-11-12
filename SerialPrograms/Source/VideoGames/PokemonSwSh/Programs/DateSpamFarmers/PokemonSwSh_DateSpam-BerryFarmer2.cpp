@@ -6,15 +6,14 @@
 
 #include "Common/Cpp/PrettyPrint.h"
 #include "Common/Cpp/Time.h"
+#include "Common/Cpp/ColoredText.h"
 #include "CommonFramework/Exceptions/ProgramFinishedException.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
-#include "Common/Cpp/ColoredText.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonTools/Async/InferenceRoutines.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_Superscalar.h"
 #include "NintendoSwitch/Programs/NintendoSwitch_GameEntry.h"
-#include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonSwSh/PokemonSwSh_Settings.h"
 #include "VideoGames/PokemonSwSh/Commands/PokemonSwSh_Commands_DateSpam.h"
 #include "VideoGames/PokemonSwSh/Inference/Battles/PokemonSwSh_BattleMenuDetector.h"
@@ -108,12 +107,12 @@ BerryFarmer2::BerryFarmer2()
         1350
     )
     , RUSTLING_TIMEOUT0(
-        "<b>Rustling Timeout:</b><br>Wait this many ticks to detect rustling.",
+        "<b>Rustling Timeout:</b><br>Number of milliseconds to wait to detect rustling.",
         LockMode::UNLOCK_WHILE_RUNNING,
         "3200 ms"
     )
     , SECONDARY_ATTEMPT_MASH_TIME0(
-        "<b>Secondary attempt mash time:</b><br>Mash ZL this many ticks for secondary fetch attempts.",
+        "<b>Secondary attempt mash time:</b><br>Number of milliseconds to mash ZL for secondary fetch attempts.",
         LockMode::UNLOCK_WHILE_RUNNING,
         "1920 ms"
     )

@@ -13,7 +13,6 @@
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
-#include <CommonFramework/GlobalSettingsPanel.h>
 
 namespace PokemonAutomation {
 namespace NintendoSwitch {

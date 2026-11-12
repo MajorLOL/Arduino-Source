@@ -22,12 +22,11 @@
 #include "Common/Cpp/Logging/AbstractLogger.h"
 #include "Common/Cpp/Concurrency/SpinPause.h"
 #include "Common/Cpp/Concurrency/SpinLock.h"
-#include "Common/Cpp/Concurrency/Mutex.h"
 #include "CommonFramework/VideoPipeline/Backends/VideoFrameQt.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 
@@ -45,7 +44,7 @@ public:
     virtual qint64 writeData(const char* data, qint64 len){
         auto scope_check = m_sanitizer.check_scope();
         m_bytes += len;
-        cout << "total = " << m_bytes << ", current = " << len << endl;
+//        cout << "total = " << m_bytes << ", current = " << len << endl;
         return len;
     }
 

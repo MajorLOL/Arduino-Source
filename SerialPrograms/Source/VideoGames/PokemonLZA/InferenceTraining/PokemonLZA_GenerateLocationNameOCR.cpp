@@ -8,7 +8,6 @@
 #include "Common/Cpp/PrettyPrint.h"
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonArray.h"
-#include "CommonFramework/Globals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
@@ -18,9 +17,9 @@
 #include "VideoGames/PokemonLZA/Inference/Map/PokemonLZA_LocationNameReader.h"
 #include "PokemonLZA_GenerateLocationNameOCR.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{

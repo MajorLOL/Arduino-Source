@@ -18,14 +18,6 @@ namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonSV{
 
-BBQuests BBQuests_string_to_enum(const std::string& token);
-
-enum class CameraAngle{
-    none,
-    up,
-    down
-};
-
 //Basic blue quests
 const std::set<BBQuests> blue_quests = {
     BBQuests::auto_10, BBQuests::make_tm, BBQuests::pickup_10, BBQuests::sneak_up, BBQuests::photo_fly, BBQuests::photo_swim, BBQuests::photo_canyon, BBQuests::photo_coastal, BBQuests::photo_polar, BBQuests::photo_savanna, BBQuests::tera_self_defeat, 
@@ -108,6 +100,20 @@ void quest_sneak_up(
     const ProgramInfo& info,
     ConsoleHandle& console, ProControllerContext& context,
     const BBQOption& BBQ_OPTIONS
+);
+
+//What a Tera route does once its encounter attempt has ended.
+enum class TeraEncounterAction{
+    StopForShiny,
+    Battle,
+    Recover,
+};
+//The route can run out of time without reaching a battle (e.g. the target did not spawn).
+//Battle commands sent outside a battle would wander the overworld, so only a battle menu seen
+//by the encounter watcher (callback 0) or by the route's own wait counts as entry.
+//A shiny always stops the program, even without entry, so it is never lost.
+TeraEncounterAction tera_encounter_action(
+    bool shiny, int encounter_watcher_result, bool battle_menu_detected
 );
 
 //Kill a tera pokemon

@@ -7,11 +7,12 @@
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/Time.h"
+
 #include "StatsDatabase.h"
 
-#include <iostream>
-using std::cout;
-using std::endl;
+//#include <iostream>
+//using std::cout;
+//using std::endl;
 
 namespace PokemonAutomation{
 
@@ -156,7 +157,7 @@ bool StatSet::update_file(
     StatsTracker& tracker
 ){
     std::string data;
-    if (!file_to_string(filepath, data)){
+    if (Filesystem::exists(filepath) && !file_to_string(filepath, data)){
         return false;
     }
 

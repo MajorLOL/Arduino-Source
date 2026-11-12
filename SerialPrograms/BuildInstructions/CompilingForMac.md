@@ -92,12 +92,40 @@ CMake is a software tool that helps compile programs. Install it using Homebrew 
 brew install cmake
 ```
 
+### Install Ninja
+
+Ninja is a build tool that CMake can use to find out quickly what files need rebuilding by file modification time. Install it using Homebrew by running in Terminal
+```
+brew install ninja
+```
+
+### Install ccache
+
+ccache is another build tool that saves build time. It uses a cache to skip building a source code file if that file's content has been compiled before. Install it using Homebrew by running in Terminal
+```
+brew install ccache
+```
+
 ### Install Qt6
 
-We use Qt6 software library to build UI (windows, panels, buttons...) for **SerialPrograms**. Install it by running in Terminal
+We use Qt6 software library to build UI (windows, panels, buttons...) for **SerialPrograms**. It also plays and decodes audio.
+
+Our current Qt version is Qt 6.10.2 with its Multimedia and Serial Port modules, including a shipped FFmpeg for fast video encode/decode.
+Please don't use Homebrew to install Qt directly (`brew install qt6`). It is a different Qt version, and on Mac its Multimedia module is buggy and built without FFmpeg.
+
+We install Qt with aqtinstall, a tool that downloads Qt from Qt's official servers.
+Install aqtinstall by running in Terminal
 ```
-brew install qt6
+brew install aqtinstall
 ```
+Then install Qt by running in Terminal
+```
+aqt install-qt mac desktop 6.10.2 clang_64 -m qtmultimedia qtserialport --outputdir ~/Qt
+```
+This puts Qt in the folder `~/Qt/6.10.2/macos` (about 1.7 GB). It works on both Intel and Apple Silicon Macs.
+
+> Note: if you installed Qt with Homebrew before, you can leave it installed.
+The compile steps below tell CMake to use the Qt in `~/Qt`.
 
 ### Install Tesseract
 
@@ -129,23 +157,33 @@ OpenCV is a software package for various computer vision algorithms. We need it 
 brew install opencv
 ```
 
+### Install SDL 3
+
+Install SDL 3.2 or newer before configuring the program:
+
+```sh
+brew install sdl3
+```
+
+SDL support is disabled by default. Enable it with `-DPA_SDL=ON` when configuring CMake.
+
 ### Install DPP (optional)
 DPP is a library for Discord integration. If you need discord webhooks for notification you need to install it.
 You can do this step after [Part 3: Download Codebase](#part-3-download-codebase).
 
-However we are using an old version of DPP (for compatibility and stability) that's not available directly on Homebrew. But you can simply tap one:
+We pin DPP to version 10.1.6 for compatibility and stability. To install this exact version, create a local Homebrew tap:
 
 ```shell
 brew tap-new --no-git <yourname>/libdpp # change <yourname> to any desired name, e.g. "my"
 ```
 Copy the formula into the tap:
 ```shell
-cp <SOURCE_DIR_ROOT>/3rdPartyBinaries/libdpp@10.1.5.rb $(brew --prefix)/Library/Taps/<yourname>/homebrew-libdpp/Formula/ # change <SOURCE_DIR_ROOT> to where *Arduino-Source* located
+cp <SOURCE_DIR_ROOT>/3rdPartyBinaries/libdpp@10.1.6.rb $(brew --prefix)/Library/Taps/<yourname>/homebrew-libdpp/Formula/ # change <SOURCE_DIR_ROOT> to where *Arduino-Source* located
 ```
 And then install it with:
 ```shell
 brew unlink libdpp # if you have already install the official one
-brew install libdpp@10.1.5
+brew install libdpp@10.1.6
 ```
 
 ### Verify Clang Version
@@ -247,10 +285,12 @@ This makes a new folder called "build_mac" in "Arduino-Source" and moves the Ter
 
 Execute the command in Terminal:
 ```
-cmake ../SerialPrograms/ -DCMAKE_BUILD_TYPE:STRING=Release -Wall
+cmake ../SerialPrograms/ -G Ninja -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_PREFIX_PATH=$HOME/Qt/6.10.2/macos -DPA_USE_CCACHE=ON
 ```
-This command uses CMake to configure our code to prepare for compilation. If successful, it should print texts like
+This command uses CMake to configure our code to prepare for compilation. `-G Ninja` tells CMake to compile with Ninja, `-DCMAKE_PREFIX_PATH` tells CMake where the Qt you installed is, and `-DPA_USE_CCACHE=ON` tells CMake to compile with ccache. If successful, it should print texts like
 ```
+...
+-- Using ccache: /opt/homebrew/bin/ccache cache_dir=/Users/<YOUR_MAC_USERNAME>/Library/Caches/ccache/PA-Arduino-Source base_dir=<YOUR_PATH_TO_ARDUINO-SOURCE_FOLDER>
 ...
 -- Configuring done
 -- Generating done
@@ -265,12 +305,15 @@ cmake --build . -j 10
 ```
 to compile and build the program in "build_mac" folder.
 It will take a while to build depending on your computer's speed.
+Later builds should be faster thanks to Ninja and ccache.
 
-If successful, it will print 
+Each line starts with a counter like `[25/1613]`. If successful, the counter reaches the total, and the last lines in Terminal look like
 ```
-[100%] Built target SerialPrograms
+[1613/1613] Linking CXX executable SerialPrograms.app/Contents/MacOS/SerialPrograms
+[Deploy] Copying resources ...
+[Deploy] Copying firmware
+[Deploy] Copying scripts
 ```
-at the end in Terminal.
 
 We have built the program on our mac computers, so in most cases you won't see any error during building.
 But in case your machine has very different hardware or software environment as ours,
@@ -306,19 +349,48 @@ instead of ...
 mkdir -p build_mac; cd build_mac
 ```
 
+> Note: if your "build_mac" folder was made before we switched to Ninja, the CMake command stops with `Does not match the generator used previously: Unix Makefiles`. [Install Ninja](#install-ninja) if you haven't yet, then in the "Arduino-Source" folder run `rm -rf build_mac` to delete the old folder, and start the build again with Ninja.
+
 ### Package updating
 In rare cases when we add new software library dependencies, just follow the guide to install those new libraries.
-If we upgrade our Qt dependency to a higher Qt version, use Homebrew to upgrade it by running the following command in Terminal:
 
+If we upgrade our Qt dependency to a higher Qt version, install the new version with aqtinstall, the same way as in [Install Qt6](#install-qt6).
+For example, for Qt 6.11.0 run in Terminal:
 ```
-brew upgrade qt6
+aqt install-qt mac desktop 6.11.0 clang_64 -m qtmultimedia qtserialport --outputdir ~/Qt
 ```
 
+### Switching to a different Qt
 
+CMake remembers which Qt it used the first time it configured "build_mac".
+So when you switch Qt (from Homebrew's Qt to the Qt in `~/Qt`, or to a newer Qt version), start a new "build_mac" folder.
+In the "Arduino-Source" folder, run in Terminal
+```
+rm -rf build_mac
+```
+to delete the old "build_mac" folder. Then follow [Part 4: Compile the Program](#part-4-compile-the-program) again,
+with the new Qt version in the `-DCMAKE_PREFIX_PATH` part of the CMake command.
+
+## Part 7: Tuning ccache (optional)
+
+The default ccache settings work for most people. This part is for developers who build often or keep several copies of the code (a.k.a worktrees) in the filesystem. 
+
+To check cache statistics on the codebase (how many cache hits and misses so far and storage space uses), run in Terminal
+```
+ccache --dir $(ccache --get-config cache_dir)/PA-Arduino-Source -s
+```
+
+By default ccache has a max cache size of 5 GB. When the storage is full, ccache deletes the files it used least recently.
+If you often switch between many branches and worktrees of the codebase, you can increase its size to say 20 GB by
+```
+ccache --dir $(ccache --get-config cache_dir)/PA-Arduino-Source --set-config max_size=20G
+```
+
+For more info on how we set up ccache when configuring the program, see `SerialPrograms/cmake/Ccache.cmake`.
 
 <hr>
 
-Guide Written by: jw098
+Guide Written by: Gin, jw098
 
 **Discord Server:** 
 

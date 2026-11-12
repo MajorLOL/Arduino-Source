@@ -5,7 +5,6 @@
  */
 
 #include <iostream>
-#include <set>
 #ifdef QT_CORE_LIB
 #include <QDesktopServices>
 #include <QUrl>
@@ -18,7 +17,6 @@
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "Common/Cpp/Options/KeyboardLayoutOption.h"
-#include "CommonFramework/Globals.h"
 #include "CommonFramework/StaticGlobals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Logging/Logger.h"
@@ -31,9 +29,10 @@
 #include "CommonFramework/AudioPipeline/AudioPipelineOptions.h"
 #include "CommonFramework/VideoPipeline/VideoPipelineOptions.h"
 #include "CommonFramework/ErrorReports/ErrorReports.h"
-#include "Integrations/DiscordSettingsOption.h"
-//#include "CommonFramework/Environment/Environment.h"
 #include "Controllers/ControllerSettings.h"
+//#include "CommonFramework/Environment/Environment.h"
+#include "Integrations/DiscordSettingsOption.h"
+#include "CommonFramework/Options/DeviceDropdownAliases.h"
 #include "GlobalSettingsPanel.h"
 
 // #include <iostream>
@@ -128,6 +127,7 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         KeyboardLayout::QWERTY
     )
+    , DEVICE_ALIASES(CONSTRUCT_TOKEN)
     , STREAM_HISTORY(CONSTRUCT_TOKEN)
     , SLEEP_SUPPRESS(CONSTRUCT_TOKEN)
     , m_discord_settings(
@@ -194,9 +194,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(STATS_FILE);
     PA_ADD_OPTION(TEMP_FOLDER);
     PA_ADD_OPTION(THEME);
-    if (IS_BETA_VERSION){
-        PA_ADD_OPTION(WALLPAPER);
-    }
+    PA_ADD_OPTION(WALLPAPER);
     PA_ADD_OPTION(OCR_LIBRARY);
 
     // gated behind Dev mode. see GlobalSettings::load_json
@@ -209,6 +207,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(LOG_WINDOW_STARTUP);
 
     PA_ADD_OPTION(KEYBOARD_CONTROLS_LAYOUT);
+    PA_ADD_OPTION(DEVICE_ALIASES);
     PA_ADD_OPTION(STREAM_HISTORY);
 
 #ifdef PA_ENABLE_SLEEP_SUPPRESS
@@ -353,6 +352,7 @@ GlobalSettings_Descriptor::Wrapper& GlobalSettings_Descriptor::instance(){
 GlobalSettingsPanel::GlobalSettingsPanel()
     : settings(GlobalSettings::instance())
 {
+    settings.DEVICE_ALIASES->add_connected_devices();
     PA_ADD_OPTION(settings);
 }
 

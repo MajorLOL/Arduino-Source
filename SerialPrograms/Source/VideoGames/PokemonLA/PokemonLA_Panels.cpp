@@ -22,7 +22,6 @@
 
 #include "Programs/Trading/PokemonLA_SelfBoxTrade.h"
 #include "Programs/Trading/PokemonLA_SelfTouchTrade.h"
-
 #include "Programs/Farming/PokemonLA_IngoBattleGrinder.h"
 #include "Programs/Farming/PokemonLA_IngoMoveGrinder.h"
 #include "Programs/Farming/PokemonLA_MagikarpMoveGrinder.h"

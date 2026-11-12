@@ -11,7 +11,6 @@
 #include <QPushButton>
 #include "Common/Cpp/ColoredText.h"
 #include "Common/Qt/Options/ConfigWidget.h"
-#include "CommonFramework/Globals.h"
 #include "CommonFramework/Panels/PanelSession.h"
 #include "CommonFramework/ProgramSession.h"
 #include "GameConsole/ConsoleProgram.h"
@@ -127,7 +126,7 @@ CollapsibleGroupBox* make_panel_header(
         break;
 
     case PanelQualityStanding::OFFICIAL_BELOW_STANDARDS:
-        text = "(This program does not our quality standards and may be difficult to use.)";
+        text = "(This program does not meet our quality standards and may be difficult to use.)";
         break;
 
     case PanelQualityStanding::THIRD_PARTY:

@@ -9,21 +9,16 @@
 #include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
-#include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
-#include "CommonTools/Images/ImageFilter.h"
-#include "CommonTools/Images/ImageManip.h"
-#include "CommonTools/OCR/OCR_NumberReader.h"
-#include "CommonTools/OCR/OCR_Routines.h"
-#include "Pokemon/Pokemon_StatsCalculation.h"
-#include "Pokemon/Inference/Pokemon_NameReader.h"
-#include "Pokemon/Inference/Pokemon_NatureReader.h"
-#include "Common/Cpp/Filesystem/Filesystem.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
+#include "CommonTools/Images/ImageFilter.h"
+#include "CommonTools/OCR/OCR_NumberReader.h"
+#include "Tests/ImageUnitTest.h"
+#include "Pokemon/Pokemon_StatsCalculation.h"
+#include "Pokemon/Inference/Pokemon_NameReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Tests.h"
-#include "Tests/TestUtils.h"
 #include "PokemonFRLG_DigitReader.h"
 #include "PokemonFRLG_PartyLevelUpReader.h"
 
@@ -73,20 +68,22 @@ StatReads PartyLevelUpReader::read_stats(Logger &logger, const ImageViewRGB32& f
 }
 
 
-class Test_PartyLevelUpReader : public UnitTest{
+class Test_PartyLevelUpReader : public ImageUnitTest{
 public:
     Test_PartyLevelUpReader(const std::string& image)
-        : UnitTest("PokemonFRLG::PartyLevelUpReader - " + image)
-        , m_image(UNIT_TEST_RESOURCE_PATH() + image)
+        : ImageUnitTest("PokemonFRLG::PartyLevelUpReader - " + image, {image})
     {}
 
-    virtual UnitTestResult run(Logger& logger, CancellableScope& scope) const override{
-        ImageRGB32 image(m_image);
+    virtual UnitTestResult run_on_images(
+        Logger& logger, CancellableScope& scope,
+        const std::vector<ImageRGB32>& images
+    ) const override{
+        const ImageRGB32& image = images[0];
         PartyLevelUpReader reader;
         StatReads stats = reader.read_stats(logger, image);
 
         return check_against_golden_file(
-            m_image,
+            UNIT_TEST_RESOURCE_PATH() + image_paths()[0],
             {"hp", "attack", "defense", "spatk", "spdef", "speed"},
             {
                 std::to_string(stats.hp),
@@ -98,9 +95,6 @@ public:
             }
         );
     };
-
-private:
-    std::string m_image;
 };
 
 

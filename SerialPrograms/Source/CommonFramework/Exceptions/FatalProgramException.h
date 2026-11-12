@@ -8,8 +8,8 @@
 #define PokemonAutomation_FatalProgramException_H
 
 #include <memory>
-#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "Common/Cpp/Exceptions.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
 
 namespace PokemonAutomation{
 
@@ -53,6 +53,7 @@ public:
 
     ErrorReportMode error_report_mode() const { return m_error_report_mode; }
     virtual const char* name() const override{ return "FatalProgramException"; }
+    virtual std::string message() const override{ return m_message; }
     ImageViewRGB32 screenshot_view() const {
         if (m_screenshot){
             return *m_screenshot;

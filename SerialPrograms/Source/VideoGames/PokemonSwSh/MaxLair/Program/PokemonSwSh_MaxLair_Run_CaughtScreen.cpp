@@ -14,7 +14,6 @@
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonSwSh/PokemonSwSh_Settings.h"
-#include "VideoGames/PokemonSwSh/Inference/PokemonSwSh_DialogTriangleDetector.h"
 #include "VideoGames/PokemonSwSh/Inference/PokemonSwSh_SelectionArrowFinder.h"
 #include "VideoGames/PokemonSwSh/Inference/PokemonSwSh_DialogBoxDetector.h"
 #include "VideoGames/PokemonSwSh/Inference/PokemonSwSh_ReceivePokemonDetector.h"
@@ -203,7 +202,7 @@ StateMachineAction run_caught_screen(
     }
 
 
-    const std::string& boss = state_tracker[console_index].boss;
+    const std::string boss = state_tracker[console_index].boss_if_caught();
     CaughtScreenAction action =
         decider.end_adventure_action(
             console_index, boss,

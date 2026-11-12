@@ -12,23 +12,24 @@
 #include "PokemonLZA_Settings.h"
 
 //  General
-#include "Programs/PokemonLZA_BoxSorter.h"
 #include "Programs/PokemonLZA_ClothingBuyer.h"
 #include "Programs/PokemonLZA_StallBuyer.h"
+#include "Programs/Trading/PokemonLZA_SelfBoxTrade.h"
 #include "Programs/PokemonLZA_PostKillCatcher.h"
-#include "Programs/PokemonLZA_TurboMacro.h"
+#include "Programs/PokemonLZA_BoxSorter.h"
+#include "Programs/NonShinyHunting/PokemonLZA_WeatherFinder.h"
+#include "Programs/Farming/PokemonLZA_HyperspaceRewardReset.h"
+#include "Programs/Farming/PokemonLZA_DonutMaker.h"
 
 //  Trading
-#include "Programs/Trading/PokemonLZA_SelfBoxTrade.h"
 
 //  Farming
-#include "Programs/Farming/PokemonLZA_DonutMaker.h"
+#include "Programs/PokemonLZA_TurboMacro.h"
 #include "Programs/Farming/PokemonLZA_RestaurantFarmer.h"
 #include "Programs/Farming/PokemonLZA_MegaShardFarmer.h"
 #include "Programs/Farming/PokemonLZA_JacintheInfiniteFarmer.h"
 #include "Programs/Farming/PokemonLZA_FriendshipFarmer.h"
 #include "Programs/Farming/PokemonLZA_InPlaceCatcher.h"
-#include "Programs/Farming/PokemonLZA_HyperspaceRewardReset.h"
 #include "Programs/Farming/PokemonLZA_WigglytuffFarmer.h"
 
 //  Shiny Hunting
@@ -47,7 +48,6 @@
 
 //  Non-Shiny Hunting
 #include "Programs/NonShinyHunting/PokemonLZA_StatsReset.h"
-#include "Programs/NonShinyHunting/PokemonLZA_WeatherFinder.h"
 
 //  Developer
 #include "Programs/TestPrograms/PokemonLZA_OverworldWatcher.h"
@@ -84,7 +84,6 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     ret.emplace_back(make_SingleSwitchProgram<HyperspaceRewardReset>());
     ret.emplace_back(make_SingleSwitchProgram<DonutMaker>());
     if (IS_BETA_VERSION){
-        ret.emplace_back(make_SingleSwitchProgram<LZA_TurboMacro>());
     }
 
     ret.emplace_back("---- Farming ----");
@@ -107,6 +106,7 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     ret.emplace_back(make_SingleSwitchProgram<ShinyHunt_SewerHunter>());
     ret.emplace_back(make_SingleSwitchProgram<ShinyHunt_HelioptileHunter>());
     ret.emplace_back(make_SingleSwitchProgram<ShinyHunt_HyperspaceLegendary>());
+    ret.emplace_back(make_SingleSwitchProgram<LZA_TurboMacro>());
     if (IS_BETA_VERSION){
         ret.emplace_back(make_SingleSwitchProgram<ShinyHunt_ShuttleRun>());
     }
