@@ -20,7 +20,8 @@ WallpaperOption::WallpaperOption()
     : GroupOption(
         "Wallpaper",
         LockMode::UNLOCK_WHILE_RUNNING,
-        EnableMode::DEFAULT_ENABLED
+        //  Off until asked for: PocketPilot has a look of its own.
+        EnableMode::DEFAULT_DISABLED
     )
     , IMAGE_PATH(
         "<b>Wallpaper Path:</b>",

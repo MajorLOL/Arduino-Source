@@ -36,10 +36,10 @@ SimpleIntegerCellWidget::SimpleIntegerCellWidget(QWidget& parent, SimpleIntegerC
         this, [this](const QString& text){
             bool ok;
             NativeType current = (NativeType)text.toLong(&ok);
+            //  The theme's own text color for a valid number (black cannot
+            //  be read in a dark theme), red for one that is not.
             QPalette palette;
-            if (ok && m_value.check_validity(current).empty()){
-                palette.setColor(QPalette::Text, Qt::black);
-            }else{
+            if (!ok || !m_value.check_validity(current).empty()){
                 palette.setColor(QPalette::Text, Qt::red);
             }
             this->setPalette(palette);

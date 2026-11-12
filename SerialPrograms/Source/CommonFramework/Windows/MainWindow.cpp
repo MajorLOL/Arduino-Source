@@ -7,14 +7,9 @@
 #include <algorithm>
 #include <utility>
 //#include <QStatusBar>
-#include <QMenuBar>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
-#include <QPushButton>
-#include <QMessageBox>
 #include "Common/Cpp/ScopeExit.h"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Logging/MultiOutputLogger.h"
@@ -22,18 +17,21 @@
 #include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/CpuId/CpuId.h"
 #include "Common/Cpp/ColoredText.h"
-#include "Common/Qt/CollapsibleGroupBox.h"
 #include "Common/Qt/UiStateQtWidget.h"
 #include "PanelLists.h"
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/Logging/LoggerWindow.h"
-#include "CommonFramework/Startup/NewVersionCheck.h"
 #include "CommonFramework/Options/ResolutionOption.h"
 #include "CommonFramework/Options/Environment/ThemeSelectorOption.h"
 #include "CommonFramework/Options/QtWidget/WallpaperWidget.h"
 #include "CommonFramework/Windows/DpiScaler.h"
+#include "PocketPilot/PocketPilot_About.h"
+#include "PocketPilot/PocketPilot_Home.h"
+#include "PocketPilot/PocketPilot_Logo.h"
+#include "PocketPilot/PocketPilot_Shell.h"
 #include "WindowTracker.h"
 #include "ButtonDiagram.h"
 #include "MainWindow.h"
@@ -51,10 +49,14 @@ MainWindow::MainWindow(QWidget* parent)
 {
     global_panel_holder() = this;
 
+    //  The theme, before any widget is made. Settings that were saved have
+    //  applied it when they were read; new settings have nothing to read.
+    apply_current_theme();
+
     if (objectName().isEmpty()){
         setObjectName(QString::fromUtf8("MainWindow"));
     }
-    this->setWindowIcon(QIcon(QString::fromStdString(RESOURCE_PATH() + "icon.png")));
+    this->setWindowIcon(PocketPilot::app_icon());
 //    QSize window_size = PERSISTENT_SETTINGS().window_size;
     resize(
         GlobalSettings::instance().WINDOW_SIZE->WIDTH,
@@ -73,13 +75,10 @@ MainWindow::MainWindow(QWidget* parent)
     centralwidget = new WallpaperWidget(this);
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
     setCentralWidget(centralwidget);
-    menubar = new QMenuBar(this);
-    menubar->setObjectName(QString::fromUtf8("menubar"));
-    setMenuBar(menubar);
 //    statusbar = new QStatusBar(this);
 //    statusbar->setObjectName(QString::fromUtf8("statusbar"));
 //    setStatusBar(statusbar);
-    std::string title = PROGRAM_NAME + " Computer-Control Programs (" + PROGRAM_VERSION + ")";
+    std::string title = PROGRAM_NAME + " (build " + PROGRAM_BUILD + ")";
 #if defined(__APPLE__)
     if (!Filesystem::STARTUP_PROFILE().empty()){
         setWindowTitle(QString::fromStdString(title + " [Profile: " + Filesystem::STARTUP_PROFILE() + "]"));
@@ -90,43 +89,50 @@ MainWindow::MainWindow(QWidget* parent)
     setWindowTitle(QString::fromStdString(title));
 #endif
 
-    QHBoxLayout* hbox = new QHBoxLayout(centralwidget);
-    CollapsibleGroupBox* sidebar = new CollapsibleGroupBox(
-        *centralwidget, "Program Select", true, Qt::Horizontal
+    //  The frame: the top bar, the side bar, the room for the page or the
+    //  program that is open, and the status strip.
+    PocketPilot::TopBar::Actions actions;
+    actions.toggle_side_bar = [this]{
+        m_frame->set_side_bar_visible(!m_frame->side_bar_visible());
+    };
+    actions.home = [this]{
+        show_games();
+    };
+    actions.output = [this]{
+        m_output_window->show();
+        m_output_window->raise(); // bring the window to front on macOS
+        m_output_window->activateWindow(); // bring the window to front on Windows
+    };
+    actions.keyboard = [this]{
+        m_button_diagram->show();
+        m_button_diagram->raise(); // bring the window to front on macOS
+        m_button_diagram->activateWindow(); // bring the window to front on Windows
+    };
+    actions.settings = [this]{
+        show_settings();
+    };
+    actions.about = [this]{
+        PocketPilot::show_about(this, about_info());
+    };
+    m_frame = std::make_unique<PocketPilot::Frame>(
+        *centralwidget,
+        QString::fromStdString(PROGRAM_NAME),
+        QString::fromStdString(
+            PROGRAM_NAME + " build " + PROGRAM_BUILD + ", on " +
+            UPSTREAM_PROGRAM_NAME + " " + PROGRAM_VERSION + " (" + PA_ARCH_STRING + ")"
+        ),
+        std::move(actions)
     );
-    hbox->addWidget(sidebar, 0);
-    QWidget* sidebar_body = new QWidget(sidebar);
-    sidebar_body->setObjectName(QString::fromUtf8("backgroundSidebarBody"));
-    sidebar->set_widget(sidebar_body);
-    QVBoxLayout* left_layout = new QVBoxLayout(sidebar_body);
-    left_layout->setContentsMargins(0, 0, 0, 0);
+    m_right_panel_layout = &m_frame->content_layout();
 
-    m_program_list = new ProgramSelect(*sidebar_body, *this);
-    m_program_list->setObjectName(QStringLiteral("backgroundProgramSelect"));
-    m_program_list->setAttribute(Qt::WA_StyledBackground, true);
-    m_program_list->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    left_layout->addWidget(m_program_list, 1);
+    //  The side bar: the games and the programs of one of them.
+    m_program_list = new ProgramSelect(m_frame->side_bar(), *this);
+    m_frame->side_layout().addWidget(m_program_list, 1);
 
-
-    QGroupBox* support_box = new QGroupBox(
-        QString::fromStdString(PROGRAM_NAME + " " + PROGRAM_VERSION + " (" + PA_ARCH_STRING + ")"),
-        centralwidget
-    );
-    support_box->setObjectName(QString::fromUtf8("backgroundSupportBox"));
-
-
-    left_layout->addWidget(support_box);
-    QVBoxLayout* support_layout = new QVBoxLayout(support_box);
-
+    //  The status strip: holding off the system's sleep.
     {
-        QHBoxLayout* layout = new QHBoxLayout();
-        support_layout->addLayout(layout);
-        layout->setAlignment(Qt::AlignHCenter);
-        layout->setContentsMargins(0, 0, 0, 0);
-        m_sleep_text = new QLabel(support_box);
-        layout->addWidget(m_sleep_text, 2);
-        m_sleep_box = new QCheckBox("Force On", support_box);
-        layout->addWidget(m_sleep_box, 1, Qt::AlignHCenter);
+        m_sleep_text = &m_frame->status_strip().sleep_label();
+        m_sleep_box = &m_frame->status_strip().sleep_box();
         MainWindow::sleep_suppress_state_changed(SystemSleepController::instance().current_state());
 #if QT_VERSION < 0x060700
         connect(
@@ -153,95 +159,12 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
     }
 
-    QHBoxLayout* support = new QHBoxLayout();
-    support_layout->addLayout(support);
-//    support->setContentsMargins(0, 0, 0, 0);
-
-    QVBoxLayout* links = new QVBoxLayout();
-    support->addLayout(links);
-    {
-        QLabel* github = new QLabel(support_box);
-        links->addWidget(github);
-        github->setText(QString::fromStdString(make_text_url(ONLINE_DOC_URL_BASE + "", "Online Documentation")));
-        github->setTextFormat(Qt::RichText);
-        github->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        github->setOpenExternalLinks(true);
-    }
-    {
-        QLabel* discord = new QLabel(support_box);
-        links->addWidget(discord);
-        discord->setText(QString::fromStdString(make_text_url(DISCORD_LINK_URL_PROGRAM, DISCORD_LINK_TEXT)));
-        discord->setTextFormat(Qt::RichText);
-        discord->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        discord->setOpenExternalLinks(true);
-    }
-    {
-        QLabel* github = new QLabel(support_box);
-        links->addWidget(github);
-        github->setText(QString::fromStdString(make_text_url(GITHUB_LINK_URL, GITHUB_LINK_TEXT)));
-//        github->setText("<a href=\"" + GITHUB_REPO + "\">GitHub Repository</a>");
-        github->setTextFormat(Qt::RichText);
-        github->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        github->setOpenExternalLinks(true);
-    }
-    {
-        QLabel* about = new QLabel(support_box);
-        links->addWidget(about);
-        about->setText(QString::fromStdString(make_text_url(GITHUB_LINK_URL, "About this Program")));
-        about->setTextFormat(Qt::RichText);
-        connect(
-            about, &QLabel::linkActivated,
-            this, [](const QString&){
-                std::string str;
-                str += PROGRAM_NAME + " Computer-Control Programs<br>";
-                str += "Copyright: 2020 - 2027<br>";
-                str += "Version: " + PROGRAM_VERSION + "<br>";
-                str += "<br>";
-                str += "Framework: Qt " + std::to_string(QT_VERSION_MAJOR);
-                str += "." + std::to_string(QT_VERSION_MINOR);
-                str += "." + std::to_string(QT_VERSION_PATCH);
-                str += "<br>";
-                str += "Compiler: " + COMPILER_VERSION;
-                str += "<br><br>";
-                str += "Made by the " + PROGRAM_NAME + " Discord Server.<br>";
-                str += "<br>";
-                str += "This program uses Qt and dynamically links to unmodified Qt libraries under LGPL.<br>";
-
-                QMessageBox box;
-                box.information(nullptr, "About", QString::fromStdString(str));
-            }
-        );
-    }
-
-    QVBoxLayout* buttons = new QVBoxLayout();
-    support->addLayout(buttons);
-    {
-        QPushButton* keyboard = new QPushButton("Keyboard Layout", support_box);
-        buttons->addWidget(keyboard);
-        m_button_diagram.reset(new ButtonDiagram());
-        connect(
-            keyboard, &QPushButton::clicked,
-            this, [button = m_button_diagram.get()](bool){
-                button->show();
-                button->raise(); // bring the window to front on macOS
-                button->activateWindow(); // bring the window to front on Windows
-            }
-        );
-    }
+    //  The windows behind the top bar's buttons.
+    m_button_diagram.reset(new ButtonDiagram());
     {
         m_output_window.reset(new LoggerWindow(nullptr));
         global_multi_logger().add_listener(*m_output_window);
 
-        QPushButton* output = new QPushButton("Output Window", support_box);
-        buttons->addWidget(output);
-        connect(
-            output, &QPushButton::clicked,
-            this, [&](bool){
-                m_output_window->show();
-                m_output_window->raise(); // bring the window to front on macOS
-                m_output_window->activateWindow(); // bring the window to front on Windows
-            }
-        );
         // get snapshot of the saved initial x/y position, since activating the window seems to change the window coordinates, 
         // which then causes initial x/y position to change, due to triggering moveEvent().
         int32_t x_pos_log = GlobalSettings::instance().LOG_WINDOW_SIZE->X_POS;
@@ -258,27 +181,32 @@ MainWindow::MainWindow(QWidget* parent)
         int32_t move_y_log = move_y_within_screen_bounds(y_pos_log);
         m_output_window->move(move_x_log, move_y_log);
     }
-    {
-        QPushButton* settings = new QPushButton("Settings", support_box);
-        m_settings = settings;
-        buttons->addWidget(settings);
-        connect(
-            settings, &QPushButton::clicked,
-            this, [this](bool){
-                if (report_new_panel_intent(GlobalSettings_Descriptor::instance())){
-                    load_panel(nullptr, GlobalSettings_Descriptor::instance().make_panel());
-                }
-            }
-        );
-    }
 
-    QVBoxLayout* right = new QVBoxLayout();
-    m_right_panel_layout = right;
-    hbox->addLayout(right, 4);
-    right->setAlignment(Qt::AlignTop);
+    //  The page with the games, shown while no program is open.
+    {
+        std::vector<PocketPilot::HomeGame> games;
+        std::vector<PocketPilot::HomeProgram> programs;
+        m_program_list->describe(games, programs);
+        PocketPilot::HomePage::Actions home_actions;
+        home_actions.open_game = [this](int game){
+            m_program_list->open_game(game);
+            m_frame->set_side_bar_visible(true);
+        };
+        home_actions.open_program = [this](int game, const QString& program){
+            m_program_list->open_program(game, program.toStdString());
+        };
+        home_actions.resume = [this]{
+            m_program_list->load_persistent_panel();
+        };
+        m_home = new PocketPilot::HomePage(
+            m_frame->content(), std::move(games), std::move(programs), std::move(home_actions)
+        );
+        m_right_panel_layout->addWidget(m_home);
+    }
 
     // Load the program panel specified in the persistent setting.
     m_program_list->load_persistent_panel();
+    update_page();
 
     GlobalSettings::instance().WINDOW_SIZE->WIDTH.add_listener(*this);
     GlobalSettings::instance().WINDOW_SIZE->HEIGHT.add_listener(*this);
@@ -301,6 +229,74 @@ MainWindow::~MainWindow(){
     GlobalSettings::instance().WALLPAPER.remove_listener(*this);
     if (m_output_window){
         global_multi_logger().remove_listener(*m_output_window);
+    }
+}
+
+PocketPilot::AboutInfo MainWindow::about_info() const{
+    PocketPilot::AboutInfo info;
+    info.name = QString::fromStdString(PROGRAM_NAME);
+    info.build = QString::fromStdString(PROGRAM_BUILD);
+    info.upstream_name = QString::fromStdString(UPSTREAM_PROGRAM_NAME);
+    info.upstream_version = QString::fromStdString(PROGRAM_VERSION);
+    info.architecture = PA_ARCH_STRING;
+    info.compiler = QString::fromStdString(COMPILER_VERSION);
+    info.project_url = QString::fromStdString(PROJECT_HOME_URL);
+    info.upstream_url = QString::fromStdString(PROJECT_SOURCE_URL);
+    return info;
+}
+
+//  The page with the games instead of the program that is open. Not while
+//  a program runs.
+void MainWindow::show_games(){
+    if (m_busy || m_panel_transition){
+        return;
+    }
+    m_panel_transition = true;
+    ScopeExit cleanup([&]{
+        m_panel_transition = false;
+    });
+    close_panel();
+    m_program_list->clear_current();
+    m_home->show_games();
+    update_page();
+    m_home->focus_search();
+}
+void MainWindow::show_settings(){
+    if (m_busy){
+        return;
+    }
+    if (report_new_panel_intent(GlobalSettings_Descriptor::instance())){
+        m_program_list->clear_current();
+        load_panel(nullptr, GlobalSettings_Descriptor::instance().make_panel());
+    }
+}
+bool MainWindow::open_program(const std::string& game, const std::string& program){
+    if (m_busy){
+        return false;
+    }
+    return m_program_list->open_program(game, program);
+}
+
+//  The page with the games while no program is open, and where the user
+//  is in the top bar.
+void MainWindow::update_page(){
+    const bool open = m_current_panel_widget != nullptr;
+    m_home->setVisible(!open);
+    if (!open){
+        std::string game, program;
+        m_program_list->persistent_panel(game, program);
+        m_home->set_resume(QString::fromStdString(game), QString::fromStdString(program));
+        m_frame->top_bar().set_location(QString(), QString());
+        return;
+    }
+    const PanelDescriptor& descriptor = m_current_panel->descriptor();
+    if (&descriptor == &GlobalSettings_Descriptor::instance()){
+        m_frame->top_bar().set_location(QString(), "Settings");
+    }else{
+        m_frame->top_bar().set_location(
+            PocketPilot::short_game_name(QString::fromStdString(m_program_list->current_game())),
+            QString::fromStdString(descriptor.display_name())
+        );
     }
 }
 
@@ -401,15 +397,19 @@ void MainWindow::load_panel(
     close_panel();
 
     //  Make new widget.
+    //  (No check for a new version here: that check is for Pokemon
+    //  Automation's own releases, not for this fork's builds.)
     try{
-        check_new_version();
         m_current_panel_widget = &dynamic_cast<UiComponentQtWidget*>(
             panel->make_ui_component(this).release()
         )->widget();
 //        cout << "load_panel() = " << m_current_panel_widget << endl;
         m_current_panel_descriptor = std::move(descriptor);
         m_current_panel = std::move(panel);
+        //  The page with the games makes room first.
+        m_home->hide();
         m_right_panel_layout->addWidget(m_current_panel_widget);
+        update_page();
         return;
     }catch (Exception& e){
         e.log(global_logger_tagged());
@@ -420,20 +420,31 @@ void MainWindow::load_panel(
     }
     if (m_current_panel_widget != nullptr){
         delete m_current_panel_widget;
+        m_current_panel_widget = nullptr;
     }
+    update_page();
 }
 void MainWindow::on_busy(){
+    m_busy = true;
     if (m_program_list){
         m_program_list->lock();
-        m_settings->setEnabled(false);
+        m_frame->top_bar().set_busy(true);
+        std::string text = "Running";
+        if (m_current_panel != nullptr){
+            text += " " + m_current_panel->descriptor().display_name();
+        }
+        m_frame->status_strip().set_state(
+            PocketPilot::StatusStrip::State::RUNNING, QString::fromStdString(text)
+        );
     }
 }
 void MainWindow::on_idle(){
+    m_busy = false;
     if (m_program_list){
         m_program_list->unlock();
-        m_settings->setEnabled(true);
+        m_frame->top_bar().set_busy(false);
+        m_frame->status_strip().set_state(PocketPilot::StatusStrip::State::READY, "Ready");
     }
-    check_new_version();
 }
 
 
@@ -503,15 +514,11 @@ void MainWindow::update_wallpaper(){
         .arg(surface_color.red()).arg(surface_color.green()).arg(surface_color.blue());
     const QString stylesheet = QString::fromLatin1(
         // Shared wallpaper surfaces: apply the same translucent theme color.
-        "QWidget#backgroundProgramSelect { background-color: %1; }"
-        "QGroupBox#backgroundSupportBox { background-color: %1; }"
+        // (The side bar is not one of them: it is part of the frame.)
         "QWidget#backgroundProgramHeader { background-color: %1; }"
         "QWidget#backgroundScrollContents { background-color: %1; }"
 
         // Shared layout containers and viewports: reveal the wallpaper surfaces.
-        "QWidget#backgroundSidebarBody { background-color: transparent; }"
-        "QListWidget#backgroundProgramList { background-color: transparent; }"
-        "QWidget#backgroundProgramListViewport { background-color: transparent; }"
         "QWidget#backgroundPanelRoot { background-color: transparent; }"
         "QScrollArea#backgroundScrollArea { background-color: transparent; border: none; }"
         "QWidget#backgroundScrollViewport { background-color: transparent; }"
@@ -527,18 +534,19 @@ void MainWindow::update_wallpaper(){
 }
 
 void MainWindow::sleep_suppress_state_changed(SleepSuppress new_state){
+    //  In words, without colors: the strip has the theme's color.
     QMetaObject::invokeMethod(this, [=, this]{
         switch (new_state){
         case PokemonAutomation::SleepSuppress::NONE:
-            m_sleep_text->setText("Sleep Suppress: <font color=\"green\">None</font>");
+            m_sleep_text->setText("The computer may sleep");
 //            m_sleep_box->setEnabled();
 //            m_sleep_box->setCheckState(Qt::CheckState::Unchecked);
             break;
         case PokemonAutomation::SleepSuppress::NO_SLEEP:
-            m_sleep_text->setText("Sleep Suppress: <font color=\"orange\">No Sleep</font>");
+            m_sleep_text->setText("The computer stays awake");
             break;
         case PokemonAutomation::SleepSuppress::SCREEN_ON:
-            m_sleep_text->setText("Sleep Suppress: <font color=\"red\">Screen On</font>");
+            m_sleep_text->setText("The screen stays on");
             break;
         }
     });

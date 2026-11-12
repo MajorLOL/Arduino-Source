@@ -33,6 +33,19 @@ PanelListDescriptor::PanelListDescriptor(
     }
 }
 
+std::vector<PanelListDescriptor::ProgramSummary> PanelListDescriptor::program_summaries() const{
+    std::vector<ProgramSummary> ret;
+    std::string section;
+    for (const PanelEntry& entry : make_panels()){
+        if (entry.descriptor == nullptr){
+            section = entry.display_name;
+            continue;
+        }
+        ret.emplace_back(ProgramSummary{section, entry.display_name, entry.descriptor->description()});
+    }
+    return ret;
+}
+
 
 
 

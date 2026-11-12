@@ -5,7 +5,9 @@
 # PA_CORE_ONLY: cmake option to only build the GUI-free core lib
 if(NOT PA_CORE_ONLY)
     qt_add_resources(DARK_STYLE_RES "../3rdParty/qdarkstyle/dark/darkstyle.qrc")
-    set(EXECUTABLE_SOURCES "Source/CommonFramework/Main.cpp" ${DARK_STYLE_RES})
+    # PocketPilot's own look: its style sheets, its typeface and a few small pictures
+    qt_add_resources(POCKETPILOT_RES "Source/PocketPilot/Resources/pocketpilot.qrc")
+    set(EXECUTABLE_SOURCES "Source/CommonFramework/Main.cpp" ${DARK_STYLE_RES} ${POCKETPILOT_RES})
 endif()
 
 # Note: Command-line executable sources are defined in Source/CommandLine/CommandLineExecutable.cmake
@@ -1439,6 +1441,20 @@ file(GLOB LIBRARY_SOURCES
     Source/NintendoSwitch/Programs/Typewriter/NintendoSwitch_TypewriterTextMapping.h
     Source/PanelLists.cpp
     Source/PanelLists.h
+    Source/PocketPilot/PocketPilot_About.cpp
+    Source/PocketPilot/PocketPilot_About.h
+    Source/PocketPilot/PocketPilot_Home.cpp
+    Source/PocketPilot/PocketPilot_Home.h
+    Source/PocketPilot/PocketPilot_Logo.cpp
+    Source/PocketPilot/PocketPilot_Logo.h
+    Source/PocketPilot/PocketPilot_ProgramList.cpp
+    Source/PocketPilot/PocketPilot_ProgramList.h
+    Source/PocketPilot/PocketPilot_SelfTest.cpp
+    Source/PocketPilot/PocketPilot_SelfTest.h
+    Source/PocketPilot/PocketPilot_Shell.cpp
+    Source/PocketPilot/PocketPilot_Shell.h
+    Source/PocketPilot/PocketPilot_Theme.cpp
+    Source/PocketPilot/PocketPilot_Theme.h
     Source/Pokemon/Inference/Pokemon_AbilityReader.cpp
     Source/Pokemon/Inference/Pokemon_AbilityReader.h
     Source/Pokemon/Inference/Pokemon_BerryNameReader.cpp

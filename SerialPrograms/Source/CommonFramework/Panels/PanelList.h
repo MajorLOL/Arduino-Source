@@ -35,6 +35,15 @@ public:
 
     PanelListWidget* make_QWidget(QWidget& parent, PanelHolder& holder) const;
 
+    //  The programs of this list in its order, for the overview and the
+    //  search over all lists.
+    struct ProgramSummary{
+        std::string section;        //  The title of its section, as in the list.
+        std::string name;
+        std::string description;
+    };
+    std::vector<ProgramSummary> program_summaries() const;
+
 protected:
     virtual std::vector<PanelEntry> make_panels() const = 0;
 

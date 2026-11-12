@@ -23,6 +23,11 @@ namespace PokemonAutomation{
 class ButtonDiagram;
 class LoggerWindow;
 class WallpaperWidget;
+namespace PocketPilot{
+    class Frame;
+    class HomePage;
+    struct AboutInfo;
+}
 
 
 class MainWindow
@@ -34,6 +39,18 @@ class MainWindow
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+
+    //  What the top bar's buttons do. Also for the test of the interface
+    //  (PocketPilot_SelfTest.cpp).
+    void show_games();
+    void show_settings();
+    //  Opens a program by the name of its game and its own name. False if
+    //  a program runs or there is no such game.
+    bool open_program(const std::string& game, const std::string& program);
+
+    PocketPilot::AboutInfo about_info() const;
+    PocketPilot::HomePage& home_page(){ return *m_home; }
+    LoggerWindow& output_window(){ return *m_output_window; }
 
 
 private:
@@ -63,17 +80,21 @@ private:
     virtual void sleep_suppress_state_changed(SleepSuppress new_state) override;
 
     void update_wallpaper();
+    void update_page();
 
 private:
     WallpaperWidget* centralwidget = nullptr;
-    QMenuBar* menubar;
 //    QStatusBar* statusbar;
+
+    //  The top bar, the side bar, the room for the page or the program, and
+    //  the status strip.
+    std::unique_ptr<PocketPilot::Frame> m_frame;
+    //  The page with the games, shown while no program is open.
+    PocketPilot::HomePage* m_home = nullptr;
 
 //    ProgramTabs* m_program_list = nullptr;
     ProgramSelect* m_program_list = nullptr;
     QVBoxLayout* m_right_panel_layout;
-
-    QWidget* m_settings;
 
     //  Keep a reference to the panel descriptor since it is referenced by the
     //  panel instance and the original descriptor may destroyed at any time.
@@ -91,6 +112,8 @@ private:
     bool m_pending_resize = false;
     bool m_pending_move = false;
     bool m_panel_transition = false;
+    //  A program runs.
+    bool m_busy = false;
 };
 
 // returns given X value, but bounded by 0 and screen_width

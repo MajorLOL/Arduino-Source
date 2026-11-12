@@ -37,10 +37,10 @@ FloatingPointCellWidget::FloatingPointCellWidget(QWidget& parent, FloatingPointC
         this, [this](const QString& text){
             bool ok;
             double current = text.toDouble(&ok);
+            //  The theme's own text color for a valid number (black cannot
+            //  be read in a dark theme), red for one that is not.
             QPalette palette;
-            if (ok && m_value.check_validity(current).empty()){
-                palette.setColor(QPalette::Text, Qt::black);
-            }else{
+            if (!ok || !m_value.check_validity(current).empty()){
                 palette.setColor(QPalette::Text, Qt::red);
             }
             this->setPalette(palette);
@@ -52,7 +52,6 @@ FloatingPointCellWidget::FloatingPointCellWidget(QWidget& parent, FloatingPointC
             bool ok;
             double current = this->text().toDouble(&ok);
             QPalette palette;
-            palette.setColor(QPalette::Text, Qt::black);
             if (sanitize){
                 m_value.set_and_sanitize(current);
             }else{

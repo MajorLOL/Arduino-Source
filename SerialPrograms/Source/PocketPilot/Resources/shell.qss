@@ -1,0 +1,214 @@
+/*  PocketPilot: the program's own widgets
+ *
+ *  The top bar, the side bar, the status strip, the home page and the
+ *  button that starts a program. These rules go by the widgets' names and
+ *  are used with every theme, also the two classic ones. The names between @ signs are
+ *  replaced by the colors of the theme in use (PocketPilot_Theme.cpp).
+ */
+
+
+/* ---- The shell: top bar, side bar, status strip ---- */
+
+QWidget#ppTopBar {
+    background-color: @shell@;
+}
+QLabel#ppWordmark {
+    color: @shell_text@;
+    background: transparent;
+}
+QLabel#ppBreadcrumb {
+    color: @shell_muted@;
+    background: transparent;
+}
+QPushButton#ppBarButton {
+    background: transparent;
+    color: @shell_text@;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+QPushButton#ppBarButton:hover {
+    background-color: @shell_hover@;
+}
+QPushButton#ppBarButton:pressed {
+    background-color: @shell_pressed@;
+}
+QPushButton#ppBarButton:focus {
+    border-color: @shell_muted@;
+}
+QPushButton#ppBarButton:disabled {
+    color: @shell_disabled@;
+    background: transparent;
+    border-color: transparent;
+}
+
+QWidget#ppSidebar {
+    background-color: @shell@;
+}
+QWidget#ppProgramSelect {
+    background: transparent;
+}
+QLabel#ppSidebarLabel {
+    color: @shell_muted@;
+    background: transparent;
+}
+QComboBox#ppGamePicker {
+    background-color: @shell_field@;
+    color: @shell_text@;
+    border: 1px solid @shell_line@;
+    border-radius: 6px;
+    padding: 5px 8px;
+}
+QComboBox#ppGamePicker:hover, QComboBox#ppGamePicker:focus {
+    border-color: @shell_muted@;
+}
+QComboBox#ppGamePicker::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 26px;
+    border: none;
+}
+QComboBox#ppGamePicker::down-arrow {
+    image: url(@arrow_down_shell@);
+    width: 12px;
+    height: 12px;
+}
+QComboBox#ppGamePicker QAbstractItemView {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @line@;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+    outline: none;
+}
+QLineEdit#ppSearch {
+    background-color: @shell_field@;
+    color: @shell_text@;
+    border: 1px solid @shell_line@;
+    border-radius: 6px;
+    padding: 5px 8px;
+    selection-background-color: @shell_text@;
+    selection-color: @shell@;
+}
+QLineEdit#ppSearch:focus {
+    border-color: @shell_muted@;
+}
+QListWidget#ppProgramList {
+    background: transparent;
+    border: none;
+    outline: none;
+}
+QListWidget#ppProgramList:disabled {
+    background: transparent;
+}
+
+QWidget#ppStatusStrip {
+    background-color: @shell_deep@;
+}
+QWidget#ppStatusStrip QLabel {
+    color: @shell_muted@;
+    background: transparent;
+}
+QWidget#ppStatusStrip QCheckBox {
+    color: @shell_muted@;
+    background: transparent;
+}
+QWidget#ppStatusStrip QCheckBox::indicator {
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    border: 1px solid @shell_muted@;
+    border-radius: 3px;
+}
+QWidget#ppStatusStrip QCheckBox::indicator:hover {
+    border-color: @shell_text@;
+}
+QWidget#ppStatusStrip QCheckBox::indicator:checked {
+    background-color: @shell_text@;
+    border-color: @shell_text@;
+    image: url(@check_shell@);
+}
+QLabel#ppStateText {
+    color: @shell_text@;
+}
+
+
+/* ---- The screen ---- */
+
+QWidget#ppScreen {
+    background-color: @screen@;
+}
+QLabel#ppHomeTitle, QLabel#ppAboutTitle {
+    color: @text@;
+    background: transparent;
+}
+QLabel#ppHomeLead, QLabel#ppMuted {
+    color: @muted@;
+    background: transparent;
+}
+QPushButton#ppBack {
+    background: transparent;
+    color: @muted@;
+    border: none;
+    padding: 2px 0px 6px 0px;
+    text-align: left;
+}
+QPushButton#ppBack:hover, QPushButton#ppBack:focus {
+    color: @text@;
+}
+QLineEdit#ppHomeSearch {
+    background-color: @field@;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 8px;
+    padding: 8px 12px;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QLineEdit#ppHomeSearch:focus {
+    border-color: @accent@;
+}
+QTreeWidget#ppSearchResults {
+    background-color: @surface@;
+    border: 1px solid @line@;
+    border-radius: 8px;
+    outline: none;
+    padding: 4px;
+}
+QTreeWidget#ppSearchResults::item {
+    padding: 7px 10px;
+    border-radius: 5px;
+}
+QTreeWidget#ppSearchResults::item:hover:enabled {
+    background-color: @surface_alt@;
+}
+QTreeWidget#ppSearchResults::item:selected {
+    background-color: @accent@;
+    color: @accent_text@;
+}
+
+
+/* ---- The button that starts a program ---- */
+
+QPushButton#ppPrimary {
+    background-color: @accent@;
+    color: @accent_text@;
+    border: 1px solid @accent@;
+    border-radius: 6px;
+    padding: 5px 14px;
+}
+QPushButton#ppPrimary:hover {
+    background-color: @accent_hover@;
+    border-color: @accent_hover@;
+}
+QPushButton#ppPrimary:pressed {
+    background-color: @accent_pressed@;
+}
+QPushButton#ppPrimary:focus {
+    border-color: @text@;
+}
+QPushButton#ppPrimary:disabled {
+    background-color: @screen@;
+    color: @disabled@;
+    border-color: @line@;
+}

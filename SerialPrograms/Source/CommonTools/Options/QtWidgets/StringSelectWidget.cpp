@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QCompleter>
 #include <QLineEdit>
+#include "Common/Cpp/ColoredText.h"
 #include "Common/Cpp/PrettyPrint.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/ImageTypes/ImageRGB32_Qt.h"
@@ -49,8 +50,12 @@ StringSelectCellWidget::StringSelectCellWidget(QWidget& parent, StringSelectCell
 
     StringSelectCellWidget::update_value();
 
+    //  An entry without a color takes the theme's text color (the color 0
+    //  would be black, which cannot be read in a dark theme).
     QPalette palette;
-    palette.setColor(QPalette::Text, QColor((uint32_t)entry.text_color));
+    if (entry.text_color){
+        palette.setColor(QPalette::Text, QColor((uint32_t)theme_readable(entry.text_color)));
+    }
     this->lineEdit()->setPalette(palette);
 
     connect(
@@ -78,7 +83,11 @@ void StringSelectCellWidget::load_options(){
             QPixmap pixmap = QPixmap::fromImage(to_QImage_ref(item.icon));
             this->addItem(pixmap, QString::fromStdString(item.display_name));
             if (item.text_color){
-                this->setItemData(this->count() - 1, QBrush(QColor((uint32_t)item.text_color)), Qt::ForegroundRole);
+                this->setItemData(
+                    this->count() - 1,
+                    QBrush(QColor((uint32_t)theme_readable(item.text_color))),
+                    Qt::ForegroundRole
+                );
             }
         }
     }
@@ -86,8 +95,9 @@ void StringSelectCellWidget::load_options(){
     this->setCurrentIndex((int)index);
 
     QPalette palette;
-    palette.setColor(QPalette::Text, QColor((uint32_t)cases[index].text_color));
-//    palette.setColor(QPalette::Text, Qt::red);
+    if (cases[index].text_color){
+        palette.setColor(QPalette::Text, QColor((uint32_t)theme_readable(cases[index].text_color)));
+    }
     this->lineEdit()->setPalette(palette);
 
     update_size_cache();
@@ -123,8 +133,9 @@ void StringSelectCellWidget::hide_options(){
     this->setCurrentIndex(0);
 
     QPalette palette;
-    palette.setColor(QPalette::Text, QColor((uint32_t)entry.text_color));
-//    palette.setColor(QPalette::Text, Qt::red);
+    if (entry.text_color){
+        palette.setColor(QPalette::Text, QColor((uint32_t)theme_readable(entry.text_color)));
+    }
     this->lineEdit()->setPalette(palette);
 
 }

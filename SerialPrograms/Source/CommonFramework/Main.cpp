@@ -41,8 +41,8 @@
 #include "Logging/Logger.h"
 #include "Logging/OutputRedirector.h"
 #include "Startup/SetupSettings.h"
-#include "Startup/NewVersionCheck.h"
 #include "Windows/MainWindow.h"
+#include "PocketPilot/PocketPilot_SelfTest.h"
 #include "GlobalSettingsPanel.h"
 #include "GlobalServices.h"
 #include "PersistentSettings.h"
@@ -222,10 +222,22 @@ int run_program(int argc, char *argv[]){
     bool augment_test_color_distortions = false;
     std::string test_substring;
     bool test_substring_missing_value = false;
+    //  The test of the interface: the folder for its pictures.
+    std::string ui_screenshots_folder;
+    bool ui_screenshots_missing_value = false;
     for (size_t i = 0; i < argc; i++){
         constexpr const char* force_run_tests = "--command-line-test-mode";
         constexpr const char* distort_test_images = "--augment-color-distortions";
         constexpr const char* filter_tests_substring = "--test-substring";
+
+        if (strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0){
+            if (i + 1 < (size_t)argc){
+                ui_screenshots_folder = argv[++i];
+                continue;
+            }else{
+                ui_screenshots_missing_value = true;
+            }
+        }
 
         if (strcmp(argv[i], force_run_tests) == 0){
             GlobalSettings::instance().COMMAND_LINE_TEST_MODE = true;
@@ -245,17 +257,24 @@ int run_program(int argc, char *argv[]){
         global_logger_command_line().log("--test-substring requires a value", COLOR_RED);
         return 1;
     }
+    if (ui_screenshots_missing_value){
+        global_logger_command_line().log(std::string(PocketPilot::UI_SCREENSHOTS_OPTION) + " requires a folder", COLOR_RED);
+        return 1;
+    }
 
     if (GlobalSettings::instance().COMMAND_LINE_TEST_MODE){
         return run_command_line_tests(augment_test_color_distortions, test_substring);
     }
 
     //  Check whether the hardware is powerful enough to run this program.
-    if (!check_hardware()){
+    //  (Not for the test of the interface: nobody is there to answer a
+    //  message box, and it runs no program.)
+    if (ui_screenshots_folder.empty() && !check_hardware()){
         return 1;
     }
 
-    check_new_version(logger);
+    //  No check for a new version: that check is for Pokemon Automation's
+    //  own releases, not for this fork's builds.
 
     set_working_directory();
 
@@ -283,9 +302,21 @@ int run_program(int argc, char *argv[]){
     global_gamepad_tracker().start();
 #endif
     MainWindow w;
+    if (!ui_screenshots_folder.empty()){
+        //  The test of the interface draws the window without putting it
+        //  on the screen: the screen of a build machine is small, and a
+        //  window on the screen cannot be larger than it.
+        w.setAttribute(Qt::WA_DontShowOnScreen, true);
+    }
     w.show();
     w.raise(); // bring the window to front on macOS
     set_permissions(w);
+
+    //  The test of the interface: pictures of every page, then exit. The
+    //  settings are not written, since the test changes the theme.
+    if (!ui_screenshots_folder.empty()){
+        return PocketPilot::run_ui_screenshots(application, w, ui_screenshots_folder);
+    }
 
     int ret = application.exec();
 

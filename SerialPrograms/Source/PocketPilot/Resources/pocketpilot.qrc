@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/pocketpilot">
+        <file>shell.qss</file>
+        <file>widgets.qss</file>
+        <file>Jersey20-Regular.ttf</file>
+        <file>arrow-light.png</file>
+        <file>arrow-light@2x.png</file>
+        <file>arrow-dark.png</file>
+        <file>arrow-dark@2x.png</file>
+        <file>arrow-gray.png</file>
+        <file>arrow-gray@2x.png</file>
+        <file>check-light.png</file>
+        <file>check-light@2x.png</file>
+        <file>check-dark.png</file>
+        <file>check-dark@2x.png</file>
+    </qresource>
+</RCC>

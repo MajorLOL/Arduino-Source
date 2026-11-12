@@ -27,6 +27,7 @@ namespace PokemonAutomation{
 
 class CheckForUpdatesOption;
 class ThemeSelectorOption;
+class StarterColorOption;
 class ResolutionOption;
 class KeyboardLayoutOption;
 class StreamHistoryOption;
@@ -84,6 +85,7 @@ public:
     FolderInputOption TEMP_FOLDER;
 
     Pimpl<ThemeSelectorOption> THEME;
+    Pimpl<StarterColorOption> STARTER_COLOR;
     WallpaperOption WALLPAPER;
     EnumDropdownOption<OcrLibrary> OCR_LIBRARY;
     StaticTextOption OCR_WARNING;

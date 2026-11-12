@@ -28,6 +28,13 @@ public:
 
     void set_panel(const std::string& panel_name);
 
+    //  No program is open anymore: no row is marked.
+    void clear_current();
+
+    //  Shows only the programs with these words in their name or
+    //  description. Returns how many are shown.
+    int filter(const QString& words);
+
 private:
     void handle_panel_clicked(const std::string& text);
 

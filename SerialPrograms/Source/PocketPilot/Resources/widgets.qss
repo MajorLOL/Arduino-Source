@@ -1,0 +1,309 @@
+/*  PocketPilot: the standard widgets
+ *
+ *  Only with the PocketPilot themes (Night and Day). The names between @ signs are
+ *  replaced by the colors of the theme in use (PocketPilot_Theme.cpp).
+ *  Qt's Fusion style with a palette of the same colors draws everything
+ *  that has no rule here: sliders, spin boxes and progress bars.
+ *
+ *  No rule sets the text color of line edits and combo boxes: the options
+ *  color their text themselves (a number out of range in red).
+ */
+
+
+/* ---- Buttons ---- */
+
+QPushButton {
+    background-color: @button@;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 6px;
+    padding: 5px 14px;
+}
+QPushButton:hover {
+    background-color: @button_hover@;
+    border-color: @muted@;
+}
+QPushButton:pressed {
+    background-color: @button_pressed@;
+}
+QPushButton:focus {
+    border-color: @accent@;
+}
+QPushButton:disabled {
+    background-color: @screen@;
+    color: @disabled@;
+    border-color: @line_soft@;
+}
+/* ---- Text fields ---- */
+
+QLineEdit, QPlainTextEdit, QTextEdit {
+    background-color: @field@;
+    border: 1px solid @line@;
+    border-radius: 5px;
+    padding: 3px 6px;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QLineEdit:hover, QPlainTextEdit:hover, QTextEdit:hover {
+    border-color: @muted@;
+}
+QLineEdit:focus, QPlainTextEdit:focus, QTextEdit:focus {
+    border-color: @accent@;
+}
+QLineEdit:disabled, QPlainTextEdit:disabled, QTextEdit:disabled {
+    background-color: @screen@;
+    border-color: @line_soft@;
+}
+
+
+/* ---- Combo boxes ---- */
+
+QComboBox {
+    background-color: @field@;
+    border: 1px solid @line@;
+    border-radius: 5px;
+    padding: 3px 8px;
+}
+QComboBox:hover {
+    border-color: @muted@;
+}
+QComboBox:focus, QComboBox:on {
+    border-color: @accent@;
+}
+QComboBox:disabled {
+    background-color: @screen@;
+    border-color: @line_soft@;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 24px;
+    border: none;
+}
+QComboBox::down-arrow {
+    image: url(@arrow_down@);
+    width: 12px;
+    height: 12px;
+}
+QComboBox::down-arrow:disabled {
+    image: url(@arrow_down_disabled@);
+}
+QComboBox QLineEdit {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+}
+QComboBox QAbstractItemView {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @line@;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+    outline: none;
+}
+
+
+/* ---- Check boxes and radio buttons ---- */
+
+QCheckBox::indicator, QGroupBox::indicator, QAbstractItemView::indicator {
+    width: 14px;
+    height: 14px;
+    background-color: @field@;
+    border: 1px solid @muted@;
+    border-radius: 3px;
+}
+QCheckBox::indicator:hover, QGroupBox::indicator:hover {
+    border-color: @accent@;
+}
+QCheckBox::indicator:checked, QGroupBox::indicator:checked, QAbstractItemView::indicator:checked {
+    background-color: @accent@;
+    border-color: @accent@;
+    image: url(@check@);
+}
+QCheckBox::indicator:disabled, QGroupBox::indicator:disabled, QAbstractItemView::indicator:disabled {
+    background-color: @screen@;
+    border-color: @line@;
+}
+QCheckBox::indicator:checked:disabled, QGroupBox::indicator:checked:disabled, QAbstractItemView::indicator:checked:disabled {
+    background-color: @disabled@;
+    border-color: @disabled@;
+}
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    background-color: @field@;
+    border: 1px solid @muted@;
+    border-radius: 8px;
+}
+QRadioButton::indicator:hover {
+    border-color: @accent@;
+}
+QRadioButton::indicator:checked {
+    width: 8px;
+    height: 8px;
+    background-color: @accent_text@;
+    border: 4px solid @accent@;
+}
+QRadioButton::indicator:disabled {
+    background-color: @screen@;
+    border-color: @line@;
+}
+QRadioButton::indicator:checked:disabled {
+    background-color: @screen@;
+    border-color: @disabled@;
+}
+
+
+/* ---- Groups ---- */
+
+QGroupBox {
+    background: transparent;
+    border: 1px solid @line@;
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 12px 8px 6px 8px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 10px;
+    padding: 0px 5px;
+    color: @muted@;
+}
+
+
+/* ---- Lists and tables ---- */
+
+QAbstractItemView {
+    background-color: @field@;
+    alternate-background-color: @surface_alt@;
+    border: 1px solid @line@;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QTableView {
+    gridline-color: @line@;
+}
+QHeaderView::section {
+    background-color: @surface_alt@;
+    color: @text@;
+    border: none;
+    border-right: 1px solid @line@;
+    border-bottom: 1px solid @line@;
+    padding: 4px 6px;
+}
+QTableCornerButton::section {
+    background-color: @surface_alt@;
+    border: none;
+    border-right: 1px solid @line@;
+    border-bottom: 1px solid @line@;
+}
+
+
+/* ---- Scrolling ---- */
+
+QScrollArea {
+    background: transparent;
+    border: none;
+}
+QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 0px;
+}
+QScrollBar:horizontal {
+    background: transparent;
+    height: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background-color: @scroll@;
+    border-radius: 4px;
+    min-height: 30px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal {
+    background-color: @scroll@;
+    border-radius: 4px;
+    min-width: 30px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover {
+    background-color: @scroll_hover@;
+}
+QScrollBar::add-line, QScrollBar::sub-line {
+    width: 0px;
+    height: 0px;
+    border: none;
+    background: none;
+}
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+
+
+/* ---- Menus, tabs, tool tips ---- */
+
+QMenuBar {
+    background-color: @screen@;
+    color: @text@;
+}
+QMenuBar::item {
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+QMenuBar::item:selected {
+    background-color: @surface_alt@;
+}
+QMenu {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @line@;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 5px 24px;
+    border-radius: 4px;
+}
+QMenu::item:selected {
+    background-color: @accent@;
+    color: @accent_text@;
+}
+QMenu::item:disabled {
+    color: @disabled@;
+}
+QMenu::separator {
+    height: 1px;
+    background-color: @line@;
+    margin: 4px 8px;
+}
+QTabWidget::pane {
+    border: 1px solid @line@;
+    border-radius: 6px;
+    top: -1px;
+}
+QTabBar::tab {
+    background: transparent;
+    color: @muted@;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 6px 14px;
+}
+QTabBar::tab:hover {
+    color: @text@;
+}
+QTabBar::tab:selected {
+    background-color: @surface@;
+    color: @text@;
+    border-color: @line@;
+}
+QToolTip {
+    background-color: @surface_alt@;
+    color: @text@;
+    border: 1px solid @line@;
+    padding: 4px 6px;
+}

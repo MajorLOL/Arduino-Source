@@ -6,6 +6,7 @@
 
 #include <QTimer>
 #include <QMenuBar>
+#include "Common/Cpp/ColoredText.h"
 #include "Common/Cpp/Logging/LastLogTracker.h"
 #include "Common/Cpp/Logging/GlobalLogger.h"
 #include "CommonFramework/GlobalAutoPaths.h"
@@ -60,7 +61,8 @@ QString LoggerWindow::to_window_str(const std::string& msg, Color color){
     // Replace spaces with &nbsp; and newlines with <br>.
     std::string str;
     if (color){
-        str += "<font color=\"" + QColor((uint32_t)color).name().toStdString() + "\">";
+        //  In a color that can be read on the theme's background.
+        str += "<font color=\"" + QColor((uint32_t)theme_readable(color)).name().toStdString() + "\">";
     }else{
         str += "<font>";
     }

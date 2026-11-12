@@ -30,7 +30,8 @@ CollapsibleGroupBox* make_panel_header(
     const std::string& doc_link,
     const std::string& description
 ){
-    CollapsibleGroupBox* header = new CollapsibleGroupBox(parent, "Current Program");
+    //  The program's name is the title of the box.
+    CollapsibleGroupBox* header = new CollapsibleGroupBox(parent, QString::fromStdString(display_name));
     header->setObjectName(QStringLiteral("backgroundProgramHeader"));
 
     QWidget* body = new QWidget(header);
@@ -38,23 +39,22 @@ CollapsibleGroupBox* make_panel_header(
     QVBoxLayout* vbox = new QVBoxLayout(body);
     vbox->setContentsMargins(0, 0, 0, 0);
 
-    std::string name_text = "<b>Name:</b> " + display_name;
-    if (!doc_link.empty()){
-        std::string path = ONLINE_DOC_URL_BASE + doc_link;
-        name_text += " (" + make_text_url(path, "online documentation") + ")";
-    }
-    QLabel* name_label = new QLabel(QString::fromStdString(name_text), header);
-    name_label->setWordWrap(true);
-    name_label->setTextFormat(Qt::RichText);
-    name_label->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    name_label->setOpenExternalLinks(true);
-    vbox->addWidget(name_label);
-
-    std::string description_text = "<b>Description:</b> ";
-    description_text += description;
     QLabel* description_label = new QLabel(QString::fromStdString(description), header);
     description_label->setWordWrap(true);
     vbox->addWidget(description_label);
+
+    //  The documentation of the programs is that of Pokemon Automation.
+    if (!doc_link.empty()){
+        std::string path = ONLINE_DOC_URL_BASE + doc_link;
+        QLabel* doc_label = new QLabel(
+            QString::fromStdString(make_text_url(path, "Documentation on the " + UPSTREAM_PROGRAM_NAME + " site")),
+            header
+        );
+        doc_label->setTextFormat(Qt::RichText);
+        doc_label->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        doc_label->setOpenExternalLinks(true);
+        vbox->addWidget(doc_label);
+    }
 
     header->set_widget(body);
 
@@ -229,6 +229,8 @@ RunnablePanelActionBar::RunnablePanelActionBar(
 
     {
         m_start_button = new QPushButton(this);
+        //  The one button to press here: in the theme's accent color.
+        m_start_button->setObjectName(QStringLiteral("ppPrimary"));
         QFont font = m_start_button->font();
         font.setPointSize(16);
         m_start_button->setFont(font);

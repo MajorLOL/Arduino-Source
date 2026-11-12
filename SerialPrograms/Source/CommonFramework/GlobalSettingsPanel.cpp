@@ -17,6 +17,7 @@
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "Common/Cpp/Options/KeyboardLayoutOption.h"
+#include "CommonFramework/Globals.h"
 #include "CommonFramework/StaticGlobals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Logging/Logger.h"
@@ -84,6 +85,7 @@ GlobalSettings::GlobalSettings()
 #endif
     )
     , THEME(CONSTRUCT_TOKEN)
+    , STARTER_COLOR(CONSTRUCT_TOKEN)
     , OCR_LIBRARY(
         "<b>OCR library:",
         {
@@ -139,10 +141,11 @@ GlobalSettings::GlobalSettings()
     )
     , RICH_PRESENCE(
         "<b>Enable Rich Presence:</b><br>"
-        "Display program activity and status under your Discord user.<br>"
+        "Display program activity and status under your Discord user. "
+        "It shows as " + UPSTREAM_PROGRAM_NAME + ", whose Discord application this is.<br>"
         "Restart the program for the change to take effect.",
         LockMode::UNLOCK_WHILE_RUNNING,
-        true
+        false
     )
     , ALL_STATS(
         "<b>All Stats:</b><br>Include all-time stats for notifications.",
@@ -194,6 +197,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(STATS_FILE);
     PA_ADD_OPTION(TEMP_FOLDER);
     PA_ADD_OPTION(THEME);
+    PA_ADD_OPTION(STARTER_COLOR);
     PA_ADD_OPTION(WALLPAPER);
     PA_ADD_OPTION(OCR_LIBRARY);
 
@@ -249,6 +253,9 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(DEVELOPER_TOKEN);
 
     DOWNLOAD_ERROR.set_visibility(ConfigOptionState::HIDDEN);
+    //  The check for a new version is for Pokemon Automation's own
+    //  releases: this fork does not run it.
+    CHECK_FOR_UPDATES->set_visibility(ConfigOptionState::HIDDEN);
     SAVE_DEBUG_VIDEOS_ON_SWITCH.set_visibility(ConfigOptionState::HIDDEN);
     ControllerSettings::instance().DEVICE_LOGGING_FLAG.set_visibility(ConfigOptionState::HIDDEN);
 
