@@ -632,20 +632,20 @@ void jump_off_wall_until_map_open(const ProgramInfo& info, VideoStream& stream, 
         context.wait_for_all_requests();
         try{
             open_map_from_overworld(info, stream, context);
-            break;
+            return;
         }
         catch(...){
             stream.log("Failed to open map.");
         }
-        if (i >= 3){
-            stream.log("Could not escape wall.");
-            OperationFailedExceptionWithScreenshot::fire(
-                ErrorReportMode::SEND_ERROR_REPORT,
-                "jump_off_wall_until_map_open(): Could not escape wall.",
-                stream
-            );
-        }
     }
+    //  After the loop: inside it, the test for the last try was never true,
+    //  and three failed tries went on as if the map were open.
+    stream.log("Could not escape wall.");
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "jump_off_wall_until_map_open(): Could not escape wall.",
+        stream
+    );
 }
 
 // Open map and teleport back to town pokecenter
