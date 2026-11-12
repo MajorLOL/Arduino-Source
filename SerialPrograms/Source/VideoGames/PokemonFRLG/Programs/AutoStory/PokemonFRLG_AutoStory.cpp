@@ -25,6 +25,7 @@
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "CommonFramework/GlobalAutoPaths.h"
+#include "CommonFramework/Globals.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Exceptions/ProgramFinishedException.h"
@@ -42,15 +43,6 @@
 #include "PokemonFRLG_AutoStoryNewGame.h"
 #include "PokemonFRLG_AutoStory.h"
 
-//  The build number, written by the Windows build (GitHub Actions) before it
-//  compiles.
-#if __has_include("PokemonFRLG_AutoStoryBuild.h")
-#include "PokemonFRLG_AutoStoryBuild.h"
-#endif
-#ifndef FRLG_AUTOSTORY_BUILD
-#define FRLG_AUTOSTORY_BUILD "local"
-#endif
-
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonFRLG{
@@ -61,14 +53,15 @@ using namespace std::chrono_literals;
 AutoStory_Descriptor::AutoStory_Descriptor()
     : SingleSwitchProgramDescriptor(
         "PokemonFRLG:AutoStory",
-        Pokemon::STRING_POKEMON + " FRLG", "Autostory (beta)",
+        Pokemon::STRING_POKEMON + " FRLG", "AutoStory",
         "Programs/PokemonFRLG/AutoStory.html",
         "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame and on after it "
         "(the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX, the Ruby and the "
         "Sapphire, the roaming legendary with the Master Ball, Mewtwo, then the Pokedex collection: "
         "what the chosen game can still register in the grass, caves and Safari Zone), "
         "on routes generated from the game's map data.",
-        PanelQualityStanding::THIRD_PARTY_UNVETTED,
+        //  PocketPilot's own program, still being tested: it shows as "beta".
+        PanelQualityStanding::OFFICIAL_BETA,
         ProgramControllerClass::StandardController_RequiresPrecision,
         FeedbackType::REQUIRED,
         AllowCommandsWhenRunning::DISABLE_COMMANDS,
@@ -921,7 +914,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     AutoStory_Descriptor::Stats& stats = env.current_stats<AutoStory_Descriptor::Stats>();
     DeferredStopButtonOption::ResetOnExit reset_on_exit(STOP_AFTER_CURRENT);
 
-    env.log(std::string("FRLG AutoStory build ") + FRLG_AUTOSTORY_BUILD, COLOR_BLUE);
+    //  Which build runs (the number of the Windows build, see Globals.cpp).
+    env.log(PROGRAM_NAME + " build " + PROGRAM_BUILD + " (FRLG AutoStory)", COLOR_BLUE);
     if (MEMORY_TEST_MINUTES > 0){
         story_memory_test(env.console, context, MEMORY_TEST_MINUTES);
         return;

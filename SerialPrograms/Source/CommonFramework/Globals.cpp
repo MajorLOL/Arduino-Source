@@ -54,8 +54,29 @@ const std::string PROGRAM_VERSION = PROGRAM_VERSION_BASE + "-user";
 
 
 
-const std::string PROGRAM_NAME = "Pok\u00e9mon Automation";
+//  PocketPilot is a fork of Pokemon Automation's SerialPrograms. The version
+//  numbers above stay those of Pokemon Automation: they say which of its
+//  versions this fork is built on. The fork's own number is its build.
 
+//  The number of the build, written by the workflow that makes the builds
+//  (.github/workflows/pocketpilot-windows.yml). "local" for a build made
+//  by hand.
+#if __has_include("PocketPilot/PocketPilot_Build.h")
+#include "PocketPilot/PocketPilot_Build.h"
+#endif
+#ifndef POCKETPILOT_BUILD
+#define POCKETPILOT_BUILD "local"
+#endif
+const std::string PROGRAM_BUILD = POCKETPILOT_BUILD;
+
+const std::string PROGRAM_NAME = "PocketPilot";
+const std::string UPSTREAM_PROGRAM_NAME = "Pok\u00e9mon Automation";
+
+//  Where this fork lives: its source, its builds and its questions.
+const std::string PROJECT_HOME_URL = "https://github.com/MajorLOL/Arduino-Source/tree/pocketpilot";
+const std::string PROJECT_HOME_TEXT = "github.com/MajorLOL/Arduino-Source";
+
+//  The documentation of the programs is Pokemon Automation's.
 const std::string ONLINE_DOC_URL_BASE = "https://pokemonautomation.github.io/";
 const std::string PROJECT_SOURCE_URL = "https://github.com/PokemonAutomation/Arduino-Source/";
 const std::string RESOURCES_URL_BASE = "https://github.com/PokemonAutomation/Packages/";

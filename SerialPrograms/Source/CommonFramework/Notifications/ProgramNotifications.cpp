@@ -39,10 +39,11 @@ void append_body_fields(JsonArray& fields, const std::vector<std::pair<std::stri
 JsonObject make_credits_field(const ProgramInfo& info){
     JsonObject field;
     field["name"] = "Powered By:";
-    std::string text = STATIC_GLOBALS.DEVELOPER_MODE
-        ? PROGRAM_NAME + " CC " + PROGRAM_VERSION + "-dev"
-        : PROGRAM_NAME + " CC " + PROGRAM_VERSION + "";
-    text += " ([GitHub](" + GITHUB_LINK_URL + ")/[Discord](" + DISCORD_LINK_URL_EMBED + "))";
+    std::string text = PROGRAM_NAME + " build " + PROGRAM_BUILD + ", on " + UPSTREAM_PROGRAM_NAME + " " + PROGRAM_VERSION;
+    if (STATIC_GLOBALS.DEVELOPER_MODE){
+        text += "-dev";
+    }
+    text += " ([GitHub](" + PROJECT_HOME_URL + "))";
     field["value"] = std::move(text);
     return field;
 }

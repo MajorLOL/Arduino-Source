@@ -242,7 +242,7 @@ void determine_shiny_status(
         std::string str;
         str += "Low alpha shiny (alpha = ";
         str += tostr_default(alpha_wild_overall);
-        str += ").\nPlease report this image to the " + PROGRAM_NAME + " server.";
+        str += ").\nPlease report this image on the " + PROGRAM_NAME + " project page (" + PROJECT_HOME_TEXT + ").";
         send_program_recoverable_error_notification(
             env, settings,
             str,

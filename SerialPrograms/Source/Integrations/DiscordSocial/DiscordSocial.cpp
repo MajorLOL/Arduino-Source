@@ -97,7 +97,8 @@ void DiscordSocial::update_rich_presence(){
 
         discordpp::ActivityAssets assets{};
         assets.SetLargeImage("rotom");
-        assets.SetLargeText(PROGRAM_NAME);
+        //  The presence is that of Pokemon Automation's Discord application.
+        assets.SetLargeText(UPSTREAM_PROGRAM_NAME);
 
         for (const auto& item : ProgramTracker::instance().all_programs()){
             switch (item.second.state){
@@ -187,7 +188,7 @@ Activity DiscordSocial::create_activity(){
 
     discordpp::ActivityAssets assets{};
     assets.SetLargeImage("rotom");
-    assets.SetLargeText(PROGRAM_NAME);
+    assets.SetLargeText(UPSTREAM_PROGRAM_NAME);
     assets.SetSmallImage("idle");
     assets.SetSmallText("Idle");
     activity.Assets().emplace(assets);

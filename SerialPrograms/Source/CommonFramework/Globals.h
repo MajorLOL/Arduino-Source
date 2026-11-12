@@ -19,7 +19,13 @@ extern const int PROGRAM_VERSION_PATCH;
 extern const std::string PROGRAM_VERSION_BASE;
 extern const std::string PROGRAM_VERSION;
 
+extern const std::string PROGRAM_BUILD;
+
 extern const std::string PROGRAM_NAME;
+extern const std::string UPSTREAM_PROGRAM_NAME;
+
+extern const std::string PROJECT_HOME_URL;
+extern const std::string PROJECT_HOME_TEXT;
 
 extern const std::string ONLINE_DOC_URL_BASE;
 extern const std::string PROJECT_SOURCE_URL;

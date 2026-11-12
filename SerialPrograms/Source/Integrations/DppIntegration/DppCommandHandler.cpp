@@ -257,7 +257,8 @@ void Handler::add_command_about(dpp::commandhandler& handler){
             embed.add_field("Uptime", handler.owner->uptime().to_string());
             embed.add_field(
                 "Powered By",
-                PROGRAM_NAME + " " + PROGRAM_VERSION + " ([GitHub](" + GITHUB_LINK_URL + ")/[Discord](" + DISCORD_LINK_URL_EMBED + "))"
+                PROGRAM_NAME + " build " + PROGRAM_BUILD + ", on " + UPSTREAM_PROGRAM_NAME + " " + PROGRAM_VERSION +
+                " ([GitHub](" + PROJECT_HOME_URL + "))"
             );
 
             message message;
