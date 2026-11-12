@@ -10,7 +10,7 @@ PocketPilot is not made, endorsed or supported by Nintendo, Game Freak, Creature
 
 ## Getting it
 
-Every push to the branch `pocketpilot` makes a Windows build: the [releases](https://github.com/MajorLOL/Arduino-Source/releases) named "PocketPilot - Windows build N". Unzip `PocketPilot-Windows.zip` and run `SerialPrograms.exe`. Each release also has pictures of that build's interface, taken on the build machine.
+Every push to the branch `pocketpilot` makes a Windows build and tests that it starts. A build that passes is published: the [releases](https://github.com/MajorLOL/Arduino-Source/releases) named "PocketPilot - Windows build N". Unzip `PocketPilot-Windows.zip` and run `SerialPrograms.exe`. Each release also has pictures of that build's interface, taken on the build machine.
 
 To keep your settings, close the old program first, then copy its `UserSettings` folder into the new folder.
 
@@ -26,7 +26,7 @@ The hardware and its setup are the same as for Pokémon Automation: see [its doc
 | **Video frames** | Pictures of the screen are made without Qt's `QVideoFrame::toImage()`, which on some computers grows the program's memory by 0.3 to 1.6 GB an hour while a program runs. See [VideoFrameConversion.h](SerialPrograms/Source/CommonFramework/VideoPipeline/Backends/VideoFrameConversion.h). |
 | **Fixes** | Fixes for bugs found in a review of the whole code: see [the list](SerialPrograms/Source/PocketPilot/FIXES.md). |
 | **Colors** | Colored text (in the options, the log window, the lists) is shown in a shade that can be read on the theme's background. |
-| **Builds** | Each build starts once on the build machine and saves pictures of its pages, so a build that does not start or looks broken shows before anyone downloads it. |
+| **Builds** | Each build starts once on the build machine, as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that does not start, crashes on the way or cannot take its pictures is not published; one that looks broken shows in its pictures before anyone downloads it. |
 | **What it leaves out** | The check for a new version (it is for Pokémon Automation's releases) and Discord Rich Presence by default (it shows as Pokémon Automation, whose Discord application it is). The wallpaper is off until you turn it on. |
 
 What is planned, what could be made faster and what could be added: [ROADMAP.md](ROADMAP.md).
@@ -35,7 +35,7 @@ What is planned, what could be made faster and what could be added: [ROADMAP.md]
 
 PocketPilot builds like Pokémon Automation's SerialPrograms: see [SerialPrograms/BuildInstructions](SerialPrograms/BuildInstructions). The Windows builds are made by [this workflow](.github/workflows/pocketpilot-windows.yml) with Qt 6.10.2.
 
-`SerialPrograms --ui-screenshots <folder>` starts the program, saves a picture of each page and theme in the folder and exits (nothing is pressed on a console, no setting is saved).
+`SerialPrograms --ui-screenshots <folder>` starts the program, saves a picture of each page, theme and opened list in the folder and exits (nothing is pressed on a console, no setting is saved). Its exit code is 0 when every picture was taken.
 
 ## Where the code is
 

@@ -3,7 +3,8 @@ name: PocketPilot - Windows build
 # Builds a ready-to-run Windows version of PocketPilot (Qt DLLs, resources and
 # firmware included), starts it once to take pictures of its interface, and
 # publishes the build with the pictures as a pre-release of this repository
-# and as a workflow artifact.
+# and as a workflow artifact. A build that fails that test (it does not
+# start, crashes or cannot take its pictures) is not published.
 #
 # The build itself follows the upstream workflow for Windows
 # (cpp-ci-serial-programs-base.yml): Ninja, and ccache to keep the compiler's
@@ -29,11 +30,12 @@ jobs:
       #  "Ninja Multi-Config" keeps Visual Studio's output layout
       #  (bin/RelWithDebInfo/). ccache can't cache assembly listings or
       #  separate debug info, so both are off: RelWithDebInfo's optimization
-      #  without its debug info.
+      #  without its debug info. (The linker's flags are in the Build step:
+      #  they have spaces.)
       - name: Set variables
         shell: bash
         run: |
-          CMAKE_ADDITIONAL_FLAGS="-DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=/INCREMENTAL:NO -DPA_ASSEMBLY_LISTINGS=OFF"
+          CMAKE_ADDITIONAL_FLAGS="-DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -DPA_ASSEMBLY_LISTINGS=OFF"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
           echo "CMAKE_GENERATOR=Ninja Multi-Config" >> $GITHUB_ENV
@@ -110,6 +112,11 @@ jobs:
         run: |
           echo '#define POCKETPILOT_BUILD "${{ github.run_number }}"' > Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
 
+      #  The linker: no incremental linking, as upstream. /DEBUG makes a
+      #  .pdb with the names of the functions (the compiler adds no debug
+      #  info, see above), so that the stack of a crash in the interface
+      #  test can be read; /OPT:REF and /OPT:ICF keep the program itself as
+      #  it is without /DEBUG. The .pdb is not in the package.
       - name: Build
         env:
           #  On a cache miss, ccache takes the include files from the
@@ -119,7 +126,7 @@ jobs:
           cd Arduino-Source/SerialPrograms
           mkdir bin
           cd bin
-          cmake .. -DQT_MAJOR:STRING=6 -DPA_SDL=ON ${{env.CMAKE_ADDITIONAL_FLAGS}}
+          cmake .. -DQT_MAJOR:STRING=6 -DPA_SDL=ON "-DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=/INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF" ${{env.CMAKE_ADDITIONAL_FLAGS}}
           cmake --build . --config RelWithDebInfo --parallel ${{env.BUILD_PARALLEL}}
 
       #  On GitHub Actions the CMake project skips windeployqt (it expects
@@ -130,6 +137,10 @@ jobs:
         run: |
           $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
           windeployqt --release --dir $out "$out/SerialPrograms.exe"
+          #  The function names for reading a crash: kept aside, not packaged.
+          New-Item -ItemType Directory -Force -Path "symbols" | Out-Null
+          Get-ChildItem "$out/*.pdb" -ErrorAction SilentlyContinue | Move-Item -Destination "symbols"
+          Get-ChildItem "symbols" | Format-Table Name, Length
           Remove-Item "$out/*.lib", "$out/*.exp", "$out/*.pdb", "$out/*.ilk" -ErrorAction SilentlyContinue
           #  The program only adds to an existing stats file ("Unable to save stats." otherwise).
           New-Item -ItemType Directory -Force -Path "$out/UserSettings" | Out-Null
@@ -156,40 +167,103 @@ jobs:
       #  Start the build once: it opens its main window, goes through its
       #  pages and themes, saves a picture of each and exits (see
       #  Source/PocketPilot/PocketPilot_SelfTest.h). After the package is
-      #  made, so that what the run writes is not in it. A failure here does
-      #  not stop the build from being published.
+      #  made, so that what the run writes is not in it. The machine is new
+      #  to the program: no settings, as on a first start after unzipping.
+      #  If the test fails, the build is not published; what the program
+      #  logged and, after a crash, where it crashed are printed here.
       - name: Interface test
         shell: pwsh
-        continue-on-error: true
         run: |
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
-          New-Item -ItemType Directory -Force -Path "ui-screenshots" | Out-Null
+          New-Item -ItemType Directory -Force -Path "ui-screenshots", "ui-test-diagnostics", "symbols" | Out-Null
           $shots = (Resolve-Path "ui-screenshots").Path
+          $diagnostics = (Resolve-Path "ui-test-diagnostics").Path
+          $symbols = (Resolve-Path "symbols").Path
+          $started = Get-Date
           $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--ui-screenshots", "`"$shots`"" -PassThru
           #  Keep the handle, or the exit code is not there afterwards.
           $handle = $process.Handle
           if ($process.WaitForExit(300000)) {
-            Write-Host "The interface test exited with code $($process.ExitCode)."
+            $code = $process.ExitCode
+            $result = "it exited with code $code ($('0x{0:X8}' -f $code))"
           } else {
             $process.Kill()
-            Write-Host "::warning::The interface test did not finish within 5 minutes and was stopped."
+            $code = -1
+            $result = "it did not finish within 5 minutes and was stopped"
           }
+          Write-Host "The interface test: $result."
           Get-ChildItem $shots | Format-Table Name, Length
-          Get-ChildItem "$dir/UserSettings" -Filter "*.log" | ForEach-Object {
-            Write-Host "---- the end of $($_.Name) ----"
-            Get-Content $_.FullName -Tail 80
+
+          #  What the program logged.
+          $log = "$dir/SerialPrograms.log"
+          if (Test-Path $log) {
+            Copy-Item $log $diagnostics
+            Write-Host "---- the end of SerialPrograms.log ----"
+            Get-Content $log -Tail 150
+          } else {
+            Write-Host "No SerialPrograms.log in $dir."
+          }
+
+          if ($code -ne 0) {
+            #  What Windows noted about a crash: the module and the offset in it.
+            Start-Sleep -Seconds 3
+            try {
+              Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Id = 1000; StartTime = $started } -MaxEvents 5 -ErrorAction Stop |
+                Where-Object { $_.Message -match 'SerialPrograms' } |
+                ForEach-Object { Write-Host "---- Windows event log ----"; Write-Host $_.Message }
+            } catch {
+              Write-Host "No crash in the Windows event log."
+            }
+            #  What the program left behind when it crashed: a report and a
+            #  dump of its memory. The debugger of the Windows SDK, if this
+            #  machine has it, reads the stack of the crash from the dump.
+            $reports = "$dir/ErrorReportsLocal"
+            if (Test-Path $reports) {
+              Copy-Item -Recurse $reports $diagnostics
+              $cdb = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+              Get-ChildItem $reports -Recurse -File | ForEach-Object {
+                Write-Host "---- $($_.FullName) ($($_.Length) bytes) ----"
+                if ($_.Extension -eq ".json") {
+                  Get-Content $_.FullName -TotalCount 60
+                }
+                if ($_.Extension -eq ".dmp") {
+                  if (Test-Path $cdb) {
+                    #  No input for the debugger: it quits where it would ask.
+                    $null | & $cdb -z $_.FullName -y $symbols -i $dir -c ".ecxr; kn 60; q" 2>&1 | Select-Object -Last 100 | ForEach-Object { Write-Host $_ }
+                  } else {
+                    Write-Host "No cdb.exe on this machine: the dump is in the artifact 'interface-test-diagnostics'."
+                  }
+                }
+              }
+            } else {
+              Write-Host "The program left no crash report (no folder ErrorReportsLocal)."
+            }
+            throw "The interface test failed: $result."
           }
           if (-not (Get-ChildItem $shots -Filter "*.png")) {
             throw "The interface test saved no pictures."
           }
+          exit 0
 
+      #  Also for a build that failed the interface test: to look at.
       - name: Upload artifact
+        if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
           name: PocketPilot-Windows
           path: |
             PocketPilot-Windows.zip
             ui-screenshots/*.png
+
+      - name: Upload what a failed interface test left behind
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: interface-test-diagnostics
+          if-no-files-found: ignore
+          path: |
+            ui-test-diagnostics/**
+            symbols/*.pdb
 
       - name: Publish pre-release
         shell: bash
@@ -206,4 +280,4 @@ jobs:
             --target "${{ github.sha }}" \
             --prerelease \
             --title "PocketPilot - Windows build ${{ github.run_number }}" \
-            --notes "PocketPilot, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. The pictures show this build's interface as it started on the build machine. For non-commercial use. Built from ${{ github.sha }}."
+            --notes "PocketPilot, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took the pictures below of its own interface. For non-commercial use. Built from ${{ github.sha }}."

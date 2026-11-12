@@ -7,11 +7,13 @@
  *
  *      SerialPrograms --ui-screenshots <folder>
  *
- *  opens its main window, goes through its pages and themes, saves a
- *  picture of each in the folder and exits. Nothing is pressed on a
- *  console and no setting is saved. The workflow that makes the builds runs
- *  it and keeps the pictures with the build, so that every build shows
- *  what it looks like and that it starts.
+ *  opens its main window, goes through its pages and themes, opens the
+ *  lists of two dropdowns, saves a picture of each in the folder and exits.
+ *  Nothing is pressed on a console and no setting is saved. What it is
+ *  about to do goes to the program's log first. The workflow that makes
+ *  the builds runs it on a machine without settings, keeps the pictures
+ *  with the build and does not publish a build that fails it: every build
+ *  shows what it looks like and that it starts.
  *
  */
 
