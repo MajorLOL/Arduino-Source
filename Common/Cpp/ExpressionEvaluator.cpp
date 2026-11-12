@@ -279,8 +279,9 @@ int64_t parse_expression(
     std::vector<int64_t> stack;
     for (const auto& item : num){
         if (item.first == 0){
+            //  (No num.pop_back() here: it shortened the vector this loop
+            //  is going through.)
             stack.push_back(item.second);
-            num.pop_back();
             continue;
         }
         switch (item.first){
