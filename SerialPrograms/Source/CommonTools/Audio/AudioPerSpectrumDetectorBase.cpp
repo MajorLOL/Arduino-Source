@@ -131,6 +131,13 @@ bool AudioPerSpectrumDetectorBase::process_spectrums(
         if (m_lowest_error < 1.0){
             m_errors.clear();
         }else{
+            //  Only read by the debugging code in log_results(). Bounded:
+            //  with a sound that never comes close (or no sound at all) it
+            //  would grow for as long as the detector lives.
+            const size_t MAX_ERRORS = 1000;
+            if (m_errors.size() >= MAX_ERRORS){
+                m_errors.erase(m_errors.begin(), m_errors.begin() + MAX_ERRORS / 2);
+            }
             m_errors.emplace_back(matcher_score, now_to_filestring());
         }
 
