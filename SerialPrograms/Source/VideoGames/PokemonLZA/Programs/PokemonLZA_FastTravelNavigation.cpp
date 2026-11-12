@@ -246,6 +246,11 @@ bool navigate_to_lumiose_sewers_location(
             if (current_selector_index == (LocationNameReader::PAGE_SIZE - 2)){
                 pbf_wait(context, 1s); // Account for video lag by making confirmation
                 context.wait_for_all_requests();
+                //  Look again: the value from before the wait confirms nothing.
+                current_selector_index = get_current_selector_index(console, FAST_TRAVEL_ARROW_BOX(), FAST_TRAVEL_SPACING);
+                if (current_selector_index == -1){
+                    return false;
+                }
                 if (current_selector_index == (LocationNameReader::PAGE_SIZE - 2)){
                     break;
                 }
