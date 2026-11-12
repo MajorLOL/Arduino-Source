@@ -34,7 +34,8 @@ void LastLogTracker::log(const char* msg, Color color){
 std::vector<LogLine> LastLogTracker::get_recent(size_t lines) const{
     ReadSpinLock lg(m_lock);
     if (lines < m_lines.size()){
-        return std::vector<LogLine>(m_lines.begin(), m_lines.begin() + lines);
+        //  The most recent ones: the end of the history, not its start.
+        return std::vector<LogLine>(m_lines.end() - lines, m_lines.end());
     }
     return std::vector<LogLine>(m_lines.begin(), m_lines.end());
 }
