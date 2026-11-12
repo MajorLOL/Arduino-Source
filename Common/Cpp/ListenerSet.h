@@ -368,7 +368,10 @@ void ListenerSet<ListenerType>::run_method(Function function, Args&&... args){
 #endif
             m_lock.unlock_read();
             try{
-                (node->listener.*function)(std::forward<Args>(args)...);
+                //  Not forwarded: this runs once for every listener, and an
+                //  argument moved into the first one would be empty for the
+                //  others.
+                (node->listener.*function)(args...);
             }catch (...){
                 if (!err){
                     err = std::current_exception();
