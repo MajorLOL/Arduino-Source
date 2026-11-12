@@ -380,6 +380,15 @@ AutoStory::AutoStory()
     )
     , COLLECTION_SUMMARY("")
     , COLLECTION(COLLECTION_SUMMARY)
+    , MEMORY_TEST_MINUTES(
+        "<b>Memory test (minutes per part, 0: off):</b><br>Instead of the story: 6 parts of this many minutes "
+        "(10 is enough), no buttons pressed, each with one thing the program does all the time (the video "
+        "frames, the screen watchers, the text reading, the shiny sound). The log gives the memory growth of "
+        "each, to find what makes the memory grow during long runs. Leave the game on the overworld. "
+        "Set it back to 0 afterwards.",
+        LockMode::LOCK_WHILE_RUNNING,
+        0, 0, 120
+    )
     , GO_HOME_WHEN_DONE(false)
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
@@ -413,6 +422,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(COLLECTION_SHINY_MINUTES);
     PA_ADD_STATIC(COLLECTION_SUMMARY);
     PA_ADD_OPTION(COLLECTION);
+    PA_ADD_OPTION(MEMORY_TEST_MINUTES);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(NOTIFICATIONS);
 
@@ -902,6 +912,11 @@ void AutoStory::run_segment(
 void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContext& context){
     AutoStory_Descriptor::Stats& stats = env.current_stats<AutoStory_Descriptor::Stats>();
     DeferredStopButtonOption::ResetOnExit reset_on_exit(STOP_AFTER_CURRENT);
+
+    if (MEMORY_TEST_MINUTES > 0){
+        story_memory_test(env.console, context, MEMORY_TEST_MINUTES);
+        return;
+    }
 
     const Starter starter = STARTER;
     const StoryScript& script = script_for(starter);

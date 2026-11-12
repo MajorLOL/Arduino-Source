@@ -6,7 +6,9 @@
 
 #include <cctype>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <algorithm>
 #include <string>
 #include <utility>
@@ -2103,6 +2105,124 @@ void story_log_memory(StoryRuntime& rt, bool force){
         gigabytes(memory.total_used_system_memory) + " of " + gigabytes(memory.total_system_memory) + " in use."
     );
     rt.console.log(story_memory_summary());
+}
+
+
+namespace{
+
+//  Watches the video and never stops anything: the frames and the inference
+//  loop, without a detector.
+class MemoryTestWatcher : public VisualInferenceCallback{
+public:
+    MemoryTestWatcher() : VisualInferenceCallback("MemoryTestWatcher") {}
+    using VisualInferenceCallback::process_frame;
+    virtual void make_overlays(VideoOverlaySet&) const override{}
+    virtual bool process_frame(const VideoSnapshot&) override{
+        return false;
+    }
+};
+
+}
+
+void story_memory_test(ConsoleHandle& console, ProControllerContext& context, uint16_t minutes){
+    const Milliseconds part_time = std::chrono::minutes(minutes);
+    console.log(
+        "Memory test: " + std::to_string(minutes) + " minutes for each of 6 parts, no buttons pressed. "
+        "Leave the game on the overworld.",
+        COLOR_BLUE
+    );
+    context.wait_for_all_requests();
+
+    std::string results;
+    auto run_part = [&](const char* name, const std::function<void(WallClock end)>& part){
+        MemoryUsage before = process_memory_usage();
+        const WallClock start = current_time();
+        console.log(std::string("Memory test: ") + name + "...", COLOR_BLUE);
+        part(start + part_time);
+        context.wait_for_all_requests();
+        MemoryUsage after = process_memory_usage();
+        const double hours = std::chrono::duration_cast<std::chrono::seconds>(current_time() - start).count() / 3600.0;
+        const double grown = ((double)after.process_virtual_memory - (double)before.process_virtual_memory) / (1024.0 * 1024.0);
+        char line[160];
+        snprintf(
+            line, sizeof(line), "%s %+.0f MB in %.0f min (%+.0f MB an hour)",
+            name, grown, hours * 60, hours > 0 ? grown / hours : 0.0
+        );
+        console.log(
+            std::string("Memory test: ") + line + "; program " + gigabytes(after.process_physical_memory) +
+            " (virtual " + gigabytes(after.process_virtual_memory) + ").",
+            COLOR_BLUE
+        );
+        results += results.empty() ? "" : "; ";
+        results += line;
+    };
+
+    //  1. Nothing: the program waits (PA itself: the video, the stream
+    //  history, the sound).
+    run_part("nothing", [&](WallClock end){
+        context.wait_until(end);
+    });
+    //  2. The video frames: a picture of the screen 15 times a second, as
+    //  the screen watchers take them, without a watcher.
+    uint64_t frames = 0;
+    run_part("frames", [&](WallClock end){
+        while (current_time() < end){
+            VideoSnapshot screen = console.video().snapshot();
+            frames += screen.frame != nullptr;
+            context.wait_for(Milliseconds(66));
+        }
+    });
+    console.log("Memory test: " + std::to_string(frames) + " frames taken.");
+    //  3. A screen watcher that looks at nothing: the inference loop.
+    run_part("empty watcher", [&](WallClock end){
+        MemoryTestWatcher watcher;
+        run_until<ProControllerContext>(
+            console, context,
+            [&](ProControllerContext& context){
+                context.wait_until(end);
+            },
+            {watcher}
+        );
+    });
+    //  4. The watchers of the walks and battles.
+    run_part("game watchers", [&](WallClock end){
+        while (current_time() < end){
+            BlackScreenWatcher black(COLOR_RED);
+            AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+            BattleMenuWatcher battle_menu(COLOR_RED);
+            WhiteDialogWatcher dialog(COLOR_RED);
+            const int ret = run_until<ProControllerContext>(
+                console, context,
+                [&](ProControllerContext& context){
+                    context.wait_until(end);
+                },
+                {black, battle_text, battle_menu, dialog}
+            );
+            if (ret >= 0){
+                //  One saw something on the screen: again, a little later.
+                context.wait_for(std::chrono::seconds(1));
+            }
+        }
+    });
+    //  5. The text reading: twice a second (a run reads some 500 times an
+    //  hour).
+    uint64_t reads = 0;
+    run_part("text reading", [&](WallClock end){
+        const ImageFloatBox box(0.045, 0.770, 0.890, 0.170);
+        while (current_time() < end){
+            read_story_text(console, box, false);
+            reads++;
+            context.wait_for(Milliseconds(500));
+        }
+    });
+    console.log("Memory test: " + std::to_string(reads) + " texts read.");
+    //  6. The shiny sound.
+    run_part("shiny sound", [&](WallClock end){
+        StoryShinyWatch watch(console, context);
+        context.wait_until(end);
+    });
+
+    console.log("Memory test done: " + results + ".", COLOR_BLUE);
 }
 
 std::set<std::string> story_species_list(const char* text){

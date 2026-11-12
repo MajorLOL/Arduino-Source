@@ -104,6 +104,7 @@ private:
     SimpleIntegerOption<uint16_t> COLLECTION_SHINY_MINUTES;
     StaticTextOption COLLECTION_SUMMARY;
     StoryCollectionTable COLLECTION;
+    SimpleIntegerOption<uint16_t> MEMORY_TEST_MINUTES;
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
