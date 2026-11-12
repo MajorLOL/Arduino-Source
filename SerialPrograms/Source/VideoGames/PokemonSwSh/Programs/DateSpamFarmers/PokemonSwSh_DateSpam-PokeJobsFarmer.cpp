@@ -107,7 +107,9 @@ void PokeJobsFarmer::program(SingleSwitchProgramEnvironment& env, ProControllerC
         }
 
         // Start new jobs
-        for (uint16_t j = 1; j <= CONCURRENCY; j++){
+        //  (A counter as wide as the option: a narrower one wraps around
+        //  below a large number of jobs and the loop never ends.)
+        for (uint32_t j = 1; j <= CONCURRENCY; j++){
             env.log("Starting job #" + tostr_u_commas(j) + " in year " + tostr_u_commas(2000 + year));
 
             // Enter Poke Jobs
@@ -149,7 +151,7 @@ void PokeJobsFarmer::program(SingleSwitchProgramEnvironment& env, ProControllerC
         pbf_mash_button(context, BUTTON_B, 5000ms);
 
         // Complete jobs
-        for (uint16_t j = 1; j <= CONCURRENCY; j++){
+        for (uint32_t j = 1; j <= CONCURRENCY; j++){
             env.log("Completing job #" + tostr_u_commas(j) + " in year " + tostr_u_commas(2000 + year));
 
             // Enter Poke Jobs

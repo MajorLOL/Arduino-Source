@@ -168,7 +168,9 @@ void AlolanTrade::program(SingleSwitchProgramEnvironment& env, CancellableScope&
     bool shiny_found = false;
     while (!shiny_found){
         //Run trades
-        for (uint16_t i = 0; i < NUM_TRADES; i++){
+        //  A counter as wide as the option: a narrower one wraps around
+        //  below a large number of trades and the loop never ends.
+        for (uint32_t i = 0; i < NUM_TRADES; i++){
             env.log("Running trade.");
             run_trade(env, context);
 
@@ -228,7 +230,7 @@ void AlolanTrade::program(SingleSwitchProgramEnvironment& env, CancellableScope&
 
         //Now check for shinies. Check everything that was traded.
         env.log("Checking received Pokemon.");
-        for (uint16_t i = 0; i < NUM_TRADES; i++){
+        for (uint32_t i = 0; i < NUM_TRADES; i++){
             VideoSnapshot screen = env.console.video().snapshot();
             ShinySymbolDetector shiny_checker(COLOR_YELLOW);
             bool check = shiny_checker.read(env.console.logger(), screen);

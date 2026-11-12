@@ -187,7 +187,9 @@ void FossilRevival::program(SingleSwitchProgramEnvironment& env, CancellableScop
     bool shiny_found = false;
     while (!shiny_found){
         //Run revives
-        for (uint16_t i = 0; i < NUM_REVIVALS; i++){
+        //  A counter as wide as the option: a narrower one wraps around
+        //  below a large number of revivals and the loop never ends.
+        for (uint32_t i = 0; i < NUM_REVIVALS; i++){
             env.log("Running trade.");
             run_revives(env, context);
 
@@ -236,7 +238,7 @@ void FossilRevival::program(SingleSwitchProgramEnvironment& env, CancellableScop
 
         //Now check for shinies. Check everything that was traded.
         env.log("Checking received Pokemon.");
-        for (uint16_t i = 0; i < NUM_REVIVALS; i++){
+        for (uint32_t i = 0; i < NUM_REVIVALS; i++){
             VideoSnapshot screen = env.console.video().snapshot();
             ShinySymbolDetector shiny_checker(COLOR_YELLOW);
             bool check = shiny_checker.read(env.console.logger(), screen);
