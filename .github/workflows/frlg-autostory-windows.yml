@@ -41,6 +41,12 @@ jobs:
           modules: 'qtmultimedia qtserialport'
           cache: true
 
+      #  The build number in the program's log ("FRLG AutoStory build N").
+      - name: Build number
+        shell: bash
+        run: |
+          echo '#define FRLG_AUTOSTORY_BUILD "${{ github.run_number }}"' > Arduino-Source/SerialPrograms/Source/VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBuild.h
+
       #  Visual Studio generator, release build without debug info.
       - name: Build
         shell: bash

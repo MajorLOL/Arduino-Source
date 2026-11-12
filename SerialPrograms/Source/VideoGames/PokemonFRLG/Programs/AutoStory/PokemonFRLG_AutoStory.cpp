@@ -42,6 +42,15 @@
 #include "PokemonFRLG_AutoStoryNewGame.h"
 #include "PokemonFRLG_AutoStory.h"
 
+//  The build number, written by the Windows build (GitHub Actions) before it
+//  compiles.
+#if __has_include("PokemonFRLG_AutoStoryBuild.h")
+#include "PokemonFRLG_AutoStoryBuild.h"
+#endif
+#ifndef FRLG_AUTOSTORY_BUILD
+#define FRLG_AUTOSTORY_BUILD "local"
+#endif
+
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonFRLG{
@@ -912,6 +921,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     AutoStory_Descriptor::Stats& stats = env.current_stats<AutoStory_Descriptor::Stats>();
     DeferredStopButtonOption::ResetOnExit reset_on_exit(STOP_AFTER_CURRENT);
 
+    env.log(std::string("FRLG AutoStory build ") + FRLG_AUTOSTORY_BUILD, COLOR_BLUE);
     if (MEMORY_TEST_MINUTES > 0){
         story_memory_test(env.console, context, MEMORY_TEST_MINUTES);
         return;

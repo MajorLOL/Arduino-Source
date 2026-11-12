@@ -1399,9 +1399,27 @@ bool walk_run(
             //  a row too low into a wall.)
             const int reach = (std::min(moves, made + 1) + 1) * tiles_per_move;
             AutoStoryScroll::Screen now;
-            if (reach <= (dx != 0 ? 10 : 6) && story_take_picture(rt, now)){
-                AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset_along(a.start, now, dx, dy, reach);
-                rt.console.log("After the stop, the run got: " + offset.summary());
+            AutoStoryScroll::TileOffset offset;
+            bool looked = false;
+            for (int look = 0; look < 2 && reach <= (dx != 0 ? 10 : 6); look++){
+                //  Unclear: a second look a little later. (Victory Road: a
+                //  battle on a one-step walk after a turn, the video unsure,
+                //  the look after the battle unclear; the walk went on a
+                //  tile too far and the STRENGTH boulder was not there.)
+                if (look > 0){
+                    if (offset.clear){
+                        break;
+                    }
+                    rt.context.wait_for(700ms);
+                }
+                if (!story_take_picture(rt, now)){
+                    break;
+                }
+                offset = AutoStoryScroll::tile_offset_along(a.start, now, dx, dy, reach);
+                rt.console.log(std::string("After the stop, the run got: ") + offset.summary() + (look > 0 ? " (second look)" : ""));
+                looked = true;
+            }
+            if (looked){
                 const int tiles = offset.x * dx + offset.y * dy;
                 if (offset.clear){
                     unsure_stop = false;
