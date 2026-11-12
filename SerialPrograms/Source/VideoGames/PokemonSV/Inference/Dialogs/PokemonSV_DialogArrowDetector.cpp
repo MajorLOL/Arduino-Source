@@ -179,6 +179,7 @@ DialogArrowWatcher::DialogArrowWatcher(Color color, VideoOverlay& overlay, const
     , m_bottom_line(bottom_line)
     , m_num_oscillation_above_top_line(0)
     , m_num_oscillation_below_bottom_line(0)
+    , m_num_no_detection(0)
 {}
 
 void DialogArrowWatcher::make_overlays(VideoOverlaySet& items) const{
