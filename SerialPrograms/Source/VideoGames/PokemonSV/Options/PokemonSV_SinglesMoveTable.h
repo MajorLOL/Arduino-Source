@@ -55,7 +55,15 @@ private:
 };
 
 
-class SinglesMoveTable : public EditableTableOption_t<SinglesMoveTableRow>{
+//  The kind of battle a SinglesMoveTable is for. A base class of its own,
+//  listed first, so that it is set before the table makes its first row:
+//  the row reads it to pick its list of moves, and the table makes that row
+//  while its other base class is still being constructed.
+struct SinglesMoveTableBattle{
+    bool m_trainer_battle;
+};
+
+class SinglesMoveTable : private SinglesMoveTableBattle, public EditableTableOption_t<SinglesMoveTableRow>{
 public:
     SinglesMoveTable(std::string label, bool trainer_battle);
 
@@ -67,8 +75,6 @@ public:
 
 private:
     friend class SinglesMoveTableRow;
-
-    bool m_trainer_battle;
 };
 
 

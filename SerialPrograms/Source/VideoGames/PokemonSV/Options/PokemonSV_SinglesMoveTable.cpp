@@ -94,7 +94,8 @@ void SinglesMoveTableRow::on_config_value_changed(void* object){
 
 
 SinglesMoveTable::SinglesMoveTable(std::string label, bool trainer_battle)
-    : EditableTableOption_t<SinglesMoveTableRow>(
+    : SinglesMoveTableBattle{trainer_battle}
+    , EditableTableOption_t<SinglesMoveTableRow>(
         std::move(label),
 #if 0
         "<b>Move Table:</b><br>"
