@@ -210,16 +210,21 @@ void ControllerCommandTable::load_json_NS_TurboMacro(const JsonValue& json){
         history.push_back(std::move(command));
 
 
+        //  The release after it: in ticks ("Release", the old format) or in
+        //  milliseconds ("ReleaseMs"). A row with either of them has one.
         JsonObject cooldown;
+        bool has_release = false;
         value = obj.get_value("Release");
         if (value != nullptr && value->is_integer()){
             cooldown["ms"] = std::to_string(value->to_integer_default() * 8) + " ms";
+            has_release = true;
         }
         value = obj.get_value("ReleaseMs");
         if (value != nullptr){
             cooldown["ms"] = value->to_string_throw();
+            has_release = true;
         }
-        if (value != nullptr){
+        if (has_release){
             history.push_back(std::move(cooldown));
         }
     }
