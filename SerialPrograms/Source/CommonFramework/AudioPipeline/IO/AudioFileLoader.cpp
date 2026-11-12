@@ -68,8 +68,9 @@ bool AudioFileLoader::start(){
         //  layout (the mixer's fallback_channel_config), which is what the
         //  tree's mix matrix is built from. Beyond that the tree cannot
         //  mix the input, so the file is rejected up front.
-        if (wav_audio_format.channelCount() > 8){
-            std::cout << "Error: audio file input supports up to 8 channels; the wav file has "
+        //  And at least 1: the conversion divides by the number of channels.
+        if (wav_audio_format.channelCount() < 1 || wav_audio_format.channelCount() > 8){
+            std::cout << "Error: audio file input supports 1 to 8 channels; the wav file has "
                 << wav_audio_format.channelCount() << " channels." << std::endl;
             return false;
         }
