@@ -97,6 +97,9 @@ void InferenceSession::clear() noexcept{
         case InferenceType::EXTERNAL:{
             Cancellable& stopper = dynamic_cast<Cancellable&>(*item.first);
             stopper.remove_cancel_listener(*this);
+            //  Not on into the next case: an external callback is no
+            //  visual one.
+            break;
         }
         case InferenceType::VISUAL:{
             StatAccumulatorI32 stats = m_stream.video_inference_pivot().remove_callback(
