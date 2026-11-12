@@ -495,6 +495,9 @@ BattleResult spam_first_move(ConsoleHandle& console, ProControllerContext& conte
             return BattleResult::unknown;
         default:
             console.log("Failed to detect move use.");
+            //  Counted, so that the check at the top of the loop can stop a
+            //  battle in which nothing is ever detected.
+            errors++;
             pbf_mash_button(context, BUTTON_B, 2000ms); // get back to the top-level battle menu
             context.wait_for_all_requests();
             continue;
