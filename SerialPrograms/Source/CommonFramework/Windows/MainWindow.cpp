@@ -49,9 +49,7 @@ MainWindow::MainWindow(QWidget* parent)
 {
     global_panel_holder() = this;
 
-    //  The theme, before any widget is made. Settings that were saved have
-    //  applied it when they were read; new settings have nothing to read.
-    apply_current_theme();
+    //  (The theme has been applied before this window was made: Main.cpp.)
 
     if (objectName().isEmpty()){
         setObjectName(QString::fromUtf8("MainWindow"));
@@ -483,6 +481,11 @@ void MainWindow::changeEvent(QEvent* event){
 }
 
 void MainWindow::update_wallpaper(){
+    //  A change of style or palette can arrive while the constructor has
+    //  not made the central widget yet.
+    if (centralwidget == nullptr){
+        return;
+    }
     GlobalSettings& settings = GlobalSettings::instance();
     const QColor surface_color = palette().color(QPalette::Active, QPalette::Window);
     centralwidget->set_appearance(

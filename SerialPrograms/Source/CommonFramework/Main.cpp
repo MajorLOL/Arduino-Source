@@ -40,6 +40,7 @@
 //#include "Windows/DpiScaler.h"
 #include "Logging/Logger.h"
 #include "Logging/OutputRedirector.h"
+#include "Options/Environment/ThemeSelectorOption.h"
 #include "Startup/SetupSettings.h"
 #include "Windows/MainWindow.h"
 #include "PocketPilot/PocketPilot_SelfTest.h"
@@ -207,6 +208,12 @@ int run_program(int argc, char *argv[]){
     }catch (const ParseException& error){
         logger.log(error.message(), COLOR_RED);
     }
+
+    //  The theme, before any window is made. Settings that were saved have
+    //  applied it when they were read; a new installation has nothing to
+    //  read. Not in the main window's constructor: a change of style sends
+    //  an event to every widget, also to a window that is still being made.
+    apply_current_theme();
 
     //  Load the Switch framework settings now, not only when their panel is opened.
     OptionsPanelWrapper<NintendoSwitch::ConsoleSettingsPanel>().make_panel()->load_json_from_global();
