@@ -223,6 +223,9 @@ void PickupFarmer::program(SingleSwitchProgramEnvironment& env, ProControllerCon
     bool spin_leftright = true;
     bool out_of_pp = false;
     uint16_t encounters_since_item_check = 0;
+    //  Failures to trigger an encounter in a row. Outside the loop: inside
+    //  it, it started at 0 every time and never reached its limit.
+    uint16_t errors = 0;
     
     while (!shiny_found){
         try{
@@ -266,7 +269,6 @@ void PickupFarmer::program(SingleSwitchProgramEnvironment& env, ProControllerCon
                 spin_leftright = true;
             }
 
-            uint16_t errors = 0;
             int ret = grass_spin(env.console, context, spin_leftright);
             shiny_found = (ret == 1);
             if (ret < 0){
@@ -284,6 +286,7 @@ void PickupFarmer::program(SingleSwitchProgramEnvironment& env, ProControllerCon
                 pbf_mash_button(context, BUTTON_B, 1000ms);
                 continue;
             }else{
+                errors = 0;
                 spin_leftright = !spin_leftright;
             }
 
