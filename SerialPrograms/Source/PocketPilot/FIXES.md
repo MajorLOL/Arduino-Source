@@ -1,0 +1,37 @@
+# Bug fixes in PocketPilot
+
+Bugs found in a review of the whole code on 12 November 2026 (cppcheck, clang-tidy and reading the core paths) and fixed in PocketPilot. Each was still in Pokémon Automation's `main` at commit `d914382` when it was fixed here. Each fix is a commit of its own, so that it can be offered to Pokémon Automation by itself.
+
+The fixes are checked by compiling them (GCC and Clang, with the warnings of the real build). None of them has run on a console yet: they change paths that only show when something goes wrong.
+
+## Shared code
+
+| # | Where | What was wrong | The fix |
+|---|---|---|---|
+| 1 | `CommonFramework/Recording/StreamHistoryTracker_SaveFrames.cpp` | Saving the stream history threw `std::runtime_error` when the video file could not be opened. It is saved while an error report is made, so the exception stopped the program that only reported an error it could recover from. Frames that could not be converted were stored empty and later written from a null picture, and a null picture divided by zero. | Saving returns `false` and logs the reason. Frames that cannot be converted are left out; a frame that cannot be read or has another size than the video is replaced by the last good one. |
+| 2 | `CommonTools/Async/InferenceSession.cpp` | A missing `break`: an external callback fell through into the code for a visual one (a wrong cast, a lookup that finds nothing, an empty line in the log). | `break`. |
+| 3 | `Controllers/ControllerStateTable.cpp` | A saved Turbo Macro row in the old format (`"Release"` only) lost its release time: the test looked at `"ReleaseMs"` only. | The release is kept when either is there. |
+| 4 | `CommonTools/Audio/AudioPerSpectrumDetectorBase.cpp` | A history of scores that nothing reads grew by about 47 entries a second for as long as no sound came close to the one listened for: about 15 MB an hour with a silent or missing audio input. | At most 1,000 entries are kept. |
+| 5 | `Common/Cpp/ListenerSet.h` | `run_method()` forwarded its arguments inside its loop over the listeners: an argument given as an rvalue was moved into the first listener, and the others got what was left of it. | The arguments are passed as they are, once for each listener. |
+| 6 | `Common/Cpp/Logging/LastLogTracker.cpp` | `get_recent(lines)` returned the oldest lines of the history, not the most recent ones. | The last `lines` entries. |
+| 7 | `Common/Cpp/ExpressionEvaluator.cpp` | The loop over the parsed expression shortened the vector it was going through. | The `pop_back()` is gone. |
+| 8 | `CommonFramework/VideoPipeline/UI/VideoSourceSelectorWidget.cpp` | A bounds check with `>` where `>=` was meant. | `>=`. |
+| 9 | `CommonFramework/AudioPipeline/IO/AudioFileLoader.cpp` | A WAV file with 0 channels divided by zero. | Such a file is refused, like one with more than 8 channels. |
+
+## Programs
+
+| # | Where | What was wrong | The fix |
+|---|---|---|---|
+| 10 | `VideoGames/PokemonFRLG/PokemonFRLG_Navigation.cpp`, `spam_first_move()` | The counter of failures was tested but never raised: a battle in which nothing was detected went on forever. | It is raised when nothing is detected. |
+| 11 | `VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_PickupFarmer.cpp` | The counter of failed encounters was made anew in every round of the loop, so "failed 5 times" could never happen. | It lives outside the loop and starts over after an encounter. |
+| 12 | `VideoGames/PokemonSV/Options/PokemonSV_SinglesMoveTable.cpp` | The table never stored whether it is for a trainer battle, and its first row read that before the table existed: whatever was in memory decided whether a row offered "Run". | The value is kept in a base class that is set before the first row is made. |
+| 13 | `VideoGames/PokemonSV/Programs/PokemonSV_WorldNavigation.cpp`, `jump_off_wall_until_map_open()` | The test for the last failed try was inside the loop where it could never be true: three failed tries went on as if the map were open. | The failure is reported after the loop. |
+| 14 | `VideoGames/PokemonSV/Inference/Boxes/PokemonSV_BoxDetection.cpp` | A copied bounds check tested `x` twice and never `y`: a negative row became row 255. | It tests `y`. |
+| 15 | `VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogArrowDetector.cpp` | A counter was used before it was ever set. | It starts at 0. |
+| 16 | `VideoGames/PokemonLZA/Programs/PokemonLZA_FastTravelNavigation.cpp` | A "confirmation" after a wait compared the value read before the wait. | The screen is read again. |
+| 17 | `PokemonLGPE_AlolanTrade.cpp`, `PokemonLGPE_FossilRevival.cpp`, `PokemonSwSh_DateSpam-PokeJobsFarmer.cpp` | Loop counters of 16 bits counting up to an option of 32 bits: above 65,535 the counter wraps around and the loop never ends. | Counters as wide as the option. |
+
+## Also changed for the new themes
+
+- `Common/Qt/Options/SimpleIntegerWidget.cpp`, `FloatingPointWidget.cpp`: a valid number was set to black text, which cannot be read in a dark theme. It now takes the theme's text color; a number out of range is still red.
+- `CommonTools/Options/QtWidgets/StringSelectWidget.cpp`: an entry without a color was set to the color 0 (black). It now takes the theme's text color.
