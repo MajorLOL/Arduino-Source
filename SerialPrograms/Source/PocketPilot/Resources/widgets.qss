@@ -58,11 +58,16 @@ QLineEdit:disabled, QPlainTextEdit:disabled, QTextEdit:disabled {
 
 /* ---- Combo boxes ---- */
 
+/*  "combobox-popup: 0" makes the list drop down below the box, as on Windows.
+    Without it Fusion draws the list as a menu over the box, and the rules for
+    the box itself are then applied to the selected row of that menu: an empty
+    row in the Day theme, dark text on black in the Night theme. */
 QComboBox {
     background-color: @field@;
     border: 1px solid @line@;
     border-radius: 5px;
     padding: 3px 8px;
+    combobox-popup: 0;
 }
 QComboBox:hover {
     border-color: @muted@;

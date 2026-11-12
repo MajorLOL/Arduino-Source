@@ -53,8 +53,10 @@ ProgramSelect::ProgramSelect(QWidget& parent, PanelHolder& holder)
     m_dropdown->setToolTip("The game whose programs are listed below");
     this->setStyleSheet("QComboBox QAbstractItemView::item { min-height: 24px; }");
     {
+        //  A list view of its own, so that the rule above applies to its rows.
+        //  No word wrap: with it the list measures its rows before it has its
+        //  width, and opens almost twice as tall as its rows the first time.
         QListView* list_view = new QListView(this);
-        list_view->setWordWrap(true);
         m_dropdown->setView(list_view);
     }
     {
