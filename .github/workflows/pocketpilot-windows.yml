@@ -1,0 +1,209 @@
+name: PocketPilot - Windows build
+
+# Builds a ready-to-run Windows version of PocketPilot (Qt DLLs, resources and
+# firmware included), starts it once to take pictures of its interface, and
+# publishes the build with the pictures as a pre-release of this repository
+# and as a workflow artifact.
+#
+# The build itself follows the upstream workflow for Windows
+# (cpp-ci-serial-programs-base.yml): Ninja, and ccache to keep the compiler's
+# output between runs, so that a build only recompiles what a change affects.
+
+on:
+  push:
+    branches: [pocketpilot]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      #  As in the upstream workflow, for Windows with the MSVC compiler.
+      #  "Ninja Multi-Config" keeps Visual Studio's output layout
+      #  (bin/RelWithDebInfo/). ccache can't cache assembly listings or
+      #  separate debug info, so both are off: RelWithDebInfo's optimization
+      #  without its debug info.
+      - name: Set variables
+        shell: bash
+        run: |
+          CMAKE_ADDITIONAL_FLAGS="-DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -DCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO=/INCREMENTAL:NO -DPA_ASSEMBLY_LISTINGS=OFF"
+          CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl"
+          CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+          echo "CMAKE_GENERATOR=Ninja Multi-Config" >> $GITHUB_ENV
+          echo "CMAKE_ADDITIONAL_FLAGS=$CMAKE_ADDITIONAL_FLAGS" >> $GITHUB_ENV
+          echo "BUILD_PARALLEL=$(( $(nproc) + 2 ))" >> $GITHUB_ENV
+
+      - name: Checkout Arduino-Source
+        uses: actions/checkout@v7
+        with:
+          path: 'Arduino-Source'
+          submodules: 'recursive'
+
+      #  The resources, firmware and scripts (Pokemon Automation's Packages).
+      - name: Checkout Packages
+        uses: actions/checkout@v7
+        with:
+          repository: 'PokemonAutomation/Packages'
+          ref: 'master'
+          path: 'Arduino-Source/Packages'
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall'
+          version: '6.10.2'
+          modules: 'qtmultimedia qtserialport'
+          cache: true
+
+      #  Ninja needs the MSVC build environment (cl and link on PATH, INCLUDE,
+      #  LIB, ...). Run vcvars64.bat from the newest Visual Studio and pass
+      #  every variable it adds or changes to the later steps.
+      - name: Set up MSVC environment
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $vcvars = cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" >nul && set"
+          if ($LASTEXITCODE -ne 0) {
+            throw "vcvars64.bat failed with exit code $LASTEXITCODE"
+          }
+          foreach ($line in $vcvars) {
+            # Skip anything that isn't a NAME=value line.
+            if ($line -notmatch '^([^=]+)=(.*)$') {
+              continue
+            }
+            $name = $Matches[1]
+            $value = $Matches[2]
+            if ([Environment]::GetEnvironmentVariable($name) -ne $value) {
+              "$name=$value" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+              [Environment]::SetEnvironmentVariable($name, $value)
+            }
+          }
+          if (-not (Get-Command cl -ErrorAction SilentlyContinue)) {
+            throw "cl.exe isn't on PATH after vcvars64.bat"
+          }
+          Get-Command cl, link, ninja, cmake -ErrorAction SilentlyContinue | Format-Table Name, Version, Source -AutoSize
+
+      #  The compiler's output of the last build of this branch. max-size is
+      #  only a cap: evict-old-files drops everything this build didn't use.
+      #  The action's own ccache: the runner's Strawberry Perl has an older
+      #  one on PATH.
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: pocketpilot-windows-2025
+          max-size: 5G
+          evict-old-files: job
+          save: true
+          install: binary
+
+      #  The number of the build, in the window's title, the "About" window
+      #  and the programs' logs ("PocketPilot build N").
+      - name: Build number
+        shell: bash
+        run: |
+          echo '#define POCKETPILOT_BUILD "${{ github.run_number }}"' > Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
+
+      - name: Build
+        env:
+          #  On a cache miss, ccache takes the include files from the
+          #  compiler's own report instead of preprocessing a second time.
+          CCACHE_DEPEND: 1
+        run: |
+          cd Arduino-Source/SerialPrograms
+          mkdir bin
+          cd bin
+          cmake .. -DQT_MAJOR:STRING=6 -DPA_SDL=ON ${{env.CMAKE_ADDITIONAL_FLAGS}}
+          cmake --build . --config RelWithDebInfo --parallel ${{env.BUILD_PARALLEL}}
+
+      #  On GitHub Actions the CMake project skips windeployqt (it expects
+      #  the developer's Qt next to the build). Deploy the Qt DLLs here so
+      #  the folder runs on its own.
+      - name: Deploy Qt and package
+        shell: pwsh
+        run: |
+          $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
+          windeployqt --release --dir $out "$out/SerialPrograms.exe"
+          Remove-Item "$out/*.lib", "$out/*.exp", "$out/*.pdb", "$out/*.ilk" -ErrorAction SilentlyContinue
+          #  The program only adds to an existing stats file ("Unable to save stats." otherwise).
+          New-Item -ItemType Directory -Force -Path "$out/UserSettings" | Out-Null
+          if (-not (Test-Path "$out/UserSettings/PA-Stats.txt")) { New-Item -ItemType File -Path "$out/UserSettings/PA-Stats.txt" | Out-Null }
+          #  The OCR model the AutoStory needs. Without it, the program
+          #  downloads it at the first start, which fails on a slow or
+          #  filtered connection to raw.githubusercontent.com.
+          $res = "$out/DownloadedResources/PaddleOCRDetection"
+          New-Item -ItemType Directory -Force -Path $res | Out-Null
+          Expand-Archive -Path "Arduino-Source/Packages/DownloadedResources/PaddleOCRDetection.zip" -DestinationPath $res -Force
+          Get-ChildItem $res | Format-Table Name, Length
+          #  The licenses: of Pokemon Automation, which PocketPilot is built
+          #  on, and of what PocketPilot adds.
+          Copy-Item -Recurse "Arduino-Source/SerialPrograms/Source/PocketPilot/Licenses" "$out/Licenses"
+          Copy-Item "Arduino-Source/LICENSE" "$out/Licenses/PokemonAutomation-MIT-License.txt"
+          Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/Jersey20-OFL.txt" "$out/Licenses/Jersey20-OFL.txt"
+          $sha = git -C Arduino-Source rev-parse HEAD
+          "https://github.com/${{ github.repository }}/commit/$sha" | Out-File "$out/version.txt"
+          New-Item -ItemType Directory -Path "package" | Out-Null
+          Copy-Item -Recurse $out "package/PocketPilot"
+          Compress-Archive -Path "package/PocketPilot" -DestinationPath "PocketPilot-Windows.zip"
+          Get-Item "PocketPilot-Windows.zip" | Format-List Name, Length
+
+      #  Start the build once: it opens its main window, goes through its
+      #  pages and themes, saves a picture of each and exits (see
+      #  Source/PocketPilot/PocketPilot_SelfTest.h). After the package is
+      #  made, so that what the run writes is not in it. A failure here does
+      #  not stop the build from being published.
+      - name: Interface test
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          New-Item -ItemType Directory -Force -Path "ui-screenshots" | Out-Null
+          $shots = (Resolve-Path "ui-screenshots").Path
+          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--ui-screenshots", "`"$shots`"" -PassThru
+          #  Keep the handle, or the exit code is not there afterwards.
+          $handle = $process.Handle
+          if ($process.WaitForExit(300000)) {
+            Write-Host "The interface test exited with code $($process.ExitCode)."
+          } else {
+            $process.Kill()
+            Write-Host "::warning::The interface test did not finish within 5 minutes and was stopped."
+          }
+          Get-ChildItem $shots | Format-Table Name, Length
+          Get-ChildItem "$dir/UserSettings" -Filter "*.log" | ForEach-Object {
+            Write-Host "---- the end of $($_.Name) ----"
+            Get-Content $_.FullName -Tail 80
+          }
+          if (-not (Get-ChildItem $shots -Filter "*.png")) {
+            throw "The interface test saved no pictures."
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: PocketPilot-Windows
+          path: |
+            PocketPilot-Windows.zip
+            ui-screenshots/*.png
+
+      - name: Publish pre-release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="pocketpilot-build-${{ github.run_number }}"
+          FILES="PocketPilot-Windows.zip"
+          if ls ui-screenshots/*.png > /dev/null 2>&1; then
+            FILES="$FILES ui-screenshots/*.png"
+          fi
+          gh release create "$TAG" $FILES \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            --title "PocketPilot - Windows build ${{ github.run_number }}" \
+            --notes "PocketPilot, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. The pictures show this build's interface as it started on the build machine. For non-commercial use. Built from ${{ github.sha }}."

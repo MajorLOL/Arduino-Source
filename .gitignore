@@ -77,3 +77,6 @@ build_*/
 .cache/*
 Packages/*
 
+
+# PocketPilot: the number of the build, written by the workflow that makes the builds
+SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
