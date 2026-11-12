@@ -76,6 +76,11 @@ std::vector<uchar> compress_video_frame(const QVideoFrame& const_frame){
     // 2. Convert to QImage (Qt 6.8+ handles internal conversions efficiently)
     // For circular buffers, using a 3-channel RGB888 is common for OpenCV
     QImage img = frame.toImage().convertToFormat(QImage::Format_RGB888);
+    //  A frame that could not be converted: nothing to compress (and its
+    //  width of 0 would divide by zero below).
+    if (img.isNull()){
+        return {};
+    }
 
     int target_width;
     const StreamHistoryOption& settings = GlobalSettings::instance().STREAM_HISTORY;
@@ -308,13 +313,34 @@ bool StreamHistoryTracker::save(const std::string& filename) const{
 
     m_logger.log("Frame size: " + std::to_string(width) + " x " + std::to_string(height));
 
+    if (first_img.isNull()){
+        m_logger.log("Unable to save stream history: the first frame cannot be read.", COLOR_RED);
+        return false;
+    }
+
     // 1. Initialize VideoWriter (e.g., MP4 with 30 FPS)
     cv::VideoWriter writer(filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 
                            m_target_fps, cv::Size(width, height), true);
 
+    //  Not an exception: this runs while an error report is made, and an
+    //  exception from here would stop the program that only wanted to report
+    //  an error it can recover from.
     if (!writer.isOpened()){
-        throw std::runtime_error("Could not open video file for writing.");
+        m_logger.log("Unable to save stream history: could not open the video file for writing: " + filename, COLOR_RED);
+        return false;
     }
+
+    //  A frame is written only if it can be read and has the size of the
+    //  video: the writer is given the frame's memory with that size.
+    auto write_frame = [&](const std::vector<unsigned char>& buffer){
+        QImage img = decompress_video_frame(buffer);
+        if (img.isNull() || img.width() != width || img.height() != height){
+            return false;
+        }
+        cv::Mat mat(height, width, CV_8UC3, (void*)img.bits(), img.bytesPerLine());
+        writer.write(mat);
+        return true;
+    };
 
     std::vector<unsigned char> last_good_buffer = frames[0].compressed_frame;
 
@@ -338,18 +364,17 @@ bool StreamHistoryTracker::save(const std::string& filename) const{
         // fill the gap with duplicate frames until we reach the target index
         while (frames_inserted < target_frame_index){
             // Decompress last known good frame and write again
-            QImage img = decompress_video_frame(last_good_buffer);
-            cv::Mat mat(height, width, CV_8UC3, (void*)img.bits(), img.bytesPerLine());
-            writer.write(mat);
+            write_frame(last_good_buffer);
             frames_inserted++;
         }
 
         // 3. decompress frame and write to video
-        QImage img = decompress_video_frame(frame.compressed_frame);
-        cv::Mat mat(height, width, CV_8UC3, (void*)img.bits(), img.bytesPerLine());
-        writer.write(mat);
-
-        last_good_buffer = frame.compressed_frame;
+        if (write_frame(frame.compressed_frame)){
+            last_good_buffer = frame.compressed_frame;
+        }else{
+            //  Keep the video's timing: the last good frame once more.
+            write_frame(last_good_buffer);
+        }
         frames_inserted++;
         frame_index++;
     }
@@ -377,6 +402,10 @@ void StreamHistoryTracker::worker_loop(){
 
         // 2. Perform the expensive compression (Outside the lock)
         auto compressed_data = compress_video_frame(frame->frame);
+        //  A frame that could not be mapped or converted is left out.
+        if (compressed_data.empty()){
+            continue;
+        }
 
         // 3. Move the result into the main storage
         {
