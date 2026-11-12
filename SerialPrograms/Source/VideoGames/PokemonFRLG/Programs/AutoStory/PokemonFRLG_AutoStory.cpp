@@ -381,11 +381,10 @@ AutoStory::AutoStory()
     , COLLECTION_SUMMARY("")
     , COLLECTION(COLLECTION_SUMMARY)
     , MEMORY_TEST_MINUTES(
-        "<b>Memory test (minutes per part, 0: off):</b><br>Instead of the story: 6 parts of this many minutes "
-        "(10 is enough), no buttons pressed, each with one thing the program does all the time (the video "
-        "frames, the screen watchers, the text reading, the shiny sound). The log gives the memory growth of "
-        "each, to find what makes the memory grow during long runs. Leave the game on the overworld. "
-        "Set it back to 0 afterwards.",
+        "<b>Memory test (minutes per part, 0: off):</b><br>Instead of the story: 5 parts of this many minutes "
+        "(10 is enough), no buttons pressed, each turning the video into pictures in another way. The log "
+        "gives the memory growth of each, to find what makes the memory grow during long runs. Where the "
+        "game is does not matter. Set it back to 0 afterwards.",
         LockMode::LOCK_WHILE_RUNNING,
         0, 0, 120
     )

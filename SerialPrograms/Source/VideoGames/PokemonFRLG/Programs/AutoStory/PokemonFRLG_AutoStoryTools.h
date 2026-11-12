@@ -327,11 +327,11 @@ void story_check_memory_at_start(StoryRuntime& rt);
 //  Log the memory the program uses (every few minutes, or now if "force").
 void story_log_memory(StoryRuntime& rt, bool force = false);
 
-//  The memory test (the option): no buttons, "minutes" for each part, the
-//  memory growth of each. The memory grows only while the program runs;
-//  each part runs one thing the program does all the time (the video
-//  frames, the screen watchers, the text reading, the shiny sound) on its
-//  own, to find which one grows it.
+//  The memory test (the option, PokemonFRLG_AutoStoryMemoryTest.cpp): no
+//  buttons, "minutes" for each part, the memory growth of each. The memory
+//  grows only while the program runs, with the pictures of the video; each
+//  part turns the video frames into pictures in another way, to find the
+//  one that grows it.
 void story_memory_test(ConsoleHandle& console, ProControllerContext& context, uint16_t minutes);
 
 //  Save from the overworld. "has_pokedex" picks the start menu layout.
