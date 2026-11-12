@@ -184,7 +184,7 @@ std::pair<BoxCursorLocation, BoxCursorCoordinates> BoxDetector::detect_location(
             return {BoxCursorLocation::NONE, {0, 0}};
         }
         int y = (int)((box.y - 0.175926) / 0.11713 + 0.5);
-        if (x < 0){
+        if (y < 0){
             return {BoxCursorLocation::NONE, {0, 0}};
         }
         return {BoxCursorLocation::SLOTS, {(uint8_t)y, (uint8_t)x}};
