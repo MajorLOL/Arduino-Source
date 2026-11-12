@@ -7,11 +7,10 @@
  *
  *  toImage() converts on the GPU where it can (a QRhi for each thread that
  *  calls it). On some computers the process memory then grows with each
- *  picture the screen watchers get and is only given back by a restart:
- *  8-90 KB a picture, 0.3-1.6 GB an hour in long runs of the FRLG AutoStory
- *  (Intel UHD 630, a 720p NV12 capture card, Qt 6.10). With PA open and no
- *  program running it does not grow: the display and the stream history
- *  convert the same frames all the time.
+ *  conversion and is only given back by restarting PA: 10-13 KB a
+ *  conversion, 0.3-1.6 GB an hour while a program with screen watchers
+ *  runs (Windows, Intel UHD 630, a 1280 x 720 NV12 capture card, Qt
+ *  6.10.2). The same frames converted here do not grow it.
  *
  *  VideoFrameConverter compares its own conversion with toImage() on the
  *  first frames with colors and takes over only when the colors match.
