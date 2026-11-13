@@ -763,6 +763,7 @@ StoryBattleResult story_battle(
         case StoryBattleResult::LEAD_FAINTED:   outcome = "the lead fainted"; color = COLOR_ORANGE; break;
         case StoryBattleResult::LOST:           outcome = "lost, the party fainted"; color = COLOR_RED; break;
         case StoryBattleResult::NO_BATTLE:      break;
+        case StoryBattleResult::OUT_OF_BALLS:   outcome = "no balls left"; color = COLOR_ORANGE; break;
         }
         std::string line = kind == StoryBattleKind::TRAINER
             ? "Trainer battle " + std::to_string(rt.trainer_battles)

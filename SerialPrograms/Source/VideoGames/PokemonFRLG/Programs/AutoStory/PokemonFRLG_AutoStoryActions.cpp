@@ -827,7 +827,27 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
     ProControllerContext& context = rt.context;
     //  Maybe healing items: look in the bag again when one is needed.
     rt.memory.no_heal_items = false;
-    console.log("Buying " + std::to_string(quantity) + "x item " + std::to_string(index + 1) + ": " + what);
+    //  The game lets the quantity go only as high as the money allows
+    //  (Task_BuyHowManyDialogueInit: money / price, 99 at most), and
+    //  (AdjustQuantityAccordingToDPadInput) UP past that goes round to 1,
+    //  DOWN from 1 round to the most, RIGHT adds ten and stops at the most.
+    //  UP for a quantity the money does not allow therefore buys something
+    //  else: 10 ULTRA BALLs with money for three were 1 (nine times UP: 2, 3,
+    //  1, 2, 3, 1, 2, 3, 1). So: RIGHT for the tens in one purchase, then the
+    //  rest one at a time. Each stops by itself where the money ends ("You
+    //  don't have enough money." takes the same four presses), and never
+    //  more is bought than asked for.
+    const int tens = quantity > 0 ? (quantity - 1) / 10 : 0;
+    const int singles = quantity > 0 ? (quantity - 1) % 10 : 0;
+    console.log(
+        (quantity <= 0
+            ? std::string("Buying as many as the money allows of")
+            : "Buying " + std::to_string(quantity) + " (or as many as the money allows) of") +
+        " item " + std::to_string(index + 1) + ": " + what +
+        (quantity > 0 && singles > 0
+            ? " (" + std::to_string(1 + 10 * tens) + " in one purchase, " + std::to_string(singles) + " one at a time)"
+            : std::string())
+    );
 
     //  "Hi there! May I help you?" BUY / SELL / SEE YA, cursor on BUY.
     story_talk_start(rt, what);
@@ -839,19 +859,26 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
     for (int i = 0; i < index; i++){
         dpad(context, DPAD_DOWN);
     }
-    press(context, BUTTON_A, 1500ms);       //  "How many would you like?"
-    if (quantity <= 0){
-        //  As many as the money allows: DOWN from 1 goes round to the most
-        //  (AdjustQuantityAccordingToDPadInput, up to 99).
-        dpad(context, DPAD_DOWN, 200ms);
+    //  One purchase, from the item list back to the item list (the cursor
+    //  stays on the item).
+    auto purchase = [&](bool most, int right){
+        press(context, BUTTON_A, 1500ms);       //  "How many would you like?"
+        if (most){
+            //  As many as the money allows: DOWN from 1 goes round to the
+            //  most (up to 99).
+            dpad(context, DPAD_DOWN, 200ms);
+        }
+        for (int i = 0; i < right; i++){
+            dpad(context, DPAD_RIGHT, 200ms);
+        }
+        press(context, BUTTON_A, 2000ms);       //  "That will be $X. OK?"
+        press(context, BUTTON_A, 2000ms);       //  YES: "Here you go! Thank you!"
+        press(context, BUTTON_A, 1500ms);       //  the item list again
+    };
+    purchase(quantity <= 0, tens);
+    for (int i = 0; i < singles; i++){
+        purchase(false, 0);
     }
-    //  UP adds one (up to what the money allows).
-    for (int i = 1; i < quantity; i++){
-        dpad(context, DPAD_UP, 200ms);
-    }
-    press(context, BUTTON_A, 2000ms);       //  "That will be $X. OK?"
-    press(context, BUTTON_A, 2000ms);       //  YES: "Here you are!"
-    press(context, BUTTON_A, 1500ms);
     press(context, BUTTON_B, 2000ms);       //  close the list
     context.wait_for_all_requests();
     //  "Is there anything else?" -> B, "Please come again!"

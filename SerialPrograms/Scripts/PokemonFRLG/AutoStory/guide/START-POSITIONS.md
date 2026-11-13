@@ -75,6 +75,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 - [C13_01_ELITE_FOUR](#c13_01_elite_four) — Elite Four again: Lorelei, Bruno, Agatha, Lance (prize money for Poke Balls)
 - [C13_01_CHAMPION](#c13_01_champion) — Champion again, Hall of Fame
 - [C13_01_OAK](#c13_01_oak) — Oak's POKeDEX rating (not 60 species yet)
+- [C13_01_MOLTRES](#c13_01_moltres) — Moltres, if it was left on Mt. Ember (Great Balls from the prize money)
 - [C13_02_ELITE_FOUR](#c13_02_elite_four) — Elite Four again: Lorelei, Bruno, Agatha, Lance (more prize money)
 - [C13_02_CHAMPION](#c13_02_champion) — Champion again, Hall of Fame
 - [C13_02_OAK](#c13_02_oak) — Oak's POKeDEX rating (not 60 species yet)
@@ -104,6 +105,17 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 - [C17_05_NETWORK_MACHINE](#c17_05_network_machine) — One Island: the Sapphire for Celio; the roaming legendary is out
 - [C18_01_SUICUNE](#c18_01_suicune) — The roaming Suicune: Route 10, the MASTER BALL
 - [C19_01_MEWTWO](#c19_01_mewtwo) — Mewtwo in Cerulean Cave (weakened, Ultra Balls)
+- [C20_01_START](#c20_01_start) — POKeDEX collection: out of the Cerulean City Pokemon Center
+- [C20_02_CERULEAN](#c20_02_cerulean) — POKeDEX collection: Route 24, Route 4, Cerulean Cave
+- [C20_03_MT_MOON](#c20_03_mt_moon) — POKeDEX collection: Mt. Moon, Route 3
+- [C20_04_VIRIDIAN](#c20_04_viridian) — POKeDEX collection: Viridian Forest, Route 22, Route 23
+- [C20_05_VICTORY_ROAD](#c20_05_victory_road) — POKeDEX collection: Victory Road
+- [C20_06_ROUTE10](#c20_06_route10) — POKeDEX collection: Power Plant, Rock Tunnel
+- [C20_07_LAVENDER](#c20_07_lavender) — POKeDEX collection: Pokemon Tower, Route 8, Route 12
+- [C20_08_CELADON](#c20_08_celadon) — POKeDEX collection: Route 16
+- [C20_09_FUCHSIA](#c20_09_fuchsia) — POKeDEX collection: Safari Zone, Routes 14, 15, 18, Seafoam Islands
+- [C20_10_CINNABAR](#c20_10_cinnabar) — POKeDEX collection: Pokemon Mansion, Route 21
+- [C20_11_VERMILION_SEVII](#c20_11_vermilion_sevii) — POKeDEX collection: Route 11, Diglett's Cave, Route 6, the Sevii Islands
 
 ## C0_01_BEDROOM_TO_LAB
 
@@ -115,7 +127,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Players House 2F (6, 6), facing up
 
-![C0_01_BEDROOM_TO_LAB step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_PlayersHouse_2F_6_6_up.png)
+![C0_01_BEDROOM_TO_LAB step 1](images/PalletTown_PlayersHouse_2F_6_6_up.png)
 
 ## C0_02_CHOOSE_STARTER
 
@@ -127,7 +139,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Professor Oaks Lab (6, 4), facing up
 
-![C0_02_CHOOSE_STARTER step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_ProfessorOaksLab_6_4_up.png)
+![C0_02_CHOOSE_STARTER step 1](images/PalletTown_ProfessorOaksLab_6_4_up.png)
 
 ## C0_03_RIVAL_BATTLE
 
@@ -139,7 +151,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Professor Oaks Lab (10, 5), facing up
 
-![C0_03_RIVAL_BATTLE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_ProfessorOaksLab_10_5_up.png)
+![C0_03_RIVAL_BATTLE step 1](images/PalletTown_ProfessorOaksLab_10_5_up.png)
 
 ## C0_04_TO_VIRIDIAN_MART
 
@@ -151,7 +163,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Professor Oaks Lab (7, 8), facing down
 
-![C0_04_TO_VIRIDIAN_MART step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_ProfessorOaksLab_7_8_down.png)
+![C0_04_TO_VIRIDIAN_MART step 1](images/PalletTown_ProfessorOaksLab_7_8_down.png)
 
 ## C0_05_PARCEL_TO_OAK
 
@@ -163,7 +175,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Viridian City Mart (4, 3), facing left
 
-![C0_05_PARCEL_TO_OAK step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_Mart_4_3_left.png)
+![C0_05_PARCEL_TO_OAK step 1](images/ViridianCity_Mart_4_3_left.png)
 
 ## C1_01_VIRIDIAN_PC
 
@@ -175,7 +187,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Professor Oaks Lab (6, 4), facing up
 
-![C1_01_VIRIDIAN_PC step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_ProfessorOaksLab_6_4_up.png)
+![C1_01_VIRIDIAN_PC step 1](images/PalletTown_ProfessorOaksLab_6_4_up.png)
 
 ## C1_02_GRIND_ROUTE2
 
@@ -189,7 +201,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 7, 8:** Viridian City Pokemon Center 1F (7, 4), facing up
 
-![C1_02_GRIND_ROUTE2 step 1, 7, 8](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+![C1_02_GRIND_ROUTE2 step 1, 7, 8](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
 
 ## C1_03_VIRIDIAN_FOREST
 
@@ -201,7 +213,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Viridian City Pokemon Center 1F (7, 4), facing up
 
-![C1_03_VIRIDIAN_FOREST step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+![C1_03_VIRIDIAN_FOREST step 1](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
 
 ## C1_04_GRIND_BROCK
 
@@ -214,7 +226,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Pewter City Pokemon Center 1F (7, 4), facing up
 
-![C1_04_GRIND_BROCK step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PewterCity_PokemonCenter_1F_7_4_up.png)
+![C1_04_GRIND_BROCK step 1, 2](images/PewterCity_PokemonCenter_1F_7_4_up.png)
 
 ## C1_05_BROCK
 
@@ -227,11 +239,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pewter City Pokemon Center 1F (7, 4), facing up
 
-![C1_05_BROCK step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PewterCity_PokemonCenter_1F_7_4_up.png)
+![C1_05_BROCK step 1](images/PewterCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 8:** Pewter City Gym (6, 6), facing up
 
-![C1_05_BROCK step 8](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PewterCity_Gym_6_6_up.png)
+![C1_05_BROCK step 8](images/PewterCity_Gym_6_6_up.png)
 
 ## C2_01_RUNNING_SHOES_ROUTE3
 
@@ -243,7 +255,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pewter City Pokemon Center 1F (7, 4), facing up
 
-![C2_01_RUNNING_SHOES_ROUTE3 step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PewterCity_PokemonCenter_1F_7_4_up.png)
+![C2_01_RUNNING_SHOES_ROUTE3 step 1](images/PewterCity_PokemonCenter_1F_7_4_up.png)
 
 ## C2_02_MT_MOON
 
@@ -255,7 +267,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 4 Pokemon Center 1F (7, 4), facing up
 
-![C2_02_MT_MOON step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route4_PokemonCenter_1F_7_4_up.png)
+![C2_02_MT_MOON step 1](images/Route4_PokemonCenter_1F_7_4_up.png)
 
 ## C2_03_GRIND_RIVAL
 
@@ -268,7 +280,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C2_03_GRIND_RIVAL step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C2_03_GRIND_RIVAL step 1, 2](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C2_04_RIVAL_NUGGET_BRIDGE
 
@@ -280,7 +292,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C2_04_RIVAL_NUGGET_BRIDGE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C2_04_RIVAL_NUGGET_BRIDGE step 1](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C2_05_BILL
 
@@ -292,7 +304,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C2_05_BILL step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C2_05_BILL step 1](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C2_06_GRIND_MISTY
 
@@ -306,7 +318,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 9, 10:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C2_06_GRIND_MISTY step 1, 9, 10](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C2_06_GRIND_MISTY step 1, 9, 10](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C2_07_MISTY
 
@@ -319,11 +331,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C2_07_MISTY step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C2_07_MISTY step 1](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 8:** Cerulean City Gym (9, 6), facing left
 
-![C2_07_MISTY step 8](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_Gym_9_6_left.png)
+![C2_07_MISTY step 8](images/CeruleanCity_Gym_9_6_left.png)
 
 ## C3_01_TO_VERMILION
 
@@ -335,7 +347,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C3_01_TO_VERMILION step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C3_01_TO_VERMILION step 1](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C3_02_SS_ANNE
 
@@ -347,7 +359,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C3_02_SS_ANNE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C3_02_SS_ANNE step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 ## C3_03_CUT_AND_GRIND
 
@@ -361,7 +373,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2, 3:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C3_03_CUT_AND_GRIND step 1, 2, 3](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C3_03_CUT_AND_GRIND step 1, 2, 3](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 ## C3_04_SURGE
 
@@ -374,11 +386,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C3_04_SURGE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C3_04_SURGE step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 24:** Vermilion City Gym (4, 2), facing right
 
-![C3_04_SURGE step 24](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_Gym_4_2_right.png)
+![C3_04_SURGE step 24](images/VermilionCity_Gym_4_2_right.png)
 
 ## C4_01_ROUTE9
 
@@ -390,7 +402,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C4_01_ROUTE9 step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C4_01_ROUTE9 step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 ## C4_02_ROCK_TUNNEL
 
@@ -403,7 +415,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 8:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C4_02_ROCK_TUNNEL step 1, 8](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C4_02_ROCK_TUNNEL step 1, 8](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 ## C4_03_TO_CELADON
 
@@ -415,7 +427,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Lavender Town Pokemon Center 1F (7, 4), facing up
 
-![C4_03_TO_CELADON step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+![C4_03_TO_CELADON step 1](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
 
 ## C4_04_TEA_AND_GRIND
 
@@ -431,7 +443,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 35, 36, 37, 38:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C4_04_TEA_AND_GRIND step 1, 35, 36, 37, 38](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C4_04_TEA_AND_GRIND step 1, 35, 36, 37, 38](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 ## C4_05_ERIKA
 
@@ -445,11 +457,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 26:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C4_05_ERIKA step 1, 26](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C4_05_ERIKA step 1, 26](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 18:** Celadon City Gym (6, 5), facing up
 
-![C4_05_ERIKA step 18](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_Gym_6_5_up.png)
+![C4_05_ERIKA step 18](images/CeladonCity_Gym_6_5_up.png)
 
 ## C5_01_HIDEOUT_LIFT_KEY
 
@@ -461,7 +473,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 16 House (4, 3), facing up
 
-![C5_01_HIDEOUT_LIFT_KEY step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route16_House_4_3_up.png)
+![C5_01_HIDEOUT_LIFT_KEY step 1](images/Route16_House_4_3_up.png)
 
 ## C5_02_HIDEOUT_GIOVANNI
 
@@ -473,7 +485,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C5_02_HIDEOUT_GIOVANNI step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C5_02_HIDEOUT_GIOVANNI step 1](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 ## C5_03_TO_LAVENDER
 
@@ -485,7 +497,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C5_03_TO_LAVENDER step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C5_03_TO_LAVENDER step 1](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 ## C5_04_POKEMON_TOWER
 
@@ -497,7 +509,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Lavender Town Pokemon Center 1F (7, 4), facing up
 
-![C5_04_POKEMON_TOWER step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+![C5_04_POKEMON_TOWER step 1](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
 
 ## C6_01_SNORLAX_TO_FUCHSIA
 
@@ -509,7 +521,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Lavender Town Pokemon Center 1F (7, 4), facing up
 
-![C6_01_SNORLAX_TO_FUCHSIA step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+![C6_01_SNORLAX_TO_FUCHSIA step 1](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
 
 ## C6_02_SAFARI_ZONE
 
@@ -521,7 +533,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C6_02_SAFARI_ZONE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C6_02_SAFARI_ZONE step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C6_03_GRIND_KOGA
 
@@ -536,7 +548,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2, 3, 4:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C6_03_GRIND_KOGA step 1, 2, 3, 4](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C6_03_GRIND_KOGA step 1, 2, 3, 4](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C6_04_KOGA
 
@@ -549,11 +561,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C6_04_KOGA step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C6_04_KOGA step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 10:** Fuchsia City Gym (7, 12), facing down
 
-![C6_04_KOGA step 10](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_Gym_7_12_down.png)
+![C6_04_KOGA step 10](images/FuchsiaCity_Gym_7_12_down.png)
 
 ## C7_01_TO_SAFFRON
 
@@ -565,7 +577,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C7_01_TO_SAFFRON step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C7_01_TO_SAFFRON step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C7_02_SILPH_CARD_KEY
 
@@ -577,7 +589,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
-![C7_02_SILPH_CARD_KEY step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_PokemonCenter_1F_7_4_up.png)
+![C7_02_SILPH_CARD_KEY step 1](images/SaffronCity_PokemonCenter_1F_7_4_up.png)
 
 ## C7_03_SILPH_GIOVANNI
 
@@ -589,7 +601,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
-![C7_03_SILPH_GIOVANNI step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_PokemonCenter_1F_7_4_up.png)
+![C7_03_SILPH_GIOVANNI step 1](images/SaffronCity_PokemonCenter_1F_7_4_up.png)
 
 ## C7_04_HMS_AND_GRIND
 
@@ -604,11 +616,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
-![C7_04_HMS_AND_GRIND step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_PokemonCenter_1F_7_4_up.png)
+![C7_04_HMS_AND_GRIND step 1](images/SaffronCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 9, 10, 11:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C7_04_HMS_AND_GRIND step 9, 10, 11](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C7_04_HMS_AND_GRIND step 9, 10, 11](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 ## C7_05_SABRINA
 
@@ -621,11 +633,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Celadon City Pokemon Center 1F (7, 4), facing up
 
-![C7_05_SABRINA step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+![C7_05_SABRINA step 1](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 15:** Saffron City Gym (14, 12), facing up
 
-![C7_05_SABRINA step 15](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_Gym_14_12_up.png)
+![C7_05_SABRINA step 15](images/SaffronCity_Gym_14_12_up.png)
 
 ## C8_01_TO_CINNABAR
 
@@ -637,7 +649,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
-![C8_01_TO_CINNABAR step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_PokemonCenter_1F_7_4_up.png)
+![C8_01_TO_CINNABAR step 1](images/SaffronCity_PokemonCenter_1F_7_4_up.png)
 
 ## C8_02_MANSION
 
@@ -649,7 +661,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C8_02_MANSION step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C8_02_MANSION step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C8_03_GRIND_BLAINE
 
@@ -665,7 +677,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2, 3, 4, 5:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C8_03_GRIND_BLAINE step 1, 2, 3, 4, 5](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C8_03_GRIND_BLAINE step 1, 2, 3, 4, 5](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C8_04_BLAINE
 
@@ -678,11 +690,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C8_04_BLAINE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C8_04_BLAINE step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 26:** Cinnabar Island Gym (5, 5), facing up
 
-![C8_04_BLAINE step 26](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_Gym_5_5_up.png)
+![C8_04_BLAINE step 26](images/CinnabarIsland_Gym_5_5_up.png)
 
 ## C8_05_GRIND_GIOVANNI
 
@@ -698,7 +710,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2, 3, 4, 5:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C8_05_GRIND_GIOVANNI step 1, 2, 3, 4, 5](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C8_05_GRIND_GIOVANNI step 1, 2, 3, 4, 5](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C9_01_TO_VIRIDIAN
 
@@ -710,7 +722,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C9_01_TO_VIRIDIAN step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C9_01_TO_VIRIDIAN step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C9_02_GIOVANNI
 
@@ -723,11 +735,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Viridian City Pokemon Center 1F (7, 4), facing up
 
-![C9_02_GIOVANNI step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+![C9_02_GIOVANNI step 1](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 13:** Viridian City Gym (2, 3), facing up
 
-![C9_02_GIOVANNI step 13](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_Gym_2_3_up.png)
+![C9_02_GIOVANNI step 13](images/ViridianCity_Gym_2_3_up.png)
 
 ## C9_03_ROUTE22_ROUTE23
 
@@ -740,7 +752,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 9:** Viridian City Pokemon Center 1F (7, 4), facing up
 
-![C9_03_ROUTE22_ROUTE23 step 1, 9](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+![C9_03_ROUTE22_ROUTE23 step 1, 9](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
 
 ## C9_04_VICTORY_ROAD
 
@@ -752,7 +764,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 23 (5, 35), facing up
 
-![C9_04_VICTORY_ROAD step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route23_5_35_up.png)
+![C9_04_VICTORY_ROAD step 1](images/Route23_5_35_up.png)
 
 ## C10_01_GRIND_LEAGUE
 
@@ -768,7 +780,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2, 3, 4, 5:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C10_01_GRIND_LEAGUE step 1, 2, 3, 4, 5](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C10_01_GRIND_LEAGUE step 1, 2, 3, 4, 5](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 ## C10_02_ITEMS
 
@@ -780,7 +792,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C10_02_ITEMS step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C10_02_ITEMS step 1](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 ## C10_03_ELITE_FOUR
 
@@ -796,19 +808,19 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C10_03_ELITE_FOUR step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C10_03_ELITE_FOUR step 1, 2](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 **Step 10:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C10_03_ELITE_FOUR step 10](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C10_03_ELITE_FOUR step 10](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
 **Step 18:** Pokemon League Brunos Room (6, 6), facing up
 
-![C10_03_ELITE_FOUR step 18](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C10_03_ELITE_FOUR step 18](images/PokemonLeague_BrunosRoom_6_6_up.png)
 
 **Step 26:** Pokemon League Agathas Room (6, 6), facing up
 
-![C10_03_ELITE_FOUR step 26](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C10_03_ELITE_FOUR step 26](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C10_04_CHAMPION
 
@@ -821,7 +833,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Pokemon League Lances Room (6, 9), facing up
 
-![C10_04_CHAMPION step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LancesRoom_6_9_up.png)
+![C10_04_CHAMPION step 1, 2](images/PokemonLeague_LancesRoom_6_9_up.png)
 
 ## C11_01_MASTER_BALL
 
@@ -833,7 +845,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pokemon League Champions Room (6, 19), facing up
 
-![C11_01_MASTER_BALL step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_ChampionsRoom_6_19_up.png)
+![C11_01_MASTER_BALL step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
 
 ## C11_02_ZAPDOS
 
@@ -848,19 +860,19 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
-![C11_02_ZAPDOS step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SaffronCity_PokemonCenter_1F_7_4_up.png)
+![C11_02_ZAPDOS step 1](images/SaffronCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C11_02_ZAPDOS step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C11_02_ZAPDOS step 6](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 21:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C11_02_ZAPDOS step 21](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C11_02_ZAPDOS step 21](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 **Step 31:** Power Plant (5, 10), facing down
 
-![C11_02_ZAPDOS step 31](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PowerPlant_5_10_down.png)
+![C11_02_ZAPDOS step 31](images/PowerPlant_5_10_down.png)
 
 ## C11_03_ARTICUNO
 
@@ -875,19 +887,19 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C11_03_ARTICUNO step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C11_03_ARTICUNO step 1](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 **Step 7:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C11_03_ARTICUNO step 7](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C11_03_ARTICUNO step 7](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 45:** Seafoam Islands B4F (9, 3), facing left
 
-![C11_03_ARTICUNO step 45](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SeafoamIslands_B4F_9_3_left.png)
+![C11_03_ARTICUNO step 45](images/SeafoamIslands_B4F_9_3_left.png)
 
 **Step 49:** Seafoam Islands B4F (9, 3), facing up
 
-![C11_03_ARTICUNO step 49](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SeafoamIslands_B4F_9_3_up.png)
+![C11_03_ARTICUNO step 49](images/SeafoamIslands_B4F_9_3_up.png)
 
 ## C12_01_ONE_ISLAND
 
@@ -899,7 +911,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C12_01_ONE_ISLAND step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C12_01_ONE_ISLAND step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C12_02_ROCK_SMASH
 
@@ -911,7 +923,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C12_02_ROCK_SMASH step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C12_02_ROCK_SMASH step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C12_03_TWO_ISLAND
 
@@ -923,7 +935,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C12_03_TWO_ISLAND step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C12_03_TWO_ISLAND step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C12_04_THREE_ISLAND
 
@@ -937,11 +949,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Two Island Pokemon Center 1F (7, 4), facing up
 
-![C12_04_THREE_ISLAND step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/TwoIsland_PokemonCenter_1F_7_4_up.png)
+![C12_04_THREE_ISLAND step 1](images/TwoIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 15, 21:** Three Island Pokemon Center 1F (7, 4), facing up
 
-![C12_04_THREE_ISLAND step 15, 21](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
+![C12_04_THREE_ISLAND step 15, 21](images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C12_05_LOSTELLE
 
@@ -953,7 +965,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Three Island Pokemon Center 1F (7, 4), facing up
 
-![C12_05_LOSTELLE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
+![C12_05_LOSTELLE step 1](images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C12_06_MOLTRES
 
@@ -967,11 +979,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Two Island Pokemon Center 1F (7, 4), facing up
 
-![C12_06_MOLTRES step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/TwoIsland_PokemonCenter_1F_7_4_up.png)
+![C12_06_MOLTRES step 1](images/TwoIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 60, 64:** Mt Ember Summit (9, 7), facing up
 
-![C12_06_MOLTRES step 60, 64](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/MtEmber_Summit_9_7_up.png)
+![C12_06_MOLTRES step 60, 64](images/MtEmber_Summit_9_7_up.png)
 
 ## C12_07_BACK_TO_KANTO
 
@@ -983,7 +995,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C12_07_BACK_TO_KANTO step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C12_07_BACK_TO_KANTO step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C13_01_ELITE_FOUR
 
@@ -1000,23 +1012,23 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C13_01_ELITE_FOUR step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C13_01_ELITE_FOUR step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 7, 8:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C13_01_ELITE_FOUR step 7, 8](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C13_01_ELITE_FOUR step 7, 8](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 **Step 16:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C13_01_ELITE_FOUR step 16](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 16](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
 **Step 24:** Pokemon League Brunos Room (6, 6), facing up
 
-![C13_01_ELITE_FOUR step 24](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 24](images/PokemonLeague_BrunosRoom_6_6_up.png)
 
 **Step 32:** Pokemon League Agathas Room (6, 6), facing up
 
-![C13_01_ELITE_FOUR step 32](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 32](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C13_01_CHAMPION
 
@@ -1029,7 +1041,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Pokemon League Lances Room (6, 9), facing up
 
-![C13_01_CHAMPION step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LancesRoom_6_9_up.png)
+![C13_01_CHAMPION step 1, 2](images/PokemonLeague_LancesRoom_6_9_up.png)
 
 ## C13_01_OAK
 
@@ -1041,7 +1053,41 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pokemon League Champions Room (6, 19), facing up
 
-![C13_01_OAK step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_ChampionsRoom_6_19_up.png)
+![C13_01_OAK step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
+
+## C13_01_MOLTRES
+
+*Moltres, if it was left on Mt. Ember (Great Balls from the prize money)*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Pallet Town | (6, 8) | down | Start of the segment (the segment before saves here) | SKIP_UNLESS_LEFT: Moltres left? |
+| **6** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: BuyMaxRepels |
+| **21** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | WALK: FerryToOneIsland |
+| **35** | One Island Pokemon Center 1F | (5, 4) | up | After a save | USE_REPEL: ToMtEmber_MaxRepel |
+| **84** | Mt Ember Summit | (9, 7) | up | After a save | WALK: Moltres |
+| **88** | Mt Ember Summit | (9, 7) | up | After a save | RESET: Reload after Moltres |
+| **109** | One Island Pokemon Center 1F | (5, 4) | up | After a save | WALK: MoltresFerryHome |
+
+**Step 1:** Pallet Town (6, 8), facing down
+
+![C13_01_MOLTRES step 1](images/PalletTown_6_8_down.png)
+
+**Step 6:** Fuchsia City Pokemon Center 1F (7, 4), facing up
+
+![C13_01_MOLTRES step 6](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+
+**Step 21:** Vermilion City Pokemon Center 1F (7, 4), facing up
+
+![C13_01_MOLTRES step 21](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+
+**Step 35, 109:** One Island Pokemon Center 1F (5, 4), facing up
+
+![C13_01_MOLTRES step 35, 109](images/OneIsland_PokemonCenter_1F_5_4_up.png)
+
+**Step 84, 88:** Mt Ember Summit (9, 7), facing up
+
+![C13_01_MOLTRES step 84, 88](images/MtEmber_Summit_9_7_up.png)
 
 ## C13_02_ELITE_FOUR
 
@@ -1058,23 +1104,23 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town (6, 8), facing down
 
-![C13_02_ELITE_FOUR step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_6_8_down.png)
+![C13_02_ELITE_FOUR step 1](images/PalletTown_6_8_down.png)
 
 **Step 6, 7:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C13_02_ELITE_FOUR step 6, 7](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C13_02_ELITE_FOUR step 6, 7](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 **Step 15:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C13_02_ELITE_FOUR step 15](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 15](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
 **Step 23:** Pokemon League Brunos Room (6, 6), facing up
 
-![C13_02_ELITE_FOUR step 23](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 23](images/PokemonLeague_BrunosRoom_6_6_up.png)
 
 **Step 31:** Pokemon League Agathas Room (6, 6), facing up
 
-![C13_02_ELITE_FOUR step 31](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 31](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C13_02_CHAMPION
 
@@ -1087,7 +1133,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Pokemon League Lances Room (6, 9), facing up
 
-![C13_02_CHAMPION step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LancesRoom_6_9_up.png)
+![C13_02_CHAMPION step 1, 2](images/PokemonLeague_LancesRoom_6_9_up.png)
 
 ## C13_02_OAK
 
@@ -1099,7 +1145,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pokemon League Champions Room (6, 19), facing up
 
-![C13_02_OAK step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_ChampionsRoom_6_19_up.png)
+![C13_02_OAK step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
 
 ## C14_01_VIRIDIAN_FOREST
 
@@ -1112,11 +1158,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town (6, 8), facing down
 
-![C14_01_VIRIDIAN_FOREST step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_6_8_down.png)
+![C14_01_VIRIDIAN_FOREST step 1](images/PalletTown_6_8_down.png)
 
 **Step 5:** Viridian City Pokemon Center 1F (7, 4), facing up
 
-![C14_01_VIRIDIAN_FOREST step 5](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+![C14_01_VIRIDIAN_FOREST step 5](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
 
 ## C14_02_ROUTE3_MT_MOON
 
@@ -1129,11 +1175,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pewter City Pokemon Center 1F (7, 4), facing up
 
-![C14_02_ROUTE3_MT_MOON step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PewterCity_PokemonCenter_1F_7_4_up.png)
+![C14_02_ROUTE3_MT_MOON step 1](images/PewterCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 15:** Route 4 Pokemon Center 1F (7, 4), facing up
 
-![C14_02_ROUTE3_MT_MOON step 15](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route4_PokemonCenter_1F_7_4_up.png)
+![C14_02_ROUTE3_MT_MOON step 15](images/Route4_PokemonCenter_1F_7_4_up.png)
 
 ## C14_03_POKEMON_TOWER
 
@@ -1146,11 +1192,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 4 Pokemon Center 1F (7, 4), facing up
 
-![C14_03_POKEMON_TOWER step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route4_PokemonCenter_1F_7_4_up.png)
+![C14_03_POKEMON_TOWER step 1](images/Route4_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Lavender Town Pokemon Center 1F (7, 4), facing up
 
-![C14_03_POKEMON_TOWER step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+![C14_03_POKEMON_TOWER step 6](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
 
 ## C14_04_POWER_PLANT
 
@@ -1163,11 +1209,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Lavender Town Pokemon Center 1F (7, 4), facing up
 
-![C14_04_POWER_PLANT step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+![C14_04_POWER_PLANT step 1](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C14_04_POWER_PLANT step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C14_04_POWER_PLANT step 6](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 ## C14_05_SAFARI_ZONE
 
@@ -1181,11 +1227,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C14_05_SAFARI_ZONE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C14_05_SAFARI_ZONE step 1](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 **Step 7, 26:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C14_05_SAFARI_ZONE step 7, 26](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C14_05_SAFARI_ZONE step 7, 26](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C14_06_SEAFOAM
 
@@ -1197,7 +1243,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C14_06_SEAFOAM step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C14_06_SEAFOAM step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C14_07_MANSION
 
@@ -1210,11 +1256,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C14_07_MANSION step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C14_07_MANSION step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C14_07_MANSION step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C14_07_MANSION step 6](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C14_08_ROUTE11_DIGLETT
 
@@ -1227,11 +1273,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
-![C14_08_ROUTE11_DIGLETT step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+![C14_08_ROUTE11_DIGLETT step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C14_08_ROUTE11_DIGLETT step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C14_08_ROUTE11_DIGLETT step 6](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 ## C14_09_VICTORY_ROAD
 
@@ -1244,11 +1290,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C14_09_VICTORY_ROAD step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C14_09_VICTORY_ROAD step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C14_09_VICTORY_ROAD step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C14_09_VICTORY_ROAD step 6](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 ## C14_10_KINDLE_ROAD
 
@@ -1261,11 +1307,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C14_10_KINDLE_ROAD step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C14_10_KINDLE_ROAD step 1](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 **Step 6:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C14_10_KINDLE_ROAD step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C14_10_KINDLE_ROAD step 6](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 ## C14_11_BOND_BRIDGE
 
@@ -1280,11 +1326,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C14_11_BOND_BRIDGE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C14_11_BOND_BRIDGE step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 **Step 13, 21, 42:** Three Island Pokemon Center 1F (7, 4), facing up
 
-![C14_11_BOND_BRIDGE step 13, 21, 42](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
+![C14_11_BOND_BRIDGE step 13, 21, 42](images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C15_01_ENOUGH
 
@@ -1297,11 +1343,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C15_01_ENOUGH step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C15_01_ENOUGH step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 7:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C15_01_ENOUGH step 7](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C15_01_ENOUGH step 7](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 ## C15_02_ELITE_FOUR
 
@@ -1318,19 +1364,19 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 3, 4:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C15_02_ELITE_FOUR step 1, 3, 4](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C15_02_ELITE_FOUR step 1, 3, 4](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 **Step 12:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C15_02_ELITE_FOUR step 12](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 12](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
 **Step 20:** Pokemon League Brunos Room (6, 6), facing up
 
-![C15_02_ELITE_FOUR step 20](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 20](images/PokemonLeague_BrunosRoom_6_6_up.png)
 
 **Step 28:** Pokemon League Agathas Room (6, 6), facing up
 
-![C15_02_ELITE_FOUR step 28](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 28](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C15_02_CHAMPION
 
@@ -1343,7 +1389,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1, 2:** Pokemon League Lances Room (6, 9), facing up
 
-![C15_02_CHAMPION step 1, 2](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_LancesRoom_6_9_up.png)
+![C15_02_CHAMPION step 1, 2](images/PokemonLeague_LancesRoom_6_9_up.png)
 
 ## C15_03_NATIONAL_DEX
 
@@ -1355,7 +1401,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pokemon League Champions Room (6, 19), facing up
 
-![C15_03_NATIONAL_DEX step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PokemonLeague_ChampionsRoom_6_19_up.png)
+![C15_03_NATIONAL_DEX step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
 
 ## C15_04_EXP_SHARE
 
@@ -1368,11 +1414,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Pallet Town Professor Oaks Lab (6, 4), facing up
 
-![C15_04_EXP_SHARE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/PalletTown_ProfessorOaksLab_6_4_up.png)
+![C15_04_EXP_SHARE step 1](images/PalletTown_ProfessorOaksLab_6_4_up.png)
 
 **Step 7:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C15_04_EXP_SHARE step 7](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C15_04_EXP_SHARE step 7](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 ## C16_01_CELIO_RUBY
 
@@ -1386,15 +1432,15 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C16_01_CELIO_RUBY step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C16_01_CELIO_RUBY step 1](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 7:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
-![C16_01_CELIO_RUBY step 7](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+![C16_01_CELIO_RUBY step 7](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 20:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C16_01_CELIO_RUBY step 20](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C16_01_CELIO_RUBY step 20](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C16_02_RUBY_PATH
 
@@ -1407,11 +1453,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C16_02_RUBY_PATH step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C16_02_RUBY_PATH step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 **Step 21:** Mt Ember Exterior (42, 41), facing up
 
-![C16_02_RUBY_PATH step 21](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/MtEmber_Exterior_42_41_up.png)
+![C16_02_RUBY_PATH step 21](images/MtEmber_Exterior_42_41_up.png)
 
 ## C16_03_RAINBOW_PASS
 
@@ -1423,7 +1469,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C16_03_RAINBOW_PASS step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C16_03_RAINBOW_PASS step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C17_01_ICEFALL_CAVE
 
@@ -1436,11 +1482,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C17_01_ICEFALL_CAVE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C17_01_ICEFALL_CAVE step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 **Step 18:** Four Island Pokemon Center 1F (7, 4), facing up
 
-![C17_01_ICEFALL_CAVE step 18](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FourIsland_PokemonCenter_1F_7_4_up.png)
+![C17_01_ICEFALL_CAVE step 18](images/FourIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C17_02_LORELEI
 
@@ -1452,7 +1498,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Four Island Icefall Cave 1F (13, 16), facing left
 
-![C17_02_LORELEI step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FourIsland_IcefallCave_1F_13_16_left.png)
+![C17_02_LORELEI step 1](images/FourIsland_IcefallCave_1F_13_16_left.png)
 
 ## C17_03_DOTTED_HOLE
 
@@ -1465,11 +1511,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Four Island Pokemon Center 1F (7, 4), facing up
 
-![C17_03_DOTTED_HOLE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FourIsland_PokemonCenter_1F_7_4_up.png)
+![C17_03_DOTTED_HOLE step 1](images/FourIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 16:** Six Island Pokemon Center 1F (7, 4), facing up
 
-![C17_03_DOTTED_HOLE step 16](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SixIsland_PokemonCenter_1F_7_4_up.png)
+![C17_03_DOTTED_HOLE step 16](images/SixIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C17_04_ROCKET_WAREHOUSE
 
@@ -1482,11 +1528,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Six Island Pokemon Center 1F (7, 4), facing up
 
-![C17_04_ROCKET_WAREHOUSE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/SixIsland_PokemonCenter_1F_7_4_up.png)
+![C17_04_ROCKET_WAREHOUSE step 1](images/SixIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 15:** Five Island Pokemon Center 1F (7, 4), facing up
 
-![C17_04_ROCKET_WAREHOUSE step 15](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FiveIsland_PokemonCenter_1F_7_4_up.png)
+![C17_04_ROCKET_WAREHOUSE step 15](images/FiveIsland_PokemonCenter_1F_7_4_up.png)
 
 ## C17_05_NETWORK_MACHINE
 
@@ -1499,11 +1545,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Five Island Pokemon Center 1F (7, 4), facing up
 
-![C17_05_NETWORK_MACHINE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FiveIsland_PokemonCenter_1F_7_4_up.png)
+![C17_05_NETWORK_MACHINE step 1](images/FiveIsland_PokemonCenter_1F_7_4_up.png)
 
 **Step 12:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C17_05_NETWORK_MACHINE step 12](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C17_05_NETWORK_MACHINE step 12](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 ## C18_01_SUICUNE
 
@@ -1516,11 +1562,11 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C18_01_SUICUNE step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C18_01_SUICUNE step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
 **Step 12:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C18_01_SUICUNE step 12](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C18_01_SUICUNE step 12](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 ## C19_01_MEWTWO
 
@@ -1536,17 +1582,325 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 **Step 1:** Route 10 Pokemon Center 1F (7, 4), facing up
 
-![C19_01_MEWTWO step 1](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/Route10_PokemonCenter_1F_7_4_up.png)
+![C19_01_MEWTWO step 1](images/Route10_PokemonCenter_1F_7_4_up.png)
 
 **Step 6:** Fuchsia City Pokemon Center 1F (7, 4), facing up
 
-![C19_01_MEWTWO step 6](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+![C19_01_MEWTWO step 6](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 21:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C19_01_MEWTWO step 21](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C19_01_MEWTWO step 21](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 **Step 38, 42:** Cerulean Cave B1F (7, 13), facing up
 
-![C19_01_MEWTWO step 38, 42](https://raw.githubusercontent.com/MajorLOL/Arduino-Source/frlg-autostory/SerialPrograms/Scripts/PokemonFRLG/AutoStory/guide/images/CeruleanCave_B1F_7_13_up.png)
+![C19_01_MEWTWO step 38, 42](images/CeruleanCave_B1F_7_13_up.png)
+
+## C20_01_START
+
+*POKeDEX collection: out of the Cerulean City Pokemon Center*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Cerulean City Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: C20_01_Out |
+
+**Step 1:** Cerulean City Pokemon Center 1F (7, 4), facing up
+
+![C20_01_START step 1](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+
+## C20_02_CERULEAN
+
+*POKeDEX collection: Route 24, Route 4, Cerulean Cave*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Cerulean City | (22, 20) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Cerulean City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: C20_02_CERULEAN_BuyPokeBalls |
+| **14** | Cerulean City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectRoute24? |
+| **22** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute24_Visit2? |
+| **30** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute4? |
+| **38** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute4_Visit2? |
+| **46** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F? |
+| **73** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit2? |
+| **98** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit3? |
+| **123** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F? |
+| **136** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F_Visit2? |
+| **149** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_02_CERULEAN_Out |
+
+**Step 1:** Cerulean City (22, 20), facing down
+
+![C20_02_CERULEAN step 1](images/CeruleanCity_22_20_down.png)
+
+**Step 6, 14, 22, 30, 38, 46, 73, 98, 123, 136, 149:** Cerulean City Pokemon Center 1F (7, 4), facing up
+
+![C20_02_CERULEAN step 6, 14, 22, 30, 38, 46, 73, 98, 123, 136, 149](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+
+## C20_03_MT_MOON
+
+*POKeDEX collection: Mt. Moon, Route 3*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Cerulean City | (22, 20) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Route 4 Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectMtMoon? |
+| **20** | Route 4 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectMtMoon_Visit2? |
+| **34** | Route 4 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute3? |
+| **42** | Route 4 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute3_Visit2? |
+| **50** | Route 4 Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_03_MT_MOON_Out |
+
+**Step 1:** Cerulean City (22, 20), facing down
+
+![C20_03_MT_MOON step 1](images/CeruleanCity_22_20_down.png)
+
+**Step 6, 20, 34, 42, 50:** Route 4 Pokemon Center 1F (7, 4), facing up
+
+![C20_03_MT_MOON step 6, 20, 34, 42, 50](images/Route4_PokemonCenter_1F_7_4_up.png)
+
+## C20_04_VIRIDIAN
+
+*POKeDEX collection: Viridian Forest, Route 22, Route 23*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Route 4 | (12, 6) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Viridian City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: C20_04_VIRIDIAN_BuyPokeBalls |
+| **14** | Viridian City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectViridianForest? |
+| **25** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectViridianForest_Visit2? |
+| **36** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute22? |
+| **44** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute22_Visit2? |
+| **52** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute23? |
+| **72** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute23_Visit2? |
+| **92** | Viridian City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_04_VIRIDIAN_Out |
+
+**Step 1:** Route 4 (12, 6), facing down
+
+![C20_04_VIRIDIAN step 1](images/Route4_12_6_down.png)
+
+**Step 6, 14, 25, 36, 44, 52, 72, 92:** Viridian City Pokemon Center 1F (7, 4), facing up
+
+![C20_04_VIRIDIAN step 6, 14, 25, 36, 44, 52, 72, 92](images/ViridianCity_PokemonCenter_1F_7_4_up.png)
+
+## C20_05_VICTORY_ROAD
+
+*POKeDEX collection: Victory Road*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Viridian City | (26, 27) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectVictoryRoad? |
+| **16** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After a save | SKIP_IF_COLLECTED: CollectVictoryRoad_Visit2? |
+| **26** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After a save | WALK: C20_05_VICTORY_ROAD_Out |
+
+**Step 1:** Viridian City (26, 27), facing down
+
+![C20_05_VICTORY_ROAD step 1](images/ViridianCity_26_27_down.png)
+
+**Step 6, 16, 26:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
+
+![C20_05_VICTORY_ROAD step 6, 16, 26](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+
+## C20_06_ROUTE10
+
+*POKeDEX collection: Power Plant, Rock Tunnel*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Indigo Plateau Exterior | (11, 7) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Route 10 Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectPowerPlant? |
+| **20** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectPowerPlant_Visit2? |
+| **34** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRockTunnel? |
+| **50** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRockTunnel_Visit2? |
+| **66** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_06_ROUTE10_Out |
+
+**Step 1:** Indigo Plateau Exterior (11, 7), facing down
+
+![C20_06_ROUTE10 step 1](images/IndigoPlateau_Exterior_11_7_down.png)
+
+**Step 6, 20, 34, 50, 66:** Route 10 Pokemon Center 1F (7, 4), facing up
+
+![C20_06_ROUTE10 step 6, 20, 34, 50, 66](images/Route10_PokemonCenter_1F_7_4_up.png)
+
+## C20_07_LAVENDER
+
+*POKeDEX collection: Pokemon Tower, Route 8, Route 12*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Route 10 | (13, 21) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Lavender Town Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectPokemonTower? |
+| **28** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectPokemonTower_Visit2? |
+| **50** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute8? |
+| **61** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute8_Visit2? |
+| **72** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute12? |
+| **104** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute12_Visit2? |
+| **136** | Lavender Town Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_07_LAVENDER_Out |
+
+**Step 1:** Route 10 (13, 21), facing down
+
+![C20_07_LAVENDER step 1](images/Route10_13_21_down.png)
+
+**Step 6, 28, 50, 61, 72, 104, 136:** Lavender Town Pokemon Center 1F (7, 4), facing up
+
+![C20_07_LAVENDER step 6, 28, 50, 61, 72, 104, 136](images/LavenderTown_PokemonCenter_1F_7_4_up.png)
+
+## C20_08_CELADON
+
+*POKeDEX collection: Route 16*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Lavender Town | (6, 6) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Celadon City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectRoute16? |
+| **17** | Celadon City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute16_Visit2? |
+| **28** | Celadon City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_08_CELADON_Out |
+
+**Step 1:** Lavender Town (6, 6), facing down
+
+![C20_08_CELADON step 1](images/LavenderTown_6_6_down.png)
+
+**Step 6, 17, 28:** Celadon City Pokemon Center 1F (7, 4), facing up
+
+![C20_08_CELADON step 6, 17, 28](images/CeladonCity_PokemonCenter_1F_7_4_up.png)
+
+## C20_09_FUCHSIA
+
+*POKeDEX collection: Safari Zone, Routes 14, 15, 18, Seafoam Islands*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Celadon City | (48, 12) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectSafariCenter? |
+| **26** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariEast? |
+| **47** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariNorth? |
+| **74** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariWest? |
+| **98** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariCenter2? |
+| **118** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariEast2? |
+| **139** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariNorth2? |
+| **166** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSafariWest2? |
+| **190** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute14? |
+| **204** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute14_Visit2? |
+| **218** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute15? |
+| **229** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute15_Visit2? |
+| **240** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute18? |
+| **248** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute18_Visit2? |
+| **256** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSeafoam? |
+| **276** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSeafoam_Visit2? |
+| **296** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_09_FUCHSIA_Out |
+
+**Step 1:** Celadon City (48, 12), facing down
+
+![C20_09_FUCHSIA step 1](images/CeladonCity_48_12_down.png)
+
+**Step 6, 26, 47, 74, 98, 118, 139, 166, 190, 204, 218, 229, 240, 248, 256, 276, 296:** Fuchsia City Pokemon Center 1F (7, 4), facing up
+
+![C20_09_FUCHSIA step 6, 26, 47, 74, 98, 118, 139, 166, 190, 204, 218, 229, 240, 248, 256, 276, 296](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
+
+## C20_10_CINNABAR
+
+*POKeDEX collection: Pokemon Mansion, Route 21*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Fuchsia City | (25, 32) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectMansion? |
+| **16** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectMansion_Visit2? |
+| **26** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute21? |
+| **50** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute21_Visit2? |
+| **74** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_10_CINNABAR_Out |
+
+**Step 1:** Fuchsia City (25, 32), facing down
+
+![C20_10_CINNABAR step 1](images/FuchsiaCity_25_32_down.png)
+
+**Step 6, 16, 26, 50, 74:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
+
+![C20_10_CINNABAR step 6, 16, 26, 50, 74](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
+
+## C20_11_VERMILION_SEVII
+
+*POKeDEX collection: Route 11, Diglett's Cave, Route 6, the Sevii Islands*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Cinnabar Island | (14, 12) | down | Start of the segment. *No save here*: the segment before goes on into this one | SKIP_IF_COLLECTED: Anything to catch here? |
+| **6** | Vermilion City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: C20_11_VERMILION_SEVII_BuyPokeBalls |
+| **14** | Vermilion City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectRoute11? |
+| **22** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute11_Visit2? |
+| **30** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectDiglettsCave? |
+| **42** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectDiglettsCave_Visit2? |
+| **54** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute6? |
+| **62** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute6_Visit2? |
+| **70** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: The Sevii Islands? |
+| **83** | One Island Pokemon Center 1F | (5, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectKindleRoad? |
+| **97** | One Island Pokemon Center 1F | (5, 4) | up | After a save | SKIP_IF_COLLECTED: CollectKindleRoad_Visit2? |
+| **111** | One Island Pokemon Center 1F | (5, 4) | up | After a save | SKIP_IF_COLLECTED: CollectTreasureBeach? |
+| **125** | One Island Pokemon Center 1F | (5, 4) | up | After a save | SKIP_IF_COLLECTED: CollectTreasureBeach_Visit2? |
+| **139** | One Island Pokemon Center 1F | (5, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRubyPath? |
+| **174** | One Island Pokemon Center 1F | (5, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRubyPath_Visit2? |
+| **209** | One Island Pokemon Center 1F | (5, 4) | up | After a save | WALK: OneIsland_ToHarbor |
+| **222** | Two Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectCapeBrink? |
+| **230** | Two Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCapeBrink_Visit2? |
+| **238** | Two Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: TwoIsland_ToHarbor |
+| **251** | Three Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectBondBridge? |
+| **259** | Three Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectBondBridge_Visit2? |
+| **267** | Three Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectBerryForest? |
+| **286** | Three Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectBerryForest_Visit2? |
+| **305** | Three Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: ThreeIsland_ToHarbor |
+| **318** | Four Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectIcefallCave? |
+| **342** | Four Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectIcefallCave_Visit2? |
+| **366** | Four Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: FourIsland_ToHarbor |
+| **380** | Five Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectFiveIsleMeadow? |
+| **388** | Five Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectFiveIsleMeadow_Visit2? |
+| **396** | Five Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectLostCave? |
+| **427** | Five Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectLostCave_Visit2? |
+| **458** | Five Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: FiveIsland_ToHarbor |
+| **473** | Six Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectRuinValley? |
+| **493** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRuinValley_Visit2? |
+| **513** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectPatternBush? |
+| **529** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectPatternBush_Visit2? |
+| **545** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectWaterPath? |
+| **553** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectWaterPath_Visit2? |
+| **561** | Six Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: SixIsland_ToHarbor |
+| **576** | Seven Island Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | SKIP_IF_COLLECTED: CollectCanyonEntrance? |
+| **584** | Seven Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCanyonEntrance_Visit2? |
+| **592** | Seven Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSevaultCanyon? |
+| **600** | Seven Island Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectSevaultCanyon_Visit2? |
+| **608** | Seven Island Pokemon Center 1F | (7, 4) | up | After a save | WALK: SevenIsland_ToHarbor |
+| **622** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_11_VERMILION_SEVII_Out |
+
+**Step 1:** Cinnabar Island (14, 12), facing down
+
+![C20_11_VERMILION_SEVII step 1](images/CinnabarIsland_14_12_down.png)
+
+**Step 6, 14, 22, 30, 42, 54, 62, 70, 622:** Vermilion City Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 6, 14, 22, 30, 42, 54, 62, 70, 622](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
+
+**Step 83, 97, 111, 125, 139, 174, 209:** One Island Pokemon Center 1F (5, 4), facing up
+
+![C20_11_VERMILION_SEVII step 83, 97, 111, 125, 139, 174, 209](images/OneIsland_PokemonCenter_1F_5_4_up.png)
+
+**Step 222, 230, 238:** Two Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 222, 230, 238](images/TwoIsland_PokemonCenter_1F_7_4_up.png)
+
+**Step 251, 259, 267, 286, 305:** Three Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 251, 259, 267, 286, 305](images/ThreeIsland_PokemonCenter_1F_7_4_up.png)
+
+**Step 318, 342, 366:** Four Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 318, 342, 366](images/FourIsland_PokemonCenter_1F_7_4_up.png)
+
+**Step 380, 388, 396, 427, 458:** Five Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 380, 388, 396, 427, 458](images/FiveIsland_PokemonCenter_1F_7_4_up.png)
+
+**Step 473, 493, 513, 529, 545, 553, 561:** Six Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 473, 493, 513, 529, 545, 553, 561](images/SixIsland_PokemonCenter_1F_7_4_up.png)
+
+**Step 576, 584, 592, 600, 608:** Seven Island Pokemon Center 1F (7, 4), facing up
+
+![C20_11_VERMILION_SEVII step 576, 584, 592, 600, 608](images/SevenIsland_PokemonCenter_1F_7_4_up.png)
 

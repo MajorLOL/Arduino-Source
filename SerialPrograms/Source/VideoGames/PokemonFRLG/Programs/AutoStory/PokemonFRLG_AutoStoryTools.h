@@ -163,6 +163,18 @@ struct StoryRuntime{
     //  A legendary Pokemon was not caught (the step fails, the save before
     //  it is loaded): such a failure counts against its own limit.
     bool legendary_missed = false;
+    //  Legendary Pokemon left where they are for now (their step's label):
+    //  the bag had too few balls, or the tries ran out, and the story comes
+    //  back for them (BATTLE with p2 & 4). Those talk and battle steps are
+    //  passed over; the steps of the way back (SKIP_UNLESS_LEFT) are played,
+    //  and a catch there takes the Pokemon off the list. Written to a file
+    //  at each save (UserSettings/PokemonFRLG-AutoStory-Left.txt), read at
+    //  the start. "legendary_can_wait": the one of the step that just
+    //  failed, if the story comes back for it; "legendary_left_now": it was
+    //  put on the list by that failure.
+    std::set<std::string> legendary_left;
+    std::string legendary_can_wait;
+    bool legendary_left_now = false;
     //  A legendary Pokemon was caught: the team is worn out from it, so
     //  wild battles are run from until the next Pokemon Center.
     bool flee_until_heal = false;
