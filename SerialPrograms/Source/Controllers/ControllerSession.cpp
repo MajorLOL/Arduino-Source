@@ -6,6 +6,7 @@
 
 //#include "Common/Cpp/Exceptions.h"
 //#include "ControllerTypeStrings.h"
+#include "Common/Cpp/ColoredText.h"
 #include "ControllerSession.h"
 
 //#include <iostream>
@@ -135,7 +136,7 @@ ControllerType ControllerSession::controller_type() const noexcept{
 std::string ControllerSession::status_text() const{
     ReadSpinLock lg(m_state_lock);
     if (!m_connection){
-        return "<font color=\"red\">No controller selected.</font>";
+        return html_color_text("No controller selected.", COLOR_RED);
     }
     return m_connection->status_text();
 }
@@ -149,13 +150,13 @@ AbstractController* ControllerSession::controller() const{
 std::string ControllerSession::user_input_blocked() const{
     ReadSpinLock lg(m_state_lock);
     if (!m_connection){
-        return "<font color=\"red\">No controller selected.</font>";
+        return html_color_text("No controller selected.", COLOR_RED);
     }
     if (!m_connection->is_ready()){
-        return "<font color=\"red\">Connection is not ready.</font>";
+        return html_color_text("Connection is not ready.", COLOR_RED);
     }
     if (!m_controller->is_ready()){
-        return "<font color=\"red\">Controller is not ready.</font>";
+        return html_color_text("Controller is not ready.", COLOR_RED);
     }
     return m_user_input_disallow_reason;
 }

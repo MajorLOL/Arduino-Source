@@ -35,3 +35,6 @@ The fixes are checked by compiling them (GCC and Clang, with the warnings of the
 
 - `Common/Qt/Options/SimpleIntegerWidget.cpp`, `FloatingPointWidget.cpp`: a valid number was set to black text, which cannot be read in a dark theme. It now takes the theme's text color; a number out of range is still red.
 - `CommonTools/Options/QtWidgets/StringSelectWidget.cpp`: an entry without a color was set to the color 0 (black). It now takes the theme's text color.
+- `Controllers/ControllerSession.cpp`: "No controller selected." and two more status texts carried a pure red of their own in HTML. They now go through `html_color_text()`, like the other status texts, which picks a red that can be read on the theme's background.
+
+About 30 other texts of the programs still carry a color of their own in HTML (`<font color="red">`, `"orange"`, `"blue"`): they look as they do in Pokémon Automation, where blue on a dark background and orange on a light one are hard to read too.
