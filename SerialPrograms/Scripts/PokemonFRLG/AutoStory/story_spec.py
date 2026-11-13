@@ -1300,7 +1300,7 @@ CHAPTER10 = [
 ]
 
 
-def legendary(map_id, xy, flags, label, weaken=False, heal=True):
+def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
     (not the Master Ball: that is kept for the roaming legendary) until it
@@ -1313,9 +1313,13 @@ def legendary(map_id, xy, flags, label, weaken=False, heal=True):
     time). heal: then the tired team is healed from the bag (REVIVE, FULL
     RESTORE on the first two), after the save, so that every try of the way
     back starts with it (Cerulean Cave: a WOBBUFFET, which cannot be run
-    from, made the team faint)."""
+    from, made the team faint). later: the story comes back for it
+    (moltres_again): with too few balls in the bag (they ran out before a
+    try had a fair chance) it is left where it is, the save in front of it
+    loaded once more, and the steps after it go on (Moltres with one ULTRA
+    BALL and two POKe BALLs: 19 tries in an hour)."""
     return [talk(map_id, xy=xy, mode="talk", label=label),
-            {"battle": 60000, "label": label, "legendary": True, "weaken": weaken},
+            {"battle": 60000, "label": label, "legendary": True, "weaken": weaken, "later": later},
             setst(flags=flags),
             save()] + ([heal_after_legendary(label)] if heal else [])
 
@@ -1528,10 +1532,18 @@ CHAPTER12 = [
                   flags=["FLAG_HIDE_THREE_ISLAND_BIKERS", "FLAG_HIDE_THREE_ISLAND_LONE_BIKER"]),
             pos("MAP_THREE_ISLAND", 9, 26, "up"),
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "BikersToThreeIslandPC"),
-            #  10 Ultra Balls for Moltres (with those left from Articuno and
-            #  the one on Mt. Ember); the rest of the money is for the Poke
-            #  Balls of the National Pokedex.
-        ] + max_repels("MAP_THREE_ISLAND_MART", 2) + buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 10, "BuyUltraBalls") + [
+            #  The money went into Ultra Balls in Fuchsia City before
+            #  Zapdos; the trainers since then paid for three more (the
+            #  second playthrough: "10 Ultra Balls" here were 1, and
+            #  Moltres got 1 Ultra Ball and 2 Poke Balls a try). With
+            #  Charmander none are bought here: Moltres gets the balls left
+            #  from Articuno, and with too few it is left for chapter 13
+            #  (moltres_again, after the League's prize money). With the
+            #  others the story ends after this chapter: 11 Ultra Balls, or
+            #  as many as the money allows.
+        ] + max_repels("MAP_THREE_ISLAND_MART", 2) + [
+            only([v for v in STARTERS if v not in FLY_VARIANTS],
+                 buy("MAP_THREE_ISLAND_MART", [2, 3], 0, 11, "BuyUltraBalls")),
             heal("MAP_THREE_ISLAND_POKEMON_CENTER_1F", "MartToThreeIslandPC"),
             save(),
         ],
@@ -1572,8 +1584,11 @@ CHAPTER12 = [
             {"boulder": {"open_to": [[9, 7], [8, 6], [10, 6]]}, "label": "SummitBoulders"},
             goto("MAP_MT_EMBER_SUMMIT", [[9, 7]], "ToMoltres"),
             save(),
-        ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
-                      weaken=True, heal=False) + [
+            #  With Charmander the story comes back for it (chapter 13)
+            #  when the bag has too few balls; with the others it ends
+            #  after this chapter.
+        ] + [only([v], legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
+                                 weaken=True, heal=False, later=v in FLY_VARIANTS)) for v in STARTERS] + [
             #  Caught (and saved): loaded again, so Strength is off whether
             #  it took one try or several. The boulders stay where they were
             #  pushed on the way up (loading a save keeps them there): the
@@ -1672,12 +1687,91 @@ def oak_rating(label):
             setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 3})]
 
 
+def vermilion_ferry(option, dest_harbor, label):
+    """The Seagallop from Vermilion: the ticket check by the pier (x 22-23,
+    y 33). VermilionCity_EventScript_ChooseSeagallopDestTriPass (and
+    ...RainbowPass): "Ah, you have a TRI-PASS." first, A to the next page,
+    then "Would you like to board a SEAGALLOP ferry?" with the destinations
+    (One, Two, Three Island). The cutscene's B on that menu is a cancel: the
+    player walks back up the pier (the first try of C14_10)."""
+    steps = [goto("MAP_VERMILION_CITY", [[23, 33]], label, trigger=True),
+             wait(2500, label + "_Pass"),
+             press("A", 1, 2000, label + "_Menu")]
+    if option:
+        steps.append(press("DOWN", option, 500, label + "_Down"))
+    return steps + [press("A", 1, 1500, label + "_Pick"),
+                    cutscene(8000, 90000, "Ferry"),
+                    pos(dest_harbor, 8, 5)]
+
+
+def sevii_ferry_home(harbor_map, label):
+    """Back to Vermilion from a Sevii harbor: Vermilion is the first of the
+    destinations now (EventScript_ChooseDest*VermilionAllowed). The ferry
+    lands by the pier (23, 32)."""
+    return [talk(harbor_map, xy=[8, 6], mode="plain", label=label),
+            press("A", 1, 2500, label + "_Talk"),
+            press("A", 1, 1500, label + "_Pick"),
+            cutscene(8000, 90000, "Ferry"),
+            pos("MAP_VERMILION_CITY", 23, 32)]
+
+
+def moltres_again():
+    """Moltres, left on Mt. Ember in chapter 12 with too few balls in the bag
+    (legendary(later=True)): back for it with balls from the League's prize
+    money. 21 GREAT BALLs (12600): about one try in four catches it. The
+    POKeDEX needs that money as well, so not ULTRA BALLs (twice the price
+    for a third more catches); and not POKe BALLs, cheaper still, because a
+    try has room for some 25 to 35 balls only: Moltres wears the team down
+    turn after turn (FIRE SPIN's trap, FLAMETHROWER). Balls thrown in a try
+    that fails come back with the save. From Pallet Town (after Oak's
+    rating) and back there by FLY; the program skips all of it unless it
+    left Moltres there.
+    Moltres is on the summit again and the boulders are back where the game
+    puts them, as at the start of C12_06; the trainers on the way are
+    beaten."""
+    return [
+        setst(clear_flags=["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"],
+              reset_objects=["MAP_MT_EMBER_SUMMIT", "MAP_MT_EMBER_EXTERIOR"]),
+        heal(PC["FUCHSIA"], "MoltresToFuchsiaPC"),
+        #  Fuchsia City: MAX REPELs for Mt. Ember, 21 GREAT BALLs (the second
+        #  item of its list; one purchase: RIGHT twice).
+    ] + max_repels("MAP_FUCHSIA_CITY_MART", 2) + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 1, 21, "BuyGreatBalls") + [
+        heal(PC["VERMILION"], "FuchsiaToVermilionPC"),
+        save(),
+    ] + vermilion_ferry(0, "MAP_ONE_ISLAND_HARBOR", "FerryToOneIsland") + [
+        heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "HarborToOneIslandPC"),
+        save(),
+        goto("MAP_MT_EMBER_EXTERIOR", [[28, 47]], "ToMtEmber"),
+        {"boulder": {"open_to": [[14, 25]]}, "label": "MtEmberBoulders"},
+        goto("MAP_MT_EMBER_SUMMIT", [[9, 14]], "ToMtEmberSummit"),
+        {"boulder": {"open_to": [[9, 7], [8, 6], [10, 6]]}, "label": "SummitBoulders"},
+        goto("MAP_MT_EMBER_SUMMIT", [[9, 7]], "ToMoltres"),
+        save(),
+    ] + legendary("MAP_MT_EMBER_SUMMIT", [9, 6], ["FLAG_FOUGHT_MOLTRES", "FLAG_HIDE_MOLTRES"], "Moltres",
+                  weaken=True, heal=False) + [
+        {"reload": True, "label": "Reload after Moltres"},
+        heal_after_legendary("Moltres"),
+        {"boulder": {"open_to": [[9, 14]]}, "label": "SummitBouldersBack"},
+        setst(reset_objects=["MAP_MT_EMBER_EXTERIOR"]),
+        heal("MAP_ONE_ISLAND_POKEMON_CENTER_1F", "SummitToOneIslandPC"),
+        save(),
+    ] + sevii_ferry_home("MAP_ONE_ISLAND_HARBOR", "MoltresFerryHome") + [
+        fly("HEAL_LOCATION_PALLET_TOWN", "MoltresBackToPallet"),
+    ]
+
+
 CHAPTER13 = league_again("C13_01", 13, "prize money for Poke Balls") + [
     {
         "id": "C13_01_OAK", "chapter": 13,
         "title": "Oak's POKeDEX rating (not 60 species yet)",
         "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
         "steps": oak_rating("Oak: not 60 species yet") + [save()],
+    },
+    {
+        "id": "C13_01_MOLTRES", "chapter": 13,
+        "title": "Moltres, if it was left on Mt. Ember (Great Balls from the prize money)",
+        "steps": [{"if_left": {"labels": ["Moltres"], "steps": moltres_again()}, "label": "Moltres left?"},
+                  save()],
     },
 ] + league_again("C13_02", 13, "more prize money") + [
     {
@@ -1725,34 +1819,6 @@ def safari_game(area_map, tiles, species, label):
     ]
 
 
-def vermilion_ferry(option, dest_harbor, label):
-    """The Seagallop from Vermilion: the ticket check by the pier (x 22-23,
-    y 33). VermilionCity_EventScript_ChooseSeagallopDestTriPass (and
-    ...RainbowPass): "Ah, you have a TRI-PASS." first, A to the next page,
-    then "Would you like to board a SEAGALLOP ferry?" with the destinations
-    (One, Two, Three Island). The cutscene's B on that menu is a cancel: the
-    player walks back up the pier (the first try of C14_10)."""
-    steps = [goto("MAP_VERMILION_CITY", [[23, 33]], label, trigger=True),
-             wait(2500, label + "_Pass"),
-             press("A", 1, 2000, label + "_Menu")]
-    if option:
-        steps.append(press("DOWN", option, 500, label + "_Down"))
-    return steps + [press("A", 1, 1500, label + "_Pick"),
-                    cutscene(8000, 90000, "Ferry"),
-                    pos(dest_harbor, 8, 5)]
-
-
-def sevii_ferry_home(harbor_map, label):
-    """Back to Vermilion from a Sevii harbor: Vermilion is the first of the
-    destinations now (EventScript_ChooseDest*VermilionAllowed). The ferry
-    lands by the pier (23, 32)."""
-    return [talk(harbor_map, xy=[8, 6], mode="plain", label=label),
-            press("A", 1, 2500, label + "_Talk"),
-            press("A", 1, 1500, label + "_Pick"),
-            cutscene(8000, 90000, "Ferry"),
-            pos("MAP_VERMILION_CITY", 23, 32)]
-
-
 def poke_balls(mart, label):
     """As many POKe BALLs as the money allows (99 at most)."""
     return buy(mart, [2, 3], 0, 0, label)
@@ -1764,9 +1830,10 @@ CHAPTER14 = [
     {
         "id": "C14_01_VIRIDIAN_FOREST", "chapter": 14,
         "title": "POKeDEX: Poke Balls in Viridian City, Viridian Forest",
-        #  80 POKe BALLs, not as many as the money allows: the ESCAPE ROPEs
-        #  in Pewter City come first there.
-        "steps": [heal(PC["VIRIDIAN"], "ToViridianPC")] + buy("MAP_VIRIDIAN_CITY_MART", [2, 3], 0, 80, "BuyPokeBalls") + [
+        #  81 POKe BALLs (one purchase: RIGHT eight times), not as many as
+        #  the money allows: the ESCAPE ROPEs in Pewter City come first
+        #  there.
+        "steps": [heal(PC["VIRIDIAN"], "ToViridianPC")] + buy("MAP_VIRIDIAN_CITY_MART", [2, 3], 0, 81, "BuyPokeBalls") + [
             dex("MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), ["caterpie", "weedle", "kakuna", "metapod", "pikachu"],
                 "DexViridianForest"),
             heal(PC["PEWTER"], "ForestToPewterPC"),

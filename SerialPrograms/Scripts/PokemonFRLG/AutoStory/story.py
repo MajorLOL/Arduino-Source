@@ -1146,6 +1146,28 @@ class Builder:
             out.append({"type": "SKIP_IF_DEX", "label": step.get("label", "Enough species"), "p0": 0,
                         "p1": r["count"], "p2": 1, "text": ",".join(r["owned"])})
             return
+        if "if_left" in step:
+            #  Steps only for a legendary Pokemon the program left where it
+            #  was (too few balls in the bag; BATTLE with p2 & 4), by its
+            #  step's label: skipped otherwise. They end where they start.
+            #  What they buy and a REPEL still on at their end do not count
+            #  for what comes after: skipped, there is neither.
+            u = step["if_left"]
+            sub = []
+            start = self.pos
+            items_before = dict(self.state.items)
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if self.pos[:3] != start[:3]:
+                raise StoryError("if_left: the steps end at %s, not %s" % (self.pos, start))
+            for item, count in list(self.state.items.items()):
+                self.state.items[item] = min(count, items_before.get(item, 0))
+            self.state.repel_left = 0
+            self.engine.invalidate()
+            out.append({"type": "SKIP_UNLESS_LEFT", "label": step.get("label", "Left for later?"), "p0": len(sub),
+                        "text": ",".join(u["labels"])})
+            out.extend(sub)
+            return
         if "unless_fly" in step:
             #  Steps the program skips when the Fly user knows FLY already
             #  (a save from before this was in the story). They end where
@@ -1239,8 +1261,11 @@ class Builder:
         if "battle" in step:
             b = {"type": "BATTLE", "label": step.get("label", "Battle"), "p0": step["battle"],
                  "p1": 2 if step.get("legendary") else (1 if step.get("flee") else 0)}
-            if step.get("weaken"):
-                b["p2"] = 1
+            #  p2: 1 = weaken it first, 4 = the story comes back for it
+            #  (left where it is when the bag has too few balls).
+            flags = (1 if step.get("weaken") else 0) | (4 if step.get("later") else 0)
+            if flags:
+                b["p2"] = flags
             out.append(b)
             return
         if "hall_of_fame" in step:

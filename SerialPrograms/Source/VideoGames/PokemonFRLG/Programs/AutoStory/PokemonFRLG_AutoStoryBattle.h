@@ -50,6 +50,8 @@ enum class StoryBattleResult{
     LEAD_FAINTED,   //  The lead fainted (the battle may have gone on with the next one).
     NO_BATTLE,      //  No battle showed up.
     LOST,           //  The whole party fainted ("... whited out!").
+    OUT_OF_BALLS,   //  A legendary Pokemon and no ball left in the bag: the battle is
+                    //  still on (the caller loads the save in front of it).
 };
 
 //  Listens for the shiny sound the whole time the program runs (an audio
@@ -261,6 +263,13 @@ struct StoryBattleMemory{
     bool dex_registered = false;
     bool safari_over = false;
     bool no_balls = false;
+    //  The last battle, a legendary Pokemon (StoryBattleSettings::
+    //  catch_legendary): the balls thrown at it, what they are worth in
+    //  POKe BALLs (a GREAT BALL catches 1.5 times as often, an ULTRA BALL
+    //  twice), and whether the bag ran out of them.
+    int legendary_balls = 0;
+    double legendary_ball_worth = 0;
+    bool legendary_no_balls = false;
     //  The ball mark of the foe's box in the last (wild) battle: the game
     //  shows it for a species caught before. 1: there, 0: not there, -1:
     //  not seen (a trainer battle, the box not found). A species the

@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <string>
 #include <vector>
@@ -607,6 +608,17 @@ void AutoStory::run_segment(
                 skip_battle = next_battle;
                 break;
             }
+            if (next_battle && next->p1 == 2 && next->p2 > 0 && (next->p2 & 4) != 0 &&
+                rt.legendary_left.count(next->label) != 0
+            ){
+                env.log(
+                    std::string(next->label) + " stays where it is for now (too few balls, or too many tries): "
+                    "the story comes back for it.",
+                    COLOR_BLUE
+                );
+                skip_battle = true;
+                break;
+            }
             if (!story_talk_start(rt, label, talk_alt(step), label.rfind("Pick up item", 0) == 0)){
                 break;
             }
@@ -671,14 +683,57 @@ void AutoStory::run_segment(
                         rt.battle.legendary_master = false;
                     }
                 } legendary(rt, step.p2 < 0 ? 0 : step.p2, label);
+                //  p2 & 4: the story comes back for it. (Set before the
+                //  battle: the team fainting ends the step from inside it.)
+                const bool can_wait = step.p2 > 0 && (step.p2 & 4) != 0;
+                rt.legendary_can_wait = can_wait ? label : std::string();
                 StoryBattleResult result = story_battle(rt, StoryBattleKind::CATCH, label);
                 if (result != StoryBattleResult::CAUGHT){
                     rt.legendary_missed = true;
+                    if (rt.memory.legendary_no_balls){
+                        //  What a try with these balls is worth: a POKe
+                        //  BALL catches a Pokemon of catch rate 3 at a third
+                        //  of its HP about once in 115 (0.86%), a GREAT BALL
+                        //  1.5 times and an ULTRA BALL twice as often.
+                        const double worth = rt.memory.legendary_ball_worth;
+                        const double chance = 1.0 - std::pow(1.0 - 0.0086, worth);
+                        std::string balls = std::to_string(rt.memory.legendary_balls) +
+                            (rt.memory.legendary_balls == 1 ? " ball" : " balls");
+                        std::string odds = rt.memory.legendary_balls == 0
+                            ? std::string("There is no ball in the bag.")
+                            : "The bag has only " + balls + ": a try with them catches it about once in " +
+                                std::to_string((int)(1.0 / std::max(chance, 0.001) + 0.5)) + ".";
+                        //  Fewer than 5 ULTRA BALLs' worth (a try in twelve
+                        //  or worse): coming back later, with balls bought
+                        //  from the League's prize money, is the shorter
+                        //  way (some 40 minutes).
+                        if (can_wait && worth < 10.0){
+                            rt.legendary_left.insert(label);
+                            rt.legendary_left_now = true;
+                            OperationFailedExceptionWithScreenshot::fire(
+                                ErrorReportMode::NO_ERROR_REPORT,
+                                label + " was not caught. " + odds + " It is left where it is: the story comes back "
+                                "for it with balls bought from the League's prize money. Loading the save in "
+                                "front of it once more, then going on.",
+                                rt.console
+                            );
+                        }
+                        OperationFailedExceptionWithScreenshot::fire(
+                            ErrorReportMode::NO_ERROR_REPORT,
+                            label + " was not caught: the balls ran out (" + balls + " thrown). "
+                            "Loading the save before it to try again.",
+                            rt.console
+                        );
+                    }
                     OperationFailedExceptionWithScreenshot::fire(
                         ErrorReportMode::NO_ERROR_REPORT,
                         label + " was not caught. Loading the save before it to try again.",
                         rt.console
                     );
+                }
+                rt.legendary_can_wait.clear();
+                if (rt.legendary_left.erase(label) != 0){
+                    env.log(label + " was left for later: no longer.", COLOR_BLUE);
                 }
                 env.log(label + " caught!", COLOR_BLUE);
                 if (!rt.battle.wild_run){
@@ -755,6 +810,37 @@ void AutoStory::run_segment(
                     names += (names.empty() ? "" : ", ") + slug;
                 }
                 env.log(label + ": still wanted here: " + names + ".", COLOR_BLUE);
+            }
+            break;
+        }
+        case StepType::SKIP_UNLESS_LEFT:{
+            //  The way back to a legendary Pokemon the program left where
+            //  it was (text: the labels of those battle steps, separated by
+            //  commas): only when it did.
+            std::string left;
+            std::string name;
+            for (const char* p = step.text; ; p++){
+                if (*p == ',' || *p == 0){
+                    if (rt.legendary_left.count(name) != 0){
+                        left += (left.empty() ? "" : ", ") + name;
+                    }
+                    name.clear();
+                    if (*p == 0){
+                        break;
+                    }
+                }else{
+                    name += *p;
+                }
+            }
+            if (left.empty()){
+                env.log(
+                    label + ": " + std::string(step.text) + " was not left for later: the next " +
+                    std::to_string(step.p0) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
+            }else{
+                env.log(label + ": " + left + " was left for later. The next steps go and catch it.", COLOR_BLUE);
             }
             break;
         }
@@ -1094,6 +1180,32 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  so the list goes to a file of its own at each save too (in
     //  UserSettings, next to PA-Stats).
     const std::string caught_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Caught.txt";
+    //  Legendary Pokemon the program left for later (StoryRuntime::
+    //  legendary_left), as of the last save: "<starter> <label>,<label>".
+    const std::string left_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Left.txt";
+    if (!new_game){
+        std::string text;
+        const std::string prefix = std::string(starter_name(starter)) + " ";
+        if (read_text_file(left_file, text) && text.rfind(prefix, 0) == 0){
+            std::string name;
+            for (char c : text.substr(prefix.size()) + ","){
+                if (c == ',' || std::isspace((unsigned char)c)){
+                    if (!name.empty()){
+                        rt.legendary_left.insert(name);
+                    }
+                    name.clear();
+                }else{
+                    name += c;
+                }
+            }
+        }
+        for (const std::string& name : rt.legendary_left){
+            env.log(
+                name + " was left for later (as of the last save: " + left_file + "): the story comes back for it.",
+                COLOR_BLUE
+            );
+        }
+    }
     bool saved_since_start = false;
     rt.on_saved = [&](const std::string& segment_id, size_t step){
         saved_since_start = true;
@@ -1107,6 +1219,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 string_to_file(caught_file, list + "\n");
             }catch (...){
                 env.log("Could not write " + caught_file + ".", COLOR_ORANGE);
+            }
+        }
+        {
+            std::string list;
+            for (const std::string& name : rt.legendary_left){
+                list += (list.empty() ? "" : ",") + name;
+            }
+            try{
+                string_to_file(left_file, std::string(starter_name(starter)) + " " + list + "\n");
+            }catch (...){
+                env.log("Could not write " + left_file + ".", COLOR_ORANGE);
             }
         }
         try{
@@ -1224,7 +1347,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 std::set<std::string> species;
                 if (step.type == StepType::CATCH || step.type == StepType::SKIP_IF_DEX || step.type == StepType::ROAM){
                     species = story_species_list(step.text);
-                }else if (step.type == StepType::BATTLE && step.p1 == 2){
+                }else if (step.type == StepType::BATTLE && step.p1 == 2 &&
+                    rt.legendary_left.count(step.label) == 0
+                ){
+                    //  (Not one that was left for later.)
                     std::string slug;
                     for (const char* p = step.label; *p; p++){
                         slug += (char)std::tolower((unsigned char)*p);
@@ -1270,6 +1396,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             string_to_file(save_file, where);
             string_to_file(new_game_file, where);
             string_to_file(caught_file, "\n");
+            string_to_file(left_file, "\n");
         }catch (...){
             env.log("Could not write the program's files in " + SETTINGS_PATH() + ".", COLOR_ORANGE);
         }
@@ -1503,10 +1630,27 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 //  tries (the save is right in front of it).
                 rt.legendary_missed = false;
                 legendary_misses++;
-                if (legendary_misses > std::max<uint16_t>(RETRIES, league_again ? 20 : 25)){
-                    throw;
+                if (rt.legendary_left_now){
+                    //  Too few balls: left for later (the step said why).
+                    rt.legendary_left_now = false;
+                    legendary_misses = 0;
+                }else if (legendary_misses > std::max<uint16_t>(RETRIES, league_again ? 20 : 25)){
+                    if (league_again || rt.legendary_can_wait.empty()){
+                        throw;
+                    }
+                    //  The tries ran out, and the story comes back for it.
+                    env.log(
+                        rt.legendary_can_wait + " was not caught in " + std::to_string(legendary_misses) +
+                        " tries. It is left where it is: the story comes back for it. Loading the save in front "
+                        "of it once more, then going on.",
+                        COLOR_ORANGE
+                    );
+                    rt.legendary_left.insert(rt.legendary_can_wait);
+                    legendary_misses = 0;
+                }else{
+                    env.log("Try " + std::to_string(legendary_misses + 1) + " at " + segment_name(segment) + ".", COLOR_BLUE);
                 }
-                env.log("Try " + std::to_string(legendary_misses + 1) + " at " + segment_name(segment) + ".", COLOR_BLUE);
+                rt.legendary_can_wait.clear();
             }else{
                 failures++;
                 if (failures > RETRIES){

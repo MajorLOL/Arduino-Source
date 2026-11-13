@@ -676,6 +676,21 @@ void use_best_move(
                 //  nothing to this foe.
                 memory.useless |= (uint8_t)(1 << slot);
                 console.log(name + " again took none of the foe's HP, another move did: not using it against this foe.", COLOR_ORANGE);
+            }else if (weakest && memory.no_damage[slot] < 2){
+                //  Weakening a Pokemon to catch it: the next weakest move
+                //  can take far more (Articuno at 67% after one CUT, the
+                //  second CUT missed, FLY then made it faint: two of nine
+                //  tries). A miss or a turn without moving is far more
+                //  likely than a move that does nothing to it: the same
+                //  move again, another one only after three turns in a row
+                //  without damage.
+                memory.no_damage[slot]++;
+                memory.damage_turns_at[slot] = memory.damage_turns;
+                console.log(
+                    name + " took none of the foe's HP (a miss, or a turn without moving). "
+                    "Weakening it: the same move again.",
+                    COLOR_ORANGE
+                );
             }else{
                 //  Nothing, but maybe the player's Pokemon did not move
                 //  (asleep, paralyzed, confused) or missed: try another move
@@ -1300,6 +1315,9 @@ StoryBattleResult run_story_battle(
     memory.dex_registered = false;
     memory.safari_over = false;
     memory.no_balls = false;
+    memory.legendary_balls = 0;
+    memory.legendary_ball_worth = 0;
+    memory.legendary_no_balls = false;
     memory.safari_balls = 0;
     memory.foe_mark = -1;
     memory.owned_by_mark.clear();
@@ -1704,9 +1722,28 @@ StoryBattleResult run_story_battle(
                     case BagUse::USED:
                         balls_thrown++;
                         throw_failures = 0;
+                        if (legendary){
+                            memory.legendary_balls++;
+                            memory.legendary_ball_worth +=
+                                last_ball_rank >= 4 ? 100.0 : (last_ball_rank == 3 ? 2.0 : (last_ball_rank == 2 ? 1.5 : 1.0));
+                        }
                         console.log("Ball " + std::to_string(balls_thrown) + (legendary || dex_catch ? "." : " at the shiny."), COLOR_BLUE);
                         break;
                     case BagUse::NONE:
+                        if (legendary && settings.catch_legendary && !roamer){
+                            //  A legendary Pokemon of the story and no ball
+                            //  left: fighting on would only make it faint
+                            //  (a minute a try). The battle is left as it
+                            //  is: the step fails, and the save in front of
+                            //  the Pokemon is loaded.
+                            memory.legendary_no_balls = true;
+                            console.log(
+                                "No balls left (" + std::to_string(balls_thrown) + " thrown). The battle is left as it is: "
+                                "the save in front of it comes next.",
+                                COLOR_ORANGE
+                            );
+                            return StoryBattleResult::OUT_OF_BALLS;
+                        }
                         console.log(
                             dex_catch ? "No balls left: running." : "No balls left for the shiny: the battle goes on as usual.",
                             COLOR_ORANGE

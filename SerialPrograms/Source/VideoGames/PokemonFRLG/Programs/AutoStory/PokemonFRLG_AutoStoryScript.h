@@ -96,7 +96,10 @@ enum class StepType : uint8_t{
     HEAL,               //  talk to the nurse, heal
     CUTSCENE,           //  p0 = min ms, p1 = max ms, text "YES": answer questions with YES
     BATTLE,             //  a battle starts (or started on the way); p1 = 1: run away if wild,
-                        //  p1 = 2: a legendary Pokemon, caught with the best ball
+                        //  p1 = 2: a legendary Pokemon, caught with the best ball; then
+                        //  p2 & 1: its HP is brought down first, p2 & 2: the Master Ball
+                        //  may be used, p2 & 4: the story comes back for it (with too few
+                        //  balls in the bag it is left where it is)
     SCRIPTED_BATTLE,    //  the first rival battle
     SAVE,               //  p0 = 1 if the start menu has POKeDEX
     GRIND,              //  p0 = level, p1 = battles between heals, dir = back and forth,
@@ -148,6 +151,9 @@ enum class StepType : uint8_t{
                         //  skip those steps
     SEAGALLOP,          //  on the pier's trigger in Vermilion City: through the sailor's text and
                         //  menus (the tickets' menu first) to row p0 of the Sevii Islands list
+    SKIP_UNLESS_LEFT,   //  text = labels of legendary BATTLE steps (p2 & 4): unless the program
+                        //  left one of them for later, skip the next p0 steps (the way back
+                        //  to it)
 };
 
 struct StoryStep{
