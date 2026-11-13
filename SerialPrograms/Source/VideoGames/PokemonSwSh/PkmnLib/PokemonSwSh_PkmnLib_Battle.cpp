@@ -256,7 +256,8 @@ double terrain_damage_multiplier(const Pokemon& attacker, const Pokemon& defende
     bool is_flying = (attacker.type1() == Type::flying) || (attacker.type2() == Type::flying);
     bool is_levitate = attacker.ability() == "levitate";
 
-    if (!is_flying || !is_levitate)
+    // a terrain only affects a Pokemon on the ground: not a flying type and not one with levitate
+    if (!is_flying && !is_levitate)
     {
         // TODO: investigate the modifier based on terrain pulse
         // bulbapedia says that the power *doubles* to 100 *and* gets powered up from the terrain
@@ -297,22 +298,22 @@ double terrain_damage_multiplier(const Pokemon& attacker, const Pokemon& defende
                 move.set_type(Type::fairy);
 //                modifier *= 1.3;
             }
-            if (move_type == Type::dragon){
-                modifier *= 0.5;
-            }
             break;
         }
     }
 
-    // rising voltage applies if the defender is affected by the terrain
+    // rising voltage and misty terrain's halving of dragon moves apply if the defender is affected by the terrain
     is_flying = (defender.type1() == Type::flying) || (defender.type2() == Type::flying);
     is_levitate = defender.ability() == "levitate";
 
-    if (!is_flying || !is_levitate){
+    if (!is_flying && !is_levitate){
         if (field.is_electric()){
             if (move == "rising-voltage"){
                 modifier *= 2.0;
             }
+        }
+        if (field.is_misty() && move_type == Type::dragon){
+            modifier *= 0.5;
         }
     }
 

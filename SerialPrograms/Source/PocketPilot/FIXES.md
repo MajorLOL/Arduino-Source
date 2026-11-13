@@ -30,6 +30,7 @@ The fixes are checked by compiling them (GCC and Clang, with the warnings of the
 | 15 | `VideoGames/PokemonSV/Inference/Dialogs/PokemonSV_DialogArrowDetector.cpp` | A counter was used before it was ever set. | It starts at 0. |
 | 16 | `VideoGames/PokemonLZA/Programs/PokemonLZA_FastTravelNavigation.cpp` | A "confirmation" after a wait compared the value read before the wait. | The screen is read again. |
 | 17 | `PokemonLGPE_AlolanTrade.cpp`, `PokemonLGPE_FossilRevival.cpp`, `PokemonSwSh_DateSpam-PokeJobsFarmer.cpp` | Loop counters of 16 bits counting up to an option of 32 bits: above 65,535 the counter wraps around and the loop never ends. | Counters as wide as the option. |
+| 18 | `VideoGames/PokemonSwSh/PkmnLib/PokemonSwSh_PkmnLib_Battle.cpp` | The move scores of the Dynamax Adventures counted a terrain for every Pokémon but a Flying type that also has Levitate (`!is_flying \|\| !is_levitate`): Electric moves of a Zapdos got the boost of Electric Terrain, and Rising Voltage counted double against a Flying target. Found on 13 November 2026, reading the code for Pokémon Automation's issue [#1072](https://github.com/PokemonAutomation/Arduino-Source/issues/1072) (which it does not explain). | A terrain counts for a Pokémon that is neither a Flying type nor has Levitate. Misty Terrain's halving of Dragon moves goes by the target, as in the game. |
 
 ## Also changed for the new themes
 
