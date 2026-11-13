@@ -867,8 +867,10 @@ StoryBattleResult story_grass_run(
         //  the transition itself). So a screen that does not change for 300
         //  ms has no battle starting. Only after a run the video saw end as
         //  asked, with the player standing still: that is when the picture
-        //  can be still at all. Where something on the screen moves
-        //  (water, people), the look takes as long as it did.
+        //  can be still at all. (Still: StableScreenWatcher allows the
+        //  video's noise and a little movement, a person or a few animated
+        //  tiles.) Where much on the screen moves, the look takes as long
+        //  as it did.
         //  (Measured over 1,614 runs of the League training: 1,266 ended
         //  without a battle and each waited the whole 1.5 seconds; of the
         //  348 battles, 343 were seen during the run and 5 by this look,
