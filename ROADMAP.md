@@ -1,6 +1,6 @@
 # PocketPilot: roadmap
 
-What the first builds have, what could make the FRLG AutoStory faster, what could be added and what could be modernized. Written on 12 November 2026.
+What the first builds have, what could make the FRLG AutoStory faster, what could be added and what could be modernized. Written on 12 November 2026; sections 6 and 7 and the numbers of section 2 are of 13 November.
 
 ## 1. What the first build has
 
@@ -11,7 +11,9 @@ What the first builds have, what could make the FRLG AutoStory faster, what coul
 - A faster build: Ninja and ccache as in Pokémon Automation's own workflow. A build takes about 4 minutes when little changed, 35 minutes from nothing (it was 35 to 40 minutes each time).
 - A test of the interface in every build: the build starts on the build machine as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that fails is not published. It found its first bug in the first build: a crash at the first start without saved settings (fixed in build 2; build 1 should not be used).
 
-Not tested yet: the AutoStory on this new base. The branch `frlg-autostory` (build 107) stays the one for the test run with Charmander until a PocketPilot build has played a few segments.
+Not tested yet: the AutoStory on this new base. The branch `frlg-autostory` (build 108) stays the one for the test run with Charmander until a PocketPilot build has played a few segments.
+
+Build 4 adds the experimental programs and options of section 6.
 
 ## 2. Can the AutoStory match a speedrunner?
 
@@ -20,12 +22,12 @@ Not today, and not by a small change. The numbers:
 | | Time |
 |---|---|
 | World record, Any% Glitchless (pokeguy, with Squirtle) | 1 h 59 min 34 s |
-| AutoStory, second playthrough with Charmander, new game to Victory Road (measured from the logs of 8 to 12 November, 33 runs) | 50 hours of play, the League training not finished |
-| of which training levels in the grass (11 segments) | 39.8 hours |
-| of which the route itself: walking, talking, the trainers on the way, the gyms, shopping, retries after a failure | 10.2 hours |
-| The League training in the first playthrough | 11.3 hours |
+| AutoStory, second playthrough with Charmander, new game to the Hall of Fame (measured from the logs of 8 to 13 November, 34 runs; the Champion fell on 13 November at 01:49) | 56.9 hours of play |
+| of which training levels in the grass (11 segments) | 45.8 hours |
+| of which the route itself: walking, talking, the trainers on the way, the gyms, shopping, retries after a failure | 11.2 hours |
+| of which the Elite Four and the Champion, each beaten at the first try | 0.9 hours |
 
-So a whole story takes about 60 hours, some 30 times the record. Three quarters of that is training:
+So a whole story takes 57 hours, some 29 times the record. Four fifths of that is training:
 
 | Training for | Hours | Levels asked for |
 |---|---|---|
@@ -37,13 +39,13 @@ So a whole story takes about 60 hours, some 30 times the record. Three quarters 
 | Sabrina (with Lapras) | 1.7 | 47, Lapras 32 |
 | Blaine | 7.0 | 52, the team 42 |
 | Giovanni | 5.6 | 66, the team 47 |
-| The League | 3.8 so far (11.3 in the first playthrough) | 74, the team 58 |
+| The League | 9.8 (11.3 in the first playthrough) | 74, the team 58 |
 
 A speedrunner does not train at all. The published routes ([Squirtle](https://www.speedrun.com/pkmnfrlg/guide/rps95), [Charmander](https://www.speedrun.com/pkmnfrlg/guides/wardh)) take their levels from the trainers on the way and a handful of Rare Candies, and win the hard fights with items bought on the 5th floor of the Celadon Department Store (the Charmander route: 22 X Special, 5 X Defend, 1 to 3 X Speed, 2 X Accuracy, 3 Guard Spec). The Charmander route meets Erika at level 34, Giovanni in Silph Co. at 43 and leaves Fuchsia at 48. They also reset the run when a fight goes wrong; the program cannot count on luck, so it levels until the fight is safe.
 
 What would bring the time down, in the order of what it gains for the work it takes:
 
-1. **X items instead of levels.** Buy the route's X items in Celadon, use them at the start of the gym leaders', Giovanni's, the rival's and the League's fights, and ask for the route's levels instead of today's. Save before each of those fights (the program does); after a loss, try again, and only after a second loss train three levels. Estimate: 5 to 10 hours of training left instead of about 47.
+1. **X items instead of levels.** Buy the route's X items in Celadon, use them at the start of the gym leaders', Giovanni's, the rival's and the League's fights, and ask for the route's levels instead of today's. Save before each of those fights (the program does); after a loss, try again, and only after a second loss train three levels. Estimate: 5 to 10 hours of training left instead of 46.
 2. **Only the lead trains.** Electrode, Vaporeon and Lapras are there for the League's match-ups. With X items the lead can carry the League; the team then only needs to exist for Surf, Strength and Fly.
 3. **Running by default.** The option "Running (experimental)" halves the walking time on the maps that allow it. It needs a run from start to end without getting lost before it can be the default.
 4. **The Switch versions' fanfare skip.** Opening and closing the help menu with L at the right moment skips a fanfare (2.68 seconds each, up to a minute and a half in a run, found by iamClemi in March 2026). Small, but free once the timing is known.
@@ -98,9 +100,73 @@ The branch takes Pokémon Automation's changes by merging its `main`. PocketPilo
 
 The fixes and the video frame conversion are separate commits, so that they can be offered to Pokémon Automation one at a time (its rules: new contributors at most two open pull requests, opened and answered by a person).
 
+## 6. What people ask for, and what build 4 has of it (experimental)
+
+Where the requests come from: Pokémon Automation's request tracker ([ComputerControl issues](https://github.com/PokemonAutomation/ComputerControl/issues), 53 open on 12 November 2026), its own plan for an FRLG AutoStory ([Arduino-Source #1827](https://github.com/PokemonAutomation/Arduino-Source/issues/1827)), and what [pokebot-gen3](https://github.com/hanzi/pokebot-gen3/blob/main/wiki/Readme.md) (for emulators) offers that Pokémon Automation's FRLG list does not.
+
+| Asked for | Where | In PocketPilot |
+|---|---|---|
+| An FRLG AutoStory | Request [#259](https://github.com/PokemonAutomation/ComputerControl/issues/259) of March 2026; Pokémon Automation started its own in November ([#1827](https://github.com/PokemonAutomation/Arduino-Source/issues/1827): the start of the game is coded, from the first gym on it is not) | There since the first build. It finished a whole game on 13 November 2026: from a new game to the Hall of Fame in 57 hours of play, over 34 runs. |
+| The program's main messages in the log on the video, not only in the log window | Request [#264](https://github.com/PokemonAutomation/ComputerControl/issues/264) | **Build 4, experimental:** the option "Progress on the video" of the AutoStory and of the Level Trainer: the step, each battle's result and HP, the level while training, heals, saves, failed steps. |
+| A loop counter for the Turbo Macro | Request [#249](https://github.com/PokemonAutomation/ComputerControl/issues/249) | **Build 4, experimental:** the Turbo Macro counts its loops under the video. |
+| Training a Pokémon to a level | pokebot-gen3's "Level Grind" mode. Pokémon Automation has an EV Trainer and an Elite Four Farmer for FRLG, nothing with a level to reach. | **Build 4, experimental:** the program "Level Trainer". It trains the first Pokémon of the party with the AutoStory's battles: where the player stands (no nurse: it stops when low on HP or out of PP), or at one of the nine training places of the story, from the nurse to the grass and back to heal. |
+| Faster battles | This fork's own measurement: of the 31 seconds of a training battle, 8 are the wait after its last text (6 seconds for nothing of a battle to show, then a look at the start menu); the game needs about 2. | **Build 4, experimental:** the option "Faster battles" of the AutoStory and the Level Trainer. The game fades to black at the end of every battle; the program looks at the start menu when the picture is back. Off by default. |
+| Entering ACE codes (box names) | Request [#260](https://github.com/PokemonAutomation/ComputerControl/issues/260) | Not built. One wrong character can corrupt the save; it needs a design that checks every name on the screen and a test on a save that may be lost. |
+| Day care and eggs, Sweet Scent, Rock Smash, the Safari Zone as a hunting ground, puzzles | pokebot-gen3 modes | Not built. See section 3 for the day care. |
+
+"Experimental" is a new standing of a program, next to Pokémon Automation's "beta" and "3rd party": the program has the tag in the list and a note under its title. It means: compiled and checked by the build's interface test, but never run on a console. The experimental options of the AutoStory are off unless turned on, so the AutoStory plays as it did.
+
+Also new in build 4, for section 7: the program "Input Timing Test" (experimental). It opens the start menu a few hundred times and reports how long the game takes to show its reaction to a press, how much that varies, and whether a press can be aimed at a frame.
+
+## 7. Can a program of our own beat the world records?
+
+The records:
+
+| | Time | How |
+|---|---|---|
+| Best run by a person, Any% Glitchless | 1 h 59 min 34 s | pokeguy, on a Game Boy Player with Game Boy Interface. The leaderboard lists GBA, Game Boy Player, GBI and DS; the Switch versions are not on it. |
+| Tool-assisted run | 1 h 44 min 17 s | mkdasher, 2013, on the emulator VBA-rr: 373,735 frames of input, with heavy manipulation of the game's random numbers (Squirtle, later a Clefable with Metronome). |
+
+**An official record: no.** speedrun.com's rules say that "the game itself must not be altered or controlled with outside tools" and that turbo controllers "or such with non-native functions" are not allowed. A program pressing the buttons is exactly that. TASVideos publishes input files made on emulators; a run on a console is not one of those.
+
+**The tool-assisted time: no.** That run is perfect to the frame for an hour and three quarters, made with save states and a view into the game's memory. A program that looks at a capture card cannot get there.
+
+**Faster than the best person, unofficially: possible in principle, far away in practice.** What speaks for it:
+
+- A long tool-assisted run has been played back on real hardware: a Pokémon Crystal run of more than 600,000 frames on a GameCube with Game Boy Interface (it lost its place once, after 32 minutes, through the drift of the game's clock, and that was fixed).
+- On a console that asks a USB controller for its buttons, as the Switch does, timed playback worked in short stretches when the playback counted the console's video frames (a Wii U and an RP2040 board); over the air it was off by up to two frames.
+- Pokémon Automation's RNG programs hit one chosen moment on the retail Switch versions after calibrating: the seed is set by when a button is pressed on the title screen, and its guide's example is 8 advances late and one seed off at the first try, on target at the next.
+- A program does not get tired. Where people play thousands of attempts for one lucky run, it can play twelve two-hour attempts a day and keep the best, and it can do what the published route says it leaves out ("not optimized for RNG manipulation").
+
+What stands in the way:
+
+- The gap between a perfect run and the best person is only 15 minutes in two hours. The AutoStory is not near that kind of play: it looks at the screen after nearly everything it does (a walk of four tiles in the grass takes 3.3 seconds, of which one second is walking), it trains for 46 hours, and it takes Charmander.
+- It would be another program, not a faster AutoStory: the speedrun route (Squirtle, no training, X items, Rare Candies, Repels, the bicycle), played by the clock in stretches of timed presses, looking at the video only where the game gives a clear sign to find its place again.
+- The Switch versions run the game in Nintendo's own emulator: its timing has to be measured, nothing of the Game Boy Advance runs can be assumed.
+- Every stretch has to be tested on the console, and a run stops at the first press that falls a frame late.
+
+The order to go about it, each step useful by itself:
+
+1. **Measure** (build 4): the Input Timing Test tells how much the delay between a press and its effect varies on this controller board, console and capture card, and whether a press can be aimed at a frame. Without that, nothing by the clock can be planned.
+2. **Take the waits out of the AutoStory** where the game gives a sign: "Faster battles" (build 4), the check after a walk in the grass, running.
+3. **X items instead of levels** (section 2): from 57 hours to under 20.
+4. **A speedrun mode** for one stretch first, for instance from the bedroom to the first rival battle: timed presses, the video as the check. Compare with the same stretch in a record run's video.
+5. **The whole route** stretch by stretch, then the random numbers (the starter's stats from the title screen, as Pokémon Automation's Starter RNG does), then many attempts.
+
+A fair guess: steps 1 to 3 are weeks, and bring a story that plays in less than a day. Steps 4 and 5 are months of test runs, with a first whole run somewhere around 3 to 4 hours. Coming under 1 h 59 min 34 s would take much more than that again, and may not be reachable through a capture card at all; the Input Timing Test is the first thing that can tell.
+
+One thing would be new either way: no program-played run of FireRed or LeafGreen on a console turned up in this search. The first one that finishes at speedrun pace has no time to beat.
+
 ## Sources
 
 - [speedrun.com: Pokémon FireRed/LeafGreen leaderboard](https://www.speedrun.com/pkmnfrlg)
+- [speedrun.com: site rules](https://www.speedrun.com/support/learn/site-rules)
+- [TASVideos: GBA Pokémon FireRed by mkdasher in 1:44:17.34](https://tasvideos.org/2520M) and [its submission](https://tasvideos.org/4143S)
+- [RetroRGB: a Pokémon Crystal tool-assisted run verified on a console with Game Boy Interface](https://retrorgb.com/pokemon-tas-gbi.html)
+- [Doug Brown: tool-assisted playback on a Wii U with an RP2040, wired and wireless](https://www.downtowndougbrown.com/2024/10/are-wireless-gamepads-terrible-mario-maker-tas-playback-with-an-rp2040)
+- [Pokémon Automation: FRLG RNG manipulation guide](https://pokemonautomation.github.io/Programs/PokemonFRLG/RngManipulationGuide.html)
+- [Pokémon Automation: request tracker](https://github.com/PokemonAutomation/ComputerControl/issues) and [the plan for its own FRLG AutoStory](https://github.com/PokemonAutomation/Arduino-Source/issues/1827)
+- [Pokémon Automation: the scrolled-bag fix this fork's test run needed](https://github.com/PokemonAutomation/Arduino-Source/pull/1771)
 - [speedrun.com: Any% (Glitchless), JP_Xinnam](https://www.speedrun.com/pkmnfrlg/guide/rps95) and [Any% (Glitchless) with Charmander, Exarion](https://www.speedrun.com/pkmnfrlg/guides/wardh)
 - [GamesRadar, 20 March 2026: the fanfare skip in the Switch versions](https://www.gamesradar.com/games/pokemon/the-biggest-time-save-in-nearly-a-decade-of-pokemon-speedrunning-has-been-discovered-thanks-to-the-new-firered-and-leafgreen-switch-ports-and-all-it-takes-is-the-press-of-a-button/)
 - [Nintendo Life: Pokémon FireRed and LeafGreen on the Switch eShop](https://www.nintendolife.com/games/switch-eshop/pokemon_firered_and_leafgreen)

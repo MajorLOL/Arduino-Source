@@ -92,12 +92,15 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     };
     const std::string GAME = Pokemon::STRING_POKEMON + " FireRed and LeafGreen";
     const std::string PROGRAM = "AutoStory";
-    auto open_program = [&]{
-        logger.log("UI test: opening " + GAME + ", " + PROGRAM);
-        if (!window.open_program(GAME, PROGRAM)){
+    auto open_named = [&](const std::string& program){
+        logger.log("UI test: opening " + GAME + ", " + program);
+        if (!window.open_program(GAME, program)){
             failed++;
-            logger.log("UI test: could not open " + GAME + ", " + PROGRAM, COLOR_RED);
+            logger.log("UI test: could not open " + GAME + ", " + program, COLOR_RED);
         }
+    };
+    auto open_program = [&]{
+        open_named(PROGRAM);
     };
     //  The list of a dropdown, opened and drawn without being put on the
     //  screen.
@@ -243,9 +246,16 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         save_lists(look.name);
     }
 
+    //  An experimental program: its tag in the list, the note in its
+    //  header, its options.
+    set_look(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
+    open_named("Level Trainer");
+    let_run(500);
+    save(window, "night-fire-level-trainer");
+    save_tall("night-fire-level-trainer-tall");
+
     //  Back to the first look. (Nothing of this is saved: the program
     //  exits without writing its settings.)
-    set_look(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
     window.show_games();
     let_run(300);
 
