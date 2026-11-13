@@ -253,6 +253,10 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     let_run(500);
     save(window, "night-fire-level-trainer");
     save_tall("night-fire-level-trainer-tall");
+    open_named("Box Namer");
+    let_run(500);
+    save(window, "night-fire-box-namer");
+    save_tall("night-fire-box-namer-tall");
 
     //  Back to the first look. (Nothing of this is saved: the program
     //  exits without writing its settings.)

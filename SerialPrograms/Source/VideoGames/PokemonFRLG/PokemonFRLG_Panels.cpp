@@ -11,6 +11,7 @@
 
 #include "PokemonFRLG_Settings.h"
 #include "Programs/AutoStory/PokemonFRLG_AutoStory.h"
+#include "Programs/BoxOrganization/PokemonFRLG_BoxNamer.h"
 #include "Programs/BoxOrganization/PokemonFRLG_BoxSorter.h"
 #include "Programs/BoxOrganization/PokemonFRLG_BoxSorterLivingDex.h"
 #include "Programs/Farming/PokemonFRLG_EliteFourFarmer.h"
@@ -72,6 +73,7 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     //  yet (PanelQualityStanding::EXPERIMENTAL).
     ret.emplace_back("---- Experimental ----");
     ret.emplace_back(make_SingleSwitchProgram<LevelTrainer>());
+    ret.emplace_back(make_SingleSwitchProgram<BoxNamer>());
     ret.emplace_back(make_SingleSwitchProgram<InputTimingTest>());
 
     ret.emplace_back("---- Farming ----");

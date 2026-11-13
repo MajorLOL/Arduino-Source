@@ -22,6 +22,7 @@
 #include "Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
 #include "Inference/PokemonFRLG_BattleLevelUpReader.h"
 #include "Inference/PokemonFRLG_BattleSelectionArrowDetector.h"
+#include "Inference/PokemonFRLG_NamingScreenText_Tests.h"
 #include "Inference/PokemonFRLG_PartyLevelUpReader.h"
 #include "Inference/PokemonFRLG_ShinySymbolDetector.h"
 #include "Inference/PokemonFRLG_StatsReader.h"
@@ -50,6 +51,7 @@ void add_tests(UnitTestDatabase& database){
     add_tests_BoxSorter(database);
     add_tests_EliteFourRoomDetector(database);
     add_tests_HallOfFameSavingDetector(database);
+    add_tests_NamingScreenText(database);
     add_tests_PartyEmptySlotDetector(database);
     add_tests_PartyHeldItemDetector(database);
     add_tests_PartyLevelUpReader(database);

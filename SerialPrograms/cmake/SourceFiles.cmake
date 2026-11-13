@@ -1759,6 +1759,10 @@ file(GLOB LIBRARY_SOURCES
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_DaycareManDetector.h
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_DigitReader.cpp
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_DigitReader.h
+    Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_NamingScreenText.cpp
+    Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_NamingScreenText.h
+    Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_NamingScreenText_Tests.cpp
+    Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_NamingScreenText_Tests.h
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_OcrPreprocessing.cpp
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_OcrPreprocessing.h
     Source/VideoGames/PokemonFRLG/Inference/PokemonFRLG_PartyLevelUpReader.cpp
@@ -1812,6 +1816,8 @@ file(GLOB LIBRARY_SOURCES
     Source/VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryTools.h
     Source/VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryWalkTracker.cpp
     Source/VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryWalkTracker.h
+    Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxNamer.cpp
+    Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxNamer.h
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxOrganization.cpp
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxOrganization.h
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxSorter.cpp
