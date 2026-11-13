@@ -208,7 +208,11 @@ The Input Timing Test has not run yet. Three things can be read from the logs of
 | Along the grass (up to 4 tiles) | 7,330 | 7,329 | 1 | 0 |
 | On the route (1 to 41 tiles) | 7,679 | 7,464 | 215 | 0 |
 
-The short ones are nearly all the same few stretches of the route, where the same tiles are missing time after time (one asks for 15 tiles and gets 13 in half of its runs): something about those places, which is worth a look, not the clock. On open ground a timed walk came out right 7,329 times of 7,330 and never went too far. So for step 4, walking by the clock is not what stands in the way on this controller board and console. What a speed mode has to solve is what is not walking: more than half of a run is battles, and the texts, menus and fades between them have no fixed length yet. That is what the Input Timing Test and "Faster battles" are for.
+The short ones are not the clock. 100 of the 215 are walks over rock stairs: the steps in front of the Indigo Plateau and the two ends of Nugget Bridge. On those tiles the game itself walks slower, 23 frames a tile instead of 16 (`PlayerIsMovingOnRockStairs` in its source). A walk over four of them came out two tiles short 83 times of 85 and one tile short the other two times; a walk over two of them one tile short, 14 times of 14. One stair tile fits in the spare time of a press (19 walks of 20). The program sees the missing tiles on the video and walks them. A clock that counts the stairs would not have to, and the script's generator knows where they are (it does not let the player run there). Another 79 are walks that did not start at all, 58 of them single steps and most of those at the same four places; those have not been looked into. And 22 are one walk in the Power Plant that came out two tiles short all 22 times, with nothing on the game's map to explain it: not understood yet. Along the grass a timed walk came out right 7,329 times of 7,330, and no walk went a tile too far.
+
+Between two walks the program takes 0.8 seconds (the median of 6,973 walks that were followed straight by another): it lets the last step end, counts the tiles on the video and waits for a still picture. The game needs up to a quarter of a second of that. In these logs the pauses add up to 87 minutes, next to 163 minutes of held presses.
+
+So for step 4, walking by the clock is not what stands in the way on this controller board and console: the clock has to count the rock stairs, and it can chain the presses where the program now stops to look. What a speed mode has to solve is what is not walking: more than half of a run is battles, and the texts, menus and fades between them have no fixed length yet. That is what the Input Timing Test and "Faster battles" are for.
 
 ## Sources
 
@@ -227,7 +231,7 @@ The short ones are nearly all the same few stretches of the route, where the sam
 - [Bulbagarden: Pokémon HOME 4.1.0 and FireRed/LeafGreen](https://bulbagarden.net/threads/pokemon-home-version-4-1-0-to-receive-october-update-adding-firered-and-leafgreen-connectivity-and-transfers-of-pokemon-in-go-safari-balls.311303/)
 - [Pokémon Automation: the list of programs](https://pokemonautomation.github.io/Programs/index.html)
 - [pokebot-gen3](https://github.com/40Cakes/pokebot-gen3)
-- [pret/pokefirered](https://github.com/pret/pokefirered): the game's source as the pret project took it apart, with the revision of the Switch versions (the naming screen, the PC's boxes, the battle transition)
+- [pret/pokefirered](https://github.com/pret/pokefirered): the game's source as the pret project took it apart, with the revision of the Switch versions (the naming screen, the PC's boxes, the battle transition, the rock stairs)
 - [Pokémon ACE notes: FRLG FAQ](https://pomeg-letterbombers.github.io/pokemon-ace-notes/frlg-faq/) and [a route with its box names](https://pomeg-letterbombers.github.io/pokemon-ace-notes/frlg-non-jpn-pre-e4-route)
 - [Nintendo Life, 28 February 2026: the Switch versions replace names that are not allowed](https://www.nintendolife.com/news/2026/02/pokemon-firered-and-leafgreen-switch-update-censors-naughty-and-offensive-names)
 - [Pokémon Automation: its test pictures](https://github.com/PokemonAutomation/CommandLineTests)
