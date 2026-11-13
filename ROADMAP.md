@@ -8,7 +8,8 @@ What the first builds have, what could make the FRLG AutoStory faster, what coul
 - A new interface: see [README.md](README.md).
 - Pokémon Automation's `main` of 11 November 2026 merged in (149 commits since the fork was made): among others gamepad support, the FRLG Box Sorter and Living Dex sorter, a reworked audio pipeline and device names for the dropdowns. Gamepad support (`PA_SDL`) is on in the builds.
 - 17 bug fixes from a review of the whole code: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
-- A faster build: Ninja and ccache as in Pokémon Automation's own workflow, and a test that starts the build and saves pictures of its interface.
+- A faster build: Ninja and ccache as in Pokémon Automation's own workflow. A build takes about 4 minutes when little changed, 35 minutes from nothing (it was 35 to 40 minutes each time).
+- A test of the interface in every build: the build starts on the build machine as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that fails is not published. It found its first bug in the first build: a crash at the first start without saved settings (fixed in build 2; build 1 should not be used).
 
 Not tested yet: the AutoStory on this new base. The branch `frlg-autostory` (build 107) stays the one for the test run with Charmander until a PocketPilot build has played a few segments.
 
@@ -86,6 +87,8 @@ Candidates:
 | **The settings page** | One long page. Groups with a search box, as in the side bar, would make it easier to use. |
 | **The log window** | A filter for errors and a search. |
 | **`catch (...)` in the programs** | Several programs catch every exception in a retry loop, also the one that stops the program. Each should let that one through. |
+| **Texts with a color of their own** | About 30 texts of the programs set their color in HTML (`<font color="red">`, `"orange"`, `"blue"`) instead of through `html_color_text()`, which picks a shade that can be read on the theme's background. Blue on a dark background and orange on a light one are hard to read, as they are in Pokémon Automation. |
+| **Colored texts after a change of theme** | A program that is open while the theme changes keeps the shades of the old theme in its colored texts until it is opened again. |
 | **Pokémon Automation's tests in this fork's workflow** | Its workflow runs the command-line tests after the build; this fork's workflow only takes the pictures. |
 | **A Dutch interface** | Everything is in English. |
 
