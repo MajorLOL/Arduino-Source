@@ -7,6 +7,7 @@
 #ifndef PokemonAutomation_PokemonFRLG_NuggetBridgeFarmer_H
 #define PokemonAutomation_PokemonFRLG_NuggetBridgeFarmer_H
 
+#include "Common/Cpp/Options/BooleanCheckBoxOption.h"
 #include "Common/Cpp/Options/SimpleIntegerOption.h"
 #include "Common/Cpp/Options/ButtonOption.h"
 #include "CommonFramework/Notifications/EventNotificationsTable.h"
@@ -43,6 +44,9 @@ private:
     GoHomeWhenDoneOption GO_HOME_WHEN_DONE;
 
     SimpleIntegerOption<uint32_t> PERIODIC_SAVE;
+
+    //  PocketPilot (experimental): see program().
+    BooleanCheckBoxOption WALK_ALONG_WALLS;
 
     EventNotificationOption NOTIFICATION_STATUS_UPDATE;
     EventNotificationsOption NOTIFICATIONS;

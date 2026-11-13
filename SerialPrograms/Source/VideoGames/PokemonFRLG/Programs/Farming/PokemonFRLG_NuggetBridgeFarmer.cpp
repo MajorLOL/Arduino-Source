@@ -69,6 +69,16 @@ NuggetBridgeFarmer::NuggetBridgeFarmer()
         50,
         0
     )
+    , WALK_ALONG_WALLS(
+        "<b>Walk along the walls (experimental):</b><br>"
+        "The walk to the Rocket goes by timings alone, and one of its legs has to come out at exactly "
+        "15 tiles: a little too long or too short and the player stops at a trainer of the bridge. "
+        "With this option the walk goes into the bay below the bridge, to its left wall, and one step "
+        "to the right from there, so that no leg depends on its exact time. "
+        "It takes about 1.4 seconds more per Nugget. Not run on a console yet.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
     , NOTIFICATION_STATUS_UPDATE("Status Update", true, false, std::chrono::seconds(3600))
     , NOTIFICATIONS({
         &NOTIFICATION_STATUS_UPDATE,
@@ -81,6 +91,7 @@ NuggetBridgeFarmer::NuggetBridgeFarmer()
     PA_ADD_OPTION(NUM_NUGGETS);
     PA_ADD_OPTION(GO_HOME_WHEN_DONE);
     PA_ADD_OPTION(PERIODIC_SAVE);
+    PA_ADD_OPTION(WALK_ALONG_WALLS);
 
     PA_ADD_OPTION(NOTIFICATIONS);
 }
@@ -180,13 +191,37 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
 
         env.console.log("Navigating to Team Rocket member...");
 
-        ssf_press_button(context, BUTTON_B, 0ms, 12000ms);
-        pbf_press_dpad(context, DPAD_LEFT, 590ms, 0ms);
-        pbf_press_dpad(context, DPAD_UP, 510ms, 0ms);
-        pbf_press_dpad(context, DPAD_LEFT, 1550ms, 0ms);
-        pbf_press_dpad(context, DPAD_UP, 1175ms, 0ms);
-        pbf_press_dpad(context, DPAD_RIGHT, 1950ms, 0ms);
-        pbf_press_dpad(context, DPAD_UP, 5300ms, 0ms);
+        if (WALK_ALONG_WALLS){
+            //  PocketPilot (experimental): the same walk up to the street in
+            //  the north of the city. Then right to anywhere below the bay
+            //  under the bridge (6 tiles wide), a little up into it, left to
+            //  its wall (the bridge's left column), one step right (its
+            //  middle column), and up to the Rocket. Walked frame by frame
+            //  on the game's map with its own rules for steps, turns and
+            //  bumps: the one step stands 70 ms less and 40 ms more of a
+            //  hold of 90 ms, every other leg 180 ms or more either way. In
+            //  the walk below the fifth leg stands 60 ms less and 55 ms more
+            //  of 1950 ms, and a pause of the game anywhere in those two
+            //  seconds counts; here only one that falls on the one step.
+            ssf_press_button(context, BUTTON_B, 0ms, 13000ms);
+            pbf_press_dpad(context, DPAD_LEFT, 590ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 510ms, 0ms);
+            pbf_press_dpad(context, DPAD_LEFT, 1550ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 1175ms, 0ms);
+            pbf_press_dpad(context, DPAD_RIGHT, 2140ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 200ms, 0ms);
+            pbf_press_dpad(context, DPAD_LEFT, 900ms, 0ms);
+            pbf_press_dpad(context, DPAD_RIGHT, 90ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 5300ms, 0ms);
+        }else{
+            ssf_press_button(context, BUTTON_B, 0ms, 12000ms);
+            pbf_press_dpad(context, DPAD_LEFT, 590ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 510ms, 0ms);
+            pbf_press_dpad(context, DPAD_LEFT, 1550ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 1175ms, 0ms);
+            pbf_press_dpad(context, DPAD_RIGHT, 1950ms, 0ms);
+            pbf_press_dpad(context, DPAD_UP, 5300ms, 0ms);
+        }
 
         context.wait_for_all_requests();
 
