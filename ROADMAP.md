@@ -1,19 +1,19 @@
 # PocketPilot: roadmap
 
-What the first builds have, what could make the FRLG AutoStory faster, what could be added and what could be modernized. Written on 12 November 2026; sections 6 and 7 and the numbers of section 2 are of 13 November.
+What the first builds have, what could make the FRLG AutoStory faster, what could be added and what could be modernized. Written on 12 November 2026; sections 6 and 7, the numbers of section 2 and the last three rows of section 3 are of 13 November.
 
 ## 1. What the first build has
 
 - Its own name, icon, "About" window, window title and build number; the links to Pokémon Automation's Discord and its check for a new version are gone.
 - A new interface: see [README.md](README.md).
-- Pokémon Automation's `main` of 11 November 2026 merged in (149 commits since the fork was made): among others gamepad support, the FRLG Box Sorter and Living Dex sorter, a reworked audio pipeline and device names for the dropdowns. Gamepad support (`PA_SDL`) is on in the builds.
-- 19 bug fixes from a review of the whole code and of Pokémon Automation's open issues: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
+- Pokémon Automation's `main` of 11 November 2026 merged in (149 commits since the fork was made): among others gamepad support, the FRLG Box Sorter and Living Dex sorter, a reworked audio pipeline and device names for the dropdowns. Gamepad support (`PA_SDL`) is on in the builds. Build 10 has its `main` of 13 November (four commits more).
+- 20 bug fixes from a review of the whole code, of Pokémon Automation's open issues and of what goes wrong in other controller programs: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
 - A faster build: Ninja and ccache as in Pokémon Automation's own workflow. A build takes about 4 minutes when little changed, 35 minutes from nothing (it was 35 to 40 minutes each time).
 - A test of the interface in every build: the build starts on the build machine as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that fails is not published. It found its first bug in the first build: a crash at the first start without saved settings (fixed in build 2; build 1 should not be used).
 
 Not tested yet: the AutoStory on this new base. The branch `frlg-autostory` (build 108) stays the one for the test run with Charmander until a PocketPilot build has played a few segments.
 
-Builds 4 and 5 add the experimental programs and options of sections 6 and 7.
+Builds 4 and 5 add the experimental programs and options of sections 6 and 7. Build 10 adds fix 20 and an experimental walk for the Nugget Bridge Farmer (section 6).
 
 ## 2. Can the AutoStory match a speedrunner?
 
@@ -69,6 +69,9 @@ From what the Switch versions and other tools offer:
 | **Counts per species and a video clip of every shiny** | pokebot-gen3 (for emulators) reports encounters, "phases" and milestones to Discord. Pokémon Automation has notifications and a stream history to build on. | Medium |
 | **A status page for the phone** on the home network (what runs, the last screenshot, the stats) | pokebot-gen3 has an HTTP API; Pokémon Automation's latest code has the start of an HTTP server. | Medium |
 | **A report of where the time went** at the end of a run | The numbers of section 2 came from reading logs by hand. | Small |
+| **Nugget Bridge as the story's source of money** | The Rocket at the end of Nugget Bridge gives a Nugget (sold for 5,000) every time until he is beaten, and a lost battle costs 16 or 24 per level of the party's highest Pokémon at that point of the story. Pokémon Automation's farmer makes about 100 Nuggets in two hours; twenty are 100,000, and in the run of 13 November money cut the story's purchases short. Needs a party that loses (the others in the PC) and selling at a Mart. | Medium |
+| **A second sign of a shiny**, next to its sound | The AutoStory and Pokémon Automation's FRLG hunts of wild Pokémon go by the sound alone, and say so when no sound comes in. AutoController2 also times the start of the battle, which a Pokémon with Intimidate or a slow picture sets off. A sign from the picture would be better: the sparkles, or the colours of the species against its two palettes. | Medium |
+| **The AutoStory's own screen readers tested on stored pictures** in every build | AutoTableTurf tests recognition apart from the game's flow. The build's test already starts the program and saves pictures of its pages; four readers of the story go by fixed colour levels and are the first to fail on another capture card ([OTHERS.md](SerialPrograms/Source/PocketPilot/OTHERS.md)). | Small |
 
 Left out on purpose: automating online battles (Pokémon Champions, released in April 2026, is built around them). That is unfair to the people on the other side.
 
@@ -105,6 +108,8 @@ The fixes and the video frame conversion are separate commits, so that they can 
 Where the requests come from: Pokémon Automation's request tracker ([ComputerControl issues](https://github.com/PokemonAutomation/ComputerControl/issues), 53 open on 12 November 2026), its own plan for an FRLG AutoStory ([Arduino-Source #1827](https://github.com/PokemonAutomation/Arduino-Source/issues/1827)), and what [pokebot-gen3](https://github.com/hanzi/pokebot-gen3/blob/main/wiki/Readme.md) (for emulators) offers that Pokémon Automation's FRLG list does not.
 
 Both of Pokémon Automation's lists were read to the end on 13 November 2026, three pages each: the 53 open entries of the request tracker and the 59 open [issues of Arduino-Source](https://github.com/PokemonAutomation/Arduino-Source/issues), which are mostly the developers' own to-do list. Ten entries carry the label "bug" and three more report a fault; none of them is about FireRed and LeafGreen. Two are already solved in the code this fork is built on: the egg programs of Scarlet and Violet that asked for the IV judge when no filter needed it ([#232](https://github.com/PokemonAutomation/ComputerControl/issues/232)), and the row of the Living Dex sorter ([#1875](https://github.com/PokemonAutomation/Arduino-Source/issues/1875)). The others need a game, a console or a capture card this fork cannot be tested with (Sword and Shield, Scarlet and Violet, a Switch 2, an AVerMedia GC573), or lie in Qt ([#570](https://github.com/PokemonAutomation/Arduino-Source/issues/570), [#189](https://github.com/PokemonAutomation/ComputerControl/issues/189), [#125](https://github.com/PokemonAutomation/ComputerControl/issues/125)). Every issue of Arduino-Source was opened: what each one asks, and where this fork stands on it, is in [ISSUES.md](SerialPrograms/Source/PocketPilot/ISSUES.md). Two fixes came out of it ([FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md), 18 and 19): a wrong test in the move scores of the Dynamax Adventures, found next to [#1072](https://github.com/PokemonAutomation/Arduino-Source/issues/1072), and the audio input that settings of an older build lost, found by following [#1032](https://github.com/PokemonAutomation/Arduino-Source/issues/1032).
+
+Also read on 13 November: the help forum of AutoController (another controller program; 21 posts, each to its end), AutoController2 itself and five more projects of that kind: [OTHERS.md](SerialPrograms/Source/PocketPilot/OTHERS.md). None of it is about this fork, and nothing was taken over as code (three of them are under the GPL). What goes wrong there with the picture, one that falls behind while the program runs and a capture card that drops frames, was measured in the logs of this fork's test runs and is not there: over 162 hours of video the delay does not grow, and since 29 October every minute had 59 frames a second or more. One fault of theirs could happen here too, in Pokémon Automation's Nugget Bridge Farmer: fix 20, in build 10, and with it an experimental option, "Walk along the walls", worked out on the game's own map and not run on a console.
 
 | Asked for | Where | In PocketPilot |
 |---|---|---|

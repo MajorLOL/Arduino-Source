@@ -34,6 +34,8 @@ into once every walk is worked out tile by tile:
 | `gen_dex.py` | Writes `PokemonFRLG_AutoStoryDex.h`. |
 | `battle_sim.py`, `team_sim.py` | Simulate the big fights with the decompilation's damage formula. They were used to choose the level targets in `story_spec.LEVELS` and the team; the generator does not run them. |
 | `move_audit.py` | For every training spot: the wild Pokemon there, the move the program picks against each, and the one that does the most damage. |
+| `log_video_check.py` | Reads logs of runs (`SerialPrograms.log`): whether the picture falls behind while a video stream runs, and how many frames a minute came in. No decompilation needed. |
+| `nugget_bridge_walk.py` | Not for the AutoStory: the Nugget Bridge Farmer's walk, frame by frame on the game's map, and how much each of its holds may be off. |
 
 A walk is written as runs of one direction and a kind. `WALK`: walked in
 one go. `CHECKED`: one step at a time, watching for a wild battle (grass,
