@@ -154,6 +154,7 @@ public:
     Lamp(QWidget& parent)
         : QWidget(&parent)
     {
+        setObjectName("ppLamp");
         setFixedSize(10, 10);
     }
     void set_running(bool running){

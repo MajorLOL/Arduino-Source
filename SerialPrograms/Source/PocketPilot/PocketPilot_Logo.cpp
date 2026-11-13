@@ -100,6 +100,9 @@ LogoWidget::LogoWidget(QWidget& parent, int size)
     : QWidget(&parent)
     , m_size(size)
 {
+    //  Named for the style sheet: a sheet that gives every widget a
+    //  background (the classic dark look) would paint a square behind it.
+    setObjectName("ppLogo");
     setFixedSize(size, size);
 }
 QSize LogoWidget::sizeHint() const{

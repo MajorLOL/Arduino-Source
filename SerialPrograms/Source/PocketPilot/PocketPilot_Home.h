@@ -83,6 +83,9 @@ public:
     void show_game(int game);
     //  The same by the game's name. False if there is no such game.
     bool show_game(const QString& name);
+    //  What a click on a game's cartridge does: its programs here and its
+    //  list in the side bar. False if there is no such game.
+    bool pick_game(const QString& name);
 
     void set_search_text(const QString& text);
     //  The cursor in the search box, so that typing searches at once.
@@ -95,6 +98,7 @@ private:
     class GameTile;
     class TileGrid;
 
+    void pick_game(int game);
     void refresh();
     void add_program_row(int index, const QString& second_column);
     void open_result(QTreeWidgetItem* item);

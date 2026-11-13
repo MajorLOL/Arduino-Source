@@ -16,6 +16,12 @@ QLabel#ppWordmark {
     color: @shell_text@;
     background: transparent;
 }
+/*  Widgets that draw themselves on the shell: a sheet that gives every
+    widget a background (the classic dark look) must not paint behind them. */
+QWidget#ppLogo, QWidget#ppLamp {
+    background: transparent;
+    border: none;
+}
 QLabel#ppBreadcrumb {
     color: @shell_muted@;
     background: transparent;
@@ -137,6 +143,13 @@ QLabel#ppStateText {
 
 QWidget#ppScreen {
     background-color: @screen@;
+}
+/*  The games page scrolls without a frame around it, also where a classic
+    sheet frames every scroll area. */
+QScrollArea#ppHomeScroll {
+    background: transparent;
+    border: none;
+    padding: 0px;
 }
 QLabel#ppHomeTitle, QLabel#ppAboutTitle {
     color: @text@;

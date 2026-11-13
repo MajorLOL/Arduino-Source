@@ -70,6 +70,18 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         let_run(700);
         save_picture(widget.grab(), name);
     };
+    //  The window much taller than a screen, so that the options of the
+    //  open program are in the picture too. (The window is not on the
+    //  screen in this test: it can have any size.)
+    const int PICTURE_WIDTH = 1360;
+    const int PICTURE_HEIGHT = 900;
+    const int PICTURE_TALL = 2600;
+    auto save_tall = [&](const char* name){
+        window.resize(PICTURE_WIDTH, PICTURE_TALL);
+        save(window, name);
+        window.resize(PICTURE_WIDTH, PICTURE_HEIGHT);
+        let_run(300);
+    };
     auto set_look = [&](UiThemeMode mode, Starter starter){
         logger.log(
             "UI test: theme " + std::to_string((int)mode) + " in starter color " + std::to_string((int)starter)
@@ -136,7 +148,7 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         save_picture(sheet, name);
     };
 
-    window.resize(1360, 900);
+    window.resize(PICTURE_WIDTH, PICTURE_HEIGHT);
     let_run(500);
 
     //  Night in the color of Fire, the look of a new installation: every
@@ -144,13 +156,19 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     set_look(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
     window.show_games();
     save(window, "night-fire-games");
-    window.home_page().show_game(QString::fromStdString(GAME));
+    //  As a click on the game's cartridge: its programs on the page and
+    //  its list in the side bar.
+    if (!window.home_page().pick_game(QString::fromStdString(GAME))){
+        failed++;
+        logger.log("UI test: no game named " + GAME, COLOR_RED);
+    }
     save(window, "night-fire-one-game");
     window.home_page().set_search_text("shiny");
     save(window, "night-fire-search");
     window.home_page().set_search_text("");
     open_program();
     save(window, "night-fire-program");
+    save_tall("night-fire-program-tall");
     logger.log("UI test: opening the settings");
     window.show_settings();
     save(window, "night-fire-settings");
@@ -182,15 +200,17 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     struct Look{
         const char* games;
         const char* program;
+        //  Also a tall picture of the program, with its options. Null: none.
+        const char* program_tall;
         UiThemeMode mode;
         Starter starter;
     };
     const Look LOOKS[] = {
-        {"day-water-games",     "day-water-program",        UiThemeMode::POCKET_DAY,    Starter::WATER},
-        {"night-grass-games",   "night-grass-program",      UiThemeMode::POCKET_NIGHT,  Starter::GRASS},
-        {"day-fire-games",      "day-fire-program",         UiThemeMode::POCKET_DAY,    Starter::FIRE},
-        {"classic-light-games", "classic-light-program",    UiThemeMode::DEFAULT_MODE,  Starter::FIRE},
-        {"classic-dark-games",  "classic-dark-program",     UiThemeMode::DARK_MODE,     Starter::FIRE},
+        {"day-water-games",     "day-water-program",        "day-water-program-tall",   UiThemeMode::POCKET_DAY,    Starter::WATER},
+        {"night-grass-games",   "night-grass-program",      nullptr,                    UiThemeMode::POCKET_NIGHT,  Starter::GRASS},
+        {"day-fire-games",      "day-fire-program",         nullptr,                    UiThemeMode::POCKET_DAY,    Starter::FIRE},
+        {"classic-light-games", "classic-light-program",    nullptr,                    UiThemeMode::DEFAULT_MODE,  Starter::FIRE},
+        {"classic-dark-games",  "classic-dark-program",     nullptr,                    UiThemeMode::DARK_MODE,     Starter::FIRE},
     };
     for (const Look& look : LOOKS){
         set_look(look.mode, look.starter);
@@ -198,6 +218,9 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         save(window, look.games);
         open_program();
         save(window, look.program);
+        if (look.program_tall != nullptr){
+            save_tall(look.program_tall);
+        }
     }
 
     //  The opened lists of two dropdowns. Last, so that the pictures above

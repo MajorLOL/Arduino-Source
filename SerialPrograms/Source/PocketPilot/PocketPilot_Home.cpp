@@ -306,6 +306,7 @@ HomePage::HomePage(
     outer->setContentsMargins(0, 0, 0, 0);
 
     QScrollArea* scroll = new QScrollArea(this);
+    scroll->setObjectName("ppHomeScroll");
     scroll->setWidgetResizable(true);
     scroll->setFrameShape(QFrame::NoFrame);
     scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -398,10 +399,7 @@ HomePage::HomePage(
         connect(
             tile, &QAbstractButton::clicked,
             this, [this, index](bool){
-                show_game((int)index);
-                if (m_actions.open_game){
-                    m_actions.open_game((int)index);
-                }
+                pick_game((int)index);
             }
         );
     }
@@ -508,6 +506,22 @@ bool HomePage::show_game(const QString& name){
     for (size_t index = 0; index < m_games.size(); index++){
         if (m_games[index].name == name){
             show_game((int)index);
+            return true;
+        }
+    }
+    return false;
+}
+
+void HomePage::pick_game(int game){
+    show_game(game);
+    if (m_actions.open_game){
+        m_actions.open_game(game);
+    }
+}
+bool HomePage::pick_game(const QString& name){
+    for (size_t index = 0; index < m_games.size(); index++){
+        if (m_games[index].name == name){
+            pick_game((int)index);
             return true;
         }
     }

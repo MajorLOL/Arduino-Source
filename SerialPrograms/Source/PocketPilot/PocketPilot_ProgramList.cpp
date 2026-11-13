@@ -119,10 +119,11 @@ void ProgramListDelegate::paint(
     const bool hover = enabled && option.state.testFlag(QStyle::State_MouseOver);
 
     //  The highlight: the open program, and the one under the mouse.
+    const QColor highlight = mix_colors(theme.shell, theme.shell_text, selected ? 0.22 : 0.11);
     if (selected || hover){
         QPainterPath path;
         path.addRoundedRect(QRectF(row).adjusted(SIDE, 1, -SIDE, -1), 6, 6);
-        painter->fillPath(path, mix_colors(theme.shell, theme.shell_text, selected ? 0.22 : 0.11));
+        painter->fillPath(path, highlight);
     }
 
     //  The arrow of a game menu in front of the open program.
@@ -134,8 +135,14 @@ void ProgramListDelegate::paint(
         arrow.lineTo(left + 7, middle);
         arrow.lineTo(left, middle + 5);
         arrow.closeSubpath();
-        //  On the shell the accent of a day theme is the shell's own color.
-        painter->fillPath(arrow, theme.dark ? theme.accent : theme.shell_text);
+        //  In the accent color where it stands out on the row. It does not
+        //  by day (the accent is the shell's own color) and in the classic
+        //  dark look (a dark blue): there the arrow has the text's color.
+        QColor arrow_color = theme.dark ? theme.accent : theme.shell_text;
+        if (contrast_ratio(arrow_color, highlight) < 2.0){
+            arrow_color = theme.shell_text;
+        }
+        painter->fillPath(arrow, arrow_color);
     }
 
     //  The tag behind the name, at the right edge.
