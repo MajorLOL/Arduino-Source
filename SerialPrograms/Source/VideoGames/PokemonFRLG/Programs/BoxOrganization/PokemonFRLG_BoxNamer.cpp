@@ -740,7 +740,8 @@ BoxNamer::BoxNamer()
         "and the boxes left out are passed over.",
         LockMode::LOCK_WHILE_RUNNING,
         "",
-        "CCUnnREo\n[ FoHIoor]\nxn"
+        //  (Qt shows the first line of a placeholder only.)
+        "CCUnnREo"
     )
     , CHECK_TITLE(
         "<b>Look at the box's title:</b><br>After OK, the title of the box must show the name. "
