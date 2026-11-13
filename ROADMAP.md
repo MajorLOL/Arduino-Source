@@ -7,7 +7,7 @@ What the first builds have, what could make the FRLG AutoStory faster, what coul
 - Its own name, icon, "About" window, window title and build number; the links to Pokémon Automation's Discord and its check for a new version are gone.
 - A new interface: see [README.md](README.md).
 - Pokémon Automation's `main` of 11 November 2026 merged in (149 commits since the fork was made): among others gamepad support, the FRLG Box Sorter and Living Dex sorter, a reworked audio pipeline and device names for the dropdowns. Gamepad support (`PA_SDL`) is on in the builds.
-- 17 bug fixes from a review of the whole code: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
+- 18 bug fixes from a review of the whole code: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
 - A faster build: Ninja and ccache as in Pokémon Automation's own workflow. A build takes about 4 minutes when little changed, 35 minutes from nothing (it was 35 to 40 minutes each time).
 - A test of the interface in every build: the build starts on the build machine as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that fails is not published. It found its first bug in the first build: a crash at the first start without saved settings (fixed in build 2; build 1 should not be used).
 
@@ -103,6 +103,8 @@ The fixes and the video frame conversion are separate commits, so that they can 
 ## 6. What people ask for, and what builds 4 and 5 have of it (experimental)
 
 Where the requests come from: Pokémon Automation's request tracker ([ComputerControl issues](https://github.com/PokemonAutomation/ComputerControl/issues), 53 open on 12 November 2026), its own plan for an FRLG AutoStory ([Arduino-Source #1827](https://github.com/PokemonAutomation/Arduino-Source/issues/1827)), and what [pokebot-gen3](https://github.com/hanzi/pokebot-gen3/blob/main/wiki/Readme.md) (for emulators) offers that Pokémon Automation's FRLG list does not.
+
+Both of Pokémon Automation's lists were read to the end on 13 November 2026, three pages each: the 53 open entries of the request tracker and the 59 open [issues of Arduino-Source](https://github.com/PokemonAutomation/Arduino-Source/issues), which are mostly the developers' own to-do list. Ten entries carry the label "bug" and three more report a fault; none of them is about FireRed and LeafGreen. Two are already solved in the code this fork is built on: the egg programs of Scarlet and Violet that asked for the IV judge when no filter needed it ([#232](https://github.com/PokemonAutomation/ComputerControl/issues/232)), and the row of the Living Dex sorter ([#1875](https://github.com/PokemonAutomation/Arduino-Source/issues/1875)). The others need a game, a console or a capture card this fork cannot be tested with (Sword and Shield, Scarlet and Violet, a Switch 2, an AVerMedia GC573), or lie in Qt ([#570](https://github.com/PokemonAutomation/Arduino-Source/issues/570), [#189](https://github.com/PokemonAutomation/ComputerControl/issues/189), [#125](https://github.com/PokemonAutomation/ComputerControl/issues/125)). Reading the code for one of them ([#1072](https://github.com/PokemonAutomation/Arduino-Source/issues/1072)) turned up fix 18 of [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
 
 | Asked for | Where | In PocketPilot |
 |---|---|---|
