@@ -1814,17 +1814,14 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             //  look for that battle first. One that starts after the press
             //  comes from the tile on the shore: the run after this one
             //  sees it, with the player on land.
-            if (r > 0 && runs[r - 1].kind == RunKind::SURF_CHECKED){
+            //  The sign is the black screen, as on a run: the detector of
+            //  the battle's text takes some places of the map for a text
+            //  box (see attempt_moves()). Not without Flash, where the
+            //  screen is mostly black anyway (no such water in the story).
+            if (r > 0 && runs[r - 1].kind == RunKind::SURF_CHECKED && !leg.dark){
                 BlackScreenWatcher battle_starting(COLOR_RED);
-                AdvanceBattleDialogWatcher battle_text(COLOR_RED);
-                BattleMenuWatcher battle_menu(COLOR_RED);
-                std::vector<PeriodicInferenceCallback> signs{battle_text, battle_menu};
-                if (!leg.dark){
-                    //  (Without Flash the screen is mostly black anyway.)
-                    signs.emplace_back(battle_starting);
-                }
                 rt.context.wait_for_all_requests();
-                if (wait_until(rt.console, rt.context, 3000ms, signs) >= 0){
+                if (wait_until(rt.console, rt.context, 3000ms, { battle_starting }) >= 0){
                     rt.console.log(
                         "A battle from the last tile on the water: the step onto the shore comes after it.",
                         COLOR_ORANGE
