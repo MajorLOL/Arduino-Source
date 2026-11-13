@@ -106,6 +106,23 @@ void AudioOption::load_json(const JsonValue& json){
     }
 
     str = obj->get_string("InputSourceType");
+    if (str == nullptr){
+        //  Settings written before the audio source descriptors have the
+        //  input as "InputFile" or "InputDevice" (a file went first). They
+        //  are taken over here: without this such settings came up with no
+        //  audio input at all, and nothing said so.
+        const std::string* file = obj->get_string("InputFile");
+        const std::string* device = obj->get_string("InputDevice");
+        if (file != nullptr && !file->empty()){
+            std::shared_ptr<AudioSourceDescriptor> descriptor = get_input_from_cache(AudioSourceType::File);
+            descriptor->load_json(JsonValue(*file));
+            m_input_source = std::move(descriptor);
+        }else if (device != nullptr && !device->empty()){
+            std::shared_ptr<AudioSourceDescriptor> descriptor = get_input_from_cache(AudioSourceType::Device);
+            descriptor->load_json(JsonValue(*device));
+            m_input_source = std::move(descriptor);
+        }
+    }
     m_input_source = get_input_from_cache(
         str != nullptr
             ? AUDIO_TYPE_STRINGS.get_enum(*str, m_input_source->type)

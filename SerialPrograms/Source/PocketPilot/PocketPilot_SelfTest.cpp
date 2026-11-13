@@ -7,7 +7,9 @@
 
 #include "Common/Compiler.h"
 #include <algorithm>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QComboBox>
@@ -18,6 +20,9 @@
 #include <QPixmap>
 #include <QTimer>
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/Json/JsonValue.h"
+#include "Common/Cpp/Json/JsonObject.h"
+#include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/Logging/LoggerWindow.h"
@@ -271,6 +276,48 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     return failed;
 }
 
+
+//  Settings written by an older build keep their audio input (FIXES.md, 19):
+//  they have it as "InputFile" or "InputDevice", newer ones as
+//  "InputSourceType". Only which kind of input comes out is checked: the
+//  device itself is not on the build machine.
+int check_older_audio_settings(Logger& logger){
+    struct Case{
+        const char* what;
+        const char* source_type;    //  nullptr: settings of an older build
+        const char* file;
+        const char* device;
+        AudioSourceType expected;
+    };
+    const Case CASES[] = {
+        {"older settings with a device",            nullptr, "", "a device", AudioSourceType::Device},
+        {"older settings with a file",              nullptr, "sound.wav", "a device", AudioSourceType::File},
+        {"older settings without an input",         nullptr, "", "", AudioSourceType::None},
+        {"newer settings (the old keys are not looked at)", "InputSource_None", "sound.wav", "a device", AudioSourceType::None},
+    };
+    int failed = 0;
+    for (const Case& test : CASES){
+        JsonObject json;
+        if (test.source_type != nullptr){
+            json["InputSourceType"] = test.source_type;
+        }
+        json["InputFile"] = test.file;
+        json["InputDevice"] = test.device;
+        AudioOption option;
+        option.load_json(JsonValue(std::move(json)));
+        if (option.input_source()->type != test.expected){
+            failed++;
+            logger.log(std::string("Settings test: the wrong kind of audio input for ") + test.what + ".", COLOR_RED);
+        }
+    }
+    logger.log(
+        "Settings test: " + std::to_string(std::size(CASES) - failed) + " of " + std::to_string(std::size(CASES)) +
+        " settings came up with the audio input they name.",
+        failed == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return failed;
+}
+
 }
 
 
@@ -282,7 +329,9 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     //  An exception must not leave the program: that looks like a crash,
     //  while its message and the pictures taken so far say what went wrong.
     try{
-        return take_pictures(application, window, out, logger) == 0 ? 0 : 1;
+        int failed = take_pictures(application, window, out, logger);
+        failed += check_older_audio_settings(logger);
+        return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);
     }catch (const std::exception& e){

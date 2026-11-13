@@ -1,6 +1,6 @@
 # Bug fixes in PocketPilot
 
-Bugs found in a review of the whole code on 12 November 2026 (cppcheck, clang-tidy and reading the core paths) and fixed in PocketPilot. Each was still in Pokémon Automation's `main` at commit `d914382` when it was fixed here. Each fix is a commit of its own, so that it can be offered to Pokémon Automation by itself.
+Bugs found in a review of the whole code on 12 November 2026 (cppcheck, clang-tidy and reading the core paths) and fixed in PocketPilot; numbers 18 and 19 were found a day later, going through Pokémon Automation's open issues ([ISSUES.md](ISSUES.md)). Each was still in Pokémon Automation's `main` at commit `d914382` when it was fixed here. Each fix is a commit of its own, so that it can be offered to Pokémon Automation by itself.
 
 The fixes are checked by compiling them (GCC and Clang, with the warnings of the real build). None of them has run on a console yet: they change paths that only show when something goes wrong.
 
@@ -17,6 +17,7 @@ The fixes are checked by compiling them (GCC and Clang, with the warnings of the
 | 7 | `Common/Cpp/ExpressionEvaluator.cpp` | The loop over the parsed expression shortened the vector it was going through. | The `pop_back()` is gone. |
 | 8 | `CommonFramework/VideoPipeline/UI/VideoSourceSelectorWidget.cpp` | A bounds check with `>` where `>=` was meant. | `>=`. |
 | 9 | `CommonFramework/AudioPipeline/IO/AudioFileLoader.cpp` | A WAV file with 0 channels divided by zero. | Such a file is refused, like one with more than 8 channels. |
+| 19 | `CommonFramework/AudioPipeline/AudioOption.cpp` | Settings written before 29 October 2026 keep the audio input as `"InputDevice"` or `"InputFile"`. Since `32f0aaf` ("AudioSourceDescriptor (Part 6)", #1764) the code reads `"InputSourceType"` and its own keys only, so such settings came up without an audio input, and nothing said so: a program that listens for the shiny sound hears nothing. This fork's own test run played 3.8 hours that way on 13 November 2026. | The old keys are read when the new one is absent. |
 
 ## Programs
 
