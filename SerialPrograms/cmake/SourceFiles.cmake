@@ -1828,6 +1828,8 @@ file(GLOB LIBRARY_SOURCES
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_HeldItemFarmer-SafariZone.h
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_ItemDuplication.cpp
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_ItemDuplication.h
+    Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_LevelTrainer.cpp
+    Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_LevelTrainer.h
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_NuggetBridgeFarmer.cpp
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_NuggetBridgeFarmer.h
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_PickupFarmer.cpp
@@ -1886,6 +1888,8 @@ file(GLOB LIBRARY_SOURCES
     Source/VideoGames/PokemonFRLG/Programs/ShinyHunting/PokemonFRLG_ShinyHunt-Fishing.h
     Source/VideoGames/PokemonFRLG/Programs/ShinyHunting/PokemonFRLG_ShinyHunt-Overworld.cpp
     Source/VideoGames/PokemonFRLG/Programs/ShinyHunting/PokemonFRLG_ShinyHunt-Overworld.h
+    Source/VideoGames/PokemonFRLG/Programs/TestPrograms/PokemonFRLG_InputTimingTest.cpp
+    Source/VideoGames/PokemonFRLG/Programs/TestPrograms/PokemonFRLG_InputTimingTest.h
     Source/VideoGames/PokemonFRLG/Programs/TestPrograms/PokemonFRLG_ReadBattleLevelUp.cpp
     Source/VideoGames/PokemonFRLG/Programs/TestPrograms/PokemonFRLG_ReadBattleLevelUp.h
     Source/VideoGames/PokemonFRLG/Programs/TestPrograms/PokemonFRLG_ReadBoxInfo.cpp

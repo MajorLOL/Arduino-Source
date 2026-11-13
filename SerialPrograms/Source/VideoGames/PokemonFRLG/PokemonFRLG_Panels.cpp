@@ -19,6 +19,7 @@
 #include "Programs/Farming/PokemonFRLG_NuggetBridgeFarmer.h"
 #include "Programs/Farming/PokemonFRLG_PickupFarmer.h"
 #include "Programs/Farming/PokemonFRLG_EvTrainer.h"
+#include "Programs/Farming/PokemonFRLG_LevelTrainer.h"
 #include "Programs/ShinyHunting/PokemonFRLG_GiftReset.h"
 #include "Programs/ShinyHunting/PokemonFRLG_LegendaryReset.h"
 #include "Programs/ShinyHunting/PokemonFRLG_LegendaryRunAway.h"
@@ -35,6 +36,7 @@
 #include "Programs/RngManipulation/PokemonFRLG_RoamingLegendaryRng.h"
 #include "Programs/RngManipulation/PokemonFRLG_EggRng.h"
 
+#include "Programs/TestPrograms/PokemonFRLG_InputTimingTest.h"
 #include "Programs/TestPrograms/PokemonFRLG_SoundListener.h"
 #include "Programs/TestPrograms/PokemonFRLG_ReadStats.h"
 #include "Programs/TestPrograms/PokemonFRLG_ReadBattleLevelUp.h"
@@ -65,6 +67,12 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
 
     ret.emplace_back("---- Story ----");
     ret.emplace_back(make_SingleSwitchProgram<AutoStory>());
+
+    //  PocketPilot's own programs that have not been tested on a console
+    //  yet (PanelQualityStanding::EXPERIMENTAL).
+    ret.emplace_back("---- Experimental ----");
+    ret.emplace_back(make_SingleSwitchProgram<LevelTrainer>());
+    ret.emplace_back(make_SingleSwitchProgram<InputTimingTest>());
 
     ret.emplace_back("---- Farming ----");
     ret.emplace_back(make_SingleSwitchProgram<NuggetBridgeFarmer>());
