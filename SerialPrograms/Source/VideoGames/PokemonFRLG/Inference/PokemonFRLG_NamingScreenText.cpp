@@ -554,10 +554,10 @@ std::vector<TypingStep> typing_steps(const std::u32string& name, int max_charact
 
 std::vector<Press> restart_presses(int max_characters){
     const int places = std::max(1, std::min(max_characters, MAX_CHARACTERS));
-    std::vector<Press> presses((size_t)places + 1, Press::B);
-    presses.push_back(Press::START);
-    presses.push_back(Press::RIGHT);
-    return presses;
+    std::vector<Press> out((size_t)places + 1, Press::B);
+    out.push_back(Press::START);
+    out.push_back(Press::RIGHT);
+    return out;
 }
 
 std::string to_utf8(const std::u32string& text){
