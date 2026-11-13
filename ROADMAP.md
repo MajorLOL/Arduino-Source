@@ -13,7 +13,7 @@ What the first builds have, what could make the FRLG AutoStory faster, what coul
 
 Not tested yet: the AutoStory on this new base. The branch `frlg-autostory` (build 108) stays the one for the test run with Charmander until a PocketPilot build has played a few segments.
 
-Build 4 adds the experimental programs and options of section 6.
+Builds 4 and 5 add the experimental programs and options of sections 6 and 7.
 
 ## 2. Can the AutoStory match a speedrunner?
 
@@ -100,7 +100,7 @@ The branch takes Pokémon Automation's changes by merging its `main`. PocketPilo
 
 The fixes and the video frame conversion are separate commits, so that they can be offered to Pokémon Automation one at a time (its rules: new contributors at most two open pull requests, opened and answered by a person).
 
-## 6. What people ask for, and what build 4 has of it (experimental)
+## 6. What people ask for, and what builds 4 and 5 have of it (experimental)
 
 Where the requests come from: Pokémon Automation's request tracker ([ComputerControl issues](https://github.com/PokemonAutomation/ComputerControl/issues), 53 open on 12 November 2026), its own plan for an FRLG AutoStory ([Arduino-Source #1827](https://github.com/PokemonAutomation/Arduino-Source/issues/1827)), and what [pokebot-gen3](https://github.com/hanzi/pokebot-gen3/blob/main/wiki/Readme.md) (for emulators) offers that Pokémon Automation's FRLG list does not.
 
@@ -111,12 +111,40 @@ Where the requests come from: Pokémon Automation's request tracker ([ComputerCo
 | A loop counter for the Turbo Macro | Request [#249](https://github.com/PokemonAutomation/ComputerControl/issues/249) | **Build 4, experimental:** the Turbo Macro counts its loops under the video. |
 | Training a Pokémon to a level | pokebot-gen3's "Level Grind" mode. Pokémon Automation has an EV Trainer and an Elite Four Farmer for FRLG, nothing with a level to reach. | **Build 4, experimental:** the program "Level Trainer". It trains the first Pokémon of the party with the AutoStory's battles: where the player stands (no nurse: it stops when low on HP or out of PP), or at one of the nine training places of the story, from the nurse to the grass and back to heal. |
 | Faster battles | This fork's own measurement: of the 31 seconds of a training battle, 8 are the wait after its last text (6 seconds for nothing of a battle to show, then a look at the start menu); the game needs about 2. | **Build 4, experimental:** the option "Faster battles" of the AutoStory and the Level Trainer. The game fades to black at the end of every battle; the program looks at the start menu when the picture is back. Off by default. |
-| Entering ACE codes (box names) | Request [#260](https://github.com/PokemonAutomation/ComputerControl/issues/260) | Not built. One wrong character can corrupt the save; it needs a design that checks every name on the screen and a test on a save that may be lost. |
+| Entering ACE codes (box names) | Request [#260](https://github.com/PokemonAutomation/ComputerControl/issues/260): "a program that renames boxes to ACE codes the user enters into it" | **Build 5, experimental:** the program "Box Namer". It types a list of names into the PC's boxes and reads every character back from the screen. See below. |
 | Day care and eggs, Sweet Scent, Rock Smash, the Safari Zone as a hunting ground, puzzles | pokebot-gen3 modes | Not built. See section 3 for the day care. |
 
 "Experimental" is a new standing of a program, next to Pokémon Automation's "beta" and "3rd party": the program has the tag in the list and a note under its title. It means: compiled and checked by the build's interface test, but never run on a console. The experimental options of the AutoStory are off unless turned on, so the AutoStory plays as it did.
 
 Also new in build 4, for section 7: the program "Input Timing Test" (experimental). It opens the start menu a few hundred times and reports how long the game takes to show its reaction to a press, how much that varies, and whether a press can be aimed at a frame.
+
+### The Box Namer (build 5)
+
+An ACE code for these games is a list of box names: the game is made to run them as instructions, so one wrong character is a wrong code. The program takes the list the way the ACE notes publish it (`Box  6: _ F o H I o o r [ FoHIoor]`) or as plain names, and does for each box what a person does: NAME in the box's menu, the name on the naming screen, OK, on to the next box.
+
+What it does to be sure of every character:
+
+- After every character it reads the name back from the screen and compares it with the game's own font, pixel by pixel: the characters typed so far, nothing after them, and the place the next one goes to (which is what tells a space). A character only counts when it is exactly its shape: `c` and `o` differ in one pixel, `.` and `,` in two.
+- A space in the eighth place looks the same as an empty eighth place. It is typed over a character that can be seen, which is read first.
+- Nothing is pressed blind where a missed or a doubled press would do harm: the arrow of the box's menu is seen on NAME before A, OK is pressed only on a name that reads as written, and the box is seen to change after RIGHT.
+- After OK it looks at the box's title, which must show the name. The Switch versions pass a name through the console's list of words that are not allowed when OK is pressed, and do not take one that is on it: the box keeps the name it had, and nothing on the naming screen says so. That is in the game's source ([pret/pokefirered](https://github.com/pret/pokefirered), `MainState_PressedOKButton` in the revision for the Switch), and the [ACE notes](https://pomeg-letterbombers.github.io/pokemon-ace-notes/frlg-faq/) list codes that cannot be entered on the Switch versions for that reason.
+
+What was tested, all of it off the console:
+
+| What | On what | Result |
+|---|---|---|
+| Reading the name being typed | A capture of this fork's test Switch (the rival's naming screen with AAAAAAA) | Read right, with the place of the next character. |
+| | The same capture scaled down to 1280 x 720, the size of this capture card's video, in five ways | Read right each time. |
+| | 3,008 pictures drawn from the game's font: every character of the keyboard in every place, names of 0 to 8 characters, scaled in four ways, blurred, with noise, as JPEG, with the game box off by up to 7 pixels or 1 in 100 in size, at 1080p and 720p | 3,008 read right, none wrong, none unread. |
+| Which keys to press | 20,030 names typed on a model of the naming screen written from the game's source (the pages, the cursor and its way around the buttons, the full name), from a screen just opened and from one left anywhere | All came out as written; 23 presses a name on average, 63 at most. |
+| The box's title | Pokémon Automation's 29 test pictures of the box: three wallpapers, three video formats, the titles BOX1, BOX2, BOX3, BOX6, BOX9 and BOX14; at 1080p and scaled down to 720p | In 28, the title shows its own name and none of the other names tried (also not BOX8 for BOX3, or BOX13 for BOX14). In the 29th a Pokémon is held in front of the title, and no name fits. |
+| The list | The lines of the ACE notes with and without box numbers, brackets and underscores | Read as meant; 15 kinds of mistakes are refused with the line and the reason. |
+
+The tests of the list, the keys to press and the box's title are also among the program's own unit tests (`PokemonFRLG::NamingScreenText`, 31 of them, the typing with 3,027 names); they were run outside the program for this build, with stand-ins for its picture classes.
+
+Not tested: anything on a console. What goes on between the screens (the box's menu, the wait for the naming screen and for the box to come back, the look at the box changing) has only been compiled. The hand on the box's name is found with Pokémon Automation's detector of its Box Sorter, which is beta there. The first run should be watched, with names that do no harm; the default names (BOX1 to BOX14) can be typed back the same way.
+
+What the program does not do: it knows nothing of the code. Which names a code needs on the Switch versions, and whether the console's word list takes them, is for the ACE notes; the program stops and says so when a box does not show its name.
 
 ## 7. Can a program of our own beat the world records?
 
@@ -148,7 +176,7 @@ What stands in the way:
 The order to go about it, each step useful by itself:
 
 1. **Measure** (build 4): the Input Timing Test tells how much the delay between a press and its effect varies on this controller board, console and capture card, and whether a press can be aimed at a frame. Without that, nothing by the clock can be planned.
-2. **Take the waits out of the AutoStory** where the game gives a sign: "Faster battles" (build 4), the check after a walk in the grass, running.
+2. **Take the waits out of the AutoStory** where the game gives a sign: "Faster battles" (build 4), "Shorter looks in the grass" (build 5, see below), running.
 3. **X items instead of levels** (section 2): from 57 hours to under 20.
 4. **A speedrun mode** for one stretch first, for instance from the bedroom to the first rival battle: timed presses, the video as the check. Compare with the same stretch in a record run's video.
 5. **The whole route** stretch by stretch, then the random numbers (the starter's stats from the title screen, as Pokémon Automation's Starter RNG does), then many attempts.
@@ -156,6 +184,31 @@ The order to go about it, each step useful by itself:
 A fair guess: steps 1 to 3 are weeks, and bring a story that plays in less than a day. Steps 4 and 5 are months of test runs, with a first whole run somewhere around 3 to 4 hours. Coming under 1 h 59 min 34 s would take much more than that again, and may not be reachable through a capture card at all; the Input Timing Test is the first thing that can tell.
 
 One thing would be new either way: no program-played run of FireRed or LeafGreen on a console turned up in this search. The first one that finishes at speedrun pace has no time to beat.
+
+### What the logs of the test runs already tell (13 November)
+
+The Input Timing Test has not run yet. Three things can be read from the logs of the AutoStory itself.
+
+**Where the time of a run goes.** The run of 12 to 13 November (9.4 hours: six hours of training for the League, the Elite Four and the Champion, then 26 tries at Zapdos) counted its own time by activity:
+
+| Activity | Minutes | Share |
+|---|---|---|
+| Battles (415), and reading text, moves and species names | 309 | 55% |
+| Walking the route | 92 | 16% |
+| Walks along the grass while training (1,614) | 85 | 15% |
+| Menus, healing, saving, resets, flying, single steps | 42 | 7% |
+| The rest | 36 | 6% |
+
+**The look after a walk in the grass.** After every walk along the grass the program watched 1.5 seconds for a battle to start. Of the 1,614 walks, 1,266 ended without one and waited the whole time: 32 minutes of the run. Of the 348 battles, the video saw 343 start during the walk itself; that look found the other 5, 1.3 seconds after the walk. The game decides on a wild battle in the frame a step ends, and what follows changes the whole picture every frame until the screen is black (two fades to gray and back, then the transition). So a screen that stays the same for 0.3 seconds has no battle starting. **Build 5, experimental:** the option "Shorter looks in the grass" of the AutoStory and the Level Trainer ends the look then. About one second less for each walk without a battle: 23 minutes of that run. With "Faster battles" (about 5 seconds for each battle that is not a catch, some 30 minutes of that run) the two would have taken a little under an hour off the 9.4, if they work as meant; neither has run on a console.
+
+**Walking by the clock.** A walk is one held press, timed to the tile (16 frames a tile), and the video counts the tiles after it. In the logs of 8 to 13 November the video could count 15,009 of them:
+
+| | Walks | Exactly the tiles asked for | Short | A tile too far |
+|---|---|---|---|---|
+| Along the grass (up to 4 tiles) | 7,330 | 7,329 | 1 | 0 |
+| On the route (1 to 41 tiles) | 7,679 | 7,464 | 215 | 0 |
+
+The short ones are nearly all the same few stretches of the route, where the same tiles are missing time after time (one asks for 15 tiles and gets 13 in half of its runs): something about those places, which is worth a look, not the clock. On open ground a timed walk came out right 7,329 times of 7,330 and never went too far. So for step 4, walking by the clock is not what stands in the way on this controller board and console. What a speed mode has to solve is what is not walking: more than half of a run is battles, and the texts, menus and fades between them have no fixed length yet. That is what the Input Timing Test and "Faster battles" are for.
 
 ## Sources
 
@@ -174,3 +227,7 @@ One thing would be new either way: no program-played run of FireRed or LeafGreen
 - [Bulbagarden: Pokémon HOME 4.1.0 and FireRed/LeafGreen](https://bulbagarden.net/threads/pokemon-home-version-4-1-0-to-receive-october-update-adding-firered-and-leafgreen-connectivity-and-transfers-of-pokemon-in-go-safari-balls.311303/)
 - [Pokémon Automation: the list of programs](https://pokemonautomation.github.io/Programs/index.html)
 - [pokebot-gen3](https://github.com/40Cakes/pokebot-gen3)
+- [pret/pokefirered](https://github.com/pret/pokefirered): the game's source as the pret project took it apart, with the revision of the Switch versions (the naming screen, the PC's boxes, the battle transition)
+- [Pokémon ACE notes: FRLG FAQ](https://pomeg-letterbombers.github.io/pokemon-ace-notes/frlg-faq/) and [a route with its box names](https://pomeg-letterbombers.github.io/pokemon-ace-notes/frlg-non-jpn-pre-e4-route)
+- [Nintendo Life, 28 February 2026: the Switch versions replace names that are not allowed](https://www.nintendolife.com/news/2026/02/pokemon-firered-and-leafgreen-switch-update-censors-naughty-and-offensive-names)
+- [Pokémon Automation: its test pictures](https://github.com/PokemonAutomation/CommandLineTests)
