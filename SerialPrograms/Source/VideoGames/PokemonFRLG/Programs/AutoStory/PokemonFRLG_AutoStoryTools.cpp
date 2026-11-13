@@ -1801,7 +1801,42 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             rt.context.wait_for_all_requests();
             rt.facing = run.direction;
             break;
-        case RunKind::DISMOUNT:
+        case RunKind::DISMOUNT:{
+            //  A wild battle set off by the last tile on the water shows
+            //  only later (two fades to gray, then the transition to
+            //  black): the run on the water was over without a sign of it,
+            //  the press below was lost in it, and after the battle the
+            //  route went on from the water as if the player stood on the
+            //  shore. (Kindle Road and Berry Forest: the battle was noticed
+            //  1.9 s after the run on the water, at "0 of 20" of the run
+            //  after this one; then a walk along the wrong column and "The
+            //  player does not move".) So after water with wild Pokemon: a
+            //  look for that battle first. One that starts after the press
+            //  comes from the tile on the shore: the run after this one
+            //  sees it, with the player on land.
+            if (r > 0 && runs[r - 1].kind == RunKind::SURF_CHECKED){
+                BlackScreenWatcher battle_starting(COLOR_RED);
+                AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+                BattleMenuWatcher battle_menu(COLOR_RED);
+                std::vector<PeriodicInferenceCallback> signs{battle_text, battle_menu};
+                if (!leg.dark){
+                    //  (Without Flash the screen is mostly black anyway.)
+                    signs.emplace_back(battle_starting);
+                }
+                rt.context.wait_for_all_requests();
+                if (wait_until(rt.console, rt.context, 3000ms, signs) >= 0){
+                    rt.console.log(
+                        "A battle from the last tile on the water: the step onto the shore comes after it.",
+                        COLOR_ORANGE
+                    );
+                    story_battle(
+                        rt, StoryBattleKind::WILD,
+                        std::string(leg.name) + " (getting off the water, going " + dpad_name(run.direction) + ")"
+                    );
+                    //  The map is back before the press.
+                    wait_for_still_screen(rt);
+                }
+            }
             //  Jump from the water onto the shore (Task_StopSurfingInit).
             //  12 frames works whichever way the player faces, and is over
             //  before the player can move again.
@@ -1810,6 +1845,7 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             rt.facing = run.direction;
             rt.steps++;
             break;
+        }
         }
     }
 
