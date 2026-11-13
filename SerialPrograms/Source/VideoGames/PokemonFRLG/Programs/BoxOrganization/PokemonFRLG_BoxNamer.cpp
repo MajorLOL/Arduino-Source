@@ -391,14 +391,17 @@ void open_naming_screen(SingleSwitchProgramEnvironment& env, ProControllerContex
     for (int attempt = 0; attempt < 2 && entry < 0; attempt++){
         tap(context, BUTTON_A, 500ms);
         entry = wait_for_menu_arrow(env, context, 10);
-        if (entry >= 0){
-            break;
-        }
-        //  No arrow. Only when the box looks as before did the press do
-        //  nothing, and only then is it pressed again: a second A on an
-        //  open menu would choose its first entry.
+        //  The menu lies over more than half of the box: with it open, the
+        //  box does not look as before.
         View view = look(env.console);
         const double change = view ? box_change(before, box_look(view.pixel)) : 255;
+        if (entry >= 0 && change >= STILL){
+            break;
+        }
+        //  No menu with its arrow. Only when the box looks as before did
+        //  the press do nothing, and only then is it pressed again: a
+        //  second A on an open menu would choose its first entry.
+        entry = -1;
         if (change >= STILL){
             pbf_press_button(context, BUTTON_B, 80ms, 500ms);
             context.wait_for_all_requests();
