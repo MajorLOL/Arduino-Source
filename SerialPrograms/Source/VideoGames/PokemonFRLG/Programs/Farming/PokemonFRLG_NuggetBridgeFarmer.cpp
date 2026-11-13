@@ -4,6 +4,7 @@
  *
  */
 
+#include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Notifications/ProgramNotifications.h"
 #include "CommonFramework/ProgramStats/StatsTracking.h"
 #include "CommonTools/Async/InferenceRoutines.h"
@@ -91,6 +92,31 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
     NuggetBridgeFarmer_Descriptor::Stats& stats = env.current_stats<NuggetBridgeFarmer_Descriptor::Stats>();
     DeferredStopButtonOption::ResetOnExit reset_on_exit(STOP_AFTER_CURRENT);
 
+    //  PocketPilot: every wait below was a loop without an end. The walk to
+    //  the Rocket goes by timings alone. Its first leg may come out a tile
+    //  short or long, and four others end at a wall or at the Rocket's own
+    //  trigger: there some time more or less does not matter. The fifth
+    //  (right, along the street in the north of the city) has to come out
+    //  at exactly 15 tiles, on the middle one of the bridge's three
+    //  columns. One tile less or more and the way up stops at a trainer of
+    //  the bridge (they stand in the two outer columns), no battle starts,
+    //  and the program mashed B until someone looked. The same with a bag
+    //  that has no room for the Nugget. Now a wait that takes far longer
+    //  than it can stops the program with an error (and its notification),
+    //  and counts in "Errors".
+    auto give_up_after = [&](WallClock started, std::chrono::seconds limit, const std::string& message){
+        if (current_time() - started <= limit){
+            return;
+        }
+        stats.errors++;
+        env.update_stats();
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "NuggetBridgeFarmer: " + message,
+            env.console
+        );
+    };
+
     for (uint32_t nuggets_since_last_save = 0;; nuggets_since_last_save++){
         send_program_status_notification(env, NOTIFICATION_STATUS_UPDATE);
         if (NUM_NUGGETS != 0 && stats.nuggets >= NUM_NUGGETS){
@@ -105,6 +131,7 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
         }
 
         env.console.log("Exiting Pokemon Center...");
+        WallClock wait_start = current_time();
         while (true){
             BlackScreenWatcher pokemon_ceter_exit(COLOR_RED);
 
@@ -119,9 +146,16 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret == 0){
                 break;
             }
+            give_up_after(
+                wait_start, std::chrono::seconds(30),
+                "Did not leave the Pokemon Center within 30 seconds of walking down. Start in front of the "
+                "nurse of Cerulean City's Pokemon Center. (After a battle that was won instead of lost the "
+                "player is still on the bridge: the Rocket gives a Nugget each time only until he is beaten.)"
+            );
         }
 
         env.console.log("Detecting overworld...");
+        wait_start = current_time();
         while (true){
             BlackScreenOverWatcher overworld_entered(COLOR_RED);
 
@@ -134,6 +168,10 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret == 0){
                 break;
             }
+            give_up_after(
+                wait_start, std::chrono::seconds(30),
+                "The city did not show within 30 seconds of leaving the Pokemon Center."
+            );
         }
 
         // There is a small delay from seeing the overworld to being able to a actually move.
@@ -153,6 +191,7 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
         context.wait_for_all_requests();
 
         env.console.log("Starting battle...");
+        wait_start = current_time();
         while (true){
             BattleMenuWatcher battle_menu(COLOR_RED);
 
@@ -167,9 +206,18 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret == 0){
                 break;
             }
+            //  His talk, the Nugget's jingle and the start of the battle
+            //  take about 20 seconds.
+            give_up_after(
+                wait_start, std::chrono::seconds(90),
+                "The battle with the Rocket did not start within 90 seconds of the walk to him. The walk "
+                "goes by timings alone and did not end in front of him, or he has no Nugget to give: the "
+                "bag has no room for it, or he was beaten before."
+            );
         }
 
         env.console.log("Loosing battle...");
+        wait_start = current_time();
         while (true){
             BlackScreenWatcher battle_lost(COLOR_RED);
 
@@ -184,9 +232,15 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret == 0){
                 break;
             }
+            give_up_after(
+                wait_start, std::chrono::seconds(600),
+                "The battle was not over within 10 minutes. The party has to lose to the Rocket, and "
+                "quickly: this program is meant for a single weak Pokemon."
+            );
         }
 
         env.console.log("Talking to nurse joy...");
+        wait_start = current_time();
         while (true){
             WhiteDialogWatcher nurse_joy_dialog(COLOR_RED);
             int ret = run_until<ProControllerContext>(
@@ -200,9 +254,14 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret == 0){
                 break;
             }
+            give_up_after(
+                wait_start, std::chrono::seconds(60),
+                "The nurse did not speak within 60 seconds of the battle's end."
+            );
         }
 
         // Spam B till nurse joy stops talking
+        wait_start = current_time();
         while (true){
             WhiteDialogWatcher nurse_joy_dialog(COLOR_RED);
             int ret = run_until<ProControllerContext>(
@@ -216,6 +275,10 @@ void NuggetBridgeFarmer::program(SingleSwitchProgramEnvironment& env, ProControl
             if (ret != 0){
                 break;
             }
+            give_up_after(
+                wait_start, std::chrono::seconds(60),
+                "The nurse's talk did not end within 60 seconds."
+            );
         }
 
         stats.nuggets++;
