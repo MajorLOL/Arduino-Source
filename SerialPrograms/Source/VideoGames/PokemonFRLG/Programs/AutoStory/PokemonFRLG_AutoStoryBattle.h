@@ -197,6 +197,16 @@ struct StoryBattleSettings{
     //  do not come back between the rooms), the Champion is beaten far more
     //  often (team_sim --gauntlet).
     bool heal_in_battle = true;
+
+    //  Experimental (the option "Faster battles"): the end of a battle is
+    //  looked for when the screen fades to black, not only after 6 seconds
+    //  without anything of a battle on it. The game fades out at the end of
+    //  every battle (battle_main.c: HandleEndTurn_FinishBattle); once the
+    //  picture is back and nothing of a battle shows, one press of + tells:
+    //  the start menu opens only where the player is free to move. Whatever
+    //  else it finds there (an evolution, text, a whiteout) is left to the
+    //  loop as before. Not while catching, and not once the party fainted.
+    bool fast_end = false;
 };
 
 //  What the battle logic remembers between battles.
@@ -209,6 +219,8 @@ struct StoryBattleMemory{
     //  Set when "... grew to LV. X!" was seen. The grinding clears it after
     //  reading the lead's level.
     bool level_up_seen = false;
+    //  How many times that text was seen (of any Pokemon of the party).
+    uint64_t level_ups = 0;
     //  Moves found to be out of PP (bit per slot): picking them just brings
     //  the move list back ("There's no PP left for this move!"). Cleared
     //  when the party is healed.
@@ -292,6 +304,13 @@ struct StoryBattleMemory{
     //  No healing item was found in the bag: not looked for again until
     //  items are bought.
     bool no_heal_items = false;
+    //  "Faster battles" (StoryBattleSettings::fast_end): battles whose end
+    //  was found by the fade to black, fades after which the player was not
+    //  free to move (the loop went on as before), and the time from the
+    //  fade to the end of those found, in milliseconds.
+    uint64_t fast_ends = 0;
+    uint64_t fast_end_misses = 0;
+    uint64_t fast_end_ms = 0;
 };
 
 

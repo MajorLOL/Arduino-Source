@@ -1766,6 +1766,41 @@ private:
 
 namespace{
 
+const AutoStoryDex::SpeciesInfo* dex_species(const std::string& slug){
+    for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
+        if (slug == info.slug){
+            return &info;
+        }
+    }
+    return nullptr;
+}
+
+//  The level of the one that trains (party slot 1). In the story that is
+//  the starter or a team member, and the caller knows its types. Not in a
+//  run of the story (the Level Trainer) it is whatever the player put
+//  there: its species gives the types for the same-type bonus and the stats
+//  its moves are valued with, and it can change on the way (an evolution).
+int read_training_level(StoryRuntime& rt){
+    if (!rt.standalone){
+        return story_read_lead_level(rt);
+    }
+    std::string front;
+    const int level = story_read_slot(rt, 1, &front);
+    const AutoStoryDex::SpeciesInfo* info = dex_species(front);
+    if (info != nullptr && info != rt.battle.lead_species){
+        rt.console.log(
+            "Party slot 1 is " + std::string(info->name) + ": its types and stats count for the choice of moves.",
+            COLOR_BLUE
+        );
+        rt.battle.lead_species = info;
+        rt.battle.lead_type1 = info->type1;
+        rt.battle.lead_type2 = info->type2;
+        rt.lead_type1 = info->type1;
+        rt.lead_type2 = info->type2;
+    }
+    return level;
+}
+
 //  The training itself: the Pokemon in party slot 1 fights. "member": it
 //  is a team member put in front for this (see story_grind()).
 void grind_front(
@@ -1789,10 +1824,14 @@ void grind_front(
         }
     };
 
-    int level = story_read_lead_level(rt);
+    int level = read_training_level(rt);
     console.log(
         where + ": training the lead to level " + std::to_string(target) +
         " (now " + (level < 0 ? std::string("unknown") : std::to_string(level)) + ")."
+    );
+    story_note(
+        rt,
+        where + ": level " + (level < 0 ? std::string("?") : std::to_string(level)) + " of " + std::to_string(target)
     );
     if (level >= target){
         //  The step starts in front of the nurse: nothing to do. (After a
@@ -1805,7 +1844,7 @@ void grind_front(
         //  The Rare Candies picked up on the way: a level each, where a
         //  level costs the most battles.
         if (story_use_rare_candies(rt, target - level) > 0){
-            int now = story_read_lead_level(rt);
+            int now = read_training_level(rt);
             if (now > 0){
                 level = now;
             }
@@ -1894,9 +1933,10 @@ void grind_front(
 
         if (rt.memory.level_up_seen){
             rt.memory.level_up_seen = false;
-            int now = story_read_lead_level(rt);
+            int now = read_training_level(rt);
             if (now > 0){
                 level = now;
+                story_note(rt, where + ": level " + std::to_string(level) + " of " + std::to_string(target));
             }
         }
         if (level >= target){
@@ -1926,7 +1966,7 @@ void grind_front(
             //  this save in front of the nurse.
             story_heal(rt, where, true);
             since_heal = 0;
-            int now = story_read_lead_level(rt);
+            int now = read_training_level(rt);
             if (now > 0){
                 level = now;
             }
@@ -1953,15 +1993,6 @@ void grind_front(
     spot.to_first_tile();
     walk(to_nurse);
     story_heal(rt, where, member);
-}
-
-const AutoStoryDex::SpeciesInfo* dex_species(const std::string& slug){
-    for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
-        if (slug == info.slug){
-            return &info;
-        }
-    }
-    return nullptr;
 }
 
 }   //  namespace
@@ -2055,6 +2086,133 @@ void story_grind(
         story_save(rt, rt.has_dex);
         story_saved(rt, rt.step_index + 1);
     }
+}
+
+
+
+void story_train_at(StoryRuntime& rt, const StoryScript& script, const StoryStep& place, int level){
+    StoryStep step = place;
+    step.p0 = level;
+    step.p2 = -1;                   //  Party slot 1 as it is: no team member.
+    step.p3 = 0;
+    step.p4 = place.p4 & 0xff;      //  The grass line only: no Rare Candies.
+    step.text = "";
+    grind_front(rt, script, step, 0, false);
+}
+
+
+StoryTrainEnd story_train_here(StoryRuntime& rt, const StoryTrainHere& options, int& level){
+    ConsoleHandle& console = rt.console;
+    const std::string where = "Level Trainer";
+    const int target = options.level;
+
+    level = read_training_level(rt);
+    console.log(
+        where + ": training party slot 1 to level " + std::to_string(target) +
+        " (now " + (level < 0 ? std::string("unknown") : std::to_string(level)) + ")."
+    );
+    story_note(
+        rt,
+        where + ": level " + (level < 0 ? std::string("?") : std::to_string(level)) + " of " + std::to_string(target)
+    );
+    if (level >= target){
+        console.log(where + ": level " + std::to_string(level) + " reached already.", COLOR_BLUE);
+        return StoryTrainEnd::LEVEL_REACHED;
+    }
+
+    //  The player stands on the first tile of the line.
+    GrassSpot spot(rt, options.forth, options.length, StoryBattleKind::WILD_FIGHT, where, options.run);
+    spot.arrived();
+
+    //  If the level cannot be read, stop after a fixed number of battles.
+    const uint64_t battle_cap = options.max_battles > 0 ? options.max_battles : (level < 0 ? 40 : 100000);
+    uint64_t battles = 0;
+    uint64_t walks_without_battle = 0;
+    StoryTrainEnd end = StoryTrainEnd::BATTLE_LIMIT;
+    while (true){
+        rt.battle.lead_level = level > 0 ? level : 0;
+        const StoryBattleResult result = spot.step(StoryBattleKind::WILD_FIGHT, false);
+        if (result == StoryBattleResult::NO_BATTLE){
+            if (++walks_without_battle > 300){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "Level Trainer: no wild battle in 300 walks along the line. Is the player in tall grass "
+                    "(or in a cave, or on water with wild Pokemon), and does the line go the way the options say?",
+                    console
+                );
+            }
+            continue;
+        }
+        walks_without_battle = 0;
+        battles++;
+
+        if (result == StoryBattleResult::LOST){
+            //  At the last Pokemon Center, healed. No route from there.
+            console.log(where + ": the party fainted.", COLOR_RED);
+            return StoryTrainEnd::WHITED_OUT;
+        }
+
+        //  The battle is a moment the screen stands still anyway: check the
+        //  count of the steps.
+        spot.check();
+
+        if (rt.memory.level_up_seen){
+            rt.memory.level_up_seen = false;
+            const int now = read_training_level(rt);
+            if (now > 0){
+                level = now;
+                story_note(rt, where + ": level " + std::to_string(level) + " of " + std::to_string(target));
+            }
+        }
+        if (level >= target){
+            end = StoryTrainEnd::LEVEL_REACHED;
+            break;
+        }
+        if (rt.lead_fainted || result == StoryBattleResult::LEAD_FAINTED){
+            console.log(where + ": the Pokemon in party slot 1 fainted.", COLOR_ORANGE);
+            end = StoryTrainEnd::LEAD_FAINTED;
+            break;
+        }
+
+        const double hp = rt.memory.player_hp;
+        const bool hp_known = hp >= 0;
+        console.log(
+            where + ": HP " + (hp_known ? std::to_string((int)(hp * 100 + 0.5)) + "%" : std::string("not seen")) +
+            ", " + std::to_string(battles) + " battles."
+        );
+        if (hp_known && hp < options.stop_hp){
+            console.log(where + ": low on HP, and no nurse here.", COLOR_ORANGE);
+            end = StoryTrainEnd::LOW_HP;
+            break;
+        }
+        //  Every move that was read is out of PP (found out one by one, as
+        //  the move list comes back after a pick).
+        {
+            int known = 0;
+            int empty = 0;
+            for (int i = 0; i < 4; i++){
+                if (rt.memory.moves[i] >= 0){
+                    known++;
+                    if (rt.memory.no_pp & (1 << i)){
+                        empty++;
+                    }
+                }
+            }
+            if (known > 0 && empty == known){
+                console.log(where + ": no PP left for any move.", COLOR_ORANGE);
+                end = StoryTrainEnd::OUT_OF_PP;
+                break;
+            }
+        }
+        if (battles >= battle_cap){
+            console.log(where + ": stopping after " + std::to_string(battles) + " battles.", COLOR_ORANGE);
+            end = StoryTrainEnd::BATTLE_LIMIT;
+            break;
+        }
+    }
+    //  Back to where the program started.
+    spot.to_first_tile();
+    return end;
 }
 
 

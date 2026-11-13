@@ -31,6 +31,11 @@ struct StoryScript;
 struct StorySegment;
 struct StoryRuntime;
 
+//  The generated story (the routes are the same for every starter; its data
+//  is compiled into PokemonFRLG_AutoStory.cpp only): for the Level Trainer,
+//  which trains at the story's training places.
+const StoryScript& autostory_routes();
+
 
 class AutoStory_Descriptor : public SingleSwitchProgramDescriptor{
 public:
@@ -99,6 +104,8 @@ private:
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;
     BooleanCheckBoxOption VERIFY_WALKING;
     BooleanCheckBoxOption RUNNING;
+    BooleanCheckBoxOption FAST_BATTLES;
+    BooleanCheckBoxOption OVERLAY_NOTES;
     StringOption DEX_CAUGHT;
     BooleanCheckBoxOption COLLECTION_SHINY;
     SimpleIntegerOption<uint16_t> COLLECTION_SHINY_MINUTES;

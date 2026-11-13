@@ -19,6 +19,7 @@
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
+#include "CommonFramework/VideoPipeline/VideoOverlay.h"
 #include "CommonTools/Async/InferenceRoutines.h"
 #include "CommonTools/VisualDetectors/BlackScreenDetector.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
@@ -572,6 +573,28 @@ RunAttempt attempt_moves(
 
 
 
+void story_note(StoryRuntime& rt, const std::string& text, Color color){
+    if (!rt.overlay_notes){
+        return;
+    }
+    rt.console.overlay().add_log(text, color);
+}
+
+std::string story_fast_end_summary(const StoryRuntime& rt){
+    const uint64_t battles = rt.wild_battles + rt.trainer_battles;
+    const uint64_t found = rt.memory.fast_ends;
+    std::string line = "Faster battles (experimental): the end of " + std::to_string(found) + " of " +
+        std::to_string(battles) + " battles was found by the fade to black";
+    if (found > 0){
+        line += ", " + std::to_string(rt.memory.fast_end_ms / found) + " ms after it on average";
+    }
+    line += ". Fades after which the player was not free to move: " +
+        std::to_string(rt.memory.fast_end_misses) + ".";
+    return line;
+}
+
+
+
 StoryBattleResult story_battle(
     StoryRuntime& rt, StoryBattleKind kind, const std::string& where,
     bool throw_on_loss
@@ -719,6 +742,40 @@ StoryBattleResult story_battle(
         rt.trainer_battles++;
     }else{
         rt.wild_battles++;
+    }
+    if (rt.overlay_notes){
+        const char* outcome = "won";
+        Color color = COLOR_WHITE;
+        switch (result){
+        case StoryBattleResult::WON:            break;
+        case StoryBattleResult::RAN:            outcome = "ran away"; break;
+        case StoryBattleResult::CAUGHT:         outcome = "caught"; color = COLOR_GREEN; break;
+        case StoryBattleResult::LEAD_FAINTED:   outcome = "the lead fainted"; color = COLOR_ORANGE; break;
+        case StoryBattleResult::LOST:           outcome = "lost, the party fainted"; color = COLOR_RED; break;
+        case StoryBattleResult::NO_BATTLE:      break;
+        }
+        std::string line = kind == StoryBattleKind::TRAINER
+            ? "Trainer battle " + std::to_string(rt.trainer_battles)
+            : "Wild battle " + std::to_string(rt.wild_battles);
+        line += std::string(": ") + outcome;
+        if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty()){
+            line += " " + rt.memory.caught;
+        }
+        if (rt.memory.player_hp >= 0 && result != StoryBattleResult::LOST){
+            line += ", HP " + std::to_string((int)(rt.memory.player_hp * 100 + 0.5)) + "%";
+        }
+        story_note(rt, line, color);
+        if (rt.memory.shiny){
+            story_note(
+                rt,
+                "A shiny " + (rt.memory.shiny_species.empty() ? std::string("Pokemon") : rt.memory.shiny_species) +
+                (rt.memory.shiny_caught ? ": caught!" : ": not caught."),
+                COLOR_YELLOW
+            );
+        }
+    }
+    if (rt.on_battle){
+        rt.on_battle();
     }
     switch (result){
     case StoryBattleResult::LEAD_FAINTED:
@@ -2086,6 +2143,7 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, cons
 void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step){
     StoryMemoryScope memory_scope("healing");
     rt.console.log("Healing: " + where);
+    story_note(rt, "Healing at the Pokemon Center");
     heal_at_pokecenter(rt.console, rt.context);
     story_cutscene(rt, 0ms, 30s, false, "Nurse at " + where);
     rt.lead_fainted = false;
@@ -2154,6 +2212,25 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
         rt.console.log("The shiny Pokemon caught is saved.", COLOR_BLUE);
     }
     rt.shiny_unsaved = false;
+    story_note(rt, "The game is saved");
+    if (rt.battle.fast_end){
+        rt.console.log(story_fast_end_summary(rt));
+    }
+    if (rt.standalone){
+        //  No story to go on with: only the memory check below.
+        rt.console.log("Saved.", COLOR_BLUE);
+        story_log_memory(rt, true);
+        MemoryUsage used = process_memory_usage();
+        if (story_memory_too_high(used)){
+            throw ProgramFinishedException(
+                "The program uses " + gigabytes(used.process_virtual_memory) + " of the " +
+                gigabytes(used.total_system_memory) + " of memory and could crash soon. The game was "
+                "just saved: close the program completely (its main window too), open it again "
+                "and start again from this save."
+            );
+        }
+        return;
+    }
     //  Saved at the end of the segment: the next one starts there.
     const bool next = resume_at >= rt.segment_steps && !rt.next_segment_id.empty();
     const std::string resume_segment = next ? rt.next_segment_id : rt.segment_id;

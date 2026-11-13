@@ -177,6 +177,14 @@ std::string segment_name(const StorySegment& segment){
     return std::string(segment.id) + " (" + segment.title + ")";
 }
 
+}   //  namespace
+
+const StoryScript& autostory_routes(){
+    return AutoStoryData::story_BULBASAUR();
+}
+
+namespace{
+
 Button button_from_name(const std::string& name){
     if (name == "A") return BUTTON_A;
     if (name == "B") return BUTTON_B;
@@ -353,6 +361,23 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         false
     )
+    , FAST_BATTLES(
+        "<b>Faster battles (experimental):</b><br>Notice the end of a battle by the screen fading to black, "
+        "instead of waiting 6 seconds for nothing of a battle to show any more: about 5 seconds less per "
+        "battle (in the training runs measured, 8 of the 31 seconds of a battle were this wait). Once the "
+        "picture is back and shows nothing of a battle, the program presses + once: the start menu opens "
+        "only where the player is free to move. Not used while catching. "
+        "<b>Not tested on a console yet:</b> if battles end wrongly with it, turn it off and send the log.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
+    , OVERLAY_NOTES(
+        "<b>Progress on the video (experimental):</b><br>Show the main events of the run in the log on the "
+        "video (turn on \"Log\" above the video): the step, each battle's result and HP, the level while "
+        "training, heals, saves and retries. The program's own log still gets everything.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
     , DEX_CAUGHT(
         false,
         "<b>Caught by the program (set by it):</b><br>The species the program caught, as of the last save. "
@@ -418,6 +443,8 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
     PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(RUNNING);
+    PA_ADD_OPTION(FAST_BATTLES);
+    PA_ADD_OPTION(OVERLAY_NOTES);
     PA_ADD_OPTION(DEX_CAUGHT);
     PA_ADD_OPTION(COLLECTION_SHINY);
     PA_ADD_OPTION(COLLECTION_SHINY_MINUTES);
@@ -547,6 +574,11 @@ void AutoStory::run_segment(
 
         env.log(
             std::string(segment.id) + " step " + std::to_string(i + 1) + "/" +
+            std::to_string(segment.step_count) + ": " + label
+        );
+        story_note(
+            rt,
+            std::string(segment.id) + " " + std::to_string(i + 1) + "/" +
             std::to_string(segment.step_count) + ": " + label
         );
         if (step.type != StepType::WALK && step.type != StepType::WAIT){
@@ -1069,6 +1101,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     rt.trainer_check = rt.encounter_check + 1000ms;
     rt.verify_walking = VERIFY_WALKING;
     rt.running = RUNNING && VERIFY_WALKING;
+    rt.battle.fast_end = FAST_BATTLES;
+    rt.overlay_notes = OVERLAY_NOTES;
+    if (FAST_BATTLES){
+        env.log("\"Faster battles\" is on (experimental): the end of a battle is looked for at the fade to black.", COLOR_BLUE);
+    }
     rt.save_after_heal = SAVE_AFTER_HEAL;
     rt.catch_shinies = CATCH_SHINIES;
     rt.collect_shiny = COLLECTION_SHINY;
@@ -1394,6 +1431,12 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             take_resume();
             stats.errors++;
             env.update_stats();
+            story_note(
+                rt,
+                std::string(segment.id) + ": a step failed (see the log). Failures in a row: " +
+                std::to_string(failures + 1),
+                COLOR_RED
+            );
             const std::string id = segment.id;
             const bool league = id.rfind("C10_03", 0) == 0 || id.rfind("C10_04", 0) == 0;
             if (rt.whited_out && league && league_training != (size_t)-1 && league_losses < 6){
@@ -1555,6 +1598,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
 
+    if (rt.battle.fast_end){
+        env.log(story_fast_end_summary(rt), COLOR_BLUE);
+    }
     send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
 }

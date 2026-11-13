@@ -115,6 +115,35 @@ void story_grind(
     int extra_levels
 );
 
+//  Experimental (the Level Trainer): the training of a GRIND step of the
+//  story ("place": its routes between the nurse and the grass, its grass
+//  line) for whatever Pokemon is in party slot 1, up to "level". Starts in
+//  front of that place's nurse and ends there, healed. No team member, no
+//  Rare Candies.
+void story_train_at(StoryRuntime& rt, const StoryScript& script, const StoryStep& place, int level);
+
+//  Experimental (the Level Trainer): training where the player stands, on a
+//  line of wild-encounter tiles from the player's tile. No nurse: it stops
+//  when the lead is low on HP, out of PP or fainted.
+struct StoryTrainHere{
+    DpadPosition forth = DPAD_UP;   //  The line, from the player's tile.
+    int length = 3;                 //  Its tiles, the player's included (2 to 5).
+    int level = 100;                //  Train party slot 1 up to this level.
+    double stop_hp = 0.35;          //  Stop below this part of its HP (0: never).
+    uint64_t max_battles = 0;       //  Stop after this many battles (0: no limit).
+    bool run = false;               //  The walks may be run (Running Shoes).
+};
+enum class StoryTrainEnd{
+    LEVEL_REACHED,
+    LOW_HP,
+    OUT_OF_PP,
+    LEAD_FAINTED,
+    WHITED_OUT,         //  The party fainted: the player is at the last Pokemon Center.
+    BATTLE_LIMIT,
+};
+//  "level": the lead's level at the end (-1 if it was never read).
+StoryTrainEnd story_train_here(StoryRuntime& rt, const StoryTrainHere& options, int& level);
+
 //  Walk back and forth in the grass until one of the species is caught.
 void story_catch(StoryRuntime& rt, const StoryStep& step);
 

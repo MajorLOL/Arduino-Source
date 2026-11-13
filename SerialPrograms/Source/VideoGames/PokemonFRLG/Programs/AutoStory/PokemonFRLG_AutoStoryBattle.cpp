@@ -26,6 +26,7 @@
 #include "CommonTools/OCR/OCR_SmallDictionaryMatcher.h"
 #include "CommonTools/OCR/OCR_StringMatchResult.h"
 #include "CommonTools/Images/ImageFilter.h"
+#include "CommonTools/VisualDetectors/BlackScreenDetector.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
@@ -35,6 +36,7 @@
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_BagDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_StartMenuDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Sounds/PokemonFRLG_ShinySoundDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_PokedexRegisteredDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_BattleSelectionArrowDetector.h"
@@ -1435,6 +1437,13 @@ StoryBattleResult run_story_battle(
     int throw_failures = 0;
     int heals_used = 0;
     int heal_failures = 0;
+    //  "Faster battles" (settings.fast_end): fades to black in this battle
+    //  after which the start menu was tried for nothing, and all the fades
+    //  looked at. A few of the first or many of the second, and the fade is
+    //  no longer looked at in this battle (a place where the screen stays
+    //  dark, or something that keeps fading).
+    int fade_misses = 0;
+    int fades_seen = 0;
     //  The battle is over: what it was.
     auto over = [&](){
         if (!shiny_caught){
@@ -1459,8 +1468,109 @@ StoryBattleResult run_story_battle(
         if (balls_thrown > 0){
             callbacks.emplace_back(dex_page);
         }
+        //  Experimental ("Faster battles"): the fade to black at the end of
+        //  the battle. Only in a battle that is one for sure and still goes
+        //  on as a plain fight or run: not while catching (the POKeDEX page,
+        //  the nickname question), not once the party fainted (the screen
+        //  then stays black for the game's text).
+        BlackScreenWatcher fade(COLOR_RED);
+        int fade_index = -1;
+        if (settings.fast_end && battle_confirmed && seen_battle && !lost &&
+            balls_thrown == 0 && !shiny_catching && !shiny_caught &&
+            fade_misses < 3 && fades_seen < 20
+        ){
+            fade_index = (int)callbacks.size();
+            callbacks.emplace_back(fade);
+        }
         context.wait_for_all_requests();
         int ret = wait_until(console, context, 6000ms, callbacks);
+        if (fade_index >= 0 && ret == fade_index){
+            //  Black. What comes after it, once the picture is back: the
+            //  overworld (the battle is over), more of the battle (back from
+            //  the party menu or the bag), an evolution, or the overworld
+            //  with someone talking.
+            const WallClock fade_seen = current_time();
+            fades_seen++;
+            {
+                //  The same part of the game's picture as the watcher above
+                //  (PokemonFRLG_DialogDetector.h), now for "no longer black".
+                PokemonAutomation::BlackScreenWatcher picture_back(
+                    COLOR_RED,
+                    GameSettings::instance().GAME_BOX.inner_to_outer({0.231692, 0.0616538, 0.551385, 0.9045}),
+                    100, 10,
+                    PokemonAutomation::BlackScreenWatcher::FinderType::GONE, 100ms
+                );
+                //  Still black after 3 seconds: looked at all the same.
+                wait_until(console, context, 3000ms, { picture_back });
+            }
+            bool battle_goes_on = false;
+            {
+                //  The fade-in takes about a third of a second, and the
+                //  game takes no input before it is over. Anything of a
+                //  battle in that time: it goes on.
+                BattleMenuWatcher menu_again(COLOR_RED);
+                BattleLearnDialogWatcher question_again(COLOR_RED);
+                PartyMenuWatcher party_again(COLOR_RED);
+                AdvanceBattleDialogWatcher advance_again(COLOR_RED);
+                battle_goes_on = wait_until(
+                    console, context, 600ms,
+                    { menu_again, question_again, party_again, advance_again }
+                ) >= 0;
+            }
+            if (!battle_goes_on){
+                //  A text box of the battle (also an evolution: never B
+                //  there), a level-up window or overworld text: not free to
+                //  move. Left to the loop, which knows what to do with each.
+                VideoSnapshot screen = console.video().snapshot();
+                BattleLevelUpDetector level_up(COLOR_RED, BattleLevelUpDialog::either, Language::English);
+                BattleDialogDetector battle_text(COLOR_RED);
+                WhiteDialogDetector white_dialog(COLOR_RED);
+                battle_goes_on = !screen ||
+                    level_up.detect(screen) || battle_text.detect(screen) || white_dialog.detect(screen);
+            }
+            if (battle_goes_on){
+                console.log("The screen faded to black and came back with the battle (or text): it goes on.");
+            }else{
+                //  Nothing of a battle on the screen. + opens the start menu
+                //  only where the player is free to move. (In a battle, an
+                //  evolution or a scene, + does nothing.) No B before the
+                //  menu is seen: B stops an evolution.
+                StartMenuWatcher start_menu(COLOR_RED);
+                const int opened = run_until<ProControllerContext>(
+                    console, context,
+                    [](ProControllerContext& ctx){
+                        pbf_press_button(ctx, BUTTON_PLUS, 200ms, 1300ms);
+                        pbf_press_button(ctx, BUTTON_PLUS, 200ms, 1300ms);
+                    },
+                    { start_menu }
+                );
+                if (opened == 0){
+                    pbf_mash_button(context, BUTTON_B, 500ms);
+                    context.wait_for_all_requests();
+                    const uint64_t took = (uint64_t)std::chrono::duration_cast<Milliseconds>(
+                        current_time() - fade_seen
+                    ).count();
+                    memory.fast_ends++;
+                    memory.fast_end_ms += took;
+                    console.log(
+                        "Battle over: the screen faded to black, and the player is free to move " +
+                        std::to_string(took) + " ms later (\"Faster battles\", experimental)."
+                    );
+                    return over();
+                }
+                context.wait_for_all_requests();
+                //  Two presses of + for nothing (3 seconds): after a few of
+                //  those in one battle the fade is no longer looked at.
+                fade_misses++;
+                memory.fast_end_misses++;
+                console.log(
+                    "The screen faded to black, nothing of a battle shows, but the start menu does not open: "
+                    "the player is not free to move. Going on as before.",
+                    COLOR_ORANGE
+                );
+            }
+            continue;
+        }
         if (ret >= 0 && intro_seen == WallClock::max()){
             intro_seen = current_time();
         }
@@ -2009,6 +2119,7 @@ StoryBattleResult run_story_battle(
                 }
                 if (text.find("grew to") != std::string::npos){
                     memory.level_up_seen = true;
+                    memory.level_ups++;
                     memory.member_moves_known = false;
                 }
                 if (text.find("trying to learn") != std::string::npos){

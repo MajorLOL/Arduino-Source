@@ -17,6 +17,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include "Common/Cpp/Color.h"
 #include "Common/Cpp/Time.h"
 #include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "CommonFramework/ImageTools/ImageBoxes.h"
@@ -201,6 +202,17 @@ struct StoryRuntime{
     //  and its step, counted from 1).
     std::function<void(const std::string& segment_id, size_t step)> on_saved;
 
+    //  Experimental (the option "Progress on the video"): the main events
+    //  of the run (the step, each battle's result, a level, a heal, a save,
+    //  a retry) also go to the log shown on the video: story_note().
+    bool overlay_notes = false;
+    //  Not a run of the story (the Level Trainer): a save is just a save,
+    //  there is no segment and step to go on from.
+    bool standalone = false;
+    //  Called after each battle that took place, the counters up to date:
+    //  for statistics shown while a long step (training) runs.
+    std::function<void()> on_battle;
+
     //  Memory use of the program, logged now and then.
     WallClock last_memory_log = WallClock::min();
 
@@ -211,6 +223,15 @@ struct StoryRuntime{
     //  warp, or the end of the last battle).
     uint64_t false_battles = 0;
 };
+
+
+//  With StoryRuntime::overlay_notes: a line in the log on the video. Only
+//  for the main events; the program's own log gets everything as before.
+void story_note(StoryRuntime& rt, const std::string& text, Color color = COLOR_WHITE);
+
+//  What "Faster battles" (StoryBattleSettings::fast_end) did so far, as one
+//  line for the log: logged at each save and at the end of a run.
+std::string story_fast_end_summary(const StoryRuntime& rt);
 
 
 //  Run a battle that just started (or is about to start). Updates the
