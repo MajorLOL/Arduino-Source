@@ -92,6 +92,10 @@ PanelListWidget::PanelListWidget(
             tag = "dev";
             tag_meaning = "Dev: a tool for developers.";
             break;
+        case PanelQualityStanding::EXPERIMENTAL:
+            tag = "experimental";
+            tag_meaning = "Experimental: new, and not tested on a console yet. Expect mistakes.";
+            break;
         }
         list_item->setData(PocketPilot::PROGRAM_LIST_TAG, QString::fromStdString(tag));
 

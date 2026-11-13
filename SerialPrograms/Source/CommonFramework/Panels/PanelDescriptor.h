@@ -25,6 +25,8 @@ enum class PanelQualityStanding{
     UNMAINTAINED,
     DEPRECATED,
     DEVELOPER,
+    //  PocketPilot: new, and not tested on a console yet.
+    EXPERIMENTAL,
 //    UNCATEGORIZED,
 };
 

@@ -28,6 +28,8 @@ Color PanelDescriptor::pick_color(PanelQualityStanding standing){
         return COLOR_RED;
     case PanelQualityStanding::DEVELOPER:
         return COLOR_DARKCYAN;
+    case PanelQualityStanding::EXPERIMENTAL:
+        return COLOR_ORANGE;
     }
     return Color();
 }

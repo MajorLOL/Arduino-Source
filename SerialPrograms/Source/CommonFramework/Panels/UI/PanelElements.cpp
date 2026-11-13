@@ -149,6 +149,11 @@ CollapsibleGroupBox* make_panel_header(
         text = "(This is a developer program.)";
         break;
 
+    case PanelQualityStanding::EXPERIMENTAL:
+        text = "(This program is experimental: it is new and has not been tested on a console yet. "
+            "Expect mistakes, watch its first runs, and save the game by hand before you start it.)";
+        break;
+
     }
 
     QLabel* label = new QLabel(
