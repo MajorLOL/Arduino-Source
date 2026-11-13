@@ -216,6 +216,13 @@ LevelTrainer::LevelTrainer()
         LockMode::LOCK_WHILE_RUNNING,
         false
     )
+    , SHORT_GRASS_LOOKS(
+        "<b>Shorter looks in the grass (experimental):</b><br>End the look for a wild battle after a walk along "
+        "the line as soon as the screen has not changed for 0.3 seconds, instead of after the whole \"Grass step "
+        "check\": about one second less for each walk without a battle. See the same option of the AutoStory.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
     , RUNNING(
         "<b>Running (experimental):</b><br>Hold B along the line, twice as fast. Needs the Running Shoes, "
         "and a map that allows running. See the same option of the AutoStory.",
@@ -251,6 +258,7 @@ LevelTrainer::LevelTrainer()
     PA_ADD_OPTION(CATCH_SHINIES);
     PA_ADD_OPTION(SAVE);
     PA_ADD_OPTION(FAST_BATTLES);
+    PA_ADD_OPTION(SHORT_GRASS_LOOKS);
     PA_ADD_OPTION(RUNNING);
     PA_ADD_OPTION(OVERLAY_NOTES);
     PA_ADD_OPTION(GRASS_STEP_CHECK_MS);
@@ -282,6 +290,7 @@ void LevelTrainer::program(SingleSwitchProgramEnvironment& env, ProControllerCon
     //  No team whose party slots have to be kept free.
     rt.party_order_final = true;
     rt.battle.fast_end = FAST_BATTLES;
+    rt.short_grass_look = SHORT_GRASS_LOOKS && rt.verify_walking;
     rt.overlay_notes = OVERLAY_NOTES;
     if (CATCH_SHINIES){
         rt.shiny_watch.reset(new StoryShinyWatch(env.console, context));
@@ -363,6 +372,9 @@ void LevelTrainer::program(SingleSwitchProgramEnvironment& env, ProControllerCon
     story_note(rt, summary, COLOR_GREEN);
     if (rt.battle.fast_end){
         env.log(story_fast_end_summary(rt), COLOR_BLUE);
+    }
+    if (rt.short_grass_look){
+        env.log(story_grass_look_summary(rt), COLOR_BLUE);
     }
     story_log_memory(rt, true);
 

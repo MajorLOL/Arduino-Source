@@ -75,6 +75,7 @@ private:
     BooleanCheckBoxOption CATCH_SHINIES;
     BooleanCheckBoxOption SAVE;
     BooleanCheckBoxOption FAST_BATTLES;
+    BooleanCheckBoxOption SHORT_GRASS_LOOKS;
     BooleanCheckBoxOption RUNNING;
     BooleanCheckBoxOption OVERLAY_NOTES;
     SimpleIntegerOption<uint16_t> GRASS_STEP_CHECK_MS;

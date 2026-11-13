@@ -206,6 +206,16 @@ struct StoryRuntime{
     //  of the run (the step, each battle's result, a level, a heal, a save,
     //  a retry) also go to the log shown on the video: story_note().
     bool overlay_notes = false;
+    //  Experimental (the option "Shorter looks in the grass"): after a run
+    //  along the grass that the video saw end as asked, the look for a
+    //  battle starting ends once the screen has not changed for a moment,
+    //  instead of after "encounter_check" (story_grass_run()). How many
+    //  looks there were after such runs, how many of them ended early, and
+    //  how long those took together.
+    bool short_grass_look = false;
+    uint64_t grass_looks = 0;
+    uint64_t grass_looks_short = 0;
+    uint64_t grass_looks_short_ms = 0;
     //  Not a run of the story (the Level Trainer): a save is just a save,
     //  there is no segment and step to go on from.
     bool standalone = false;
@@ -232,6 +242,10 @@ void story_note(StoryRuntime& rt, const std::string& text, Color color = COLOR_W
 //  What "Faster battles" (StoryBattleSettings::fast_end) did so far, as one
 //  line for the log: logged at each save and at the end of a run.
 std::string story_fast_end_summary(const StoryRuntime& rt);
+
+//  What "Shorter looks in the grass" (StoryRuntime::short_grass_look) did so
+//  far, likewise.
+std::string story_grass_look_summary(const StoryRuntime& rt);
 
 
 //  Run a battle that just started (or is about to start). Updates the

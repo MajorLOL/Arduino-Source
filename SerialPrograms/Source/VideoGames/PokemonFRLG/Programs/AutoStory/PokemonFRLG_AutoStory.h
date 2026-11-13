@@ -105,6 +105,7 @@ private:
     BooleanCheckBoxOption VERIFY_WALKING;
     BooleanCheckBoxOption RUNNING;
     BooleanCheckBoxOption FAST_BATTLES;
+    BooleanCheckBoxOption SHORT_GRASS_LOOKS;
     BooleanCheckBoxOption OVERLAY_NOTES;
     StringOption DEX_CAUGHT;
     BooleanCheckBoxOption COLLECTION_SHINY;

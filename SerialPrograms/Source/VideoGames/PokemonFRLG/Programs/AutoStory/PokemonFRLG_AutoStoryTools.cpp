@@ -593,6 +593,16 @@ std::string story_fast_end_summary(const StoryRuntime& rt){
     return line;
 }
 
+std::string story_grass_look_summary(const StoryRuntime& rt){
+    std::string line = "Shorter looks in the grass (experimental): " + std::to_string(rt.grass_looks_short) + " of " +
+        std::to_string(rt.grass_looks) + " looks after a run along the grass ended early";
+    if (rt.grass_looks_short > 0){
+        line += ", after " + std::to_string(rt.grass_looks_short_ms / rt.grass_looks_short) + " ms on average";
+    }
+    line += " (the others took up to " + std::to_string(rt.encounter_check.count()) + " ms).";
+    return line;
+}
+
 
 
 StoryBattleResult story_battle(
@@ -848,17 +858,39 @@ StoryBattleResult story_grass_run(
         BlackScreenWatcher battle_starting(COLOR_RED);
         AdvanceBattleDialogWatcher battle_started(COLOR_RED);
         WhiteDialogWatcher trainer_talking(COLOR_RED);
+        std::vector<PeriodicInferenceCallback> signs{battle_starting, battle_started, trainer_talking};
+        //  "Shorter looks in the grass" (experimental). A wild battle is
+        //  decided in the frame the step ends, and its transition starts
+        //  with the whole picture fading to gray and back twice, a step of
+        //  the fade every frame, and goes on changing until the screen is
+        //  black (battle_transition.c: CreateIntroTask(0, 0, 2, 2, 2), then
+        //  the transition itself). So a screen that does not change for 300
+        //  ms has no battle starting. Only after a run the video saw end as
+        //  asked, with the player standing still: that is when the picture
+        //  can be still at all. Where something on the screen moves
+        //  (water, people), the look takes as long as it did.
+        //  (Measured over 1,614 runs of the League training: 1,266 ended
+        //  without a battle and each waited the whole 1.5 seconds; of the
+        //  348 battles, 343 were seen during the run and 5 by this look,
+        //  1.3 seconds after the run.)
+        StableScreenWatcher nothing_starts(300ms);
+        const bool short_look = rt.short_grass_look && sure;
+        if (short_look){
+            signs.emplace_back(nothing_starts);
+            rt.grass_looks++;
+        }
         rt.context.wait_for_all_requests();
-        int ret = wait_until(
-            rt.console, rt.context, rt.encounter_check,
-            { battle_starting, battle_started, trainer_talking }
-        );
+        const WallClock look_start = current_time();
+        int ret = wait_until(rt.console, rt.context, rt.encounter_check, signs);
         if (ret == 0){
             event = RunEvent::BATTLE_START;
         }else if (ret == 1){
             event = RunEvent::BATTLE_TEXT;
         }else if (ret == 2){
             event = RunEvent::DIALOG;
+        }else if (ret == 3){
+            rt.grass_looks_short++;
+            rt.grass_looks_short_ms += (uint64_t)std::chrono::duration_cast<Milliseconds>(current_time() - look_start).count();
         }
     }else if (event == RunEvent::NONE && a.lost){
         event = RunEvent::SCREEN_CHANGED;
@@ -2215,6 +2247,9 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     story_note(rt, "The game is saved");
     if (rt.battle.fast_end){
         rt.console.log(story_fast_end_summary(rt));
+    }
+    if (rt.short_grass_look){
+        rt.console.log(story_grass_look_summary(rt));
     }
     if (rt.standalone){
         //  No story to go on with: only the memory check below.

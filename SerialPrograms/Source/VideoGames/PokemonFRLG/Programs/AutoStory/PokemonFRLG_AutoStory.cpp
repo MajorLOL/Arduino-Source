@@ -371,6 +371,16 @@ AutoStory::AutoStory()
         LockMode::LOCK_WHILE_RUNNING,
         false
     )
+    , SHORT_GRASS_LOOKS(
+        "<b>Shorter looks in the grass (experimental):</b><br>After every walk along the grass while training, "
+        "the program watches for a wild battle to start for as long as \"Grass step check\" says (1.5 seconds), "
+        "also when none does: in the training runs measured that was three walks of every four, 1.5 seconds each. "
+        "With this option the look ends as soon as the screen has not changed for 0.3 seconds: a battle that is "
+        "starting changes the whole picture every frame. About one second less for each walk without a battle. "
+        "<b>Not tested on a console yet:</b> if battles are missed with it, turn it off and send the log.",
+        LockMode::LOCK_WHILE_RUNNING,
+        false
+    )
     , OVERLAY_NOTES(
         "<b>Progress on the video (experimental):</b><br>Show the main events of the run in the log on the "
         "video (turn on \"Log\" above the video): the step, each battle's result and HP, the level while "
@@ -444,6 +454,7 @@ AutoStory::AutoStory()
     PA_ADD_OPTION(VERIFY_WALKING);
     PA_ADD_OPTION(RUNNING);
     PA_ADD_OPTION(FAST_BATTLES);
+    PA_ADD_OPTION(SHORT_GRASS_LOOKS);
     PA_ADD_OPTION(OVERLAY_NOTES);
     PA_ADD_OPTION(DEX_CAUGHT);
     PA_ADD_OPTION(COLLECTION_SHINY);
@@ -1106,6 +1117,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     if (FAST_BATTLES){
         env.log("\"Faster battles\" is on (experimental): the end of a battle is looked for at the fade to black.", COLOR_BLUE);
     }
+    rt.short_grass_look = SHORT_GRASS_LOOKS && VERIFY_WALKING;
+    if (rt.short_grass_look){
+        env.log("\"Shorter looks in the grass\" is on (experimental): a look after a walk in the grass ends when the screen stays still.", COLOR_BLUE);
+    }
     rt.save_after_heal = SAVE_AFTER_HEAL;
     rt.catch_shinies = CATCH_SHINIES;
     rt.collect_shiny = COLLECTION_SHINY;
@@ -1600,6 +1615,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
 
     if (rt.battle.fast_end){
         env.log(story_fast_end_summary(rt), COLOR_BLUE);
+    }
+    if (rt.short_grass_look){
+        env.log(story_grass_look_summary(rt), COLOR_BLUE);
     }
     send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
