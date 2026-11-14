@@ -829,33 +829,75 @@ const ImageFloatBox PARTY_MESSAGE_BOX(0.040, 0.755, 0.920, 0.190);
 
 //  What the party menu shows during a battle.
 enum class PartyScreen{
-    GONE,       //  not the party menu (any more)
+    GONE,       //  not the party menu (any more): the battle
     LIST,       //  its list of Pokemon, "Choose a POKeMON." below it
-    OTHER,      //  the small menu of one Pokemon, or a text in the large box
+    MESSAGE,    //  a text in its large box that waits for a press
+    OTHER,      //  the small menu of one Pokemon
 };
 
-//  PartyMenuDetector wants the teal background left of the list down to
-//  where the small text box begins, and that box white along its top. The
-//  large text box ("X has no energy left to battle!") begins higher and is
-//  wider: while it is shown the detector does not see the menu (with build
-//  10 the loop's six seconds of looking ran out on that text each time).
-//  So: the upper part of that background alone tells that the party menu
-//  is there (the large box's frame begins at 0.70 of the height), the
-//  detector that it is on its list.
-PartyScreen party_screen(ConsoleHandle& console){
-    VideoSnapshot screen = console.video().snapshot();
-    if (!screen){
-        return PartyScreen::GONE;
+//  The party menu after a pick in it: gone (the Pokemon came in), on its
+//  list, or showing "X has no energy left to battle!" in its large text
+//  box. PartyMenuDetector sees only the list: it wants the teal background
+//  left of the list down to where the small text box begins, and the large
+//  box begins higher (with build 10 the loop's six seconds of looking ran
+//  out on that text each time; BattleDialogDetector then took the white
+//  box for the battle's, and a blind A closed it). What is looked at here:
+//  - the list: PartyMenuDetector;
+//  - the party menu's background, the upper part of the detector's box
+//    (the large box's frame begins at 0.70 of the height). The color test
+//    goes by the ratio of red, green and blue: a bluish battle background
+//    passes it too, so this alone does not tell;
+//  - the line below the top edge of the box at the bottom: all white is
+//    the party menu's large text box, all dark the battle's text box (its
+//    blue, 40 81 106); mixed is neither (the party menu's list and small
+//    menu have the last slots and the background there);
+//  - the battle's menu: BattleMenuDetector (which leaves white out).
+//  None of it: the screen is changing (the menu fades out, the battle
+//  comes back): looked at again for a second and a half.
+PartyScreen party_screen(ConsoleHandle& console, ProControllerContext& context){
+    std::string seen = "no picture";
+    for (int look = 0; look < 6; look++){
+        VideoSnapshot screen = console.video().snapshot();
+        if (screen){
+            PartyMenuDetector list(COLOR_RED);
+            if (list.detect(screen)){
+                console.log("After the pick: the party menu's list.");
+                return PartyScreen::LIST;
+            }
+            const bool background = is_solid(
+                game_box(screen, ImageFloatBox(0.028, 0.500, 0.010, 0.180)),
+                { 0.020, 0.424, 0.412 }, 0.25, 20
+            );
+            const ImageStats top = image_stats(
+                game_box(screen, ImageFloatBox(0.0372308, 0.750154, 0.925538, 0.00934615))
+            );
+            const double brightness = top.average.sum();
+            const bool even = top.stddev.sum() <= 40;
+            //  (The numbers: for a log that shows a pick going wrong.)
+            seen = std::string(background ? "" : "not ") + "the party menu's background; the box's top line " +
+                std::to_string((int)brightness) + " of 765, spread " + std::to_string((int)top.stddev.sum());
+            if (background && even && brightness >= 550){
+                console.log("After the pick: a text in the party menu's large box (" + seen + ").");
+                return PartyScreen::MESSAGE;
+            }
+            BattleMenuDetector battle_menu(COLOR_RED);
+            const bool menu = battle_menu.detect(screen);
+            if (menu || (even && brightness > 60 && brightness < 450)){
+                console.log(
+                    std::string("After the pick: the battle's ") + (menu ? "menu" : "text box") + " (" + seen + ")."
+                );
+                return PartyScreen::GONE;
+            }
+            if (background){
+                console.log("After the pick: the party menu, not on its list (" + seen + ").");
+                return PartyScreen::OTHER;
+            }
+        }
+        pbf_wait(context, 300ms);
+        context.wait_for_all_requests();
     }
-    const bool background = is_solid(
-        game_box(screen, ImageFloatBox(0.028, 0.500, 0.010, 0.180)),
-        { 0.020, 0.424, 0.412 }, 0.25, 20
-    );
-    if (!background){
-        return PartyScreen::GONE;
-    }
-    PartyMenuDetector list(COLOR_RED);
-    return list.detect(screen) ? PartyScreen::LIST : PartyScreen::OTHER;
+    console.log("After the pick: neither the party menu nor the battle's box (" + seen + "). Taken for the battle.");
+    return PartyScreen::GONE;
 }
 
 //  The party menu during a battle: send in the one at battle position
@@ -893,14 +935,20 @@ int pick_party_slot(ConsoleHandle& console, ProControllerContext& context, int p
         context.wait_for_all_requests();
         bool again = false;
         for (int look = 0; look < 3 && !again; look++){
-            const PartyScreen shown = party_screen(console);
+            const PartyScreen shown = party_screen(console, context);
             if (shown == PartyScreen::GONE){
                 return 1;
+            }
+            if (shown == PartyScreen::LIST){
+                //  The presses were not taken: once more.
+                again = true;
+                break;
             }
             const std::string text = read_text(console, PARTY_MESSAGE_BOX, false);
             auto has = [&](const char* words){
                 return text.find(words) != std::string::npos;
             };
+            const bool no_energy = has("energy") || has("left to") || has("has no");
             if (has("already")){
                 //  "X is already in battle!": the one on top. The presses
                 //  down were not taken. B: the text goes; once more.
@@ -908,24 +956,21 @@ int pick_party_slot(ConsoleHandle& console, ProControllerContext& context, int p
                 pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                 context.wait_for_all_requests();
                 again = true;
-            }else if (has("energy") || has("left to") || has("has no")){
+            }else if (no_energy || shown == PartyScreen::MESSAGE){
+                //  "X has no energy left to battle!" B: the text goes, the
+                //  list is back (the cursor on that one).
                 console.log("The party menu: " + text, COLOR_ORANGE);
-                //  B: the text goes, the list is back (the cursor on that
-                //  one).
                 pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                 context.wait_for_all_requests();
                 return 0;
-            }else if (shown == PartyScreen::LIST){
-                //  The list: the presses were not taken. Once more.
-                again = true;
             }else if (has("do what")){
                 //  The small menu is open (one press was not taken): A on
                 //  its first entry.
                 pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
                 context.wait_for_all_requests();
             }else{
-                //  The small menu or a text, not read. B closes either, the
-                //  list is back; once more.
+                //  The small menu, not read. B closes it, the list is back;
+                //  once more.
                 console.log("The party menu, not read: " + text, COLOR_ORANGE);
                 pbf_press_button(context, BUTTON_B, 160ms, 840ms);
                 context.wait_for_all_requests();
