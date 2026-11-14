@@ -20,6 +20,7 @@
 #define PokemonAutomation_PocketPilot_Assistant_Service_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <vector>
 #include <QString>
@@ -113,6 +114,12 @@ public:
     const std::vector<ModelChoice>& models() const{ return m_models; }
     void refresh_models(std::function<void(const QString& error)> done);
 
+    //  For what uses this service's connection from outside (a program in
+    //  which Claude plays, Assistant_Play.h): "close" is called when the
+    //  service ends, before anything of it is gone.
+    void at_end(const void* owner, std::function<void()> close);
+    void forget_end(const void* owner);
+
     //  A commit was made: for the panel, which shows it with its buttons.
     std::function<void(const CommitInfo& info)> on_commit;
     //  The user wants to see the changes of the conversation.
@@ -129,6 +136,7 @@ private:
     ToolSet m_tools;
     std::unique_ptr<Agent> m_agent;
     std::vector<ModelChoice> m_models;
+    std::map<const void*, std::function<void()>> m_at_end;
     std::shared_ptr<bool> m_alive;
 };
 

@@ -1456,6 +1456,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/Assistant/Assistant_Http.h
     Source/PocketPilot/Assistant/Assistant_Panel.cpp
     Source/PocketPilot/Assistant/Assistant_Panel.h
+    Source/PocketPilot/Assistant/Assistant_Play.cpp
+    Source/PocketPilot/Assistant/Assistant_Play.h
     Source/PocketPilot/Assistant/Assistant_SelfTest.cpp
     Source/PocketPilot/Assistant/Assistant_SelfTest.h
     Source/PocketPilot/Assistant/Assistant_Service.cpp
@@ -1853,6 +1855,8 @@ file(GLOB LIBRARY_SOURCES
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxSorterLivingDex.h
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxSorter_Tests.cpp
     Source/VideoGames/PokemonFRLG/Programs/BoxOrganization/PokemonFRLG_BoxSorter_Tests.h
+    Source/VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.cpp
+    Source/VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_EliteFourFarmer.cpp
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_EliteFourFarmer.h
     Source/VideoGames/PokemonFRLG/Programs/Farming/PokemonFRLG_EvTrainer.cpp

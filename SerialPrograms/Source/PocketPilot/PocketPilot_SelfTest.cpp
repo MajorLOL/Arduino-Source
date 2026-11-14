@@ -9,28 +9,37 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QComboBox>
 #include <QDialog>
 #include <QDir>
 #include <QEventLoop>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
 #include <QTimer>
+#include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/Logging/LoggerWindow.h"
 #include "CommonFramework/Options/Environment/ThemeSelectorOption.h"
+#include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "Assistant/Assistant_Panel.h"
+#include "Assistant/Assistant_Play.h"
 #include "Assistant/Assistant_SelfTest.h"
 #include "Assistant/Assistant_Service.h"
 #include "PocketPilot_About.h"
@@ -266,6 +275,10 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     let_run(500);
     save(window, "night-fire-box-namer");
     save_tall("night-fire-box-namer-tall");
+    open_named("Claude Plays");
+    let_run(500);
+    save(window, "night-fire-claude-plays");
+    save_tall("night-fire-claude-plays-tall");
 
     //  Claude: its panel next to a program. The test answers for Claude
     //  and for GitHub itself (Assistant/Assistant_SelfTest.h): the build
@@ -375,6 +388,92 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
             logger.log("Assistant test: the conversation did not end in the commit it should have made.", COLOR_RED);
         }
 
+        //  A program in which Claude plays (Assistant/Assistant_Play.h): it
+        //  talks to Claude from a thread of its own, through this same
+        //  connection. Here the "program" is a task that answers a look and
+        //  a press with made-up results.
+        {
+            backend.claude_calls("look", QJsonObject(), "I look at the screen first.");
+            backend.claude_calls("press", QJsonObject{{"buttons", QJsonArray{"A"}}});
+            backend.claude_says("Nothing more to do here.");
+            const int requests_before = backend.requests_to_claude();
+            struct Played{
+                std::string unavailable = "?";
+                std::vector<Assistant::PlayEvent> events;
+                Assistant::PlayUsage usage;
+                size_t picture_bytes = 0;
+            };
+            Played played;
+            CancellableHolder<CancellableScope> scope;
+            AsyncTask task = GlobalThreadPools::unlimited_normal().dispatch_now_blocking([&played, &scope]{
+                try{
+                    played.unavailable = Assistant::PlaySession::why_unavailable(scope);
+                    Assistant::PlaySession::Setup setup;
+                    setup.model = "claude-haiku-5-5";
+                    setup.system = NintendoSwitch::PokemonFRLG::claude_plays_instructions(false);
+                    setup.tools = NintendoSwitch::PokemonFRLG::claude_plays_tools(false);
+                    Assistant::PlaySession session(std::move(setup));
+                    session.start("Goal: a test of the interface.");
+                    for (int round = 0; round < 3; round++){
+                        const Assistant::PlayEvent event = session.wait(scope);
+                        played.events.push_back(event);
+                        if (event.kind != Assistant::PlayEvent::Kind::CALL){
+                            break;
+                        }
+                        Assistant::PlayResult result;
+                        result.text = "Screen: made up for the test.";
+                        if (event.call.name == "look"){
+                            ImageRGB32 frame(1280, 720);
+                            frame.fill(0xff204060);
+                            result.image_png = Assistant::play_picture(frame, 240, 160, 2);
+                            played.picture_bytes = result.image_png.size();
+                        }
+                        session.finish(event.call, std::move(result));
+                    }
+                    played.usage = session.usage();
+                }catch (...){
+                    //  Stopped by the scope: what was seen so far tells.
+                }
+            });
+            for (int waited = 0; waited < 20000 && !task.is_finished(); waited += 20){
+                let_run(20);
+            }
+            if (!task.is_finished()){
+                scope.cancel(nullptr);
+            }
+            task.wait_and_ignore_exceptions();
+            //  What the session posted on its way out.
+            let_run(100);
+            const bool played_well =
+                played.unavailable.empty() &&
+                played.events.size() == 3 &&
+                played.events[0].kind == Assistant::PlayEvent::Kind::CALL &&
+                played.events[0].call.name == "look" &&
+                played.events[0].said == "I look at the screen first." &&
+                played.events[1].kind == Assistant::PlayEvent::Kind::CALL &&
+                played.events[1].call.name == "press" &&
+                played.events[1].call.input == "{\"buttons\":[\"A\"]}" &&
+                played.events[2].kind == Assistant::PlayEvent::Kind::ANSWERED &&
+                played.picture_bytes > 100 &&
+                played.usage.requests == 3 &&
+                backend.requests_to_claude() == requests_before + 3;
+            if (played_well){
+                logger.log(
+                    "Assistant test: a program's thread played three turns with Claude (a look with its "
+                    "picture, a press, the end).",
+                    COLOR_BLUE
+                );
+            }else{
+                failed++;
+                logger.log(
+                    "Assistant test: a program's thread did not play as it should have: " +
+                    std::to_string(played.events.size()) + " events, " + std::to_string(played.usage.requests) +
+                    " requests, a picture of " + std::to_string(played.picture_bytes) + " bytes. " + played.unavailable,
+                    COLOR_RED
+                );
+            }
+        }
+
         panel.show_page(Assistant::Panel::Page::SETTINGS);
         save(window, "night-fire-claude-settings");
         panel.show_start_page();
@@ -462,7 +561,45 @@ int check_assistant(const QString& out, Logger& logger){
         std::to_string(result.checks) + " checks passed.",
         result.failed == 0 ? COLOR_BLUE : COLOR_RED
     );
-    return result.failed;
+
+    //  What Claude gets in the program "Claude Plays": tools with a schema
+    //  the API takes (an object with its properties), each name once, and
+    //  the one that saves only when the user allows it.
+    int wrong = 0;
+    for (bool allow_save : {false, true}){
+        const std::vector<Assistant::PlayTool> tools = NintendoSwitch::PokemonFRLG::claude_plays_tools(allow_save);
+        std::set<std::string> names;
+        bool saves = false;
+        for (const Assistant::PlayTool& tool : tools){
+            const JsonValue schema = parse_json(tool.input_schema);
+            const JsonObject* object = schema.to_object();
+            const bool fine =
+                object != nullptr &&
+                object->get_string_default("type") == "object" &&
+                object->get_object("properties") != nullptr &&
+                !tool.name.empty() && !tool.description.empty() &&
+                names.insert(tool.name).second;
+            if (!fine){
+                wrong++;
+                logger.log("Assistant test: failed: the tool \"" + tool.name + "\" of Claude Plays", COLOR_RED);
+            }
+            saves = saves || tool.name == "save_game";
+        }
+        const std::string instructions = NintendoSwitch::PokemonFRLG::claude_plays_instructions(allow_save);
+        if (tools.size() < 8 || saves != allow_save ||
+            (instructions.find("Do not save the game") != std::string::npos) == allow_save
+        ){
+            wrong++;
+            logger.log("Assistant test: failed: saving in Claude Plays, allowed or not", COLOR_RED);
+        }
+    }
+    logger.log(
+        wrong == 0
+            ? "Assistant test: the tools of Claude Plays are what the API takes."
+            : "Assistant test: the tools of Claude Plays are not right.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return result.failed + wrong;
 }
 
 }

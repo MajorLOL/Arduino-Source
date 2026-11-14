@@ -52,10 +52,26 @@ Service::Service(AppHooks hooks, std::unique_ptr<HttpTransport> transport)
 }
 
 Service::~Service(){
+    //  First of all: they still use what goes below.
+    std::map<const void*, std::function<void()>> closers;
+    closers.swap(m_at_end);
+    for (const auto& closer : closers){
+        if (closer.second){
+            closer.second();
+        }
+    }
     *m_alive = false;
     if (g_instance == this){
         g_instance = nullptr;
     }
+}
+
+void Service::at_end(const void* owner, std::function<void()> close){
+    m_at_end[owner] = std::move(close);
+}
+
+void Service::forget_end(const void* owner){
+    m_at_end.erase(owner);
 }
 
 void Service::save_settings(){

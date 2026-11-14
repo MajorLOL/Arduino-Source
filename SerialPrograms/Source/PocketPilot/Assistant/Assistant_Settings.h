@@ -60,9 +60,9 @@ private:
 
 
 struct Settings{
-    //  The model of the chat, and of the program that lets Claude play.
+    //  The model of the chat. (A program in which Claude plays has the
+    //  model among its own options.)
     QString chat_model = "claude-sonnet-5-5";
-    QString play_model = "claude-haiku-5-5";
     //  "low", "medium", "high". Empty: the model's own default.
     QString chat_effort;
     //  Ask whether to go on each time a conversation has cost this much

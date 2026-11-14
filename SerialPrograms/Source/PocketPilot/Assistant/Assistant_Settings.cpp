@@ -180,7 +180,6 @@ void Settings::load(const QString& file_path){
         }
     };
     text("chat_model", chat_model);
-    text("play_model", play_model);
     text("chat_effort", chat_effort);
     text("repository_owner", repository_owner);
     text("repository_name", repository_name);
@@ -197,9 +196,6 @@ void Settings::load(const QString& file_path){
     if (chat_model.isEmpty()){
         chat_model = Settings().chat_model;
     }
-    if (play_model.isEmpty()){
-        play_model = Settings().play_model;
-    }
     if (chat_effort != "low" && chat_effort != "medium" && chat_effort != "high"){
         chat_effort.clear();
     }
@@ -208,7 +204,6 @@ void Settings::load(const QString& file_path){
 bool Settings::save(const QString& file_path) const{
     QJsonObject object{
         {"chat_model", chat_model},
-        {"play_model", play_model},
         {"chat_effort", chat_effort},
         {"ask_at_usd", ask_at_usd},
         {"repository_owner", repository_owner},

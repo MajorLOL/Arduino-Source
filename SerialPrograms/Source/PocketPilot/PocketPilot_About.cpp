@@ -95,10 +95,11 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     ));
 
     layout->addWidget(paragraph(dialog,
-        "<b>Claude.</b> The panel \"Claude\" talks to Claude, the AI model of Anthropic, with an API "
-        "key of your own, which Anthropic bills you for. What you write there and what Claude looks "
-        "up to answer (the log, the options, parts of the source) is sent to Anthropic, and nothing "
-        "before you add a key. Its changes to the source go to a branch of their own."
+        "<b>Claude.</b> The panel \"Claude\" and the program \"Claude Plays\" talk to Claude, the AI "
+        "model of Anthropic, with an API key of your own, which Anthropic bills you for. What you "
+        "write, what Claude looks up to answer (the log, the options, parts of the source) and, when "
+        "it plays, pictures of the game are sent to Anthropic, and nothing before you add a key. Its "
+        "changes to the source go to a branch of their own."
     ));
 
     layout->addWidget(paragraph(dialog,

@@ -701,10 +701,14 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
             check(store.get(Secret::CLAUDE_API_KEY) == key, "the key is back after a new start");
             check(store.get(Secret::GITHUB_TOKEN) == token, "the token is back after a new start");
             check(!store.unreadable(Secret::CLAUDE_API_KEY), "the saved key can be read");
-            QFile file(path);
+            //  Closed again before the store writes: Windows does not
+            //  replace a file that is open.
             QByteArray content;
-            if (file.open(QIODevice::ReadOnly)){
-                content = file.readAll();
+            {
+                QFile file(path);
+                if (file.open(QIODevice::ReadOnly)){
+                    content = file.readAll();
+                }
             }
             check(!content.isEmpty() && !content.contains(key.toUtf8()) && !content.contains(token.toUtf8()), "the keys' file does not show the keys");
 #ifdef _WIN32
@@ -729,7 +733,7 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
         again.load(settings_path);
         check(
             again.chat_model == "claude-opus-5-5" && about_equal(again.ask_at_usd, 2.5) && again.panel_width == 512 &&
-            again.play_model == Settings().play_model,
+            again.chat_effort == Settings().chat_effort,
             "the settings are back after a new start"
         );
         QFile::remove(settings_path);
