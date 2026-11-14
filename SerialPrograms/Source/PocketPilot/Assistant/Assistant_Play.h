@@ -56,8 +56,9 @@ struct PlayCall{
 struct PlayResult{
     std::string text;
     bool is_error = false;
-    //  A picture that goes with the text (the bytes of a PNG). Empty: none.
-    std::string image_png;
+    //  A picture that goes with the text: the bytes of a PNG or of a JPEG,
+    //  as play_picture() packs them. Empty: none.
+    std::string image;
 };
 
 //  What comes next in the conversation.
@@ -91,12 +92,25 @@ struct PlayUsage{
 };
 
 
+//  How a picture for Claude is packed. PNG keeps every pixel: small for a
+//  game that draws few pixels in few colors. JPEG is a tenth of that for
+//  the picture of a 3D game, and a conversation sends its pictures again
+//  with every request.
+enum class PlayPictureFormat{
+    PNG,
+    JPEG,
+};
+
 //  A picture of the game as it goes to Claude: scaled to "width" x "height"
 //  (each pixel the average of what it stands for), every pixel then
-//  enlarged to a square of "enlarge" pixels a side, packed as a PNG. For a
-//  game that draws few pixels, its own size and a whole number keep the
-//  picture sharp and the file small. Empty if there is no picture.
-std::string play_picture(const ImageViewRGB32& screen, int width, int height, int enlarge = 1);
+//  enlarged to a square of "enlarge" pixels a side, and packed. For a game
+//  that draws few pixels, its own size and a whole number keep the picture
+//  sharp and the file small. As a PNG if it cannot be packed as a JPEG.
+//  Empty if there is no picture.
+std::string play_picture(
+    const ImageViewRGB32& screen, int width, int height, int enlarge = 1,
+    PlayPictureFormat format = PlayPictureFormat::PNG
+);
 
 
 class PlaySession{

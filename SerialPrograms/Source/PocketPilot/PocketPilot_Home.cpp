@@ -64,6 +64,8 @@ void game_label_colors(const QString& name, QColor& first, QColor& second){
         {"Pokopia",         0xffe2875c, 0xffe2875c},
         {"Home",            0xff2c9c93, 0xff2c9c93},
         {"Zelda",           0xff4c8c68, 0xff4c8c68},
+        //  The list for whatever else is on the screen (ClaudePlays).
+        {"Other Games",     0xff5a55b8, 0xff5a55b8},
     };
     for (const Entry& entry : ENTRIES){
         if (name.contains(QLatin1String(entry.word), Qt::CaseInsensitive)){
@@ -584,7 +586,8 @@ void HomePage::refresh(){
         m_lead->setText(
             "Each game has its own programs. A program watches the game through your capture card "
             "and presses the buttons for you. With Claude, at the top right, you can ask about a "
-            "program, or have one built or fixed."
+            "program or have one built or fixed. Claude Plays, in every list, plays toward a goal "
+            "you write down."
         );
     }
 

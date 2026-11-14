@@ -423,17 +423,22 @@ void Agent::finish_tool(const PendingCall& call, ToolResult result){
         {"type", "tool_result"},
         {"tool_use_id", call.id},
     };
-    if (result.image_png.isEmpty()){
+    if (result.image.isEmpty()){
         block["content"] = text;
     }else{
+        //  A JPEG begins with FF D8 FF. Anything else here is a PNG.
+        const bool jpeg = result.image.size() >= 3 &&
+            (unsigned char)result.image[0] == 0xff &&
+            (unsigned char)result.image[1] == 0xd8 &&
+            (unsigned char)result.image[2] == 0xff;
         block["content"] = QJsonArray{
             text_block(text),
             QJsonObject{
                 {"type", "image"},
                 {"source", QJsonObject{
                     {"type", "base64"},
-                    {"media_type", "image/png"},
-                    {"data", QString::fromLatin1(result.image_png.toBase64())},
+                    {"media_type", jpeg ? "image/jpeg" : "image/png"},
+                    {"data", QString::fromLatin1(result.image.toBase64())},
                 }},
             },
         };

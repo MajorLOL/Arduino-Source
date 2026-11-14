@@ -1468,6 +1468,14 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/Assistant/Assistant_Tools.h
     Source/PocketPilot/Assistant/Assistant_Workspace.cpp
     Source/PocketPilot/Assistant/Assistant_Workspace.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_AnyGame.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_AnyGame.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Games.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Games.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Program.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_Program.h
     Source/PocketPilot/PocketPilot_About.cpp
     Source/PocketPilot/PocketPilot_About.h
     Source/PocketPilot/PocketPilot_Home.cpp

@@ -31,6 +31,7 @@
 #include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
+#include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/Logging/LoggerWindow.h"
 #include "CommonFramework/Options/Environment/ThemeSelectorOption.h"
@@ -42,6 +43,9 @@
 #include "Assistant/Assistant_Play.h"
 #include "Assistant/Assistant_SelfTest.h"
 #include "Assistant/Assistant_Service.h"
+#include "ClaudePlays/ClaudePlays_AnyGame.h"
+#include "ClaudePlays/ClaudePlays_Engine.h"
+#include "ClaudePlays/ClaudePlays_Games.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Theme.h"
@@ -279,6 +283,15 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     let_run(500);
     save(window, "night-fire-claude-plays");
     save_tall("night-fire-claude-plays-tall");
+    //  The Claude Plays of every other list, here of "Other Games".
+    logger.log(std::string("UI test: opening ") + ClaudePlays::OTHER_GAMES_LIST + ", Claude Plays");
+    if (!window.open_program(ClaudePlays::OTHER_GAMES_LIST, "Claude Plays")){
+        failed++;
+        logger.log(std::string("UI test: could not open ") + ClaudePlays::OTHER_GAMES_LIST + ", Claude Plays", COLOR_RED);
+    }
+    let_run(500);
+    save(window, "night-fire-claude-plays-any-game");
+    save_tall("night-fire-claude-plays-any-game-tall");
 
     //  Claude: its panel next to a program. The test answers for Claude
     //  and for GitHub itself (Assistant/Assistant_SelfTest.h): the build
@@ -425,8 +438,8 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
                         if (event.call.name == "look"){
                             ImageRGB32 frame(1280, 720);
                             frame.fill(0xff204060);
-                            result.image_png = Assistant::play_picture(frame, 240, 160, 2);
-                            played.picture_bytes = result.image_png.size();
+                            result.image = Assistant::play_picture(frame, 240, 160, 2);
+                            played.picture_bytes = result.image.size();
                         }
                         session.finish(event.call, std::move(result));
                     }
@@ -471,6 +484,143 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
                     " requests, a picture of " + std::to_string(played.picture_bytes) + " bytes. " + played.unavailable,
                     COLOR_RED
                 );
+            }
+        }
+
+        //  The Claude Plays of every game (ClaudePlays/ClaudePlays_AnyGame.h):
+        //  a whole session through that same connection, with a console that
+        //  is made up here. Its picture changes with every press, so what
+        //  the program says about the screen is part of the test.
+        {
+            backend.claude_calls("look", QJsonObject(), "I look at the screen first.");
+            backend.claude_calls("press", QJsonObject{{"buttons", QJsonArray{"A", "DOWN"}}, {"read", "bottom"}});
+            backend.claude_calls("hold", QJsonObject{{"left_stick", "up"}, {"buttons", QJsonArray{"B"}}, {"ms", 400}});
+            backend.claude_calls("note", QJsonObject{{"text", "The menu is open."}});
+            backend.claude_calls("done", QJsonObject{{"reached", true}, {"summary", "Looked, pressed and walked."}});
+            const int requests_before = backend.requests_to_claude();
+
+            struct MadeUpConsole : public ClaudePlays::PlayConsole{
+                std::vector<std::string> did;
+                int presses = 0;
+                size_t read_width = 0;
+                size_t read_height = 0;
+                virtual const ClaudePlays::PadLayout& layout() const override{
+                    return ClaudePlays::pro_controller_layout();
+                }
+                virtual void hold(const ClaudePlays::PadInput& input, std::chrono::milliseconds duration) override{
+                    std::string line = "hold";
+                    for (const std::string& button : input.buttons){
+                        line += " " + button;
+                    }
+                    if (input.stick_y > 0.9){
+                        line += " stick-up";
+                    }
+                    did.push_back(line + " " + std::to_string(duration.count()));
+                    presses++;
+                }
+                virtual void mash(const std::string& button, std::chrono::milliseconds) override{
+                    did.push_back("mash " + button);
+                }
+                virtual void wait(std::chrono::milliseconds) override{}
+                virtual bool screen(const std::function<void(const ImageViewRGB32&)>& use) override{
+                    //  A lighter band of 80 lines that moves down with every
+                    //  press: a ninth of the picture where it was, and a ninth
+                    //  where it is now.
+                    std::vector<uint32_t> pixels((size_t)1280 * 720, 0xff204060);
+                    const size_t top = (size_t)(presses % 6) * 80;
+                    std::fill(pixels.begin() + top * 1280, pixels.begin() + (top + 80) * 1280, 0xffd0d8e8);
+                    use(ImageViewRGB32(pixels.data(), 1280 * sizeof(uint32_t), 1280, 720));
+                    return true;
+                }
+                virtual std::string read_text(const ImageViewRGB32& picture) override{
+                    read_width = picture.width();
+                    read_height = picture.height();
+                    return "Start Game\n";
+                }
+            };
+            struct TestHost : public ClaudePlays::Host{
+                CancellableHolder<CancellableScope> cancel;
+                std::vector<std::string> lines;
+                uint64_t actions = 0;
+                virtual void log(const std::string& text, Color) override{ lines.push_back(text); }
+                virtual void show(const std::string&, Color) override{}
+                virtual void count(uint64_t done, const Assistant::PlayUsage&) override{ actions = done; }
+                virtual CancellableScope& scope() override{ return cancel; }
+            };
+            MadeUpConsole console;
+            TestHost host;
+            ClaudePlays::Ending ending;
+            std::vector<std::string> results;
+            bool jpeg = false;
+            AsyncTask task = GlobalThreadPools::unlimited_normal().dispatch_now_blocking([&]{
+                try{
+                    ClaudePlays::GameFacts facts;
+                    facts.name = "a game made up for the test";
+                    //  The game, with what it hands back kept for the checks.
+                    struct Watched : public ClaudePlays::AnyGame{
+                        using ClaudePlays::AnyGame::AnyGame;
+                        std::vector<std::string>* results = nullptr;
+                        bool* jpeg = nullptr;
+                        virtual Assistant::PlayResult run(const Assistant::PlayCall& call) override{
+                            Assistant::PlayResult result = ClaudePlays::AnyGame::run(call);
+                            results->push_back(result.text);
+                            if (result.image.size() > 3 &&
+                                (unsigned char)result.image[0] == 0xff && (unsigned char)result.image[1] == 0xd8
+                            ){
+                                *jpeg = true;
+                            }
+                            return result;
+                        }
+                    };
+                    Watched game(console, facts, ClaudePlays::AnyGameOptions());
+                    game.results = &results;
+                    game.jpeg = &jpeg;
+                    Assistant::PlaySession session(ClaudePlays::make_setup(game, ClaudePlays::Model::HAIKU));
+                    ending = ClaudePlays::play(host, game, session, "A test of the interface.", ClaudePlays::Limits());
+                }catch (...){
+                    //  Stopped by the scope: what was done so far tells.
+                }
+            });
+            for (int waited = 0; waited < 30000 && !task.is_finished(); waited += 20){
+                let_run(20);
+            }
+            if (!task.is_finished()){
+                host.cancel.cancel(nullptr);
+            }
+            task.wait_and_ignore_exceptions();
+            let_run(100);
+            const bool played_well =
+                ending.reached && !ending.failed && ending.actions == 3 && host.actions == 3 &&
+                backend.requests_to_claude() == requests_before + 5 &&
+                console.did == std::vector<std::string>{"hold A 150", "hold DOWN 110", "hold B stick-up 400"} &&
+                results.size() == 3 &&
+                results[0] == "Screen: still now. [A picture of the screen.]" &&
+                jpeg &&
+                results[1] ==
+                    "Pressed A, DOWN. Screen: 22% of the picture differs from before the action; still now.\n"
+                    "Text in its bottom part, as the program reads it:\nStart Game" &&
+                console.read_width == 1280 && console.read_height == 360 &&
+                results[2].rfind("Held left stick up + B for 400 ms. Screen: 22% of the picture differs", 0) == 0;
+            if (played_well){
+                logger.log(
+                    "Assistant test: Claude played a session of any game on a made-up console (a look as a "
+                    "JPEG, presses with the text read after them, a stick held, a note, done).",
+                    COLOR_BLUE
+                );
+            }else{
+                failed++;
+                logger.log(
+                    "Assistant test: the session of any game did not go as it should have: " + ending.summary +
+                    " | " + std::to_string(console.did.size()) + " inputs, " + std::to_string(results.size()) +
+                    " results" + (jpeg ? "" : ", no JPEG"),
+                    COLOR_RED
+                );
+                for (const std::string& line : results){
+                    logger.log("Assistant test:   a result: " + line, COLOR_RED);
+                }
+                for (const std::string& line : console.did){
+                    logger.log("Assistant test:   an input: " + line, COLOR_RED);
+                }
             }
         }
 
@@ -593,10 +743,69 @@ int check_assistant(const QString& out, Logger& logger){
             logger.log("Assistant test: failed: saving in Claude Plays, allowed or not", COLOR_RED);
         }
     }
+    //  The same for the Claude Plays of the other games: for each game its
+    //  controller, with and without saving and HOME.
+    int game_cases = 0;
+    std::set<std::string> identifiers;
+    for (ClaudePlays::GameId id : ClaudePlays::all_games()){
+        const ClaudePlays::GameProfile& profile = ClaudePlays::game_profile(id);
+        if (!identifiers.insert(profile.identifier).second){
+            wrong++;
+            logger.log("Assistant test: failed: two games with the identifier " + profile.identifier, COLOR_RED);
+        }
+        const ClaudePlays::PadLayout& layout = profile.pad == ClaudePlays::PadKind::RIGHT_JOYCON
+            ? ClaudePlays::right_joycon_layout()
+            : ClaudePlays::pro_controller_layout();
+        for (bool allowed : {false, true}){
+            game_cases++;
+            ClaudePlays::AnyGameOptions options;
+            options.allow_save = allowed;
+            options.allow_home = allowed;
+            std::vector<Assistant::PlayTool> tools = ClaudePlays::any_game_tools(layout, options, profile.save_routine);
+            for (Assistant::PlayTool& tool : ClaudePlays::session_tools()){
+                tools.push_back(std::move(tool));
+            }
+            std::set<std::string> names;
+            bool saves = false;
+            bool home = false;
+            for (const Assistant::PlayTool& tool : tools){
+                const JsonValue schema = parse_json(tool.input_schema);
+                const JsonObject* object = schema.to_object();
+                const bool fine =
+                    object != nullptr &&
+                    object->get_string_default("type") == "object" &&
+                    object->get_object("properties") != nullptr &&
+                    !tool.name.empty() && !tool.description.empty() &&
+                    names.insert(tool.name).second;
+                if (!fine){
+                    wrong++;
+                    logger.log(
+                        "Assistant test: failed: the tool \"" + tool.name + "\" of Claude Plays for " + profile.identifier,
+                        COLOR_RED
+                    );
+                }
+                saves = saves || tool.name == "save_game";
+                home = home || tool.input_schema.find("\"HOME\"") != std::string::npos;
+            }
+            ClaudePlays::GameFacts facts;
+            facts.name = profile.name;
+            facts.notes = profile.notes;
+            const std::string instructions = ClaudePlays::any_game_instructions(layout, options, facts, profile.save_routine);
+            if (tools.size() < 8 || saves != (allowed && profile.save_routine) || home != allowed ||
+                (instructions.find("Do not save the game") != std::string::npos) == allowed ||
+                (instructions.find("does not know which game") != std::string::npos) != profile.name.empty()
+            ){
+                wrong++;
+                logger.log("Assistant test: failed: what Claude gets for " + profile.identifier, COLOR_RED);
+            }
+        }
+    }
     logger.log(
         wrong == 0
-            ? "Assistant test: the tools of Claude Plays are what the API takes."
-            : "Assistant test: the tools of Claude Plays are not right.",
+            ? "Assistant test: the tools of Claude Plays are what the API takes (FireRed and LeafGreen, and " +
+              std::to_string(game_cases) + " cases of the " + std::to_string(ClaudePlays::all_games().size()) +
+              " other lists)."
+            : std::string("Assistant test: the tools of Claude Plays are not right."),
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return result.failed + wrong;

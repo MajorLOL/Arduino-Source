@@ -50,7 +50,10 @@ const std::chrono::milliseconds LOOK_EVERY(20);
 
 
 
-std::string play_picture(const ImageViewRGB32& screen, int width, int height, int enlarge){
+std::string play_picture(
+    const ImageViewRGB32& screen, int width, int height, int enlarge,
+    PlayPictureFormat format
+){
     if (!screen || width <= 0 || height <= 0 || enlarge <= 0){
         return std::string();
     }
@@ -61,12 +64,22 @@ std::string play_picture(const ImageViewRGB32& screen, int width, int height, in
     }
     //  Without transparency: there is none, and the file is smaller.
     picture = picture.convertToFormat(QImage::Format_RGB888);
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
-    if (!buffer.open(QIODevice::WriteOnly) || !picture.save(&buffer, "PNG")){
-        return std::string();
+    auto packed = [&](const char* kind, int quality){
+        QByteArray bytes;
+        QBuffer buffer(&bytes);
+        if (!buffer.open(QIODevice::WriteOnly) || !picture.save(&buffer, kind, quality)){
+            return std::string();
+        }
+        return std::string(bytes.constData(), (size_t)bytes.size());
+    };
+    if (format == PlayPictureFormat::JPEG){
+        //  (Qt reads and writes JPEG through a plugin: without it, a PNG.)
+        std::string jpeg = packed("JPG", 82);
+        if (!jpeg.empty()){
+            return jpeg;
+        }
     }
-    return std::string(bytes.constData(), (size_t)bytes.size());
+    return packed("PNG", -1);
 }
 
 
@@ -285,7 +298,7 @@ void PlaySession::Shared::finish(const std::string& id, const PlayResult& result
     ToolResult tool_result;
     tool_result.text = QString::fromStdString(result.text);
     tool_result.is_error = result.is_error;
-    tool_result.image_png = QByteArray(result.image_png.data(), (qsizetype)result.image_png.size());
+    tool_result.image = QByteArray(result.image.data(), (qsizetype)result.image.size());
     done(std::move(tool_result));
 }
 

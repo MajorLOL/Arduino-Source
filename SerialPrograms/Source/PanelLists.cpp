@@ -27,6 +27,7 @@
 #include "VideoGames/PokemonLZA/PokemonLZA_Panels.h"
 #include "VideoGames/PokemonPokopia/PokemonPokopia_Panels.h"
 #include "VideoGames/ZeldaTotK/ZeldaTotK_Panels.h"
+#include "PocketPilot/ClaudePlays/ClaudePlays_Program.h"
 #include "PanelLists.h"
 
 //#include <iostream>
@@ -96,6 +97,9 @@ ProgramSelect::ProgramSelect(QWidget& parent, PanelHolder& holder)
     }
 
     add(std::make_unique<NintendoSwitch::ZeldaTotK::PanelListFactory>());
+
+    //  PocketPilot: whatever game is on the screen, played by Claude.
+    add(std::make_unique<PocketPilot::ClaudePlays::OtherGamesList>());
 
     if (STATIC_GLOBALS.DEVELOPER_MODE){
         add(std::make_unique<ML::PanelListFactory>());

@@ -7,6 +7,7 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 //#include "CommonFramework/GlobalSettingsPanel.h"
 #include "ZeldaTotK_Panels.h"
+#include "PocketPilot/ClaudePlays/ClaudePlays_Program.h"
 
 //#include "ZeldaTotK_Settings.h"
 
@@ -36,6 +37,10 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     // ret.emplace_back(make_settings<GameSettings_Descriptor, GameSettingsPanel>());
 
     //ret.emplace_back("---- General ----");
+
+    //  PocketPilot: Claude plays toward a goal the user writes down.
+    ret.emplace_back("---- Claude ----");
+    ret.emplace_back(PocketPilot::ClaudePlays::make_claude_plays(PocketPilot::ClaudePlays::GameId::ZELDA_TOTK));
 
     ret.emplace_back("---- Glitches (v1.1.1) ----");
     ret.emplace_back(make_SingleSwitchProgram<BowItemDuper>());

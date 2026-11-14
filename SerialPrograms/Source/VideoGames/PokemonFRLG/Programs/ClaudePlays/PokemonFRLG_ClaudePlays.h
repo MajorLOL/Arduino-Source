@@ -23,15 +23,17 @@
 #include "NintendoSwitch/NintendoSwitch_SingleSwitchProgram.h"
 #include "NintendoSwitch/Options/NintendoSwitch_GoHomeWhenDoneOption.h"
 #include "PocketPilot/Assistant/Assistant_Play.h"
+#include "PocketPilot/ClaudePlays/ClaudePlays_Engine.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonFRLG{
 
 
-//  What Claude gets in this program: its tools and its instructions.
-//  "allow_save": the user lets Claude save the game. (Here for the test of
-//  the interface as well, which checks that they are what the API takes.)
+//  What Claude gets in this program: its tools (with the session's own two,
+//  "note" and "done") and its instructions. "allow_save": the user lets
+//  Claude save the game. (Here for the test of the interface as well, which
+//  checks that they are what the API takes.)
 std::vector<PocketPilot::Assistant::PlayTool> claude_plays_tools(bool allow_save);
 std::string claude_plays_instructions(bool allow_save);
 
@@ -54,12 +56,7 @@ public:
         FeedbackType feedback_type
     ) override{}
 
-    enum class Model{
-        HAIKU,
-        SONNET,
-        OPUS,
-        FABLE,
-    };
+    using Model = PocketPilot::ClaudePlays::Model;
 
     //  How large the pictures are that go to Claude.
     enum class Picture{

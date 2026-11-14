@@ -8,6 +8,7 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "PokemonRSE_Panels.h"
+#include "PocketPilot/ClaudePlays/ClaudePlays_Program.h"
 
 #include "PokemonRSE_Settings.h"
 
@@ -41,6 +42,10 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
     ret.emplace_back(make_OptionsPanel<GameSettingsPanel>());
 
     //ret.emplace_back("---- General ----");
+
+    //  PocketPilot: Claude plays toward a goal the user writes down.
+    ret.emplace_back("---- Claude ----");
+    ret.emplace_back(PocketPilot::ClaudePlays::make_claude_plays(PocketPilot::ClaudePlays::GameId::RUBY_SAPPHIRE_EMERALD));
 
     ret.emplace_back("---- Shiny Hunting (Ruby/Sapphire) ----"); //Remove RS only if E is fixed
     ret.emplace_back(make_SingleSwitchProgram<AudioStarterReset>());

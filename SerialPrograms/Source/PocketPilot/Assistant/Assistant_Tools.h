@@ -32,8 +32,9 @@ namespace Assistant{
 struct ToolResult{
     QString text;
     bool is_error = false;
-    //  A picture that goes with the text (PNG). Empty: none.
-    QByteArray image_png;
+    //  A picture that goes with the text: the bytes of a PNG or of a JPEG
+    //  (they say which themselves). Empty: none.
+    QByteArray image;
 
     static ToolResult error(const QString& text){
         ToolResult result;

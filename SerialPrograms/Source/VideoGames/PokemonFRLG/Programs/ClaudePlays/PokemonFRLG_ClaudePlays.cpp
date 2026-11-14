@@ -16,11 +16,12 @@
  *      AutoStory (PokemonFRLG_AutoStoryTools.h): a whole battle or scene
  *      for one call, without a token in between.
  *
- *  The conversation is held by PocketPilot's assistant
- *  (PocketPilot/Assistant/Assistant_Play.h) with the key of the panel
- *  "Claude". When it gets long it is started over with Claude's own notes
- *  and the last actions, so that a long session does not send its whole
- *  past with every request.
+ *  The session itself is the one of every game's Claude Plays
+ *  (PocketPilot/ClaudePlays/ClaudePlays_Engine.h): the conversation with
+ *  the key of the panel "Claude", Claude's notes, the limits. When the
+ *  conversation gets long it is started over with the notes and the last
+ *  actions, so that a long session does not send its whole past with every
+ *  request.
  *
  *  A routine of the AutoStory that does not understand the screen (it
  *  throws an OperationFailedException) does not stop the program: Claude
@@ -30,7 +31,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <deque>
 #include <string>
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
@@ -68,11 +68,17 @@ namespace PokemonFRLG{
 using namespace std::chrono_literals;
 
 using PocketPilot::Assistant::PlayCall;
-using PocketPilot::Assistant::PlayEvent;
 using PocketPilot::Assistant::PlayResult;
 using PocketPilot::Assistant::PlaySession;
 using PocketPilot::Assistant::PlayTool;
 using PocketPilot::Assistant::PlayUsage;
+
+//  The session that every game's Claude Plays has: the class of this
+//  program has the name of its namespace.
+namespace Plays = PocketPilot::ClaudePlays;
+using Plays::money;
+using Plays::one_line;
+using Plays::trimmed;
 
 
 ClaudePlays_Descriptor::ClaudePlays_Descriptor()
@@ -128,80 +134,6 @@ const ImageFloatBox BATTLE_TEXT_BOX(0.045, 0.770, 0.890, 0.170);
 //  Where the screen is looked at for "black", as the game's other
 //  programs do.
 const ImageFloatBox BLACK_SCREEN_BOX(0.231692, 0.0616538, 0.551385, 0.9045);
-
-//  A conversation whose last request sent this many tokens is started
-//  over, with the notes and the last actions. (Every request sends the
-//  whole conversation again. From the cache that costs little, but past
-//  100,000 tokens the smallest model costs five times as much.)
-const uint64_t RESTART_AT_TOKENS = 40000;
-//  The last actions that go along into a conversation that starts over.
-const size_t JOURNAL_LINES = 6;
-//  How much of Claude's notes is kept (the newest).
-const size_t NOTES_CHARACTERS = 2500;
-//  Claude ending its turn without a tool call this often in a row ends
-//  the session.
-const int MAX_NUDGES = 3;
-
-
-const char* model_id(ClaudePlays::Model model){
-    switch (model){
-    case ClaudePlays::Model::HAIKU:     return "claude-haiku-5-5";
-    case ClaudePlays::Model::SONNET:    return "claude-sonnet-5-5";
-    case ClaudePlays::Model::OPUS:      return "claude-opus-5-5";
-    case ClaudePlays::Model::FABLE:     return "claude-fable-5-2";
-    }
-    return "claude-haiku-5-5";
-}
-
-std::string trimmed(const std::string& text){
-    size_t first = 0;
-    size_t last = text.size();
-    while (first < last && std::isspace((unsigned char)text[first])){
-        first++;
-    }
-    while (last > first && std::isspace((unsigned char)text[last - 1])){
-        last--;
-    }
-    return text.substr(first, last - first);
-}
-
-//  On one line, and not longer than "limit".
-std::string one_line(const std::string& text, size_t limit){
-    std::string line;
-    bool space = false;
-    for (char ch : trimmed(text)){
-        if (std::isspace((unsigned char)ch)){
-            space = true;
-            continue;
-        }
-        if (space && !line.empty()){
-            line += ' ';
-        }
-        space = false;
-        line += ch;
-    }
-    if (line.size() > limit){
-        line.resize(limit);
-        line += "...";
-    }
-    return line;
-}
-
-std::string money(double usd){
-    const long long cents = (long long)(usd * 100.0 + 0.5);
-    const std::string rest = std::to_string(cents % 100);
-    return "$" + std::to_string(cents / 100) + "." + (rest.size() < 2 ? "0" + rest : rest);
-}
-
-std::string usage_line(const PlayUsage& usage){
-    std::string line = std::to_string(usage.tokens) + " tokens in " + std::to_string(usage.requests) +
-        (usage.requests == 1 ? " request" : " requests");
-    if (usage.cost_known && usage.requests > 0){
-        line += usage.cost_usd < 0.005 ? ", less than $0.01" : ", about " + money(usage.cost_usd);
-    }
-    return line;
-}
-
 
 //  What the program finds on the screen by itself.
 struct ScreenRead{
@@ -279,10 +211,8 @@ std::string take_picture(StoryRuntime& rt, int enlarge){
 const char* const LOOK_PARAMETER =
     R"("look":{"type":"boolean","description":"true: a picture of the screen comes back with the result."})";
 
-}   //  namespace
-
-
-std::vector<PlayTool> claude_plays_tools(bool allow_save){
+//  The tools of the game, without the session's own.
+std::vector<PlayTool> game_tools(bool allow_save){
     std::vector<PlayTool> tools;
     tools.push_back(PlayTool{
         "look",
@@ -356,19 +286,17 @@ std::vector<PlayTool> claude_plays_tools(bool allow_save){
         std::string(R"({"type":"object","properties":{"ms":{"type":"integer","description":"100 to 10000."},)") +
         LOOK_PARAMETER + R"(},"required":["ms"]})"
     });
-    tools.push_back(PlayTool{
-        "note",
-        "Writes a line down for yourself. The program starts the conversation over now and then to save "
-        "tokens, and only your notes and the last few actions come along: note where the player is, what is "
-        "done and what comes next whenever that changes.",
-        R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"]})"
-    });
-    tools.push_back(PlayTool{
-        "done",
-        "Ends the session: the goal is reached, or it cannot be reached. Say which, and what was done.",
-        std::string(R"({"type":"object","properties":{"reached":{"type":"boolean"},)") +
-        R"("summary":{"type":"string"}},"required":["reached","summary"]})"
-    });
+    return tools;
+}
+
+}   //  namespace
+
+
+std::vector<PlayTool> claude_plays_tools(bool allow_save){
+    std::vector<PlayTool> tools = game_tools(allow_save);
+    for (PlayTool& tool : Plays::session_tools()){
+        tools.push_back(std::move(tool));
+    }
     return tools;
 }
 
@@ -426,12 +354,6 @@ struct Session{
     int enlarge = 2;
     bool allow_save = false;
     bool overlay = true;
-
-    //  Claude's notes (one a line), and the last actions with what came of
-    //  them: what a conversation that starts over begins with.
-    std::string notes;
-    std::deque<std::string> journal;
-    uint64_t actions = 0;
 
     void show(const std::string& text, Color color = COLOR_WHITE) const{
         if (overlay){
@@ -730,39 +652,79 @@ PlayResult run_call(Session& session, const PlayCall& call){
     const ScreenRead screen = read_screen(session.rt);
     result.text += (result.text.empty() ? "" : " ") + std::string("Screen: ") + screen.text;
     if (call.name == "look" || input.get_boolean_default("look", false)){
-        result.image_png = take_picture(session.rt, session.enlarge);
-        if (result.image_png.empty()){
+        result.image = take_picture(session.rt, session.enlarge);
+        if (result.image.empty()){
             result.text += " (No picture could be taken.)";
         }
     }
     return result;
 }
 
-//  A few words on a call, for the log and the journal.
-std::string call_words(const PlayCall& call){
-    return call.name + " " + one_line(call.input, 120);
-}
 
-//  What a conversation begins with.
-std::string first_message(const Session& session, const std::string& goal, const std::string& screen){
-    std::string text = "Goal: " + goal + "\n\n";
-    if (session.actions > 0){
-        text += "The program started this conversation over to save tokens, after " +
-            std::to_string(session.actions) + " actions.\n";
-        text += session.notes.empty()
-            ? "You wrote no notes down.\n"
-            : "Your notes:\n" + session.notes;
-        if (!session.journal.empty()){
-            text += "The last actions before that, with what came of them:\n";
-            for (const std::string& line : session.journal){
-                text += "- " + line + "\n";
-            }
-        }
-        text += "\n";
+//  This game for the session: its tools are the AutoStory's routines.
+class FrlgGame : public Plays::Game{
+public:
+    explicit FrlgGame(Session& session)
+        : m_session(session)
+    {}
+
+    virtual std::vector<PlayTool> tools() const override{
+        return game_tools(m_session.allow_save);
     }
-    text += "Screen now: " + screen;
-    return text;
-}
+    virtual std::string instructions() const override{
+        return claude_plays_instructions(m_session.allow_save);
+    }
+    virtual std::string screen() override{
+        return read_screen(m_session.rt).text;
+    }
+    virtual PlayResult run(const PlayCall& call) override{
+        return run_call(m_session, call);
+    }
+
+private:
+    Session& m_session;
+};
+
+//  This program for the session: its log, the lines on the video, the
+//  numbers under it.
+class FrlgHost : public Plays::Host{
+public:
+    FrlgHost(Session& session, ClaudePlays_Descriptor::Stats& stats)
+        : m_session(session)
+        , m_stats(stats)
+    {}
+
+    virtual void log(const std::string& text, Color color) override{
+        m_session.env.log(text, color);
+    }
+    virtual void show(const std::string& text, Color color) override{
+        m_session.show(text, color);
+    }
+    virtual void count(uint64_t actions, const PlayUsage& usage) override{
+        m_stats.actions += actions - m_actions;
+        m_stats.requests += usage.requests - m_requests;
+        m_stats.tokens += usage.tokens - m_tokens;
+        const uint64_t battles = m_session.rt.wild_battles + m_session.rt.trainer_battles;
+        m_stats.battles += battles - m_battles;
+        m_actions = actions;
+        m_requests = usage.requests;
+        m_tokens = usage.tokens;
+        m_battles = battles;
+        m_session.env.update_stats();
+    }
+    virtual CancellableScope& scope() override{
+        return m_session.context;
+    }
+
+private:
+    Session& m_session;
+    ClaudePlays_Descriptor::Stats& m_stats;
+    //  What the numbers under the video have already.
+    uint64_t m_actions = 0;
+    uint64_t m_requests = 0;
+    uint64_t m_tokens = 0;
+    uint64_t m_battles = 0;
+};
 
 }   //  namespace
 
@@ -903,176 +865,30 @@ void ClaudePlays::program(SingleSwitchProgramEnvironment& env, ProControllerCont
     story_memory_reset();
     home_black_border_check(env.console, context);
 
-    PlaySession::Setup setup;
-    setup.model = model_id(model);
-    setup.effort = "low";
-    setup.system = claude_plays_instructions(session.allow_save);
-    setup.tools = claude_plays_tools(session.allow_save);
-    setup.max_tokens = 4000;
-    PlaySession claude(std::move(setup));
+    FrlgGame game(session);
+    FrlgHost host(session, stats);
+    PlaySession claude(Plays::make_setup(game, model));
 
     env.log(
-        std::string("Claude Plays: ") + model_id(model) + ", at most " + std::to_string(max_actions) +
+        std::string("Claude Plays: ") + Plays::model_id(model) + ", at most " + std::to_string(max_actions) +
         " actions" + (max_cost > 0 ? ", at most about " + money(max_cost) : std::string(", no cost limit")) +
         ". Goal: " + one_line(goal, 300),
         COLOR_BLUE
     );
     session.show("Claude plays: " + goal, COLOR_GREEN);
 
-    //  The numbers under the video.
-    uint64_t requests_shown = 0;
-    uint64_t tokens_shown = 0;
-    uint64_t battles_shown = 0;
-    bool warned_no_price = false;
-    auto show_stats = [&](){
-        const PlayUsage usage = claude.usage();
-        stats.requests += usage.requests - requests_shown;
-        stats.tokens += usage.tokens - tokens_shown;
-        requests_shown = usage.requests;
-        tokens_shown = usage.tokens;
-        const uint64_t battles = rt.wild_battles + rt.trainer_battles;
-        stats.battles += battles - battles_shown;
-        battles_shown = battles;
-        env.update_stats();
-        if (!usage.cost_known && max_cost > 0 && !warned_no_price){
-            warned_no_price = true;
-            env.log(
-                "Claude Plays: this build does not know the price of the model, so the cost limit cannot "
-                "stop the session. The limit on actions still does.",
-                COLOR_ORANGE
-            );
-        }
-        return usage;
-    };
-
-    claude.start(first_message(session, goal, read_screen(rt).text));
-
-    std::string summary;
-    bool reached = false;
-    int nudges = 0;
-    //  Everything Claude did, the notes and the turns without a tool call
-    //  included: they cost requests like an action does.
-    uint64_t turns = 0;
-    while (summary.empty()){
-        const PlayEvent event = claude.wait(context);
-        const PlayUsage usage = show_stats();
-        if (!event.said.empty()){
-            env.log("Claude: " + one_line(event.said, 600), COLOR_PURPLE);
-            session.show("Claude: " + event.said);
-        }
-        turns++;
-        if (max_cost > 0 && usage.cost_known && usage.cost_usd >= max_cost){
-            summary = "Stopped at a cost of about " + money(usage.cost_usd) + ", the most this session may cost.";
-            break;
-        }
-        if (turns > 2 * max_actions + 20){
-            summary = "Stopped: Claude took far more turns than the actions this session may take.";
-            break;
-        }
-
-        if (event.kind == PlayEvent::Kind::FAILED){
-            throw OperationFailedException(
-                ErrorReportMode::NO_ERROR_REPORT,
-                "Claude could not be reached, after " + std::to_string(session.actions) + " actions (" +
-                usage_line(usage) + "): " + event.message
-            );
-        }
-        if (event.kind == PlayEvent::Kind::REFUSED){
-            summary = "Claude declined to go on. " + event.message;
-            break;
-        }
-        if (event.kind == PlayEvent::Kind::ANSWERED || event.kind == PlayEvent::Kind::CUT_OFF){
-            //  A turn without a tool call: it has to call done to end.
-            if (++nudges >= MAX_NUDGES){
-                summary = "Claude stopped calling tools without saying that it is done.";
-                break;
-            }
-            claude.say(
-                "The program: go on with the goal through the tools. If it is reached, or cannot be reached, "
-                "call done."
-            );
-            continue;
-        }
-
-        //  A call.
-        nudges = 0;
-        const PlayCall& call = event.call;
-        if (call.name == "done"){
-            const JsonValue json = parse_json(call.input);
-            const JsonObject* input = json.to_object();
-            reached = input != nullptr && input->get_boolean_default("reached", false);
-            summary = std::string(reached ? "Claude says the goal is reached. " : "Claude says the goal is not reached. ") +
-                (input != nullptr ? one_line(input->get_string_default("summary"), 600) : std::string());
-            break;
-        }
-        if (call.name == "note"){
-            const JsonValue json = parse_json(call.input);
-            const JsonObject* input = json.to_object();
-            const std::string note = input != nullptr ? one_line(input->get_string_default("text"), 400) : std::string();
-            PlayResult result;
-            if (note.empty()){
-                result.is_error = true;
-                result.text = "\"text\" was empty: nothing was written down.";
-            }else{
-                session.notes += "- " + note + "\n";
-                //  The newest notes are the ones to keep.
-                while (session.notes.size() > NOTES_CHARACTERS){
-                    const size_t line_end = session.notes.find('\n');
-                    session.notes.erase(0, line_end == std::string::npos ? session.notes.size() : line_end + 1);
-                }
-                env.log("Claude's note: " + note, COLOR_PURPLE);
-                result.text = "Written down.";
-            }
-            claude.finish(call, std::move(result));
-            continue;
-        }
-
-        env.log("Claude Plays: " + call_words(call));
-        session.show(call_words(call), COLOR_CYAN);
-        const PlayResult result = run_call(session, call);
-        session.actions++;
-        stats.actions++;
-        show_stats();
-        env.log(
-            std::string("Claude Plays:   ") + (result.is_error ? "(not done) " : "") + one_line(result.text, 500) +
-            (result.image_png.empty() ? "" : " [with a picture]"),
-            result.is_error ? COLOR_ORANGE : Color()
-        );
-        session.journal.push_back(call_words(call) + " -> " + one_line(result.text, 240));
-        while (session.journal.size() > JOURNAL_LINES){
-            session.journal.pop_front();
-        }
-
-        if (session.actions >= max_actions){
-            summary = "Stopped after " + std::to_string(session.actions) + " actions, the most this session may take.";
-            break;
-        }
-        if (session.actions % 10 == 0){
-            env.log("Claude Plays: " + std::to_string(session.actions) + " actions so far, " + usage_line(usage) + ".", COLOR_BLUE);
-        }
-
-        if (usage.conversation_tokens >= RESTART_AT_TOKENS){
-            //  The call's result goes along in the journal instead of back
-            //  into the long conversation.
-            env.log(
-                "Claude Plays: the conversation has grown to " + std::to_string(usage.conversation_tokens) +
-                " tokens. Starting it over with Claude's notes and the last actions.",
-                COLOR_BLUE
-            );
-            claude.start(first_message(session, goal, read_screen(rt).text));
-            continue;
-        }
-        claude.finish(call, result);
-    }
-
-    const PlayUsage usage = show_stats();
-    summary += " " + std::to_string(session.actions) + (session.actions == 1 ? " action, " : " actions, ") +
-        usage_line(usage) + ".";
-    env.log("Claude Plays: " + summary, reached ? COLOR_BLUE : COLOR_ORANGE);
-    session.show(summary, reached ? COLOR_GREEN : COLOR_ORANGE);
+    Plays::Limits limits;
+    limits.max_actions = max_actions;
+    limits.max_cost = max_cost;
+    const Plays::Ending ending = Plays::play(host, game, claude, goal, limits);
     story_log_memory(rt, true);
+    if (ending.failed){
+        throw OperationFailedException(ErrorReportMode::NO_ERROR_REPORT, ending.summary);
+    }
+    env.log("Claude Plays: " + ending.summary, ending.reached ? COLOR_BLUE : COLOR_ORANGE);
+    session.show(ending.summary, ending.reached ? COLOR_GREEN : COLOR_ORANGE);
 
-    send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH, summary);
+    send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH, ending.summary);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
 }
 
