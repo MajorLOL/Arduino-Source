@@ -26,6 +26,7 @@
 #include "CommonTools/OCR/OCR_SmallDictionaryMatcher.h"
 #include "CommonTools/OCR/OCR_StringMatchResult.h"
 #include "CommonTools/Images/ImageFilter.h"
+#include "CommonTools/Images/SolidColorTest.h"
 #include "CommonTools/VisualDetectors/BlackScreenDetector.h"
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
@@ -822,28 +823,134 @@ void run_from_battle(ConsoleHandle& console, ProControllerContext& context, bool
 }
 
 
-//  Party menu during a battle (the lead fainted): send in the next one.
-void send_next_pokemon(ConsoleHandle& console, ProControllerContext& context, int& next_slot){
-    console.log("Sending in party slot " + std::to_string(next_slot + 1) + ".");
-    //  The cursor is on the fainted lead (slot 1) when the menu opens, and
-    //  slots 2-6 are below it. After a pick that did not go ("X has no
-    //  energy left to battle!") the menu stays, the cursor on that slot:
-    //  LEFT goes to slot 1 from any other (UpdatePartySelectionSingleLayout())
-    //  and does nothing there. (Without it the next pick counted down from
-    //  where the last one was: with four of six down, "slot 2, 3, 4, 5, 6,
-    //  2, 3" went to slots 2, 4, CANCEL, 4, 2, 3, 5: a minute and a half
-    //  until the fifth came in.)
-    pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
-    for (int i = 0; i < next_slot; i++){
-        pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+//  Message box of the party menu (window 6 of sSinglePartyMenuWindowTemplate:
+//  tiles (1,15) 28x4), with the small "Choose a POKeMON." box in it.
+const ImageFloatBox PARTY_MESSAGE_BOX(0.040, 0.755, 0.920, 0.190);
+
+//  What the party menu shows during a battle.
+enum class PartyScreen{
+    GONE,       //  not the party menu (any more)
+    LIST,       //  its list of Pokemon, "Choose a POKeMON." below it
+    OTHER,      //  the small menu of one Pokemon, or a text in the large box
+};
+
+//  PartyMenuDetector wants the teal background left of the list down to
+//  where the small text box begins, and that box white along its top. The
+//  large text box ("X has no energy left to battle!") begins higher and is
+//  wider: while it is shown the detector does not see the menu (with build
+//  10 the loop's six seconds of looking ran out on that text each time).
+//  So: the upper part of that background alone tells that the party menu
+//  is there (the large box's frame begins at 0.70 of the height), the
+//  detector that it is on its list.
+PartyScreen party_screen(ConsoleHandle& console){
+    VideoSnapshot screen = console.video().snapshot();
+    if (!screen){
+        return PartyScreen::GONE;
     }
-    //  A opens the small menu, A on SHIFT sends it in.
-    pbf_press_button(context, BUTTON_A, 160ms, 840ms);
-    pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
-    context.wait_for_all_requests();
-    next_slot++;
-    if (next_slot > 5){
-        next_slot = 1;
+    const bool background = is_solid(
+        game_box(screen, ImageFloatBox(0.028, 0.500, 0.010, 0.180)),
+        { 0.020, 0.424, 0.412 }, 0.25, 20
+    );
+    if (!background){
+        return PartyScreen::GONE;
+    }
+    PartyMenuDetector list(COLOR_RED);
+    return list.detect(screen) ? PartyScreen::LIST : PartyScreen::OTHER;
+}
+
+//  The party menu during a battle: send in the one at battle position
+//  "pos" (0: the one that is out, on top; the others below it).
+//  Returns 1: it came in (the menu closed). 0: it cannot ("X has no energy
+//  left to battle!"); the menu is back on its list. -1: the menu is still
+//  open (on its list) for another reason.
+//
+//  The cursor is on the first one when the menu opens (InitPartyMenu(),
+//  keepCursorPos FALSE). "stayed": maybe not, after a pick before this one.
+//  LEFT goes to the first one from any other and does nothing there or on
+//  CANCEL; DOWN goes from CANCEL to the first one, from the first to the
+//  second (UpdatePartySelectionSingleLayout()). So LEFT, DOWN, LEFT ends on
+//  the first one from anywhere.
+//  A opens the small menu (SHIFT or SEND OUT, SUMMARY, CANCEL), A on its
+//  first entry sends the Pokemon in (CursorCB_SendMon()). For one that has
+//  fainted the game says so instead and waits for a press
+//  (gText_PkmnHasNoEnergy ends with PAUSE_UNTIL_PRESS): until then nothing
+//  else is taken. (With build 10 the presses meant for the next pick went
+//  into that text and into the small menu of the same Pokemon: with four of
+//  six down it took a minute and a half until one came in, and it was not
+//  the one the program had picked.)
+int pick_party_slot(ConsoleHandle& console, ProControllerContext& context, int pos, bool stayed){
+    for (int attempt = 0; attempt < 2; attempt++){
+        if (stayed || attempt > 0){
+            pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
+            pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+            pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
+        }
+        for (int i = 0; i < pos; i++){
+            pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+        }
+        pbf_press_button(context, BUTTON_A, 160ms, 840ms);
+        pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+        context.wait_for_all_requests();
+        bool again = false;
+        for (int look = 0; look < 3 && !again; look++){
+            const PartyScreen shown = party_screen(console);
+            if (shown == PartyScreen::GONE){
+                return 1;
+            }
+            const std::string text = read_text(console, PARTY_MESSAGE_BOX, false);
+            auto has = [&](const char* words){
+                return text.find(words) != std::string::npos;
+            };
+            if (has("already")){
+                //  "X is already in battle!": the one on top. The presses
+                //  down were not taken. B: the text goes; once more.
+                console.log("The party menu: " + text, COLOR_ORANGE);
+                pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                context.wait_for_all_requests();
+                again = true;
+            }else if (has("energy") || has("left to") || has("has no")){
+                console.log("The party menu: " + text, COLOR_ORANGE);
+                //  B: the text goes, the list is back (the cursor on that
+                //  one).
+                pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                context.wait_for_all_requests();
+                return 0;
+            }else if (shown == PartyScreen::LIST){
+                //  The list: the presses were not taken. Once more.
+                again = true;
+            }else if (has("do what")){
+                //  The small menu is open (one press was not taken): A on
+                //  its first entry.
+                pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+                context.wait_for_all_requests();
+            }else{
+                //  The small menu or a text, not read. B closes either, the
+                //  list is back; once more.
+                console.log("The party menu, not read: " + text, COLOR_ORANGE);
+                pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                context.wait_for_all_requests();
+                again = true;
+            }
+        }
+    }
+    console.log("The party menu is still open after the pick.", COLOR_ORANGE);
+    return -1;
+}
+
+//  Party menu during a battle (the one that was out fainted): send in the
+//  next one of the party that can fight, slot after slot.
+void send_next_pokemon(ConsoleHandle& console, ProControllerContext& context, int& next_slot){
+    for (int tries = 0; tries < 6; tries++){
+        console.log("Sending in party slot " + std::to_string(next_slot + 1) + ".");
+        const int went = pick_party_slot(console, context, next_slot, true);
+        next_slot++;
+        if (next_slot > 5){
+            next_slot = 1;
+        }
+        if (went != 0){
+            //  It came in, or the menu is not what it was: the loop looks.
+            return;
+        }
     }
 }
 
@@ -1149,8 +1256,10 @@ const char* heal_name(int rank){
 
 //  At the battle menu: the best healing item on the Pokemon that is out
 //  (the first one in the party menu, which shows the battle order).
-BagUse heal_in_battle(ConsoleHandle& console, ProControllerContext& context){
+//  "restore": it was one that restores all HP (FULL RESTORE, MAX POTION).
+BagUse heal_in_battle(ConsoleHandle& console, ProControllerContext& context, bool& restore){
     int rank = 0;
+    restore = false;
     BagUse ret = pick_in_battle_bag(console, context, 0, heal_rank, "healing item", rank);
     if (ret != BagUse::USED){
         return ret;
@@ -1181,6 +1290,7 @@ BagUse heal_in_battle(ConsoleHandle& console, ProControllerContext& context){
     //  "X's HP was restored by N points." Then the turn goes on.
     pbf_press_button(context, BUTTON_A, 160ms, 840ms);
     context.wait_for_all_requests();
+    restore = rank >= 999;
     return BagUse::USED;
 }
 
@@ -1337,6 +1447,7 @@ StoryBattleResult run_story_battle(
     memory.legendary_ball_worth = 0;
     memory.legendary_no_balls = false;
     memory.safari_balls = 0;
+    memory.restores_used = 0;
     memory.foe_mark = -1;
     memory.owned_by_mark.clear();
     memory.dex_by_mark.clear();
@@ -1354,11 +1465,60 @@ StoryBattleResult run_story_battle(
     std::string evaluated;
     memory.team_used.clear();
     memory.team_fainted.clear();
+    //  The one that is out is not of the team (the team is down: whoever
+    //  else is in the party came in).
+    bool other_active = false;
+    bool all_down_at_start = false;
+    //  A party menu opened to switch was closed again with B (nobody better
+    //  could come in): seen right after that, it is still that menu, not
+    //  the one after a faint.
+    WallClock menu_closed_at = WallClock::min();
+    int menu_not_closed = 0;
+    int menu_not_understood = 0;
     if (team){
         for (size_t i = 0; i < settings.team.size(); i++){
             order.push_back((int)i);
         }
-        memory.team_used.insert(0);
+        //  Down since a battle before this one (no REVIVE, no Pokemon Center
+        //  since).
+        memory.team_fighters = 0;
+        memory.team_down_at_start = 0;
+        for (size_t i = 0; i < settings.team.size(); i++){
+            down[i] = memory.team_down.count((int)i) != 0;
+            if (settings.team[i].fights){
+                memory.team_fighters++;
+                memory.team_down_at_start += down[i] ? 1 : 0;
+            }
+        }
+        //  The game starts the battle with the first of the party that can
+        //  fight, and its party menu has the others below it in party order
+        //  (BufferBattlePartyOrder()).
+        size_t first = 0;
+        while (first < down.size() && down[first]){
+            first++;
+        }
+        if (first >= down.size()){
+            all_down_at_start = true;
+            other_active = true;
+            console.log(
+                "The whole team is down since the battles before: whoever else is in the party fights.",
+                COLOR_ORANGE
+            );
+        }else if (first > 0){
+            order.erase(order.begin() + (std::ptrdiff_t)first);
+            order.insert(order.begin(), (int)first);
+            const StoryTeamMember& member = settings.team[first];
+            settings.lead_type1 = member.type1;
+            settings.lead_type2 = member.type2;
+            console.log(
+                "Team member " + std::to_string(first + 1) + " starts this battle: the ones before it are down "
+                "since the battles before.",
+                COLOR_ORANGE
+            );
+        }
+        if (!all_down_at_start){
+            memory.team_used.insert(order[0]);
+        }
     }
     //  The member at battle position "pos" came in.
     auto set_active = [&](int pos){
@@ -1368,6 +1528,7 @@ StoryBattleResult run_story_battle(
         settings.lead_type2 = member.type2;
         memory.team_used.insert(order[0]);
         memory.reset_active();
+        other_active = false;
     };
     //  The battle position of the best member against "against" (-1: none).
     auto best_position = [&](const SpeciesInfo* against, bool with_active){
@@ -1387,23 +1548,60 @@ StoryBattleResult run_story_battle(
         return best;
     };
     auto score_at = [&](int pos, const SpeciesInfo* against){
+        if (pos == 0 && other_active){
+            return 0.0;
+        }
         int index = order[(size_t)pos];
         return down[(size_t)index] ? 0.0 : team_score(settings.team[(size_t)index], against);
     };
-    //  In the party menu (cursor on the active): send in the one at "pos".
-    //  "stayed": the menu may have stayed open after a pick that did not go,
-    //  the cursor on that slot: LEFT first (see send_next_pokemon()).
-    auto pick_in_party_menu = [&](int pos, bool stayed = false){
-        if (stayed){
-            pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
+    //  In the party menu: send in the member at battle position "pos". One
+    //  that cannot come in ("X has no energy left to battle!") is down since
+    //  a battle before this one (those of this battle are known): the next
+    //  best one then, as long as "good_enough" holds for its position.
+    //  "fresh": the menu has just opened (the cursor is on the first one).
+    //  1: one came in. 0: nobody can, the menu is still open. -1: the menu
+    //  is still open and what it says was not understood.
+    auto send_member = [&](int pos, bool fresh, const std::function<bool(int)>& good_enough){
+        while (pos > 0){
+            const int index = order[(size_t)pos];
+            const int went = pick_party_slot(console, context, pos, !fresh);
+            fresh = false;
+            if (went == 1){
+                set_active(pos);
+                return 1;
+            }
+            if (went < 0){
+                return -1;
+            }
+            console.log(
+                "Team member " + std::to_string(index + 1) + " cannot come in: it is down since a battle before "
+                "this one.",
+                COLOR_ORANGE
+            );
+            if (!down[(size_t)index]){
+                down[(size_t)index] = true;
+                memory.team_down.insert(index);
+                if (settings.team[(size_t)index].fights){
+                    memory.team_down_at_start++;
+                }
+            }
+            pos = best_position(foe, false);
+            if (pos > 0 && !good_enough(pos)){
+                pos = -1;
+            }
+            if (pos > 0){
+                console.log("Team member " + std::to_string(order[(size_t)pos] + 1) + " instead.");
+            }
         }
-        for (int i = 0; i < pos; i++){
-            pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
-        }
-        //  A opens the small menu, A on SHIFT sends it in.
-        pbf_press_button(context, BUTTON_A, 160ms, 840ms);
-        pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
+        return 0;
+    };
+    //  A party menu opened to switch, and nobody came in: B closes it (the
+    //  one that is out stays, the battle goes on).
+    auto close_switch_menu = [&](){
+        console.log("Nobody better can come in: the one that is out stays.", COLOR_ORANGE);
+        pbf_press_button(context, BUTTON_B, 160ms, 1840ms);
         context.wait_for_all_requests();
+        menu_closed_at = current_time();
     };
 
     StoryBattleResult result = StoryBattleResult::WON;
@@ -1419,6 +1617,15 @@ StoryBattleResult run_story_battle(
     bool lost = false;
     int next_slot = 1;
     bool others_started = false;    //  team play: one that is not of the team was sent in
+    if (all_down_at_start){
+        //  One of the others is out, the team below it in the party menu:
+        //  the next of the others comes after the team.
+        others_started = true;
+        next_slot = (int)settings.team.size() + 1;
+        if (next_slot > 5){
+            next_slot = 1;
+        }
+    }
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
     int list_only_in_row = 0;   //  of those, how many showed the move list
     //  "Move lists" in a row with no move name read: then not taken for the
@@ -1631,7 +1838,7 @@ StoryBattleResult run_story_battle(
                 double hp = read_player_hp(screen);
                 if (hp >= 0){
                     memory.player_hp = hp;
-                    if (team && !order.empty() && order[0] >= 0 && order[0] < 6){
+                    if (team && !other_active && !order.empty() && order[0] >= 0 && order[0] < 6){
                         memory.team_hp[order[0]] = hp;
                     }
                 }
@@ -1895,9 +2102,11 @@ StoryBattleResult run_story_battle(
                     "HP " + std::to_string((int)(memory.player_hp * 100 + 0.5)) + "%: healing with an item.",
                     COLOR_BLUE
                 );
-                switch (heal_in_battle(console, context)){
+                bool restore = false;
+                switch (heal_in_battle(console, context, restore)){
                 case BagUse::USED:
                     heals_used++;
+                    memory.restores_used += restore ? 1 : 0;
                     memory.player_hp = -1;      //  Seen again on the next turn.
                     break;
                 case BagUse::NONE:
@@ -1964,7 +2173,14 @@ StoryBattleResult run_story_battle(
                         PartyMenuWatcher party(COLOR_RED);
                         context.wait_for_all_requests();
                         if (wait_until(console, context, 3000ms, { party }) == 0){
-                            pick_in_party_menu(position);
+                            if (pick_party_slot(console, context, position, false) != 1){
+                                //  It cannot come in (it has fainted): the
+                                //  member fights on.
+                                console.log("The other one did not come in: the member fights.", COLOR_ORANGE);
+                                pbf_mash_button(context, BUTTON_B, 1000ms);
+                                context.wait_for_all_requests();
+                                break;
+                            }
                             memory.player_hp = -1;  //  That was the member's.
                             settings.lead_type1 = settings.share_type1;
                             settings.lead_type2 = settings.share_type2;
@@ -2001,8 +2217,9 @@ StoryBattleResult run_story_battle(
                         PartyMenuWatcher party(COLOR_RED);
                         context.wait_for_all_requests();
                         if (wait_until(console, context, 3000ms, { party }) == 0){
-                            pick_in_party_menu(pos);
-                            set_active(pos);
+                            if (send_member(pos, true, [&](int p){ return score_at(p, foe) >= score_at(0, foe) * 1.5 + 0.5; }) != 1){
+                                close_switch_menu();
+                            }
                         }else{
                             console.log("The party menu did not open.", COLOR_ORANGE);
                             pbf_mash_button(context, BUTTON_B, 1000ms);
@@ -2116,8 +2333,9 @@ StoryBattleResult run_story_battle(
                             answer(context, true);
                             PartyMenuWatcher party(COLOR_RED);
                             if (wait_until(console, context, 3000ms, { party }) == 0){
-                                pick_in_party_menu(pos);
-                                set_active(pos);
+                                if (send_member(pos, true, [&](int p){ return score_at(p, next) >= score_at(0, next) * 1.25 + 0.25; }) != 1){
+                                    close_switch_menu();
+                                }
                             }else{
                                 console.log("The party menu did not open.", COLOR_ORANGE);
                             }
@@ -2136,20 +2354,36 @@ StoryBattleResult run_story_battle(
         }
         case 2:
             last_activity = current_time();
+            if (team && menu_closed_at != WallClock::min() && current_time() - menu_closed_at < 5s &&
+                ++menu_not_closed <= 3
+            ){
+                //  Still the menu that was opened to switch.
+                console.log("The party menu is still open: B.", COLOR_ORANGE);
+                pbf_press_button(context, BUTTON_B, 160ms, 1840ms);
+                context.wait_for_all_requests();
+                menu_closed_at = current_time();
+                break;
+            }
             if (seen_battle){
                 memory.lead_faints++;
                 result = StoryBattleResult::LEAD_FAINTED;
             }
             if (team){
-                //  The active fainted: the best one left against the foe.
-                down[(size_t)order[0]] = true;
-                memory.team_fainted.insert(order[0]);
+                //  The one that was out fainted: the best one left against
+                //  the foe.
+                if (!other_active){
+                    down[(size_t)order[0]] = true;
+                    memory.team_fainted.insert(order[0]);
+                    memory.team_down.insert(order[0]);
+                }
                 int pos = best_position(foe, false);
                 if (pos > 0){
                     console.log("Sending in team member " + std::to_string(order[(size_t)pos] + 1) + ".");
-                    pick_in_party_menu(pos, true);
-                    set_active(pos);
-                    break;
+                    const int sent = send_member(pos, menu_not_understood == 0, [](int){ return true; });
+                    if (sent == 1 || (sent < 0 && ++menu_not_understood <= 2)){
+                        //  (Not understood: the loop looks at it again.)
+                        break;
+                    }
                 }
                 //  The team is down: whoever else is in the party (the
                 //  legendary birds). They are below the team in this menu
@@ -2163,6 +2397,7 @@ StoryBattleResult run_story_battle(
                         next_slot = 1;
                     }
                 }
+                other_active = true;
             }
             send_next_pokemon(console, context, next_slot);
             //  Whoever came in: not the Pokemon the moves were valued for

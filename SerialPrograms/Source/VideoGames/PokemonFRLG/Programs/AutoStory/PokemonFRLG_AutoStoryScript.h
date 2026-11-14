@@ -120,8 +120,12 @@ enum class StepType : uint8_t{
     OSCILLATE,          //  walk back and forth (dir) until a scene starts; p0 = max ms; p1 >= 3: a
                         //  line of p1 tiles with a wall at both ends, run along (B held)
     PUSH,               //  push a Strength boulder toward dir
-    BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity
-    HEAL_ITEMS,         //  heal the party with items from the bag
+    BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity; p2 = what it is
+                        //  for the program's count of the bag (1 REVIVE, 2 FULL RESTORE or MAX
+                        //  POTION); p3 = 1: only what is missing up to p1 (the League again)
+    HEAL_ITEMS,         //  heal the party with items from the bag; p0: 0 after a room of the
+                        //  first League, 1 after a legendary Pokemon, 2 after a room of the
+                        //  League again, 3 the same before the Champion
     USE_ITEM,           //  use an item on party slot p0; text = a word of its description
     TEAM,               //  p0 = 1: trainer battles are fought by the whole team from now on
     RESET,              //  The Hall of Fame: A now and then for p0 ms (the game saves on

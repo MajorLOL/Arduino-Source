@@ -544,6 +544,13 @@ void set_wanted(StoryRuntime& rt, const StoryScript& script, const StorySegment&
     }
 }
 
+//  A segment of the League again (C13, C15: for prize money, and for the
+//  Hall of Fame the National POKeDEX wants): the Elite Four or the Champion.
+bool league_again_segment(const std::string& id){
+    return (id.rfind("C13_", 0) == 0 || id.rfind("C15_", 0) == 0) &&
+        (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos);
+}
+
 }
 
 
@@ -799,6 +806,22 @@ void AutoStory::run_segment(
                 SceneAfter(StoryRuntime& p_rt, bool on) : rt(p_rt){ rt.battle.scene_after = on; }
                 ~SceneAfter(){ rt.battle.scene_after = false; }
             } scene_after(rt, next != nullptr && next->type == StepType::RESET);
+            //  The League again: no healing item in the battle. Its few FULL
+            //  RESTOREs are for between the rooms, where they cost no turn.
+            //  (In the battle a turn spent on one is another hit taken, and
+            //  whoever faints is back with a REVIVE for less: with them
+            //  used in battle the first round was won 64 times in 100, not
+            //  96, league_again_sim.py.)
+            struct NoItems{
+                StoryRuntime& rt;
+                bool before;
+                NoItems(StoryRuntime& p_rt, bool off) : rt(p_rt), before(p_rt.battle.heal_in_battle){
+                    if (off){
+                        rt.battle.heal_in_battle = false;
+                    }
+                }
+                ~NoItems(){ rt.battle.heal_in_battle = before; }
+            } no_items(rt, trainer && league_again_segment(segment.id));
             StoryBattleResult result = story_battle(rt, trainer ? StoryBattleKind::TRAINER : StoryBattleKind::WILD_RUN, label);
             if (result == StoryBattleResult::NO_BATTLE && trainer && rt.last_leg_dark &&
                 rt.trainer_battles == rt.trainer_battles_before_leg
@@ -976,7 +999,9 @@ void AutoStory::run_segment(
             story_push_boulder(rt, step.dir);
             break;
         case StepType::BUY:
-            story_buy(rt, step.p0, step.p1, label);
+            //  p2: what it is for the program's count of the bag; p3 1: only
+            //  what is missing up to p1.
+            story_buy(rt, step.p0, step.p1, label, step.p2 > 0 ? step.p2 : 0, step.p3 == 1);
             break;
         case StepType::ESCAPE_ROPE:
             //  The next p0 steps walk out instead (when the bag has none).
@@ -997,7 +1022,7 @@ void AutoStory::run_segment(
             if (step.p0 == 1){
                 story_heal_after_legendary(rt);
             }else{
-                story_heal_with_items(rt);
+                story_heal_with_items(rt, step.p0);
             }
             break;
         case StepType::USE_ITEM:
@@ -1017,7 +1042,11 @@ void AutoStory::run_segment(
             //  and the game resets to the title screen. A gets through the
             //  texts and the Hall of Fame (and later loads the game, which
             //  the reset below does again).
-            env.log("Hall of Fame and credits: A now and then, then the save the game made is loaded.", COLOR_BLUE);
+            if (step.p0 > 0){
+                env.log("Hall of Fame and credits: A now and then, then the save the game made is loaded.", COLOR_BLUE);
+            }else{
+                env.log("Loading the save again (the map as the game sets it up).", COLOR_BLUE);
+            }
             const WallClock end = current_time() + Milliseconds(step.p0);
             while (current_time() < end){
                 pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
@@ -1027,6 +1056,21 @@ void AutoStory::run_segment(
             rt.facing = DPAD_NONE;
             rt.arrived_by_warp = false;
             rt.battle.team.clear();
+            if (step.p0 > 0){
+                //  The Hall of Fame heals the party before the game saves
+                //  (EnterHallOfFame(): HealPlayerParty()).
+                rt.memory.team_down.clear();
+                for (double& hp : rt.memory.team_hp){
+                    hp = -1;
+                }
+            }else{
+                rt.memory.team_down = rt.team_down_at_save;
+                for (int k = 0; k < 6; k++){
+                    rt.memory.team_hp[k] = rt.team_hp_at_save[k];
+                }
+                rt.bag_revives = rt.bag_revives_at_save;
+                rt.bag_restores = rt.bag_restores_at_save;
+            }
             story_saved(rt, i + 1);
             break;
         }
@@ -1498,6 +1542,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
     int league_losses = 0;
+    //  The League again (C13, C15): losses that were left standing, in a row.
+    int league_again_losses = 0;
     //  "Shiny only": chapter 20 goes round its towns again (from the first
     //  town, after the way out of the Cerulean City Pokemon Center) as long
     //  as the table wants a shiny of a species of its places.
@@ -1552,6 +1598,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             stats.segments++;
             env.update_stats();
             failures = 0;
+            if (std::string(segment.id).find("_CHAMPION") != std::string::npos){
+                league_again_losses = 0;
+            }
             take_resume();
             current_segment++;
             current_step = 0;
@@ -1680,14 +1729,104 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 failed_segment = resume_segment;
                 failed_step = resume_step;
             }
-            //  The League again for prize money (C13, C15): a loss costs no
-            //  money when the save in front of the room is loaded again, and
-            //  the next try goes another way (the Champion was won at the
-            //  4th try, and lost 4 times in a row the next time).
-            const bool league_again = whited_out &&
-                (id.rfind("C13_", 0) == 0 || id.rfind("C15_", 0) == 0) &&
-                (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos);
-            if (rt.legendary_missed || league_again){
+            //  The League again (C13, C15). A loss costs nothing when the
+            //  save in front of the room is loaded again, and the next try
+            //  goes another way (the Champion was won at the 5th try once):
+            //  up to three tries from a save. Not from a save that has the
+            //  team worn out (half of it or more down when the battle
+            //  began: 21 tries at the Champion with CHARIZARD and ARTICUNO
+            //  left were 21 losses, two hours), and not a fourth time: then
+            //  the loss stands. The game has taken some money (4 x 30 x the
+            //  highest level: 9360 at level 78, less than two rooms pay),
+            //  healed the team at the Indigo Plateau and reset the Elite
+            //  Four, who pay again: on from the League's start, where
+            //  healing items are bought with what the rooms paid.
+            const bool league_again = whited_out && league_again_segment(id);
+            if (league_again){
+                legendary_misses++;
+                const int fighters = rt.memory.team_fighters;
+                const int were_down = rt.memory.team_down_at_start;
+                const bool worn = fighters > 0 && (fighters - were_down) * 2 <= fighters;
+                //  The Elite Four segment of this League, and its step after
+                //  the nurse (where the loss puts the player).
+                size_t league_start = current_segment;
+                if (id.find("_CHAMPION") != std::string::npos && current_segment > 0){
+                    league_start = current_segment - 1;
+                }
+                const StorySegment& rooms = script.segments[league_start];
+                size_t after_nurse = (size_t)-1;
+                if (std::string(rooms.id).find("_ELITE_FOUR") != std::string::npos){
+                    for (size_t k = 0; k < rooms.step_count; k++){
+                        if (script.step(rooms, k).type == StepType::HEAL){
+                            after_nurse = k + 1;
+                            break;
+                        }
+                    }
+                }
+                if ((worn || legendary_misses >= 3) && after_nurse != (size_t)-1 && after_nurse < rooms.step_count){
+                    league_again_losses++;
+                    const std::string why = worn
+                        ? std::to_string(were_down) + " of the " + std::to_string(fighters) +
+                            " of the team were down when the battle began"
+                        : "lost " + std::to_string(legendary_misses) + " times from the same save";
+                    env.log(
+                        "Lost in " + segment_name(segment) + " (" + why + "). The save in front of it is not "
+                        "loaded again: the loss stands. The game took some of the money, healed the team at the "
+                        "Indigo Plateau, and the Elite Four start over (and pay again). On from " +
+                        std::string(rooms.id) + " step " + std::to_string(after_nurse + 1) + ".",
+                        COLOR_RED
+                    );
+                    rt.facing = DPAD_UP;
+                    rt.arrived_by_warp = false;
+                    rt.lead_fainted = false;
+                    rt.battle.team.clear();
+                    rt.battle.lead_type1 = rt.lead_type1;
+                    rt.battle.lead_type2 = rt.lead_type2;
+                    rt.battle.share_position = 0;
+                    rt.memory.member_moves_known = false;
+                    rt.memory.no_pp = 0;
+                    rt.memory.no_heal_items = false;
+                    rt.segment_id = rooms.id;
+                    rt.segment_steps = rooms.step_count;
+                    rt.next_segment_id = league_start + 1 < script.segment_count ? script.segments[league_start + 1].id : "";
+                    rt.has_dex = rooms.has_dex;
+                    //  Saved here: a reset comes back to this, not to the
+                    //  save in front of the room.
+                    bool saved = false;
+                    try{
+                        story_save(rt, rt.has_dex);
+                        story_saved(rt, after_nurse);
+                        saved = true;
+                    }catch (OperationFailedException&){
+                        env.log(
+                            "Saving at the Indigo Plateau did not work: the save in front of the room is loaded "
+                            "again after all.",
+                            COLOR_RED
+                        );
+                    }
+                    if (saved){
+                        current_segment = league_start;
+                        current_step = after_nurse;
+                        resume_segment = current_segment;
+                        resume_step = after_nurse;
+                        failures = 0;
+                        legendary_misses = 0;
+                        failed_segment = (size_t)-1;
+                        failed_step = (size_t)-1;
+                        if (league_again_losses > 6){
+                            throw UserSetupError(
+                                env.console,
+                                "The League was lost " + std::to_string(league_again_losses) + " times in a row, "
+                                "started over each time. The game is saved at the Indigo Plateau, the team healed. "
+                                "Train the team more (segment C10_01 with more \"Extra levels\"), then start at "
+                                "segment " + std::string(rooms.id) + ", step " + std::to_string(after_nurse + 1) + "."
+                            );
+                        }
+                        continue;
+                    }
+                }
+                env.log("Try " + std::to_string(legendary_misses + 1) + " at " + segment_name(segment) + ".", COLOR_BLUE);
+            }else if (rt.legendary_missed){
                 //  Without the Master Ball a legendary Pokemon takes a few
                 //  tries (the save is right in front of it).
                 rt.legendary_missed = false;
@@ -1696,8 +1835,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                     //  Too few balls: left for later (the step said why).
                     rt.legendary_left_now = false;
                     legendary_misses = 0;
-                }else if (legendary_misses > std::max<uint16_t>(RETRIES, league_again ? 20 : 25)){
-                    if (league_again || rt.legendary_can_wait.empty()){
+                }else if (legendary_misses > std::max<uint16_t>(RETRIES, 25)){
+                    if (rt.legendary_can_wait.empty()){
                         throw;
                     }
                     //  The tries ran out, and the story comes back for it.
@@ -1759,9 +1898,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.battle.share_position = 0;
             rt.memory.member_moves_known = false;
             rt.memory.no_heal_items = false;
-            for (double& hp : rt.memory.team_hp){
-                hp = -1;
+            //  The team and the bag as the save has them.
+            rt.memory.team_down = rt.team_down_at_save;
+            for (int k = 0; k < 6; k++){
+                rt.memory.team_hp[k] = rt.team_hp_at_save[k];
             }
+            rt.bag_revives = rt.bag_revives_at_save;
+            rt.bag_restores = rt.bag_restores_at_save;
             current_segment = resume_segment;
             current_step = resume_step;
         }

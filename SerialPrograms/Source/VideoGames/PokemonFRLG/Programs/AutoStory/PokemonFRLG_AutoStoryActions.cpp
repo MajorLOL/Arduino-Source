@@ -282,7 +282,9 @@ std::string wait_party_message(
 }
 
 //  In the bag, on an item from the ITEMS pocket: use it on a party slot.
-void use_item_on(StoryRuntime& rt, int party_slot, const std::string& what){
+//  True: used (the bag is back). False: it had no effect there (the item is
+//  still in the bag), or what happened is not known.
+bool use_item_on(StoryRuntime& rt, int party_slot, const std::string& what){
     ProControllerContext& context = rt.context;
     rt.console.log("Using " + what + " on party slot " + std::to_string(party_slot) + ".");
     //  A: USE / GIVE / TOSS / CANCEL, cursor on USE. A: the party menu.
@@ -292,7 +294,7 @@ void use_item_on(StoryRuntime& rt, int party_slot, const std::string& what){
     PartyMenuWatcher party(COLOR_RED);
     if (wait_until(rt.console, context, 3000ms, { party }) != 0){
         rt.console.log("The party menu did not open.", COLOR_RED);
-        return;
+        return false;
     }
     //  The party menu opened from the bag keeps the cursor where the last
     //  one left it (InitPartyMenu(), keepCursorPos). LEFT from any slot on
@@ -310,14 +312,16 @@ void use_item_on(StoryRuntime& rt, int party_slot, const std::string& what){
         PartyMenuWatcher party_again(COLOR_RED);
         int ret = wait_until(rt.console, context, 1500ms, { bag, party_again });
         if (ret == 0){
-            return;
+            return true;
         }
         if (ret == 1){
             //  No effect: back to the party menu. B goes back to the bag.
+            rt.console.log("No effect on party slot " + std::to_string(party_slot) + ": " + what + " stays in the bag.");
             press(context, BUTTON_B, 1500ms);
-            return;
+            return false;
         }
     }
+    return false;
 }
 
 
@@ -822,13 +826,46 @@ void story_teach_hm(
 
 
 
-void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& what){
+void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& what, int kind, bool up_to){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     //  Maybe healing items: look in the bag again when one is needed.
     rt.memory.no_heal_items = false;
     rt.no_revives = false;
     rt.no_full_restores = false;
+    int* have = kind == 1 ? &rt.bag_revives : kind == 2 ? &rt.bag_restores : nullptr;
+    if (have != nullptr && up_to && quantity > 0){
+        const std::string name = kind == 1 ? "REVIVE" : "FULL RESTORE or MAX POTION";
+        if (*have < 0){
+            //  Not known how many the bag has (the program was started in
+            //  between, or they are from before it counted): is there one?
+            console.log("How many of " + name + " the bag has is not known: a look.");
+            open_bag_from_overworld(console, context);
+            const bool found = kind == 1
+                ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
+                : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
+            pbf_mash_button(context, BUTTON_B, 3000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "bag");
+            //  One or more: taken for half of what is wanted.
+            *have = found ? (quantity + 1) / 2 : 0;
+        }
+        const int missing = quantity - *have;
+        if (missing <= 0){
+            console.log(
+                "The bag has " + std::to_string(*have) + " of " + name + " (as far as the program knows), " +
+                std::to_string(quantity) + " are wanted: none bought (" + what + ").",
+                COLOR_BLUE
+            );
+            return;
+        }
+        console.log(
+            "The bag has " + std::to_string(*have) + " of " + name + " (as far as the program knows), " +
+            std::to_string(quantity) + " are wanted: " + std::to_string(missing) + " more.",
+            COLOR_BLUE
+        );
+        quantity = missing;
+    }
     //  The game lets the quantity go only as high as the money allows
     //  (Task_BuyHowManyDialogueInit: money / price, 99 at most), and
     //  (AdjustQuantityAccordingToDPadInput) UP past that goes round to 1,
@@ -885,6 +922,11 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
     context.wait_for_all_requests();
     //  "Is there anything else?" -> B, "Please come again!"
     story_back_to_overworld(rt, "Poke Mart");
+    if (have != nullptr && quantity > 0){
+        //  As if the money was enough for all of them: a look in the bag
+        //  that finds none sets it right.
+        *have = std::max(0, *have) + quantity;
+    }
 }
 
 
@@ -960,61 +1002,103 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
 
 
 
-void story_heal_with_items(StoryRuntime& rt){
+void story_heal_with_items(StoryRuntime& rt, int mode){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     if (!rt.battle.team.empty()){
-        //  The team: revive who fainted in the last battle, then a Full
-        //  Restore for everyone who fought and is below 60% of its HP (as
-        //  last seen; not seen: healed). The Full Restores are for the
-        //  battles too, and the League is long.
-        for (int index : rt.memory.team_used){
+        //  One item from the bag on a team member. 1: used. 2: it had no
+        //  effect (and is still in the bag). 0: the bag has none.
+        auto use = [&](int index, bool revive){
             const int slot = index + 1;
-            const bool fainted = rt.memory.team_fainted.count(index) != 0;
-            const double hp = index >= 0 && index < 6 ? rt.memory.team_hp[index] : -1;
-            if (!fainted && hp >= 0.6){
+            bool& none = revive ? rt.no_revives : rt.no_full_restores;
+            int& have = revive ? rt.bag_revives : rt.bag_restores;
+            if (none){
                 console.log(
-                    "Party slot " + std::to_string(slot) + " is at " + std::to_string((int)(hp * 100 + 0.5)) +
-                    "% of its HP: no Full Restore."
+                    std::string("Party slot ") + std::to_string(slot) + (revive ? " is down" : " is low on HP") +
+                    ", but the bag has no " + (revive ? "REVIVE" : "FULL RESTORE or MAX POTION") + " (looked before).",
+                    COLOR_ORANGE
+                );
+                return 0;
+            }
+            console.log(
+                (revive ? "Reviving party slot " : "All HP back for party slot ") + std::to_string(slot) +
+                (revive ? "." : " (FULL RESTORE or MAX POTION).")
+            );
+            open_bag_from_overworld(console, context);
+            const bool found = revive
+                ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
+                : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
+            bool used = false;
+            if (found){
+                used = use_item_on(rt, slot, revive ? "REVIVE" : "FULL RESTORE");
+                if (used && have > 0){
+                    have--;
+                }
+            }else{
+                none = true;
+                have = 0;
+            }
+            pbf_mash_button(context, BUTTON_B, 3000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "bag");
+            return !found ? 0 : used ? 1 : 2;
+        };
+        const int members = (int)std::min<size_t>(rt.battle.team.size(), 6);
+        //  Who is down gets a REVIVE (half its HP). Also those down since an
+        //  earlier battle: without one then, with one now. (Only those of
+        //  the last battle were looked at: ELECTRODE, down since Lorelei,
+        //  was forgotten after Bruno.)
+        for (int index = 0; index < members; index++){
+            if (rt.memory.team_down.count(index) == 0 || !rt.battle.team[(size_t)index].fights){
+                continue;
+            }
+            const int revived = use(index, true);
+            if (revived == 1){
+                rt.memory.team_down.erase(index);
+                rt.memory.team_hp[index] = 0.5;
+            }else if (revived == 2){
+                //  It was not down after all.
+                rt.memory.team_down.erase(index);
+            }
+        }
+        //  Then the HP: the strongest first (the others in party order).
+        int strongest = 0;
+        for (int index = 1; index < members; index++){
+            if (rt.battle.team[(size_t)index].strength > rt.battle.team[(size_t)strongest].strength){
+                strongest = index;
+            }
+        }
+        std::vector<int> by_strength{strongest};
+        for (int index = 0; index < members; index++){
+            if (index != strongest){
+                by_strength.push_back(index);
+            }
+        }
+        for (int index : by_strength){
+            if (rt.memory.team_down.count(index) != 0 || !rt.battle.team[(size_t)index].fights){
+                continue;
+            }
+            const double hp = rt.memory.team_hp[index];
+            if (hp < 0){
+                continue;       //  Not seen since it was healed.
+            }
+            //  The first League: below 60%. The League again (the items
+            //  cost part of the prize money): the strongest below 50%, the
+            //  others below 25%; before the Champion below 70% and 50%.
+            const double below =
+                mode == 2 ? (index == strongest ? 0.50 : 0.25) :
+                mode == 3 ? (index == strongest ? 0.70 : 0.50) :
+                0.60;
+            const int percent = (int)(hp * 100 + 0.5);
+            if (hp >= below){
+                console.log(
+                    "Party slot " + std::to_string(index + 1) + " is at " + std::to_string(percent) +
+                    "% of its HP: nothing for it (only below " + std::to_string((int)(below * 100 + 0.5)) + "% here)."
                 );
                 continue;
             }
-            bool revived = false;
-            for (int round = 0; round < 2; round++){
-                const bool revive = round == 0;
-                if (revive && !fainted){
-                    continue;
-                }
-                if (!revive && fainted && !revived){
-                    //  Still fainted: a FULL RESTORE does nothing for it.
-                    continue;
-                }
-                bool& none = revive ? rt.no_revives : rt.no_full_restores;
-                if (none){
-                    console.log(
-                        std::string("Party slot ") + std::to_string(slot) + (revive ? " fainted" : " is low on HP") +
-                        ", but the bag has no " + (revive ? "REVIVE" : "FULL RESTORE") + " (looked before)."
-                    );
-                    continue;
-                }
-                console.log((revive ? "Reviving party slot " : "Full Restore on party slot ") + std::to_string(slot) + ".");
-                open_bag_from_overworld(console, context);
-                bool found = revive
-                    ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
-                    : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
-                if (found){
-                    use_item_on(rt, slot, revive ? "REVIVE" : "FULL RESTORE");
-                    if (revive){
-                        revived = true;
-                    }else if (index >= 0 && index < 6){
-                        rt.memory.team_hp[index] = 1.0;
-                    }
-                }else{
-                    none = true;
-                }
-                pbf_mash_button(context, BUTTON_B, 3000ms);
-                context.wait_for_all_requests();
-                story_back_to_overworld(rt, "bag");
+            if (use(index, false) != 0){
+                rt.memory.team_hp[index] = 1.0;
             }
         }
         rt.lead_fainted = false;
@@ -1036,6 +1120,7 @@ void story_heal_with_items(StoryRuntime& rt){
 
     for (const Use& use : uses){
         bool& none = use.revive ? rt.no_revives : rt.no_full_restores;
+        int& have = use.revive ? rt.bag_revives : rt.bag_restores;
         if (none){
             console.log(std::string("The bag has no ") + (use.revive ? "REVIVE" : "FULL RESTORE") + " (looked before).");
             continue;
@@ -1045,9 +1130,12 @@ void story_heal_with_items(StoryRuntime& rt){
             ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
             : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
         if (found){
-            use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
+            if (use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE") && have > 0){
+                have--;
+            }
         }else{
             none = true;
+            have = 0;
         }
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
@@ -1082,13 +1170,30 @@ void story_heal_after_legendary(StoryRuntime& rt){
             ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {}, "REVIVE")
             : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
         if (found){
-            use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
+            const bool used = use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
+            if (use.revive){
+                //  Revived, or it was not down: up again either way.
+                rt.memory.team_down.erase(use.slot - 1);
+                if (used){
+                    rt.memory.team_hp[use.slot - 1] = 0.5;
+                    if (rt.bag_revives > 0){
+                        rt.bag_revives--;
+                    }
+                }
+            }else if (used){
+                rt.memory.team_hp[use.slot - 1] = 1.0;
+                if (rt.bag_restores > 0){
+                    rt.bag_restores--;
+                }
+            }
         }else if (use.revive){
             no_revive = true;
             rt.no_revives = true;
+            rt.bag_revives = 0;
         }else{
             no_restore = true;
             rt.no_full_restores = true;
+            rt.bag_restores = 0;
         }
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();

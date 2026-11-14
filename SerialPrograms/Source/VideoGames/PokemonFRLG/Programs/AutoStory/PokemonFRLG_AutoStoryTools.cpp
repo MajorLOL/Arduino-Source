@@ -616,6 +616,14 @@ StoryBattleResult story_battle(
     //  keep the slots the team still needs.
     rt.battle.shiny_catch = rt.catch_shinies && (rt.party_order_final || (int)rt.team.size() + rt.party_extras < 6);
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
+    //  The program's count of the bag: the FULL RESTOREs and MAX POTIONs
+    //  the battle used.
+    if (rt.bag_restores > 0){
+        rt.bag_restores = std::max(0, rt.bag_restores - rt.memory.restores_used);
+    }
+    if (rt.memory.no_heal_items){
+        rt.bag_restores = 0;
+    }
     if (rt.shiny_watch){
         StoryShinyWatch& watch = *rt.shiny_watch;
         watch.consume();
@@ -796,6 +804,10 @@ StoryBattleResult story_battle(
         //  The player is back at the last Pokemon Center, healed.
         rt.lead_fainted = false;
         rt.memory.no_pp = 0;
+        rt.memory.team_down.clear();
+        for (double& hp : rt.memory.team_hp){
+            hp = -1;
+        }
         rt.facing = DPAD_UP;
         rt.whited_out = true;
         if (rt.battle.catch_legendary){
@@ -2216,6 +2228,11 @@ void story_heal(StoryRuntime& rt, const std::string& where, bool mid_step){
     story_cutscene(rt, 0ms, 30s, false, "Nurse at " + where);
     rt.lead_fainted = false;
     rt.memory.no_pp = 0;
+    //  Everyone is up again, at full HP.
+    rt.memory.team_down.clear();
+    for (double& hp : rt.memory.team_hp){
+        hp = -1;
+    }
     rt.facing = DPAD_UP;
     if (!rt.save_after_heal || (!mid_step && rt.next_is_save)){
         return;
@@ -2276,6 +2293,12 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     }
     rt.party_extras_at_save = rt.party_extras;
     rt.party_order_final_at_save = rt.party_order_final;
+    rt.bag_revives_at_save = rt.bag_revives;
+    rt.bag_restores_at_save = rt.bag_restores;
+    rt.team_down_at_save = rt.memory.team_down;
+    for (int i = 0; i < 6; i++){
+        rt.team_hp_at_save[i] = rt.memory.team_hp[i];
+    }
     if (rt.shiny_unsaved){
         rt.console.log("The shiny Pokemon caught is saved.", COLOR_BLUE);
     }

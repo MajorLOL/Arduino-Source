@@ -76,6 +76,20 @@ struct StoryRuntime{
     //  four of them after Lance alone.)
     bool no_revives = false;
     bool no_full_restores = false;
+    //  The healing items of the League: how many REVIVEs and how many that
+    //  restore all HP (FULL RESTORE, MAX POTION) the bag has, as far as the
+    //  program knows (-1: not known). Counted from what it buys and uses; a
+    //  look that finds none sets 0. A purchase "up to N" (the League again)
+    //  buys what is missing; not known, it looks in the bag first. The
+    //  count at the last save comes back with a reset.
+    int bag_revives = -1;
+    int bag_restores = -1;
+    int bag_revives_at_save = -1;
+    int bag_restores_at_save = -1;
+    //  StoryBattleMemory::team_down and team_hp at the last save (a reset
+    //  loads them).
+    std::set<int> team_down_at_save;
+    double team_hp_at_save[6] = {-1, -1, -1, -1, -1, -1};
 
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;

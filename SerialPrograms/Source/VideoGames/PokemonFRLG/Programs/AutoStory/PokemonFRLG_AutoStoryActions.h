@@ -36,11 +36,24 @@ void story_teach_hm(
 
 //  Facing a Poke Mart clerk: buy "quantity" of the item at "index" of the
 //  list (as many as the money allows).
-void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& what);
+//  "kind": what it is, for the program's count of the bag (1 REVIVE, 2 FULL
+//  RESTORE or MAX POTION, 0 anything else). "up_to": only what is missing
+//  up to "quantity" of that kind (not known how many the bag has: a look in
+//  it; none bought if nothing is missing).
+void story_buy(
+    StoryRuntime& rt, int index, int quantity, const std::string& what,
+    int kind = 0, bool up_to = false
+);
 
-//  Full Restore on the first Pokemon (Revive first if it fainted, and a
-//  Full Restore on the second one too).
-void story_heal_with_items(StoryRuntime& rt);
+//  Between two battles, with items from the bag. The team (team play): a
+//  REVIVE for everyone who is down, then FULL RESTOREs (or MAX POTIONs):
+//  "mode" 0, the first League: for everyone below 60% of its HP;
+//  "mode" 2, the League again (for prize money, which the items cost): for
+//  the strongest below 50%, the others below 25%; "mode" 3, the same before
+//  the Champion: below 70% and below 50%. The strongest first.
+//  Without team play: a Full Restore on the first Pokemon (a Revive first
+//  if it fainted) and on the second one.
+void story_heal_with_items(StoryRuntime& rt, int mode = 0);
 
 //  After a legendary Pokemon (the save right after it): REVIVE on party
 //  slots 1 and 2, then FULL RESTORE on both, as far as the bag has them.

@@ -197,7 +197,9 @@ struct StoryBattleSettings{
     //  gets the best healing item of the bag (Full Restore, Max Potion,
     //  Hyper/Super Potion...). In the League, played as one gauntlet (the PP
     //  do not come back between the rooms), the Champion is beaten far more
-    //  often (team_sim --gauntlet).
+    //  often (team_sim --gauntlet). Off in the League again (chapters 13
+    //  and 15), which has four of them, not fifteen: there they are worth
+    //  more between the rooms (league_again_sim.py).
     bool heal_in_battle = true;
 
     //  Experimental (the option "Faster battles"): the end of a battle is
@@ -320,15 +322,32 @@ struct StoryBattleMemory{
     //  seen in the last battle: 0 to 1. -1 if not seen.
     double player_hp = -1;
     //  Team play: the members (team indexes) that fought in the last
-    //  battle, and those that fainted.
+    //  battle, and those that fainted in it.
     std::set<int> team_used;
     std::set<int> team_fainted;
     //  ... and the HP bar of each the last time it was out (0 to 1, -1 not
     //  known). Kept from battle to battle (set to 1 when healed).
     double team_hp[6] = {-1, -1, -1, -1, -1, -1};
+    //  The members that are down: fainted in a battle and not revived since
+    //  (no REVIVE, no Pokemon Center). Kept from battle to battle: such a
+    //  member cannot come in ("X has no energy left to battle!"), and with
+    //  the first of the team down the game starts the battle with the next
+    //  one. (The League without REVIVEs: ELECTRODE, down since Lorelei, was
+    //  the pick against Lance's GYARADOS. The menu stayed open, the program
+    //  took that for a faint, and from there on its order of the party was
+    //  not the game's: ZAPDOS came in for LAPRAS, CHARIZARD counted as down.)
+    //  Also the ones a pick found out about. Not known after the program
+    //  was started again: found out then.
+    std::set<int> team_down;
+    //  Of the last team battle: the members that fight (not the ones only
+    //  carried along), and how many of them were down already when it began.
+    int team_fighters = 0;
+    int team_down_at_start = 0;
     //  No healing item was found in the bag: not looked for again until
     //  items are bought.
     bool no_heal_items = false;
+    //  FULL RESTOREs and MAX POTIONs used in the last battle.
+    int restores_used = 0;
     //  "Faster battles" (StoryBattleSettings::fast_end): battles whose end
     //  was found by the fade to black, fades after which the player was not
     //  free to move (the loop went on as before), and the time from the
