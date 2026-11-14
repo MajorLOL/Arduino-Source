@@ -560,6 +560,11 @@ void AutoStory::run_segment(
     bool skip_talk = false;
     bool skip_battle = false;
 
+    //  The bag is looked through again for healing items (a segment starts
+    //  here, also after a reset to its save: the bag is the save's then).
+    rt.no_revives = false;
+    rt.no_full_restores = false;
+
     for (size_t i = first_step; i < segment.step_count; i++){
         const StoryStep& step = script.step(segment, i);
         const StoryStep* next = i + 1 < segment.step_count ? &script.step(segment, i + 1) : nullptr;
@@ -599,6 +604,11 @@ void AutoStory::run_segment(
         }
         if (label.rfind("RareCandy", 0) == 0){
             rt.no_rare_candies = false;     //  One is picked up here.
+        }
+        if (label.rfind("Pick up item", 0) == 0){
+            //  Whatever it is: maybe a healing item.
+            rt.no_revives = false;
+            rt.no_full_restores = false;
         }
         if (rt.talk_alt_back != DPAD_NONE && (
             step.type == StepType::WALK || step.type == StepType::HEAL ||

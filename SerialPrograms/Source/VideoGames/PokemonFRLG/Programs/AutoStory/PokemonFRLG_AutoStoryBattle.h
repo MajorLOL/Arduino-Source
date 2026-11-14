@@ -254,6 +254,22 @@ struct StoryBattleMemory{
         foe_hp = -1;
         foe_for_hp = nullptr;
     }
+    //  Another Pokemon of the player's came in: its moves are not known
+    //  yet, and what the slots of the one before did to this foe says
+    //  nothing about them. (The Champion's BLASTOISE: VAPOREON's HYDRO PUMP
+    //  in slot 4, out of PP, "took none of the foe's HP" twice. Slot 4 stayed
+    //  left out for everyone who came in after it: CHARIZARD's WING ATTACK,
+    //  LAPRAS's STRENGTH, and ZAPDOS and ARTICUNO, whose only attacks are in
+    //  slot 4, used THUNDER WAVE six times and MIST fifteen times.)
+    void reset_active(){
+        no_pp = 0;
+        last_slot = -1;
+        list_back = 0;
+        for (int& m : moves){
+            m = -1;
+        }
+        reset_foe();
+    }
     //  The slot picked last, -1 if none in this battle.
     int last_slot = -1;
     //  How many times in a row the move list came back after picking

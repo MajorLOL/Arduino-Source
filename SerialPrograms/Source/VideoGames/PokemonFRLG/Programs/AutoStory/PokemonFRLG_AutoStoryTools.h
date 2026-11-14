@@ -69,6 +69,13 @@ struct StoryRuntime{
     //  No Rare Candy was found in the bag: not looked for again until one
     //  is picked up.
     bool no_rare_candies = false;
+    //  No REVIVE, no FULL RESTORE (or MAX POTION) was found in the bag when
+    //  healing with items: not looked for again in this segment, until
+    //  something is bought or picked up. (A look goes down the whole ITEMS
+    //  pocket, 20 seconds: the League without FULL RESTOREs looked ten times,
+    //  four of them after Lance alone.)
+    bool no_revives = false;
+    bool no_full_restores = false;
 
     //  Which way the player faces. DPAD_NONE if not known.
     DpadPosition facing = DPAD_NONE;
@@ -405,6 +412,10 @@ std::string story_read_dialog(StoryRuntime& rt);
 
 //  A text box on the way that is "REPEL's effect wore off...": closed, and
 //  true (the walk goes on). False for anything else (a trainer...).
+//  (Rarely seen: the game itself closes that box on the next press of the
+//  d-pad in another direction than the last talk's, WaitForAorBPress() in
+//  scrcmd.c, and the walk goes on. No run of the story ever logged it. So
+//  where a REPEL ends is counted by the generator, story.py: repel_plan().)
 bool story_close_repel_text(StoryRuntime& rt);
 
 //  Close menus and text boxes until the player can move.

@@ -660,6 +660,14 @@ void use_best_move(
         //  Another foe: start over.
         memory.reset_foe();
         memory.foe_for_hp = opponent;
+    }else if (memory.list_back > 0){
+        //  The move list came back after the last pick: that move did not
+        //  happen ("There's no PP left for this move!", or a press the game
+        //  missed), and the foe's HP says nothing about it. The same move
+        //  again: a second time back, it has no PP (the loop marks it).
+        //  (Judged by the HP, it "took none" and another move was tried
+        //  once: it never came back twice in a row, was taken for a move
+        //  that does nothing to this foe, and was tried again on the next.)
     }else if (memory.last_slot >= 0 && memory.last_slot < 4 && memory.foe_hp >= 0 && foe_hp >= 0){
         const int slot = memory.last_slot;
         const int move = memory.moves[slot];
@@ -817,7 +825,15 @@ void run_from_battle(ConsoleHandle& console, ProControllerContext& context, bool
 //  Party menu during a battle (the lead fainted): send in the next one.
 void send_next_pokemon(ConsoleHandle& console, ProControllerContext& context, int& next_slot){
     console.log("Sending in party slot " + std::to_string(next_slot + 1) + ".");
-    //  The cursor is on the fainted lead (slot 1). Slots 2-6 are below it.
+    //  The cursor is on the fainted lead (slot 1) when the menu opens, and
+    //  slots 2-6 are below it. After a pick that did not go ("X has no
+    //  energy left to battle!") the menu stays, the cursor on that slot:
+    //  LEFT goes to slot 1 from any other (UpdatePartySelectionSingleLayout())
+    //  and does nothing there. (Without it the next pick counted down from
+    //  where the last one was: with four of six down, "slot 2, 3, 4, 5, 6,
+    //  2, 3" went to slots 2, 4, CANCEL, 4, 2, 3, 5: a minute and a half
+    //  until the fifth came in.)
+    pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
     for (int i = 0; i < next_slot; i++){
         pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
     }
@@ -1351,12 +1367,7 @@ StoryBattleResult run_story_battle(
         settings.lead_type1 = member.type1;
         settings.lead_type2 = member.type2;
         memory.team_used.insert(order[0]);
-        memory.no_pp = 0;
-        memory.last_slot = -1;
-        memory.list_back = 0;
-        for (int& m : memory.moves){
-            m = -1;
-        }
+        memory.reset_active();
     };
     //  The battle position of the best member against "against" (-1: none).
     auto best_position = [&](const SpeciesInfo* against, bool with_active){
@@ -1380,7 +1391,12 @@ StoryBattleResult run_story_battle(
         return down[(size_t)index] ? 0.0 : team_score(settings.team[(size_t)index], against);
     };
     //  In the party menu (cursor on the active): send in the one at "pos".
-    auto pick_in_party_menu = [&](int pos){
+    //  "stayed": the menu may have stayed open after a pick that did not go,
+    //  the cursor on that slot: LEFT first (see send_next_pokemon()).
+    auto pick_in_party_menu = [&](int pos, bool stayed = false){
+        if (stayed){
+            pbf_press_dpad(context, DPAD_LEFT, 160ms, 340ms);
+        }
         for (int i = 0; i < pos; i++){
             pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
         }
@@ -1402,6 +1418,7 @@ StoryBattleResult run_story_battle(
     int run_attempts = 0;
     bool lost = false;
     int next_slot = 1;
+    bool others_started = false;    //  team play: one that is not of the team was sent in
     int unknown_in_row = 0;     //  turns of the loop with nothing recognized
     int list_only_in_row = 0;   //  of those, how many showed the move list
     //  "Move lists" in a row with no move name read: then not taken for the
@@ -1953,11 +1970,7 @@ StoryBattleResult run_story_battle(
                             settings.lead_type2 = settings.share_type2;
                             settings.lead_species = nullptr;    //  Not known: valued by power and type.
                             settings.lead_level = 0;
-                            memory.no_pp = 0;
-                            memory.last_slot = -1;
-                            for (int& m : memory.moves){
-                                m = -1;
-                            }
+                            memory.reset_active();
                         }else{
                             console.log("The party menu did not open.", COLOR_ORANGE);
                             pbf_mash_button(context, BUTTON_B, 1000ms);
@@ -2134,12 +2147,32 @@ StoryBattleResult run_story_battle(
                 int pos = best_position(foe, false);
                 if (pos > 0){
                     console.log("Sending in team member " + std::to_string(order[(size_t)pos] + 1) + ".");
-                    pick_in_party_menu(pos);
+                    pick_in_party_menu(pos, true);
                     set_active(pos);
                     break;
                 }
+                //  The team is down: whoever else is in the party (the
+                //  legendary birds). They are below the team in this menu
+                //  (the battle order: only the one that fights changes
+                //  places with the first). The first time; after that the
+                //  slots go round as they do.
+                if (!others_started){
+                    others_started = true;
+                    next_slot = std::max(next_slot, (int)settings.team.size());
+                    if (next_slot > 5){
+                        next_slot = 1;
+                    }
+                }
             }
             send_next_pokemon(console, context, next_slot);
+            //  Whoever came in: not the Pokemon the moves were valued for
+            //  (its species and types are not known: by power and type
+            //  alone, no same-type bonus).
+            settings.lead_species = nullptr;
+            settings.lead_level = 0;
+            settings.lead_type1 = AutoStoryDex::Type::MYSTERY;
+            settings.lead_type2 = AutoStoryDex::Type::MYSTERY;
+            memory.reset_active();
             break;
         case 3:
             last_activity = current_time();

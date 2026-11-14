@@ -827,6 +827,8 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
     ProControllerContext& context = rt.context;
     //  Maybe healing items: look in the bag again when one is needed.
     rt.memory.no_heal_items = false;
+    rt.no_revives = false;
+    rt.no_full_restores = false;
     //  The game lets the quantity go only as high as the money allows
     //  (Task_BuyHowManyDialogueInit: money / price, 99 at most), and
     //  (AdjustQuantityAccordingToDPadInput) UP past that goes round to 1,
@@ -977,9 +979,22 @@ void story_heal_with_items(StoryRuntime& rt){
                 );
                 continue;
             }
+            bool revived = false;
             for (int round = 0; round < 2; round++){
                 const bool revive = round == 0;
                 if (revive && !fainted){
+                    continue;
+                }
+                if (!revive && fainted && !revived){
+                    //  Still fainted: a FULL RESTORE does nothing for it.
+                    continue;
+                }
+                bool& none = revive ? rt.no_revives : rt.no_full_restores;
+                if (none){
+                    console.log(
+                        std::string("Party slot ") + std::to_string(slot) + (revive ? " fainted" : " is low on HP") +
+                        ", but the bag has no " + (revive ? "REVIVE" : "FULL RESTORE") + " (looked before)."
+                    );
                     continue;
                 }
                 console.log((revive ? "Reviving party slot " : "Full Restore on party slot ") + std::to_string(slot) + ".");
@@ -989,9 +1004,13 @@ void story_heal_with_items(StoryRuntime& rt){
                     : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
                 if (found){
                     use_item_on(rt, slot, revive ? "REVIVE" : "FULL RESTORE");
-                    if (!revive && index >= 0 && index < 6){
+                    if (revive){
+                        revived = true;
+                    }else if (index >= 0 && index < 6){
                         rt.memory.team_hp[index] = 1.0;
                     }
+                }else{
+                    none = true;
                 }
                 pbf_mash_button(context, BUTTON_B, 3000ms);
                 context.wait_for_all_requests();
@@ -1016,12 +1035,19 @@ void story_heal_with_items(StoryRuntime& rt){
     uses.push_back({2, false});
 
     for (const Use& use : uses){
+        bool& none = use.revive ? rt.no_revives : rt.no_full_restores;
+        if (none){
+            console.log(std::string("The bag has no ") + (use.revive ? "REVIVE" : "FULL RESTORE") + " (looked before).");
+            continue;
+        }
         open_bag_from_overworld(console, context);
         bool found = use.revive
             ? select_bag_item(rt, BagPocket::ITEMS, {"revives a", "revive"}, {"fully"}, "REVIVE")
             : select_bag_item(rt, BagPocket::ITEMS, {"fully restores", "fully restore"}, {"revive"}, "FULL RESTORE");
         if (found){
             use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
+        }else{
+            none = true;
         }
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
@@ -1041,8 +1067,10 @@ void story_heal_after_legendary(StoryRuntime& rt){
         bool revive;
     };
     const Use uses[] = {{1, true}, {2, true}, {1, false}, {2, false}};
+    //  (This look for a REVIVE takes a MAX REVIVE too: one more than the
+    //  look that set "no_revives".)
     bool no_revive = false;
-    bool no_restore = false;
+    bool no_restore = rt.no_full_restores;
     for (const Use& use : uses){
         if (use.revive ? no_revive : no_restore){
             continue;
@@ -1057,8 +1085,10 @@ void story_heal_after_legendary(StoryRuntime& rt){
             use_item_on(rt, use.slot, use.revive ? "REVIVE" : "FULL RESTORE");
         }else if (use.revive){
             no_revive = true;
+            rt.no_revives = true;
         }else{
             no_restore = true;
+            rt.no_full_restores = true;
         }
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
