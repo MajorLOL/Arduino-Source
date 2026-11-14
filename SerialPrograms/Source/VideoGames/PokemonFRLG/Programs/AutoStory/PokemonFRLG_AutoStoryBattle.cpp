@@ -2712,10 +2712,17 @@ StoryBattleResult run_story_battle(
             //  with whoever the player faces once the text is over.
             WhiteDialogDetector white_dialog(COLOR_RED);
             if (white_dialog.detect(screen)){
-                if (settings.scene_after && battle_confirmed){
-                    if (lost){
-                        return StoryBattleResult::LOST;
-                    }
+                //  A scene follows the battle that was won. After one that
+                //  was lost there is none: the player whited out to the
+                //  last Pokemon Center, and this text is the nurse's ("First,
+                //  you should restore your POKeMON to full health."). Through
+                //  it like through any text, until the player is free to
+                //  move, as after every other battle that is lost. (The
+                //  Champion, 14 November: the loss was reported at her first
+                //  line. Saving there, for the loss to stand, never got the
+                //  start menu, the worn save was loaded again, and the
+                //  Champion was lost to fifteen times in a row.)
+                if (settings.scene_after && battle_confirmed && !lost){
                     console.log("Battle over: the scene after it has begun.");
                     return over();
                 }

@@ -1568,6 +1568,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     int league_losses = 0;
     //  The League again (C13, C15): losses that were left standing, in a row.
     int league_again_losses = 0;
+    //  ... and losses that should have been left standing, but the game
+    //  could not be saved after them, in a row.
+    int league_save_failures = 0;
     //  "Shiny only": chapter 20 goes round its towns again (from the first
     //  town, after the way out of the Cerulean City Pokemon Center) as long
     //  as the table wants a shiny of a species of its places.
@@ -1703,6 +1706,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 rt.segment_steps = script.segments[current_segment].step_count;
                 rt.next_segment_id = current_segment + 1 < script.segment_count ? script.segments[current_segment + 1].id : "";
                 rt.has_dex = script.segments[current_segment].has_dex;
+                //  The nurse's words after the loss, if any are still up:
+                //  the start menu only opens once the player is free.
+                story_back_to_overworld(rt, "after the loss in " + id);
                 story_save(rt, rt.has_dex);
                 story_saved(rt, 0);
                 resume_segment = current_segment;
@@ -1818,17 +1824,38 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                     //  save in front of the room.
                     bool saved = false;
                     try{
+                        //  The nurse's words after the loss, if any are
+                        //  still up: the start menu only opens once the
+                        //  player is free.
+                        story_back_to_overworld(rt, "after the loss in " + id);
                         story_save(rt, rt.has_dex);
                         story_saved(rt, after_nurse);
                         saved = true;
                     }catch (OperationFailedException&){
+                        league_save_failures++;
                         env.log(
                             "Saving at the Indigo Plateau did not work: the save in front of the room is loaded "
                             "again after all.",
                             COLOR_RED
                         );
+                        //  That save loses the same way each time (15 losses
+                        //  in a row on 14 November, each followed by a save
+                        //  that did not work): not a third time.
+                        if (league_save_failures >= 2){
+                            throw UserSetupError(
+                                env.console,
+                                "Lost in " + segment_name(segment) + " (" + why + "), and the game could not be "
+                                "saved after the loss, twice in a row. The save in front of the room would only "
+                                "be lost from again, so the program stops here. The game is not saved: the "
+                                "player is at the Indigo Plateau, the team healed, the Elite Four start over. "
+                                "Get the player free (A or B until no text is up), save the game by hand, and "
+                                "start at segment " + std::string(rooms.id) + ", step " +
+                                std::to_string(after_nurse + 1) + "."
+                            );
+                        }
                     }
                     if (saved){
+                        league_save_failures = 0;
                         current_segment = league_start;
                         current_step = after_nurse;
                         resume_segment = current_segment;
