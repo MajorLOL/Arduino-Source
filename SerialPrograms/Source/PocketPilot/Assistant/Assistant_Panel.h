@@ -119,6 +119,8 @@ private:
     QScrollArea* m_scroll = nullptr;
     //  The conversation is scrolled to its end, and stays there.
     bool m_at_end = true;
+    //  The answers are about to be shown again in the colors of a new theme.
+    bool m_recolor_pending = false;
     QWidget* m_rows_widget = nullptr;
     QVBoxLayout* m_rows = nullptr;
     QWidget* m_empty = nullptr;

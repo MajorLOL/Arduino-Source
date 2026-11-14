@@ -55,6 +55,9 @@ const QString MARK_DONE = QString::fromUtf8("\xe2\x9c\x93");        //  a check 
 const QString MARK_FAILED = QString::fromUtf8("\xc3\x97");          //  a multiplication sign
 
 
+//  The Markdown a text view shows, kept as a property of the view.
+const char* const MARKDOWN_PROPERTY = "ppMarkdown";
+
 //  A text view as high as its text: it never scrolls itself, the
 //  conversation around it does.
 class TextView : public QTextBrowser{
@@ -233,6 +236,9 @@ QString first_line(const QString& text, int length){
 
 void show_markdown(QTextBrowser& view, const QString& markdown){
     const ThemeColors& theme = theme_colors();
+    //  Kept with the view: the backgrounds below are the theme's of this
+    //  moment, and are made again when the theme changes.
+    view.setProperty(MARKDOWN_PROPERTY, markdown);
     QTextDocument* document = view.document();
     document->setMarkdown(markdown, QTextDocument::MarkdownDialectGitHub);
 
@@ -1360,12 +1366,34 @@ void Panel::render_answer(){
 
 void Panel::changeEvent(QEvent* event){
     QWidget::changeEvent(event);
-    //  The colors of the answers follow the theme.
-    if (event->type() == QEvent::PaletteChange && m_rows_widget != nullptr){
+    //  The colors of the answers follow the theme: the text by itself, the
+    //  backgrounds of their code by showing them again. Once the theme is
+    //  all there, and once for the several events one change of it sends.
+    const bool theme_changed = event->type() == QEvent::PaletteChange || event->type() == QEvent::StyleChange;
+    if (!theme_changed || m_rows_widget == nullptr || m_recolor_pending){
+        return;
+    }
+    m_recolor_pending = true;
+    const std::shared_ptr<bool> alive = m_alive;
+    QTimer::singleShot(0, this, [this, alive]{
+        if (!*alive){
+            return;
+        }
+        m_recolor_pending = false;
         for (QSyntaxHighlighter* colors : window()->findChildren<QSyntaxHighlighter*>()){
             colors->rehighlight();
         }
-    }
+        for (QTextBrowser* view : m_rows_widget->findChildren<QTextBrowser*>()){
+            const QVariant markdown = view->property(MARKDOWN_PROPERTY);
+            if (!markdown.isValid()){
+                continue;
+            }
+            show_markdown(*view, markdown.toString());
+            if (TextView* text = dynamic_cast<TextView*>(view)){
+                text->fit();
+            }
+        }
+    });
 }
 
 bool Panel::eventFilter(QObject* object, QEvent* event){
