@@ -79,6 +79,9 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 - [C13_02_ELITE_FOUR](#c13_02_elite_four) — Elite Four again: Lorelei, Bruno, Agatha, Lance (more prize money)
 - [C13_02_CHAMPION](#c13_02_champion) — Champion again, Hall of Fame
 - [C13_02_OAK](#c13_02_oak) — Oak's POKeDEX rating (not 60 species yet)
+- [C13_03_ELITE_FOUR](#c13_03_elite_four) — Elite Four again: Lorelei, Bruno, Agatha, Lance (prize money once more)
+- [C13_03_CHAMPION](#c13_03_champion) — Champion again, Hall of Fame
+- [C13_03_OAK](#c13_03_oak) — Oak's POKeDEX rating (not 60 species yet)
 - [C14_01_VIRIDIAN_FOREST](#c14_01_viridian_forest) — POKeDEX: Poke Balls in Viridian City, Viridian Forest
 - [C14_02_ROUTE3_MT_MOON](#c14_02_route3_mt_moon) — POKeDEX: more Poke Balls in Pewter City, Route 3, a Magikarp, Mt. Moon
 - [C14_03_POKEMON_TOWER](#c14_03_pokemon_tower) — POKeDEX: Pokemon Tower
@@ -90,7 +93,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 - [C14_09_VICTORY_ROAD](#c14_09_victory_road) — POKeDEX: Victory Road
 - [C14_10_KINDLE_ROAD](#c14_10_kindle_road) — POKeDEX: Poke Balls, the ferry to One Island, Kindle Road
 - [C14_11_BOND_BRIDGE](#c14_11_bond_bridge) — POKeDEX: Three Island, Bond Bridge (Berry Forest if still short)
-- [C15_01_ENOUGH](#c15_01_enough) — 60 species? Full Restores for the Elite Four
+- [C15_01_ENOUGH](#c15_01_enough) — 60 species? To the Indigo Plateau
 - [C15_02_ELITE_FOUR](#c15_02_elite_four) — Elite Four again: Lorelei, Bruno, Agatha, Lance (for the National POKeDEX)
 - [C15_02_CHAMPION](#c15_02_champion) — Champion again, Hall of Fame
 - [C15_03_NATIONAL_DEX](#c15_03_national_dex) — Oak: 60 species, the National POKeDEX
@@ -1004,31 +1007,36 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Cinnabar Island Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: ToIndigoPlateau_Out |
-| **7** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After a save | TEAM: Team play |
-| **8** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After putting the party back in order | WALK: ToLorelei |
-| **16** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
-| **24** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
-| **32** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
+| **6** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | WALK: BuyRevives |
+| **11** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After a save | TEAM: Team play |
+| **12** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After putting the party back in order | WALK: ToLorelei |
+| **20** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
+| **28** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
+| **36** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
 
 **Step 1:** Cinnabar Island Pokemon Center 1F (7, 4), facing up
 
 ![C13_01_ELITE_FOUR step 1](images/CinnabarIsland_PokemonCenter_1F_7_4_up.png)
 
-**Step 7, 8:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
+**Step 6:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C13_01_ELITE_FOUR step 7, 8](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C13_01_ELITE_FOUR step 6](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
-**Step 16:** Pokemon League Loreleis Room (6, 6), facing up
+**Step 11, 12:** Indigo Plateau Pokemon Center 1F (0, 9), facing up
 
-![C13_01_ELITE_FOUR step 16](images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 11, 12](images/IndigoPlateau_PokemonCenter_1F_0_9_up.png)
 
-**Step 24:** Pokemon League Brunos Room (6, 6), facing up
+**Step 20:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C13_01_ELITE_FOUR step 24](images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 20](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
-**Step 32:** Pokemon League Agathas Room (6, 6), facing up
+**Step 28:** Pokemon League Brunos Room (6, 6), facing up
 
-![C13_01_ELITE_FOUR step 32](images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C13_01_ELITE_FOUR step 28](images/PokemonLeague_BrunosRoom_6_6_up.png)
+
+**Step 36:** Pokemon League Agathas Room (6, 6), facing up
+
+![C13_01_ELITE_FOUR step 36](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C13_01_CHAMPION
 
@@ -1096,31 +1104,36 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Pallet Town | (6, 8) | down | Start of the segment (the segment before saves here) | FLY: ToIndigoPlateau_Fly |
-| **6** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After a save | TEAM: Team play |
-| **7** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After putting the party back in order | WALK: ToLorelei |
-| **15** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
-| **23** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
-| **31** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
+| **5** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | WALK: BuyRevives |
+| **10** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After a save | TEAM: Team play |
+| **11** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After putting the party back in order | WALK: ToLorelei |
+| **19** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
+| **27** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
+| **35** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
 
 **Step 1:** Pallet Town (6, 8), facing down
 
 ![C13_02_ELITE_FOUR step 1](images/PalletTown_6_8_down.png)
 
-**Step 6, 7:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
+**Step 5:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C13_02_ELITE_FOUR step 6, 7](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C13_02_ELITE_FOUR step 5](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
-**Step 15:** Pokemon League Loreleis Room (6, 6), facing up
+**Step 10, 11:** Indigo Plateau Pokemon Center 1F (0, 9), facing up
 
-![C13_02_ELITE_FOUR step 15](images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 10, 11](images/IndigoPlateau_PokemonCenter_1F_0_9_up.png)
 
-**Step 23:** Pokemon League Brunos Room (6, 6), facing up
+**Step 19:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C13_02_ELITE_FOUR step 23](images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 19](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
-**Step 31:** Pokemon League Agathas Room (6, 6), facing up
+**Step 27:** Pokemon League Brunos Room (6, 6), facing up
 
-![C13_02_ELITE_FOUR step 31](images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C13_02_ELITE_FOUR step 27](images/PokemonLeague_BrunosRoom_6_6_up.png)
+
+**Step 35:** Pokemon League Agathas Room (6, 6), facing up
+
+![C13_02_ELITE_FOUR step 35](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C13_02_CHAMPION
 
@@ -1146,6 +1159,69 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 **Step 1:** Pokemon League Champions Room (6, 19), facing up
 
 ![C13_02_OAK step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
+
+## C13_03_ELITE_FOUR
+
+*Elite Four again: Lorelei, Bruno, Agatha, Lance (prize money once more)*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Pallet Town | (6, 8) | down | Start of the segment (the segment before saves here) | FLY: ToIndigoPlateau_Fly |
+| **5** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | WALK: BuyRevives |
+| **10** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After a save | TEAM: Team play |
+| **11** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After putting the party back in order | WALK: ToLorelei |
+| **19** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
+| **27** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
+| **35** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
+
+**Step 1:** Pallet Town (6, 8), facing down
+
+![C13_03_ELITE_FOUR step 1](images/PalletTown_6_8_down.png)
+
+**Step 5:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
+
+![C13_03_ELITE_FOUR step 5](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+
+**Step 10, 11:** Indigo Plateau Pokemon Center 1F (0, 9), facing up
+
+![C13_03_ELITE_FOUR step 10, 11](images/IndigoPlateau_PokemonCenter_1F_0_9_up.png)
+
+**Step 19:** Pokemon League Loreleis Room (6, 6), facing up
+
+![C13_03_ELITE_FOUR step 19](images/PokemonLeague_LoreleisRoom_6_6_up.png)
+
+**Step 27:** Pokemon League Brunos Room (6, 6), facing up
+
+![C13_03_ELITE_FOUR step 27](images/PokemonLeague_BrunosRoom_6_6_up.png)
+
+**Step 35:** Pokemon League Agathas Room (6, 6), facing up
+
+![C13_03_ELITE_FOUR step 35](images/PokemonLeague_AgathasRoom_6_6_up.png)
+
+## C13_03_CHAMPION
+
+*Champion again, Hall of Fame*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Pokemon League Lances Room | (6, 9) | up | Start of the segment (the segment before saves here) | TEAM: Team play |
+| **2** | Pokemon League Lances Room | (6, 9) | up | After putting the party back in order | WALK: ToChampion |
+
+**Step 1, 2:** Pokemon League Lances Room (6, 9), facing up
+
+![C13_03_CHAMPION step 1, 2](images/PokemonLeague_LancesRoom_6_9_up.png)
+
+## C13_03_OAK
+
+*Oak's POKeDEX rating (not 60 species yet)*
+
+| Start at step | Place | Tile (x, y) | Facing | Why | Next step |
+|---|---|---|---|---|---|
+| **1** | Pokemon League Champions Room | (6, 19) | up | Start of the segment. *No save here*: the segment before goes on into this one | CUTSCENE: Oak: not 60 species yet |
+
+**Step 1:** Pokemon League Champions Room (6, 19), facing up
+
+![C13_03_OAK step 1](images/PokemonLeague_ChampionsRoom_6_19_up.png)
 
 ## C14_01_VIRIDIAN_FOREST
 
@@ -1334,20 +1410,15 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 ## C15_01_ENOUGH
 
-*60 species? Full Restores for the Elite Four*
+*60 species? To the Indigo Plateau*
 
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Vermilion City Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | SKIP_IF_DEX: 60 species caught |
-| **7** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | WALK: BuyFullRestore |
 
 **Step 1:** Vermilion City Pokemon Center 1F (7, 4), facing up
 
 ![C15_01_ENOUGH step 1](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
-
-**Step 7:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
-
-![C15_01_ENOUGH step 7](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
 ## C15_02_ELITE_FOUR
 
@@ -1356,27 +1427,32 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | Start of the segment (the segment before saves here) | HEAL: Heal at IndigoPlateau_PokemonCenter_1F |
-| **3** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After a save | TEAM: Team play |
-| **4** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After putting the party back in order | WALK: ToLorelei |
-| **12** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
-| **20** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
-| **28** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
+| **2** | Indigo Plateau Pokemon Center 1F | (13, 12) | up | After healing (with "Save after healing" on) | WALK: BuyRevives |
+| **7** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After a save | TEAM: Team play |
+| **8** | Indigo Plateau Pokemon Center 1F | (0, 9) | up | After putting the party back in order | WALK: ToLorelei |
+| **16** | Pokemon League Loreleis Room | (6, 6) | up | After a save | WALK: ToBruno |
+| **24** | Pokemon League Brunos Room | (6, 6) | up | After a save | WALK: ToAgatha |
+| **32** | Pokemon League Agathas Room | (6, 6) | up | After a save | WALK: ToLance |
 
-**Step 1, 3, 4:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
+**Step 1, 2:** Indigo Plateau Pokemon Center 1F (13, 12), facing up
 
-![C15_02_ELITE_FOUR step 1, 3, 4](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
+![C15_02_ELITE_FOUR step 1, 2](images/IndigoPlateau_PokemonCenter_1F_13_12_up.png)
 
-**Step 12:** Pokemon League Loreleis Room (6, 6), facing up
+**Step 7, 8:** Indigo Plateau Pokemon Center 1F (0, 9), facing up
 
-![C15_02_ELITE_FOUR step 12](images/PokemonLeague_LoreleisRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 7, 8](images/IndigoPlateau_PokemonCenter_1F_0_9_up.png)
 
-**Step 20:** Pokemon League Brunos Room (6, 6), facing up
+**Step 16:** Pokemon League Loreleis Room (6, 6), facing up
 
-![C15_02_ELITE_FOUR step 20](images/PokemonLeague_BrunosRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 16](images/PokemonLeague_LoreleisRoom_6_6_up.png)
 
-**Step 28:** Pokemon League Agathas Room (6, 6), facing up
+**Step 24:** Pokemon League Brunos Room (6, 6), facing up
 
-![C15_02_ELITE_FOUR step 28](images/PokemonLeague_AgathasRoom_6_6_up.png)
+![C15_02_ELITE_FOUR step 24](images/PokemonLeague_BrunosRoom_6_6_up.png)
+
+**Step 32:** Pokemon League Agathas Room (6, 6), facing up
+
+![C15_02_ELITE_FOUR step 32](images/PokemonLeague_AgathasRoom_6_6_up.png)
 
 ## C15_02_CHAMPION
 

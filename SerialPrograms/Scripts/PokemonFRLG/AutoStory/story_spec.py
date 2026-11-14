@@ -130,14 +130,21 @@ def talk_no(map_id, xy, label):
     return talk(map_id, xy=xy, mode="no", label=label)
 
 
-def buy(map_id, clerk_xy, item_index, quantity, label, item=None):
+def buy(map_id, clerk_xy, item_index, quantity, label, item=None, kind=None, up_to=False):
     """Buy from a Poke Mart clerk: item_index in the mart's list (decomp).
     item: ESCAPE_ROPE or MAX_REPEL, counted for the router (story.py,
     Builder.shortcuts). Bought before the balls "as many as the money
-    allows" of the same visit."""
+    allows" of the same visit.
+    kind: "revive" or "restore" (FULL RESTORE, MAX POTION), the healing
+    items of the League: the program keeps count of them. up_to: only what
+    is missing up to the quantity."""
     b = {"index": item_index, "quantity": quantity}
     if item:
         b["item"] = item
+    if kind:
+        b["kind"] = kind
+        if up_to:
+            b["up_to"] = True
     return [talk(map_id, xy=clerk_xy, mode="plain", label=label, counter=True),
             {"buy": b, "label": label}]
 
@@ -1222,7 +1229,10 @@ LEAGUE_ROOMS = [
 LEAGUE_LEADER_XY = {"Lorelei": [6, 5], "Bruno": [6, 5], "Agatha": [6, 5], "Lance": [6, 8]}
 
 
-def league_room_steps():
+def league_room_steps(again=False):
+    """again: the League again for prize money. Between its rooms the
+    healing items are used sparingly (a REVIVE for who is down, a potion
+    only for who is low), before the Champion less so."""
     out = []
     for i, (room, name, flag, entry_xy, door_label) in enumerate(LEAGUE_ROOMS):
         #  Arriving starts PokemonLeague_*Room_EventScript_EnterRoom (walk in,
@@ -1234,7 +1244,8 @@ def league_room_steps():
         out.append(talk(room, xy=LEAGUE_LEADER_XY[name], mode="battle", label=name))
         out.append(cutscene(3000, 60000, "%s: the door opens" % name))
         out.append(setst(flags=[flag], script_tiles=[[room, "@" + door_label]]))
-        out.append({"heal_items": True, "label": "Heal with items after " + name})
+        mode = True if not again else "league_again_last" if name == "Lance" else "league_again"
+        out.append({"heal_items": mode, "label": "Heal with items after " + name})
         out.append(save())
     return out
 
@@ -1269,8 +1280,8 @@ CHAPTER10 = [
         "title": "Buy Full Restores, Revives and Ultra Balls",
         #  Between the rooms everyone who fought gets a Full Restore (and a
         #  Revive first if they fainted).
-        "steps": buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 2, 15, "BuyFullRestore")
-        + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 4, 8, "BuyRevive")
+        "steps": buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 2, 15, "BuyFullRestore", kind="restore")
+        + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 4, 8, "BuyRevive", kind="revive")
         #  With the money left: Ultra Balls for a shiny.
         + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 0, 5, "BuyUltraBalls")
         + [heal(PC["INDIGO"], "ShopToIndigoNurse"), save()],
@@ -1631,9 +1642,11 @@ CHAPTER12 = [
 #  Sapphire (two gems, the key items of the Sevii Islands story) in his
 #  Network Machine, the roaming legendary (Suicune for the Charmander
 #  player) starts roaming Kanto.
-#  The balls for some 50 species cost more than the story leaves: the Elite
-#  Four twice more first, for the prize money (some 30000 each); Oak's
-#  rating after each Hall of Fame says it is not 60 yet.
+#  The balls for some 50 species cost more than the story leaves (some 300
+#  POKe BALLs, 60000): the Elite Four three times more first, for the prize
+#  money (29100 a run, some 19000 of it left after the REVIVEs and MAX
+#  POTIONs it takes: league_kit()); Oak's rating after each Hall of Fame
+#  says it is not 60 yet.
 
 #  Species caught for sure by the program in the story: the starter's line,
 #  the team (Voltorb -> Electrode, Eevee and its evolution, Lapras) and the
@@ -1654,16 +1667,43 @@ LEAGUE_FLAGS = ["FLAG_DEFEATED_LORELEI", "FLAG_DEFEATED_BRUNO", "FLAG_DEFEATED_A
                 "FLAG_DEFEATED_LANCE", "FLAG_DEFEATED_CHAMP"]
 
 
+#  The healing items of a League run for prize money, from the Indigo
+#  Plateau's Poke Mart (IndigoPlateau_PokemonCenter_1F_Items: ULTRA BALL,
+#  GREAT BALL, FULL RESTORE, MAX POTION, REVIVE, ...): REVIVEs (1500) and MAX
+#  POTIONs (2500: all the HP like a FULL RESTORE, 500 cheaper). Without any,
+#  the team reaches the Champion worn out and loses (the second League
+#  again: four of six down in front of the Champion, 21 tries lost). With
+#  four of each, used sparingly between the rooms (league_room_steps(again)),
+#  the League is won at the first go nearly every time, for about 2.5 REVIVEs
+#  and 2.5 MAX POTIONs: some 19000 of the 29100 the five battles pay are
+#  left (league_again_sim.py, on team_sim.py). Only what is missing up to
+#  four is bought (the program counts what it uses), as far as the money
+#  goes, the REVIVEs first.
+LEAGUE_KIT = 4
+
+
+def league_kit():
+    mart = "MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F"
+    return (buy(mart, [0, 7], 4, LEAGUE_KIT, "BuyRevives", kind="revive", up_to=True)
+            + buy(mart, [0, 7], 3, LEAGUE_KIT, "BuyMaxPotions", kind="restore", up_to=True))
+
+
 def league_again(prefix, chapter, why):
     """The Elite Four and the Champion again (EventScript_ResetEliteFour at
     each Hall of Fame), from the Indigo Plateau, then Oak's rating in Pallet
-    Town."""
+    Town.
+    The nurse first, then the Poke Mart's counter in the same room: a loss
+    the program leaves standing (the save in front of a room worn out, or
+    lost three times) puts the player in front of that nurse, and the run
+    goes on from the step after her, with healing items bought from what
+    the rooms paid."""
     return [
         {
             "id": prefix + "_ELITE_FOUR", "chapter": chapter,
             "title": "Elite Four again: Lorelei, Bruno, Agatha, Lance (" + why + ")",
             "state": {"clear_flags": LEAGUE_FLAGS, "vars": {"VAR_MAP_SCENE_POKEMON_LEAGUE": 0}},
-            "steps": [heal(PC["INDIGO"], "ToIndigoPlateau"), save(), team()] + league_room_steps(),
+            "steps": [heal(PC["INDIGO"], "ToIndigoPlateau")] + league_kit() + [save(), team()]
+            + league_room_steps(again=True),
         },
         {
             "id": prefix + "_CHAMPION", "chapter": chapter,
@@ -1776,6 +1816,13 @@ CHAPTER13 = league_again("C13_01", 13, "prize money for Poke Balls") + [
 ] + league_again("C13_02", 13, "more prize money") + [
     {
         "id": "C13_02_OAK", "chapter": 13,
+        "title": "Oak's POKeDEX rating (not 60 species yet)",
+        "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
+        "steps": oak_rating("Oak: not 60 species yet") + [save()],
+    },
+] + league_again("C13_03", 13, "prize money once more") + [
+    {
+        "id": "C13_03_OAK", "chapter": 13,
         "title": "Oak's POKeDEX rating (not 60 species yet)",
         "state": {"vars": {"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}},
         "steps": oak_rating("Oak: not 60 species yet") + [save()],
@@ -1996,11 +2043,10 @@ CHAPTER14 = [
 CHAPTER15 = [
     {
         "id": "C15_01_ENOUGH", "chapter": 15,
-        "title": "60 species? Full Restores for the Elite Four",
+        "title": "60 species? To the Indigo Plateau",
+        #  (The healing items for the Elite Four: league_again().)
         "steps": [only([v], [{"require_dex": {"count": 60, "owned": dex_owned(v)}, "label": "60 species caught"}])
-                  for v in STARTERS] + [heal(PC["INDIGO"], "ToIndigoPC")]
-        + buy("MAP_INDIGO_PLATEAU_POKEMON_CENTER_1F", [0, 7], 2, 6, "BuyFullRestore")
-        + [heal(PC["INDIGO"], "ShopToIndigoNurse"), save()],
+                  for v in STARTERS] + [heal(PC["INDIGO"], "ToIndigoPC"), save()],
     },
 ] + league_again("C15_02", 15, "for the National POKeDEX") + [
     {

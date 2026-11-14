@@ -1503,15 +1503,25 @@ class Builder:
             return
         if "buy" in step:
             b = step["buy"]
-            out.append({"type": "BUY", "label": step.get("label", "Buy"), "p0": b["index"], "p1": b["quantity"]})
+            bought = {"type": "BUY", "label": step.get("label", "Buy"), "p0": b["index"], "p1": b["quantity"]}
+            #  p2: a healing item of the League, for the program's count of
+            #  the bag (1 REVIVE, 2 FULL RESTORE or MAX POTION); p3 1: only
+            #  what is missing up to the quantity.
+            if b.get("kind"):
+                bought["p2"] = {"revive": 1, "restore": 2}[b["kind"]]
+                if b.get("up_to"):
+                    bought["p3"] = 1
+            out.append(bought)
             if b.get("item"):
                 self.state.items[b["item"]] = self.state.items.get(b["item"], 0) + b["quantity"]
             return
         if "heal_items" in step:
             #  p0 1: after a legendary Pokemon (REVIVE and FULL RESTORE on
-            #  party slots 1 and 2, whatever is known of them).
+            #  party slots 1 and 2, whatever is known of them). 2, 3: after
+            #  a room of the League again (3: before the Champion).
+            modes = {"after_legendary": 1, "league_again": 2, "league_again_last": 3}
             out.append({"type": "HEAL_ITEMS", "label": step.get("label", "Heal with items"),
-                        "p0": 1 if step["heal_items"] == "after_legendary" else 0})
+                        "p0": modes.get(step["heal_items"], 0)})
             return
         if "boulder" in step:
             self.boulder_puzzle(step, out)
