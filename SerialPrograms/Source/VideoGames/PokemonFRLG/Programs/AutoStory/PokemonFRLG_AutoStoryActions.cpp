@@ -1773,6 +1773,11 @@ public:
         return false;
     }
 
+    //  The steps taken along the line so far (those of step()).
+    uint64_t steps() const{
+        return m_steps;
+    }
+
     //  Onto the first tile, where the routes there and back meet.
     void to_first_tile(){
         for (int attempt = 0; attempt < 4; attempt++){
@@ -1835,11 +1840,13 @@ public:
             );
             if (moved){
                 m_pos = target;
+                m_steps++;
             }
         }else{
             int made = 0;
             result = story_grass_run(m_rt, direction, moves, kind, m_where, throw_on_loss, made, sure, m_run);
             moved = made > 0 || result != StoryBattleResult::NO_BATTLE;
+            m_steps += (uint64_t)std::max(0, made);
             if (made > moves){
                 //  Past the end of the line (the input lasted too long):
                 //  look, and back onto it.
@@ -1849,6 +1856,12 @@ public:
         }
         if (result == StoryBattleResult::LOST){
             return result;      //  At the Pokemon Center.
+        }
+        if (m_rt.safari_over){
+            //  The Safari Game ended on the way (the PA's text is up, or the
+            //  last ball is thrown): the player no longer walks here, and a
+            //  look at where they stand would be a look at that text.
+            return result;
         }
 
         if (m_rt.false_battles != false_before){
@@ -1920,6 +1933,7 @@ private:
     bool m_forward = true;      //  heading for the far end
     int m_not_moved = 0;
     int m_false_in_row = 0;
+    uint64_t m_steps = 0;
 };
 
 }
@@ -2551,6 +2565,25 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 std::to_string(rt.collection->caught(slug)) + "/" + std::to_string(rt.collection->needed(slug));
         }
     }else{
+        //  A place's list has the species of both games (the Safari Zone:
+        //  SCYTHER in FireRed, PINSIR in LeafGreen; the Seafoam Islands:
+        //  PSYDUCK or SLOWPOKE). The other game's never come, so a list with
+        //  one of them never got empty: the place was left only after its
+        //  battles in a row without a catch, or after its minutes.
+        if (rt.collection != nullptr){
+            std::set<std::string> in_game;
+            std::set<std::string> other_game;
+            for (const std::string& slug : listed){
+                (rt.collection->needed(slug) > 0 ? in_game : other_game).insert(slug);
+            }
+            if (!in_game.empty() && !other_game.empty()){
+                console.log(
+                    label + ": not in this game (" + rt.collection->game_name() + "), so not looked for: " +
+                    species_names(other_game) + "."
+                );
+                listed = in_game;
+            }
+        }
         for (const std::string& slug : listed){
             if (rt.caught.count(slug) == 0){
                 wanted.insert(slug);
@@ -2613,7 +2646,16 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     int battles = 0;
     size_t caught_here = 0;
     const WallClock start = current_time();
-    const WallClock deadline = start + (safari ? std::chrono::minutes(30) : std::chrono::minutes(minutes_limit));
+    //  A Safari Game ends by itself: after 600 steps, or with the last of
+    //  its 30 balls. How long the steps take depends on the battles on the
+    //  way, which take 20 seconds each also when they are only run from. In
+    //  the east area on 14 November, 61 to 64 battles a game left some 500
+    //  steps on the grass in 30 minutes (15 to 60 short of the end, with
+    //  those of the way there), and a limit of 30 minutes ended four games
+    //  in a row, and with the fourth the program. The limit is for a game
+    //  that does not end at all.
+    const std::chrono::minutes safari_limit(75);
+    const WallClock deadline = start + (safari ? safari_limit : std::chrono::minutes(minutes_limit));
     try{
         while (current_time() < deadline && !rt.safari_over){
             if (!safari && (rt.battle.dex_species.empty() || idle >= idle_limit || rt.no_balls)){
@@ -2693,14 +2735,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         (marked > 0 ? ", " + std::to_string(marked) + " found caught before (the ball mark)" : std::string()) +
         " in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
         " minutes. Not caught: " + species_names(left) + "." +
-        (rt.no_balls ? " No balls left." : ""),
+        (rt.no_balls ? " No balls left." : "") +
+        (safari ? " " + std::to_string(spot.steps()) + " steps on the grass (the game ends after 600, with those "
+            "of the way there)." : std::string()),
         COLOR_BLUE
     );
     if (safari){
         if (!rt.safari_over){
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::SEND_ERROR_REPORT,
-                "story_dex(): The Safari Game did not end in 30 minutes: " + label,
+                "story_dex(): The Safari Game did not end in " + std::to_string(safari_limit.count()) +
+                " minutes: " + label,
                 console
             );
         }
