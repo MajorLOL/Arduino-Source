@@ -126,13 +126,16 @@ ProgramSelect::ProgramSelect(QWidget& parent, PanelHolder& holder)
     );
 }
 
+//  PocketPilot: the list is locked, not disabled. A disabled list does not
+//  scroll: while a program ran, the wheel did nothing and the bar did not
+//  move.
 void ProgramSelect::lock(){
     m_locked = true;
-    m_active_list->setEnabled(false);
+    m_active_list->set_locked(true);
 }
 void ProgramSelect::unlock(){
     m_locked = false;
-    m_active_list->setEnabled(true);
+    m_active_list->set_locked(false);
 }
 
 void ProgramSelect::add(std::unique_ptr<PanelListDescriptor> list){
@@ -198,7 +201,7 @@ void ProgramSelect::change_list(int index){
     PERSISTENT_SETTINGS().panels["ProgramCategory"] = m_lists[index]->name();
     delete m_active_list;
     m_active_list = m_lists[index]->make_QWidget(*this, m_holder);
-    m_active_list->setEnabled(!m_locked);
+    m_active_list->set_locked(m_locked);
     layout()->addWidget(m_active_list);
     //  The words searched for were for the other game.
     if (m_search->text().isEmpty()){

@@ -32,12 +32,9 @@ PanelListWidget::PanelListWidget(
     QWidget& parent, PanelHolder& holder,
     std::vector<PanelEntry> list
 )
-    : QListWidget(&parent)
+    : PocketPilot::ProgramList(&parent)     //  With the looks of the side bar.
     , m_panel_holder(holder)
 {
-    //  The looks of the side bar: how a row is drawn, and its height.
-    PocketPilot::style_program_list(*this);
-
     for (PanelEntry& item : list){
         const std::string& display_name = item.display_name;
         PanelDescriptor* descriptor = item.descriptor.get();
@@ -112,6 +109,9 @@ PanelListWidget::PanelListWidget(
             if (item->data(PocketPilot::PROGRAM_LIST_SECTION).toBool()){
                 return;
             }
+            if (refuse_while_locked(*item)){
+                return;
+            }
             handle_panel_clicked(item->text().toStdString());
         }
     );
@@ -122,9 +122,24 @@ PanelListWidget::PanelListWidget(
             if (item->data(PocketPilot::PROGRAM_LIST_SECTION).toBool()){
                 return;
             }
+            if (refuse_while_locked(*item)){
+                return;
+            }
             handle_panel_clicked(item->text().toStdString());
         }
     );
+}
+
+bool PanelListWidget::refuse_while_locked(const QListWidgetItem& item){
+    if (!locked()){
+        return false;
+    }
+    //  A program runs: no other one is opened. (The row of the one that
+    //  runs needs no words.)
+    if (!item.isSelected()){
+        show_locked_hint();
+    }
+    return true;
 }
 
 

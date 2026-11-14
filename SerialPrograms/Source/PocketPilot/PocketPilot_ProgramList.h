@@ -9,15 +9,18 @@
  *  is not a regular one (beta, third party, ...) has a small tag behind its
  *  name.
  *
+ *  While a program runs, another one cannot be opened. The list is locked
+ *  for that, not disabled: a disabled list does not scroll either (the wheel
+ *  does nothing, and its bar does not move).
+ *
  */
 
 #ifndef PokemonAutomation_PocketPilot_ProgramList_H
 #define PokemonAutomation_PocketPilot_ProgramList_H
 
+#include <QListWidget>
 #include <QString>
 #include <QStyledItemDelegate>
-
-class QListWidget;
 
 namespace PokemonAutomation{
 namespace PocketPilot{
@@ -52,6 +55,31 @@ public:
         QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index
     ) const override;
     virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+};
+
+
+//  The list of a game's programs, with the looks of the side bar.
+class ProgramList : public QListWidget{
+public:
+    explicit ProgramList(QWidget* parent = nullptr);
+
+    //  Locked: a click or a key no longer picks a row, and the rows are
+    //  drawn in the colors of a list that is off. The list still scrolls,
+    //  with the wheel and by its bar, and still shows what a program is
+    //  when the mouse rests on it.
+    void set_locked(bool on);
+    bool locked() const{ return m_locked; }
+
+    //  Says, where the mouse is, why a click on a locked list did nothing.
+    void show_locked_hint();
+
+protected:
+    virtual QItemSelectionModel::SelectionFlags selectionCommand(
+        const QModelIndex& index, const QEvent* event = nullptr
+    ) const override;
+
+private:
+    bool m_locked = false;
 };
 
 

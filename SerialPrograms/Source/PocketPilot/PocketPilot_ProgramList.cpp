@@ -6,9 +6,12 @@
  */
 
 #include "Common/Compiler.h"
+#include <QCursor>
 #include <QListWidget>
 #include <QPainter>
 #include <QPainterPath>
+#include <QToolTip>
+#include <QVariant>
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_ProgramList.h"
 
@@ -21,6 +24,9 @@ const int ROW_PADDING = 10;         //  Added to the height of the text.
 const int SECTION_EXTRA = 8;        //  Room above the title of a section.
 const int SIDE = 6;                 //  From the list's edge to a row's highlight.
 const int TEXT_LEFT = 28;           //  Where a program's name starts.
+
+//  Set on a list that is locked: how its rows know.
+const char* const LOCKED_PROPERTY = "ppLocked";
 
 }
 
@@ -90,7 +96,9 @@ void ProgramListDelegate::paint(
 ) const{
     const ThemeColors& theme = theme_colors();
     const QRect row = option.rect;
-    const bool enabled = option.state.testFlag(QStyle::State_Enabled);
+    //  A locked list looks like one that is off.
+    const bool locked = option.widget != nullptr && option.widget->property(LOCKED_PROPERTY).toBool();
+    const bool enabled = option.state.testFlag(QStyle::State_Enabled) && !locked;
     const QString text = index.data(Qt::DisplayRole).toString();
 
     painter->save();
@@ -178,6 +186,38 @@ void ProgramListDelegate::paint(
     );
 
     painter->restore();
+}
+
+
+
+ProgramList::ProgramList(QWidget* parent)
+    : QListWidget(parent)
+{
+    style_program_list(*this);
+}
+
+void ProgramList::set_locked(bool on){
+    if (m_locked == on){
+        return;
+    }
+    m_locked = on;
+    setProperty(LOCKED_PROPERTY, on);
+    viewport()->update();
+}
+
+void ProgramList::show_locked_hint(){
+    QToolTip::showText(QCursor::pos(), "A program is running. Stop it to open another one.", this);
+}
+
+QItemSelectionModel::SelectionFlags ProgramList::selectionCommand(
+    const QModelIndex& index, const QEvent* event
+) const{
+    //  What the user does with the mouse and the keys goes through here;
+    //  what the program itself marks (the open program) does not.
+    if (m_locked){
+        return QItemSelectionModel::NoUpdate;
+    }
+    return QListWidget::selectionCommand(index, event);
 }
 
 
