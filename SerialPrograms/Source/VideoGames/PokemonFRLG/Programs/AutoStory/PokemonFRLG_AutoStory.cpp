@@ -1491,6 +1491,43 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
     rt.collection_at_save = COLLECTION.snapshot();
+    //  A run that ends between two saves (stopped by hand, or an error after
+    //  the last retry) leaves what it caught since the last save behind: the
+    //  next start loads that save. The table goes back to it too, as it does
+    //  after a reset within the run. (After the fourth Safari Game of 14
+    //  November the program stopped, and the table kept three catches that
+    //  the game no longer had. A species the table has enough of is not
+    //  looked for in chapter 20.) The table cannot be edited during a run.
+    struct CollectionBackToSave{
+        StoryRuntime& runtime;
+        ~CollectionBackToSave(){
+            try{
+                if (runtime.collection == nullptr){
+                    return;
+                }
+                size_t changed = 0;
+                for (const auto& item : runtime.collection->snapshot()){
+                    auto iter = runtime.collection_at_save.find(item.first);
+                    const bool known = iter != runtime.collection_at_save.end();
+                    if (item.second.caught != (known ? iter->second.caught : 0) ||
+                        item.second.shiny != (known ? iter->second.shiny : 0)
+                    ){
+                        changed++;
+                    }
+                }
+                if (changed == 0){
+                    return;
+                }
+                runtime.collection->restore(runtime.collection_at_save);
+                runtime.console.log(
+                    "The POKeDEX table is as it was at the last save again: what was caught after that save (" +
+                    std::to_string(changed) + " species) is not in it, and the next start loads it.",
+                    COLOR_BLUE
+                );
+            }catch (...){
+            }
+        }
+    } collection_back_to_save{rt};
     {
         size_t registered, total, to_catch;
         COLLECTION.counts_summary(registered, total, to_catch);
