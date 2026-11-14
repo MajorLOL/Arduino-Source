@@ -121,6 +121,8 @@ class Builder:
         #  Where the shortcuts were taken (for the report).
         self.shortcut_log = []
         self.segment_no_repel = False
+        #  No REPEL was ever on (see REPEL_AFTER).
+        self.state.repel_left = -Builder.REPEL_AFTER
 
     # ------------------------------------------------------------ helpers
     def layout_tiles(self, map_id, layout_id):
@@ -357,22 +359,38 @@ class Builder:
     def walk_to(self, goals, label, out, end_mode="STOP", face=None, allow_trigger=False, face_map=None,
                 shortcuts=False):
         """Route to any of goals [(map,x,y)], emitting legs and actions.
-        shortcuts: first an ESCAPE ROPE out of a cave or building, Fly, a
-        REPEL, where they pay (not in legs the program walks again and
-        again)."""
+        shortcuts: first an ESCAPE ROPE out of a cave or building, Fly, and
+        on the way a MAX REPEL, where they pay (not in legs the program
+        walks again and again)."""
         if shortcuts:
             self.shortcuts(goals, label, out)
         guard = 0
+        parts = {}
         while True:
             guard += 1
             if guard > 30:
-                raise StoryError("Too many planned battles on the way to %s" % label)
+                raise StoryError("Too many planned battles and REPELs on the way to %s" % label)
             start = self.node()
             route = self.engine.route(start, goals, start_facing=self.pos[3])
             if route is None:
                 raise StoryError("No route for '%s' from %s to %s" % (label, self.pos, sorted(goals)[:4]))
             route = self.avoid_walk_up_tiles(start, goals, route)
             pb = self.predicted_battle_index(route)
+            rp = self.repel_plan(route, shortcuts)
+            if rp is not None and (pb is None or rp[1] <= pb[0]):
+                #  The walk up to where a MAX REPEL is used, or up to where
+                #  the one that is on ends; the rest is planned from there.
+                what, cut, saved = rp
+                if cut > 0:
+                    name = label + ("_ToRepel" if what == "use" else "_RepelEnds")
+                    parts[name] = parts.get(name, 0) + 1
+                    if parts[name] > 1:
+                        name += str(parts[name])
+                    self.check_scenes_on_the_way(start, route[:cut], label)
+                    self.emit_route(route[:cut], name, out, "STOP")
+                if what == "use":
+                    self.use_repel(label, out, saved)
+                continue
             if pb is not None:
                 i, mid, key, tdir, dist = pb
                 part = route[: i + 1]
@@ -419,9 +437,10 @@ class Builder:
             if at is not None and k not in ("warp",):
                 self.warnings.append("%s: %s walks where trainer %s may stand (%d,%d)" % (
                     self.segment_id, label, at, node[1], node[2]))
-            if k in ("walk", "surf", "jump", "spin", "dismount", "stepwarp") and self.state.repel_left > 0:
-                #  "REPEL's effect wore off..." where it gets to 0 (the
-                #  program closes the text); wild battles from then on.
+            if k in Builder.REPEL_STEP_KINDS and self.state.repel_left > -Builder.REPEL_AFTER:
+                #  "REPEL's effect wore off..." where it gets to 0 (the next
+                #  press of the d-pad closes that text, see REPEL_STEP_KINDS);
+                #  wild battles from then on.
                 self.state.repel_left -= 1
                 if self.state.repel_left == REPEL_MARGIN:
                     self.engine.invalidate()
@@ -783,10 +802,33 @@ class Builder:
     #  in: about 25 s.
     COST_ROPE = 60.0
     ROPE_MARGIN = 30.0
-    #  A MAX REPEL (250 steps) when the walk has at least this many tiles
-    #  with wild Pokemon (after the Hall of Fame).
-    REPEL_MIN_ENCOUNTER_TILES = 60
+    #  A MAX REPEL (250 steps, after the Hall of Fame) where it keeps at
+    #  least this many wild battles away, as the maps' encounter rates have
+    #  it: a battle takes about half a minute and wears the team down on
+    #  the way to a legendary Pokemon; the bag takes 25 s, and the REPEL
+    #  costs 700.
+    REPEL_MIN_BATTLES = 2.0
     REPEL_STEPS = 250
+    #  The edges that are a step for the game's count (UpdateRepelCounter(),
+    #  from TryStartStepBasedScript(), for every step the player takes: a
+    #  ledge jump is one). Not the step onto a warp tile (the warp comes
+    #  first there), not getting on or off SURF, a waterfall or a spin (the
+    #  game moves the player), nor the way in through a door.
+    #  Where the count gets to 0 the game says "REPEL's effect wore off..."
+    #  (EventScript_RepelWoreOff: a sign's text box). Its wait for a button
+    #  is over with A or B, and just as well with a direction held other
+    #  than the one the player faced at the last talk (WaitForAorBPress(),
+    #  with the script about to end): the walk's next press that way closes
+    #  it. So the program hardly ever sees that text (no run logged it), and
+    #  the count here has to say where the REPEL ends.
+    REPEL_STEP_KINDS = ("walk", "surf", "jump", "cut", "smash", "item", "door")
+    #  While a REPEL is on the game refuses another one ("...the effects of
+    #  a REPEL lingered from earlier"): the next one this many steps after
+    #  the one before ended by the count here (WorldState.repel_left goes
+    #  on below 0 that far). The real walk has more steps than the count (a
+    #  step back after one too far), rarely fewer: the step that starts a
+    #  trainer's battle or a scene is none for the game.
+    REPEL_AFTER = 5
 
     def cost_from(self, pos, goals, surfing=False):
         saved = (self.pos, self.surfing)
@@ -858,9 +900,8 @@ class Builder:
 
     def shortcuts(self, goals, label, out):
         """Before a walk: an ESCAPE ROPE out of a cave or a building, Fly
-        (from anywhere in Kanto, to the town nearest the goal), and after
-        the Hall of Fame a MAX REPEL for a walk through wild Pokemon; each
-        only where it pays clearly."""
+        (from anywhere in Kanto, to the town nearest the goal); each only
+        where it pays clearly. (The MAX REPEL: repel_plan().)"""
         walk = self.route_cost(goals)
         least = min(Builder.COST_FLY + Builder.FLY_MARGIN, Builder.COST_ROPE + Builder.ROPE_MARGIN)
         if walk is None or walk > least:
@@ -880,7 +921,6 @@ class Builder:
                 before = self.pos
                 if self.fly(fo[1], label, out):
                     self.shortcut_log.append((self.segment_id, label, "FLY from %s" % before[0], w - fo[0]))
-        self.maybe_repel(goals, label, out)
 
     _map_graph = None
 
@@ -953,22 +993,109 @@ class Builder:
         self.pos = (em, ex, ey, "down")
         self.surfing = False
 
-    def maybe_repel(self, goals, label, out):
+    def wild_odds(self, edge, node):
+        """The chance of a wild battle on this edge of a route without a
+        REPEL: the encounter rate of its map on grass, cave floor and
+        water; for a rock ROCK SMASH breaks, also the rate of the rocks
+        (RockSmashWildEncounter(), which a REPEL stops as well)."""
+        k = edge["kind"]
+        if k not in Builder.REPEL_STEP_KINDS:
+            return 0.0
+        odds = 0.0
+        if "encounter" in self.engine.tile_risk(self.engine.view(node[0]), node[1], node[2], k == "surf", repel=False):
+            odds = (self.gd.water_rate if k == "surf" else self.gd.land_rate).get(node[0], 0) / 100.0
+        if k == "smash":
+            odds += self.gd.rock_rate.get(node[0], 0) / 100.0
+        return odds
+
+    def repel_plan(self, route, may_use):
+        """What a MAX REPEL changes about this route. None: nothing.
+        ("ends", i, 0): the one that is on ends after route[:i] with wild
+        Pokemon still ahead: the rest is planned again, without it.
+        ("use", i, battles): one is used after route[:i], and keeps about
+        that many wild battles away.
+
+        It is used as late as it can be: right before the first tile with
+        wild Pokemon, not at the start of the walk. (Used in the Pokemon
+        Center of One Island, it was over four steps before the rock at
+        the foot of Mt. Ember's Summit Path: a wild Pokemon came out of the
+        rock, and every one of the cave after it. The same on the way to
+        Zapdos, Articuno, the Ruby and Mewtwo: town and sea first, the cave
+        last.)
+        A walk that ends in a cave or on a route with grass goes on there
+        (boulders to push, the way to the legendary Pokemon): only its land
+        counts then, the REPEL is not spent on the sea before it. With more
+        than 250 steps to cover: a second one where the first ends if the
+        bag has it, else the 250 steps that keep the most battles away."""
         import os
-        if (not self.postgame or self.segment_no_repel or self.state.repel_left > 0
-                or (self.state.items.get("MAX_REPEL", 0) <= 0 and not os.environ.get("STORY_REPELS_UNLIMITED"))):
-            return
-        route = self.engine.route(self.node(), goals, start_facing=self.pos[3])
-        if route is None:
-            return
-        tiles = sum(1 for e, _ in route if "encounter" in e.get("risk", ()))
-        if tiles < Builder.REPEL_MIN_ENCOUNTER_TILES:
-            return
+        n = len(route)
+        left = self.state.repel_left
+        counted = [1 if e["kind"] in Builder.REPEL_STEP_KINDS else 0 for e, _ in route]
+
+        def standing(c):
+            #  After route[:c] the player stands on land (the bag can be
+            #  opened, a leg can end), not in the sight of a trainer that
+            #  turns around.
+            if c == 0:
+                return not self.surfing
+            e, nd = route[c - 1]
+            return (e["kind"] in ("walk", "jump", "dismount", "cut", "smash", "item", "door")
+                    and not nd[4] and "trainer" not in e.get("risk", ()))
+
+        if left > REPEL_MARGIN:
+            steps = 0
+            for i in range(n):
+                steps += counted[i]
+                if steps >= left - REPEL_MARGIN and standing(i + 1):
+                    #  (On the water the walk goes on to the shore first:
+                    #  nothing to plan differently there.)
+                    if any(self.wild_odds(e, nd) > 0 for e, nd in route[i + 1:]):
+                        return ("ends", i + 1, 0)
+                    break
+            return None
+        have = 99 if os.environ.get("STORY_REPELS_UNLIMITED") else self.state.items.get("MAX_REPEL", 0)
+        if not may_use or not self.postgame or self.segment_no_repel or have <= 0 or n == 0:
+            return None
+        land_only = route[-1][1][0] in self.gd.land_encounters
+        odds = [0.0 if (land_only and e["kind"] == "surf") else self.wild_odds(e, nd) for e, nd in route]
+        steps_before = [0] * (n + 1)
+        odds_before = [0.0] * (n + 1)
+        for i in range(n):
+            steps_before[i + 1] = steps_before[i] + counted[i]
+            odds_before[i + 1] = odds_before[i] + odds[i]
+        #  The steps it keeps the wild Pokemon away, as the router plans
+        #  them (the last ones count as without it).
+        lasts = Builder.REPEL_STEPS - REPEL_MARGIN - 1
+
+        def saved(c):
+            end = c
+            while end < n and steps_before[end + 1] - steps_before[c] <= lasts:
+                end += 1
+            return odds_before[end] - odds_before[c]
+
+        #  Not before the one that is on (its last steps) is over for sure.
+        wait = max(0, left + Builder.REPEL_AFTER)
+        spots = [c for c in range(n) if steps_before[c] >= wait and standing(c)]
+        if not spots:
+            return None
+        save = {c: saved(c) for c in spots}
+        most = max(save.values())
+        if most < Builder.REPEL_MIN_BATTLES:
+            return None
+        risky = [i for i in range(n) if odds[i] > 0 and i >= spots[0]]
+        first = max(c for c in spots if c <= risky[0])
+        beyond = (odds_before[n] - odds_before[first]) - save[first]
+        if save[first] >= Builder.REPEL_MIN_BATTLES and (beyond < 1.0 or (have >= 2 and beyond >= Builder.REPEL_MIN_BATTLES)):
+            return ("use", first, save[first])
+        best = max(c for c in spots if save[c] >= most - 1e-9)
+        return ("use", best, save[best])
+
+    def use_repel(self, label, out, saved):
         out.append({"type": "USE_REPEL", "label": label + "_MaxRepel"})
         self.state.items["MAX_REPEL"] = self.state.items.get("MAX_REPEL", 0) - 1
         self.state.repel_left = Builder.REPEL_STEPS
         self.engine.invalidate()
-        self.shortcut_log.append((self.segment_id, label, "MAX REPEL", tiles))
+        self.shortcut_log.append((self.segment_id, label, "MAX REPEL", saved))
 
     def no_repel_here(self, what):
         """Catching needs the wild Pokemon: no REPEL may still be on."""
@@ -2057,6 +2184,12 @@ class Builder:
             start_pos = self.pos
             self.segment_id = seg["id"]
             self.segment_no_repel = bool(seg.get("no_repel"))
+            if self.segment_no_repel and self.state.repel_left > 0:
+                #  Its walks are planned without the REPEL that is still on
+                #  from the segment before (its last steps): they are walked
+                #  again later, when none is.
+                self.state.repel_left = 0
+                self.engine.invalidate()
             import os as _os
             import time as _time
             _t0 = _time.time()

@@ -2323,8 +2323,9 @@ CHAPTER19 = [
         "title": "Mewtwo in Cerulean Cave (weakened, Ultra Balls)",
         "steps": [
             heal(PC["FUCHSIA"], "ToFuchsiaPC"),
-            #  A MAX REPEL first: the way to Mewtwo.
-        ] + max_repels("MAP_FUCHSIA_CITY_MART", 1) + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
+            #  MAX REPELs first: the way to Mewtwo, some 290 steps through
+            #  the cave (the second one where the first ends).
+        ] + max_repels("MAP_FUCHSIA_CITY_MART", 2) + buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls") + [
             heal(PC["CERULEAN"], "FuchsiaToCeruleanPC"),
             save(),
             goto("MAP_CERULEAN_CAVE_B1F", [[7, 13]], "ToMewtwo"),

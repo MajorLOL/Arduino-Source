@@ -300,7 +300,9 @@ def main():
         for w in b.warnings:
             print("  WARNING: %s" % w)
         for seg_id, label, kind, gain in b.shortcut_log:
-            print("  SHORTCUT: %-26s %-36s %-34s %7.0f" % (seg_id, label[:36], kind[:34], gain))
+            #  The gain: route cost saved; for a MAX REPEL, the wild battles it keeps away.
+            print("  SHORTCUT: %-26s %-36s %-34s %7s" % (
+                seg_id, label[:36], kind[:34], ("%.1f" if kind == "MAX REPEL" else "%.0f") % gain))
         if b.state.items:
             print("  ITEMS LEFT: %s" % ", ".join("%s %d" % kv for kv in sorted(b.state.items.items())))
     if failed:

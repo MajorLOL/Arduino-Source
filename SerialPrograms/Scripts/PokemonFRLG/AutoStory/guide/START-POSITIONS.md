@@ -855,8 +855,8 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 |---|---|---|---|---|---|
 | **1** | Saffron City Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: SaffronToFuchsiaPC_Out |
 | **6** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: BuyMaxRepels |
-| **21** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | USE_REPEL: Zapdos_MaxRepel |
-| **31** | Power Plant | (5, 10) | down | After a save | HEAL_ITEMS: Heal with items after Zapdos |
+| **21** | Route 10 Pokemon Center 1F | (7, 4) | up | After a save | WALK: Zapdos_ToRepel |
+| **32** | Power Plant | (5, 10) | down | After a save | HEAL_ITEMS: Heal with items after Zapdos |
 
 **Step 1:** Saffron City Pokemon Center 1F (7, 4), facing up
 
@@ -870,9 +870,9 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 ![C11_02_ZAPDOS step 21](images/Route10_PokemonCenter_1F_7_4_up.png)
 
-**Step 31:** Power Plant (5, 10), facing down
+**Step 32:** Power Plant (5, 10), facing down
 
-![C11_02_ZAPDOS step 31](images/PowerPlant_5_10_down.png)
+![C11_02_ZAPDOS step 32](images/PowerPlant_5_10_down.png)
 
 ## C11_03_ARTICUNO
 
@@ -881,9 +881,9 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Route 10 Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: Route10ToFuchsiaPC_Out |
-| **7** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | USE_REPEL: ToSeafoamB3F_MaxRepel |
-| **45** | Seafoam Islands B4F | (9, 3) | left | After a save | WALK: Articuno |
-| **49** | Seafoam Islands B4F | (9, 3) | up | After a save | HEAL_ITEMS: Heal with items after Articuno |
+| **7** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After a save | WALK: ToSeafoamB3F_RepelEnds |
+| **47** | Seafoam Islands B4F | (9, 3) | left | After a save | WALK: Articuno |
+| **51** | Seafoam Islands B4F | (9, 3) | up | After a save | HEAL_ITEMS: Heal with items after Articuno |
 
 **Step 1:** Route 10 Pokemon Center 1F (7, 4), facing up
 
@@ -893,13 +893,13 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 ![C11_03_ARTICUNO step 7](images/FuchsiaCity_PokemonCenter_1F_7_4_up.png)
 
-**Step 45:** Seafoam Islands B4F (9, 3), facing left
+**Step 47:** Seafoam Islands B4F (9, 3), facing left
 
-![C11_03_ARTICUNO step 45](images/SeafoamIslands_B4F_9_3_left.png)
+![C11_03_ARTICUNO step 47](images/SeafoamIslands_B4F_9_3_left.png)
 
-**Step 49:** Seafoam Islands B4F (9, 3), facing up
+**Step 51:** Seafoam Islands B4F (9, 3), facing up
 
-![C11_03_ARTICUNO step 49](images/SeafoamIslands_B4F_9_3_up.png)
+![C11_03_ARTICUNO step 51](images/SeafoamIslands_B4F_9_3_up.png)
 
 ## C12_01_ONE_ISLAND
 
@@ -919,7 +919,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
-| **1** | One Island Pokemon Center 1F | (5, 4) | up | Start of the segment (the segment before saves here) | WALK: RockSmashMan |
+| **1** | One Island Pokemon Center 1F | (5, 4) | up | Start of the segment (the segment before saves here) | WALK: RockSmashMan_RepelEnds |
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
@@ -961,7 +961,7 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
-| **1** | Three Island Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: Lostelle_ToTrainer |
+| **1** | Three Island Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: Lostelle_ToRepel |
 
 **Step 1:** Three Island Pokemon Center 1F (7, 4), facing up
 
@@ -974,16 +974,16 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
 | **1** | Two Island Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: FerryToOneIsland |
-| **60** | Mt Ember Summit | (9, 7) | up | After a save | WALK: Moltres |
-| **64** | Mt Ember Summit | (9, 7) | up | After a save | RESET: Reload after Moltres |
+| **62** | Mt Ember Summit | (9, 7) | up | After a save | WALK: Moltres |
+| **66** | Mt Ember Summit | (9, 7) | up | After a save | RESET: Reload after Moltres |
 
 **Step 1:** Two Island Pokemon Center 1F (7, 4), facing up
 
 ![C12_06_MOLTRES step 1](images/TwoIsland_PokemonCenter_1F_7_4_up.png)
 
-**Step 60, 64:** Mt Ember Summit (9, 7), facing up
+**Step 62, 66:** Mt Ember Summit (9, 7), facing up
 
-![C12_06_MOLTRES step 60, 64](images/MtEmber_Summit_9_7_up.png)
+![C12_06_MOLTRES step 62, 66](images/MtEmber_Summit_9_7_up.png)
 
 ## C12_07_BACK_TO_KANTO
 
@@ -1064,10 +1064,10 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | **1** | Pallet Town | (6, 8) | down | Start of the segment (the segment before saves here) | SKIP_UNLESS_LEFT: Moltres left? |
 | **6** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: BuyMaxRepels |
 | **21** | Vermilion City Pokemon Center 1F | (7, 4) | up | After a save | WALK: FerryToOneIsland |
-| **35** | One Island Pokemon Center 1F | (5, 4) | up | After a save | USE_REPEL: ToMtEmber_MaxRepel |
-| **84** | Mt Ember Summit | (9, 7) | up | After a save | WALK: Moltres |
-| **88** | Mt Ember Summit | (9, 7) | up | After a save | RESET: Reload after Moltres |
-| **109** | One Island Pokemon Center 1F | (5, 4) | up | After a save | WALK: MoltresFerryHome |
+| **35** | One Island Pokemon Center 1F | (5, 4) | up | After a save | WALK: ToMtEmber |
+| **88** | Mt Ember Summit | (9, 7) | up | After a save | WALK: Moltres |
+| **92** | Mt Ember Summit | (9, 7) | up | After a save | RESET: Reload after Moltres |
+| **115** | One Island Pokemon Center 1F | (5, 4) | up | After a save | WALK: MoltresFerryHome |
 
 **Step 1:** Pallet Town (6, 8), facing down
 
@@ -1081,13 +1081,13 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 ![C13_01_MOLTRES step 21](images/VermilionCity_PokemonCenter_1F_7_4_up.png)
 
-**Step 35, 109:** One Island Pokemon Center 1F (5, 4), facing up
+**Step 35, 115:** One Island Pokemon Center 1F (5, 4), facing up
 
-![C13_01_MOLTRES step 35, 109](images/OneIsland_PokemonCenter_1F_5_4_up.png)
+![C13_01_MOLTRES step 35, 115](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
-**Step 84, 88:** Mt Ember Summit (9, 7), facing up
+**Step 88, 92:** Mt Ember Summit (9, 7), facing up
 
-![C13_01_MOLTRES step 84, 88](images/MtEmber_Summit_9_7_up.png)
+![C13_01_MOLTRES step 88, 92](images/MtEmber_Summit_9_7_up.png)
 
 ## C13_02_ELITE_FOUR
 
@@ -1448,16 +1448,16 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 | Start at step | Place | Tile (x, y) | Facing | Why | Next step |
 |---|---|---|---|---|---|
-| **1** | One Island Pokemon Center 1F | (5, 4) | up | Start of the segment (the segment before saves here) | USE_REPEL: RocketPassword_MaxRepel |
-| **21** | Mt Ember Exterior | (42, 41) | up | After a save | WALK: ToRubyPathB2F |
+| **1** | One Island Pokemon Center 1F | (5, 4) | up | Start of the segment (the segment before saves here) | WALK: RocketPassword |
+| **23** | Mt Ember Exterior | (42, 41) | up | After a save | WALK: ToRubyPathB2F_ToRepel |
 
 **Step 1:** One Island Pokemon Center 1F (5, 4), facing up
 
 ![C16_02_RUBY_PATH step 1](images/OneIsland_PokemonCenter_1F_5_4_up.png)
 
-**Step 21:** Mt Ember Exterior (42, 41), facing up
+**Step 23:** Mt Ember Exterior (42, 41), facing up
 
-![C16_02_RUBY_PATH step 21](images/MtEmber_Exterior_42_41_up.png)
+![C16_02_RUBY_PATH step 23](images/MtEmber_Exterior_42_41_up.png)
 
 ## C16_03_RAINBOW_PASS
 
@@ -1576,9 +1576,9 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 |---|---|---|---|---|---|
 | **1** | Route 10 Pokemon Center 1F | (7, 4) | up | Start of the segment (the segment before saves here) | WALK: ToFuchsiaPC_Out |
 | **6** | Fuchsia City Pokemon Center 1F | (7, 4) | up | After healing (with "Save after healing" on) | WALK: BuyMaxRepels |
-| **21** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | USE_REPEL: ToMewtwo_MaxRepel |
-| **38** | Cerulean Cave B1F | (7, 13) | up | After a save | WALK: Mewtwo |
-| **42** | Cerulean Cave B1F | (7, 13) | up | After a save | HEAL_ITEMS: Heal with items after Mewtwo |
+| **21** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | WALK: ToMewtwo_ToRepel |
+| **42** | Cerulean Cave B1F | (7, 13) | up | After a save | WALK: Mewtwo |
+| **46** | Cerulean Cave B1F | (7, 13) | up | After a save | HEAL_ITEMS: Heal with items after Mewtwo |
 
 **Step 1:** Route 10 Pokemon Center 1F (7, 4), facing up
 
@@ -1592,9 +1592,9 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 
 ![C19_01_MEWTWO step 21](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
-**Step 38, 42:** Cerulean Cave B1F (7, 13), facing up
+**Step 42, 46:** Cerulean Cave B1F (7, 13), facing up
 
-![C19_01_MEWTWO step 38, 42](images/CeruleanCave_B1F_7_13_up.png)
+![C19_01_MEWTWO step 42, 46](images/CeruleanCave_B1F_7_13_up.png)
 
 ## C20_01_START
 
@@ -1621,19 +1621,19 @@ Where the player must stand (and face) for every **Start at segment** and **Star
 | **30** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute4? |
 | **38** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectRoute4_Visit2? |
 | **46** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F? |
-| **73** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit2? |
-| **98** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit3? |
-| **123** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F? |
-| **136** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F_Visit2? |
-| **149** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_02_CERULEAN_Out |
+| **74** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit2? |
+| **101** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCaveB1F_Visit3? |
+| **126** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F? |
+| **139** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | SKIP_IF_COLLECTED: CollectCeruleanCave1F_Visit2? |
+| **152** | Cerulean City Pokemon Center 1F | (7, 4) | up | After a save | WALK: C20_02_CERULEAN_Out |
 
 **Step 1:** Cerulean City (22, 20), facing down
 
 ![C20_02_CERULEAN step 1](images/CeruleanCity_22_20_down.png)
 
-**Step 6, 14, 22, 30, 38, 46, 73, 98, 123, 136, 149:** Cerulean City Pokemon Center 1F (7, 4), facing up
+**Step 6, 14, 22, 30, 38, 46, 74, 101, 126, 139, 152:** Cerulean City Pokemon Center 1F (7, 4), facing up
 
-![C20_02_CERULEAN step 6, 14, 22, 30, 38, 46, 73, 98, 123, 136, 149](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
+![C20_02_CERULEAN step 6, 14, 22, 30, 38, 46, 74, 101, 126, 139, 152](images/CeruleanCity_PokemonCenter_1F_7_4_up.png)
 
 ## C20_03_MT_MOON
 

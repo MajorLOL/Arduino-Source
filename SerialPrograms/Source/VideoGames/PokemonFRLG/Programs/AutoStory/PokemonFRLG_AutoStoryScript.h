@@ -145,7 +145,8 @@ enum class StepType : uint8_t{
     ESCAPE_ROPE,        //  an ESCAPE ROPE from the bag: out to where the cave or building was
                         //  entered from outdoors, facing down; then skip the next p0 steps
                         //  (the way out on foot, for a bag without one)
-    USE_REPEL,          //  a MAX REPEL from the bag (250 steps without weaker wild Pokemon)
+    USE_REPEL,          //  a MAX REPEL from the bag (250 steps without weaker wild Pokemon),
+                        //  right before the first tile with wild Pokemon of the walk
     SKIP_IF_COLLECTED,  //  text = the species of the places of the next p0 steps: the program's
                         //  POKeDEX table wants none of them (in its game, with its starter):
                         //  skip those steps

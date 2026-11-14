@@ -178,8 +178,19 @@ class GameData:
         self.land_slugs = {}
         #  The highest level of a wild Pokemon in the grass (or cave) of a map.
         self.wild_max_level = {}
+        #  The encounter rates of a map: of 100 steps on its grass (cave
+        #  floor) or water, that many start a wild battle; of 100 rocks
+        #  ROCK SMASH breaks there, that many have a wild Pokemon under them
+        #  (DoWildEncounterRateTest(): rate * 16 of 1600).
+        self.land_rate = {}
+        self.water_rate = {}
+        self.rock_rate = {}
         for g in groups:
             for e in g["encounters"]:
+                for kind, rates in (("land_mons", self.land_rate), ("water_mons", self.water_rate),
+                                    ("rock_smash_mons", self.rock_rate)):
+                    if kind in e:
+                        rates[e["map"]] = max(rates.get(e["map"], 0), e[kind]["encounter_rate"])
                 if "land_mons" in e:
                     self.land_encounters.add(e["map"])
                     sp = self.wild_species.setdefault((e["map"], e.get("base_label", "")), [])
@@ -335,6 +346,8 @@ class WorldState:
         self.escape = None
         #  Steps the REPEL used still lasts (VAR_REPEL_STEP_COUNT): no wild
         #  battles meanwhile (the team leads by far after the Hall of Fame).
+        #  0 and below: none is on (story.py counts on a few steps below 0:
+        #  how long ago it ended, Builder.REPEL_AFTER).
         self.repel_left = 0
 
     def clone(self):
