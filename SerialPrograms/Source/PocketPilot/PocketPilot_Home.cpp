@@ -583,7 +583,8 @@ void HomePage::refresh(){
         m_title->setText("Pick a game");
         m_lead->setText(
             "Each game has its own programs. A program watches the game through your capture card "
-            "and presses the buttons for you."
+            "and presses the buttons for you. With Claude, at the top right, you can ask about a "
+            "program, or have one built or fixed."
         );
     }
 

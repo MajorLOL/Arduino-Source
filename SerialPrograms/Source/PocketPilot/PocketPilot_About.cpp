@@ -73,6 +73,13 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     name->setObjectName("ppAboutTitle");
     name->setFont(display_font(42));
     names->addWidget(name);
+    QLabel* tagline = new QLabel(
+        "Automation programs for Switch games: run them, and build or fix them with Claude.",
+        &dialog
+    );
+    tagline->setWordWrap(true);
+    names->addWidget(tagline);
+    names->addSpacing(4);
     QLabel* build = new QLabel(
         "Build " + info.build + ", on " + info.upstream_name + " " + info.upstream_version,
         &dialog
@@ -83,8 +90,15 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     names->addStretch(1);
 
     layout->addWidget(paragraph(dialog,
-        info.name + " plays games on a Nintendo Switch by itself. It watches the game through a "
-        "capture card and presses the buttons through a controller board."
+        "A program of " + info.name + " plays a game on a Nintendo Switch by itself: it watches the "
+        "game through a capture card and presses the buttons through a controller board."
+    ));
+
+    layout->addWidget(paragraph(dialog,
+        "<b>Claude.</b> The panel \"Claude\" talks to Claude, the AI model of Anthropic, with an API "
+        "key of your own, which Anthropic bills you for. What you write there and what Claude looks "
+        "up to answer (the log, the options, parts of the source) is sent to Anthropic, and nothing "
+        "before you add a key. Its changes to the source go to a branch of their own."
     ));
 
     layout->addWidget(paragraph(dialog,
@@ -98,7 +112,7 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
 
     layout->addWidget(paragraph(dialog,
         "<b>Not an official product.</b> " + info.name + " is not made, endorsed or supported by "
-        "Nintendo, Game Freak, Creatures or The Pokémon Company. The names of the games "
+        "Nintendo, Game Freak, Creatures, The Pokémon Company or Anthropic. The names of the games "
         "belong to their owners and are used here only to say which game a program is for."
     ));
 
@@ -123,6 +137,13 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     layout->addWidget(buttons);
     QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+
+    //  As tall as its text needs at this width. Left to itself, a window
+    //  is at most two thirds of the screen high: on a small screen the
+    //  text would be cut off.
+    layout->activate();
+    const int width = dialog.minimumWidth();
+    dialog.resize(width, layout->totalHeightForWidth(width));
 
     return owner;
 }

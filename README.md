@@ -1,16 +1,18 @@
-# PocketPilot
+# PocketPilot Studio
 
-<img src="IconResource/pocketpilot.png" width="96" alt="PocketPilot's icon: a handheld console with a play arrow on its screen">
+<img src="IconResource/pocketpilot.png" width="96" alt="PocketPilot Studio's icon: a handheld console with a play arrow on its screen">
 
-PocketPilot plays Pokémon games on a Nintendo Switch by itself. It watches the game through a capture card and presses the buttons through a controller board (for example an ESP32).
+Automation programs for Switch games: run them, and build or fix them with Claude.
 
-It is a personal fork of [Pokémon Automation](https://github.com/PokemonAutomation/Arduino-Source)'s "SerialPrograms", with a new interface, a program that plays the whole story of FireRed and LeafGreen, and fixes of its own. The programs for the other games are those of Pokémon Automation.
+A program of PocketPilot Studio plays a Pokémon game on a Nintendo Switch by itself. It watches the game through a capture card and presses the buttons through a controller board (for example an ESP32). Claude, in a panel of the main window, answers questions about the programs and can change their source: on a branch of its own, which becomes a pull request.
 
-PocketPilot is not made, endorsed or supported by Nintendo, Game Freak, Creatures or The Pokémon Company, nor by the Pokémon Automation project. Please do not ask the Pokémon Automation team for help with this fork: use the [issues of this repository](https://github.com/MajorLOL/Arduino-Source/issues).
+It is a personal fork of [Pokémon Automation](https://github.com/PokemonAutomation/Arduino-Source)'s "SerialPrograms", with a new interface, a program that plays the whole story of FireRed and LeafGreen, Claude built in, and fixes of its own. The programs for the other games are those of Pokémon Automation. Until build 12 its name was PocketPilot; the files and folders of the builds still have that name.
+
+PocketPilot Studio is not made, endorsed or supported by Nintendo, Game Freak, Creatures or The Pokémon Company, nor by Anthropic or the Pokémon Automation project. Please do not ask the Pokémon Automation team for help with this fork: use the [issues of this repository](https://github.com/MajorLOL/Arduino-Source/issues).
 
 ## Getting it
 
-Every push to the branch `pocketpilot` makes a Windows build and tests that it starts. A build that passes is published: the [releases](https://github.com/MajorLOL/Arduino-Source/releases) named "PocketPilot - Windows build N". Unzip `PocketPilot-Windows.zip` and run `SerialPrograms.exe`. Each release also has pictures of that build's interface, taken on the build machine.
+Every push to the branch `pocketpilot` makes a Windows build and tests that it starts. A build that passes is published: the [releases](https://github.com/MajorLOL/Arduino-Source/releases) named "PocketPilot Studio - Windows build N" ("PocketPilot - Windows build N" until build 12). Unzip `PocketPilot-Windows.zip` and run `SerialPrograms.exe`. Each release also has pictures of that build's interface, taken on the build machine.
 
 To keep your settings, close the old program first, then copy its `UserSettings` folder into the new folder.
 
@@ -21,30 +23,31 @@ The hardware and its setup are the same as for Pokémon Automation: see [its doc
 | | |
 |---|---|
 | **Interface** | A top bar, a side bar with the games and a search over the programs, a page with all games as cartridges, a page with the programs of one game and what each does, and a status strip. Two themes of its own (Night and Day) in the color of a starter (Fire, Water or Grass), set under Settings. The two looks of Pokémon Automation are still there ("Classic"). |
+| **Claude** | A panel behind the button "Claude" in the top bar: a conversation with Anthropic's Claude, on an API key of your own. It answers questions about the programs (it can read the program list, the options of the open program, the log and the source), and it builds or fixes a program: every change goes to a branch `claude/...` of this repository, after you have seen and approved it, and from there into a pull request that is built and tested before you merge it. What it needs, what it costs and what it sends: [ASSISTANT.md](SerialPrograms/Source/PocketPilot/ASSISTANT.md). |
 | **Search** | The side bar searches the programs of the game that is open; the Games page searches the programs of all games. |
 | **FRLG AutoStory** | Plays FireRed or LeafGreen from a new game to the Hall of Fame and on: the legendary Pokémon, the Sevii Islands, the National Pokédex, Mewtwo and a Pokédex collection. See [the program's folder](SerialPrograms/Source/VideoGames/PokemonFRLG/Programs/AutoStory). |
 | **Experimental programs** | Programs and options that are new and have not run on a console yet carry the tag "experimental": the FRLG **Level Trainer** (trains the first Pokémon of the party to a level, where the player stands or at one of the AutoStory's nine training places), the FRLG **Box Namer** (types a list of names into the PC's boxes, as an ACE code asks for, and reads every character back from the screen), the FRLG **Input Timing Test** (how long the game takes to show its reaction to a press, and how much that varies), the AutoStory's options "Faster battles", "Shorter looks in the grass" and "Progress on the video", and the option "Walk along the walls" of the FRLG Nugget Bridge Farmer. The Turbo Macro counts its loops. What they are for and how far each was tested: [ROADMAP.md](ROADMAP.md), sections 6 and 7. |
 | **Video frames** | Pictures of the screen are made without Qt's `QVideoFrame::toImage()`, which on some computers grows the program's memory by 0.3 to 1.6 GB an hour while a program runs. See [VideoFrameConversion.h](SerialPrograms/Source/CommonFramework/VideoPipeline/Backends/VideoFrameConversion.h). |
 | **Fixes** | Fixes for bugs found in a review of the whole code: see [the list](SerialPrograms/Source/PocketPilot/FIXES.md). What Pokémon Automation's open issues and other controller programs' users run into, and where this fork stands on each: [ISSUES.md](SerialPrograms/Source/PocketPilot/ISSUES.md), [OTHERS.md](SerialPrograms/Source/PocketPilot/OTHERS.md). |
 | **Colors** | Colored text (in the options, the log window, the lists) is shown in a shade that can be read on the theme's background. |
-| **Builds** | Each build starts once on the build machine, as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that does not start, crashes on the way or cannot take its pictures is not published; one that looks broken shows in its pictures before anyone downloads it. |
+| **Builds** | Each build starts once on the build machine, as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that does not start, crashes on the way or cannot take its pictures is not published; one that looks broken shows in its pictures before anyone downloads it. A pull request into `pocketpilot` is built and tested the same way, as it will be once merged, and not published. |
 | **What it leaves out** | The check for a new version (it is for Pokémon Automation's releases) and Discord Rich Presence by default (it shows as Pokémon Automation, whose Discord application it is). The wallpaper is off until you turn it on. |
 
 What is planned, what could be made faster and what could be added: [ROADMAP.md](ROADMAP.md).
 
 ## Building
 
-PocketPilot builds like Pokémon Automation's SerialPrograms: see [SerialPrograms/BuildInstructions](SerialPrograms/BuildInstructions). The Windows builds are made by [this workflow](.github/workflows/pocketpilot-windows.yml) with Qt 6.10.2.
+PocketPilot Studio builds like Pokémon Automation's SerialPrograms: see [SerialPrograms/BuildInstructions](SerialPrograms/BuildInstructions). The Windows builds are made by [this workflow](.github/workflows/pocketpilot-windows.yml) with Qt 6.10.2.
 
-`SerialPrograms --ui-screenshots <folder>` starts the program, saves a picture of each page, theme and opened list in the folder and exits (nothing is pressed on a console, no setting is saved). Its exit code is 0 when every picture was taken.
+`SerialPrograms --ui-screenshots <folder>` starts the program, saves a picture of each page, theme and opened list in the folder and exits (nothing is pressed on a console, no setting is saved). It also holds a conversation with a made-up Claude that ends in a commit on a made-up GitHub: no key is used and nothing is sent anywhere. Its exit code is 0 when every picture was taken and every check passed.
 
 ## Where the code is
 
-PocketPilot's own code is in [SerialPrograms/Source/PocketPilot](SerialPrograms/Source/PocketPilot): the themes, the frame of the main window, the Games page, the look of the program list, the "About" window and the test of the interface. The rest of the tree is Pokémon Automation's, with the changes this fork needs. The branch follows Pokémon Automation's `main` by merging it.
+PocketPilot Studio's own code is in [SerialPrograms/Source/PocketPilot](SerialPrograms/Source/PocketPilot): the themes, the frame of the main window, the Games page, the look of the program list, the "About" window and the test of the interface. Claude is in its folder [Assistant](SerialPrograms/Source/PocketPilot/Assistant): the connection to the Claude API, the conversation and its tools, the work on the repository through GitHub, and the panel. The rest of the tree is Pokémon Automation's, with the changes this fork needs. The branch follows Pokémon Automation's `main` by merging it.
 
 ## Licenses
 
-- The source code is under the MIT license, like Pokémon Automation's: see [LICENSE](LICENSE) (Copyright (c) 2021 Alexander J. Yee). PocketPilot's own changes and additions are under the same license.
+- The source code is under the MIT license, like Pokémon Automation's: see [LICENSE](LICENSE) (Copyright (c) 2021 Alexander J. Yee). PocketPilot Studio's own changes and additions are under the same license.
 - The builds bring along precompiled libraries and the resources of Pokémon Automation ([Packages](https://github.com/PokemonAutomation/Packages)), which that project gives for non-commercial use only. Use the builds for non-commercial purposes.
 - The typeface of the name and the headings is Jersey 20 by Sarah Cadigan-Fried, under the [SIL Open Font License 1.1](SerialPrograms/Source/PocketPilot/Resources/Jersey20-OFL.txt).
 - The names of the games belong to their owners and are used only to say which game a program is for.

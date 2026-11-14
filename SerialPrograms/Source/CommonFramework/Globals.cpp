@@ -69,7 +69,7 @@ const std::string PROGRAM_VERSION = PROGRAM_VERSION_BASE + "-user";
 #endif
 const std::string PROGRAM_BUILD = POCKETPILOT_BUILD;
 
-const std::string PROGRAM_NAME = "PocketPilot";
+const std::string PROGRAM_NAME = "PocketPilot Studio";
 const std::string UPSTREAM_PROGRAM_NAME = "Pok\u00e9mon Automation";
 
 //  Where this fork lives: its source, its builds and its questions.
