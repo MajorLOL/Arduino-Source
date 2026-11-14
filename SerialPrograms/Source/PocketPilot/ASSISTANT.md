@@ -1,8 +1,8 @@
 # Claude in PocketPilot Studio
 
-The button "Claude" in the top bar opens a panel at the right of the main window: a conversation with Claude, the AI model of Anthropic. It answers questions about the programs, and it builds or fixes a program in the source of this repository. Its changes never go to the branch the builds are made from: they go to a branch of their own, which you turn into a pull request.
+The button "Claude" in the top bar opens a panel at the right of the main window: a conversation with Claude, the AI model of Anthropic. It answers questions about the programs, and it builds or fixes a program in the source of this repository. Its changes never go to the branch the builds are made from: they go to a branch of their own, which you turn into a pull request. In the program "Claude Plays", Claude plays the game itself.
 
-**Status: experimental.** The connection follows Anthropic's and GitHub's documentation as of November 2026. Every build tests it against made-up answers (see "How it is tested" below), but the build machine has no key, so it has not run against the real Claude API or made a real commit until someone with a key tries it. If something does not work, the panel shows what the API answered: that text is what to report.
+**Status: experimental.** The connection follows Anthropic's and GitHub's documentation as of November 2026. Every build tests it against made-up answers (see "How it is tested" below), but the build machine has no key, so it has not run against the real Claude API or made a real commit until someone with a key tries it. Claude Plays has run neither with a key nor on a console. If something does not work, the panel (or the program's log) shows what the API answered: that text is what to report.
 
 ## What you need
 
@@ -54,6 +54,37 @@ What the program holds to, whatever Claude asks for:
 
 Claude cannot compile or run anything, on your computer or elsewhere: the pull request's build is the first time a change meets the compiler. It can be wrong. Read the changes before you commit them, and treat a new program as untested until it has run on a console.
 
+## Letting Claude play
+
+The program "Claude Plays" (FireRed and LeafGreen, under "Experimental") lets Claude play toward a goal you write down, in any language: something no program exists for. It uses the key of the panel. Write the goal in the program's options and start it like any other program.
+
+Claude does not watch the video. It gets tools, and the program runs each call on the console:
+
+| Tool | What the program does |
+|---|---|
+| `look` | Sends a picture of the game. |
+| `press` | Presses buttons (A, B, START, SELECT, L, R and the four directions), up to 20 in one call. |
+| `walk` | Walks up to 20 steps one way, each step checked on the video. A battle that starts on the way is fought to its end. |
+| `battle` | Fights the battle on the screen to its end the way the AutoStory does (the move that does the most damage, new moves learned when they are better), or runs from a wild one. |
+| `advance_text` | Gets through text and scenes until the player can move again. |
+| `close_menus` | Closes menus and text until the player stands free. |
+| `heal_at_nurse` | In a Pokémon Center: up to the nurse, and the party healed. |
+| `save_game` | Saves the game. Only there when you allow saving. |
+| `wait`, `note`, `done` | Waits; writes a note down for itself; ends the session. |
+
+What keeps a session cheap:
+
+- Every tool returns what the program reads from the screen by itself: a text box and its text, a YES/NO question, a battle, the start menu. That is a few tokens. A picture goes to Claude only when it asks for one, at the game's own 240 x 160 pixels doubled: about 216 tokens.
+- The AutoStory's routines do a whole battle or scene for one call, without a token in between.
+- The smallest model, Claude Haiku 5.5, is the default.
+- A conversation that has grown to 40,000 tokens is started over with Claude's own notes and the last six actions, so that a long session does not send its whole past with every request.
+
+It ends when Claude says it is done, after the number of actions you set (100 unless you change it), at the estimated cost you set ($0.50 unless you change it), or when you stop the program. By the prices below, a hundred actions come to a few cents with the smallest model and to some tens of cents with Sonnet 5.5. That is arithmetic, not a measurement: no session has run yet.
+
+What to expect: it is slow next to a program made for one task, since every decision is a request to Claude, and it can lose its way: from a picture a model does not always tell which tile the player stands on. What the program reads from the screen can be wrong too (a floor that looks like a text box), which is why Claude can ask for the picture.
+
+Saving is off unless you allow it: Claude is told not to save, has no tool for it, and the program does not press A while the game asks whether to save. Claude still presses the buttons, so this cannot rule a save out altogether. Save the game yourself before you start the program.
+
 ## What it costs
 
 Claude's use is counted in tokens (about four characters each) and billed by Anthropic. Under the box you write in, the panel shows what the conversation used so far and what that costs at the public prices this build knows (November 2026, per million tokens of input / output):
@@ -77,7 +108,7 @@ Set a spending limit in Anthropic's console as well: that one holds whatever thi
 
 ## What is sent where
 
-- **To Anthropic:** what you write, the line about the open program, and what the tools returned (lines of the log, the open program's options, parts of the source). The log can have the name of your Windows account in a path. How Anthropic handles what the API receives is in its own terms.
+- **To Anthropic:** what you write, the line about the open program, and what the tools returned (lines of the log, the open program's options, parts of the source). From Claude Plays: the goal, what the program read from the screen, and the pictures of the game Claude asked for. The log can have the name of your Windows account in a path. How Anthropic handles what the API receives is in its own terms.
 - **To GitHub:** the requests to read the repository and, with your token, the commits. A commit is public, like the repository.
 - **Nowhere else.** Nothing of a conversation goes to Pokemon Automation or to anyone else, and this fork's builds send no error reports.
 
@@ -87,9 +118,10 @@ Set a spending limit in Anthropic's console as well: that one holds whatever thi
 
 - holds a conversation with a made-up Claude and a made-up GitHub behind the same connection the real ones use (a question that reads the log and the source, then a change that ends in a commit), and checks that the change is on a branch `claude/...` and the base branch is as it was;
 - checks the parts that need no connection: reading the API's stream (cut into pieces, with thinking blocks and errors), the prices, the line ends and byte order mark of changed files, the errors of a build's log, and that the file with the keys is encrypted and comes back after a new start;
-- checks that the build can make secure connections at all.
+- checks that the build can make secure connections at all;
+- plays three turns from a thread of its own, as Claude Plays does (a look with its picture, a press, the end), and checks that every tool of Claude Plays has a schema the API takes.
 
-It uses no key and sends nothing. The pictures `night-fire-claude-*.png` of a release show the panel as that build draws it.
+It uses no key and sends nothing. The pictures `night-fire-claude-*.png` of a release show the panel and the page of Claude Plays as that build draws them.
 
 ## For developers
 
@@ -105,6 +137,7 @@ The code is in [Assistant](Assistant):
 | `Assistant_Service` | What ties them together, and Claude's instructions. |
 | `Assistant_Settings` | The file with the keys and the settings of the panel. |
 | `Assistant_Panel` | The panel. |
+| `Assistant_Play` | For a program in which Claude plays: the program waits in its own thread for Claude's next call, runs it, and hands back what came of it. No Qt in its header. `Programs/ClaudePlays` of FireRed and LeafGreen is the one program that uses it. |
 | `Assistant_SelfTest` | The made-up Claude and GitHub, and the checks of every build. |
 
-Everything runs in the thread of the interface, on Qt's event loop: a request never blocks it. The instructions and the list of tools stay the same for a whole conversation and its earlier messages are never changed, which keeps Anthropic's cache valid and is what the API asks for when the model thinks between tool calls.
+Everything runs in the thread of the interface, on Qt's event loop: a request never blocks it. (A program in which Claude plays runs in its own thread, like every program, and reaches the conversation through `Assistant_Play`.) The instructions and the list of tools stay the same for a whole conversation and its earlier messages are never changed, which keeps Anthropic's cache valid and is what the API asks for when the model thinks between tool calls.

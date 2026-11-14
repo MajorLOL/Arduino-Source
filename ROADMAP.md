@@ -221,6 +221,23 @@ Between two walks the program takes 0.8 seconds (the median of 6,973 walks that 
 
 So for step 4, walking by the clock is not what stands in the way on this controller board and console: the clock has to count the rock stairs and the steps of a Repel, and it can chain the presses where the program now stops to look. What a speed mode has to solve is what is not walking: more than half of a run is battles, and the texts, menus and fades between them have no fixed length yet. That is what the Input Timing Test and "Faster battles" are for.
 
+## 8. Claude in the program (build 13)
+
+Build 13 brings Claude, Anthropic's AI model, into the program, on the user's own API key. The guide is [ASSISTANT.md](SerialPrograms/Source/PocketPilot/ASSISTANT.md). In short:
+
+- **A chat in a panel of the main window.** It answers questions about the programs, with tools that look things up instead of sending everything along: the program list, the open program's options and the log come from the program itself, the source from GitHub, a part at a time.
+- **Building and fixing.** A change is kept in the conversation until the user has seen it and clicks "Commit". It goes to a branch `claude/<topic>`, never to `pocketpilot`, and into a pull request the user creates. A pull request is now built and tested like every build, and Claude can read the result and the compiler's errors.
+- **Claude Plays** (experimental), for FireRed and LeafGreen: Claude plays toward a goal the user writes down. To save tokens it gets what the program reads from the screen instead of a picture wherever that is enough, and a whole battle, scene or walk is one call to a routine of the AutoStory.
+- **The name.** PocketPilot is now PocketPilot Studio: programs are not only run here, they are built and fixed here. The name is one line (`PROGRAM_NAME` in `Globals.cpp`); the files and folders of the builds keep the old one.
+
+How far it was tested: every build holds a conversation with a made-up Claude and a made-up GitHub, up to a commit on a branch of its own, plays three turns as Claude Plays does, and checks what needs no connection (the lines "Assistant test" of the build's log). The build machine has no key: nothing has run against the real Claude API, no real commit was made, and Claude Plays has not run on a console.
+
+What could come next:
+
+- **Seeing the game in the chat.** The chat reads the log, not the video. A tool that hands it a picture of the game (as Claude Plays has) would let it say what a program is stuck on.
+- **Playing without API credit.** Pokémon Automation added a small HTTP server to its code on 13 November ([#1879](https://github.com/PokemonAutomation/Arduino-Source/pull/1879)). If the tools of Claude Plays were offered over such a server in the form Claude's own apps can connect to, a session could run on a Claude subscription. Not built, and not looked into further.
+- **Claude Plays for other games.** `Assistant_Play` is not tied to FireRed and LeafGreen: a game needs its own tools on top of it.
+
 ## Sources
 
 - [speedrun.com: Pokémon FireRed/LeafGreen leaderboard](https://www.speedrun.com/pkmnfrlg)
