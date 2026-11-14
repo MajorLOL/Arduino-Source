@@ -613,7 +613,9 @@ void GameProgram::program(SingleSwitchProgramEnvironment& env, CancellableScope&
 namespace{
 
 //  The picture of the list "Other Games": a controller, in the size and
-//  shape of the pictures of the other lists.
+//  shape of the pictures of the other lists. On a ground of its own, in the
+//  color of the list's cartridge (PocketPilot_Home.cpp): in the list of
+//  games of the light themes a white controller alone is not seen.
 ImageRGB32 other_games_picture(){
     QImage image(256, 128, QImage::Format_ARGB32);
     image.fill(Qt::transparent);
@@ -621,6 +623,9 @@ ImageRGB32 other_games_picture(){
         QPainter painter(&image);
         painter.setRenderHint(QPainter::Antialiasing, true);
         painter.setPen(Qt::NoPen);
+
+        painter.setBrush(QColor(0x5a, 0x55, 0xb8));
+        painter.drawRoundedRect(QRectF(0, 0, 256, 128), 16, 16);
 
         //  The body: a bar with two grips.
         const QColor body(0xf2, 0xf3, 0xf7);

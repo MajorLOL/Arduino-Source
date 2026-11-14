@@ -586,8 +586,8 @@ void HomePage::refresh(){
         m_lead->setText(
             "Each game has its own programs. A program watches the game through your capture card "
             "and presses the buttons for you. With Claude, at the top right, you can ask about a "
-            "program or have one built or fixed. Claude Plays, in every list, plays toward a goal "
-            "you write down."
+            "program or have one built or fixed. Claude Plays, in every game's list and under "
+            "Other Games, plays toward a goal you write down."
         );
     }
 

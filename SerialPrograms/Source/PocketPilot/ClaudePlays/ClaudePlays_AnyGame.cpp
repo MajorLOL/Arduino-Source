@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
+#include <QStringList>
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "ClaudePlays_AnyGame.h"
@@ -273,7 +274,31 @@ std::string with_result_parameters(){
 const char* const STICK_DIRECTIONS =
     R"(["up","up-right","right","down-right","down","down-left","left","up-left"])";
 
-bool stick_vector(const std::string& direction, double& x, double& y){
+//  The way a stick is pushed, by its name. Also by the names Claude may
+//  give it instead ("up_right", "forward", "north-east").
+bool stick_vector(const std::string& given, double& x, double& y){
+    std::string direction;
+    for (char ch : given){
+        direction += ch == '_' || ch == ' ' ? '-' : ch;
+    }
+    struct Other{
+        const char* name;
+        const char* direction;
+    };
+    const Other OTHERS[] = {
+        {"forward", "up"}, {"forwards", "up"}, {"north", "up"},
+        {"back", "down"}, {"backward", "down"}, {"backwards", "down"}, {"south", "down"},
+        {"west", "left"}, {"east", "right"},
+        {"north-east", "up-right"}, {"north-west", "up-left"},
+        {"south-east", "down-right"}, {"south-west", "down-left"},
+        {"right-up", "up-right"}, {"left-up", "up-left"},
+        {"right-down", "down-right"}, {"left-down", "down-left"},
+    };
+    for (const Other& other : OTHERS){
+        if (direction == other.name){
+            direction = other.direction;
+        }
+    }
     const double diagonal = 0.7071;
     struct Entry{
         const char* name;
@@ -446,6 +471,21 @@ std::string screen_line(
 }
 
 
+//  The buttons of a call as a list: also when Claude gave one button as a
+//  string, or several in one string ("A, B").
+QJsonArray button_list(const QJsonValue& given){
+    if (!given.isString()){
+        return given.toArray();
+    }
+    QJsonArray list;
+    for (const QString& part : given.toString().split(QLatin1Char(','), Qt::SkipEmptyParts)){
+        if (!part.trimmed().isEmpty()){
+            list.append(part.trimmed());
+        }
+    }
+    return list;
+}
+
 //  The buttons of a call, checked.
 bool read_buttons(
     const QJsonArray& given, const PadLayout& layout, const AnyGameOptions& options,
@@ -485,7 +525,7 @@ bool direction_to_stick(const std::string& button, PadInput& input){
 
 Outcome press_buttons(PlayConsole& console, const AnyGameOptions& options, const QJsonObject& input){
     const PadLayout& layout = console.layout();
-    const QJsonArray given = input.value("buttons").toArray();
+    const QJsonArray given = button_list(input.value("buttons"));
     if (given.isEmpty()){
         return Outcome::error("\"buttons\" has to be a list with at least one button.");
     }
@@ -522,7 +562,7 @@ Outcome hold_inputs(PlayConsole& console, const AnyGameOptions& options, const Q
     const PadLayout& layout = console.layout();
     std::vector<std::string> buttons;
     std::string error;
-    if (!read_buttons(input.value("buttons").toArray(), layout, options, buttons, error)){
+    if (!read_buttons(button_list(input.value("buttons")), layout, options, buttons, error)){
         return Outcome::error(error);
     }
     const double tilt = input.value("tilt").isDouble()
