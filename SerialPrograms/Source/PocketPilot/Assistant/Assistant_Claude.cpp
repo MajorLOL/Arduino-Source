@@ -397,13 +397,38 @@ QJsonArray MessageStream::content() const{
 
 //  The client.
 
-namespace{
-
-//  What to tell the user about an error.
-QString error_for_user(const QString& type, int status, const QString& message, const QString& error_code){
+QString api_error_text(
+    const QString& type, int status, const QString& message, const QString& error_code,
+    bool workspace_named
+){
     if (type == "network"){
         return "No answer from the Claude API (" + message + "). Check the internet connection, then try again.";
     }
+    //  The workspace the request runs in: a key that was not made for one
+    //  has to name it. (The API's words, November 2026: "This API key is
+    //  not scoped to a workspace, so this request must include the
+    //  anthropic-workspace-id header with the ID of the workspace to use.",
+    //  and "anthropic-workspace-id header must be a valid workspace ID.")
+    if (message.contains("anthropic-workspace-id") || message.contains("scoped to a workspace")){
+        if (!workspace_named){
+            return
+                "This API key was not made for one workspace, so the Claude API has to be told which workspace to "
+                "use. Either make a new key in the Claude Console and choose a workspace for it, or enter the "
+                "workspace's ID (wrkspc_..., on the Console's page Workspaces) in the settings of this panel. (" +
+                message + ")";
+        }
+        return
+            "The Claude API did not take the workspace ID of this panel's settings. Check it against the "
+            "Console's page Workspaces (it starts with wrkspc_). (" + message + ")";
+    }
+    //  Sent along with each request: what to look at when the API does not
+    //  find, or does not allow, what was asked for.
+    const QString workspace_hint = workspace_named
+        ? QString(
+            " The workspace ID of this panel's settings is sent with each request: check it too, or clear it "
+            "for a key that was made for one workspace."
+        )
+        : QString();
     if (type == "authentication_error" || status == 401){
         return "The Claude API did not accept the API key. Check the key in the settings of this panel. (" + message + ")";
     }
@@ -411,7 +436,7 @@ QString error_for_user(const QString& type, int status, const QString& message, 
         return "The Claude API reports a problem with the billing of this account: " + message;
     }
     if (type == "permission_error"){
-        return "This API key may not use what was asked for: " + message;
+        return "This API key may not use what was asked for: " + message + workspace_hint;
     }
     if (type == "rate_limit_error"){
         if (error_code == "enforced_spend_limit_reached"){
@@ -423,7 +448,9 @@ QString error_for_user(const QString& type, int status, const QString& message, 
         return "The Claude API is overloaded right now. Try again in a moment.";
     }
     if (type == "not_found_error"){
-        return "The Claude API does not know what was asked for (" + message + "). Pick another model in this panel.";
+        return
+            "The Claude API does not know what was asked for (" + message + "). Pick another model in this panel." +
+            workspace_hint;
     }
     if (type == "request_too_large" || status == 413){
         return "The conversation has become too large for the Claude API. Start a new one.";
@@ -437,12 +464,18 @@ QString error_for_user(const QString& type, int status, const QString& message, 
     return "The Claude API reported an error: " + message;
 }
 
-std::vector<HttpHeader> api_headers(const QString& key, bool old_version){
-    return std::vector<HttpHeader>{
+namespace{
+
+std::vector<HttpHeader> api_headers(const QString& key, const QString& workspace, bool old_version){
+    std::vector<HttpHeader> headers{
         {"x-api-key", key.toUtf8()},
         {"anthropic-version", old_version ? API_VERSION_BEFORE : API_VERSION},
         {"content-type", "application/json"},
     };
+    if (!workspace.isEmpty()){
+        headers.push_back(HttpHeader{"anthropic-workspace-id", workspace.toUtf8()});
+    }
+    return headers;
 }
 
 //  The error of an answer that is not a stream: its JSON body.
@@ -533,7 +566,7 @@ private:
         reply.ok = false;
         reply.status = status;
         reply.error_type = type;
-        reply.error_message = error_for_user(type, status, message, error_code);
+        reply.error_message = api_error_text(type, status, message, error_code, m_workspace_named);
         finish(std::move(reply));
     }
 
@@ -541,7 +574,7 @@ private:
         if (m_finished || !*m_alive){
             return;
         }
-        const QString key = m_client.m_key ? m_client.m_key().trimmed() : QString();
+        const QString key = m_client.current_key();
         if (key.isEmpty()){
             ClaudeReply reply;
             reply.error_type = "no_key";
@@ -566,7 +599,9 @@ private:
         HttpRequest request;
         request.method = "POST";
         request.url = QUrl(QString::fromLatin1(API_MESSAGES));
-        request.headers = api_headers(key, m_client.m_old_version);
+        const QString workspace = m_client.current_workspace();
+        m_workspace_named = !workspace.isEmpty();
+        request.headers = api_headers(key, workspace, m_client.m_old_version);
         request.body = m_client.request_body(m_request);
         //  The API sends something every few seconds while it works.
         request.idle_timeout_ms = 180000;
@@ -640,8 +675,9 @@ private:
         }
 
         //  Something this API does not take: once more without it, and
-        //  without it from now on. (Not counted as a try.)
-        if (status == 400){
+        //  without it from now on. (Not counted as a try. Not for what it
+        //  says about the workspace: that is for the user to set right.)
+        if (status == 400 && !message.contains("anthropic-workspace-id")){
             bool again = false;
             if (!m_client.m_no_auto_cache && message.contains("cache_control")){
                 m_client.m_no_auto_cache = true;
@@ -725,18 +761,32 @@ private:
     Usage m_usage;
     int m_try = 0;
     bool m_finished = false;
+    //  The last try named a workspace.
+    bool m_workspace_named = false;
 };
 
 
 
-ClaudeClient::ClaudeClient(HttpTransport& transport, KeySource key)
+ClaudeClient::ClaudeClient(HttpTransport& transport, KeySource key, KeySource workspace)
     : m_transport(transport)
     , m_key(std::move(key))
+    , m_workspace(std::move(workspace))
     , m_alive(std::make_shared<bool>(true))
 {}
 
 ClaudeClient::~ClaudeClient(){
     *m_alive = false;
+}
+
+QString ClaudeClient::current_key() const{
+    return m_key ? m_key().trimmed() : QString();
+}
+QString ClaudeClient::current_workspace() const{
+    return m_workspace ? m_workspace().trimmed() : QString();
+}
+
+std::vector<HttpHeader> ClaudeClient::request_headers() const{
+    return api_headers(current_key(), current_workspace(), m_old_version);
 }
 
 QByteArray ClaudeClient::request_body(const ClaudeRequest& request) const{
@@ -777,15 +827,15 @@ std::shared_ptr<HttpCall> ClaudeClient::send(
 std::shared_ptr<HttpCall> ClaudeClient::list_models(
     std::function<void(const std::vector<ModelChoice>& models, const QString& error)> done
 ){
-    const QString key = m_key ? m_key().trimmed() : QString();
     HttpRequest request;
     request.url = QUrl(QString::fromLatin1(API_MODELS));
-    request.headers = api_headers(key, m_old_version);
+    request.headers = request_headers();
     request.idle_timeout_ms = 30000;
+    const bool workspace_named = !current_workspace().isEmpty();
     std::shared_ptr<bool> alive = m_alive;
     return m_transport.send(
         request, nullptr,
-        [alive, done](const HttpResponse& response){
+        [alive, done, workspace_named](const HttpResponse& response){
             if (!*alive || !done){
                 return;
             }
@@ -799,7 +849,10 @@ std::shared_ptr<HttpCall> ClaudeClient::list_models(
                 }else{
                     read_error_body(response.body, type, message, error_code);
                 }
-                done(std::vector<ModelChoice>(), error_for_user(type, response.status, message, error_code));
+                done(
+                    std::vector<ModelChoice>(),
+                    api_error_text(type, response.status, message, error_code, workspace_named)
+                );
                 return;
             }
             struct Entry{

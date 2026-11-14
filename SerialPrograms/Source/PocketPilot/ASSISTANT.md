@@ -8,10 +8,12 @@ The button "Claude" in the top bar opens a panel at the right of the main window
 
 | | |
 |---|---|
-| **A Claude API key** | From Anthropic's console: the panel links to [how to get one](https://platform.claude.com/docs/en/get-api-key). The API is billed by Anthropic on its own, per token; a subscription to the Claude apps is a different thing and does not pay for it. |
+| **A Claude API key** | From Anthropic's console: the panel links to [how to get one](https://platform.claude.com/docs/en/get-api-key). The API is billed by Anthropic on its own, per token; a subscription to the Claude apps is a different thing and does not pay for it. In the console: "Connect to the Claude API", then "Somewhere else" (the choice that makes a key), and in "Create API key" leave **Scope** on a workspace, as it comes ("Default workspace"): such a key works here as it is, and cannot be used to manage the account. |
 | **A GitHub token** (only for changes) | Reading the source works without. To commit a change and to read why a build failed, Claude needs a fine-grained personal access token for this one repository with the permissions **Contents: Read and write** and **Actions: Read-only**. Make one at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new): "Only select repositories", this repository, those two permissions, nothing else. |
 
 Enter both in the panel yourself: the key on its first page ("Connect Claude"), the token under "Settings". "Test the key" asks the API which models the key can use, and costs nothing.
+
+**A key that was not made for one workspace** (another choice under Scope) is not enough by itself: the API wants to be told with each request which workspace to use, and answers "This API key is not scoped to a workspace..." otherwise. For such a key, enter the workspace's ID under "Settings" in the panel ("Workspace ID": it starts with `wrkspc_`, and the console's page [Workspaces](https://platform.claude.com/settings/workspaces) shows it). Leave that box empty for a key of one workspace. The ID is not a secret: it is kept with the panel's other settings.
 
 ## Where the key and the token are kept
 
@@ -134,7 +136,7 @@ Set a spending limit in Anthropic's console as well: that one holds whatever thi
 `SerialPrograms --ui-screenshots <folder>`, which every build runs on the build machine, also
 
 - holds a conversation with a made-up Claude and a made-up GitHub behind the same connection the real ones use (a question that reads the log and the source, then a change that ends in a commit), and checks that the change is on a branch `claude/...` and the base branch is as it was;
-- checks the parts that need no connection: reading the API's stream (cut into pieces, with thinking blocks and errors), the prices, the line ends and byte order mark of changed files, the errors of a build's log, and that the file with the keys is encrypted and comes back after a new start;
+- checks the parts that need no connection: reading the API's stream (cut into pieces, with thinking blocks and errors), the prices, the headers of a request with and without a workspace ID and what the panel says when the API misses one, the line ends and byte order mark of changed files, the errors of a build's log, and that the file with the keys is encrypted and comes back after a new start;
 - checks that the build can make secure connections at all;
 - plays three turns from a thread of its own, as Claude Plays does (a look with its picture, a press, the end);
 - plays a whole session of the Claude Plays of every list on a console that is made up for the test (a look as a JPEG, presses with the text read after them, a stick held, a note, done), and checks what the program says about the screen after each action;

@@ -18,6 +18,11 @@
  *
  *  What a request cost is counted from the answer's usage numbers.
  *
+ *  The key goes in the header "x-api-key" (the API's first way, and still
+ *  taken next to "Authorization: Bearer"). A key that was not made for one
+ *  workspace has to name the workspace with each request, in the header
+ *  "anthropic-workspace-id": the user enters its ID in the settings then.
+ *
  */
 
 #ifndef PokemonAutomation_PocketPilot_Assistant_Claude_H
@@ -113,6 +118,14 @@ struct ClaudeReply{
 };
 
 
+//  What to tell the user about an error of the API. "workspace_named": the
+//  request named a workspace (see ClaudeClient). (Also for the tests.)
+QString api_error_text(
+    const QString& type, int status, const QString& message, const QString& error_code,
+    bool workspace_named
+);
+
+
 //  The answer of the API as it streams in (server-sent events), put back
 //  together into its blocks.
 class MessageStream{
@@ -196,7 +209,11 @@ public:
     //  entered is used at once.
     using KeySource = std::function<QString()>;
 
-    ClaudeClient(HttpTransport& transport, KeySource key);
+    //  "workspace": the ID of the workspace of the API to run in
+    //  ("wrkspc_..."), asked for at each request like the key. For a key
+    //  that was not made for one workspace. No source, or an empty ID: no
+    //  workspace is named.
+    ClaudeClient(HttpTransport& transport, KeySource key, KeySource workspace = KeySource());
     ~ClaudeClient();
 
     //  One request, with new tries where they can help (the API is busy,
@@ -216,6 +233,8 @@ public:
 
     //  The request's body, as it is sent. (Also for the tests.)
     QByteArray request_body(const ClaudeRequest& request) const;
+    //  The headers of a request, as they are sent now. (Also for the tests.)
+    std::vector<HttpHeader> request_headers() const;
 
     //  Times between tries: 0 for the tests.
     void set_retry_scale(double scale){ m_retry_scale = scale; }
@@ -224,8 +243,13 @@ private:
     class Operation;
     friend class Operation;
 
+    //  As their sources give them now.
+    QString current_key() const;
+    QString current_workspace() const;
+
     HttpTransport& m_transport;
     KeySource m_key;
+    KeySource m_workspace;
     double m_retry_scale = 1.0;
     //  What this API turned out not to take (see send()): left out from
     //  then on.

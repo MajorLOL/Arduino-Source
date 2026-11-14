@@ -637,6 +637,82 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
         );
     }
 
+    //  The workspace of the API: named for a key that was not made for one,
+    //  and words for the user when the API misses it.
+    {
+        class NoTransport : public HttpTransport{
+        public:
+            virtual std::shared_ptr<HttpCall> send(const HttpRequest&, DataHandler, DoneHandler) override{
+                return nullptr;
+            }
+        };
+        //  A header's value, "(none)" or "(twice)".
+        const auto header_of = [](const std::vector<HttpHeader>& headers, const char* name){
+            QByteArray value = "(none)";
+            int found = 0;
+            for (const HttpHeader& header : headers){
+                if (header.name == name){
+                    value = header.value;
+                    found++;
+                }
+            }
+            return found > 1 ? QByteArray("(twice)") : value;
+        };
+        NoTransport transport;
+        QString workspace_id;
+        ClaudeClient client(
+            transport,
+            []{
+                return QString("  sk-ant-test-0123456789\n");
+            },
+            [&workspace_id]{
+                return workspace_id;
+            }
+        );
+        std::vector<HttpHeader> headers = client.request_headers();
+        check(
+            header_of(headers, "x-api-key") == "sk-ant-test-0123456789" &&
+            header_of(headers, "anthropic-version").startsWith("20") &&
+            header_of(headers, "content-type") == "application/json",
+            "the headers of a request"
+        );
+        check(header_of(headers, "anthropic-workspace-id") == "(none)", "no workspace is named unless one is set");
+        workspace_id = " wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ ";
+        headers = client.request_headers();
+        check(
+            header_of(headers, "anthropic-workspace-id") == "wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ",
+            "the workspace that is set is named"
+        );
+
+        const QString unscoped =
+            "This API key is not scoped to a workspace, so this request must include the anthropic-workspace-id "
+            "header with the ID of the workspace to use. Add the header, or use an API key that is scoped to a "
+            "workspace.";
+        const QString told = api_error_text("invalid_request_error", 400, unscoped, QString(), false);
+        check(
+            told.contains("was not made for one workspace") && told.contains("settings of this panel") &&
+            told.contains(unscoped),
+            "a key without a workspace: what to do about it"
+        );
+        check(
+            api_error_text(
+                "invalid_request_error", 400, "anthropic-workspace-id header must be a valid workspace ID.",
+                QString(), true
+            ).contains("did not take the workspace ID"),
+            "a workspace ID the API does not take"
+        );
+        check(
+            api_error_text("not_found_error", 404, "Not found", QString(), true).contains("workspace ID") &&
+            !api_error_text("not_found_error", 404, "model: claude-none", QString(), false).contains("workspace"),
+            "the workspace ID is pointed at only when one was named"
+        );
+        check(
+            clean_workspace_id("  wrkspc_01Ab-Z9\r\nx-other: y ") == "wrkspc_01Ab-Z9x-othery" &&
+            clean_workspace_id(QString()).isEmpty(),
+            "a workspace ID is letters, digits, _ and - alone"
+        );
+    }
+
     //  Text files: their line ends and the mark in front come back as they were.
     {
         const QByteArray samples[] = {
@@ -728,6 +804,7 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
         settings.chat_model = "claude-opus-5-5";
         settings.ask_at_usd = 2.5;
         settings.panel_width = 512;
+        settings.api_workspace_id = "wrkspc_01SelfTest";
         check(settings.save(settings_path), "the settings are saved");
         Settings again;
         again.load(settings_path);
@@ -735,6 +812,10 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
             again.chat_model == "claude-opus-5-5" && about_equal(again.ask_at_usd, 2.5) && again.panel_width == 512 &&
             again.chat_effort == Settings().chat_effort,
             "the settings are back after a new start"
+        );
+        check(
+            again.api_workspace_id == "wrkspc_01SelfTest" && Settings().api_workspace_id.isEmpty(),
+            "the workspace ID is back after a new start, and empty unless set"
         );
         QFile::remove(settings_path);
     }

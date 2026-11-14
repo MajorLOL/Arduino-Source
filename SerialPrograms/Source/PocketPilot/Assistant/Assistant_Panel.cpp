@@ -47,6 +47,7 @@ namespace Assistant{
 namespace{
 
 const char* const KEY_HELP_URL = "https://platform.claude.com/docs/en/get-api-key";
+const char* const WORKSPACES_URL = "https://platform.claude.com/settings/workspaces";
 const char* const TOKEN_HELP_URL = "https://github.com/settings/personal-access-tokens/new";
 
 //  The marks in front of a tool's line: at work, done, failed.
@@ -691,6 +692,11 @@ QWidget* Panel::make_connect_page(){
         save_key();
     });
     layout->addWidget(make_link(page, "How to get an API key", KEY_HELP_URL));
+    layout->addWidget(make_label(
+        page, "ppAssistantSmall",
+        "In the Claude Console, make the key for one workspace: it then works here as it is. (A key that was "
+        "not made for one workspace needs the workspace's ID, under Settings in this panel.)"
+    ));
     layout->addWidget(make_label(page, "ppAssistantSmall", SecretStore::protection_text()));
     layout->addStretch(1);
     return page;
@@ -806,6 +812,31 @@ QWidget* Panel::make_settings_page(){
     }
     layout->addWidget(make_link(page, "How to get an API key", KEY_HELP_URL));
     layout->addWidget(make_label(page, "ppAssistantSmall", SecretStore::protection_text()));
+
+    //  The workspace, for a key that was not made for one.
+    layout->addSpacing(4);
+    layout->addWidget(make_label(
+        page, "ppCardText",
+        "Workspace ID. Only for a key that was not made for one workspace: the Claude API then has to be told "
+        "which workspace to use."
+    ));
+    m_api_workspace = field("wrkspc_...  (empty for a key of one workspace)", "Workspace ID of the Claude API");
+    layout->addWidget(m_api_workspace);
+    m_api_workspace_note = make_label(page, "ppAssistantProblem", QString());
+    m_api_workspace_note->setVisible(false);
+    layout->addWidget(m_api_workspace_note);
+    layout->addWidget(make_link(page, "The workspaces and their IDs, in the Claude Console", WORKSPACES_URL));
+    connect(m_api_workspace, &QLineEdit::editingFinished, this, [this]{
+        const QString id = clean_workspace_id(m_api_workspace->text());
+        if (id != m_api_workspace->text()){
+            m_api_workspace->setText(id);
+        }
+        if (id != m_service.settings().api_workspace_id){
+            m_service.settings().api_workspace_id = id;
+            m_service.save_settings();
+        }
+        refresh_workspace_note();
+    });
 
     //  The model and the cost.
     section("Model and cost");
@@ -1131,6 +1162,8 @@ void Panel::refresh_settings_page(){
     }else{
         m_token_state->setText("No token is saved: Claude can read the source, not commit.");
     }
+    m_api_workspace->setText(m_service.settings().api_workspace_id);
+    refresh_workspace_note();
     const Repository repository = m_service.repository();
     m_owner->setText(repository.owner);
     m_repository->setText(repository.name);
@@ -1215,6 +1248,20 @@ void Panel::set_input(const QString& text){
     QTextCursor cursor = m_input->textCursor();
     cursor.movePosition(QTextCursor::End);
     m_input->setTextCursor(cursor);
+}
+
+void Panel::refresh_workspace_note(){
+    const QString id = m_service.settings().api_workspace_id;
+    //  What the Console shows as a workspace's ID starts like this; a name
+    //  entered instead would only come back as an error of the API.
+    const bool odd = !id.isEmpty() && !id.startsWith("wrkspc_");
+    if (odd){
+        m_api_workspace_note->setText(
+            "A workspace ID starts with wrkspc_ (the Console's page Workspaces shows it), not with the "
+            "workspace's name."
+        );
+    }
+    m_api_workspace_note->setVisible(odd);
 }
 
 void Panel::save_key(){

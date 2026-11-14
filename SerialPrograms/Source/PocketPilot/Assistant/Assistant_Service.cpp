@@ -35,9 +35,15 @@ Service::Service(AppHooks hooks, std::unique_ptr<HttpTransport> transport)
     m_secrets = std::make_unique<SecretStore>(m_hooks.settings_folder + KEYS_FILE);
     m_settings.load(m_hooks.settings_folder + SETTINGS_FILE);
 
-    m_claude = std::make_unique<ClaudeClient>(*m_transport, [this]{
-        return m_secrets->get(Secret::CLAUDE_API_KEY);
-    });
+    m_claude = std::make_unique<ClaudeClient>(
+        *m_transport,
+        [this]{
+            return m_secrets->get(Secret::CLAUDE_API_KEY);
+        },
+        [this]{
+            return m_settings.api_workspace_id;
+        }
+    );
     m_github = std::make_unique<GitHubClient>(*m_transport, [this]{
         return m_secrets->get(Secret::GITHUB_TOKEN);
     });

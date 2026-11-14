@@ -68,6 +68,11 @@ struct Settings{
     //  Ask whether to go on each time a conversation has cost this much
     //  more (estimated US dollars). 0: never ask.
     double ask_at_usd = 1.0;
+    //  The workspace of the Claude API the requests run in ("wrkspc_..."),
+    //  for a key that was not made for one workspace: the API wants it named
+    //  with each request then. Empty: none is named, as a key of one
+    //  workspace needs it.
+    QString api_workspace_id;
 
     //  Where the program's source is, and the branch a change is made for.
     QString repository_owner;
@@ -82,6 +87,10 @@ struct Settings{
     void load(const QString& file_path);
     bool save(const QString& file_path) const;
 };
+
+//  A workspace ID as it can be sent: the letters, the digits, "_" and "-"
+//  of what was entered. (It becomes a header of each request.)
+QString clean_workspace_id(const QString& entered);
 
 
 

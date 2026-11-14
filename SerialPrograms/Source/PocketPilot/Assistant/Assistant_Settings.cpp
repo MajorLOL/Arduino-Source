@@ -184,6 +184,8 @@ void Settings::load(const QString& file_path){
     text("repository_owner", repository_owner);
     text("repository_name", repository_name);
     text("base_branch", base_branch);
+    text("api_workspace_id", api_workspace_id);
+    api_workspace_id = clean_workspace_id(api_workspace_id);
     if (object.value("ask_at_usd").isDouble()){
         ask_at_usd = std::clamp(object.value("ask_at_usd").toDouble(), 0.0, 1000.0);
     }
@@ -206,6 +208,7 @@ bool Settings::save(const QString& file_path) const{
         {"chat_model", chat_model},
         {"chat_effort", chat_effort},
         {"ask_at_usd", ask_at_usd},
+        {"api_workspace_id", api_workspace_id},
         {"repository_owner", repository_owner},
         {"repository_name", repository_name},
         {"base_branch", base_branch},
@@ -219,6 +222,20 @@ bool Settings::save(const QString& file_path) const{
     }
     file.write(QJsonDocument(object).toJson(QJsonDocument::Indented));
     return file.commit();
+}
+
+QString clean_workspace_id(const QString& entered){
+    QString id;
+    for (const QChar character : entered){
+        const char16_t code = character.unicode();
+        if (
+            (code >= u'0' && code <= u'9') || (code >= u'A' && code <= u'Z') || (code >= u'a' && code <= u'z') ||
+            code == u'_' || code == u'-'
+        ){
+            id += character;
+        }
+    }
+    return id.left(128);
 }
 
 

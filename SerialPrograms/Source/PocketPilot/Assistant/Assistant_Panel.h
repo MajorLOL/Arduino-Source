@@ -105,6 +105,7 @@ private:
     void send_from_input();
     void start_new_chat();
     void save_key();
+    void refresh_workspace_note();
 
 private:
     Service& m_service;
@@ -148,6 +149,8 @@ private:
     QLabel* m_key_state = nullptr;
     QLineEdit* m_key_replace = nullptr;
     QLabel* m_key_result = nullptr;
+    QLineEdit* m_api_workspace = nullptr;
+    QLabel* m_api_workspace_note = nullptr;
     QComboBox* m_effort = nullptr;
     QDoubleSpinBox* m_ask_at = nullptr;
     QLabel* m_token_state = nullptr;
