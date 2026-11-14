@@ -6,14 +6,31 @@ name: PocketPilot - Windows build
 # and as a workflow artifact. A build that fails that test (it does not
 # start, crashes or cannot take its pictures) is not published.
 #
+# It runs
+#
+# - for every push to the branch pocketpilot: built, tested and published;
+# - for every pull request into pocketpilot (the changes Claude makes from
+#   inside the program arrive that way, on a branch claude/...): built and
+#   tested as it will be once merged, not published. The build is the
+#   artifact "PocketPilot-Windows" of the run;
+# - by hand, published or not.
+#
 # The build itself follows the upstream workflow for Windows
 # (cpp-ci-serial-programs-base.yml): Ninja, and ccache to keep the compiler's
 # output between runs, so that a build only recompiles what a change affects.
+# (A pull request's build uses what the last build of pocketpilot left.)
 
 on:
   push:
     branches: [pocketpilot]
+  pull_request:
+    branches: [pocketpilot]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the build as a pre-release'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -95,22 +112,44 @@ jobs:
       #  The compiler's output of the last build of this branch. max-size is
       #  only a cap: evict-old-files drops everything this build didn't use.
       #  The action's own ccache: the runner's Strawberry Perl has an older
-      #  one on PATH.
+      #  one on PATH. A pull request's build reads it and leaves none of its
+      #  own, which would only take the room of the branch's.
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2.24
         with:
           key: pocketpilot-windows-2025
           max-size: 5G
           evict-old-files: job
-          save: true
+          save: ${{ github.event_name != 'pull_request' }}
           install: binary
 
       #  The number of the build, in the window's title, the "About" window
-      #  and the programs' logs ("PocketPilot build N").
+      #  and the programs' logs ("PocketPilot Studio build N"). A build that
+      #  is published gets the number after the last published one; a pull
+      #  request's build is named after the pull request.
       - name: Build number
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish) }}
         run: |
-          echo '#define POCKETPILOT_BUILD "${{ github.run_number }}"' > Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
+          if [ "$PUBLISH" = "true" ]; then
+            LAST=$(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '[.[].tag_name | select(startswith("pocketpilot-build-")) | ltrimstr("pocketpilot-build-") | tonumber?] | max // 0')
+            if ! [[ "$LAST" =~ ^[0-9]+$ ]]; then
+              echo "::error::The number of the last published build could not be read: '$LAST'."
+              exit 1
+            fi
+            NUMBER=$((LAST + 1))
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            NUMBER="pr${{ github.event.number }}"
+          else
+            NUMBER="test${{ github.run_number }}"
+          fi
+          echo "This build: $NUMBER (published: $PUBLISH)"
+          echo "BUILD_NUMBER=$NUMBER" >> $GITHUB_ENV
+          echo "PUBLISH=$PUBLISH" >> $GITHUB_ENV
+          echo "#define POCKETPILOT_BUILD \"$NUMBER\"" > Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
+          cat Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
 
       #  The linker: no incremental linking, as upstream. /DEBUG makes a
       #  .pdb with the names of the functions (the compiler adds no debug
@@ -266,11 +305,12 @@ jobs:
             symbols/*.pdb
 
       - name: Publish pre-release
+        if: env.PUBLISH == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="pocketpilot-build-${{ github.run_number }}"
+          TAG="pocketpilot-build-$BUILD_NUMBER"
           FILES="PocketPilot-Windows.zip"
           if ls ui-screenshots/*.png > /dev/null 2>&1; then
             FILES="$FILES ui-screenshots/*.png"
@@ -279,5 +319,5 @@ jobs:
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --prerelease \
-            --title "PocketPilot - Windows build ${{ github.run_number }}" \
-            --notes "PocketPilot, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took the pictures below of its own interface. For non-commercial use. Built from ${{ github.sha }}."
+            --title "PocketPilot Studio - Windows build $BUILD_NUMBER" \
+            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took the pictures below of its own interface. For non-commercial use. Built from ${{ github.sha }}."
