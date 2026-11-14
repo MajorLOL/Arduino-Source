@@ -572,6 +572,30 @@ void AutoStory::run_segment(
     rt.no_revives = false;
     rt.no_full_restores = false;
 
+    //  Started in the middle of the segment (the program started from a
+    //  save in it, the one after an Elite Four room for one): team play as
+    //  the steps before set it. Without this the rooms after such a start
+    //  were fought by the lead alone.
+    {
+        int team_play = -1;
+        for (size_t k = 0; k < first_step && k < segment.step_count; k++){
+            const StoryStep& earlier = script.step(segment, k);
+            if (earlier.type == StepType::TEAM){
+                team_play = earlier.p0 == 1 ? 1 : 0;
+            }
+        }
+        if (team_play == 1 && rt.battle.team.empty()){
+            env.log(
+                "Team play was turned on by a step before this one: the whole team fights from now on.",
+                COLOR_BLUE
+            );
+            story_fix_party_order(rt, false);
+            rt.battle.team = rt.team;
+        }else if (team_play == 0 && !rt.battle.team.empty()){
+            rt.battle.team.clear();
+        }
+    }
+
     for (size_t i = first_step; i < segment.step_count; i++){
         const StoryStep& step = script.step(segment, i);
         const StoryStep* next = i + 1 < segment.step_count ? &script.step(segment, i + 1) : nullptr;
