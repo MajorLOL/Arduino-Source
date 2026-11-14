@@ -16,6 +16,10 @@ QLabel#ppWordmark {
     color: @shell_text@;
     background: transparent;
 }
+QLabel#ppWordmarkSecond {
+    color: @shell_muted@;
+    background: transparent;
+}
 /*  Widgets that draw themselves on the shell: a sheet that gives every
     widget a background (the classic dark look) must not paint behind them. */
 QWidget#ppLogo, QWidget#ppLamp {
@@ -224,4 +228,215 @@ QPushButton#ppPrimary:disabled {
     background-color: @screen@;
     color: @disabled@;
     border-color: @line@;
+}
+
+
+/* ---- Claude: its button in the top bar, and the panel at the right ---- */
+
+QPushButton#ppAssistantButton {
+    background: transparent;
+    color: @shell_text@;
+    border: 1px solid @shell_line@;
+    border-radius: 14px;
+    min-height: 18px;
+    padding: 4px 14px 4px 34px;
+}
+QPushButton#ppAssistantButton:hover {
+    background-color: @shell_hover@;
+    border-color: @shell_muted@;
+}
+QPushButton#ppAssistantButton:pressed {
+    background-color: @shell_pressed@;
+}
+QPushButton#ppAssistantButton:focus {
+    border-color: @shell_text@;
+}
+QPushButton#ppAssistantButton[open="true"] {
+    background-color: @shell_text@;
+    color: @shell@;
+    border-color: @shell_text@;
+}
+
+QWidget#ppAssistant {
+    background-color: @surface@;
+    border-left: 1px solid @line@;
+}
+QWidget#ppAssistantGrip {
+    background-color: @surface@;
+}
+QWidget#ppAssistantHeader, QWidget#ppAssistantRows, QWidget#ppAssistantForm {
+    background: transparent;
+}
+QLabel#ppAssistantTitle {
+    color: @text@;
+    background: transparent;
+}
+QLabel#ppAssistantSmall, QLabel#ppAssistantStatus, QLabel#ppToolLine {
+    color: @muted@;
+    background: transparent;
+}
+QLabel#ppToolLine[failed="true"], QLabel#ppAssistantProblem {
+    color: @danger@;
+    background: transparent;
+}
+QLabel#ppAssistantLink {
+    background: transparent;
+}
+QScrollArea#ppAssistantScroll, QScrollArea#ppAssistantFormScroll {
+    background: transparent;
+    border: none;
+    padding: 0px;
+}
+
+/*  Buttons of the panel: one that is only text, one of the suggestions,
+    and the plain one next to the button that does the main thing. */
+QPushButton#ppGhost {
+    background: transparent;
+    color: @muted@;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 9px;
+}
+QPushButton#ppGhost:hover {
+    background-color: @surface_alt@;
+    color: @text@;
+    border-color: transparent;
+}
+QPushButton#ppGhost:pressed {
+    background-color: @button_pressed@;
+}
+QPushButton#ppGhost:focus {
+    border-color: @line@;
+}
+QPushButton#ppGhost:disabled {
+    background: transparent;
+    color: @disabled@;
+    border-color: transparent;
+}
+QPushButton#ppSuggestion {
+    background: transparent;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 8px;
+    padding: 9px 12px;
+    text-align: left;
+}
+QPushButton#ppSuggestion:hover, QPushButton#ppSuggestion:focus {
+    background-color: @surface_alt@;
+    border-color: @accent@;
+}
+QPushButton#ppSecondary {
+    background-color: @button@;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 6px;
+    padding: 5px 12px;
+}
+QPushButton#ppSecondary:hover {
+    background-color: @button_hover@;
+    border-color: @muted@;
+}
+QPushButton#ppSecondary:pressed {
+    background-color: @button_pressed@;
+}
+QPushButton#ppSecondary:focus {
+    border-color: @accent@;
+}
+
+/*  The conversation: what the user wrote, what Claude answered, and the
+    boxes that ask or tell something. */
+QFrame#ppUserBubble {
+    background-color: @surface_alt@;
+    border: none;
+    border-radius: 12px;
+    border-bottom-right-radius: 3px;
+}
+QTextBrowser#ppAssistantText {
+    background: transparent;
+    color: @text@;
+    border: none;
+    padding: 0px;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QFrame#ppCard {
+    background-color: @screen@;
+    border: 1px solid @line@;
+    border-radius: 10px;
+}
+QFrame#ppCard[kind="ask"] {
+    border-color: @accent@;
+}
+QFrame#ppCard[kind="problem"] {
+    border-color: @danger@;
+}
+QFrame#ppCard[kind="done"] {
+    border-color: @ok@;
+}
+QLabel#ppCardTitle {
+    color: @text@;
+    background: transparent;
+}
+QLabel#ppCardText {
+    color: @muted@;
+    background: transparent;
+}
+
+/*  The box to write in, the fields of the settings, the model. */
+QPlainTextEdit#ppAssistantInput {
+    background-color: @field@;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 10px;
+    padding: 6px 8px;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QPlainTextEdit#ppAssistantInput:focus {
+    border-color: @accent@;
+}
+QLineEdit#ppAssistantField {
+    background-color: @field@;
+    color: @text@;
+    border: 1px solid @line@;
+    border-radius: 6px;
+    padding: 6px 9px;
+    selection-background-color: @accent@;
+    selection-color: @accent_text@;
+}
+QLineEdit#ppAssistantField:focus {
+    border-color: @accent@;
+}
+QComboBox#ppAssistantModel {
+    background: transparent;
+    color: @muted@;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 3px 22px 3px 6px;
+}
+QComboBox#ppAssistantModel:hover, QComboBox#ppAssistantModel:focus {
+    color: @text@;
+    border-color: @line@;
+}
+QComboBox#ppAssistantModel:disabled {
+    background: transparent;
+    color: @disabled@;
+    border-color: transparent;
+}
+QComboBox#ppAssistantModel::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;
+}
+QComboBox#ppAssistantModel::down-arrow {
+    image: url(@arrow_down@);
+    width: 10px;
+    height: 10px;
+}
+QPlainTextEdit#ppAssistantDiff {
+    background-color: @field@;
+    color: @muted@;
+    border: 1px solid @line@;
+    border-radius: 6px;
 }

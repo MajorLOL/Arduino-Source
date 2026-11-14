@@ -14,6 +14,8 @@
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Logging/MultiOutputLogger.h"
 #include "Common/Cpp/Logging/GlobalLogger.h"
+#include "Common/Cpp/Logging/LastLogTracker.h"
+#include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/CpuId/CpuId.h"
 #include "Common/Cpp/ColoredText.h"
@@ -32,6 +34,8 @@
 #include "PocketPilot/PocketPilot_Home.h"
 #include "PocketPilot/PocketPilot_Logo.h"
 #include "PocketPilot/PocketPilot_Shell.h"
+#include "PocketPilot/Assistant/Assistant_Panel.h"
+#include "PocketPilot/Assistant/Assistant_Service.h"
 #include "WindowTracker.h"
 #include "ButtonDiagram.h"
 #include "MainWindow.h"
@@ -111,6 +115,9 @@ MainWindow::MainWindow(QWidget* parent)
     };
     actions.about = [this]{
         PocketPilot::show_about(this, about_info());
+    };
+    actions.assistant = [this]{
+        show_assistant(!m_frame->panel_visible());
     };
     m_frame = std::make_unique<PocketPilot::Frame>(
         *centralwidget,
@@ -206,6 +213,14 @@ MainWindow::MainWindow(QWidget* parent)
     m_program_list->load_persistent_panel();
     update_page();
 
+    //  Claude, in the panel at the right. Open if it was when the program
+    //  closed.
+    make_assistant(nullptr, SETTINGS_PATH());
+    m_frame->on_panel_width = [this](int width){
+        m_assistant->settings().panel_width = width;
+        m_assistant->save_settings();
+    };
+
     GlobalSettings::instance().WINDOW_SIZE->WIDTH.add_listener(*this);
     GlobalSettings::instance().WINDOW_SIZE->HEIGHT.add_listener(*this);
     GlobalSettings::instance().WINDOW_SIZE->X_POS.add_listener(*this);
@@ -217,6 +232,10 @@ MainWindow::MainWindow(QWidget* parent)
 //    cout << "Done constructing" << endl;
 }
 MainWindow::~MainWindow(){
+    //  The panel before what it shows.
+    delete m_assistant_panel;
+    m_assistant_panel = nullptr;
+    m_assistant.reset();
     close_panel();
     SystemSleepController::instance().remove_listener(*this);
     GlobalSettings::instance().WINDOW_SIZE->WIDTH.remove_listener(*this);
@@ -273,6 +292,113 @@ bool MainWindow::open_program(const std::string& game, const std::string& progra
         return false;
     }
     return m_program_list->open_program(game, program);
+}
+
+//  Claude: the service with what the tools may look at in this program, and
+//  the panel that shows it.
+void MainWindow::make_assistant(
+    std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
+    const std::string& settings_folder
+){
+    namespace Assistant = PocketPilot::Assistant;
+    delete m_assistant_panel;
+    m_assistant_panel = nullptr;
+    m_assistant.reset();
+
+    Assistant::AppHooks hooks;
+    hooks.name = QString::fromStdString(PROGRAM_NAME);
+    hooks.build = QString::fromStdString(PROGRAM_BUILD);
+    hooks.upstream = QString::fromStdString(UPSTREAM_PROGRAM_NAME + " " + PROGRAM_VERSION);
+    hooks.settings_folder = QString::fromStdString(settings_folder);
+    //  Where this build's source is: "https://github.com/<owner>/<name>/tree/<branch>".
+    {
+        const QStringList parts = QString::fromStdString(PROJECT_HOME_URL).split('/', Qt::SkipEmptyParts);
+        const qsizetype host = parts.indexOf("github.com");
+        if (host >= 0 && parts.size() >= host + 5 && parts[host + 3] == "tree"){
+            hooks.repository.owner = parts[host + 1];
+            hooks.repository.name = parts[host + 2];
+            hooks.repository.base_branch = parts.mid(host + 4).join('/');
+        }
+    }
+    //  The programs, as the page with the games lists them.
+    {
+        std::vector<PocketPilot::HomeGame> games;
+        std::vector<PocketPilot::HomeProgram> programs;
+        m_program_list->describe(games, programs);
+        std::vector<Assistant::ProgramInfo> list;
+        for (const PocketPilot::HomeProgram& program : programs){
+            if (program.game < 0 || program.game >= (int)games.size()){
+                continue;
+            }
+            Assistant::ProgramInfo info;
+            info.game = games[(size_t)program.game].name;
+            info.section = program.section;
+            info.name = program.name;
+            info.description = program.description;
+            list.emplace_back(std::move(info));
+        }
+        hooks.programs = [list]{
+            return list;
+        };
+    }
+    hooks.open_program = [this]{
+        Assistant::OpenProgramInfo open;
+        if (m_current_panel == nullptr){
+            return open;
+        }
+        const PanelDescriptor& descriptor = m_current_panel->descriptor();
+        open.open = true;
+        open.name = QString::fromStdString(descriptor.display_name());
+        //  The program's own settings have things that are nobody else's
+        //  (where notifications go): only their name is told.
+        if (&descriptor == &GlobalSettings_Descriptor::instance()){
+            open.name = "Settings";
+            return open;
+        }
+        open.game = QString::fromStdString(m_program_list->current_game());
+        open.description = QString::fromStdString(descriptor.description());
+        open.running = m_busy;
+        try{
+            open.settings = QString::fromStdString(m_current_panel->to_json().dump(2));
+        }catch (...){}
+        return open;
+    };
+    hooks.recent_log = [](int lines){
+        QStringList text;
+        for (const LogLine& line : global_last_log_history().get_recent((size_t)std::max(lines, 0))){
+            text += (line.color == COLOR_RED ? "(red) " : "") + QString::fromStdString(line.text);
+        }
+        return text;
+    };
+
+    m_assistant = std::make_unique<Assistant::Service>(std::move(hooks), std::move(transport));
+    m_assistant_panel = new Assistant::Panel(*centralwidget, *m_assistant);
+    m_frame->panel_layout().addWidget(m_assistant_panel);
+    m_assistant_panel->on_close = [this]{
+        show_assistant(false);
+    };
+    m_frame->set_panel_width(m_assistant->settings().panel_width);
+    m_frame->set_panel_visible(m_assistant->settings().panel_open);
+}
+
+void MainWindow::remake_assistant(
+    std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
+    const std::string& settings_folder
+){
+    m_frame->set_panel_visible(false);
+    make_assistant(std::move(transport), settings_folder);
+}
+
+void MainWindow::show_assistant(bool show){
+    m_frame->set_panel_visible(show);
+    if (m_assistant->settings().panel_open != show){
+        m_assistant->settings().panel_open = show;
+        m_assistant->save_settings();
+    }
+    if (show){
+        m_assistant_panel->show_start_page();
+        m_assistant_panel->focus_input();
+    }
 }
 
 //  The page with the games while no program is open, and where the user

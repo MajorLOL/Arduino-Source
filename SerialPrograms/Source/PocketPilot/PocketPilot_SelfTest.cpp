@@ -18,6 +18,7 @@
 #include <QEventLoop>
 #include <QPainter>
 #include <QPixmap>
+#include <QPushButton>
 #include <QTimer>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Json/JsonValue.h"
@@ -29,6 +30,9 @@
 #include "CommonFramework/Options/Environment/ThemeSelectorOption.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "Assistant/Assistant_Panel.h"
+#include "Assistant/Assistant_SelfTest.h"
+#include "Assistant/Assistant_Service.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Theme.h"
@@ -263,6 +267,130 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     save(window, "night-fire-box-namer");
     save_tall("night-fire-box-namer-tall");
 
+    //  Claude: its panel next to a program. The test answers for Claude
+    //  and for GitHub itself (Assistant/Assistant_SelfTest.h): the build
+    //  machine has no key and uses no network. Everything in front of
+    //  those answers is the real thing, so the conversation here also
+    //  shows that a change ends up on a branch of its own.
+    {
+        logger.log("UI test: the panel with Claude, with the test answering for Claude and GitHub");
+        Assistant::TestBackend backend;
+        const QString folder = out + "/assistant-test";
+        QDir().mkpath(folder);
+        window.remake_assistant(backend.make_transport(), (folder + "/").toStdString());
+        open_program();
+        window.show_assistant(true);
+        save(window, "night-fire-claude-connect");
+
+        Assistant::Service& service = window.assistant();
+        Assistant::Panel& panel = window.assistant_panel();
+        QString error;
+        service.secrets().set(Assistant::Secret::CLAUDE_API_KEY, "a-key-made-up-for-the-test", error);
+        service.secrets().set(Assistant::Secret::GITHUB_TOKEN, "a-token-made-up-for-the-test", error);
+        panel.show_start_page();
+        save(window, "night-fire-claude-empty");
+
+        auto wait_until = [&](const std::function<bool()>& done, const char* what){
+            for (int waited = 0; waited < 20000 && !done(); waited += 50){
+                let_run(50);
+            }
+            if (!done()){
+                failed++;
+                logger.log(std::string("UI test: Claude's panel did not get to ") + what, COLOR_RED);
+                return false;
+            }
+            return true;
+        };
+        auto find_button = [&](const QString& text){
+            QPushButton* found = nullptr;
+            for (QPushButton* button : panel.findChildren<QPushButton*>()){
+                if (button->text() == text && button->isVisible()){
+                    found = button;
+                }
+            }
+            return found;
+        };
+
+        //  A question about a run: Claude looks in the log and the source.
+        const QString source = QString::fromLatin1(Assistant::TestBackend::SOURCE_FILE);
+        backend.claude_calls("read_log", QJsonObject{{"lines", 120}});
+        backend.claude_calls("find_files", QJsonObject{{"words", "frlg autostory.cpp"}});
+        backend.claude_calls("read_file", QJsonObject{{"path", source}, {"first_line", 40}, {"last_line", 46}});
+        backend.claude_says(
+            "The run stopped in `C13_02_CHAMPION`: the League was lost **seven times in a row**, and then "
+            "the program stops by itself.\n\n"
+            "## Where that is\n"
+            "`PokemonFRLG_AutoStory.cpp`, line 43:\n\n"
+            "```cpp\nif (league_again_losses > 6){\n    throw UserSetupError(env.logger(), \"The League was "
+            "lost seven times in a row.\");\n}\n```\n\n"
+            "What you can do:\n"
+            "- Raise **Extra levels** in the options, so that the team trains further first.\n"
+            "- Have the limit changed: say so and I make the change on a branch of its own."
+        );
+        panel.send("Why did the last run stop?");
+        wait_until([&]{ return !service.agent().busy(); }, "the end of an answer");
+        save(window, "night-fire-claude-answer");
+
+        //  A change: made, and committed once the user says so.
+        backend.claude_calls(
+            "edit_file",
+            QJsonObject{{"path", source}, {"old_text", "league_again_losses > 6"}, {"new_text", "league_again_losses > 9"}},
+            "I will set the limit to ten losses in `PokemonFRLG_AutoStory.cpp`."
+        );
+        backend.claude_calls(
+            "commit_changes",
+            QJsonObject{
+                {"topic", "League loss limit"},
+                {"message", "FRLG AutoStory: stop after ten League losses in a row\n\nThe limit was seven."},
+            }
+        );
+        backend.claude_says(
+            "Committed to `claude/league-loss-limit`. Open the pull request with the button above: its build "
+            "takes about 7 minutes. Tell me when it is done and I will look whether it passed."
+        );
+        panel.send("Make it ten losses.");
+        if (wait_until([&]{ return find_button("Commit") != nullptr; }, "the question whether to commit")){
+            save(window, "night-fire-claude-commit-question");
+            find_button("Commit")->click();
+        }
+        wait_until([&]{ return !service.agent().busy(); }, "the end of the commit");
+        save(window, "night-fire-claude-committed");
+
+        const QString branch = "claude/league-loss-limit";
+        const bool committed =
+            backend.has_branch(branch) &&
+            backend.file_on(branch, source).contains("league_again_losses > 9){\r\n") &&
+            backend.file_on(Assistant::TestBackend::BASE_BRANCH, source).contains("league_again_losses > 6){\r\n") &&
+            backend.requests_to_claude() == 7 &&
+            service.workspace().branch() == branch &&
+            service.workspace().changes().empty();
+        if (committed){
+            logger.log(
+                "Assistant test: the conversation ended in a commit on a branch of its own, with the base "
+                "branch as it was.",
+                COLOR_BLUE
+            );
+        }else{
+            failed++;
+            logger.log("Assistant test: the conversation did not end in the commit it should have made.", COLOR_RED);
+        }
+
+        panel.show_page(Assistant::Panel::Page::SETTINGS);
+        save(window, "night-fire-claude-settings");
+        panel.show_start_page();
+        set_look(UiThemeMode::POCKET_DAY, Starter::WATER);
+        save(window, "day-water-claude");
+        set_look(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
+
+        //  The made-up connection ends with this block: back to the
+        //  network, with the files still in the test's folder and without
+        //  the made-up keys, so that nothing can be sent with them.
+        service.secrets().set(Assistant::Secret::CLAUDE_API_KEY, QString(), error);
+        service.secrets().set(Assistant::Secret::GITHUB_TOKEN, QString(), error);
+        window.show_assistant(false);
+        window.remake_assistant(nullptr, (folder + "/").toStdString());
+    }
+
     //  Back to the first look. (Nothing of this is saved: the program
     //  exits without writing its settings.)
     window.show_games();
@@ -318,6 +446,25 @@ int check_older_audio_settings(Logger& logger){
     return failed;
 }
 
+
+
+//  The parts of the assistant that need no connection: reading the API's
+//  stream, the prices, line ends, and the file with the keys (on Windows:
+//  that it really is encrypted, and comes back).
+int check_assistant(const QString& out, Logger& logger){
+    const QString folder = out + "/assistant-test";
+    QDir().mkpath(folder);
+    const Assistant::CheckResult result = Assistant::run_checks(folder, [&](const QString& line){
+        logger.log("Assistant test: failed: " + line.toStdString(), COLOR_RED);
+    });
+    logger.log(
+        "Assistant test: " + std::to_string(result.checks - result.failed) + " of " +
+        std::to_string(result.checks) + " checks passed.",
+        result.failed == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return result.failed;
+}
+
 }
 
 
@@ -331,6 +478,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     try{
         int failed = take_pictures(application, window, out, logger);
         failed += check_older_audio_settings(logger);
+        failed += check_assistant(out, logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

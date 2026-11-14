@@ -238,6 +238,10 @@ QString fill_style_sheet(const QString& path, const ThemeColors& colors){
         {"accent_pressed",  mix_colors(colors.accent, black, 0.16).name()},
         {"accent_text",     colors.accent_text.name()},
 
+        {"ok",              colors.ok.name()},
+        {"warning",         colors.warning.name()},
+        {"danger",          colors.danger.name()},
+
         {"scroll",          mix_colors(colors.screen, colors.text, 0.24).name()},
         {"scroll_hover",    mix_colors(colors.screen, colors.text, 0.42).name()},
 

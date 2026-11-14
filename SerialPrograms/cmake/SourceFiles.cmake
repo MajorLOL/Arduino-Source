@@ -1441,6 +1441,27 @@ file(GLOB LIBRARY_SOURCES
     Source/NintendoSwitch/Programs/Typewriter/NintendoSwitch_TypewriterTextMapping.h
     Source/PanelLists.cpp
     Source/PanelLists.h
+    Source/PocketPilot/Assistant/Assistant_Agent.cpp
+    Source/PocketPilot/Assistant/Assistant_Agent.h
+    Source/PocketPilot/Assistant/Assistant_ChatTools.cpp
+    Source/PocketPilot/Assistant/Assistant_Claude.cpp
+    Source/PocketPilot/Assistant/Assistant_Claude.h
+    Source/PocketPilot/Assistant/Assistant_GitHub.cpp
+    Source/PocketPilot/Assistant/Assistant_GitHub.h
+    Source/PocketPilot/Assistant/Assistant_Http.cpp
+    Source/PocketPilot/Assistant/Assistant_Http.h
+    Source/PocketPilot/Assistant/Assistant_Panel.cpp
+    Source/PocketPilot/Assistant/Assistant_Panel.h
+    Source/PocketPilot/Assistant/Assistant_SelfTest.cpp
+    Source/PocketPilot/Assistant/Assistant_SelfTest.h
+    Source/PocketPilot/Assistant/Assistant_Service.cpp
+    Source/PocketPilot/Assistant/Assistant_Service.h
+    Source/PocketPilot/Assistant/Assistant_Settings.cpp
+    Source/PocketPilot/Assistant/Assistant_Settings.h
+    Source/PocketPilot/Assistant/Assistant_Tools.cpp
+    Source/PocketPilot/Assistant/Assistant_Tools.h
+    Source/PocketPilot/Assistant/Assistant_Workspace.cpp
+    Source/PocketPilot/Assistant/Assistant_Workspace.h
     Source/PocketPilot/PocketPilot_About.cpp
     Source/PocketPilot/PocketPilot_About.h
     Source/PocketPilot/PocketPilot_Home.cpp

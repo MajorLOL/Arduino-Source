@@ -7,6 +7,8 @@
 #ifndef PokemonAutomation_MainWindow_H
 #define PokemonAutomation_MainWindow_H
 
+#include <memory>
+#include <string>
 #include <QMainWindow>
 #include "Common/Cpp/Options/ConfigOption.h"
 #include "PanelLists.h"
@@ -27,6 +29,11 @@ namespace PocketPilot{
     class Frame;
     class HomePage;
     struct AboutInfo;
+    namespace Assistant{
+        class HttpTransport;
+        class Panel;
+        class Service;
+    }
 }
 
 
@@ -51,6 +58,18 @@ public:
     PocketPilot::AboutInfo about_info() const;
     PocketPilot::HomePage& home_page(){ return *m_home; }
     LoggerWindow& output_window(){ return *m_output_window; }
+
+    //  The panel with Claude at the right: shown or hidden.
+    void show_assistant(bool show);
+    PocketPilot::Assistant::Service& assistant(){ return *m_assistant; }
+    PocketPilot::Assistant::Panel& assistant_panel(){ return *m_assistant_panel; }
+    //  Makes the assistant anew with another connection than the network
+    //  and its files in another folder: for the test of the interface,
+    //  which answers for Claude and GitHub itself and has no keys.
+    void remake_assistant(
+        std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
+        const std::string& settings_folder
+    );
 
 
 private:
@@ -81,6 +100,10 @@ private:
 
     void update_wallpaper();
     void update_page();
+    void make_assistant(
+        std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
+        const std::string& settings_folder
+    );
 
 private:
     WallpaperWidget* centralwidget = nullptr;
@@ -91,6 +114,9 @@ private:
     std::unique_ptr<PocketPilot::Frame> m_frame;
     //  The page with the games, shown while no program is open.
     PocketPilot::HomePage* m_home = nullptr;
+    //  Claude: what it needs to work, and its panel at the right.
+    std::unique_ptr<PocketPilot::Assistant::Service> m_assistant;
+    PocketPilot::Assistant::Panel* m_assistant_panel = nullptr;
 
 //    ProgramTabs* m_program_list = nullptr;
     ProgramSelect* m_program_list = nullptr;
