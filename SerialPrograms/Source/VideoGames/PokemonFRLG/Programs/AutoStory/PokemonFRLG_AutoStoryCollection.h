@@ -23,17 +23,11 @@
 #include "Common/Cpp/Options/SimpleIntegerOption.h"
 #include "Common/Cpp/Options/StaticTextOption.h"
 #include "CommonFramework/Options/LabelCellOption.h"
+#include "PokemonFRLG_AutoStoryCollectionText.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace PokemonFRLG{
-
-
-//  How many of a species the program caught, and how many of them shiny.
-struct StoryCollectionCount{
-    int caught = 0;
-    int shiny = 0;
-};
 
 
 class StoryCollectionRow : public EditableTableRow{

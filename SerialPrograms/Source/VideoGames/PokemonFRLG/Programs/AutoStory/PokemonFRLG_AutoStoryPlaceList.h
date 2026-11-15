@@ -1,0 +1,85 @@
+/*  Pokemon FRLG Autostory Place List
+ *
+ *  From: https://github.com/PokemonAutomation/
+ *
+ *  The species of a place where the program catches for the POKeDEX (the
+ *  text of a DEX step), with how often each comes there in each game:
+ *
+ *      doduo:35:35,raticate:5:5,nidoran-m:20:0
+ *
+ *  A name, then how many of 100 wild Pokemon there are that species in
+ *  FireRed, then in LeafGreen. 0: it does not come there in that game. The
+ *  two games do not have the same species everywhere: the center of the
+ *  Safari Zone has NIDORAN M in FireRed and NIDORAN F in LeafGreen, and a
+ *  list of both together made the program wait in FireRed for a NIDORAN F
+ *  that only comes in the east and west areas.
+ *
+ *  And which place is worth a wait for a species: where it comes 1 in 10
+ *  or more, or at least half as often as at the best place of the
+ *  collection. On Route 16 a RATICATE is 1 in 20; in the Pokemon Mansion
+ *  and on Route 18 it is 3 in 10. On 15 November the program stayed on
+ *  Route 16 for 35 battles and 18 minutes for one.
+ *
+ *  This part has no dependencies on the rest of the program so it can be
+ *  tested on its own.
+ *
+ */
+
+#ifndef PokemonAutomation_PokemonFRLG_AutoStoryPlaceList_H
+#define PokemonAutomation_PokemonFRLG_AutoStoryPlaceList_H
+
+#include <algorithm>
+#include <cstdlib>
+#include <map>
+#include <string>
+
+namespace PokemonAutomation{
+namespace NintendoSwitch{
+namespace PokemonFRLG{
+
+
+//  The species of a place's list for a game (0 FireRed, 1 LeafGreen; any
+//  other number: either game): the ones that come there in it, with how
+//  often of 100. A name without numbers (a list that has none): it comes
+//  there (100).
+inline std::map<std::string, int> story_place_species(const char* text, int game){
+    std::map<std::string, int> species;
+    const std::string list = text == nullptr ? "" : text;
+    size_t start = 0;
+    while (start <= list.size()){
+        const size_t comma = list.find(',', start);
+        const std::string item = list.substr(start, comma == std::string::npos ? std::string::npos : comma - start);
+        //  "slug", or "slug:F:L".
+        const size_t first = item.find(':');
+        const std::string slug = item.substr(0, first);
+        int share[2] = {100, 100};
+        if (first != std::string::npos){
+            const size_t second = item.find(':', first + 1);
+            const size_t length = second == std::string::npos ? std::string::npos : second - first - 1;
+            share[0] = std::atoi(item.substr(first + 1, length).c_str());
+            share[1] = second == std::string::npos ? share[0] : std::atoi(item.substr(second + 1).c_str());
+        }
+        const int here = game == 0 ? share[0] : game == 1 ? share[1] : std::max(share[0], share[1]);
+        if (!slug.empty() && here > 0){
+            species[slug] = here;
+        }
+        if (comma == std::string::npos){
+            break;
+        }
+        start = comma + 1;
+    }
+    return species;
+}
+
+//  A place where a species comes "here" times of 100 is worth a wait for
+//  it, when the best place of the collection has it "best" times of 100
+//  (0: not known).
+inline bool story_place_worth(int here, int best){
+    return here > 0 && (here >= 10 || best <= 0 || 2 * here >= best);
+}
+
+
+}
+}
+}
+#endif

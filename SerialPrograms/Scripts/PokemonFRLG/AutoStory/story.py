@@ -1232,16 +1232,26 @@ class Builder:
                 self.run_step(s, sub)
             if not whole and self.pos[:3] != start[:3]:
                 raise StoryError("unless_collected: the steps end at %s, not %s" % (self.pos, start))
+            #  The species of those places, each as often as at the place
+            #  where it comes most ("slug:FireRed:LeafGreen", as in a DEX
+            #  step). The program looks at the places themselves (which of
+            #  them is worth a visit for a species); this is for reading.
             species = []
+            share = {}
             for s in sub:
                 if s["type"] == "DEX" and (s.get("p2", 0) & 2):
-                    for slug in s["text"].split(","):
+                    for item in s["text"].split(","):
+                        slug, fire_red, leaf_green = item.split(":")
                         if slug not in species:
                             species.append(slug)
+                        best = share.setdefault(slug, [0, 0])
+                        best[0] = max(best[0], int(fire_red))
+                        best[1] = max(best[1], int(leaf_green))
             if not species:
                 raise StoryError("%s: no place to catch at in these steps" % step.get("label", "?"))
             out.append({"type": "SKIP_IF_COLLECTED", "label": step.get("label", "Anything to catch?"),
-                        "p0": len(sub), "text": ",".join(species)})
+                        "p0": len(sub),
+                        "text": ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)})
             out.extend(sub)
             return
         if "outside" in step:
@@ -2154,10 +2164,17 @@ class Builder:
             osc, length = strips[tuple(self.pos[:3])]
         else:
             osc, length = self.osc_dir(self.grass_tiles(c["map"], c["tiles"]), label), 2
+        #  The list with how often each species comes here, of 100 wild
+        #  Pokemon, in FireRed and in LeafGreen ("slug:FireRed:LeafGreen", 0:
+        #  not here in that game): the program looks for what comes here in
+        #  its game, and does not stay for a species that is rare here and
+        #  common at another place of the collection.
+        share = self.gd.land_share.get(c["map"], {})
+        text = ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)
         #  p3: no catching here once the game counts that many species.
         #  p2 & 2: what the program's POKeDEX table still wants of the list
         #  (the game and starter chosen, extra ones to evolve).
-        out.append({"type": "DEX", "label": label, "text": ",".join(species),
+        out.append({"type": "DEX", "label": label, "text": text,
                     "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
                     "p2": (1 if c.get("safari") else 0) | (2 if c.get("collect") else 0),
                     "p3": c.get("enough", 0), "dir": osc, "p4": length})

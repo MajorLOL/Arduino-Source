@@ -26,6 +26,7 @@
 #include "PokemonFRLG_AutoStoryBattle.h"
 #include "PokemonFRLG_AutoStoryScroll.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
+#include "PokemonFRLG_AutoStoryPlaceList.h"
 
 namespace PokemonAutomation{
 
@@ -148,6 +149,14 @@ struct StoryRuntime{
     StoryCollectionTable* collection = nullptr;
     //  Its counts at the last save (a reset goes back to them).
     std::map<std::string, StoryCollectionCount> collection_at_save;
+    //  Said once in a run: the table is far behind the game's own count.
+    bool warned_table_behind = false;
+    //  The places of the POKeDEX collection (the DEX steps that catch for
+    //  the table), in the table's game: how often each species comes, of
+    //  100 wild Pokemon, at the place where it comes most. A place is worth
+    //  staying at for a species that comes there at least half as often as
+    //  that, or 1 in 10 (story_place_wanted()).
+    std::map<std::string, int> collect_best;
     //  The option "Shiny only" of the collection (chapter 20): only shiny
     //  Pokemon of the species the table wants are caught, and a visit of a
     //  place lasts "collect_shiny_minutes".
@@ -290,8 +299,29 @@ StoryBattleResult story_battle(
 );
 
 
-//  The species of a catch step ("a,b,c").
+//  The species of a catch step ("a,b,c"; of a place, "a:20:5,b:10:10": the
+//  names).
 std::set<std::string> story_species_list(const char* text);
+
+//  A place of the POKeDEX collection (a DEX step that catches for the
+//  table), as the table has it now (PokemonFRLG_AutoStoryPlaceList.h).
+struct StoryPlaceWanted{
+    //  What comes there in the table's game and can be caught for it, with
+    //  how often of 100.
+    std::map<std::string, int> here;
+    //  Of those, what the table still wants.
+    std::set<std::string> wanted;
+    //  Of the wanted: the ones the place is worth a visit and a wait for
+    //  (they come there 1 in 10 or more, or at least half as often as at
+    //  the best place of the collection) ...
+    std::set<std::string> looked_for;
+    //  ... and the ones that are rare there and much more common at another
+    //  place: caught when one comes, not waited for. (Route 16 on 15
+    //  November: 35 battles and 18 minutes for a RATICATE, 1 in 20 there
+    //  and 3 in 10 in the Pokemon Mansion and on Route 18.)
+    std::set<std::string> in_passing;
+};
+StoryPlaceWanted story_place_wanted(const StoryRuntime& rt, const StoryStep& step);
 
 
 //  Walk one generated leg. Handles wild battles and turning trainers on the

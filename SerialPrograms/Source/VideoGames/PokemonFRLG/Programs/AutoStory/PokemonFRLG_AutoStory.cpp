@@ -883,26 +883,48 @@ void AutoStory::run_segment(
             story_dex(rt, step);
             break;
         case StepType::SKIP_IF_COLLECTED:{
-            //  The places of the next p0 steps: is any species there that
-            //  the POKeDEX table still wants?
-            const std::set<std::string> here = story_species_list(step.text);
-            std::set<std::string> wanted;
-            if (rt.collection != nullptr){
-                wanted = rt.collection->wanted(here);
+            //  The places of the next p0 steps: does the POKeDEX table still
+            //  want a species one of them is looked at for? (What comes
+            //  there in the game played; not what is rare there and much
+            //  more common at another place of the collection.)
+            std::set<std::string> here;
+            std::set<std::string> looked_for;
+            std::set<std::string> in_passing;
+            const size_t end = std::min<size_t>(segment.step_count, i + 1 + (size_t)std::max(0, (int)step.p0));
+            for (size_t k = i + 1; k < end; k++){
+                const StoryStep& place_step = script.step(segment, k);
+                if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
+                    continue;
+                }
+                const StoryPlaceWanted place = story_place_wanted(rt, place_step);
+                for (const auto& item : place.here){
+                    here.insert(item.first);
+                }
+                looked_for.insert(place.looked_for.begin(), place.looked_for.end());
+                in_passing.insert(place.in_passing.begin(), place.in_passing.end());
             }
-            if (wanted.empty()){
+            auto names = [](const std::set<std::string>& species){
+                std::string list;
+                for (const std::string& slug : species){
+                    list += (list.empty() ? "" : ", ") + slug;
+                }
+                return list;
+            };
+            //  Looked for at one of the places: not "in passing" for them all.
+            for (const std::string& slug : looked_for){
+                in_passing.erase(slug);
+            }
+            const std::string rare = in_passing.empty() ? std::string() :
+                " (Rare here and more common at another place, so not a reason to come: " + names(in_passing) + ".)";
+            if (looked_for.empty()){
                 env.log(
                     label + ": the POKeDEX table wants none of the " + std::to_string(here.size()) +
-                    " species here: the next " + std::to_string(step.p0) + " steps are skipped.",
+                    " species looked for here: the next " + std::to_string(step.p0) + " steps are skipped." + rare,
                     COLOR_BLUE
                 );
                 i += (size_t)std::max(0, (int)step.p0);
             }else{
-                std::string names;
-                for (const std::string& slug : wanted){
-                    names += (names.empty() ? "" : ", ") + slug;
-                }
-                env.log(label + ": still wanted here: " + names + ".", COLOR_BLUE);
+                env.log(label + ": still wanted here: " + names(looked_for) + "." + rare, COLOR_BLUE);
             }
             break;
         }
@@ -1304,6 +1326,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  so the list goes to a file of its own at each save too (in
     //  UserSettings, next to PA-Stats).
     const std::string caught_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Caught.txt";
+    //  The same for the POKeDEX table (PokemonFRLG_AutoStoryCollectionText.h):
+    //  its counts as of the last save.
+    const std::string collection_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Collection.txt";
     //  Legendary Pokemon the program left for later (StoryRuntime::
     //  legendary_left), as of the last save: "<starter> <label>,<label>".
     const std::string left_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Left.txt";
@@ -1354,6 +1379,16 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 string_to_file(left_file, std::string(starter_name(starter)) + " " + list + "\n");
             }catch (...){
                 env.log("Could not write " + left_file + ".", COLOR_ORANGE);
+            }
+        }
+        if (rt.collection != nullptr){
+            try{
+                string_to_file(
+                    collection_file,
+                    story_collection_to_text(starter_name(starter), rt.collection_at_save)
+                );
+            }catch (...){
+                env.log("Could not write " + collection_file + ".", COLOR_ORANGE);
             }
         }
         try{
@@ -1410,18 +1445,46 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  ... and those for the POKeDEX, as the last run left them.
     if (dex_before){
         std::string known = DEX_CAUGHT;
-        if (known.empty()){
+        //  The list of the last save is this playthrough's: the program's
+        //  save file, written with it, names the starter. (An empty option
+        //  takes the list as before, without that.)
+        bool list_of_this_story = known.empty();
+        {
+            std::string text;
+            if (read_text_file(save_file, text) &&
+                text.rfind(std::string(starter_name(starter)) + " ", 0) == 0
+            ){
+                list_of_this_story = true;
+            }
+        }
+        if (known != "-" && list_of_this_story){
             //  The settings file was not written (the window was not
-            //  closed), or is from before: the list of the last save.
+            //  closed), or is from before: the list of the last save has
+            //  more. The two together. (Until build 23 the file only
+            //  counted when the option was empty: an option with two
+            //  species from days before hid the list of the last save.)
             std::string from_file;
             if (read_text_file(caught_file, from_file)){
-                while (!from_file.empty() && std::isspace((unsigned char)from_file.back())){
-                    from_file.pop_back();
+                std::set<std::string> both = story_species_list(known.c_str());
+                const size_t before = both.size();
+                for (char& c : from_file){
+                    if (std::isspace((unsigned char)c)){
+                        c = ',';
+                    }
                 }
-                if (!from_file.empty()){
-                    known = from_file;
+                const std::set<std::string> saved = story_species_list(from_file.c_str());
+                both.insert(saved.begin(), saved.end());
+                if (both.size() > before){
+                    known.clear();
+                    for (const std::string& slug : both){
+                        known += (known.empty() ? "" : ",") + slug;
+                    }
                     DEX_CAUGHT.set(known);
-                    env.log("\"Caught by the program\" from " + caught_file + ".", COLOR_BLUE);
+                    env.log(
+                        "\"Caught by the program\": " + std::to_string(both.size() - before) + " species more from " +
+                        caught_file + " (the list of the last save; the settings were older).",
+                        COLOR_BLUE
+                    );
                 }
             }
         }
@@ -1459,10 +1522,56 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     COLLECTION.set_game(GAME_VERSION == GameVersion::LEAFGREEN ? 1 : 0, (int)starter);
     COLLECTION.set_shiny_only(COLLECTION_SHINY);
     rt.collection = &COLLECTION;
+    //  The places of the collection: where each species comes most, in this
+    //  game (story_place_wanted()).
+    rt.collect_best.clear();
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type != StepType::DEX || step.p2 <= 0 || (step.p2 & 2) == 0){
+                continue;
+            }
+            for (const auto& item : story_place_species(step.text, COLLECTION.game())){
+                int& best = rt.collect_best[item.first];
+                best = std::max(best, item.second);
+            }
+        }
+    }
     if (new_game || (first == 0 && first_step == 0)){
         COLLECTION.clear_counts();
         env.log("A new game: the POKeDEX table starts from 0.", COLOR_BLUE);
     }else{
+        //  The table of the last save, from its own file: the settings are
+        //  written only when the program's window closes, so the table in
+        //  them can be from days before. The larger count of each species.
+        {
+            std::string text;
+            std::map<std::string, StoryCollectionCount> saved;
+            if (read_text_file(collection_file, text) &&
+                story_collection_from_text(text, starter_name(starter), saved)
+            ){
+                std::map<std::string, StoryCollectionCount> counts = COLLECTION.snapshot();
+                size_t with_one = 0;
+                for (const auto& item : counts){
+                    if (item.second.caught > 0){
+                        with_one++;
+                    }
+                }
+                const size_t more = story_collection_merge(counts, saved);
+                if (more > 0){
+                    COLLECTION.restore(counts);
+                    size_t registered, total, to_catch;
+                    COLLECTION.counts_summary(registered, total, to_catch);
+                    env.log(
+                        "POKeDEX table: " + std::to_string(more) + " species have more in " + collection_file +
+                        " (the table of the last save) than in the settings, which had " +
+                        std::to_string(with_one) + " species with at least one: the table of the last save counts.",
+                        COLOR_BLUE
+                    );
+                }
+            }
+        }
         for (size_t s = 0; s <= first; s++){
             const StorySegment& segment = script.segments[s];
             const size_t end = s == first ? first_step : segment.step_count;
@@ -1558,6 +1667,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             string_to_file(new_game_file, where);
             string_to_file(caught_file, "\n");
             string_to_file(left_file, "\n");
+            string_to_file(collection_file, story_collection_to_text(starter_name(starter), {}));
         }catch (...){
             env.log("Could not write the program's files in " + SETTINGS_PATH() + ".", COLOR_ORANGE);
         }

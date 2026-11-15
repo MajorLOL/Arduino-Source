@@ -2544,19 +2544,32 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     //  For the POKeDEX table: what it still wants of the list, in its game.
     const bool collect = step.p2 > 0 && (step.p2 & 2) != 0 && rt.collection != nullptr;
     const std::string label = step.label;
+    //  A place's list has the species of both games, each with how often
+    //  it comes there in FireRed and in LeafGreen. What does not come there
+    //  in the game played is not looked for: the other game's species (the
+    //  Safari Zone: SCYTHER in FireRed, PINSIR in LeafGreen), and those the
+    //  two games have at different places (the Safari Zone's center:
+    //  NIDORAN M in FireRed, NIDORAN F in LeafGreen; NIDORAN F is in
+    //  FireRed's east and west areas). A list with one of them never got
+    //  empty: the place was left only after its battles in a row without a
+    //  catch, or after its minutes, and a second Safari Game was played.
     std::set<std::string> listed = story_species_list(step.text);
     std::set<std::string> wanted;
     std::set<std::string> extra;
+    //  Collecting: what the place is worth a wait for, and what is only
+    //  caught when one comes (rare here, common elsewhere).
+    std::set<std::string> looked_for;
+    std::set<std::string> in_passing;
     std::string counts;
     if (collect){
-        wanted = rt.collection->wanted(listed);
-        std::set<std::string> in_game;
-        for (const std::string& slug : listed){
-            if (rt.collection->needed(slug) > 0){
-                in_game.insert(slug);
-            }
+        const StoryPlaceWanted place = story_place_wanted(rt, step);
+        listed.clear();
+        for (const auto& item : place.here){
+            listed.insert(item.first);
         }
-        listed = in_game;
+        wanted = place.wanted;
+        looked_for = place.looked_for;
+        in_passing = place.in_passing;
         for (const std::string& slug : wanted){
             if (rt.collection->wants_more_than_one(slug)){
                 extra.insert(slug);
@@ -2565,21 +2578,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 std::to_string(rt.collection->caught(slug)) + "/" + std::to_string(rt.collection->needed(slug));
         }
     }else{
-        //  A place's list has the species of both games (the Safari Zone:
-        //  SCYTHER in FireRed, PINSIR in LeafGreen; the Seafoam Islands:
-        //  PSYDUCK or SLOWPOKE). The other game's never come, so a list with
-        //  one of them never got empty: the place was left only after its
-        //  battles in a row without a catch, or after its minutes.
         if (rt.collection != nullptr){
             std::set<std::string> in_game;
-            std::set<std::string> other_game;
+            std::set<std::string> not_here;
+            const std::map<std::string, int> here = story_place_species(step.text, rt.collection->game());
             for (const std::string& slug : listed){
-                (rt.collection->needed(slug) > 0 ? in_game : other_game).insert(slug);
+                (here.count(slug) != 0 && rt.collection->needed(slug) > 0 ? in_game : not_here).insert(slug);
             }
-            if (!in_game.empty() && !other_game.empty()){
+            if (!in_game.empty() && !not_here.empty()){
                 console.log(
-                    label + ": not in this game (" + rt.collection->game_name() + "), so not looked for: " +
-                    species_names(other_game) + "."
+                    label + ": not here in this game (" + rt.collection->game_name() + "), so not looked for: " +
+                    species_names(not_here) + "."
                 );
                 listed = in_game;
             }
@@ -2589,7 +2598,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 wanted.insert(slug);
             }
         }
+        looked_for = wanted;
     }
+    //  Something the place is looked at for is still on the list.
+    auto any_looked_for = [&](){
+        for (const std::string& slug : looked_for){
+            if (rt.battle.dex_species.count(slug) != 0){
+                return true;
+            }
+        }
+        return false;
+    };
     //  "Shiny only": only shiny ones of the wanted species, for a while at
     //  each place (one wild Pokemon in 8192 is shiny): no limit of battles
     //  in a row without a catch.
@@ -2600,16 +2619,24 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         throw UserSetupError(console, "\"Shiny only\" needs the shiny sound: the program could not listen to the game.");
     }
     console.log(
-        label + ": for the POKeDEX, catching " + (shiny_only ? "shiny " : "") + species_names(wanted) +
+        label + ": for the POKeDEX, catching " + (shiny_only ? "shiny " : "") + species_names(looked_for) +
         (collect ? " (" + rt.collection->game_name() + ", the table: " + counts + ")" : std::string()) +
         (safari ? " (the Safari Game, until it is over)." :
             shiny_only ? " (all others are run from; at most " + std::to_string(minutes_limit) + " minutes)." :
             " (until " + std::to_string(idle_limit) + " battles in a row bring none, at most " +
-            std::to_string(minutes_limit) + " minutes)."),
+            std::to_string(minutes_limit) + " minutes).") +
+        (in_passing.empty() ? std::string() :
+            " Also caught if one comes, but not waited for (rare here, more common at another place): " +
+            species_names(in_passing) + "."),
         COLOR_BLUE
     );
-    if (wanted.empty() && !safari){
-        console.log(label + ": all of them were caught already.", COLOR_BLUE);
+    if (looked_for.empty() && !safari){
+        console.log(
+            label + (wanted.empty()
+                ? ": all of them were caught already."
+                : ": nothing left that this place is looked at for."),
+            COLOR_BLUE
+        );
         return;
     }
     //  Enough for what the POKeDEX is caught for (the National POKeDEX),
@@ -2658,7 +2685,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     const WallClock deadline = start + (safari ? safari_limit : std::chrono::minutes(minutes_limit));
     try{
         while (current_time() < deadline && !rt.safari_over){
-            if (!safari && (rt.battle.dex_species.empty() || idle >= idle_limit || rt.no_balls)){
+            if (!safari && (!any_looked_for() || idle >= idle_limit || rt.no_balls)){
                 break;
             }
             if (!safari && step.p3 > 0 && rt.dex_count_at_load >= 0 &&
@@ -2701,7 +2728,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 console.log(label + ": a shiny Pokemon is caught: back to the nurse to save it.", COLOR_BLUE);
                 break;
             }
-            if (collect && !safari && !rt.battle.dex_species.empty() &&
+            if (collect && !safari && any_looked_for() &&
                 (rt.lead_fainted || (rt.memory.player_hp >= 0 && rt.memory.player_hp < 0.35))
             ){
                 //  Catching at full HP lets the wild Pokemon hit back (Cerulean
@@ -2723,7 +2750,13 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         rt.battle = saved;
         throw;
     }
-    const std::set<std::string> left = rt.battle.dex_species;
+    //  What the place was looked at for and did not give, and what was
+    //  not waited for here and did not come.
+    std::set<std::string> left;
+    std::set<std::string> left_in_passing;
+    for (const std::string& slug : rt.battle.dex_species){
+        (in_passing.count(slug) != 0 ? left_in_passing : left).insert(slug);
+    }
     rt.in_safari = false;
     rt.collecting = false;
     rt.battle = saved;
@@ -2735,6 +2768,8 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         (marked > 0 ? ", " + std::to_string(marked) + " found caught before (the ball mark)" : std::string()) +
         " in " + std::to_string(battles) + " battles, " + std::to_string(minutes) +
         " minutes. Not caught: " + species_names(left) + "." +
+        (left_in_passing.empty() ? std::string() :
+            " Not waited for here: " + species_names(left_in_passing) + ".") +
         (rt.no_balls ? " No balls left." : "") +
         (safari ? " " + std::to_string(spot.steps()) + " steps on the grass (the game ends after 600, with those "
             "of the way there)." : std::string()),

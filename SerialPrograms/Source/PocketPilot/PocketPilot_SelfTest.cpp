@@ -18,6 +18,7 @@
 #include <QDialog>
 #include <QDir>
 #include <QEventLoop>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QListWidget>
@@ -33,6 +34,7 @@
 #include <QWheelEvent>
 #include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/Filesystem/FileIO.h"
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "CommonFramework/AudioPipeline/AudioOption.h"
@@ -45,7 +47,9 @@
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "Assistant/Assistant_Panel.h"
 #include "Assistant/Assistant_Play.h"
@@ -1017,6 +1021,88 @@ int check_name_mark(Logger& logger){
     return wrong;
 }
 
+
+//  What the FRLG AutoStory catches where: a place's list for each game and
+//  which place is worth a wait for a species, and the POKeDEX table through
+//  its own file and back, as this build writes and reads it.
+int check_collection_lists(const QString& out, Logger& logger){
+    using namespace NintendoSwitch::PokemonFRLG;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+    //  The center of the Safari Zone (PokemonFRLG_AutoStoryData.h).
+    const char* CENTER =
+        "chansey:1:1,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,"
+        "parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:15:15";
+    std::map<std::string, int> fire_red = story_place_species(CENTER, 0);
+    std::map<std::string, int> leaf_green = story_place_species(CENTER, 1);
+    check(
+        fire_red.size() == 9 && fire_red.count("nidoran-f") == 0 && fire_red.count("pinsir") == 0 &&
+        fire_red["nidoran-m"] == 20 && fire_red["scyther"] == 4 && fire_red["nidorina"] == 5,
+        "the center of the Safari Zone in FireRed"
+    );
+    check(
+        leaf_green.size() == 9 && leaf_green.count("nidoran-m") == 0 && leaf_green.count("scyther") == 0 &&
+        leaf_green["nidoran-f"] == 20 && leaf_green["pinsir"] == 4 && leaf_green["nidorina"] == 10,
+        "the center of the Safari Zone in LeafGreen"
+    );
+    check(
+        story_place_species("abra,zubat", 0).size() == 2 && story_place_species(nullptr, 0).empty() &&
+        story_place_species(CENTER, -1).size() == 11,
+        "a list without numbers, no list, either game"
+    );
+    check(
+        story_place_worth(5, 5) && story_place_worth(3, 5) && !story_place_worth(2, 5) &&
+        !story_place_worth(5, 30) && story_place_worth(10, 70) && !story_place_worth(1, 4) && story_place_worth(1, 0),
+        "which place is worth a wait"
+    );
+    //  The table: written as the program writes its files (a mark in front,
+    //  Windows line ends), read back.
+    std::map<std::string, StoryCollectionCount> counts;
+    counts["doduo"] = {2, 0};
+    counts["nidoran-f"] = {1, 1};
+    counts["pidgey"] = {0, 0};
+    std::map<std::string, StoryCollectionCount> back;
+    std::map<std::string, StoryCollectionCount> other;
+    bool read = false;
+    bool not_another = false;
+    const std::string path = (out + "/autostory-collection-test.txt").toStdString();
+    try{
+        string_to_file(path, story_collection_to_text("Charmander", counts));
+        std::string text;
+        read = file_to_string(path, text) && story_collection_from_text(text, "Charmander", back);
+        not_another = !story_collection_from_text(text, "Squirtle", other) && other.empty();
+    }catch (...){
+    }
+    QFile::remove(QString::fromStdString(path));
+    check(
+        read && back.size() == 2 && back["doduo"].caught == 2 && back["nidoran-f"].caught == 1 &&
+        back["nidoran-f"].shiny == 1,
+        "the POKeDEX table through its file and back"
+    );
+    check(not_another, "the POKeDEX table of another starter is not taken");
+    std::map<std::string, StoryCollectionCount> older;
+    older["doduo"] = {1, 0};
+    older["gloom"] = {3, 0};
+    check(
+        story_collection_merge(older, back) == 2 && older["doduo"].caught == 2 && older["gloom"].caught == 3 &&
+        older["nidoran-f"].shiny == 1,
+        "the larger count of two tables"
+    );
+    logger.log(
+        "AutoStory test: the lists of what comes where in each game, and the POKeDEX table through its file: " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1033,6 +1119,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
         failed += check_name_mark(logger);
+        failed += check_collection_lists(out, logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

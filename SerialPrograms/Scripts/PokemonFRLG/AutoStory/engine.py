@@ -185,6 +185,20 @@ class GameData:
         #  The Kanto species in the grass (cave) of a map, FireRed and
         #  LeafGreen together (slugs as the program reads them: nidoran-f).
         self.land_slugs = {}
+        #  ... and how often each comes there, of 100 wild Pokemon, in
+        #  FireRed and in LeafGreen: {map: {slug: [FireRed, LeafGreen]}}. The
+        #  two games do not have the same species everywhere (the Safari
+        #  Zone's center: NIDORAN M in FireRed, NIDORAN F in LeafGreen), and
+        #  a place's 12 slots are not equally likely (20, 20, 10, 10, 10, 10,
+        #  5, 5, 4, 4, 1, 1 of 100).
+        self.land_share = {}
+        slot_share = None
+        for g in groups:
+            for field in g.get("fields", []):
+                if field["type"] == "land_mons":
+                    slot_share = field["encounter_rates"]
+        if not slot_share or sum(slot_share) != 100:
+            raise EngineError("wild_encounters.json: no land_mons encounter_rates that add up to 100")
         #  The highest level of a wild Pokemon in the grass (or cave) of a map.
         self.wild_max_level = {}
         #  The encounter rates of a map: of 100 steps on its grass (cave
@@ -203,10 +217,18 @@ class GameData:
                 if "land_mons" in e:
                     self.land_encounters.add(e["map"])
                     sp = self.wild_species.setdefault((e["map"], e.get("base_label", "")), [])
-                    for mon in e["land_mons"]["mons"]:
+                    label = e.get("base_label", "")
+                    game = 0 if "FireRed" in label else 1 if "LeafGreen" in label else None
+                    if game is not None and len(e["land_mons"]["mons"]) != len(slot_share):
+                        raise EngineError("wild_encounters.json: %s has %d land slots, not %d" % (
+                            label, len(e["land_mons"]["mons"]), len(slot_share)))
+                    for slot, mon in enumerate(e["land_mons"]["mons"]):
                         sp.append(mon["species"])
-                        self.land_slugs.setdefault(e["map"], set()).add(mon["species"][8:].lower().replace("_", "-"))
+                        slug = mon["species"][8:].lower().replace("_", "-")
+                        self.land_slugs.setdefault(e["map"], set()).add(slug)
                         self.wild_max_level[e["map"]] = max(self.wild_max_level.get(e["map"], 0), mon["max_level"])
+                        if game is not None:
+                            self.land_share.setdefault(e["map"], {}).setdefault(slug, [0, 0])[game] += slot_share[slot]
                 if "water_mons" in e:
                     self.water_encounters.add(e["map"])
         #  Flags set by EventScript_ResetAllMapFlags (new game).

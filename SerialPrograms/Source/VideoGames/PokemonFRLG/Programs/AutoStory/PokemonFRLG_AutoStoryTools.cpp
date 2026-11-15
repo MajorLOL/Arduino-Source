@@ -2293,6 +2293,8 @@ std::set<std::string> story_species_list(const char* text){
     while (start <= list.size()){
         size_t comma = list.find(',', start);
         std::string slug = list.substr(start, comma == std::string::npos ? std::string::npos : comma - start);
+        //  A place's list has how often each comes behind its name.
+        slug = slug.substr(0, slug.find(':'));
         if (!slug.empty()){
             species.insert(slug);
         }
@@ -2302,6 +2304,28 @@ std::set<std::string> story_species_list(const char* text){
         start = comma + 1;
     }
     return species;
+}
+
+StoryPlaceWanted story_place_wanted(const StoryRuntime& rt, const StoryStep& step){
+    StoryPlaceWanted place;
+    if (rt.collection == nullptr){
+        return place;
+    }
+    for (const auto& item : story_place_species(step.text, rt.collection->game())){
+        if (rt.collection->needed(item.first) > 0){
+            place.here.insert(item);
+        }
+    }
+    for (const auto& item : place.here){
+        if (!rt.collection->wants(item.first)){
+            continue;
+        }
+        place.wanted.insert(item.first);
+        auto best = rt.collect_best.find(item.first);
+        const bool worth = story_place_worth(item.second, best == rt.collect_best.end() ? 0 : best->second);
+        (worth ? place.looked_for : place.in_passing).insert(item.first);
+    }
+    return place;
 }
 
 
@@ -2676,6 +2700,28 @@ void story_soft_reset(StoryRuntime& rt){
     rt.dex_new_since_load.clear();
     if (count >= 0){
         rt.console.log("The game's POKeDEX in this save: " + std::to_string(count) + " species caught.", COLOR_BLUE);
+        //  The program's table far behind the game's own count: it is not
+        //  the table of this save. (15 November: 13 species where the game
+        //  had 72, after a new build in a new folder.) A few fewer is as it
+        //  should be: the game also counts what evolved.
+        if (rt.collection != nullptr && !rt.warned_table_behind){
+            int with_one = 0;
+            for (const auto& item : rt.collection->snapshot()){
+                if (item.second.caught > 0){
+                    with_one++;
+                }
+            }
+            if (count - with_one >= 25){
+                rt.warned_table_behind = true;
+                rt.console.log(
+                    "The POKeDEX table has " + std::to_string(with_one) + " species with at least one, the game "
+                    "counts " + std::to_string(count) + ": the table is not that of this save (the settings of "
+                    "another folder, or from before the last runs?). What the game has already is found again "
+                    "by the ball mark as it comes, which takes longer: the collection looks for it once more.",
+                    COLOR_ORANGE
+                );
+            }
+        }
     }else{
         rt.console.log("The POKeDEX number of the load menu was not read (no POKeDEX yet?).");
     }
