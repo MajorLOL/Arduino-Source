@@ -162,7 +162,26 @@ bool battle_instead_of_warp(StoryRuntime& rt, bool dark, const char* leg_name){
     BattleMenuWatcher battle_menu(COLOR_RED);
     rt.context.wait_for_all_requests();
     if (wait_until(rt.console, rt.context, 3000ms, { battle_text, battle_menu }) < 0){
-        return false;
+        //  The first text of a wild battle can come later than that: the
+        //  Pokemon slides in and cries first. (Icefall Cave, the step onto
+        //  the ice that breaks: the text came 3.4 s after the black was
+        //  over. The battle passed for the fall, the route went on as if on
+        //  the floor below, and it took a load of the save.) The battle's
+        //  text box is up from the start, with nothing in it yet: with it
+        //  on the screen, wait for the text. A map has no such box, so a
+        //  warp does not wait longer than before.
+        VideoSnapshot screen = rt.console.video().snapshot();
+        BattleDialogDetector battle_box(COLOR_RED);
+        if (!screen || !battle_box.detect(screen)){
+            return false;
+        }
+        rt.console.log(
+            std::string("The text box of a battle is up after the fade: waiting for its text. ") + leg_name,
+            COLOR_ORANGE
+        );
+        if (wait_until(rt.console, rt.context, 6000ms, { battle_text, battle_menu }) < 0){
+            return false;
+        }
     }
     rt.console.log(std::string("A wild battle, not the warp: ") + leg_name + ". The warp again after it.", COLOR_ORANGE);
     story_battle(rt, StoryBattleKind::WILD, std::string(leg_name) + " (before the warp)");
