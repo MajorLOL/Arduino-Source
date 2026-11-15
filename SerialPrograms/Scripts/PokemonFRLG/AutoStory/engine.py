@@ -71,6 +71,15 @@ FACING_FOR_MOVEMENT = {
 
 
 COST_TRAINER_AREA = 300.0      # where a walking trainer may stand (and stay after a battle)
+#  A tile on the round of someone who walks a fixed loop (a walk sequence),
+#  trainer or not. Such a walker does not turn away from what is in its way:
+#  it walks in place until the way is free (MoveNextDirectionInSequence()).
+#  Met head-on on its loop, it waits for the player and the player for it,
+#  for good. (Celadon City: the little girl round the fountain. The way back
+#  from Route 16 ran along two sides of her round, against her. She starts
+#  her round when the player comes near, so the two met on the same tile
+#  each time: four loads of the save, then the program stopped.)
+COST_WALK_LOOP = 300.0
 
 
 def trainer_walk_area(m, o, walkable):
@@ -481,11 +490,19 @@ class MapView:
                 #  end is half as often in the way (Kindle Road: the two
                 #  BLACK BELTs on row 64, crossed at the middle of the path).
                 back_and_forth = "AROUND" not in mv and (horiz != vert)
+                #  One that walks its line without a pause (WALK_, not
+                #  WANDER_) does not turn away from the player either
+                #  (MovementType_WalkBackAndForth_Step2()): met head-on on
+                #  the line, the two wait for each other. (A trainer's line
+                #  is kept off as its walk area, below.)
+                walks_on = back_and_forth and "WANDER" not in mv and not (o["trainer"] and o["sight"] > 0)
                 for tx in xs:
                     for ty in ys:
                         if (tx, ty) != xy:
                             end = (horiz and abs(tx - o["x"]) == o["rx"]) or (vert and abs(ty - o["y"]) == o["ry"])
                             cost = COST_NPC_RANGE if (end or not back_and_forth) else 2 * COST_NPC_RANGE
+                            if walks_on:
+                                cost = COST_WALK_LOOP
                             self.soft[(tx, ty)] = self.soft.get((tx, ty), 0) + cost
             if o["trainer"] and o["sight"] > 0:
                 walk_area = trainer_walk_area(
@@ -493,6 +510,15 @@ class MapView:
                 )
             else:
                 walk_area = None
+                if "WALK_SEQUENCE_" in mv:
+                    #  Not a trainer (or one that does not look): the tiles
+                    #  of its round are to be kept off all the same.
+                    loop = trainer_walk_area(
+                        m, o, lambda x, y: m.tile(x, y)[1] == 0 or (x, y) in st.tile_overrides.get(m.id, {})
+                    )
+                    for txy in (loop or {}):
+                        if txy != xy:
+                            self.soft[txy] = self.soft.get(txy, 0) + COST_WALK_LOOP
             if walk_area is not None:
                 #  A trainer that walks around: it may stand anywhere on its
                 #  way (and stays there after a battle), and sees from there.

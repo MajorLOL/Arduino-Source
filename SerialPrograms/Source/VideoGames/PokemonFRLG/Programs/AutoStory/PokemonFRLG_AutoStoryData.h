@@ -20291,9 +20291,9 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_UP, 1, RunKind::CHECKED},
     {DPAD_DOWN, 5, RunKind::WALK},
-    {DPAD_RIGHT, 22, RunKind::WALK},
+    {DPAD_RIGHT, 17, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_RIGHT, 33, RunKind::WALK},
+    {DPAD_RIGHT, 38, RunKind::WALK},
     {DPAD_UP, 3, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -20304,9 +20304,9 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_UP, 1, RunKind::CHECKED},
     {DPAD_DOWN, 5, RunKind::WALK},
-    {DPAD_RIGHT, 22, RunKind::WALK},
+    {DPAD_RIGHT, 17, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_RIGHT, 33, RunKind::WALK},
+    {DPAD_RIGHT, 38, RunKind::WALK},
     {DPAD_UP, 3, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -28803,7 +28803,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "5c04af125d";
+inline constexpr const char* DATA_ID = "be4ed3335d";
 
 }
 }
