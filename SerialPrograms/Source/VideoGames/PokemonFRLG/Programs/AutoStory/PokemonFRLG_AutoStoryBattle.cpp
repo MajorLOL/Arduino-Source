@@ -46,6 +46,7 @@
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_BattleMenuNavigation.h"
 #include "Pokemon/Inference/Pokemon_NameReader.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
+#include "PokemonFRLG_AutoStoryNameMark.h"
 #include "PokemonFRLG_AutoStoryBattle.h"
 
 namespace PokemonAutomation{
@@ -77,6 +78,10 @@ const ImageFloatBox MENU_FIRST_OPTION_BOX(0.560, 0.770, 0.190, 0.070);
 
 //  The text of the battle dialog box (white text on teal).
 const ImageFloatBox BATTLE_TEXT_BOX(0.045, 0.770, 0.890, 0.170);
+
+//  The name in the foe's HP box (the box WildEncounterReader reads it from):
+//  from two game pixels before the name to where the level starts.
+const ImageFloatBox FOE_NAME_BOX(0.075, 0.120, 0.260, 0.063);
 
 
 ImageViewRGB32 game_box(const ImageViewRGB32& frame, const ImageFloatBox& box){
@@ -302,9 +307,36 @@ const Pokemon::PokemonNameReader& species_name_reader(){
     return reader;
 }
 
-//  Read the opponent's species from its HP box (top left).
-const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug, const std::string& known = std::string()){
+//  The mark at the end of the name in the foe's HP box: the male or the
+//  female one of the two NIDORANs. "seen": the name's last glyph, for the
+//  log.
+AutoStoryNameMark::Mark read_name_mark(const ImageViewRGB32& frame, std::string& seen){
+    seen.clear();
+    ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
+    if (!game || game.width() < 240){
+        return AutoStoryNameMark::Mark::NOT_TOLD;
+    }
+    ImageViewRGB32 name = extract_box_reference(game, FOE_NAME_BOX);
+    if (!name){
+        return AutoStoryNameMark::Mark::NOT_TOLD;
+    }
+    return AutoStoryNameMark::read_mark(
+        name.data(), name.width(), name.height(), name.bytes_per_row(),
+        (double)game.width() / 240.0, &seen
+    );
+}
+
+//  Read the opponent's species from its HP box (top left). "mark_told": it
+//  is one of the two NIDORANs, and the mark at the end of its name told
+//  which.
+const SpeciesInfo* read_opponent(
+    ConsoleHandle& console, std::string& slug, const std::string& known = std::string(),
+    bool* mark_told = nullptr
+){
     StoryMemoryScope memory_scope("reading species");
+    if (mark_told != nullptr){
+        *mark_told = false;
+    }
     VideoSnapshot screen = console.video().snapshot();
     WildEncounterReader reader(COLOR_RED);
     PokemonFRLG_WildEncounter encounter = reader.read_encounter_with_reader(
@@ -323,6 +355,37 @@ const SpeciesInfo* read_opponent(ConsoleHandle& console, std::string& slug, cons
             slug = known;
             return legendary;
         }
+    }
+    if (slug == "nidoran-f" || slug == "nidoran-m"){
+        //  The two NIDORANs have the same name but for its last sign, the
+        //  male or the female mark, and the text reading gives the same for
+        //  both (the first of the two: the female one). The mark itself
+        //  tells them apart.
+        std::string seen;
+        const AutoStoryNameMark::Mark mark = screen
+            ? read_name_mark(screen, seen)
+            : AutoStoryNameMark::Mark::NOT_TOLD;
+        if (seen.empty()){
+            seen = "nothing";
+        }
+        if (mark == AutoStoryNameMark::Mark::NOT_TOLD){
+            console.log(
+                "Opponent: NIDORAN, the male or the female one: the mark at the end of its name was not read (seen: " +
+                seen + ").",
+                COLOR_ORANGE
+            );
+        }else{
+            const bool male = mark == AutoStoryNameMark::Mark::MALE;
+            slug = male ? "nidoran-m" : "nidoran-f";
+            if (mark_told != nullptr){
+                *mark_told = true;
+            }
+            console.log(
+                std::string("Opponent: NIDORAN, the ") + (male ? "male" : "female") +
+                " one (the mark at the end of its name: " + seen + ")."
+            );
+        }
+        return find_species(slug);
     }
     const SpeciesInfo* info = find_species(slug);
     if (info != nullptr){
@@ -1496,6 +1559,7 @@ StoryBattleResult run_story_battle(
     memory.foe_mark = -1;
     memory.owned_by_mark.clear();
     memory.dex_by_mark.clear();
+    memory.nidoran_told = false;
 
     //  The active Pokemon's types count for the moves (same-type bonus).
     StoryBattleSettings settings = base_settings;
@@ -1941,7 +2005,7 @@ StoryBattleResult run_story_battle(
                     memory.shiny = true;
                     shiny_safari = menu_is_safari(console);
                     std::string slug;
-                    read_opponent(console, slug, settings.legendary_species);
+                    read_opponent(console, slug, settings.legendary_species, &memory.nidoran_told);
                     memory.shiny_species = slug;
                     shiny_wanted = !slug.empty() &&
                         (settings.catch_species.count(slug) != 0 || settings.dex_species.count(slug) != 0);
@@ -1957,16 +2021,17 @@ StoryBattleResult run_story_battle(
                     }
                 }
                 //  For the POKeDEX: a species not caught yet. (The two
-                //  NIDORANs read alike: either, while one is wanted.) The
-                //  game's ball mark decides over the program's list: with
-                //  it, not caught again; without it, caught even if the
-                //  list has it.
+                //  NIDORANs are told apart by the mark at the end of the
+                //  name. If that was not read, they read alike: either,
+                //  while one is wanted.) The game's ball mark decides over
+                //  the program's list: with it, not caught again; without
+                //  it, caught even if the list has it.
                 if (!shiny_catching && wild && !settings.dex_shiny_only &&
                     (!settings.dex_species.empty() || !settings.dex_all.empty())
                 ){
                     std::string slug;
-                    read_opponent(console, slug, settings.legendary_species);
-                    const bool nidoran = slug.rfind("nidoran", 0) == 0 &&
+                    read_opponent(console, slug, settings.legendary_species, &memory.nidoran_told);
+                    const bool nidoran = !memory.nidoran_told && slug.rfind("nidoran", 0) == 0 &&
                         (settings.dex_species.count("nidoran-f") != 0 || settings.dex_species.count("nidoran-m") != 0);
                     bool wanted = !slug.empty() && (nidoran || settings.dex_species.count(slug) != 0);
                     if (wanted && memory.foe_mark == 1 && !nidoran && settings.dex_extra.count(slug) != 0){

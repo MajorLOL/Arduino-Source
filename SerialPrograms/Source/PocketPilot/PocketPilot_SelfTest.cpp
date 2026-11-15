@@ -45,6 +45,7 @@
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "Assistant/Assistant_Panel.h"
 #include "Assistant/Assistant_Play.h"
@@ -991,6 +992,31 @@ int check_assistant(const QString& out, Logger& logger){
     return result.failed + wrong;
 }
 
+
+//  The FRLG AutoStory tells the two NIDORANs apart by the mark at the end of
+//  the name in the foe's box: that reader on names drawn for it, as this
+//  build was compiled.
+int check_name_mark(Logger& logger){
+    int cases = 0;
+    std::string failures;
+    const int wrong = NintendoSwitch::PokemonFRLG::AutoStoryNameMark::check_reader(cases, failures);
+    size_t at = 0;
+    while (at < failures.size()){
+        size_t end = failures.find('\n', at);
+        if (end == std::string::npos){
+            end = failures.size();
+        }
+        logger.log("AutoStory test: failed: " + failures.substr(at, end - at), COLOR_RED);
+        at = end + 1;
+    }
+    logger.log(
+        "AutoStory test: the mark at the end of a NIDORAN's name was read right in " +
+        std::to_string(cases - wrong) + " of " + std::to_string(cases) + " drawn names.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1006,6 +1032,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_program_list(window, logger);
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
+        failed += check_name_mark(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

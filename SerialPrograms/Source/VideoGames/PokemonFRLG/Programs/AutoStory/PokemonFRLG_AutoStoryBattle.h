@@ -308,6 +308,10 @@ struct StoryBattleMemory{
     int foe_mark = -1;
     std::string owned_by_mark;
     std::string dex_by_mark;
+    //  The foe of the last (wild) battle was one of the two NIDORANs, and
+    //  the mark at the end of its name told which. (Not told, they read
+    //  alike: the female one.)
+    bool nidoran_told = false;
     //  SAFARI BALLs thrown in the last battle.
     int safari_balls = 0;
     //  Shared experience: the moves of the member that stayed out, and the

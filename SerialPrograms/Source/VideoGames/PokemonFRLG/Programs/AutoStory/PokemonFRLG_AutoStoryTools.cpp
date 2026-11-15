@@ -700,12 +700,13 @@ StoryBattleResult story_battle(
         }
     }
     if (result == StoryBattleResult::CAUGHT && !rt.memory.caught.empty() &&
-        rt.memory.caught.rfind("nidoran", 0) == 0 &&
+        !rt.memory.nidoran_told && rt.memory.caught.rfind("nidoran", 0) == 0 &&
         (rt.battle.dex_species.count("nidoran-f") != 0 || rt.battle.dex_species.count("nidoran-m") != 0)
     ){
-        //  The two NIDORANs read alike: only the ball mark (or the POKeDEX
-        //  page) tells that the one caught was a wanted one (not the other,
-        //  caught before).
+        //  The mark at the end of the name did not tell which of the two
+        //  NIDORANs it was, and they read alike: only the ball mark (or the
+        //  POKeDEX page) tells that the one caught was a wanted one (not
+        //  the other, caught before).
         std::string other = rt.memory.caught == "nidoran-f" ? "nidoran-m" : "nidoran-f";
         if (!new_to_dex){
             rt.console.log("Caught a NIDORAN that was in the POKeDEX already: the other one is still wanted.", COLOR_ORANGE);
