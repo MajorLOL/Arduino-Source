@@ -19182,10 +19182,11 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_DOWN, 2, RunKind::WALK},
     {DPAD_LEFT, 2, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_UP, 30, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 16, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
-    {DPAD_RIGHT, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 29, RunKind::SURF_BUMP},
+    {DPAD_RIGHT, 1, RunKind::SURF_CHECKED},
+    {DPAD_UP, 1, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 23, RunKind::SURF_BUMP},
     {DPAD_DOWN, 1, RunKind::WALK},
     {DPAD_RIGHT, 2, RunKind::WALK},
     {DPAD_UP, 5, RunKind::WALK},
@@ -19217,12 +19218,10 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_LEFT, 5, RunKind::WALK},
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_LEFT, 3, RunKind::WALK},
-    {DPAD_LEFT, 16, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 30, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 1, RunKind::DISMOUNT},
-    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_LEFT, 16, RunKind::SURF_BUMP},
+    {DPAD_DOWN, 40, RunKind::SURF_BUMP},
     {DPAD_RIGHT, 4, RunKind::WALK},
-    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::WALK},
     {DPAD_RIGHT, 5, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -19231,10 +19230,11 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_DOWN, 2, RunKind::WALK},
     {DPAD_LEFT, 2, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_UP, 30, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 16, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
-    {DPAD_RIGHT, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 29, RunKind::SURF_BUMP},
+    {DPAD_RIGHT, 1, RunKind::SURF_CHECKED},
+    {DPAD_UP, 1, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 23, RunKind::SURF_BUMP},
     {DPAD_DOWN, 1, RunKind::WALK},
     {DPAD_RIGHT, 2, RunKind::WALK},
     {DPAD_UP, 5, RunKind::WALK},
@@ -19266,12 +19266,10 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_LEFT, 5, RunKind::WALK},
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_LEFT, 3, RunKind::WALK},
-    {DPAD_LEFT, 16, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 30, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 1, RunKind::DISMOUNT},
-    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_LEFT, 16, RunKind::SURF_BUMP},
+    {DPAD_DOWN, 40, RunKind::SURF_BUMP},
     {DPAD_RIGHT, 4, RunKind::WALK},
-    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::WALK},
     {DPAD_RIGHT, 5, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -21769,10 +21767,11 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_DOWN, 2, RunKind::WALK},
     {DPAD_LEFT, 2, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_UP, 30, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 16, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
-    {DPAD_RIGHT, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 29, RunKind::SURF_BUMP},
+    {DPAD_RIGHT, 1, RunKind::SURF_CHECKED},
+    {DPAD_UP, 1, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 23, RunKind::SURF_BUMP},
     {DPAD_DOWN, 1, RunKind::WALK},
     {DPAD_RIGHT, 11, RunKind::WALK},
     {DPAD_RIGHT, 2, RunKind::SURF_CHECKED},
@@ -21811,12 +21810,10 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_LEFT, 15, RunKind::WALK},
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_LEFT, 3, RunKind::WALK},
-    {DPAD_LEFT, 16, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 30, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 1, RunKind::DISMOUNT},
-    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_LEFT, 16, RunKind::SURF_BUMP},
+    {DPAD_DOWN, 40, RunKind::SURF_BUMP},
     {DPAD_RIGHT, 4, RunKind::WALK},
-    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::WALK},
     {DPAD_RIGHT, 5, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -21825,10 +21822,11 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_DOWN, 2, RunKind::WALK},
     {DPAD_LEFT, 2, RunKind::WALK},
     {DPAD_UP, 7, RunKind::WALK},
-    {DPAD_UP, 30, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 16, RunKind::SURF_CHECKED},
-    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
-    {DPAD_RIGHT, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 29, RunKind::SURF_BUMP},
+    {DPAD_RIGHT, 1, RunKind::SURF_CHECKED},
+    {DPAD_UP, 1, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 23, RunKind::SURF_BUMP},
     {DPAD_DOWN, 1, RunKind::WALK},
     {DPAD_RIGHT, 11, RunKind::WALK},
     {DPAD_RIGHT, 2, RunKind::SURF_CHECKED},
@@ -21867,12 +21865,10 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_LEFT, 15, RunKind::WALK},
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_LEFT, 3, RunKind::WALK},
-    {DPAD_LEFT, 16, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 30, RunKind::SURF_CHECKED},
-    {DPAD_DOWN, 1, RunKind::DISMOUNT},
-    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_LEFT, 16, RunKind::SURF_BUMP},
+    {DPAD_DOWN, 40, RunKind::SURF_BUMP},
     {DPAD_RIGHT, 4, RunKind::WALK},
-    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::WALK},
     {DPAD_RIGHT, 5, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
@@ -23967,822 +23963,850 @@ inline constexpr StoryLeg LEGS[] = {
     {"HarborToFiveIslandNurse", 4868, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 28, 8, 5},  //  1472
     {"HarborToFiveIslandNurse_1", 4869, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 12, 14},  //  1473
     {"HarborToFiveIslandNurse_2", 4871, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  1474
-    {"Gillian_ToGillian", 4872, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1475
-    {"Gillian_ToGillian_1", 4873, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1476
-    {"Gillian_ToGillian_2", 4878, 7, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 9, 2},  //  1477
-    {"Gillian_Walk1", 4885, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1478
-    {"Gillian_Back1", 4887, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1479
-    {"Gillian_Walk2", 4889, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1480
-    {"Gillian_Back2", 4891, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1481
-    {"Gillian_Walk3", 4893, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1482
-    {"Gillian_Back3", 4895, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1483
-    {"Gillian_Walk4", 4897, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1484
-    {"Gillian_Back4", 4899, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1485
-    {"Gillian_Walk5", 4901, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1486
-    {"Gillian_Back5", 4903, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1487
-    {"Gillian_Walk6", 4905, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1488
-    {"Gillian_Back6", 4907, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1489
-    {"GillianToNurse", 4909, 4, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1490
-    {"GillianToNurse_1", 4913, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 33, 25, 12},  //  1491
-    {"GillianToNurse_2", 4920, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  1492
-    {"GillianAgain_ToGillian", 4921, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1493
-    {"GillianAgain_ToGillian_1", 4922, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1494
-    {"GillianAgain_ToGillian_2", 4927, 7, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 9, 2},  //  1495
-    {"GillianAgain_Walk1", 4934, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1496
-    {"GillianAgain_Back1", 4936, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1497
-    {"GillianAgain_Walk2", 4938, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1498
-    {"GillianAgain_Back2", 4940, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1499
-    {"GillianAgain_Walk3", 4942, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1500
-    {"GillianAgain_Back3", 4944, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1501
-    {"GillianAgain_Walk4", 4946, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1502
-    {"GillianAgain_Back4", 4948, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1503
-    {"GillianAgain_Walk5", 4950, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1504
-    {"GillianAgain_Back5", 4952, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1505
-    {"GillianAgain_Walk6", 4954, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1506
-    {"GillianAgain_Back6", 4956, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1507
-    {"GillianAgainToNurse", 4958, 4, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1508
-    {"GillianAgainToNurse_1", 4962, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 33, 25, 12},  //  1509
-    {"GillianAgainToNurse_2", 4969, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  1510
-    {"FerryToVermilion", 4970, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1511
-    {"FerryToVermilion_1", 4971, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1512
-    {"FerryToVermilion_2", 4974, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 28, 8, 3},  //  1513
-    {"BuyPokeBalls3", 4975, 5, DPAD_NONE, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 23, 32},  //  1514
-    {"BuyPokeBalls3_1", 4980, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 7},  //  1515
-    {"BuyPokeBalls5", 4981, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1516
-    {"BuyPokeBalls7", 4981, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1517
-    {"BuyPokeBalls9", 4981, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1518
-    {"MartToVermilionNurse", 4981, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1519
-    {"MartToVermilionNurse_1", 4982, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 29, 18},  //  1520
-    {"MartToVermilionNurse_2", 4988, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  1521
-    {"C20_01B_MONEY_Out", 4989, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  1522
-    {"C20_02_CERULEAN_ToNurse", 4990, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1523
-    {"C20_02_CERULEAN_ToNurse_1", 4990, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1524
-    {"CollectRoute24_ToGrass", 4991, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1525
-    {"CollectRoute24_ToGrass_1", 4992, 11, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1526
-    {"CollectRoute24_BackToNurse", 5003, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 129, 4, 19},  //  1527
-    {"CollectRoute24_BackToNurse_1", 5011, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1528
-    {"CollectRoute24_Visit2_ToGrass", 5012, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1529
-    {"CollectRoute24_Visit2_ToGrass_1", 5013, 11, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1530
-    {"CollectRoute24_Visit2_BackToNurse", 5024, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 129, 4, 19},  //  1531
-    {"CollectRoute24_Visit2_BackToNurse_1", 5032, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1532
-    {"CollectRoute4_ToGrass", 5033, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1533
-    {"CollectRoute4_ToGrass_1", 5034, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1534
-    {"CollectRoute4_BackToNurse", 5042, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 85, 17},  //  1535
-    {"CollectRoute4_BackToNurse_1", 5049, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1536
-    {"CollectRoute4_Visit2_ToGrass", 5050, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1537
-    {"CollectRoute4_Visit2_ToGrass_1", 5051, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1538
-    {"CollectRoute4_Visit2_BackToNurse", 5059, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 85, 17},  //  1539
-    {"CollectRoute4_Visit2_BackToNurse_1", 5066, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1540
-    {"CollectCeruleanCaveB1F_ToGrass", 5067, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1541
-    {"CollectCeruleanCaveB1F_ToGrass_1", 5068, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1542
-    {"CollectCeruleanCaveB1F_ToGrass_2", 5077, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1543
-    {"CollectCeruleanCaveB1F_ToGrass_3", 5083, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1544
-    {"CollectCeruleanCaveB1F_ToGrass_4", 5086, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1545
-    {"CollectCeruleanCaveB1F_ToGrass_5", 5108, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1546
-    {"CollectCeruleanCaveB1F_ToGrass_6", 5126, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1547
-    {"CollectCeruleanCaveB1F_ToGrass_7", 5128, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1548
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut", 5129, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1549
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_1", 5131, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1550
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_2", 5134, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1551
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_3", 5152, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1552
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_4", 5166, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 11, 17},  //  1553
-    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_5", 5167, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1554
-    {"CollectCeruleanCaveB1F_BackToNurse", 5178, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1555
-    {"CollectCeruleanCaveB1F_BackToNurse_1", 5189, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1556
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass", 5190, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1557
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_1", 5191, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1558
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_2", 5200, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1559
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_3", 5206, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1560
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_4", 5209, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1561
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_5", 5231, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1562
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_6", 5249, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1563
-    {"CollectCeruleanCaveB1F_Visit2_ToGrass_7", 5251, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1564
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse", 5252, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1565
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_1", 5254, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1566
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_2", 5257, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1567
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_3", 5275, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1568
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_4", 5289, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 11, 17},  //  1569
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_5", 5290, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1570
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_6", 5301, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1571
-    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_7", 5312, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1572
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass", 5313, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1573
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_1", 5314, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1574
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_2", 5323, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1575
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_3", 5329, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1576
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_4", 5332, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1577
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_5", 5354, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1578
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_6", 5372, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1579
-    {"CollectCeruleanCaveB1F_Visit3_ToGrass_7", 5374, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1580
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse", 5375, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1581
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_1", 5377, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1582
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_2", 5380, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1583
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_3", 5398, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1584
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_4", 5412, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1585
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_5", 5423, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1586
-    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_6", 5434, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1587
-    {"CollectCeruleanCave1F_ToGrass", 5435, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1588
-    {"CollectCeruleanCave1F_ToGrass_1", 5436, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1589
-    {"CollectCeruleanCave1F_ToGrass_2", 5445, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1590
-    {"CollectCeruleanCave1F_ToGrass_3", 5451, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1591
-    {"CollectCeruleanCave1F_BackToNurse", 5452, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 33, 19},  //  1592
-    {"CollectCeruleanCave1F_BackToNurse_1", 5453, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1593
-    {"CollectCeruleanCave1F_BackToNurse_2", 5464, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1594
-    {"CollectCeruleanCave1F_Visit2_ToGrass", 5465, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1595
-    {"CollectCeruleanCave1F_Visit2_ToGrass_1", 5466, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1596
-    {"CollectCeruleanCave1F_Visit2_ToGrass_2", 5475, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1597
-    {"CollectCeruleanCave1F_Visit2_ToGrass_3", 5481, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1598
-    {"CollectCeruleanCave1F_Visit2_BackToNurse", 5482, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 33, 19},  //  1599
-    {"CollectCeruleanCave1F_Visit2_BackToNurse_1", 5483, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1600
-    {"CollectCeruleanCave1F_Visit2_BackToNurse_2", 5494, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1601
-    {"C20_02_CERULEAN_Out", 5495, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1602
-    {"C20_03_MT_MOON_ToNurse", 5496, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1603
-    {"C20_03_MT_MOON_ToNurse_1", 5496, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1604
-    {"CollectMtMoon_ToGrass", 5497, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1605
-    {"CollectMtMoon_ToGrass_1", 5498, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 135, 12, 6},  //  1606
-    {"CollectMtMoon_ToGrass_2", 5500, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 68, 18, 37},  //  1607
-    {"CollectMtMoon_ToGrass_3", 5505, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 43, 21},  //  1608
-    {"CollectMtMoon_ToGrass_4", 5508, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 70, 17, 31},  //  1609
-    {"CollectMtMoon_BackToNurse", 5509, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 70, 19, 31},  //  1610
-    {"CollectMtMoon_BackToNurse_1", 5511, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 26, 36},  //  1611
-    {"CollectMtMoon_BackToNurse_2", 5514, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 68, 31, 16},  //  1612
-    {"CollectMtMoon_BackToNurse_3", 5518, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 19, 6},  //  1613
-    {"CollectMtMoon_BackToNurse_4", 5519, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1614
-    {"CollectMtMoon_Visit2_ToGrass", 5520, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1615
-    {"CollectMtMoon_Visit2_ToGrass_1", 5521, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 135, 12, 6},  //  1616
-    {"CollectMtMoon_Visit2_ToGrass_2", 5523, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 68, 18, 37},  //  1617
-    {"CollectMtMoon_Visit2_ToGrass_3", 5528, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 43, 21},  //  1618
-    {"CollectMtMoon_Visit2_ToGrass_4", 5531, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 70, 17, 31},  //  1619
-    {"CollectMtMoon_Visit2_BackToNurse", 5532, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 70, 19, 31},  //  1620
-    {"CollectMtMoon_Visit2_BackToNurse_1", 5534, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 26, 36},  //  1621
-    {"CollectMtMoon_Visit2_BackToNurse_2", 5537, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 68, 31, 16},  //  1622
-    {"CollectMtMoon_Visit2_BackToNurse_3", 5541, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 19, 6},  //  1623
-    {"CollectMtMoon_Visit2_BackToNurse_4", 5542, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1624
-    {"CollectRoute3_ToGrass", 5543, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1625
-    {"CollectRoute3_ToGrass_1", 5544, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1626
-    {"CollectRoute3_BackToNurse", 5546, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 134, 73, 10},  //  1627
-    {"CollectRoute3_BackToNurse_1", 5548, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1628
-    {"CollectRoute3_Visit2_ToGrass", 5549, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1629
-    {"CollectRoute3_Visit2_ToGrass_1", 5550, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1630
-    {"CollectRoute3_Visit2_BackToNurse", 5552, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 134, 73, 10},  //  1631
-    {"CollectRoute3_Visit2_BackToNurse_1", 5554, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1632
-    {"C20_03_MT_MOON_Out", 5555, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1633
-    {"C20_04_VIRIDIAN_ToNurse", 5556, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1634
-    {"C20_04_VIRIDIAN_ToNurse_1", 5556, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1635
-    {"CollectViridianForest_ToGrass", 5557, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1636
-    {"CollectViridianForest_ToGrass_1", 5558, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1637
-    {"CollectViridianForest_ToGrass_2", 5566, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 133, 7, 10},  //  1638
-    {"CollectViridianForest_ToGrass_3", 5567, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 217, 29, 62},  //  1639
-    {"CollectViridianForest_BackToNurse", 5570, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1640
-    {"CollectViridianForest_BackToNurse_1", 5570, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1641
-    {"CollectViridianForest_Visit2_ToGrass", 5571, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1642
-    {"CollectViridianForest_Visit2_ToGrass_1", 5572, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1643
-    {"CollectViridianForest_Visit2_ToGrass_2", 5580, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 133, 7, 10},  //  1644
-    {"CollectViridianForest_Visit2_ToGrass_3", 5581, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 217, 29, 62},  //  1645
-    {"CollectViridianForest_Visit2_BackToNurse", 5584, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1646
-    {"CollectViridianForest_Visit2_BackToNurse_1", 5584, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1647
-    {"CollectRoute22_ToGrass", 5585, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1648
-    {"CollectRoute22_ToGrass_1", 5586, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1649
-    {"CollectRoute22_BackToNurse", 5592, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 39, 13},  //  1650
-    {"CollectRoute22_BackToNurse_1", 5598, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1651
-    {"CollectRoute22_Visit2_ToGrass", 5599, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1652
-    {"CollectRoute22_Visit2_ToGrass_1", 5600, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1653
-    {"CollectRoute22_Visit2_BackToNurse", 5606, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 39, 13},  //  1654
-    {"CollectRoute22_Visit2_BackToNurse_1", 5612, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1655
-    {"CollectRoute23_ToGrass", 5613, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1656
-    {"CollectRoute23_ToGrass_1", 5614, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1657
-    {"CollectRoute23_ToGrass_2", 5623, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 22, 8},  //  1658
-    {"CollectRoute23_ToGrass_3", 5631, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 127, 7, 10},  //  1659
-    {"CollectRoute23_ToGrass_4", 5632, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 8, 153},  //  1660
-    {"CollectRoute23_ToGrass_5", 5641, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 13, 117},  //  1661
-    {"CollectRoute23_ToGrass_6", 5645, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 128, 8, 98},  //  1662
-    {"CollectRoute23_BackToNurse", 5651, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1663
-    {"CollectRoute23_BackToNurse_1", 5651, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1664
-    {"CollectRoute23_Visit2_ToGrass", 5652, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1665
-    {"CollectRoute23_Visit2_ToGrass_1", 5653, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1666
-    {"CollectRoute23_Visit2_ToGrass_2", 5662, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 22, 8},  //  1667
-    {"CollectRoute23_Visit2_ToGrass_3", 5670, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 127, 7, 10},  //  1668
-    {"CollectRoute23_Visit2_ToGrass_4", 5671, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 8, 153},  //  1669
-    {"CollectRoute23_Visit2_ToGrass_5", 5680, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 13, 117},  //  1670
-    {"CollectRoute23_Visit2_ToGrass_6", 5684, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 128, 8, 98},  //  1671
-    {"CollectRoute23_Visit2_BackToNurse", 5690, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1672
-    {"CollectRoute23_Visit2_BackToNurse_1", 5690, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1673
-    {"C20_04_VIRIDIAN_Out", 5691, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1674
-    {"C20_05_VICTORY_ROAD_ToNurse", 5692, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 49, 11, 7},  //  1675
-    {"C20_05_VICTORY_ROAD_ToNurse_1", 5692, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1676
-    {"CollectVictoryRoad_ToGrass", 5694, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1677
-    {"CollectVictoryRoad_ToGrass_1", 5696, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 49, 11, 7},  //  1678
-    {"CollectVictoryRoad_ToGrass_2", 5705, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 211, 48, 12},  //  1679
-    {"CollectVictoryRoad_BackToNurse", 5707, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 211, 46, 11},  //  1680
-    {"CollectVictoryRoad_BackToNurse_1", 5709, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 128, 18, 29},  //  1681
-    {"CollectVictoryRoad_BackToNurse_2", 5717, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1682
-    {"CollectVictoryRoad_Visit2_ToGrass", 5719, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1683
-    {"CollectVictoryRoad_Visit2_ToGrass_1", 5721, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 49, 11, 7},  //  1684
-    {"CollectVictoryRoad_Visit2_ToGrass_2", 5730, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 211, 48, 12},  //  1685
-    {"CollectVictoryRoad_Visit2_BackToNurse", 5732, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 211, 46, 11},  //  1686
-    {"CollectVictoryRoad_Visit2_BackToNurse_1", 5734, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 128, 18, 29},  //  1687
-    {"CollectVictoryRoad_Visit2_BackToNurse_2", 5742, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1688
-    {"C20_05_VICTORY_ROAD_Out", 5744, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1689
-    {"C20_06_ROUTE10_ToNurse", 5746, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1690
-    {"C20_06_ROUTE10_ToNurse_1", 5746, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1691
-    {"CollectPowerPlant_ToGrass", 5747, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1692
-    {"CollectPowerPlant_ToGrass_1", 5748, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1693
-    {"CollectPowerPlant_ToGrass_2", 5753, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 108, 19, 4},  //  1694
-    {"CollectPowerPlant_ToGrass_3", 5759, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 100, 5, 38},  //  1695
-    {"CollectPowerPlant_BackToNurse_Out", 5760, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 100, 5, 36},  //  1696
-    {"CollectPowerPlant_BackToNurse", 5761, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1697
-    {"CollectPowerPlant_BackToNurse_1", 5761, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1698
-    {"CollectPowerPlant_Visit2_ToGrass", 5762, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1699
-    {"CollectPowerPlant_Visit2_ToGrass_1", 5763, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1700
-    {"CollectPowerPlant_Visit2_ToGrass_2", 5768, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 108, 19, 4},  //  1701
-    {"CollectPowerPlant_Visit2_ToGrass_3", 5774, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 100, 5, 38},  //  1702
-    {"CollectPowerPlant_Visit2_BackToNurse_Out", 5775, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 100, 5, 36},  //  1703
-    {"CollectPowerPlant_Visit2_BackToNurse", 5776, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1704
-    {"CollectPowerPlant_Visit2_BackToNurse_1", 5776, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1705
-    {"CollectRockTunnel_ToGrass", 5777, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1706
-    {"CollectRockTunnel_ToGrass_1", 5778, 1, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1707
-    {"CollectRockTunnel_ToGrass_2", 5779, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, true, MapPreview::CAVE, true, 108, 10, 21},  //  1708
-    {"CollectRockTunnel_ToGrass_3", 5782, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, true, false, MapPreview::NONE, false, 106, 17, 2},  //  1709
-    {"CollectRockTunnel_BackToNurse", 5783, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, true, false, MapPreview::NONE, false, 106, 17, 4},  //  1710
-    {"CollectRockTunnel_BackToNurse_1", 5785, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 8, 20},  //  1711
-    {"CollectRockTunnel_BackToNurse_2", 5786, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 9, 20},  //  1712
-    {"CollectRockTunnel_BackToNurse_3", 5789, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1713
-    {"CollectRockTunnel_Visit2_ToGrass", 5790, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1714
-    {"CollectRockTunnel_Visit2_ToGrass_1", 5791, 1, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1715
-    {"CollectRockTunnel_Visit2_ToGrass_2", 5792, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, true, MapPreview::CAVE, true, 108, 10, 21},  //  1716
-    {"CollectRockTunnel_Visit2_ToGrass_3", 5795, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, true, false, MapPreview::NONE, false, 106, 17, 2},  //  1717
-    {"CollectRockTunnel_Visit2_BackToNurse", 5796, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, true, false, MapPreview::NONE, false, 106, 17, 4},  //  1718
-    {"CollectRockTunnel_Visit2_BackToNurse_1", 5798, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 8, 20},  //  1719
-    {"CollectRockTunnel_Visit2_BackToNurse_2", 5799, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 9, 20},  //  1720
-    {"CollectRockTunnel_Visit2_BackToNurse_3", 5802, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1721
-    {"C20_06_ROUTE10_Out", 5803, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1722
-    {"C20_07_LAVENDER_ToNurse", 5804, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1723
-    {"C20_07_LAVENDER_ToNurse_1", 5804, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1724
-    {"CollectPokemonTower_ToGrass", 5805, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1725
-    {"CollectPokemonTower_ToGrass_1", 5806, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 51, 6, 6},  //  1726
-    {"CollectPokemonTower_ToGrass_2", 5810, 2, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 11, 18},  //  1727
-    {"CollectPokemonTower_ToGrass_3", 5812, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 18, 10},  //  1728
-    {"CollectPokemonTower_ToGrass_4", 5815, 6, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 4, 10},  //  1729
-    {"CollectPokemonTower_ToGrass_5", 5821, 9, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 18, 10},  //  1730
-    {"CollectPokemonTower_ToGrass_6", 5830, 5, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 4, 10},  //  1731
-    {"CollectPokemonTower_ToGrass_7", 5835, 10, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 18, 10},  //  1732
-    {"CollectPokemonTower_ToGrass_8", 5845, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 99, 11, 16},  //  1733
-    {"CollectPokemonTower_BackToNurse", 5847, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 99, 12, 15},  //  1734
-    {"CollectPokemonTower_BackToNurse_1", 5849, 9, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 11, 16},  //  1735
-    {"CollectPokemonTower_BackToNurse_2", 5858, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 18, 10},  //  1736
-    {"CollectPokemonTower_BackToNurse_3", 5863, 10, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 4, 10},  //  1737
-    {"CollectPokemonTower_BackToNurse_4", 5873, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 18, 10},  //  1738
-    {"CollectPokemonTower_BackToNurse_5", 5878, 3, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 4, 10},  //  1739
-    {"CollectPokemonTower_BackToNurse_6", 5881, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 18, 9},  //  1740
-    {"CollectPokemonTower_BackToNurse_7", 5883, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 18, 7},  //  1741
-    {"CollectPokemonTower_BackToNurse_8", 5886, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1742
-    {"CollectPokemonTower_Visit2_ToGrass", 5887, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1743
-    {"CollectPokemonTower_Visit2_ToGrass_1", 5888, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 51, 6, 6},  //  1744
-    {"CollectPokemonTower_Visit2_ToGrass_2", 5892, 2, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 11, 18},  //  1745
-    {"CollectPokemonTower_Visit2_ToGrass_3", 5894, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 18, 10},  //  1746
-    {"CollectPokemonTower_Visit2_ToGrass_4", 5897, 6, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 4, 10},  //  1747
-    {"CollectPokemonTower_Visit2_ToGrass_5", 5903, 9, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 18, 10},  //  1748
-    {"CollectPokemonTower_Visit2_ToGrass_6", 5912, 5, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 4, 10},  //  1749
-    {"CollectPokemonTower_Visit2_ToGrass_7", 5917, 10, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 18, 10},  //  1750
-    {"CollectPokemonTower_Visit2_ToGrass_8", 5927, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 99, 11, 16},  //  1751
-    {"CollectPokemonTower_Visit2_BackToNurse", 5929, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 99, 12, 15},  //  1752
-    {"CollectPokemonTower_Visit2_BackToNurse_1", 5931, 9, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 11, 16},  //  1753
-    {"CollectPokemonTower_Visit2_BackToNurse_2", 5940, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 18, 10},  //  1754
-    {"CollectPokemonTower_Visit2_BackToNurse_3", 5945, 10, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 4, 10},  //  1755
-    {"CollectPokemonTower_Visit2_BackToNurse_4", 5955, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 18, 10},  //  1756
-    {"CollectPokemonTower_Visit2_BackToNurse_5", 5960, 3, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 4, 10},  //  1757
-    {"CollectPokemonTower_Visit2_BackToNurse_6", 5963, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 18, 9},  //  1758
-    {"CollectPokemonTower_Visit2_BackToNurse_7", 5965, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 18, 7},  //  1759
-    {"CollectPokemonTower_Visit2_BackToNurse_8", 5968, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1760
-    {"CollectRoute8_ToGrass", 5969, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1761
-    {"CollectRoute8_ToGrass_1", 5970, 7, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1762
-    {"CollectRoute8_ToGrass_2", 5977, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 141, 48, 12},  //  1763
-    {"CollectRoute8_BackToNurse", 5979, 8, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 141, 45, 12},  //  1764
-    {"CollectRoute8_BackToNurse_1", 5987, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1765
-    {"CollectRoute8_Visit2_ToGrass", 5988, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1766
-    {"CollectRoute8_Visit2_ToGrass_1", 5989, 7, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1767
-    {"CollectRoute8_Visit2_ToGrass_2", 5996, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 141, 48, 12},  //  1768
-    {"CollectRoute8_Visit2_BackToNurse", 5998, 8, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 141, 45, 12},  //  1769
-    {"CollectRoute8_Visit2_BackToNurse_1", 6006, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1770
-    {"CollectRoute12_ToGrass", 6007, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1771
-    {"CollectRoute12_ToGrass_1", 6008, 7, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1772
-    {"CollectRoute12_ToGrass_2", 6015, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 112, 5, 2},  //  1773
-    {"CollectRoute12_ToGrass_3", 6016, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 22},  //  1774
-    {"CollectRoute12_ToGrass_4", 6019, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 33},  //  1775
-    {"CollectRoute12_ToGrass_5", 6022, 4, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 40},  //  1776
-    {"CollectRoute12_ToGrass_6", 6026, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 44},  //  1777
-    {"CollectRoute12_ToGrass_7", 6029, 7, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 60},  //  1778
-    {"CollectRoute12_ToGrass_8", 6036, 7, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 20, 87},  //  1779
-    {"CollectRoute12_ToGrass_9", 6043, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 108},  //  1780
-    {"CollectRoute12_ToGrass_10", 6047, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 111, 13, 111},  //  1781
-    {"CollectRoute12_BackToNurse", 6049, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1782
-    {"CollectRoute12_BackToNurse_1", 6049, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1783
-    {"CollectRoute12_Visit2_ToGrass", 6050, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1784
-    {"CollectRoute12_Visit2_ToGrass_1", 6051, 7, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1785
-    {"CollectRoute12_Visit2_ToGrass_2", 6058, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 112, 5, 2},  //  1786
-    {"CollectRoute12_Visit2_ToGrass_3", 6059, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 22},  //  1787
-    {"CollectRoute12_Visit2_ToGrass_4", 6062, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 33},  //  1788
-    {"CollectRoute12_Visit2_ToGrass_5", 6065, 4, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 40},  //  1789
-    {"CollectRoute12_Visit2_ToGrass_6", 6069, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 44},  //  1790
-    {"CollectRoute12_Visit2_ToGrass_7", 6072, 7, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 60},  //  1791
-    {"CollectRoute12_Visit2_ToGrass_8", 6079, 7, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 20, 87},  //  1792
-    {"CollectRoute12_Visit2_ToGrass_9", 6086, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 108},  //  1793
-    {"CollectRoute12_Visit2_ToGrass_10", 6090, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 111, 13, 111},  //  1794
-    {"CollectRoute12_Visit2_BackToNurse", 6092, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1795
-    {"CollectRoute12_Visit2_BackToNurse_1", 6092, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1796
-    {"C20_07_LAVENDER_Out", 6093, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1797
-    {"C20_08_CELADON_ToNurse", 6094, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1798
-    {"C20_08_CELADON_ToNurse_1", 6094, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1799
-    {"CollectRoute16_ToGrass", 6095, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1800
-    {"CollectRoute16_ToGrass_1", 6096, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1801
-    {"CollectRoute16_ToGrass_2", 6100, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 117, 41, 12},  //  1802
-    {"CollectRoute16_BackToNurse", 6102, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 117, 41, 7},  //  1803
-    {"CollectRoute16_BackToNurse_1", 6107, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1804
-    {"CollectRoute16_Visit2_ToGrass", 6108, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1805
-    {"CollectRoute16_Visit2_ToGrass_1", 6109, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1806
-    {"CollectRoute16_Visit2_ToGrass_2", 6113, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 117, 41, 12},  //  1807
-    {"CollectRoute16_Visit2_BackToNurse", 6115, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 117, 41, 7},  //  1808
-    {"CollectRoute16_Visit2_BackToNurse_1", 6120, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1809
-    {"C20_08_CELADON_Out", 6121, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1810
-    {"C20_09_FUCHSIA_ToNurse", 6122, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1811
-    {"C20_09_FUCHSIA_ToNurse_1", 6122, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1812
-    {"CollectSafariCenter_Desk", 6123, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1813
-    {"CollectSafariCenter_Desk_1", 6124, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1814
-    {"CollectSafariCenter_Desk_2", 6129, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1815
-    {"CollectSafariCenter_Desk_3", 6131, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1816
-    {"CollectSafariCenter_Desk_4", 6134, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1817
-    {"CollectSafariCenter_ToGrass", 6135, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1818
-    {"CollectSafariCenter_BackToNurse_Out", 6139, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1819
-    {"CollectSafariCenter_BackToNurse", 6140, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1820
-    {"CollectSafariCenter_BackToNurse_1", 6140, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1821
-    {"CollectSafariEast_Desk", 6141, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1822
-    {"CollectSafariEast_Desk_1", 6142, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1823
-    {"CollectSafariEast_Desk_2", 6147, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1824
-    {"CollectSafariEast_Desk_3", 6149, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1825
-    {"CollectSafariEast_Desk_4", 6152, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1826
-    {"CollectSafariEast_ToGrass", 6153, 4, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1827
-    {"CollectSafariEast_ToGrass_1", 6157, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 145, 8, 27},  //  1828
-    {"CollectSafariEast_BackToNurse_Out", 6161, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1829
-    {"CollectSafariEast_BackToNurse", 6162, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1830
-    {"CollectSafariEast_BackToNurse_1", 6162, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1831
-    {"CollectSafariNorth_Desk", 6163, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1832
-    {"CollectSafariNorth_Desk_1", 6164, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1833
-    {"CollectSafariNorth_Desk_2", 6169, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1834
-    {"CollectSafariNorth_Desk_3", 6171, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1835
-    {"CollectSafariNorth_Desk_4", 6174, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1836
-    {"CollectSafariNorth_ToGrass", 6175, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1837
-    {"CollectSafariNorth_ToGrass_1", 6178, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1838
-    {"CollectSafariNorth_ToGrass_2", 6183, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 25, 14},  //  1839
-    {"CollectSafariNorth_ToGrass_3", 6186, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 146, 30, 34},  //  1840
-    {"CollectSafariNorth_BackToNurse_Out", 6188, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1841
-    {"CollectSafariNorth_BackToNurse", 6189, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1842
-    {"CollectSafariNorth_BackToNurse_1", 6189, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1843
-    {"CollectSafariWest_Desk", 6190, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1844
-    {"CollectSafariWest_Desk_1", 6191, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1845
-    {"CollectSafariWest_Desk_2", 6196, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1846
-    {"CollectSafariWest_Desk_3", 6198, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1847
-    {"CollectSafariWest_Desk_4", 6201, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1848
-    {"CollectSafariWest_ToGrass", 6202, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1849
-    {"CollectSafariWest_ToGrass_1", 6205, 5, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1850
-    {"CollectSafariWest_ToGrass_2", 6210, 7, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 148, 40, 27},  //  1851
-    {"CollectSafariWest_BackToNurse_Out", 6217, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1852
-    {"CollectSafariWest_BackToNurse", 6218, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1853
-    {"CollectSafariWest_BackToNurse_1", 6218, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1854
-    {"CollectSafariCenter2_Desk", 6219, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1855
-    {"CollectSafariCenter2_Desk_1", 6220, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1856
-    {"CollectSafariCenter2_Desk_2", 6225, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1857
-    {"CollectSafariCenter2_Desk_3", 6227, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1858
-    {"CollectSafariCenter2_Desk_4", 6230, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1859
-    {"CollectSafariCenter2_ToGrass", 6231, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1860
-    {"CollectSafariCenter2_BackToNurse_Out", 6235, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1861
-    {"CollectSafariCenter2_BackToNurse", 6236, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1862
-    {"CollectSafariCenter2_BackToNurse_1", 6236, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1863
-    {"CollectSafariEast2_Desk", 6237, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1864
-    {"CollectSafariEast2_Desk_1", 6238, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1865
-    {"CollectSafariEast2_Desk_2", 6243, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1866
-    {"CollectSafariEast2_Desk_3", 6245, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1867
-    {"CollectSafariEast2_Desk_4", 6248, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1868
-    {"CollectSafariEast2_ToGrass", 6249, 4, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1869
-    {"CollectSafariEast2_ToGrass_1", 6253, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 145, 8, 27},  //  1870
-    {"CollectSafariEast2_BackToNurse_Out", 6257, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1871
-    {"CollectSafariEast2_BackToNurse", 6258, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1872
-    {"CollectSafariEast2_BackToNurse_1", 6258, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1873
-    {"CollectSafariNorth2_Desk", 6259, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1874
-    {"CollectSafariNorth2_Desk_1", 6260, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1875
-    {"CollectSafariNorth2_Desk_2", 6265, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1876
-    {"CollectSafariNorth2_Desk_3", 6267, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1877
-    {"CollectSafariNorth2_Desk_4", 6270, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1878
-    {"CollectSafariNorth2_ToGrass", 6271, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1879
-    {"CollectSafariNorth2_ToGrass_1", 6274, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1880
-    {"CollectSafariNorth2_ToGrass_2", 6279, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 25, 14},  //  1881
-    {"CollectSafariNorth2_ToGrass_3", 6282, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 146, 30, 34},  //  1882
-    {"CollectSafariNorth2_BackToNurse_Out", 6284, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1883
-    {"CollectSafariNorth2_BackToNurse", 6285, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1884
-    {"CollectSafariNorth2_BackToNurse_1", 6285, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1885
-    {"CollectSafariWest2_Desk", 6286, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1886
-    {"CollectSafariWest2_Desk_1", 6287, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1887
-    {"CollectSafariWest2_Desk_2", 6292, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1888
-    {"CollectSafariWest2_Desk_3", 6294, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1889
-    {"CollectSafariWest2_Desk_4", 6297, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1890
-    {"CollectSafariWest2_ToGrass", 6298, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1891
-    {"CollectSafariWest2_ToGrass_1", 6301, 5, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1892
-    {"CollectSafariWest2_ToGrass_2", 6306, 7, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 148, 40, 27},  //  1893
-    {"CollectSafariWest2_BackToNurse_Out", 6313, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1894
-    {"CollectSafariWest2_BackToNurse", 6314, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1895
-    {"CollectSafariWest2_BackToNurse_1", 6314, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1896
-    {"CollectRoute14_ToGrass", 6315, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1897
-    {"CollectRoute14_ToGrass_1", 6316, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1898
-    {"CollectRoute14_ToGrass_2", 6321, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1899
-    {"CollectRoute14_ToGrass_3", 6322, 20, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1900
-    {"CollectRoute14_ToGrass_4", 6342, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 113, 7, 27},  //  1901
-    {"CollectRoute14_BackToNurse", 6344, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1902
-    {"CollectRoute14_BackToNurse_1", 6344, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1903
-    {"CollectRoute14_Visit2_ToGrass", 6345, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1904
-    {"CollectRoute14_Visit2_ToGrass_1", 6346, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1905
-    {"CollectRoute14_Visit2_ToGrass_2", 6351, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1906
-    {"CollectRoute14_Visit2_ToGrass_3", 6352, 20, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1907
-    {"CollectRoute14_Visit2_ToGrass_4", 6372, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 113, 7, 27},  //  1908
-    {"CollectRoute14_Visit2_BackToNurse", 6374, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1909
-    {"CollectRoute14_Visit2_BackToNurse_1", 6374, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1910
-    {"CollectRoute15_ToGrass", 6375, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1911
-    {"CollectRoute15_ToGrass_1", 6376, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1912
-    {"CollectRoute15_ToGrass_2", 6381, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1913
-    {"CollectRoute15_ToGrass_3", 6382, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1914
-    {"CollectRoute15_BackToNurse", 6385, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1915
-    {"CollectRoute15_BackToNurse_1", 6385, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1916
-    {"CollectRoute15_Visit2_ToGrass", 6386, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1917
-    {"CollectRoute15_Visit2_ToGrass_1", 6387, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1918
-    {"CollectRoute15_Visit2_ToGrass_2", 6392, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1919
-    {"CollectRoute15_Visit2_ToGrass_3", 6393, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1920
-    {"CollectRoute15_Visit2_BackToNurse", 6396, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1921
-    {"CollectRoute15_Visit2_BackToNurse_1", 6396, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1922
-    {"CollectRoute18_ToGrass", 6397, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1923
-    {"CollectRoute18_ToGrass_1", 6398, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1924
-    {"CollectRoute18_BackToNurse", 6407, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 120, 45, 13},  //  1925
-    {"CollectRoute18_BackToNurse_1", 6414, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1926
-    {"CollectRoute18_Visit2_ToGrass", 6415, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1927
-    {"CollectRoute18_Visit2_ToGrass_1", 6416, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1928
-    {"CollectRoute18_Visit2_BackToNurse", 6425, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 120, 45, 13},  //  1929
-    {"CollectRoute18_Visit2_BackToNurse_1", 6432, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1930
-    {"CollectSeafoam_ToGrass", 6433, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1931
-    {"CollectSeafoam_ToGrass_1", 6434, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1932
-    {"CollectSeafoam_ToGrass_2", 6441, 19, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 121, 8, 12},  //  1933
-    {"CollectSeafoam_ToGrass_3", 6460, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 153, 6, 21},  //  1934
-    {"CollectSeafoam_ToGrass_4", 6464, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 10, 6},  //  1935
-    {"CollectSeafoam_ToGrass_5", 6470, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 17, 9},  //  1936
-    {"CollectSeafoam_ToGrass_6", 6474, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 156, 8, 14},  //  1937
-    {"CollectSeafoam_BackToNurse_Out", 6476, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 156, 7, 13},  //  1938
-    {"CollectSeafoam_BackToNurse_Out_1", 6478, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 7, 17},  //  1939
-    {"CollectSeafoam_BackToNurse_Out_2", 6482, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 17, 9},  //  1940
-    {"CollectSeafoam_BackToNurse_Out_3", 6488, 4, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 153, 10, 6},  //  1941
-    {"CollectSeafoam_BackToNurse", 6492, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1942
-    {"CollectSeafoam_BackToNurse_1", 6492, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1943
-    {"CollectSeafoam_Visit2_ToGrass", 6493, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1944
-    {"CollectSeafoam_Visit2_ToGrass_1", 6494, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1945
-    {"CollectSeafoam_Visit2_ToGrass_2", 6501, 19, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 121, 8, 12},  //  1946
-    {"CollectSeafoam_Visit2_ToGrass_3", 6520, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 153, 6, 21},  //  1947
-    {"CollectSeafoam_Visit2_ToGrass_4", 6524, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 10, 6},  //  1948
-    {"CollectSeafoam_Visit2_ToGrass_5", 6530, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 17, 9},  //  1949
-    {"CollectSeafoam_Visit2_ToGrass_6", 6534, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 156, 8, 14},  //  1950
-    {"CollectSeafoam_Visit2_BackToNurse_Out", 6536, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 156, 7, 13},  //  1951
-    {"CollectSeafoam_Visit2_BackToNurse_Out_1", 6538, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 7, 17},  //  1952
-    {"CollectSeafoam_Visit2_BackToNurse_Out_2", 6542, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 17, 9},  //  1953
-    {"CollectSeafoam_Visit2_BackToNurse_Out_3", 6548, 4, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 153, 10, 6},  //  1954
-    {"CollectSeafoam_Visit2_BackToNurse", 6552, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1955
-    {"CollectSeafoam_Visit2_BackToNurse_1", 6552, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1956
-    {"C20_09_FUCHSIA_Out", 6553, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1957
-    {"C20_10_CINNABAR_ToNurse", 6554, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1958
-    {"C20_10_CINNABAR_ToNurse_1", 6554, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1959
-    {"CollectMansion_ToGrass", 6555, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1960
-    {"CollectMansion_ToGrass_1", 6556, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 22, 14, 12},  //  1961
-    {"CollectMansion_ToGrass_2", 6560, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 89, 8, 33},  //  1962
-    {"CollectMansion_BackToNurse", 6561, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 89, 8, 31},  //  1963
-    {"CollectMansion_BackToNurse_1", 6562, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 8, 4},  //  1964
-    {"CollectMansion_BackToNurse_2", 6566, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1965
-    {"CollectMansion_Visit2_ToGrass", 6567, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1966
-    {"CollectMansion_Visit2_ToGrass_1", 6568, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 22, 14, 12},  //  1967
-    {"CollectMansion_Visit2_ToGrass_2", 6572, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 89, 8, 33},  //  1968
-    {"CollectMansion_Visit2_BackToNurse", 6573, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 89, 8, 31},  //  1969
-    {"CollectMansion_Visit2_BackToNurse_1", 6574, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 8, 4},  //  1970
-    {"CollectMansion_Visit2_BackToNurse_2", 6578, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1971
-    {"CollectRoute21_ToGrass", 6579, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1972
-    {"CollectRoute21_ToGrass_1", 6580, 5, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1973
-    {"CollectRoute21_ToGrass_2", 6585, 3, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 11, 45},  //  1974
-    {"CollectRoute21_ToGrass_3", 6588, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 12, 36},  //  1975
-    {"CollectRoute21_ToGrass_4", 6592, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 17, 12},  //  1976
-    {"CollectRoute21_ToGrass_5", 6595, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 124, 17, 39},  //  1977
-    {"CollectRoute21_ToGrass_6", 6599, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 124, 15, 22},  //  1978
-    {"CollectRoute21_BackToNurse", 6601, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1979
-    {"CollectRoute21_BackToNurse_1", 6601, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1980
-    {"CollectRoute21_Visit2_ToGrass", 6602, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1981
-    {"CollectRoute21_Visit2_ToGrass_1", 6603, 5, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1982
-    {"CollectRoute21_Visit2_ToGrass_2", 6608, 3, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 11, 45},  //  1983
-    {"CollectRoute21_Visit2_ToGrass_3", 6611, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 12, 36},  //  1984
-    {"CollectRoute21_Visit2_ToGrass_4", 6615, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 17, 12},  //  1985
-    {"CollectRoute21_Visit2_ToGrass_5", 6618, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 124, 17, 39},  //  1986
-    {"CollectRoute21_Visit2_ToGrass_6", 6622, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 124, 15, 22},  //  1987
-    {"CollectRoute21_Visit2_BackToNurse", 6624, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1988
-    {"CollectRoute21_Visit2_BackToNurse_1", 6624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1989
-    {"C20_10_CINNABAR_Out", 6625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1990
-    {"C20_11_VERMILION_SEVII_ToNurse", 6626, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 15, 7},  //  1991
-    {"C20_11_VERMILION_SEVII_ToNurse_1", 6626, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  1992
-    {"CollectRoute11_ToGrass", 6627, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  1993
-    {"CollectRoute11_ToGrass_1", 6628, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  1994
-    {"CollectRoute11_BackToNurse", 6636, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 15, 13},  //  1995
-    {"CollectRoute11_BackToNurse_1", 6643, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  1996
-    {"CollectRoute11_Visit2_ToGrass", 6644, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  1997
-    {"CollectRoute11_Visit2_ToGrass_1", 6645, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  1998
-    {"CollectRoute11_Visit2_BackToNurse", 6653, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 15, 13},  //  1999
-    {"CollectRoute11_Visit2_BackToNurse_1", 6660, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2000
-    {"CollectDiglettsCave_ToGrass", 6661, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2001
-    {"CollectDiglettsCave_ToGrass_1", 6662, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 206, 15, 7},  //  2002
-    {"CollectDiglettsCave_ToGrass_2", 6669, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 26, 4, 6},  //  2003
-    {"CollectDiglettsCave_ToGrass_3", 6672, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 25, 82, 71},  //  2004
-    {"CollectDiglettsCave_BackToNurse", 6673, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 25, 80, 71},  //  2005
-    {"CollectDiglettsCave_BackToNurse_1", 6675, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 26, 6, 4},  //  2006
-    {"CollectDiglettsCave_BackToNurse_2", 6677, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 6, 8},  //  2007
-    {"CollectDiglettsCave_BackToNurse_3", 6684, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2008
-    {"CollectDiglettsCave_Visit2_ToGrass", 6685, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2009
-    {"CollectDiglettsCave_Visit2_ToGrass_1", 6686, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 206, 15, 7},  //  2010
-    {"CollectDiglettsCave_Visit2_ToGrass_2", 6693, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 26, 4, 6},  //  2011
-    {"CollectDiglettsCave_Visit2_ToGrass_3", 6696, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 25, 82, 71},  //  2012
-    {"CollectDiglettsCave_Visit2_BackToNurse", 6697, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 25, 80, 71},  //  2013
-    {"CollectDiglettsCave_Visit2_BackToNurse_1", 6699, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 26, 6, 4},  //  2014
-    {"CollectDiglettsCave_Visit2_BackToNurse_2", 6701, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 6, 8},  //  2015
-    {"CollectDiglettsCave_Visit2_BackToNurse_3", 6708, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2016
-    {"CollectRoute6_ToGrass", 6709, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2017
-    {"CollectRoute6_ToGrass_1", 6710, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2018
-    {"CollectRoute6_BackToNurse", 6716, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 138, 13, 31},  //  2019
-    {"CollectRoute6_BackToNurse_1", 6721, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2020
-    {"CollectRoute6_Visit2_ToGrass", 6722, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2021
-    {"CollectRoute6_Visit2_ToGrass_1", 6723, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2022
-    {"CollectRoute6_Visit2_BackToNurse", 6729, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 138, 13, 31},  //  2023
-    {"CollectRoute6_Visit2_BackToNurse_1", 6734, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2024
-    {"ToTheSeagallop", 6735, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2025
-    {"ToTheSeagallop_1", 6736, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2026
-    {"ToTheSeagallop_2", 6741, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 206, 24, 26},  //  2027
-    {"OneIsland_ToNurse", 6746, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 72, 8, 5},  //  2028
-    {"OneIsland_ToNurse_1", 6747, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 71, 12, 18},  //  2029
-    {"OneIsland_ToNurse_2", 6750, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2030
-    {"CollectKindleRoad_ToGrass", 6753, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2031
-    {"CollectKindleRoad_ToGrass_1", 6756, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2032
-    {"CollectKindleRoad_ToGrass_2", 6761, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2033
-    {"CollectKindleRoad_BackToNurse", 6767, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 8, 114},  //  2034
-    {"CollectKindleRoad_BackToNurse_1", 6769, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2035
-    {"CollectKindleRoad_BackToNurse_2", 6778, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2036
-    {"CollectKindleRoad_Visit2_ToGrass", 6781, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2037
-    {"CollectKindleRoad_Visit2_ToGrass_1", 6784, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2038
-    {"CollectKindleRoad_Visit2_ToGrass_2", 6789, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2039
-    {"CollectKindleRoad_Visit2_BackToNurse", 6795, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 8, 114},  //  2040
-    {"CollectKindleRoad_Visit2_BackToNurse_1", 6797, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2041
-    {"CollectKindleRoad_Visit2_BackToNurse_2", 6806, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2042
-    {"CollectTreasureBeach_ToGrass", 6809, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2043
-    {"CollectTreasureBeach_ToGrass_1", 6812, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2044
-    {"CollectTreasureBeach_ToGrass_2", 6815, 18, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 71, 10, 18},  //  2045
-    {"CollectTreasureBeach_BackToNurse", 6833, 6, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 76, 12, 31},  //  2046
-    {"CollectTreasureBeach_BackToNurse_1", 6839, 15, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 76, 7, 18},  //  2047
-    {"CollectTreasureBeach_BackToNurse_2", 6854, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2048
-    {"CollectTreasureBeach_Visit2_ToGrass", 6857, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2049
-    {"CollectTreasureBeach_Visit2_ToGrass_1", 6860, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2050
-    {"CollectTreasureBeach_Visit2_ToGrass_2", 6863, 18, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 71, 10, 18},  //  2051
-    {"CollectTreasureBeach_Visit2_BackToNurse", 6881, 6, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 76, 12, 31},  //  2052
-    {"CollectTreasureBeach_Visit2_BackToNurse_1", 6887, 15, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 76, 7, 18},  //  2053
-    {"CollectTreasureBeach_Visit2_BackToNurse_2", 6902, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2054
-    {"CollectRubyPath_ToGrass", 6905, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2055
-    {"CollectRubyPath_ToGrass_1", 6908, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2056
-    {"CollectRubyPath_ToGrass_2", 6913, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2057
-    {"CollectRubyPath_ToGrass_3", 6919, 16, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 18, 116},  //  2058
-    {"CollectRubyPath_ToGrass_4", 6935, 13, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, false, 73, 10, 51},  //  2059
-    {"CollectRubyPath_ToGrass_5", 6948, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 55, 29, 48},  //  2060
-    {"CollectRubyPath_ToGrass_6", 6953, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 56, 22, 17},  //  2061
-    {"CollectRubyPath_ToGrass_7", 6959, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 57, 9, 21},  //  2062
-    {"CollectRubyPath_BackToNurse", 6960, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 57, 7, 21},  //  2063
-    {"CollectRubyPath_BackToNurse_1", 6962, 6, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 56, 1, 1},  //  2064
-    {"CollectRubyPath_BackToNurse_2", 6968, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 55, 42, 40},  //  2065
-    {"CollectRubyPath_BackToNurse_3", 6973, 2, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 11, 6},  //  2066
-    {"CollectRubyPath_BackToNurse_4", 6975, 19, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 5, 20},  //  2067
-    {"CollectRubyPath_BackToNurse_5", 6994, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 9, 83},  //  2068
-    {"CollectRubyPath_BackToNurse_6", 6996, 8, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 9, 86},  //  2069
-    {"CollectRubyPath_BackToNurse_7", 7004, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2070
-    {"CollectRubyPath_BackToNurse_8", 7013, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2071
-    {"CollectRubyPath_Visit2_ToGrass", 7016, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2072
-    {"CollectRubyPath_Visit2_ToGrass_1", 7019, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2073
-    {"CollectRubyPath_Visit2_ToGrass_2", 7024, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2074
-    {"CollectRubyPath_Visit2_ToGrass_3", 7030, 16, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 18, 116},  //  2075
-    {"CollectRubyPath_Visit2_ToGrass_4", 7046, 13, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, false, 73, 10, 51},  //  2076
-    {"CollectRubyPath_Visit2_ToGrass_5", 7059, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 55, 29, 48},  //  2077
-    {"CollectRubyPath_Visit2_ToGrass_6", 7064, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 56, 22, 17},  //  2078
-    {"CollectRubyPath_Visit2_ToGrass_7", 7070, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 57, 9, 21},  //  2079
-    {"CollectRubyPath_Visit2_BackToNurse", 7071, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 57, 7, 21},  //  2080
-    {"CollectRubyPath_Visit2_BackToNurse_1", 7073, 6, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 56, 1, 1},  //  2081
-    {"CollectRubyPath_Visit2_BackToNurse_2", 7079, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 55, 42, 40},  //  2082
-    {"CollectRubyPath_Visit2_BackToNurse_3", 7084, 2, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 11, 6},  //  2083
-    {"CollectRubyPath_Visit2_BackToNurse_4", 7086, 19, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 5, 20},  //  2084
-    {"CollectRubyPath_Visit2_BackToNurse_5", 7105, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 9, 83},  //  2085
-    {"CollectRubyPath_Visit2_BackToNurse_6", 7107, 8, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 9, 86},  //  2086
-    {"CollectRubyPath_Visit2_BackToNurse_7", 7115, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2087
-    {"CollectRubyPath_Visit2_BackToNurse_8", 7124, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2088
-    {"OneIsland_ToHarbor", 7127, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2089
-    {"OneIsland_ToHarbor_1", 7130, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2090
-    {"OneIsland_ToHarbor_2", 7133, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 72, 8, 3},  //  2091
-    {"FerryToTwoIsland", 7134, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 72, 8, 5},  //  2092
-    {"TwoIsland_ToNurse", 7134, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2093
-    {"TwoIsland_ToNurse_1", 7135, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 195, 10, 8},  //  2094
-    {"TwoIsland_ToNurse_2", 7140, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2095
-    {"CollectCapeBrink_ToGrass", 7141, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2096
-    {"CollectCapeBrink_ToGrass_1", 7142, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2097
-    {"CollectCapeBrink_BackToNurse", 7149, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 8, 31},  //  2098
-    {"CollectCapeBrink_BackToNurse_1", 7155, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2099
-    {"CollectCapeBrink_Visit2_ToGrass", 7156, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2100
-    {"CollectCapeBrink_Visit2_ToGrass_1", 7157, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2101
-    {"CollectCapeBrink_Visit2_BackToNurse", 7164, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 8, 31},  //  2102
-    {"CollectCapeBrink_Visit2_BackToNurse_1", 7170, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2103
-    {"TwoIsland_ToHarbor", 7171, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2104
-    {"TwoIsland_ToHarbor_1", 7172, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2105
-    {"TwoIsland_ToHarbor_2", 7177, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 197, 8, 3},  //  2106
-    {"FerryToThreeIsland", 7178, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2107
-    {"ThreeIsland_ToNurse", 7178, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 191, 8, 5},  //  2108
-    {"ThreeIsland_ToNurse_1", 7179, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 194, 12, 13},  //  2109
-    {"ThreeIsland_ToNurse_2", 7182, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2110
-    {"CollectBondBridge_ToGrass", 7183, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2111
-    {"CollectBondBridge_ToGrass_1", 7184, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2112
-    {"CollectBondBridge_BackToNurse", 7191, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 83, 11},  //  2113
-    {"CollectBondBridge_BackToNurse_1", 7197, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2114
-    {"CollectBondBridge_Visit2_ToGrass", 7198, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2115
-    {"CollectBondBridge_Visit2_ToGrass_1", 7199, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2116
-    {"CollectBondBridge_Visit2_BackToNurse", 7206, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 83, 11},  //  2117
-    {"CollectBondBridge_Visit2_BackToNurse_1", 7212, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2118
-    {"CollectBerryForest_ToGrass", 7213, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2119
-    {"CollectBerryForest_ToGrass_1", 7214, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2120
-    {"CollectBerryForest_ToGrass_2", 7226, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 72, 9},  //  2121
-    {"CollectBerryForest_ToGrass_3", 7237, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 190, 34, 11},  //  2122
-    {"CollectBerryForest_ToGrass_4", 7245, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 189, 43, 41},  //  2123
-    {"CollectBerryForest_BackToNurse", 7248, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 189, 31, 37},  //  2124
-    {"CollectBerryForest_BackToNurse_1", 7250, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 12, 6},  //  2125
-    {"CollectBerryForest_BackToNurse_2", 7256, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 34, 12},  //  2126
-    {"CollectBerryForest_BackToNurse_3", 7278, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2127
-    {"CollectBerryForest_Visit2_ToGrass", 7279, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2128
-    {"CollectBerryForest_Visit2_ToGrass_1", 7280, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2129
-    {"CollectBerryForest_Visit2_ToGrass_2", 7292, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 72, 9},  //  2130
-    {"CollectBerryForest_Visit2_ToGrass_3", 7303, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 190, 34, 11},  //  2131
-    {"CollectBerryForest_Visit2_ToGrass_4", 7311, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 189, 43, 41},  //  2132
-    {"CollectBerryForest_Visit2_BackToNurse", 7314, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 189, 31, 37},  //  2133
-    {"CollectBerryForest_Visit2_BackToNurse_1", 7316, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 12, 6},  //  2134
-    {"CollectBerryForest_Visit2_BackToNurse_2", 7322, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 34, 12},  //  2135
-    {"CollectBerryForest_Visit2_BackToNurse_3", 7344, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2136
-    {"ThreeIsland_ToHarbor", 7345, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2137
-    {"ThreeIsland_ToHarbor_1", 7346, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2138
-    {"ThreeIsland_ToHarbor_2", 7349, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 191, 8, 3},  //  2139
-    {"FerryToFourIsland", 7350, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 191, 8, 5},  //  2140
-    {"FourIsland_ToNurse", 7350, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 36, 8, 5},  //  2141
-    {"FourIsland_ToNurse_1", 7351, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 10, 28},  //  2142
-    {"FourIsland_ToNurse_2", 7353, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2143
-    {"CollectIcefallCave_ToGrass", 7354, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2144
-    {"CollectIcefallCave_ToGrass_1", 7355, 7, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2145
-    {"CollectIcefallCave_ToGrass_2", 7362, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 35, 38, 22},  //  2146
-    {"CollectIcefallCave_ToGrass_3", 7365, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 17, 30},  //  2147
-    {"CollectIcefallCave_ToGrass_4", 7366, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 40, 17, 27},  //  2148
-    {"CollectIcefallCave_ToGrass_5", 7371, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 37, 3, 17},  //  2149
-    {"CollectIcefallCave_BackToNurse", 7372, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 37, 3, 15},  //  2150
-    {"CollectIcefallCave_BackToNurse_1", 7373, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 10, 22},  //  2151
-    {"CollectIcefallCave_BackToNurse_2", 7374, 4, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 40, 10, 25},  //  2152
-    {"CollectIcefallCave_BackToNurse_3", 7378, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 35, 38, 13},  //  2153
-    {"CollectIcefallCave_BackToNurse_4", 7379, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 38, 15},  //  2154
-    {"CollectIcefallCave_BackToNurse_5", 7388, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2155
-    {"CollectIcefallCave_Visit2_ToGrass", 7389, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2156
-    {"CollectIcefallCave_Visit2_ToGrass_1", 7390, 7, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2157
-    {"CollectIcefallCave_Visit2_ToGrass_2", 7397, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 35, 38, 22},  //  2158
-    {"CollectIcefallCave_Visit2_ToGrass_3", 7400, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 17, 30},  //  2159
-    {"CollectIcefallCave_Visit2_ToGrass_4", 7401, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 40, 17, 27},  //  2160
-    {"CollectIcefallCave_Visit2_ToGrass_5", 7406, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 37, 3, 17},  //  2161
-    {"CollectIcefallCave_Visit2_BackToNurse", 7407, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 37, 3, 15},  //  2162
-    {"CollectIcefallCave_Visit2_BackToNurse_1", 7408, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 10, 22},  //  2163
-    {"CollectIcefallCave_Visit2_BackToNurse_2", 7409, 4, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 40, 10, 25},  //  2164
-    {"CollectIcefallCave_Visit2_BackToNurse_3", 7413, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 35, 38, 13},  //  2165
-    {"CollectIcefallCave_Visit2_BackToNurse_4", 7414, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 38, 15},  //  2166
-    {"CollectIcefallCave_Visit2_BackToNurse_5", 7423, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2167
-    {"FourIsland_ToHarbor", 7424, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2168
-    {"FourIsland_ToHarbor_1", 7425, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2169
-    {"FourIsland_ToHarbor_2", 7428, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 36, 8, 3},  //  2170
-    {"FerryToFiveIsland", 7429, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 36, 8, 5},  //  2171
-    {"FiveIsland_ToNurse", 7429, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 28, 8, 5},  //  2172
-    {"FiveIsland_ToNurse_1", 7430, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 12, 14},  //  2173
-    {"FiveIsland_ToNurse_2", 7432, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2174
-    {"CollectFiveIsleMeadow_ToGrass", 7433, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2175
-    {"CollectFiveIsleMeadow_ToGrass_1", 7434, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2176
-    {"CollectFiveIsleMeadow_BackToNurse", 7440, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 31, 3, 7},  //  2177
-    {"CollectFiveIsleMeadow_BackToNurse_1", 7445, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2178
-    {"CollectFiveIsleMeadow_Visit2_ToGrass", 7446, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2179
-    {"CollectFiveIsleMeadow_Visit2_ToGrass_1", 7447, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2180
-    {"CollectFiveIsleMeadow_Visit2_BackToNurse", 7453, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 31, 3, 7},  //  2181
-    {"CollectFiveIsleMeadow_Visit2_BackToNurse_1", 7458, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2182
-    {"CollectLostCave_ToGrass", 7459, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2183
-    {"CollectLostCave_ToGrass_1", 7460, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2184
-    {"CollectLostCave_ToGrass_2", 7465, 6, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 9, 2},  //  2185
-    {"CollectLostCave_ToGrass_3", 7471, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 43, 14},  //  2186
-    {"CollectLostCave_ToGrass_4", 7476, 8, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 33, 48, 11},  //  2187
-    {"CollectLostCave_ToGrass_5", 7484, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 29, 5, 8},  //  2188
-    {"CollectLostCave_ToGrass_6", 7485, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 8, 2},  //  2189
-    {"CollectLostCave_BackToNurse", 7488, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 30, 4, 7},  //  2190
-    {"CollectLostCave_BackToNurse_1", 7490, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 8, 5},  //  2191
-    {"CollectLostCave_BackToNurse_2", 7492, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 29, 5, 5},  //  2192
-    {"CollectLostCave_BackToNurse_3", 7493, 2, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 64, 14},  //  2193
-    {"CollectLostCave_BackToNurse_4", 7495, 8, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 61, 15},  //  2194
-    {"CollectLostCave_BackToNurse_5", 7503, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 45, 13},  //  2195
-    {"CollectLostCave_BackToNurse_6", 7507, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 33, 25, 12},  //  2196
-    {"CollectLostCave_BackToNurse_7", 7514, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2197
-    {"CollectLostCave_Visit2_ToGrass", 7515, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2198
-    {"CollectLostCave_Visit2_ToGrass_1", 7516, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2199
-    {"CollectLostCave_Visit2_ToGrass_2", 7521, 6, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 9, 2},  //  2200
-    {"CollectLostCave_Visit2_ToGrass_3", 7527, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 43, 14},  //  2201
-    {"CollectLostCave_Visit2_ToGrass_4", 7532, 8, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 33, 48, 11},  //  2202
-    {"CollectLostCave_Visit2_ToGrass_5", 7540, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 29, 5, 8},  //  2203
-    {"CollectLostCave_Visit2_ToGrass_6", 7541, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 8, 2},  //  2204
-    {"CollectLostCave_Visit2_BackToNurse", 7544, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 30, 4, 7},  //  2205
-    {"CollectLostCave_Visit2_BackToNurse_1", 7546, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 8, 5},  //  2206
-    {"CollectLostCave_Visit2_BackToNurse_2", 7548, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 29, 5, 5},  //  2207
-    {"CollectLostCave_Visit2_BackToNurse_3", 7549, 2, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 64, 14},  //  2208
-    {"CollectLostCave_Visit2_BackToNurse_4", 7551, 8, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 61, 15},  //  2209
-    {"CollectLostCave_Visit2_BackToNurse_5", 7559, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 45, 13},  //  2210
-    {"CollectLostCave_Visit2_BackToNurse_6", 7563, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 33, 25, 12},  //  2211
-    {"CollectLostCave_Visit2_BackToNurse_7", 7570, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2212
-    {"FiveIsland_ToHarbor", 7571, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2213
-    {"FiveIsland_ToHarbor_1", 7572, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2214
-    {"FiveIsland_ToHarbor_2", 7575, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 28, 8, 3},  //  2215
-    {"FerryToSixIsland", 7576, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 28, 8, 5},  //  2216
-    {"SixIsland_ToNurse", 7576, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 179, 8, 5},  //  2217
-    {"SixIsland_ToNurse_1", 7577, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 171, 11, 23},  //  2218
-    {"SixIsland_ToNurse_2", 7578, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2219
-    {"CollectRuinValley_ToGrass", 7579, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2220
-    {"CollectRuinValley_ToGrass_1", 7580, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2221
-    {"CollectRuinValley_ToGrass_2", 7583, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 13, 56},  //  2222
-    {"CollectRuinValley_ToGrass_3", 7586, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 183, 17, 61},  //  2223
-    {"CollectRuinValley_BackToNurse", 7603, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 182, 44, 9},  //  2224
-    {"CollectRuinValley_BackToNurse_1", 7616, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 18, 73},  //  2225
-    {"CollectRuinValley_BackToNurse_2", 7621, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 13, 60},  //  2226
-    {"CollectRuinValley_BackToNurse_3", 7628, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2227
-    {"CollectRuinValley_Visit2_ToGrass", 7629, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2228
-    {"CollectRuinValley_Visit2_ToGrass_1", 7630, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2229
-    {"CollectRuinValley_Visit2_ToGrass_2", 7633, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 13, 56},  //  2230
-    {"CollectRuinValley_Visit2_ToGrass_3", 7636, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 183, 17, 61},  //  2231
-    {"CollectRuinValley_Visit2_BackToNurse", 7653, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 182, 44, 9},  //  2232
-    {"CollectRuinValley_Visit2_BackToNurse_1", 7666, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 18, 73},  //  2233
-    {"CollectRuinValley_Visit2_BackToNurse_2", 7671, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 13, 60},  //  2234
-    {"CollectRuinValley_Visit2_BackToNurse_3", 7678, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2235
-    {"CollectPatternBush_ToGrass", 7679, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2236
-    {"CollectPatternBush_ToGrass_1", 7680, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2237
-    {"CollectPatternBush_ToGrass_2", 7686, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 183, 13, 51},  //  2238
-    {"CollectPatternBush_ToGrass_3", 7697, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 55, 26},  //  2239
-    {"CollectPatternBush_BackToNurse", 7700, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 180, 53, 24},  //  2240
-    {"CollectPatternBush_BackToNurse_1", 7702, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 178, 63, 10},  //  2241
-    {"CollectPatternBush_BackToNurse_2", 7708, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 11, 27},  //  2242
-    {"CollectPatternBush_BackToNurse_3", 7718, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2243
-    {"CollectPatternBush_Visit2_ToGrass", 7719, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2244
-    {"CollectPatternBush_Visit2_ToGrass_1", 7720, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2245
-    {"CollectPatternBush_Visit2_ToGrass_2", 7726, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 183, 13, 51},  //  2246
-    {"CollectPatternBush_Visit2_ToGrass_3", 7737, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 55, 26},  //  2247
-    {"CollectPatternBush_Visit2_BackToNurse", 7740, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 180, 53, 24},  //  2248
-    {"CollectPatternBush_Visit2_BackToNurse_1", 7742, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 178, 63, 10},  //  2249
-    {"CollectPatternBush_Visit2_BackToNurse_2", 7748, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 11, 27},  //  2250
-    {"CollectPatternBush_Visit2_BackToNurse_3", 7758, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2251
-    {"CollectWaterPath_ToGrass", 7759, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2252
-    {"CollectWaterPath_ToGrass_1", 7760, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2253
-    {"CollectWaterPath_BackToNurse", 7763, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 10, 57},  //  2254
-    {"CollectWaterPath_BackToNurse_1", 7766, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2255
-    {"CollectWaterPath_Visit2_ToGrass", 7767, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2256
-    {"CollectWaterPath_Visit2_ToGrass_1", 7768, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2257
-    {"CollectWaterPath_Visit2_BackToNurse", 7771, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 10, 57},  //  2258
-    {"CollectWaterPath_Visit2_BackToNurse_1", 7774, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2259
-    {"SixIsland_ToHarbor", 7775, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2260
-    {"SixIsland_ToHarbor_1", 7776, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2261
-    {"SixIsland_ToHarbor_2", 7777, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 179, 8, 3},  //  2262
-    {"FerryToSevenIsland", 7778, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 179, 8, 5},  //  2263
-    {"SevenIsland_ToNurse", 7778, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 159, 8, 5},  //  2264
-    {"SevenIsland_ToNurse_1", 7779, 4, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 16, 13},  //  2265
-    {"SevenIsland_ToNurse_2", 7783, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2266
-    {"CollectCanyonEntrance_ToGrass", 7784, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2267
-    {"CollectCanyonEntrance_ToGrass_1", 7785, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2268
-    {"CollectCanyonEntrance_BackToNurse", 7791, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 162, 6, 8},  //  2269
-    {"CollectCanyonEntrance_BackToNurse_1", 7795, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2270
-    {"CollectCanyonEntrance_Visit2_ToGrass", 7796, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2271
-    {"CollectCanyonEntrance_Visit2_ToGrass_1", 7797, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2272
-    {"CollectCanyonEntrance_Visit2_BackToNurse", 7803, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 162, 6, 8},  //  2273
-    {"CollectCanyonEntrance_Visit2_BackToNurse_1", 7807, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2274
-    {"CollectSevaultCanyon_ToGrass", 7808, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2275
-    {"CollectSevaultCanyon_ToGrass_1", 7809, 34, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2276
-    {"CollectSevaultCanyon_BackToNurse", 7843, 33, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 161, 7, 9},  //  2277
-    {"CollectSevaultCanyon_BackToNurse_1", 7876, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2278
-    {"CollectSevaultCanyon_Visit2_ToGrass", 7877, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2279
-    {"CollectSevaultCanyon_Visit2_ToGrass_1", 7878, 34, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2280
-    {"CollectSevaultCanyon_Visit2_BackToNurse", 7912, 33, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 161, 7, 9},  //  2281
-    {"CollectSevaultCanyon_Visit2_BackToNurse_1", 7945, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2282
-    {"SevenIsland_ToHarbor", 7946, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2283
-    {"SevenIsland_ToHarbor_1", 7947, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2284
-    {"SevenIsland_ToHarbor_2", 7952, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 159, 8, 3},  //  2285
-    {"FerryToVermilion", 7953, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 159, 8, 5},  //  2286
-    {"PierToVermilionNurse", 7953, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 206, 23, 32},  //  2287
-    {"PierToVermilionNurse_1", 7955, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 24, 27},  //  2288
-    {"PierToVermilionNurse_2", 7962, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2289
-    {"C20_11_VERMILION_SEVII_Out", 7963, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2290
+    {"Gillian_ToShore", 4872, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1475
+    {"Gillian_ToShore_1", 4873, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1476
+    {"Gillian_Channel", 4879, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 8, 3},  //  1477
+    {"Gillian_Channel_1", 4879, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 27, 8, 2},  //  1478
+    {"Gillian_Row", 4880, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 8, 13},  //  1479
+    {"Gillian_Beach", 4882, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  1480
+    {"Gillian_ToGillian", 4883, 3, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 32, 12},  //  1481
+    {"Gillian_Walk1", 4886, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1482
+    {"Gillian_Back1", 4888, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1483
+    {"Gillian_Walk2", 4890, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1484
+    {"Gillian_Back2", 4892, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1485
+    {"Gillian_Walk3", 4894, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1486
+    {"Gillian_Back3", 4896, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1487
+    {"Gillian_Walk4", 4898, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1488
+    {"Gillian_Back4", 4900, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1489
+    {"Gillian_Walk5", 4902, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1490
+    {"Gillian_Back5", 4904, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1491
+    {"Gillian_Walk6", 4906, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1492
+    {"Gillian_Back6", 4908, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1493
+    {"Gillian_Back_ToShore", 4910, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1494
+    {"Gillian_Back_Row", 4914, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 26, 12},  //  1495
+    {"Gillian_Back_Row_1", 4914, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 25, 12},  //  1496
+    {"Gillian_Back_Channel", 4915, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  1497
+    {"GillianToNurse", 4916, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 9, 12},  //  1498
+    {"GillianToNurse_1", 4919, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  1499
+    {"GillianAgain_ToShore", 4920, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1500
+    {"GillianAgain_ToShore_1", 4921, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1501
+    {"GillianAgain_Channel", 4927, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 8, 3},  //  1502
+    {"GillianAgain_Channel_1", 4927, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 27, 8, 2},  //  1503
+    {"GillianAgain_Row", 4928, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 8, 13},  //  1504
+    {"GillianAgain_Beach", 4930, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  1505
+    {"GillianAgain_ToGillian", 4931, 3, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 32, 12},  //  1506
+    {"GillianAgain_Walk1", 4934, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1507
+    {"GillianAgain_Back1", 4936, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1508
+    {"GillianAgain_Walk2", 4938, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1509
+    {"GillianAgain_Back2", 4940, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1510
+    {"GillianAgain_Walk3", 4942, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1511
+    {"GillianAgain_Back3", 4944, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1512
+    {"GillianAgain_Walk4", 4946, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1513
+    {"GillianAgain_Back4", 4948, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1514
+    {"GillianAgain_Walk5", 4950, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1515
+    {"GillianAgain_Back5", 4952, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1516
+    {"GillianAgain_Walk6", 4954, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1517
+    {"GillianAgain_Back6", 4956, 2, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 41, 11},  //  1518
+    {"GillianAgain_Back_ToShore", 4958, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 34, 8},  //  1519
+    {"GillianAgain_Back_Row", 4962, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 26, 12},  //  1520
+    {"GillianAgain_Back_Row_1", 4962, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 25, 12},  //  1521
+    {"GillianAgain_Back_Channel", 4963, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  1522
+    {"GillianAgainToNurse", 4964, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 9, 12},  //  1523
+    {"GillianAgainToNurse_1", 4967, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  1524
+    {"FerryToVermilion", 4968, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  1525
+    {"FerryToVermilion_1", 4969, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 18, 7},  //  1526
+    {"FerryToVermilion_2", 4972, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 28, 8, 3},  //  1527
+    {"BuyPokeBalls3", 4973, 5, DPAD_NONE, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 23, 32},  //  1528
+    {"BuyPokeBalls3_1", 4978, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 7},  //  1529
+    {"BuyPokeBalls5", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1530
+    {"BuyPokeBalls7", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1531
+    {"BuyPokeBalls9", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1532
+    {"MartToVermilionNurse", 4979, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 208, 4, 3},  //  1533
+    {"MartToVermilionNurse_1", 4980, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 29, 18},  //  1534
+    {"MartToVermilionNurse_2", 4986, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  1535
+    {"C20_01B_MONEY_Out", 4987, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  1536
+    {"C20_02_CERULEAN_ToNurse", 4988, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1537
+    {"C20_02_CERULEAN_ToNurse_1", 4988, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1538
+    {"CollectRoute24_ToGrass", 4989, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1539
+    {"CollectRoute24_ToGrass_1", 4990, 11, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1540
+    {"CollectRoute24_BackToNurse", 5001, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 129, 4, 19},  //  1541
+    {"CollectRoute24_BackToNurse_1", 5009, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1542
+    {"CollectRoute24_Visit2_ToGrass", 5010, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1543
+    {"CollectRoute24_Visit2_ToGrass_1", 5011, 11, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1544
+    {"CollectRoute24_Visit2_BackToNurse", 5022, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 129, 4, 19},  //  1545
+    {"CollectRoute24_Visit2_BackToNurse_1", 5030, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1546
+    {"CollectRoute4_ToGrass", 5031, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1547
+    {"CollectRoute4_ToGrass_1", 5032, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1548
+    {"CollectRoute4_BackToNurse", 5040, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 85, 17},  //  1549
+    {"CollectRoute4_BackToNurse_1", 5047, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1550
+    {"CollectRoute4_Visit2_ToGrass", 5048, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1551
+    {"CollectRoute4_Visit2_ToGrass_1", 5049, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 16, 22, 20},  //  1552
+    {"CollectRoute4_Visit2_BackToNurse", 5057, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 85, 17},  //  1553
+    {"CollectRoute4_Visit2_BackToNurse_1", 5064, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1554
+    {"CollectCeruleanCaveB1F_ToGrass", 5065, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1555
+    {"CollectCeruleanCaveB1F_ToGrass_1", 5066, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1556
+    {"CollectCeruleanCaveB1F_ToGrass_2", 5075, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1557
+    {"CollectCeruleanCaveB1F_ToGrass_3", 5081, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1558
+    {"CollectCeruleanCaveB1F_ToGrass_4", 5084, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1559
+    {"CollectCeruleanCaveB1F_ToGrass_5", 5106, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1560
+    {"CollectCeruleanCaveB1F_ToGrass_6", 5124, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1561
+    {"CollectCeruleanCaveB1F_ToGrass_7", 5126, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1562
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut", 5127, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1563
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_1", 5129, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1564
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_2", 5132, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1565
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_3", 5150, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1566
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_4", 5164, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 11, 17},  //  1567
+    {"CollectCeruleanCaveB1F_BackToNurse_WalkOut_5", 5165, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1568
+    {"CollectCeruleanCaveB1F_BackToNurse", 5176, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1569
+    {"CollectCeruleanCaveB1F_BackToNurse_1", 5187, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1570
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass", 5188, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1571
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_1", 5189, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1572
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_2", 5198, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1573
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_3", 5204, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1574
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_4", 5207, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1575
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_5", 5229, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1576
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_6", 5247, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1577
+    {"CollectCeruleanCaveB1F_Visit2_ToGrass_7", 5249, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1578
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse", 5250, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1579
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_1", 5252, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1580
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_2", 5255, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1581
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_3", 5273, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1582
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_4", 5287, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 11, 17},  //  1583
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_5", 5288, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1584
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_6", 5299, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1585
+    {"CollectCeruleanCaveB1F_Visit2_BackToNurse_7", 5310, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1586
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass", 5311, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1587
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_1", 5312, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1588
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_2", 5321, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1589
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_3", 5327, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1590
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_4", 5330, 22, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 13, 36, 12},  //  1591
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_5", 5352, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 23, 10},  //  1592
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_6", 5370, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 2, 4},  //  1593
+    {"CollectCeruleanCaveB1F_Visit3_ToGrass_7", 5372, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 15, 5, 7},  //  1594
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse", 5373, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 15, 7, 7},  //  1595
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_1", 5375, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 13, 1, 7},  //  1596
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_2", 5378, 18, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 14, 5, 6},  //  1597
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_3", 5396, 14, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 13, 24, 11},  //  1598
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_4", 5410, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 11, 15},  //  1599
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_5", 5421, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1600
+    {"CollectCeruleanCaveB1F_Visit3_BackToNurse_6", 5432, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1601
+    {"CollectCeruleanCave1F_ToGrass", 5433, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1602
+    {"CollectCeruleanCave1F_ToGrass_1", 5434, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1603
+    {"CollectCeruleanCave1F_ToGrass_2", 5443, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1604
+    {"CollectCeruleanCave1F_ToGrass_3", 5449, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1605
+    {"CollectCeruleanCave1F_BackToNurse", 5450, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 33, 19},  //  1606
+    {"CollectCeruleanCave1F_BackToNurse_1", 5451, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1607
+    {"CollectCeruleanCave1F_BackToNurse_2", 5462, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1608
+    {"CollectCeruleanCave1F_Visit2_ToGrass", 5463, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1609
+    {"CollectCeruleanCave1F_Visit2_ToGrass_1", 5464, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  1610
+    {"CollectCeruleanCave1F_Visit2_ToGrass_2", 5473, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 129, 6, 16},  //  1611
+    {"CollectCeruleanCave1F_Visit2_ToGrass_3", 5479, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 13, 33, 21},  //  1612
+    {"CollectCeruleanCave1F_Visit2_BackToNurse", 5480, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 13, 33, 19},  //  1613
+    {"CollectCeruleanCave1F_Visit2_BackToNurse_1", 5481, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 16, 1, 13},  //  1614
+    {"CollectCeruleanCave1F_Visit2_BackToNurse_2", 5492, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 21, 7, 8},  //  1615
+    {"C20_02_CERULEAN_Out", 5493, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 21, 7, 4},  //  1616
+    {"C20_03_MT_MOON_ToNurse", 5494, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1617
+    {"C20_03_MT_MOON_ToNurse_1", 5494, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1618
+    {"CollectMtMoon_ToGrass", 5495, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1619
+    {"CollectMtMoon_ToGrass_1", 5496, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 135, 12, 6},  //  1620
+    {"CollectMtMoon_ToGrass_2", 5498, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 68, 18, 37},  //  1621
+    {"CollectMtMoon_ToGrass_3", 5503, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 43, 21},  //  1622
+    {"CollectMtMoon_ToGrass_4", 5506, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 70, 17, 31},  //  1623
+    {"CollectMtMoon_BackToNurse", 5507, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 70, 19, 31},  //  1624
+    {"CollectMtMoon_BackToNurse_1", 5509, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 26, 36},  //  1625
+    {"CollectMtMoon_BackToNurse_2", 5512, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 68, 31, 16},  //  1626
+    {"CollectMtMoon_BackToNurse_3", 5516, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 19, 6},  //  1627
+    {"CollectMtMoon_BackToNurse_4", 5517, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1628
+    {"CollectMtMoon_Visit2_ToGrass", 5518, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1629
+    {"CollectMtMoon_Visit2_ToGrass_1", 5519, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 135, 12, 6},  //  1630
+    {"CollectMtMoon_Visit2_ToGrass_2", 5521, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 68, 18, 37},  //  1631
+    {"CollectMtMoon_Visit2_ToGrass_3", 5526, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 43, 21},  //  1632
+    {"CollectMtMoon_Visit2_ToGrass_4", 5529, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 70, 17, 31},  //  1633
+    {"CollectMtMoon_Visit2_BackToNurse", 5530, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 70, 19, 31},  //  1634
+    {"CollectMtMoon_Visit2_BackToNurse_1", 5532, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 69, 26, 36},  //  1635
+    {"CollectMtMoon_Visit2_BackToNurse_2", 5535, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 68, 31, 16},  //  1636
+    {"CollectMtMoon_Visit2_BackToNurse_3", 5539, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 135, 19, 6},  //  1637
+    {"CollectMtMoon_Visit2_BackToNurse_4", 5540, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1638
+    {"CollectRoute3_ToGrass", 5541, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1639
+    {"CollectRoute3_ToGrass_1", 5542, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1640
+    {"CollectRoute3_BackToNurse", 5544, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 134, 73, 10},  //  1641
+    {"CollectRoute3_BackToNurse_1", 5546, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1642
+    {"CollectRoute3_Visit2_ToGrass", 5547, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1643
+    {"CollectRoute3_Visit2_ToGrass_1", 5548, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 135, 12, 6},  //  1644
+    {"CollectRoute3_Visit2_BackToNurse", 5550, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 134, 73, 10},  //  1645
+    {"CollectRoute3_Visit2_BackToNurse_1", 5552, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 136, 7, 8},  //  1646
+    {"C20_03_MT_MOON_Out", 5553, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 136, 7, 4},  //  1647
+    {"C20_04_VIRIDIAN_ToNurse", 5554, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1648
+    {"C20_04_VIRIDIAN_ToNurse_1", 5554, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1649
+    {"CollectViridianForest_ToGrass", 5555, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1650
+    {"CollectViridianForest_ToGrass_1", 5556, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1651
+    {"CollectViridianForest_ToGrass_2", 5564, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 133, 7, 10},  //  1652
+    {"CollectViridianForest_ToGrass_3", 5565, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 217, 29, 62},  //  1653
+    {"CollectViridianForest_BackToNurse", 5568, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1654
+    {"CollectViridianForest_BackToNurse_1", 5568, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1655
+    {"CollectViridianForest_Visit2_ToGrass", 5569, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1656
+    {"CollectViridianForest_Visit2_ToGrass_1", 5570, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1657
+    {"CollectViridianForest_Visit2_ToGrass_2", 5578, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 133, 7, 10},  //  1658
+    {"CollectViridianForest_Visit2_ToGrass_3", 5579, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 217, 29, 62},  //  1659
+    {"CollectViridianForest_Visit2_BackToNurse", 5582, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1660
+    {"CollectViridianForest_Visit2_BackToNurse_1", 5582, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1661
+    {"CollectRoute22_ToGrass", 5583, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1662
+    {"CollectRoute22_ToGrass_1", 5584, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1663
+    {"CollectRoute22_BackToNurse", 5590, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 39, 13},  //  1664
+    {"CollectRoute22_BackToNurse_1", 5596, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1665
+    {"CollectRoute22_Visit2_ToGrass", 5597, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1666
+    {"CollectRoute22_Visit2_ToGrass_1", 5598, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1667
+    {"CollectRoute22_Visit2_BackToNurse", 5604, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 39, 13},  //  1668
+    {"CollectRoute22_Visit2_BackToNurse_1", 5610, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1669
+    {"CollectRoute23_ToGrass", 5611, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1670
+    {"CollectRoute23_ToGrass_1", 5612, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1671
+    {"CollectRoute23_ToGrass_2", 5621, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 22, 8},  //  1672
+    {"CollectRoute23_ToGrass_3", 5629, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 127, 7, 10},  //  1673
+    {"CollectRoute23_ToGrass_4", 5630, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 8, 153},  //  1674
+    {"CollectRoute23_ToGrass_5", 5639, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 13, 117},  //  1675
+    {"CollectRoute23_ToGrass_6", 5643, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 128, 8, 98},  //  1676
+    {"CollectRoute23_BackToNurse", 5649, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1677
+    {"CollectRoute23_BackToNurse_1", 5649, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1678
+    {"CollectRoute23_Visit2_ToGrass", 5650, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1679
+    {"CollectRoute23_Visit2_ToGrass_1", 5651, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1680
+    {"CollectRoute23_Visit2_ToGrass_2", 5660, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 22, 8},  //  1681
+    {"CollectRoute23_Visit2_ToGrass_3", 5668, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 127, 7, 10},  //  1682
+    {"CollectRoute23_Visit2_ToGrass_4", 5669, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 8, 153},  //  1683
+    {"CollectRoute23_Visit2_ToGrass_5", 5678, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 128, 13, 117},  //  1684
+    {"CollectRoute23_Visit2_ToGrass_6", 5682, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 128, 8, 98},  //  1685
+    {"CollectRoute23_Visit2_BackToNurse", 5688, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 26, 27},  //  1686
+    {"CollectRoute23_Visit2_BackToNurse_1", 5688, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 216, 7, 8},  //  1687
+    {"C20_04_VIRIDIAN_Out", 5689, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 216, 7, 4},  //  1688
+    {"C20_05_VICTORY_ROAD_ToNurse", 5690, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 49, 11, 7},  //  1689
+    {"C20_05_VICTORY_ROAD_ToNurse_1", 5690, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1690
+    {"CollectVictoryRoad_ToGrass", 5692, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1691
+    {"CollectVictoryRoad_ToGrass_1", 5694, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 49, 11, 7},  //  1692
+    {"CollectVictoryRoad_ToGrass_2", 5703, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 211, 48, 12},  //  1693
+    {"CollectVictoryRoad_BackToNurse", 5705, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 211, 46, 11},  //  1694
+    {"CollectVictoryRoad_BackToNurse_1", 5707, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 128, 18, 29},  //  1695
+    {"CollectVictoryRoad_BackToNurse_2", 5715, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1696
+    {"CollectVictoryRoad_Visit2_ToGrass", 5717, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1697
+    {"CollectVictoryRoad_Visit2_ToGrass_1", 5719, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 49, 11, 7},  //  1698
+    {"CollectVictoryRoad_Visit2_ToGrass_2", 5728, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 211, 48, 12},  //  1699
+    {"CollectVictoryRoad_Visit2_BackToNurse", 5730, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 211, 46, 11},  //  1700
+    {"CollectVictoryRoad_Visit2_BackToNurse_1", 5732, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 128, 18, 29},  //  1701
+    {"CollectVictoryRoad_Visit2_BackToNurse_2", 5740, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 11, 16},  //  1702
+    {"C20_05_VICTORY_ROAD_Out", 5742, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 13, 12},  //  1703
+    {"C20_06_ROUTE10_ToNurse", 5744, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1704
+    {"C20_06_ROUTE10_ToNurse_1", 5744, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1705
+    {"CollectPowerPlant_ToGrass", 5745, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1706
+    {"CollectPowerPlant_ToGrass_1", 5746, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1707
+    {"CollectPowerPlant_ToGrass_2", 5751, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 108, 19, 4},  //  1708
+    {"CollectPowerPlant_ToGrass_3", 5757, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 100, 5, 38},  //  1709
+    {"CollectPowerPlant_BackToNurse_Out", 5758, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 100, 5, 36},  //  1710
+    {"CollectPowerPlant_BackToNurse", 5759, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1711
+    {"CollectPowerPlant_BackToNurse_1", 5759, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1712
+    {"CollectPowerPlant_Visit2_ToGrass", 5760, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1713
+    {"CollectPowerPlant_Visit2_ToGrass_1", 5761, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1714
+    {"CollectPowerPlant_Visit2_ToGrass_2", 5766, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 108, 19, 4},  //  1715
+    {"CollectPowerPlant_Visit2_ToGrass_3", 5772, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 100, 5, 38},  //  1716
+    {"CollectPowerPlant_Visit2_BackToNurse_Out", 5773, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 100, 5, 36},  //  1717
+    {"CollectPowerPlant_Visit2_BackToNurse", 5774, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1718
+    {"CollectPowerPlant_Visit2_BackToNurse_1", 5774, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1719
+    {"CollectRockTunnel_ToGrass", 5775, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1720
+    {"CollectRockTunnel_ToGrass_1", 5776, 1, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1721
+    {"CollectRockTunnel_ToGrass_2", 5777, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, true, MapPreview::CAVE, true, 108, 10, 21},  //  1722
+    {"CollectRockTunnel_ToGrass_3", 5780, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, true, false, MapPreview::NONE, false, 106, 17, 2},  //  1723
+    {"CollectRockTunnel_BackToNurse", 5781, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, true, false, MapPreview::NONE, false, 106, 17, 4},  //  1724
+    {"CollectRockTunnel_BackToNurse_1", 5783, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 8, 20},  //  1725
+    {"CollectRockTunnel_BackToNurse_2", 5784, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 9, 20},  //  1726
+    {"CollectRockTunnel_BackToNurse_3", 5787, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1727
+    {"CollectRockTunnel_Visit2_ToGrass", 5788, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1728
+    {"CollectRockTunnel_Visit2_ToGrass_1", 5789, 1, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 13, 21},  //  1729
+    {"CollectRockTunnel_Visit2_ToGrass_2", 5790, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, true, MapPreview::CAVE, true, 108, 10, 21},  //  1730
+    {"CollectRockTunnel_Visit2_ToGrass_3", 5793, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, true, false, MapPreview::NONE, false, 106, 17, 2},  //  1731
+    {"CollectRockTunnel_Visit2_BackToNurse", 5794, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, true, false, MapPreview::NONE, false, 106, 17, 4},  //  1732
+    {"CollectRockTunnel_Visit2_BackToNurse_1", 5796, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 108, 8, 20},  //  1733
+    {"CollectRockTunnel_Visit2_BackToNurse_2", 5797, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 108, 9, 20},  //  1734
+    {"CollectRockTunnel_Visit2_BackToNurse_3", 5800, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 109, 7, 8},  //  1735
+    {"C20_06_ROUTE10_Out", 5801, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 7, 4},  //  1736
+    {"C20_07_LAVENDER_ToNurse", 5802, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1737
+    {"C20_07_LAVENDER_ToNurse_1", 5802, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1738
+    {"CollectPokemonTower_ToGrass", 5803, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1739
+    {"CollectPokemonTower_ToGrass_1", 5804, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 51, 6, 6},  //  1740
+    {"CollectPokemonTower_ToGrass_2", 5808, 2, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 11, 18},  //  1741
+    {"CollectPokemonTower_ToGrass_3", 5810, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 18, 10},  //  1742
+    {"CollectPokemonTower_ToGrass_4", 5813, 6, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 4, 10},  //  1743
+    {"CollectPokemonTower_ToGrass_5", 5819, 9, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 18, 10},  //  1744
+    {"CollectPokemonTower_ToGrass_6", 5828, 5, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 4, 10},  //  1745
+    {"CollectPokemonTower_ToGrass_7", 5833, 10, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 18, 10},  //  1746
+    {"CollectPokemonTower_ToGrass_8", 5843, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 99, 11, 16},  //  1747
+    {"CollectPokemonTower_BackToNurse", 5845, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 99, 12, 15},  //  1748
+    {"CollectPokemonTower_BackToNurse_1", 5847, 9, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 11, 16},  //  1749
+    {"CollectPokemonTower_BackToNurse_2", 5856, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 18, 10},  //  1750
+    {"CollectPokemonTower_BackToNurse_3", 5861, 10, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 4, 10},  //  1751
+    {"CollectPokemonTower_BackToNurse_4", 5871, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 18, 10},  //  1752
+    {"CollectPokemonTower_BackToNurse_5", 5876, 3, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 4, 10},  //  1753
+    {"CollectPokemonTower_BackToNurse_6", 5879, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 18, 9},  //  1754
+    {"CollectPokemonTower_BackToNurse_7", 5881, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 18, 7},  //  1755
+    {"CollectPokemonTower_BackToNurse_8", 5884, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1756
+    {"CollectPokemonTower_Visit2_ToGrass", 5885, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1757
+    {"CollectPokemonTower_Visit2_ToGrass_1", 5886, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 51, 6, 6},  //  1758
+    {"CollectPokemonTower_Visit2_ToGrass_2", 5890, 2, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 11, 18},  //  1759
+    {"CollectPokemonTower_Visit2_ToGrass_3", 5892, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 18, 10},  //  1760
+    {"CollectPokemonTower_Visit2_ToGrass_4", 5895, 6, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 4, 10},  //  1761
+    {"CollectPokemonTower_Visit2_ToGrass_5", 5901, 9, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 18, 10},  //  1762
+    {"CollectPokemonTower_Visit2_ToGrass_6", 5910, 5, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 4, 10},  //  1763
+    {"CollectPokemonTower_Visit2_ToGrass_7", 5915, 10, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 18, 10},  //  1764
+    {"CollectPokemonTower_Visit2_ToGrass_8", 5925, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 99, 11, 16},  //  1765
+    {"CollectPokemonTower_Visit2_BackToNurse", 5927, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 99, 12, 15},  //  1766
+    {"CollectPokemonTower_Visit2_BackToNurse_1", 5929, 9, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 98, 11, 16},  //  1767
+    {"CollectPokemonTower_Visit2_BackToNurse_2", 5938, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 97, 18, 10},  //  1768
+    {"CollectPokemonTower_Visit2_BackToNurse_3", 5943, 10, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 96, 4, 10},  //  1769
+    {"CollectPokemonTower_Visit2_BackToNurse_4", 5953, 5, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 18, 10},  //  1770
+    {"CollectPokemonTower_Visit2_BackToNurse_5", 5958, 3, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 94, 4, 10},  //  1771
+    {"CollectPokemonTower_Visit2_BackToNurse_6", 5961, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 93, 18, 9},  //  1772
+    {"CollectPokemonTower_Visit2_BackToNurse_7", 5963, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 18, 7},  //  1773
+    {"CollectPokemonTower_Visit2_BackToNurse_8", 5966, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1774
+    {"CollectRoute8_ToGrass", 5967, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1775
+    {"CollectRoute8_ToGrass_1", 5968, 7, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1776
+    {"CollectRoute8_ToGrass_2", 5975, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 141, 48, 12},  //  1777
+    {"CollectRoute8_BackToNurse", 5977, 8, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 141, 45, 12},  //  1778
+    {"CollectRoute8_BackToNurse_1", 5985, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1779
+    {"CollectRoute8_Visit2_ToGrass", 5986, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1780
+    {"CollectRoute8_Visit2_ToGrass_1", 5987, 7, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1781
+    {"CollectRoute8_Visit2_ToGrass_2", 5994, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 141, 48, 12},  //  1782
+    {"CollectRoute8_Visit2_BackToNurse", 5996, 8, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 141, 45, 12},  //  1783
+    {"CollectRoute8_Visit2_BackToNurse_1", 6004, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1784
+    {"CollectRoute12_ToGrass", 6005, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1785
+    {"CollectRoute12_ToGrass_1", 6006, 7, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1786
+    {"CollectRoute12_ToGrass_2", 6013, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 112, 5, 2},  //  1787
+    {"CollectRoute12_ToGrass_3", 6014, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 22},  //  1788
+    {"CollectRoute12_ToGrass_4", 6017, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 33},  //  1789
+    {"CollectRoute12_ToGrass_5", 6020, 4, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 40},  //  1790
+    {"CollectRoute12_ToGrass_6", 6024, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 44},  //  1791
+    {"CollectRoute12_ToGrass_7", 6027, 7, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 60},  //  1792
+    {"CollectRoute12_ToGrass_8", 6034, 7, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 20, 87},  //  1793
+    {"CollectRoute12_ToGrass_9", 6041, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 108},  //  1794
+    {"CollectRoute12_ToGrass_10", 6045, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 111, 13, 111},  //  1795
+    {"CollectRoute12_BackToNurse", 6047, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1796
+    {"CollectRoute12_BackToNurse_1", 6047, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1797
+    {"CollectRoute12_Visit2_ToGrass", 6048, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1798
+    {"CollectRoute12_Visit2_ToGrass_1", 6049, 7, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1799
+    {"CollectRoute12_Visit2_ToGrass_2", 6056, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 112, 5, 2},  //  1800
+    {"CollectRoute12_Visit2_ToGrass_3", 6057, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 22},  //  1801
+    {"CollectRoute12_Visit2_ToGrass_4", 6060, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 33},  //  1802
+    {"CollectRoute12_Visit2_ToGrass_5", 6063, 4, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 19, 40},  //  1803
+    {"CollectRoute12_Visit2_ToGrass_6", 6067, 3, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 44},  //  1804
+    {"CollectRoute12_Visit2_ToGrass_7", 6070, 7, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 17, 60},  //  1805
+    {"CollectRoute12_Visit2_ToGrass_8", 6077, 7, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 20, 87},  //  1806
+    {"CollectRoute12_Visit2_ToGrass_9", 6084, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 111, 14, 108},  //  1807
+    {"CollectRoute12_Visit2_ToGrass_10", 6088, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 111, 13, 111},  //  1808
+    {"CollectRoute12_Visit2_BackToNurse", 6090, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 51, 6, 6},  //  1809
+    {"CollectRoute12_Visit2_BackToNurse_1", 6090, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 53, 7, 8},  //  1810
+    {"C20_07_LAVENDER_Out", 6091, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 53, 7, 4},  //  1811
+    {"C20_08_CELADON_ToNurse", 6092, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1812
+    {"C20_08_CELADON_ToNurse_1", 6092, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1813
+    {"CollectRoute16_ToGrass", 6093, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1814
+    {"CollectRoute16_ToGrass_1", 6094, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1815
+    {"CollectRoute16_ToGrass_2", 6098, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 117, 41, 12},  //  1816
+    {"CollectRoute16_BackToNurse", 6100, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 117, 41, 7},  //  1817
+    {"CollectRoute16_BackToNurse_1", 6105, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1818
+    {"CollectRoute16_Visit2_ToGrass", 6106, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1819
+    {"CollectRoute16_Visit2_ToGrass_1", 6107, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 48, 12},  //  1820
+    {"CollectRoute16_Visit2_ToGrass_2", 6111, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 117, 41, 12},  //  1821
+    {"CollectRoute16_Visit2_BackToNurse", 6113, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 117, 41, 7},  //  1822
+    {"CollectRoute16_Visit2_BackToNurse_1", 6118, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 12, 7, 8},  //  1823
+    {"C20_08_CELADON_Out", 6119, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 12, 7, 4},  //  1824
+    {"C20_09_FUCHSIA_ToNurse", 6120, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1825
+    {"C20_09_FUCHSIA_ToNurse_1", 6120, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1826
+    {"CollectSafariCenter_Desk", 6121, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1827
+    {"CollectSafariCenter_Desk_1", 6122, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1828
+    {"CollectSafariCenter_Desk_2", 6127, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1829
+    {"CollectSafariCenter_Desk_3", 6129, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1830
+    {"CollectSafariCenter_Desk_4", 6132, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1831
+    {"CollectSafariCenter_ToGrass", 6133, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1832
+    {"CollectSafariCenter_BackToNurse_Out", 6137, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1833
+    {"CollectSafariCenter_BackToNurse", 6138, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1834
+    {"CollectSafariCenter_BackToNurse_1", 6138, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1835
+    {"CollectSafariEast_Desk", 6139, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1836
+    {"CollectSafariEast_Desk_1", 6140, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1837
+    {"CollectSafariEast_Desk_2", 6145, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1838
+    {"CollectSafariEast_Desk_3", 6147, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1839
+    {"CollectSafariEast_Desk_4", 6150, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1840
+    {"CollectSafariEast_ToGrass", 6151, 4, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1841
+    {"CollectSafariEast_ToGrass_1", 6155, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 145, 8, 27},  //  1842
+    {"CollectSafariEast_BackToNurse_Out", 6159, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1843
+    {"CollectSafariEast_BackToNurse", 6160, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1844
+    {"CollectSafariEast_BackToNurse_1", 6160, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1845
+    {"CollectSafariNorth_Desk", 6161, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1846
+    {"CollectSafariNorth_Desk_1", 6162, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1847
+    {"CollectSafariNorth_Desk_2", 6167, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1848
+    {"CollectSafariNorth_Desk_3", 6169, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1849
+    {"CollectSafariNorth_Desk_4", 6172, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1850
+    {"CollectSafariNorth_ToGrass", 6173, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1851
+    {"CollectSafariNorth_ToGrass_1", 6176, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1852
+    {"CollectSafariNorth_ToGrass_2", 6181, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 25, 14},  //  1853
+    {"CollectSafariNorth_ToGrass_3", 6184, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 146, 30, 34},  //  1854
+    {"CollectSafariNorth_BackToNurse_Out", 6186, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1855
+    {"CollectSafariNorth_BackToNurse", 6187, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1856
+    {"CollectSafariNorth_BackToNurse_1", 6187, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1857
+    {"CollectSafariWest_Desk", 6188, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1858
+    {"CollectSafariWest_Desk_1", 6189, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1859
+    {"CollectSafariWest_Desk_2", 6194, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1860
+    {"CollectSafariWest_Desk_3", 6196, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1861
+    {"CollectSafariWest_Desk_4", 6199, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1862
+    {"CollectSafariWest_ToGrass", 6200, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1863
+    {"CollectSafariWest_ToGrass_1", 6203, 5, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1864
+    {"CollectSafariWest_ToGrass_2", 6208, 7, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 148, 40, 27},  //  1865
+    {"CollectSafariWest_BackToNurse_Out", 6215, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1866
+    {"CollectSafariWest_BackToNurse", 6216, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1867
+    {"CollectSafariWest_BackToNurse_1", 6216, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1868
+    {"CollectSafariCenter2_Desk", 6217, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1869
+    {"CollectSafariCenter2_Desk_1", 6218, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1870
+    {"CollectSafariCenter2_Desk_2", 6223, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1871
+    {"CollectSafariCenter2_Desk_3", 6225, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1872
+    {"CollectSafariCenter2_Desk_4", 6228, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1873
+    {"CollectSafariCenter2_ToGrass", 6229, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1874
+    {"CollectSafariCenter2_BackToNurse_Out", 6233, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1875
+    {"CollectSafariCenter2_BackToNurse", 6234, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1876
+    {"CollectSafariCenter2_BackToNurse_1", 6234, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1877
+    {"CollectSafariEast2_Desk", 6235, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1878
+    {"CollectSafariEast2_Desk_1", 6236, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1879
+    {"CollectSafariEast2_Desk_2", 6241, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1880
+    {"CollectSafariEast2_Desk_3", 6243, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1881
+    {"CollectSafariEast2_Desk_4", 6246, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1882
+    {"CollectSafariEast2_ToGrass", 6247, 4, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1883
+    {"CollectSafariEast2_ToGrass_1", 6251, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 145, 8, 27},  //  1884
+    {"CollectSafariEast2_BackToNurse_Out", 6255, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1885
+    {"CollectSafariEast2_BackToNurse", 6256, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1886
+    {"CollectSafariEast2_BackToNurse_1", 6256, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1887
+    {"CollectSafariNorth2_Desk", 6257, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1888
+    {"CollectSafariNorth2_Desk_1", 6258, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1889
+    {"CollectSafariNorth2_Desk_2", 6263, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1890
+    {"CollectSafariNorth2_Desk_3", 6265, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1891
+    {"CollectSafariNorth2_Desk_4", 6268, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1892
+    {"CollectSafariNorth2_ToGrass", 6269, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1893
+    {"CollectSafariNorth2_ToGrass_1", 6272, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1894
+    {"CollectSafariNorth2_ToGrass_2", 6277, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 25, 14},  //  1895
+    {"CollectSafariNorth2_ToGrass_3", 6280, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 146, 30, 34},  //  1896
+    {"CollectSafariNorth2_BackToNurse_Out", 6282, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1897
+    {"CollectSafariNorth2_BackToNurse", 6283, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1898
+    {"CollectSafariNorth2_BackToNurse_1", 6283, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1899
+    {"CollectSafariWest2_Desk", 6284, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1900
+    {"CollectSafariWest2_Desk_1", 6285, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1901
+    {"CollectSafariWest2_Desk_2", 6290, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 24, 23},  //  1902
+    {"CollectSafariWest2_Desk_3", 6292, 3, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 21, 14},  //  1903
+    {"CollectSafariWest2_Desk_4", 6295, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 47, 4, 7},  //  1904
+    {"CollectSafariWest2_ToGrass", 6296, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 144, 26, 30},  //  1905
+    {"CollectSafariWest2_ToGrass_1", 6299, 5, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 32, 18},  //  1906
+    {"CollectSafariWest2_ToGrass_2", 6304, 7, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 148, 40, 27},  //  1907
+    {"CollectSafariWest2_BackToNurse_Out", 6311, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 47, 4, 4},  //  1908
+    {"CollectSafariWest2_BackToNurse", 6312, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1909
+    {"CollectSafariWest2_BackToNurse_1", 6312, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1910
+    {"CollectRoute14_ToGrass", 6313, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1911
+    {"CollectRoute14_ToGrass_1", 6314, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1912
+    {"CollectRoute14_ToGrass_2", 6319, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1913
+    {"CollectRoute14_ToGrass_3", 6320, 20, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1914
+    {"CollectRoute14_ToGrass_4", 6340, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 113, 7, 27},  //  1915
+    {"CollectRoute14_BackToNurse", 6342, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1916
+    {"CollectRoute14_BackToNurse_1", 6342, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1917
+    {"CollectRoute14_Visit2_ToGrass", 6343, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1918
+    {"CollectRoute14_Visit2_ToGrass_1", 6344, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1919
+    {"CollectRoute14_Visit2_ToGrass_2", 6349, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1920
+    {"CollectRoute14_Visit2_ToGrass_3", 6350, 20, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1921
+    {"CollectRoute14_Visit2_ToGrass_4", 6370, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 113, 7, 27},  //  1922
+    {"CollectRoute14_Visit2_BackToNurse", 6372, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1923
+    {"CollectRoute14_Visit2_BackToNurse_1", 6372, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1924
+    {"CollectRoute15_ToGrass", 6373, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1925
+    {"CollectRoute15_ToGrass_1", 6374, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1926
+    {"CollectRoute15_ToGrass_2", 6379, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1927
+    {"CollectRoute15_ToGrass_3", 6380, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1928
+    {"CollectRoute15_BackToNurse", 6383, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1929
+    {"CollectRoute15_BackToNurse_1", 6383, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1930
+    {"CollectRoute15_Visit2_ToGrass", 6384, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1931
+    {"CollectRoute15_Visit2_ToGrass_1", 6385, 5, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1932
+    {"CollectRoute15_Visit2_ToGrass_2", 6390, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 115, 1, 6},  //  1933
+    {"CollectRoute15_Visit2_ToGrass_3", 6391, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 114, 16, 11},  //  1934
+    {"CollectRoute15_Visit2_BackToNurse", 6394, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1935
+    {"CollectRoute15_Visit2_BackToNurse_1", 6394, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1936
+    {"CollectRoute18_ToGrass", 6395, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1937
+    {"CollectRoute18_ToGrass_1", 6396, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1938
+    {"CollectRoute18_BackToNurse", 6405, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 120, 45, 13},  //  1939
+    {"CollectRoute18_BackToNurse_1", 6412, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1940
+    {"CollectRoute18_Visit2_ToGrass", 6413, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1941
+    {"CollectRoute18_Visit2_ToGrass_1", 6414, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1942
+    {"CollectRoute18_Visit2_BackToNurse", 6423, 7, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 120, 45, 13},  //  1943
+    {"CollectRoute18_Visit2_BackToNurse_1", 6430, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1944
+    {"CollectSeafoam_ToGrass", 6431, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1945
+    {"CollectSeafoam_ToGrass_1", 6432, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1946
+    {"CollectSeafoam_ToGrass_2", 6439, 19, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 121, 8, 12},  //  1947
+    {"CollectSeafoam_ToGrass_3", 6458, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 153, 6, 21},  //  1948
+    {"CollectSeafoam_ToGrass_4", 6462, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 10, 6},  //  1949
+    {"CollectSeafoam_ToGrass_5", 6468, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 17, 9},  //  1950
+    {"CollectSeafoam_ToGrass_6", 6472, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 156, 8, 14},  //  1951
+    {"CollectSeafoam_BackToNurse_Out", 6474, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 156, 7, 13},  //  1952
+    {"CollectSeafoam_BackToNurse_Out_1", 6476, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 7, 17},  //  1953
+    {"CollectSeafoam_BackToNurse_Out_2", 6480, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 17, 9},  //  1954
+    {"CollectSeafoam_BackToNurse_Out_3", 6486, 4, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 153, 10, 6},  //  1955
+    {"CollectSeafoam_BackToNurse", 6490, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1956
+    {"CollectSeafoam_BackToNurse_1", 6490, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1957
+    {"CollectSeafoam_Visit2_ToGrass", 6491, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1958
+    {"CollectSeafoam_Visit2_ToGrass_1", 6492, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1959
+    {"CollectSeafoam_Visit2_ToGrass_2", 6499, 19, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 121, 8, 12},  //  1960
+    {"CollectSeafoam_Visit2_ToGrass_3", 6518, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 153, 6, 21},  //  1961
+    {"CollectSeafoam_Visit2_ToGrass_4", 6522, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 10, 6},  //  1962
+    {"CollectSeafoam_Visit2_ToGrass_5", 6528, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 17, 9},  //  1963
+    {"CollectSeafoam_Visit2_ToGrass_6", 6532, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 156, 8, 14},  //  1964
+    {"CollectSeafoam_Visit2_BackToNurse_Out", 6534, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 156, 7, 13},  //  1965
+    {"CollectSeafoam_Visit2_BackToNurse_Out_1", 6536, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 155, 7, 17},  //  1966
+    {"CollectSeafoam_Visit2_BackToNurse_Out_2", 6540, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 154, 17, 9},  //  1967
+    {"CollectSeafoam_Visit2_BackToNurse_Out_3", 6546, 4, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 153, 10, 6},  //  1968
+    {"CollectSeafoam_Visit2_BackToNurse", 6550, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 43, 25, 32},  //  1969
+    {"CollectSeafoam_Visit2_BackToNurse_1", 6550, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 46, 7, 8},  //  1970
+    {"C20_09_FUCHSIA_Out", 6551, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 46, 7, 4},  //  1971
+    {"C20_10_CINNABAR_ToNurse", 6552, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1972
+    {"C20_10_CINNABAR_ToNurse_1", 6552, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1973
+    {"CollectMansion_ToGrass", 6553, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1974
+    {"CollectMansion_ToGrass_1", 6554, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 22, 14, 12},  //  1975
+    {"CollectMansion_ToGrass_2", 6558, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 89, 8, 33},  //  1976
+    {"CollectMansion_BackToNurse", 6559, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 89, 8, 31},  //  1977
+    {"CollectMansion_BackToNurse_1", 6560, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 8, 4},  //  1978
+    {"CollectMansion_BackToNurse_2", 6564, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1979
+    {"CollectMansion_Visit2_ToGrass", 6565, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1980
+    {"CollectMansion_Visit2_ToGrass_1", 6566, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 22, 14, 12},  //  1981
+    {"CollectMansion_Visit2_ToGrass_2", 6570, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 89, 8, 33},  //  1982
+    {"CollectMansion_Visit2_BackToNurse", 6571, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 89, 8, 31},  //  1983
+    {"CollectMansion_Visit2_BackToNurse_1", 6572, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 8, 4},  //  1984
+    {"CollectMansion_Visit2_BackToNurse_2", 6576, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1985
+    {"CollectRoute21_ToGrass", 6577, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1986
+    {"CollectRoute21_ToGrass_1", 6578, 5, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1987
+    {"CollectRoute21_ToGrass_2", 6583, 3, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 11, 45},  //  1988
+    {"CollectRoute21_ToGrass_3", 6586, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 12, 36},  //  1989
+    {"CollectRoute21_ToGrass_4", 6590, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 17, 12},  //  1990
+    {"CollectRoute21_ToGrass_5", 6593, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 124, 17, 39},  //  1991
+    {"CollectRoute21_ToGrass_6", 6597, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 124, 15, 22},  //  1992
+    {"CollectRoute21_BackToNurse", 6599, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1993
+    {"CollectRoute21_BackToNurse_1", 6599, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1994
+    {"CollectRoute21_Visit2_ToGrass", 6600, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1995
+    {"CollectRoute21_Visit2_ToGrass_1", 6601, 5, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 22, 14, 12},  //  1996
+    {"CollectRoute21_Visit2_ToGrass_2", 6606, 3, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 11, 45},  //  1997
+    {"CollectRoute21_Visit2_ToGrass_3", 6609, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 12, 36},  //  1998
+    {"CollectRoute21_Visit2_ToGrass_4", 6613, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 125, 17, 12},  //  1999
+    {"CollectRoute21_Visit2_ToGrass_5", 6616, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 124, 17, 39},  //  2000
+    {"CollectRoute21_Visit2_ToGrass_6", 6620, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 124, 15, 22},  //  2001
+    {"CollectRoute21_Visit2_BackToNurse", 6622, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 22, 14, 12},  //  2002
+    {"CollectRoute21_Visit2_BackToNurse_1", 6622, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  2003
+    {"C20_10_CINNABAR_Out", 6623, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  2004
+    {"C20_11_VERMILION_SEVII_ToNurse", 6624, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2005
+    {"C20_11_VERMILION_SEVII_ToNurse_1", 6624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2006
+    {"CollectRoute11_ToGrass", 6625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2007
+    {"CollectRoute11_ToGrass_1", 6626, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2008
+    {"CollectRoute11_BackToNurse", 6634, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 15, 13},  //  2009
+    {"CollectRoute11_BackToNurse_1", 6641, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2010
+    {"CollectRoute11_Visit2_ToGrass", 6642, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2011
+    {"CollectRoute11_Visit2_ToGrass_1", 6643, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2012
+    {"CollectRoute11_Visit2_BackToNurse", 6651, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 15, 13},  //  2013
+    {"CollectRoute11_Visit2_BackToNurse_1", 6658, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2014
+    {"CollectDiglettsCave_ToGrass", 6659, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2015
+    {"CollectDiglettsCave_ToGrass_1", 6660, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 206, 15, 7},  //  2016
+    {"CollectDiglettsCave_ToGrass_2", 6667, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 26, 4, 6},  //  2017
+    {"CollectDiglettsCave_ToGrass_3", 6670, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 25, 82, 71},  //  2018
+    {"CollectDiglettsCave_BackToNurse", 6671, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 25, 80, 71},  //  2019
+    {"CollectDiglettsCave_BackToNurse_1", 6673, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 26, 6, 4},  //  2020
+    {"CollectDiglettsCave_BackToNurse_2", 6675, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 6, 8},  //  2021
+    {"CollectDiglettsCave_BackToNurse_3", 6682, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2022
+    {"CollectDiglettsCave_Visit2_ToGrass", 6683, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2023
+    {"CollectDiglettsCave_Visit2_ToGrass_1", 6684, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 206, 15, 7},  //  2024
+    {"CollectDiglettsCave_Visit2_ToGrass_2", 6691, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 26, 4, 6},  //  2025
+    {"CollectDiglettsCave_Visit2_ToGrass_3", 6694, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 25, 82, 71},  //  2026
+    {"CollectDiglettsCave_Visit2_BackToNurse", 6695, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 25, 80, 71},  //  2027
+    {"CollectDiglettsCave_Visit2_BackToNurse_1", 6697, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 26, 6, 4},  //  2028
+    {"CollectDiglettsCave_Visit2_BackToNurse_2", 6699, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 110, 6, 8},  //  2029
+    {"CollectDiglettsCave_Visit2_BackToNurse_3", 6706, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2030
+    {"CollectRoute6_ToGrass", 6707, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2031
+    {"CollectRoute6_ToGrass_1", 6708, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2032
+    {"CollectRoute6_BackToNurse", 6714, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 138, 13, 31},  //  2033
+    {"CollectRoute6_BackToNurse_1", 6719, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2034
+    {"CollectRoute6_Visit2_ToGrass", 6720, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2035
+    {"CollectRoute6_Visit2_ToGrass_1", 6721, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2036
+    {"CollectRoute6_Visit2_BackToNurse", 6727, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 138, 13, 31},  //  2037
+    {"CollectRoute6_Visit2_BackToNurse_1", 6732, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2038
+    {"ToTheSeagallop", 6733, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2039
+    {"ToTheSeagallop_1", 6734, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 206, 15, 7},  //  2040
+    {"ToTheSeagallop_2", 6739, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 206, 24, 26},  //  2041
+    {"OneIsland_ToNurse", 6744, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 72, 8, 5},  //  2042
+    {"OneIsland_ToNurse_1", 6745, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 71, 12, 18},  //  2043
+    {"OneIsland_ToNurse_2", 6748, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2044
+    {"CollectKindleRoad_ToGrass", 6751, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2045
+    {"CollectKindleRoad_ToGrass_1", 6754, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2046
+    {"CollectKindleRoad_ToGrass_2", 6759, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2047
+    {"CollectKindleRoad_BackToNurse", 6765, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 8, 114},  //  2048
+    {"CollectKindleRoad_BackToNurse_1", 6767, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2049
+    {"CollectKindleRoad_BackToNurse_2", 6776, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2050
+    {"CollectKindleRoad_Visit2_ToGrass", 6779, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2051
+    {"CollectKindleRoad_Visit2_ToGrass_1", 6782, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2052
+    {"CollectKindleRoad_Visit2_ToGrass_2", 6787, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2053
+    {"CollectKindleRoad_Visit2_BackToNurse", 6793, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 8, 114},  //  2054
+    {"CollectKindleRoad_Visit2_BackToNurse_1", 6795, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2055
+    {"CollectKindleRoad_Visit2_BackToNurse_2", 6804, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2056
+    {"CollectTreasureBeach_ToGrass", 6807, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2057
+    {"CollectTreasureBeach_ToGrass_1", 6810, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2058
+    {"CollectTreasureBeach_ToGrass_2", 6813, 18, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 71, 10, 18},  //  2059
+    {"CollectTreasureBeach_BackToNurse", 6831, 6, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 76, 12, 31},  //  2060
+    {"CollectTreasureBeach_BackToNurse_1", 6837, 15, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 76, 7, 18},  //  2061
+    {"CollectTreasureBeach_BackToNurse_2", 6852, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2062
+    {"CollectTreasureBeach_Visit2_ToGrass", 6855, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2063
+    {"CollectTreasureBeach_Visit2_ToGrass_1", 6858, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2064
+    {"CollectTreasureBeach_Visit2_ToGrass_2", 6861, 18, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 71, 10, 18},  //  2065
+    {"CollectTreasureBeach_Visit2_BackToNurse", 6879, 6, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 76, 12, 31},  //  2066
+    {"CollectTreasureBeach_Visit2_BackToNurse_1", 6885, 15, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 76, 7, 18},  //  2067
+    {"CollectTreasureBeach_Visit2_BackToNurse_2", 6900, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2068
+    {"CollectRubyPath_ToGrass", 6903, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2069
+    {"CollectRubyPath_ToGrass_1", 6906, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2070
+    {"CollectRubyPath_ToGrass_2", 6911, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2071
+    {"CollectRubyPath_ToGrass_3", 6917, 16, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 18, 116},  //  2072
+    {"CollectRubyPath_ToGrass_4", 6933, 13, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, false, 73, 10, 51},  //  2073
+    {"CollectRubyPath_ToGrass_5", 6946, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 55, 29, 48},  //  2074
+    {"CollectRubyPath_ToGrass_6", 6951, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 56, 22, 17},  //  2075
+    {"CollectRubyPath_ToGrass_7", 6957, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 57, 9, 21},  //  2076
+    {"CollectRubyPath_BackToNurse", 6958, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 57, 7, 21},  //  2077
+    {"CollectRubyPath_BackToNurse_1", 6960, 6, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 56, 1, 1},  //  2078
+    {"CollectRubyPath_BackToNurse_2", 6966, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 55, 42, 40},  //  2079
+    {"CollectRubyPath_BackToNurse_3", 6971, 2, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 11, 6},  //  2080
+    {"CollectRubyPath_BackToNurse_4", 6973, 19, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 5, 20},  //  2081
+    {"CollectRubyPath_BackToNurse_5", 6992, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 9, 83},  //  2082
+    {"CollectRubyPath_BackToNurse_6", 6994, 8, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 9, 86},  //  2083
+    {"CollectRubyPath_BackToNurse_7", 7002, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2084
+    {"CollectRubyPath_BackToNurse_8", 7011, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2085
+    {"CollectRubyPath_Visit2_ToGrass", 7014, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2086
+    {"CollectRubyPath_Visit2_ToGrass_1", 7017, 5, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2087
+    {"CollectRubyPath_Visit2_ToGrass_2", 7022, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 3, 130},  //  2088
+    {"CollectRubyPath_Visit2_ToGrass_3", 7028, 16, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 18, 116},  //  2089
+    {"CollectRubyPath_Visit2_ToGrass_4", 7044, 13, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, false, 73, 10, 51},  //  2090
+    {"CollectRubyPath_Visit2_ToGrass_5", 7057, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 55, 29, 48},  //  2091
+    {"CollectRubyPath_Visit2_ToGrass_6", 7062, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 56, 22, 17},  //  2092
+    {"CollectRubyPath_Visit2_ToGrass_7", 7068, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 57, 9, 21},  //  2093
+    {"CollectRubyPath_Visit2_BackToNurse", 7069, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 57, 7, 21},  //  2094
+    {"CollectRubyPath_Visit2_BackToNurse_1", 7071, 6, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 56, 1, 1},  //  2095
+    {"CollectRubyPath_Visit2_BackToNurse_2", 7077, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 55, 42, 40},  //  2096
+    {"CollectRubyPath_Visit2_BackToNurse_3", 7082, 2, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 11, 6},  //  2097
+    {"CollectRubyPath_Visit2_BackToNurse_4", 7084, 19, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 5, 20},  //  2098
+    {"CollectRubyPath_Visit2_BackToNurse_5", 7103, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 73, 9, 83},  //  2099
+    {"CollectRubyPath_Visit2_BackToNurse_6", 7105, 8, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 73, 9, 86},  //  2100
+    {"CollectRubyPath_Visit2_BackToNurse_7", 7113, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 73, 9, 124},  //  2101
+    {"CollectRubyPath_Visit2_BackToNurse_8", 7122, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 75, 9, 9},  //  2102
+    {"OneIsland_ToHarbor", 7125, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 75, 5, 4},  //  2103
+    {"OneIsland_ToHarbor_1", 7128, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 71, 14, 6},  //  2104
+    {"OneIsland_ToHarbor_2", 7131, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 72, 8, 3},  //  2105
+    {"FerryToTwoIsland", 7132, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 72, 8, 5},  //  2106
+    {"TwoIsland_ToNurse", 7132, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2107
+    {"TwoIsland_ToNurse_1", 7133, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 195, 10, 8},  //  2108
+    {"TwoIsland_ToNurse_2", 7138, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2109
+    {"CollectCapeBrink_ToGrass", 7139, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2110
+    {"CollectCapeBrink_ToGrass_1", 7140, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2111
+    {"CollectCapeBrink_BackToNurse", 7147, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 8, 31},  //  2112
+    {"CollectCapeBrink_BackToNurse_1", 7153, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2113
+    {"CollectCapeBrink_Visit2_ToGrass", 7154, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2114
+    {"CollectCapeBrink_Visit2_ToGrass_1", 7155, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2115
+    {"CollectCapeBrink_Visit2_BackToNurse", 7162, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 8, 31},  //  2116
+    {"CollectCapeBrink_Visit2_BackToNurse_1", 7168, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 199, 7, 8},  //  2117
+    {"TwoIsland_ToHarbor", 7169, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 7, 4},  //  2118
+    {"TwoIsland_ToHarbor_1", 7170, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 195, 21, 8},  //  2119
+    {"TwoIsland_ToHarbor_2", 7175, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 197, 8, 3},  //  2120
+    {"FerryToThreeIsland", 7176, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2121
+    {"ThreeIsland_ToNurse", 7176, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 191, 8, 5},  //  2122
+    {"ThreeIsland_ToNurse_1", 7177, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 194, 12, 13},  //  2123
+    {"ThreeIsland_ToNurse_2", 7180, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2124
+    {"CollectBondBridge_ToGrass", 7181, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2125
+    {"CollectBondBridge_ToGrass_1", 7182, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2126
+    {"CollectBondBridge_BackToNurse", 7189, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 83, 11},  //  2127
+    {"CollectBondBridge_BackToNurse_1", 7195, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2128
+    {"CollectBondBridge_Visit2_ToGrass", 7196, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2129
+    {"CollectBondBridge_Visit2_ToGrass_1", 7197, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2130
+    {"CollectBondBridge_Visit2_BackToNurse", 7204, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 83, 11},  //  2131
+    {"CollectBondBridge_Visit2_BackToNurse_1", 7210, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2132
+    {"CollectBerryForest_ToGrass", 7211, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2133
+    {"CollectBerryForest_ToGrass_1", 7212, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2134
+    {"CollectBerryForest_ToGrass_2", 7224, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 72, 9},  //  2135
+    {"CollectBerryForest_ToGrass_3", 7235, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 190, 34, 11},  //  2136
+    {"CollectBerryForest_ToGrass_4", 7243, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 189, 43, 41},  //  2137
+    {"CollectBerryForest_BackToNurse", 7246, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 189, 31, 37},  //  2138
+    {"CollectBerryForest_BackToNurse_1", 7248, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 12, 6},  //  2139
+    {"CollectBerryForest_BackToNurse_2", 7254, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 34, 12},  //  2140
+    {"CollectBerryForest_BackToNurse_3", 7276, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2141
+    {"CollectBerryForest_Visit2_ToGrass", 7277, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2142
+    {"CollectBerryForest_Visit2_ToGrass_1", 7278, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2143
+    {"CollectBerryForest_Visit2_ToGrass_2", 7290, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 72, 9},  //  2144
+    {"CollectBerryForest_Visit2_ToGrass_3", 7301, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 190, 34, 11},  //  2145
+    {"CollectBerryForest_Visit2_ToGrass_4", 7309, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 189, 43, 41},  //  2146
+    {"CollectBerryForest_Visit2_BackToNurse", 7312, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 189, 31, 37},  //  2147
+    {"CollectBerryForest_Visit2_BackToNurse_1", 7314, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 190, 12, 6},  //  2148
+    {"CollectBerryForest_Visit2_BackToNurse_2", 7320, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 34, 12},  //  2149
+    {"CollectBerryForest_Visit2_BackToNurse_3", 7342, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 7, 8},  //  2150
+    {"ThreeIsland_ToHarbor", 7343, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 7, 4},  //  2151
+    {"ThreeIsland_ToHarbor_1", 7344, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 188, 14, 28},  //  2152
+    {"ThreeIsland_ToHarbor_2", 7347, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 191, 8, 3},  //  2153
+    {"FerryToFourIsland", 7348, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 191, 8, 5},  //  2154
+    {"FourIsland_ToNurse", 7348, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 36, 8, 5},  //  2155
+    {"FourIsland_ToNurse_1", 7349, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 10, 28},  //  2156
+    {"FourIsland_ToNurse_2", 7351, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2157
+    {"CollectIcefallCave_ToGrass", 7352, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2158
+    {"CollectIcefallCave_ToGrass_1", 7353, 7, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2159
+    {"CollectIcefallCave_ToGrass_2", 7360, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 35, 38, 22},  //  2160
+    {"CollectIcefallCave_ToGrass_3", 7363, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 17, 30},  //  2161
+    {"CollectIcefallCave_ToGrass_4", 7364, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 40, 17, 27},  //  2162
+    {"CollectIcefallCave_ToGrass_5", 7369, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 37, 3, 17},  //  2163
+    {"CollectIcefallCave_BackToNurse", 7370, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 37, 3, 15},  //  2164
+    {"CollectIcefallCave_BackToNurse_1", 7371, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 10, 22},  //  2165
+    {"CollectIcefallCave_BackToNurse_2", 7372, 4, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 40, 10, 25},  //  2166
+    {"CollectIcefallCave_BackToNurse_3", 7376, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 35, 38, 13},  //  2167
+    {"CollectIcefallCave_BackToNurse_4", 7377, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 38, 15},  //  2168
+    {"CollectIcefallCave_BackToNurse_5", 7386, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2169
+    {"CollectIcefallCave_Visit2_ToGrass", 7387, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2170
+    {"CollectIcefallCave_Visit2_ToGrass_1", 7388, 7, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2171
+    {"CollectIcefallCave_Visit2_ToGrass_2", 7395, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 35, 38, 22},  //  2172
+    {"CollectIcefallCave_Visit2_ToGrass_3", 7398, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 17, 30},  //  2173
+    {"CollectIcefallCave_Visit2_ToGrass_4", 7399, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 40, 17, 27},  //  2174
+    {"CollectIcefallCave_Visit2_ToGrass_5", 7404, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 37, 3, 17},  //  2175
+    {"CollectIcefallCave_Visit2_BackToNurse", 7405, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 37, 3, 15},  //  2176
+    {"CollectIcefallCave_Visit2_BackToNurse_1", 7406, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 40, 10, 22},  //  2177
+    {"CollectIcefallCave_Visit2_BackToNurse_2", 7407, 4, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 40, 10, 25},  //  2178
+    {"CollectIcefallCave_Visit2_BackToNurse_3", 7411, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 35, 38, 13},  //  2179
+    {"CollectIcefallCave_Visit2_BackToNurse_4", 7412, 9, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 38, 15},  //  2180
+    {"CollectIcefallCave_Visit2_BackToNurse_5", 7421, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 42, 7, 8},  //  2181
+    {"FourIsland_ToHarbor", 7422, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 42, 7, 4},  //  2182
+    {"FourIsland_ToHarbor_1", 7423, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 35, 18, 21},  //  2183
+    {"FourIsland_ToHarbor_2", 7426, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 36, 8, 3},  //  2184
+    {"FerryToFiveIsland", 7427, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 36, 8, 5},  //  2185
+    {"FiveIsland_ToNurse", 7427, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 28, 8, 5},  //  2186
+    {"FiveIsland_ToNurse_1", 7428, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 12, 14},  //  2187
+    {"FiveIsland_ToNurse_2", 7430, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2188
+    {"CollectFiveIsleMeadow_ToGrass", 7431, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2189
+    {"CollectFiveIsleMeadow_ToGrass_1", 7432, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2190
+    {"CollectFiveIsleMeadow_BackToNurse", 7438, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 31, 3, 7},  //  2191
+    {"CollectFiveIsleMeadow_BackToNurse_1", 7443, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2192
+    {"CollectFiveIsleMeadow_Visit2_ToGrass", 7444, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2193
+    {"CollectFiveIsleMeadow_Visit2_ToGrass_1", 7445, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2194
+    {"CollectFiveIsleMeadow_Visit2_BackToNurse", 7451, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 31, 3, 7},  //  2195
+    {"CollectFiveIsleMeadow_Visit2_BackToNurse_1", 7456, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2196
+    {"CollectLostCave_ToShore", 7457, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2197
+    {"CollectLostCave_ToShore_1", 7458, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2198
+    {"CollectLostCave_Channel", 7464, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 8, 3},  //  2199
+    {"CollectLostCave_Channel_1", 7464, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 27, 8, 2},  //  2200
+    {"CollectLostCave_Row", 7465, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 8, 13},  //  2201
+    {"CollectLostCave_Beach", 7467, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  2202
+    {"CollectLostCave_ToGrass", 7468, 2, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 32, 12},  //  2203
+    {"CollectLostCave_ToGrass_1", 7470, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 43, 14},  //  2204
+    {"CollectLostCave_ToGrass_2", 7475, 8, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 33, 48, 11},  //  2205
+    {"CollectLostCave_ToGrass_3", 7483, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 29, 5, 8},  //  2206
+    {"CollectLostCave_ToGrass_4", 7484, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 8, 2},  //  2207
+    {"CollectLostCave_Back_ToShore", 7487, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 30, 4, 7},  //  2208
+    {"CollectLostCave_Back_ToShore_1", 7489, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 8, 5},  //  2209
+    {"CollectLostCave_Back_ToShore_2", 7491, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 29, 5, 5},  //  2210
+    {"CollectLostCave_Back_ToShore_3", 7492, 2, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 64, 14},  //  2211
+    {"CollectLostCave_Back_ToShore_4", 7494, 8, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 61, 15},  //  2212
+    {"CollectLostCave_Back_ToShore_5", 7502, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 45, 13},  //  2213
+    {"CollectLostCave_Back_Row", 7506, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 26, 12},  //  2214
+    {"CollectLostCave_Back_Row_1", 7506, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 25, 12},  //  2215
+    {"CollectLostCave_Back_Channel", 7507, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  2216
+    {"CollectLostCave_BackToNurse", 7508, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 9, 12},  //  2217
+    {"CollectLostCave_BackToNurse_1", 7511, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2218
+    {"CollectLostCave_Visit2_ToShore", 7512, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2219
+    {"CollectLostCave_Visit2_ToShore_1", 7513, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2220
+    {"CollectLostCave_Visit2_Channel", 7519, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 27, 8, 3},  //  2221
+    {"CollectLostCave_Visit2_Channel_1", 7519, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 27, 8, 2},  //  2222
+    {"CollectLostCave_Visit2_Row", 7520, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 8, 13},  //  2223
+    {"CollectLostCave_Visit2_Beach", 7522, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  2224
+    {"CollectLostCave_Visit2_ToGrass", 7523, 2, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 32, 12},  //  2225
+    {"CollectLostCave_Visit2_ToGrass_1", 7525, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 43, 14},  //  2226
+    {"CollectLostCave_Visit2_ToGrass_2", 7530, 8, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 33, 48, 11},  //  2227
+    {"CollectLostCave_Visit2_ToGrass_3", 7538, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 29, 5, 8},  //  2228
+    {"CollectLostCave_Visit2_ToGrass_4", 7539, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 8, 2},  //  2229
+    {"CollectLostCave_Visit2_Back_ToShore", 7542, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 30, 4, 7},  //  2230
+    {"CollectLostCave_Visit2_Back_ToShore_1", 7544, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 8, 5},  //  2231
+    {"CollectLostCave_Visit2_Back_ToShore_2", 7546, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 29, 5, 5},  //  2232
+    {"CollectLostCave_Visit2_Back_ToShore_3", 7547, 2, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 64, 14},  //  2233
+    {"CollectLostCave_Visit2_Back_ToShore_4", 7549, 8, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 61, 15},  //  2234
+    {"CollectLostCave_Visit2_Back_ToShore_5", 7557, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 45, 13},  //  2235
+    {"CollectLostCave_Visit2_Back_Row", 7561, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 33, 26, 12},  //  2236
+    {"CollectLostCave_Visit2_Back_Row_1", 7561, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 25, 12},  //  2237
+    {"CollectLostCave_Visit2_Back_Channel", 7562, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 33, 9, 12},  //  2238
+    {"CollectLostCave_Visit2_BackToNurse", 7563, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 9, 12},  //  2239
+    {"CollectLostCave_Visit2_BackToNurse_1", 7566, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 32, 7, 8},  //  2240
+    {"FiveIsland_ToHarbor", 7567, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 7, 4},  //  2241
+    {"FiveIsland_ToHarbor_1", 7568, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 18, 7},  //  2242
+    {"FiveIsland_ToHarbor_2", 7571, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 28, 8, 3},  //  2243
+    {"FerryToSixIsland", 7572, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 28, 8, 5},  //  2244
+    {"SixIsland_ToNurse", 7572, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 179, 8, 5},  //  2245
+    {"SixIsland_ToNurse_1", 7573, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 171, 11, 23},  //  2246
+    {"SixIsland_ToNurse_2", 7574, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2247
+    {"CollectRuinValley_ToGrass", 7575, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2248
+    {"CollectRuinValley_ToGrass_1", 7576, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2249
+    {"CollectRuinValley_ToGrass_2", 7579, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 13, 56},  //  2250
+    {"CollectRuinValley_ToGrass_3", 7582, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 183, 17, 61},  //  2251
+    {"CollectRuinValley_BackToNurse", 7599, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 182, 44, 9},  //  2252
+    {"CollectRuinValley_BackToNurse_1", 7612, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 18, 73},  //  2253
+    {"CollectRuinValley_BackToNurse_2", 7617, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 13, 60},  //  2254
+    {"CollectRuinValley_BackToNurse_3", 7624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2255
+    {"CollectRuinValley_Visit2_ToGrass", 7625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2256
+    {"CollectRuinValley_Visit2_ToGrass_1", 7626, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2257
+    {"CollectRuinValley_Visit2_ToGrass_2", 7629, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 13, 56},  //  2258
+    {"CollectRuinValley_Visit2_ToGrass_3", 7632, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 183, 17, 61},  //  2259
+    {"CollectRuinValley_Visit2_BackToNurse", 7649, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 182, 44, 9},  //  2260
+    {"CollectRuinValley_Visit2_BackToNurse_1", 7662, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 183, 18, 73},  //  2261
+    {"CollectRuinValley_Visit2_BackToNurse_2", 7667, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 13, 60},  //  2262
+    {"CollectRuinValley_Visit2_BackToNurse_3", 7674, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2263
+    {"CollectPatternBush_ToGrass", 7675, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2264
+    {"CollectPatternBush_ToGrass_1", 7676, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2265
+    {"CollectPatternBush_ToGrass_2", 7682, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 183, 13, 51},  //  2266
+    {"CollectPatternBush_ToGrass_3", 7693, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 55, 26},  //  2267
+    {"CollectPatternBush_BackToNurse", 7696, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 180, 53, 24},  //  2268
+    {"CollectPatternBush_BackToNurse_1", 7698, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 178, 63, 10},  //  2269
+    {"CollectPatternBush_BackToNurse_2", 7704, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 11, 27},  //  2270
+    {"CollectPatternBush_BackToNurse_3", 7714, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2271
+    {"CollectPatternBush_Visit2_ToGrass", 7715, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2272
+    {"CollectPatternBush_Visit2_ToGrass_1", 7716, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2273
+    {"CollectPatternBush_Visit2_ToGrass_2", 7722, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 183, 13, 51},  //  2274
+    {"CollectPatternBush_Visit2_ToGrass_3", 7733, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 55, 26},  //  2275
+    {"CollectPatternBush_Visit2_BackToNurse", 7736, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 180, 53, 24},  //  2276
+    {"CollectPatternBush_Visit2_BackToNurse_1", 7738, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 178, 63, 10},  //  2277
+    {"CollectPatternBush_Visit2_BackToNurse_2", 7744, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 11, 27},  //  2278
+    {"CollectPatternBush_Visit2_BackToNurse_3", 7754, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2279
+    {"CollectWaterPath_ToGrass", 7755, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2280
+    {"CollectWaterPath_ToGrass_1", 7756, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2281
+    {"CollectWaterPath_BackToNurse", 7759, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 10, 57},  //  2282
+    {"CollectWaterPath_BackToNurse_1", 7762, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2283
+    {"CollectWaterPath_Visit2_ToGrass", 7763, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2284
+    {"CollectWaterPath_Visit2_ToGrass_1", 7764, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2285
+    {"CollectWaterPath_Visit2_BackToNurse", 7767, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 183, 10, 57},  //  2286
+    {"CollectWaterPath_Visit2_BackToNurse_1", 7770, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 181, 7, 8},  //  2287
+    {"SixIsland_ToHarbor", 7771, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 7, 4},  //  2288
+    {"SixIsland_ToHarbor_1", 7772, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 171, 11, 12},  //  2289
+    {"SixIsland_ToHarbor_2", 7773, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 179, 8, 3},  //  2290
+    {"FerryToSevenIsland", 7774, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 179, 8, 5},  //  2291
+    {"SevenIsland_ToNurse", 7774, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 159, 8, 5},  //  2292
+    {"SevenIsland_ToNurse_1", 7775, 4, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 16, 13},  //  2293
+    {"SevenIsland_ToNurse_2", 7779, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2294
+    {"CollectCanyonEntrance_ToGrass", 7780, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2295
+    {"CollectCanyonEntrance_ToGrass_1", 7781, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2296
+    {"CollectCanyonEntrance_BackToNurse", 7787, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 162, 6, 8},  //  2297
+    {"CollectCanyonEntrance_BackToNurse_1", 7791, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2298
+    {"CollectCanyonEntrance_Visit2_ToGrass", 7792, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2299
+    {"CollectCanyonEntrance_Visit2_ToGrass_1", 7793, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2300
+    {"CollectCanyonEntrance_Visit2_BackToNurse", 7799, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 162, 6, 8},  //  2301
+    {"CollectCanyonEntrance_Visit2_BackToNurse_1", 7803, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2302
+    {"CollectSevaultCanyon_ToGrass", 7804, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2303
+    {"CollectSevaultCanyon_ToGrass_1", 7805, 34, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2304
+    {"CollectSevaultCanyon_BackToNurse", 7839, 33, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 161, 7, 9},  //  2305
+    {"CollectSevaultCanyon_BackToNurse_1", 7872, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2306
+    {"CollectSevaultCanyon_Visit2_ToGrass", 7873, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2307
+    {"CollectSevaultCanyon_Visit2_ToGrass_1", 7874, 34, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2308
+    {"CollectSevaultCanyon_Visit2_BackToNurse", 7908, 33, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 161, 7, 9},  //  2309
+    {"CollectSevaultCanyon_Visit2_BackToNurse_1", 7941, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 160, 7, 8},  //  2310
+    {"SevenIsland_ToHarbor", 7942, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 160, 7, 4},  //  2311
+    {"SevenIsland_ToHarbor_1", 7943, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 12, 4},  //  2312
+    {"SevenIsland_ToHarbor_2", 7948, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 159, 8, 3},  //  2313
+    {"FerryToVermilion", 7949, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 159, 8, 5},  //  2314
+    {"PierToVermilionNurse", 7949, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 206, 23, 32},  //  2315
+    {"PierToVermilionNurse_1", 7951, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 24, 27},  //  2316
+    {"PierToVermilionNurse_2", 7958, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 7, 8},  //  2317
+    {"C20_11_VERMILION_SEVII_Out", 7959, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 7, 4},  //  2318
 };
 
 inline constexpr int32_t LEG_LISTS[] = {
@@ -24801,9 +24825,9 @@ inline constexpr int32_t LEG_LISTS[] = {
     3, 606, 607, 608, 3, 609, 610, 611, 3, 612, 613, 614, 3, 615, 616, 617, 3, 618, 619, 620,
     3, 621, 622, 623, 3, 744, 745, 746, 3, 747, 748, 749, 3, 750, 751, 752, 3, 753, 754, 755,
     3, 756, 757, 758, 3, 759, 760, 761, 3, 762, 763, 764, 3, 765, 766, 767, 3, 768, 769, 770,
-    3, 771, 772, 773, 3, 774, 775, 776, 3, 777, 778, 779, 2, 1426, 1427, 1, 1425, 12, 1478, 1479,
-    1480, 1481, 1482, 1483, 1484, 1485, 1486, 1487, 1488, 1489, 12, 1496, 1497, 1498, 1499, 1500, 1501, 1502, 1503, 1504,
-    1505, 1506, 1507,
+    3, 771, 772, 773, 3, 774, 775, 776, 3, 777, 778, 779, 2, 1426, 1427, 1, 1425, 12, 1482, 1483,
+    1484, 1485, 1486, 1487, 1488, 1489, 1490, 1491, 1492, 1493, 12, 1507, 1508, 1509, 1510, 1511, 1512, 1513, 1514, 1515,
+    1516, 1517, 1518,
 };
 
 inline constexpr StoryStep STEPS[] = {
@@ -27298,1410 +27322,1438 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "HarborToFiveIslandNurse_2", 1474, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "Gillian_ToGillian", 1475, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "Gillian_ToGillian_1", 1476, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_ToShore", 1475, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_ToShore_1", 1476, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Channel", 1477, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "Gillian_ToGillian_2", 1477, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Channel_1", 1478, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Row", 1479, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Beach", 1480, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_ToGillian", 1481, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::REMATCH, "Gillian", -1, 4, 45, 9800, 0, 0, DPAD_NONE, "", 317, 0, 0},
-    {StepType::WALK, "GillianToNurse", 1490, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Back_ToShore", 1494, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Back_Row", 1495, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianToNurse_1", 1491, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianToNurse_2", 1492, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Back_Row_1", 1496, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Gillian_Back_Channel", 1497, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianToNurse", 1498, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianToNurse_1", 1499, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianAgain_ToGillian", 1493, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianAgain_ToGillian_1", 1494, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_ToShore", 1500, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_ToShore_1", 1501, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Channel", 1502, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianAgain_ToGillian_2", 1495, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Channel_1", 1503, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Row", 1504, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Beach", 1505, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_ToGillian", 1506, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::REMATCH, "GillianAgain", -1, 5, 45, 9800, 0, 0, DPAD_NONE, "", 330, 0, 0},
-    {StepType::WALK, "GillianAgainToNurse", 1508, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Back_ToShore", 1519, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Back_Row", 1520, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianAgainToNurse_1", 1509, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "GillianAgainToNurse_2", 1510, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Back_Row_1", 1521, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgain_Back_Channel", 1522, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgainToNurse", 1523, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "GillianAgainToNurse_1", 1524, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToVermilion", 1511, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToVermilion_1", 1512, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToVermilion_2", 1513, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion", 1525, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion_1", 1526, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion_2", 1527, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToVermilion_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToVermilion_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "BuyPokeBalls3", 1514, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "BuyPokeBalls3_1", 1515, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "BuyPokeBalls3", 1528, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "BuyPokeBalls3_1", 1529, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::BUY, "BuyPokeBalls3", -1, 0, 0, -1, 0, 3, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "BuyPokeBalls5", 1516, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "BuyPokeBalls5", 1530, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::BUY, "BuyPokeBalls5", -1, 0, 0, -1, 0, 5, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "BuyPokeBalls7", 1517, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "BuyPokeBalls7", 1531, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::BUY, "BuyPokeBalls7", -1, 0, 0, -1, 0, 7, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "BuyPokeBalls9", 1518, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "BuyPokeBalls9", 1532, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::BUY, "BuyPokeBalls9", -1, 0, 0, -1, 0, 9, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "MartToVermilionNurse", 1519, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "MartToVermilionNurse_1", 1520, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "MartToVermilionNurse_2", 1521, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MartToVermilionNurse", 1533, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MartToVermilionNurse_1", 1534, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MartToVermilionNurse_2", 1535, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_01B_MONEY_Out", 1522, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_01B_MONEY_Out", 1536, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 143, 0, -1, 0, 0, DPAD_NONE, "abra:15:15,bellsprout:0:25,caterpie:20:20,kakuna:4:1,metapod:1:4,oddish:25:0,pidgey:15:15,weedle:20:20,ekans:25:0,mankey:5:5,rattata:35:35,sandshrew:0:25,spearow:35:35,ditto:25:25,electrode:5:5,golbat:14:14,kadabra:25:25,machoke:10:10,magneton:20:20,parasect:25:25,wobbuffet:4:4,primeape:11:11", 0, 0, 0},
     {StepType::FLY, "C20_02_CERULEAN_Fly_Fly", -1, 4, 1, -1, 0, 0, DPAD_NONE, "MAP_CERULEAN_CITY", 0, 0, 0},
-    {StepType::WALK, "C20_02_CERULEAN_ToNurse", 1523, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_02_CERULEAN_ToNurse_1", 1524, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_02_CERULEAN_ToNurse", 1537, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_02_CERULEAN_ToNurse_1", 1538, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute24?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "abra:15:15,bellsprout:0:25,caterpie:20:20,kakuna:4:1,metapod:1:4,oddish:25:0,pidgey:15:15,weedle:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_ToGrass", 1525, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_ToGrass_1", 1526, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_ToGrass", 1539, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_ToGrass_1", 1540, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute24", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "abra:15:15,bellsprout:0:25,caterpie:20:20,kakuna:4:1,metapod:1:4,oddish:25:0,pidgey:15:15,weedle:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_BackToNurse", 1527, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_BackToNurse_1", 1528, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_BackToNurse", 1541, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_BackToNurse_1", 1542, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute24_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "abra:15:15,bellsprout:0:25,caterpie:20:20,kakuna:4:1,metapod:1:4,oddish:25:0,pidgey:15:15,weedle:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_Visit2_ToGrass", 1529, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_Visit2_ToGrass_1", 1530, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_Visit2_ToGrass", 1543, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_Visit2_ToGrass_1", 1544, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute24_Visit2", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "abra:15:15,bellsprout:0:25,caterpie:20:20,kakuna:4:1,metapod:1:4,oddish:25:0,pidgey:15:15,weedle:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_Visit2_BackToNurse", 1531, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute24_Visit2_BackToNurse_1", 1532, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_Visit2_BackToNurse", 1545, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute24_Visit2_BackToNurse_1", 1546, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute4?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "ekans:25:0,mankey:5:5,rattata:35:35,sandshrew:0:25,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_ToGrass", 1533, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_ToGrass_1", 1534, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_ToGrass", 1547, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_ToGrass_1", 1548, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute4", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "ekans:25:0,mankey:5:5,rattata:35:35,sandshrew:0:25,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_BackToNurse", 1535, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_BackToNurse_1", 1536, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_BackToNurse", 1549, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_BackToNurse_1", 1550, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute4_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "ekans:25:0,mankey:5:5,rattata:35:35,sandshrew:0:25,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_Visit2_ToGrass", 1537, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_Visit2_ToGrass_1", 1538, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_Visit2_ToGrass", 1551, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_Visit2_ToGrass_1", 1552, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute4_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "ekans:25:0,mankey:5:5,rattata:35:35,sandshrew:0:25,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_Visit2_BackToNurse", 1539, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute4_Visit2_BackToNurse_1", 1540, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_Visit2_BackToNurse", 1553, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute4_Visit2_BackToNurse_1", 1554, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCeruleanCaveB1F?", -1, 27, 0, -1, 0, 0, DPAD_NONE, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass", 1541, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_1", 1542, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass", 1555, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_1", 1556, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_2", 1543, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_3", 1544, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_2", 1557, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_3", 1558, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_4", 1545, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_5", 1546, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_6", 1547, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_7", 1548, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_4", 1559, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_5", 1560, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_6", 1561, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_ToGrass_7", 1562, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCeruleanCaveB1F", -1, 30, 30, 2, 0, 4, DPAD_UP, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
     {StepType::ESCAPE_ROPE, "CollectCeruleanCaveB1F_BackToNurse_EscapeRope", -1, 9, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut", 1549, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_1", 1550, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_2", 1551, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_3", 1552, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut", 1563, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_1", 1564, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_2", 1565, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_3", 1566, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK, "Pick up item (FLAG_HIDE_CERULEAN_CAVE_1F_FULL_RESTORE)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_4", 1553, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_4", 1567, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_5", 1554, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse", 1555, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_1", 1556, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_WalkOut_5", 1568, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse", 1569, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_BackToNurse_1", 1570, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCeruleanCaveB1F_Visit2?", -1, 26, 0, -1, 0, 0, DPAD_NONE, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass", 1557, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_1", 1558, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass", 1571, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_1", 1572, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_2", 1559, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_3", 1560, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_2", 1573, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_3", 1574, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_4", 1561, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_5", 1562, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_6", 1563, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_7", 1564, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_4", 1575, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_5", 1576, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_6", 1577, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_ToGrass_7", 1578, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCeruleanCaveB1F_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse", 1565, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_1", 1566, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_2", 1567, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_3", 1568, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse", 1579, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_1", 1580, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_2", 1581, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_3", 1582, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK, "Pick up item (FLAG_HIDE_CERULEAN_CAVE_1F_FULL_RESTORE)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_4", 1569, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_4", 1583, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_5", 1570, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_6", 1571, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_7", 1572, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_5", 1584, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_6", 1585, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit2_BackToNurse_7", 1586, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCeruleanCaveB1F_Visit3?", -1, 24, 0, -1, 0, 0, DPAD_NONE, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass", 1573, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_1", 1574, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass", 1587, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_1", 1588, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_2", 1575, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_3", 1576, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_2", 1589, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_3", 1590, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_4", 1577, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_5", 1578, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_6", 1579, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_7", 1580, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_4", 1591, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_5", 1592, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_6", 1593, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_ToGrass_7", 1594, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCeruleanCaveB1F_Visit3", -1, 30, 30, 2, 0, 4, DPAD_UP, "ditto:25:25,electrode:4:4,golbat:11:11,kadabra:25:25,machoke:10:10,magneton:10:10,parasect:14:14,wobbuffet:1:1", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse", 1581, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_1", 1582, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_2", 1583, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_3", 1584, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse", 1595, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_1", 1596, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_2", 1597, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_3", 1598, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_4", 1585, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_5", 1586, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_6", 1587, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_4", 1599, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_5", 1600, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCaveB1F_Visit3_BackToNurse_6", 1601, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCeruleanCave1F?", -1, 12, 0, -1, 0, 0, DPAD_NONE, "ditto:11:11,electrode:5:5,golbat:14:14,machoke:10:10,magneton:20:20,parasect:25:25,primeape:11:11,wobbuffet:4:4", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_ToGrass", 1588, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_1", 1589, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_ToGrass", 1602, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_1", 1603, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_2", 1590, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_3", 1591, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_2", 1604, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_ToGrass_3", 1605, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCeruleanCave1F", -1, 30, 30, 2, 0, 4, DPAD_UP, "ditto:11:11,electrode:5:5,golbat:14:14,machoke:10:10,magneton:20:20,parasect:25:25,primeape:11:11,wobbuffet:4:4", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse", 1592, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse_1", 1593, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse_2", 1594, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse", 1606, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse_1", 1607, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_BackToNurse_2", 1608, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCeruleanCave1F_Visit2?", -1, 12, 0, -1, 0, 0, DPAD_NONE, "ditto:11:11,electrode:5:5,golbat:14:14,machoke:10:10,magneton:20:20,parasect:25:25,primeape:11:11,wobbuffet:4:4", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass", 1595, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_1", 1596, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass", 1609, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_1", 1610, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_2", 1597, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_3", 1598, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_2", 1611, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_ToGrass_3", 1612, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCeruleanCave1F_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "ditto:11:11,electrode:5:5,golbat:14:14,machoke:10:10,magneton:20:20,parasect:25:25,primeape:11:11,wobbuffet:4:4", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse", 1599, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse_1", 1600, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse_2", 1601, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse", 1613, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse_1", 1614, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCeruleanCave1F_Visit2_BackToNurse_2", 1615, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeruleanCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_02_CERULEAN_Out", 1602, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_02_CERULEAN_Out", 1616, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 49, 0, -1, 0, 0, DPAD_NONE, "clefairy:6:6,geodude:30:30,paras:15:15,zubat:49:49,jigglypuff:10:10,mankey:10:10,nidoran-f:1:14,nidoran-m:14:1,pidgey:30:30,spearow:35:35", 0, 0, 0},
     {StepType::FLY, "C20_03_MT_MOON_Fly_Fly", -1, 3, 1, -1, 0, 0, DPAD_NONE, "MAP_ROUTE4", 0, 0, 0},
-    {StepType::WALK, "C20_03_MT_MOON_ToNurse", 1603, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_03_MT_MOON_ToNurse_1", 1604, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_03_MT_MOON_ToNurse", 1617, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_03_MT_MOON_ToNurse_1", 1618, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route4_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectMtMoon?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "clefairy:6:6,geodude:30:30,paras:15:15,zubat:49:49", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_ToGrass", 1605, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_ToGrass_1", 1606, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_ToGrass_2", 1607, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_ToGrass_3", 1608, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_ToGrass_4", 1609, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_ToGrass", 1619, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_ToGrass_1", 1620, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_ToGrass_2", 1621, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_ToGrass_3", 1622, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_ToGrass_4", 1623, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectMtMoon", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "clefairy:6:6,geodude:30:30,paras:15:15,zubat:49:49", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_BackToNurse", 1610, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_BackToNurse_1", 1611, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_BackToNurse_2", 1612, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_BackToNurse_3", 1613, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_BackToNurse_4", 1614, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_BackToNurse", 1624, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_BackToNurse_1", 1625, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_BackToNurse_2", 1626, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_BackToNurse_3", 1627, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_BackToNurse_4", 1628, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route4_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectMtMoon_Visit2?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "clefairy:6:6,geodude:30:30,paras:15:15,zubat:49:49", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass", 1615, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_1", 1616, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_2", 1617, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_3", 1618, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_4", 1619, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass", 1629, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_1", 1630, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_2", 1631, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_3", 1632, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_ToGrass_4", 1633, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectMtMoon_Visit2", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "clefairy:6:6,geodude:30:30,paras:15:15,zubat:49:49", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse", 1620, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_1", 1621, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_2", 1622, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_3", 1623, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_4", 1624, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse", 1634, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_1", 1635, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_2", 1636, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_3", 1637, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMtMoon_Visit2_BackToNurse_4", 1638, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route4_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute3?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "jigglypuff:10:10,mankey:10:10,nidoran-f:1:14,nidoran-m:14:1,pidgey:30:30,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_ToGrass", 1625, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_ToGrass_1", 1626, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_ToGrass", 1639, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_ToGrass_1", 1640, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute3", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "jigglypuff:10:10,mankey:10:10,nidoran-f:1:14,nidoran-m:14:1,pidgey:30:30,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_BackToNurse", 1627, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_BackToNurse_1", 1628, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_BackToNurse", 1641, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_BackToNurse_1", 1642, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route4_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute3_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "jigglypuff:10:10,mankey:10:10,nidoran-f:1:14,nidoran-m:14:1,pidgey:30:30,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_Visit2_ToGrass", 1629, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_Visit2_ToGrass_1", 1630, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_Visit2_ToGrass", 1643, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_Visit2_ToGrass_1", 1644, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute3_Visit2", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "jigglypuff:10:10,mankey:10:10,nidoran-f:1:14,nidoran-m:14:1,pidgey:30:30,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_Visit2_BackToNurse", 1631, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute3_Visit2_BackToNurse_1", 1632, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_Visit2_BackToNurse", 1645, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute3_Visit2_BackToNurse_1", 1646, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route4_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_03_MT_MOON_Out", 1633, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_03_MT_MOON_Out", 1647, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 83, 0, -1, 0, 0, DPAD_NONE, "caterpie:40:40,kakuna:10:5,metapod:5:10,pikachu:5:5,weedle:40:40,mankey:45:45,rattata:45:45,spearow:15:15,arbok:5:0,ekans:20:0,fearow:25:25,primeape:5:5,sandshrew:0:20,sandslash:0:5", 0, 0, 0},
     {StepType::FLY, "C20_04_VIRIDIAN_Fly_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
-    {StepType::WALK, "C20_04_VIRIDIAN_ToNurse", 1634, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_04_VIRIDIAN_ToNurse_1", 1635, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_04_VIRIDIAN_ToNurse", 1648, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_04_VIRIDIAN_ToNurse_1", 1649, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectViridianForest?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "caterpie:40:40,kakuna:10:5,metapod:5:10,pikachu:5:5,weedle:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_ToGrass", 1636, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_ToGrass_1", 1637, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_ToGrass_2", 1638, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_ToGrass_3", 1639, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_ToGrass", 1650, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_ToGrass_1", 1651, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_ToGrass_2", 1652, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_ToGrass_3", 1653, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectViridianForest", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "caterpie:40:40,kakuna:10:5,metapod:5:10,pikachu:5:5,weedle:40:40", 0, 0, 0},
     {StepType::FLY, "CollectViridianForest_BackToNurse_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_BackToNurse", 1640, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_BackToNurse_1", 1641, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_BackToNurse", 1654, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_BackToNurse_1", 1655, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectViridianForest_Visit2?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "caterpie:40:40,kakuna:10:5,metapod:5:10,pikachu:5:5,weedle:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass", 1642, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_1", 1643, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_2", 1644, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_3", 1645, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass", 1656, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_1", 1657, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_2", 1658, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_ToGrass_3", 1659, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectViridianForest_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "caterpie:40:40,kakuna:10:5,metapod:5:10,pikachu:5:5,weedle:40:40", 0, 0, 0},
     {StepType::FLY, "CollectViridianForest_Visit2_BackToNurse_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_BackToNurse", 1646, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectViridianForest_Visit2_BackToNurse_1", 1647, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_BackToNurse", 1660, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectViridianForest_Visit2_BackToNurse_1", 1661, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute22?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "mankey:45:45,rattata:45:45,spearow:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_ToGrass", 1648, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_ToGrass_1", 1649, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_ToGrass", 1662, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_ToGrass_1", 1663, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute22", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "mankey:45:45,rattata:45:45,spearow:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_BackToNurse", 1650, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_BackToNurse_1", 1651, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_BackToNurse", 1664, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_BackToNurse_1", 1665, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute22_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "mankey:45:45,rattata:45:45,spearow:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_Visit2_ToGrass", 1652, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_Visit2_ToGrass_1", 1653, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_Visit2_ToGrass", 1666, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_Visit2_ToGrass_1", 1667, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute22_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "mankey:45:45,rattata:45:45,spearow:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_Visit2_BackToNurse", 1654, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute22_Visit2_BackToNurse_1", 1655, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_Visit2_BackToNurse", 1668, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute22_Visit2_BackToNurse_1", 1669, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute23?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "arbok:5:0,ekans:20:0,fearow:25:25,mankey:30:30,primeape:5:5,sandshrew:0:20,sandslash:0:5,spearow:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass", 1656, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_1", 1657, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass", 1670, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_1", 1671, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_2", 1658, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_3", 1659, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_4", 1660, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_2", 1672, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_3", 1673, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_4", 1674, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_5", 1661, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_5", 1675, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_ToGrass_6", 1662, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_ToGrass_6", 1676, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute23", -1, 30, 30, 2, 0, 4, DPAD_UP, "arbok:5:0,ekans:20:0,fearow:25:25,mankey:30:30,primeape:5:5,sandshrew:0:20,sandslash:0:5,spearow:15:15", 0, 0, 0},
     {StepType::FLY, "CollectRoute23_BackToNurse_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_BackToNurse", 1663, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_BackToNurse_1", 1664, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_BackToNurse", 1677, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_BackToNurse_1", 1678, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute23_Visit2?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "arbok:5:0,ekans:20:0,fearow:25:25,mankey:30:30,primeape:5:5,sandshrew:0:20,sandslash:0:5,spearow:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass", 1665, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_1", 1666, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass", 1679, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_1", 1680, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_2", 1667, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_3", 1668, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_4", 1669, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_2", 1681, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_3", 1682, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_4", 1683, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_5", 1670, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_5", 1684, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_6", 1671, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_ToGrass_6", 1685, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute23_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "arbok:5:0,ekans:20:0,fearow:25:25,mankey:30:30,primeape:5:5,sandshrew:0:20,sandslash:0:5,spearow:15:15", 0, 0, 0},
     {StepType::FLY, "CollectRoute23_Visit2_BackToNurse_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_BackToNurse", 1672, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute23_Visit2_BackToNurse_1", 1673, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_BackToNurse", 1686, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute23_Visit2_BackToNurse_1", 1687, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ViridianCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_04_VIRIDIAN_Out", 1674, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_04_VIRIDIAN_Out", 1688, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 25, 0, -1, 0, 0, DPAD_NONE, "arbok:5:0,geodude:20:20,golbat:5:5,machoke:5:5,machop:20:20,marowak:5:5,onix:20:20,primeape:10:10,sandslash:0:5,zubat:10:10", 0, 0, 0},
     {StepType::FLY, "C20_05_VICTORY_ROAD_Fly_Fly", -1, 12, 1, -1, 0, 0, DPAD_NONE, "MAP_INDIGO_PLATEAU_EXTERIOR", 0, 0, 0},
-    {StepType::WALK, "C20_05_VICTORY_ROAD_ToNurse", 1675, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_05_VICTORY_ROAD_ToNurse_1", 1676, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_05_VICTORY_ROAD_ToNurse", 1689, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_05_VICTORY_ROAD_ToNurse_1", 1690, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectVictoryRoad?", -1, 9, 0, -1, 0, 0, DPAD_NONE, "arbok:5:0,geodude:20:20,golbat:5:5,machoke:5:5,machop:20:20,marowak:5:5,onix:20:20,primeape:10:10,sandslash:0:5,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_ToGrass", 1677, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_ToGrass_1", 1678, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_ToGrass_2", 1679, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_ToGrass", 1691, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_ToGrass_1", 1692, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_ToGrass_2", 1693, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectVictoryRoad", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "arbok:5:0,geodude:20:20,golbat:5:5,machoke:5:5,machop:20:20,marowak:5:5,onix:20:20,primeape:10:10,sandslash:0:5,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_BackToNurse", 1680, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_BackToNurse_1", 1681, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_BackToNurse_2", 1682, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_BackToNurse", 1694, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_BackToNurse_1", 1695, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_BackToNurse_2", 1696, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectVictoryRoad_Visit2?", -1, 9, 0, -1, 0, 0, DPAD_NONE, "arbok:5:0,geodude:20:20,golbat:5:5,machoke:5:5,machop:20:20,marowak:5:5,onix:20:20,primeape:10:10,sandslash:0:5,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass", 1683, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass_1", 1684, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass_2", 1685, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass", 1697, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass_1", 1698, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_ToGrass_2", 1699, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectVictoryRoad_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "arbok:5:0,geodude:20:20,golbat:5:5,machoke:5:5,machop:20:20,marowak:5:5,onix:20:20,primeape:10:10,sandslash:0:5,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse", 1686, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse_1", 1687, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse_2", 1688, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse", 1700, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse_1", 1701, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectVictoryRoad_Visit2_BackToNurse_2", 1702, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at IndigoPlateau_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_05_VICTORY_ROAD_Out", 1689, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_05_VICTORY_ROAD_Out", 1703, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 65, 0, -1, 0, 0, DPAD_NONE, "electabuzz:5:0,magnemite:30:30,magneton:10:15,pikachu:25:25,voltorb:30:30,geodude:35:35,machop:15:15,mankey:15:15,onix:5:5,zubat:30:30", 0, 0, 0},
     {StepType::FLY, "C20_06_ROUTE10_Fly_Fly", -1, 6, 1, -1, 0, 0, DPAD_NONE, "MAP_ROUTE10", 0, 0, 0},
-    {StepType::WALK, "C20_06_ROUTE10_ToNurse", 1690, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_06_ROUTE10_ToNurse_1", 1691, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_06_ROUTE10_ToNurse", 1704, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_06_ROUTE10_ToNurse_1", 1705, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route10_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPowerPlant?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "electabuzz:5:0,magnemite:30:30,magneton:10:15,pikachu:25:25,voltorb:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_ToGrass", 1692, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_ToGrass_1", 1693, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_ToGrass", 1706, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_ToGrass_1", 1707, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_ToGrass_2", 1694, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_ToGrass_3", 1695, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_ToGrass_2", 1708, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_ToGrass_3", 1709, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPowerPlant", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "electabuzz:5:0,magnemite:30:30,magneton:10:15,pikachu:25:25,voltorb:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_BackToNurse_Out", 1696, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_BackToNurse_Out", 1710, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectPowerPlant_BackToNurse_Fly", -1, 6, 1, -1, 0, 0, DPAD_NONE, "MAP_ROUTE10", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_BackToNurse", 1697, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_BackToNurse_1", 1698, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_BackToNurse", 1711, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_BackToNurse_1", 1712, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route10_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPowerPlant_Visit2?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "electabuzz:5:0,magnemite:30:30,magneton:10:15,pikachu:25:25,voltorb:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass", 1699, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_1", 1700, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass", 1713, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_1", 1714, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_2", 1701, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_3", 1702, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_2", 1715, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_ToGrass_3", 1716, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPowerPlant_Visit2", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "electabuzz:5:0,magnemite:30:30,magneton:10:15,pikachu:25:25,voltorb:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse_Out", 1703, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse_Out", 1717, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectPowerPlant_Visit2_BackToNurse_Fly", -1, 6, 1, -1, 0, 0, DPAD_NONE, "MAP_ROUTE10", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse", 1704, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse_1", 1705, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse", 1718, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPowerPlant_Visit2_BackToNurse_1", 1719, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route10_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRockTunnel?", -1, 15, 0, -1, 0, 0, DPAD_NONE, "geodude:35:35,machop:15:15,mankey:15:15,onix:5:5,zubat:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_ToGrass", 1706, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_ToGrass_1", 1707, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_ToGrass", 1720, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_ToGrass_1", 1721, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_ToGrass_2", 1708, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_ToGrass_3", 1709, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_ToGrass_2", 1722, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_ToGrass_3", 1723, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRockTunnel", -1, 30, 30, 2, 0, 2, DPAD_LEFT, "geodude:35:35,machop:15:15,mankey:15:15,onix:5:5,zubat:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_BackToNurse", 1710, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_BackToNurse_1", 1711, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_BackToNurse", 1724, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_BackToNurse_1", 1725, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_BackToNurse_2", 1712, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_BackToNurse_3", 1713, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_BackToNurse_2", 1726, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_BackToNurse_3", 1727, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route10_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRockTunnel_Visit2?", -1, 15, 0, -1, 0, 0, DPAD_NONE, "geodude:35:35,machop:15:15,mankey:15:15,onix:5:5,zubat:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass", 1714, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_1", 1715, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass", 1728, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_1", 1729, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_2", 1716, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_3", 1717, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_2", 1730, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_ToGrass_3", 1731, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRockTunnel_Visit2", -1, 30, 30, 2, 0, 2, DPAD_LEFT, "geodude:35:35,machop:15:15,mankey:15:15,onix:5:5,zubat:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse", 1718, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_1", 1719, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse", 1732, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_1", 1733, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_2", 1720, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_3", 1721, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_2", 1734, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRockTunnel_Visit2_BackToNurse_3", 1735, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at Route10_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_06_ROUTE10_Out", 1722, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_06_ROUTE10_Out", 1736, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 135, 0, -1, 0, 0, DPAD_NONE, "cubone:10:10,gastly:75:75,haunter:15:15,ekans:20:0,growlithe:20:0,meowth:30:30,pidgey:30:30,sandshrew:0:20,vulpix:0:20,bellsprout:0:35,gloom:5:0,oddish:35:0,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "C20_07_LAVENDER_Fly_Fly", -1, 7, 1, -1, 0, 0, DPAD_NONE, "MAP_LAVENDER_TOWN", 0, 0, 0},
-    {StepType::WALK, "C20_07_LAVENDER_ToNurse", 1723, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_07_LAVENDER_ToNurse_1", 1724, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_07_LAVENDER_ToNurse", 1737, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_07_LAVENDER_ToNurse_1", 1738, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPokemonTower?", -1, 21, 0, -1, 0, 0, DPAD_NONE, "cubone:10:10,gastly:75:75,haunter:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass", 1725, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_1", 1726, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_2", 1727, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_3", 1728, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_4", 1729, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_5", 1730, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_6", 1731, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_7", 1732, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_ToGrass_8", 1733, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass", 1739, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_1", 1740, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_2", 1741, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_3", 1742, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_4", 1743, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_5", 1744, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_6", 1745, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_7", 1746, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_ToGrass_8", 1747, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPokemonTower", -1, 30, 30, 2, 0, 4, DPAD_UP, "cubone:10:10,gastly:75:75,haunter:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse", 1734, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_1", 1735, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_2", 1736, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_3", 1737, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_4", 1738, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_5", 1739, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_6", 1740, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_7", 1741, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_BackToNurse_8", 1742, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse", 1748, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_1", 1749, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_2", 1750, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_3", 1751, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_4", 1752, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_5", 1753, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_6", 1754, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_7", 1755, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_BackToNurse_8", 1756, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPokemonTower_Visit2?", -1, 21, 0, -1, 0, 0, DPAD_NONE, "cubone:10:10,gastly:75:75,haunter:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass", 1743, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_1", 1744, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_2", 1745, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_3", 1746, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_4", 1747, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_5", 1748, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_6", 1749, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_7", 1750, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_8", 1751, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass", 1757, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_1", 1758, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_2", 1759, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_3", 1760, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_4", 1761, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_5", 1762, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_6", 1763, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_7", 1764, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_ToGrass_8", 1765, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPokemonTower_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "cubone:10:10,gastly:75:75,haunter:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse", 1752, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_1", 1753, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_2", 1754, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_3", 1755, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_4", 1756, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_5", 1757, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_6", 1758, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_7", 1759, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_8", 1760, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse", 1766, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_1", 1767, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_2", 1768, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_3", 1769, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_4", 1770, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_5", 1771, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_6", 1772, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_7", 1773, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPokemonTower_Visit2_BackToNurse_8", 1774, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute8?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "ekans:20:0,growlithe:20:0,meowth:30:30,pidgey:30:30,sandshrew:0:20,vulpix:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_ToGrass", 1761, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_ToGrass_1", 1762, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_ToGrass", 1775, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_ToGrass_1", 1776, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_ToGrass_2", 1763, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_ToGrass_2", 1777, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute8", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "ekans:20:0,growlithe:20:0,meowth:30:30,pidgey:30:30,sandshrew:0:20,vulpix:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_BackToNurse", 1764, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_BackToNurse_1", 1765, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_BackToNurse", 1778, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_BackToNurse_1", 1779, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute8_Visit2?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "ekans:20:0,growlithe:20:0,meowth:30:30,pidgey:30:30,sandshrew:0:20,vulpix:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_Visit2_ToGrass", 1766, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_Visit2_ToGrass_1", 1767, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_Visit2_ToGrass", 1780, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_Visit2_ToGrass_1", 1781, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_Visit2_ToGrass_2", 1768, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_Visit2_ToGrass_2", 1782, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute8_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "ekans:20:0,growlithe:20:0,meowth:30:30,pidgey:30:30,sandshrew:0:20,vulpix:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_Visit2_BackToNurse", 1769, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute8_Visit2_BackToNurse_1", 1770, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_Visit2_BackToNurse", 1783, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute8_Visit2_BackToNurse_1", 1784, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute12?", -1, 31, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,gloom:5:0,oddish:35:0,pidgey:30:30,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass", 1771, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_1", 1772, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_2", 1773, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_3", 1774, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass", 1785, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_1", 1786, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_2", 1787, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_3", 1788, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_4", 1775, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_4", 1789, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_5", 1776, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_5", 1790, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_6", 1777, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_6", 1791, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_7", 1778, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_7", 1792, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_8", 1779, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_8", 1793, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_9", 1780, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_9", 1794, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_ToGrass_10", 1781, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_ToGrass_10", 1795, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute12", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "bellsprout:0:35,gloom:5:0,oddish:35:0,pidgey:30:30,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute12_BackToNurse_Fly", -1, 7, 1, -1, 0, 0, DPAD_NONE, "MAP_LAVENDER_TOWN", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_BackToNurse", 1782, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_BackToNurse_1", 1783, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_BackToNurse", 1796, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_BackToNurse_1", 1797, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute12_Visit2?", -1, 31, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,gloom:5:0,oddish:35:0,pidgey:30:30,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass", 1784, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_1", 1785, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_2", 1786, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_3", 1787, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass", 1798, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_1", 1799, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_2", 1800, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_3", 1801, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_4", 1788, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_4", 1802, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_5", 1789, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_5", 1803, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_6", 1790, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_6", 1804, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_7", 1791, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_7", 1805, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_8", 1792, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_8", 1806, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_9", 1793, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_9", 1807, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_10", 1794, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_ToGrass_10", 1808, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute12_Visit2", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "bellsprout:0:35,gloom:5:0,oddish:35:0,pidgey:30:30,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute12_Visit2_BackToNurse_Fly", -1, 7, 1, -1, 0, 0, DPAD_NONE, "MAP_LAVENDER_TOWN", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_BackToNurse", 1795, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute12_Visit2_BackToNurse_1", 1796, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_BackToNurse", 1809, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute12_Visit2_BackToNurse_1", 1810, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at LavenderTown_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_07_LAVENDER_Out", 1797, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_07_LAVENDER_Out", 1811, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 27, 0, -1, 0, 0, DPAD_NONE, "doduo:35:35,raticate:5:5,rattata:30:30,spearow:30:30", 0, 0, 0},
     {StepType::FLY, "C20_08_CELADON_Fly_Fly", -1, 8, 1, -1, 0, 0, DPAD_NONE, "MAP_CELADON_CITY", 0, 0, 0},
-    {StepType::WALK, "C20_08_CELADON_ToNurse", 1798, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_08_CELADON_ToNurse_1", 1799, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_08_CELADON_ToNurse", 1812, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_08_CELADON_ToNurse_1", 1813, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeladonCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute16?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "doduo:35:35,raticate:5:5,rattata:30:30,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_ToGrass", 1800, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_ToGrass_1", 1801, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_ToGrass", 1814, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_ToGrass_1", 1815, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_ToGrass_2", 1802, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_ToGrass_2", 1816, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute16", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "doduo:35:35,raticate:5:5,rattata:30:30,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_BackToNurse", 1803, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_BackToNurse_1", 1804, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_BackToNurse", 1817, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_BackToNurse_1", 1818, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeladonCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute16_Visit2?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "doduo:35:35,raticate:5:5,rattata:30:30,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_Visit2_ToGrass", 1805, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_Visit2_ToGrass_1", 1806, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_Visit2_ToGrass", 1819, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_Visit2_ToGrass_1", 1820, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_Visit2_ToGrass_2", 1807, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_Visit2_ToGrass_2", 1821, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute16_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "doduo:35:35,raticate:5:5,rattata:30:30,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_Visit2_BackToNurse", 1808, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute16_Visit2_BackToNurse_1", 1809, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_Visit2_BackToNurse", 1822, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute16_Visit2_BackToNurse_1", 1823, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CeladonCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_08_CELADON_Out", 1810, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_08_CELADON_Out", 1824, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 295, 0, -1, 0, 0, DPAD_NONE, "chansey:4:4,exeggcute:20:20,nidoran-f:5:20,nidoran-m:20:5,nidorina:5:10,nidorino:10:5,parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:30:30,doduo:35:35,kangaskhan:4:4,paras:15:15,tauros:4:4,venomoth:5:5,bellsprout:0:35,ditto:15:15,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:20:20,weepinbell:0:5,fearow:15:15,raticate:15:15,rattata:5:5,spearow:30:30,dewgong:5:5,golbat:10:10,golduck:15:0,psyduck:20:0,seel:40:40,slowbro:0:15,slowpoke:0:20,zubat:10:10", 0, 0, 0},
     {StepType::FLY, "C20_09_FUCHSIA_Fly_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "C20_09_FUCHSIA_ToNurse", 1811, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_09_FUCHSIA_ToNurse_1", 1812, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_09_FUCHSIA_ToNurse", 1825, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_09_FUCHSIA_ToNurse_1", 1826, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariCenter?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "chansey:1:1,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_Desk", 1813, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_Desk_1", 1814, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_Desk", 1827, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_Desk_1", 1828, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_Desk_2", 1815, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_Desk_2", 1829, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_Desk_3", 1816, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_Desk_4", 1817, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_Desk_3", 1830, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_Desk_4", 1831, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 3, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_ToGrass", 1818, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_ToGrass", 1832, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariCenter", -1, 30, 30, 3, 0, 5, DPAD_LEFT, "chansey:1:1,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:15:15", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_BackToNurse_Out", 1819, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_BackToNurse_Out", 1833, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariCenter_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_BackToNurse", 1820, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter_BackToNurse_1", 1821, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_BackToNurse", 1834, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter_BackToNurse_1", 1835, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariEast?", -1, 20, 0, -1, 0, 0, DPAD_NONE, "doduo:20:20,exeggcute:20:20,kangaskhan:4:4,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,paras:15:15,parasect:5:5,pinsir:0:1,scyther:1:0", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_Desk", 1822, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_Desk_1", 1823, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_Desk", 1836, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_Desk_1", 1837, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_Desk_2", 1824, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_Desk_2", 1838, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_Desk_3", 1825, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_Desk_4", 1826, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_Desk_3", 1839, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_Desk_4", 1840, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 4, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_ToGrass", 1827, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_ToGrass_1", 1828, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_ToGrass", 1841, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_ToGrass_1", 1842, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariEast", -1, 30, 30, 3, 0, 5, DPAD_RIGHT, "doduo:20:20,exeggcute:20:20,kangaskhan:4:4,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,paras:15:15,parasect:5:5,pinsir:0:1,scyther:1:0", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_BackToNurse_Out", 1829, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_BackToNurse_Out", 1843, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariEast_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_BackToNurse", 1830, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast_BackToNurse_1", 1831, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_BackToNurse", 1844, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast_BackToNurse_1", 1845, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariNorth?", -1, 26, 0, -1, 0, 0, DPAD_NONE, "chansey:4:4,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,paras:15:15,rhyhorn:20:20,tauros:1:1,venomoth:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_Desk", 1832, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_Desk_1", 1833, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_Desk", 1846, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_Desk_1", 1847, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_Desk_2", 1834, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_Desk_2", 1848, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_Desk_3", 1835, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_Desk_4", 1836, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_Desk_3", 1849, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_Desk_4", 1850, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 10, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_ToGrass", 1837, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_ToGrass", 1851, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_ToGrass_1", 1838, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_ToGrass_1", 1852, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_ToGrass_2", 1839, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_ToGrass_3", 1840, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_ToGrass_2", 1853, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_ToGrass_3", 1854, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariNorth", -1, 30, 30, 3, 0, 5, DPAD_RIGHT, "chansey:4:4,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,paras:15:15,rhyhorn:20:20,tauros:1:1,venomoth:5:5", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_BackToNurse_Out", 1841, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_BackToNurse_Out", 1855, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariNorth_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_BackToNurse", 1842, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth_BackToNurse_1", 1843, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_BackToNurse", 1856, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth_BackToNurse_1", 1857, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariWest?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "doduo:20:20,exeggcute:20:20,kangaskhan:1:1,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,tauros:4:4,venomoth:5:5,venonat:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_Desk", 1844, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_Desk_1", 1845, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_Desk", 1858, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_Desk_1", 1859, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_Desk_2", 1846, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_Desk_2", 1860, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_Desk_3", 1847, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_Desk_4", 1848, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_Desk_3", 1861, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_Desk_4", 1862, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 7, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_ToGrass", 1849, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_ToGrass", 1863, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_ToGrass_1", 1850, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_ToGrass_2", 1851, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_ToGrass_1", 1864, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_ToGrass_2", 1865, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariWest", -1, 30, 30, 3, 0, 5, DPAD_LEFT, "doduo:20:20,exeggcute:20:20,kangaskhan:1:1,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,tauros:4:4,venomoth:5:5,venonat:15:15", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_BackToNurse_Out", 1852, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_BackToNurse_Out", 1866, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariWest_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_BackToNurse", 1853, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest_BackToNurse_1", 1854, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_BackToNurse", 1867, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest_BackToNurse_1", 1868, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariCenter2?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "chansey:1:1,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_Desk", 1855, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_Desk_1", 1856, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_Desk", 1869, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_Desk_1", 1870, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_Desk_2", 1857, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_Desk_2", 1871, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_Desk_3", 1858, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_Desk_4", 1859, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_Desk_3", 1872, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_Desk_4", 1873, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 3, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_ToGrass", 1860, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_ToGrass", 1874, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariCenter2", -1, 30, 30, 3, 0, 5, DPAD_LEFT, "chansey:1:1,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,parasect:5:5,pinsir:0:4,rhyhorn:20:20,scyther:4:0,venonat:15:15", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_BackToNurse_Out", 1861, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_BackToNurse_Out", 1875, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariCenter2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_BackToNurse", 1862, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariCenter2_BackToNurse_1", 1863, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_BackToNurse", 1876, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariCenter2_BackToNurse_1", 1877, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariEast2?", -1, 20, 0, -1, 0, 0, DPAD_NONE, "doduo:20:20,exeggcute:20:20,kangaskhan:4:4,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,paras:15:15,parasect:5:5,pinsir:0:1,scyther:1:0", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_Desk", 1864, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_Desk_1", 1865, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_Desk", 1878, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_Desk_1", 1879, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_Desk_2", 1866, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_Desk_2", 1880, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_Desk_3", 1867, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_Desk_4", 1868, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_Desk_3", 1881, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_Desk_4", 1882, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 4, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_ToGrass", 1869, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_ToGrass_1", 1870, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_ToGrass", 1883, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_ToGrass_1", 1884, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariEast2", -1, 30, 30, 3, 0, 5, DPAD_RIGHT, "doduo:20:20,exeggcute:20:20,kangaskhan:4:4,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,paras:15:15,parasect:5:5,pinsir:0:1,scyther:1:0", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_BackToNurse_Out", 1871, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_BackToNurse_Out", 1885, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariEast2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_BackToNurse", 1872, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariEast2_BackToNurse_1", 1873, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_BackToNurse", 1886, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariEast2_BackToNurse_1", 1887, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariNorth2?", -1, 26, 0, -1, 0, 0, DPAD_NONE, "chansey:4:4,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,paras:15:15,rhyhorn:20:20,tauros:1:1,venomoth:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_Desk", 1874, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_Desk_1", 1875, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_Desk", 1888, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_Desk_1", 1889, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_Desk_2", 1876, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_Desk_2", 1890, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_Desk_3", 1877, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_Desk_4", 1878, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_Desk_3", 1891, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_Desk_4", 1892, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 10, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_ToGrass", 1879, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_ToGrass", 1893, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_ToGrass_1", 1880, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_ToGrass_1", 1894, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_ToGrass_2", 1881, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_ToGrass_3", 1882, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_ToGrass_2", 1895, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_ToGrass_3", 1896, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariNorth2", -1, 30, 30, 3, 0, 5, DPAD_RIGHT, "chansey:4:4,exeggcute:20:20,nidoran-f:0:20,nidoran-m:20:0,nidorina:5:10,nidorino:10:5,paras:15:15,rhyhorn:20:20,tauros:1:1,venomoth:5:5", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_BackToNurse_Out", 1883, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_BackToNurse_Out", 1897, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariNorth2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_BackToNurse", 1884, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariNorth2_BackToNurse_1", 1885, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_BackToNurse", 1898, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariNorth2_BackToNurse_1", 1899, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSafariWest2?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "doduo:20:20,exeggcute:20:20,kangaskhan:1:1,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,tauros:4:4,venomoth:5:5,venonat:15:15", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_Desk", 1886, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_Desk_1", 1887, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_Desk", 1900, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_Desk_1", 1901, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_Desk_2", 1888, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_Desk_2", 1902, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_Desk_3", 1889, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_Desk_4", 1890, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_Desk_3", 1903, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_Desk_4", 1904, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Join the Safari Game", -1, 4000, 90000, -1, 7, 0, DPAD_NONE, "YES", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_ToGrass", 1891, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_ToGrass", 1905, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_ToGrass_1", 1892, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_ToGrass_2", 1893, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_ToGrass_1", 1906, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_ToGrass_2", 1907, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSafariWest2", -1, 30, 30, 3, 0, 5, DPAD_LEFT, "doduo:20:20,exeggcute:20:20,kangaskhan:1:1,nidoran-f:5:20,nidoran-m:20:5,nidorina:0:10,nidorino:10:0,tauros:4:4,venomoth:5:5,venonat:15:15", 0, 0, 0},
     {StepType::CUTSCENE, "The Safari Game is over", -1, 3000, 40000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_BackToNurse_Out", 1894, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_BackToNurse_Out", 1908, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSafariWest2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_BackToNurse", 1895, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSafariWest2_BackToNurse_1", 1896, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_BackToNurse", 1909, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSafariWest2_BackToNurse_1", 1910, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute14?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,ditto:15:15,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:10:10,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_ToGrass", 1897, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_ToGrass_1", 1898, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_ToGrass_2", 1899, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_ToGrass_3", 1900, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_ToGrass", 1911, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_ToGrass_1", 1912, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_ToGrass_2", 1913, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_ToGrass_3", 1914, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_ToGrass_4", 1901, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_ToGrass_4", 1915, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute14", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "bellsprout:0:35,ditto:15:15,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:10:10,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute14_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_BackToNurse", 1902, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_BackToNurse_1", 1903, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_BackToNurse", 1916, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_BackToNurse_1", 1917, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute14_Visit2?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,ditto:15:15,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:10:10,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_ToGrass", 1904, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_1", 1905, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_2", 1906, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_3", 1907, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_ToGrass", 1918, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_1", 1919, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_2", 1920, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_3", 1921, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_4", 1908, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_ToGrass_4", 1922, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute14_Visit2", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "bellsprout:0:35,ditto:15:15,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:10:10,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute14_Visit2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_BackToNurse", 1909, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute14_Visit2_BackToNurse_1", 1910, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_BackToNurse", 1923, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute14_Visit2_BackToNurse_1", 1924, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute15?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,ditto:5:5,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:20:20,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_ToGrass", 1911, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_ToGrass_1", 1912, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_ToGrass_2", 1913, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_ToGrass_3", 1914, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_ToGrass", 1925, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_ToGrass_1", 1926, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_ToGrass_2", 1927, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_ToGrass_3", 1928, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute15", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "bellsprout:0:35,ditto:5:5,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:20:20,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute15_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_BackToNurse", 1915, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_BackToNurse_1", 1916, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_BackToNurse", 1929, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_BackToNurse_1", 1930, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute15_Visit2?", -1, 10, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:35,ditto:5:5,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:20:20,venonat:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_ToGrass", 1917, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_1", 1918, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_2", 1919, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_3", 1920, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_ToGrass", 1931, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_1", 1932, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_2", 1933, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_ToGrass_3", 1934, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute15_Visit2", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "bellsprout:0:35,ditto:5:5,gloom:5:0,oddish:35:0,pidgeotto:5:5,pidgey:20:20,venonat:30:30,weepinbell:0:5", 0, 0, 0},
     {StepType::FLY, "CollectRoute15_Visit2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_BackToNurse", 1921, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute15_Visit2_BackToNurse_1", 1922, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_BackToNurse", 1935, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute15_Visit2_BackToNurse_1", 1936, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute18?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "doduo:35:35,fearow:15:15,raticate:15:15,rattata:5:5,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_ToGrass", 1923, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_ToGrass_1", 1924, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_ToGrass", 1937, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_ToGrass_1", 1938, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute18", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "doduo:35:35,fearow:15:15,raticate:15:15,rattata:5:5,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_BackToNurse", 1925, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_BackToNurse_1", 1926, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_BackToNurse", 1939, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_BackToNurse_1", 1940, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute18_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "doduo:35:35,fearow:15:15,raticate:15:15,rattata:5:5,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_Visit2_ToGrass", 1927, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_Visit2_ToGrass_1", 1928, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_Visit2_ToGrass", 1941, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_Visit2_ToGrass_1", 1942, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute18_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "doduo:35:35,fearow:15:15,raticate:15:15,rattata:5:5,spearow:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_Visit2_BackToNurse", 1929, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute18_Visit2_BackToNurse_1", 1930, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_Visit2_BackToNurse", 1943, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute18_Visit2_BackToNurse_1", 1944, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSeafoam?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "dewgong:5:5,golbat:10:10,golduck:15:0,psyduck:20:0,seel:40:40,slowbro:0:15,slowpoke:0:20,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass", 1931, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_1", 1932, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass", 1945, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_1", 1946, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_2", 1933, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_3", 1934, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_4", 1935, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_5", 1936, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_ToGrass_6", 1937, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_2", 1947, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_3", 1948, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_4", 1949, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_5", 1950, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_ToGrass_6", 1951, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSeafoam", -1, 30, 30, 2, 0, 4, DPAD_UP, "dewgong:5:5,golbat:10:10,golduck:15:0,psyduck:20:0,seel:40:40,slowbro:0:15,slowpoke:0:20,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse_Out", 1938, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_1", 1939, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_2", 1940, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_3", 1941, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse_Out", 1952, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_1", 1953, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_2", 1954, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse_Out_3", 1955, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSeafoam_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse", 1942, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_BackToNurse_1", 1943, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse", 1956, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_BackToNurse_1", 1957, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSeafoam_Visit2?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "dewgong:5:5,golbat:10:10,golduck:15:0,psyduck:20:0,seel:40:40,slowbro:0:15,slowpoke:0:20,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass", 1944, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_1", 1945, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass", 1958, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_1", 1959, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_2", 1946, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_3", 1947, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_4", 1948, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_5", 1949, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_6", 1950, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_2", 1960, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_3", 1961, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_4", 1962, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_5", 1963, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_ToGrass_6", 1964, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSeafoam_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "dewgong:5:5,golbat:10:10,golduck:15:0,psyduck:20:0,seel:40:40,slowbro:0:15,slowpoke:0:20,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out", 1951, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_1", 1952, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_2", 1953, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_3", 1954, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out", 1965, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_1", 1966, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_2", 1967, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_Out_3", 1968, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::FLY, "CollectSeafoam_Visit2_BackToNurse_Fly", -1, 10, 1, -1, 0, 0, DPAD_NONE, "MAP_FUCHSIA_CITY", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse", 1955, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_1", 1956, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse", 1969, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSeafoam_Visit2_BackToNurse_1", 1970, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FuchsiaCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_09_FUCHSIA_Out", 1957, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_09_FUCHSIA_Out", 1971, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 73, 0, -1, 0, 0, DPAD_NONE, "grimer:5:30,growlithe:15:0,koffing:30:5,muk:0:5,raticate:30:30,rattata:15:15,vulpix:0:15,weezing:5:0,tangela:100:100", 0, 0, 0},
     {StepType::FLY, "C20_10_CINNABAR_Fly_Fly", -1, 11, 1, -1, 0, 0, DPAD_NONE, "MAP_CINNABAR_ISLAND", 0, 0, 0},
-    {StepType::WALK, "C20_10_CINNABAR_ToNurse", 1958, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_10_CINNABAR_ToNurse_1", 1959, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_10_CINNABAR_ToNurse", 1972, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_10_CINNABAR_ToNurse_1", 1973, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CinnabarIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectMansion?", -1, 9, 0, -1, 0, 0, DPAD_NONE, "grimer:5:30,growlithe:15:0,koffing:30:5,muk:0:5,raticate:30:30,rattata:15:15,vulpix:0:15,weezing:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_ToGrass", 1960, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_ToGrass_1", 1961, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_ToGrass_2", 1962, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_ToGrass", 1974, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_ToGrass_1", 1975, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_ToGrass_2", 1976, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectMansion", -1, 30, 30, 2, 0, 4, DPAD_UP, "grimer:5:30,growlithe:15:0,koffing:30:5,muk:0:5,raticate:30:30,rattata:15:15,vulpix:0:15,weezing:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_BackToNurse", 1963, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_BackToNurse_1", 1964, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_BackToNurse_2", 1965, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_BackToNurse", 1977, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_BackToNurse_1", 1978, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_BackToNurse_2", 1979, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CinnabarIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectMansion_Visit2?", -1, 9, 0, -1, 0, 0, DPAD_NONE, "grimer:5:30,growlithe:15:0,koffing:30:5,muk:0:5,raticate:30:30,rattata:15:15,vulpix:0:15,weezing:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_ToGrass", 1966, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_ToGrass_1", 1967, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_ToGrass_2", 1968, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_ToGrass", 1980, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_ToGrass_1", 1981, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_ToGrass_2", 1982, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectMansion_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "grimer:5:30,growlithe:15:0,koffing:30:5,muk:0:5,raticate:30:30,rattata:15:15,vulpix:0:15,weezing:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_BackToNurse", 1969, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_BackToNurse_1", 1970, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectMansion_Visit2_BackToNurse_2", 1971, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_BackToNurse", 1983, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_BackToNurse_1", 1984, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMansion_Visit2_BackToNurse_2", 1985, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CinnabarIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute21?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "tangela:100:100", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass", 1972, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_1", 1973, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass", 1986, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_1", 1987, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_2", 1974, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_2", 1988, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_3", 1975, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_3", 1989, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_4", 1976, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_4", 1990, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_5", 1977, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_5", 1991, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_ToGrass_6", 1978, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_ToGrass_6", 1992, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute21", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "tangela:100:100", 0, 0, 0},
     {StepType::FLY, "CollectRoute21_BackToNurse_Fly", -1, 11, 1, -1, 0, 0, DPAD_NONE, "MAP_CINNABAR_ISLAND", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_BackToNurse", 1979, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_BackToNurse_1", 1980, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_BackToNurse", 1993, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_BackToNurse_1", 1994, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CinnabarIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute21_Visit2?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "tangela:100:100", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass", 1981, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_1", 1982, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass", 1995, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_1", 1996, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_2", 1983, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_2", 1997, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_3", 1984, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_3", 1998, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_4", 1985, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_4", 1999, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_5", 1986, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_5", 2000, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_6", 1987, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_ToGrass_6", 2001, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute21_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "tangela:100:100", 0, 0, 0},
     {StepType::FLY, "CollectRoute21_Visit2_BackToNurse_Fly", -1, 11, 1, -1, 0, 0, DPAD_NONE, "MAP_CINNABAR_ISLAND", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_BackToNurse", 1988, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute21_Visit2_BackToNurse_1", 1989, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_BackToNurse", 2002, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute21_Visit2_BackToNurse_1", 2003, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at CinnabarIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_10_CINNABAR_Out", 1990, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 613, 0, -1, 0, 0, DPAD_NONE, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35,diglett:95:95,dugtrio:5:5,bellsprout:0:30,meowth:35:35,oddish:30:0,pidgey:40:40,fearow:20:20,geodude:70:70,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,tangela:30:30,slugma:30:30,gloom:20:0,golduck:5:0,slowbro:0:5,weepinbell:0:20,pidgeotto:20:20,venonat:10:10,exeggcute:5:5,hypno:5:5,venomoth:5:5,delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:20:20,hoppip:15:15,sentret:30:30,gastly:25:25,haunter:30:30,misdreavus:0:5,murkrow:5:0,marill:0:10,natu:25:25,wobbuffet:5:5,wooper:10:0,yanma:10:10,caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10,phanpy:20:20,cubone:10:10,larvitar:5:5,marowak:10:10,onix:5:5,skarmory:5:0", 0, 0, 0},
+    {StepType::WALK, "C20_10_CINNABAR_Out", 2004, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_COLLECTED, "Anything to catch here?", -1, 627, 0, -1, 0, 0, DPAD_NONE, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35,diglett:95:95,dugtrio:5:5,bellsprout:0:30,meowth:35:35,oddish:30:0,pidgey:40:40,fearow:20:20,geodude:70:70,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,tangela:30:30,slugma:30:30,gloom:20:0,golduck:5:0,slowbro:0:5,weepinbell:0:20,pidgeotto:20:20,venonat:10:10,exeggcute:5:5,hypno:5:5,venomoth:5:5,delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:20:20,hoppip:15:15,sentret:30:30,gastly:25:25,haunter:30:30,misdreavus:0:5,murkrow:5:0,marill:0:10,natu:25:25,wobbuffet:5:5,wooper:10:0,yanma:10:10,caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10,phanpy:20:20,cubone:10:10,larvitar:5:5,marowak:10:10,onix:5:5,skarmory:5:0", 0, 0, 0},
     {StepType::FLY, "C20_11_VERMILION_SEVII_Fly_Fly", -1, 5, 1, -1, 0, 0, DPAD_NONE, "MAP_VERMILION_CITY", 0, 0, 0},
-    {StepType::WALK, "C20_11_VERMILION_SEVII_ToNurse", 1991, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_11_VERMILION_SEVII_ToNurse_1", 1992, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_11_VERMILION_SEVII_ToNurse", 2005, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_11_VERMILION_SEVII_ToNurse_1", 2006, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute11?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_ToGrass", 1993, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_ToGrass_1", 1994, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_ToGrass", 2007, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_ToGrass_1", 2008, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute11", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_BackToNurse", 1995, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_BackToNurse_1", 1996, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_BackToNurse", 2009, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_BackToNurse_1", 2010, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute11_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_Visit2_ToGrass", 1997, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_Visit2_ToGrass_1", 1998, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_Visit2_ToGrass", 2011, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_Visit2_ToGrass_1", 2012, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute11_Visit2", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "drowzee:25:25,ekans:40:0,sandshrew:0:40,spearow:35:35", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_Visit2_BackToNurse", 1999, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute11_Visit2_BackToNurse_1", 2000, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_Visit2_BackToNurse", 2013, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute11_Visit2_BackToNurse_1", 2014, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectDiglettsCave?", -1, 11, 0, -1, 0, 0, DPAD_NONE, "diglett:95:95,dugtrio:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_ToGrass", 2001, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_ToGrass_1", 2002, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_ToGrass_2", 2003, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_ToGrass_3", 2004, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_ToGrass", 2015, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_ToGrass_1", 2016, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_ToGrass_2", 2017, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_ToGrass_3", 2018, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectDiglettsCave", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "diglett:95:95,dugtrio:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_BackToNurse", 2005, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_BackToNurse_1", 2006, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_BackToNurse_2", 2007, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_BackToNurse_3", 2008, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_BackToNurse", 2019, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_BackToNurse_1", 2020, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_BackToNurse_2", 2021, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_BackToNurse_3", 2022, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectDiglettsCave_Visit2?", -1, 11, 0, -1, 0, 0, DPAD_NONE, "diglett:95:95,dugtrio:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass", 2009, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_1", 2010, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_2", 2011, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_3", 2012, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass", 2023, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_1", 2024, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_2", 2025, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_ToGrass_3", 2026, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectDiglettsCave_Visit2", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "diglett:95:95,dugtrio:5:5", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse", 2013, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_1", 2014, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_2", 2015, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_3", 2016, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse", 2027, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_1", 2028, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_2", 2029, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectDiglettsCave_Visit2_BackToNurse_3", 2030, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute6?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:25,meowth:35:35,oddish:25:0,pidgey:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_ToGrass", 2017, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_ToGrass_1", 2018, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_ToGrass", 2031, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_ToGrass_1", 2032, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute6", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "bellsprout:0:25,meowth:35:35,oddish:25:0,pidgey:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_BackToNurse", 2019, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_BackToNurse_1", 2020, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_BackToNurse", 2033, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_BackToNurse_1", 2034, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRoute6_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:25,meowth:35:35,oddish:25:0,pidgey:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_Visit2_ToGrass", 2021, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_Visit2_ToGrass_1", 2022, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_Visit2_ToGrass", 2035, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_Visit2_ToGrass_1", 2036, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRoute6_Visit2", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "bellsprout:0:25,meowth:35:35,oddish:25:0,pidgey:40:40", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_Visit2_BackToNurse", 2023, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRoute6_Visit2_BackToNurse_1", 2024, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_Visit2_BackToNurse", 2037, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRoute6_Visit2_BackToNurse_1", 2038, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_COLLECTED, "The Sevii Islands?", -1, 551, 0, -1, 0, 0, DPAD_NONE, "fearow:20:20,geodude:70:70,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:30:30,tangela:30:30,slugma:30:30,bellsprout:0:30,gloom:20:0,golduck:5:0,oddish:30:0,slowbro:0:5,weepinbell:0:20,pidgeotto:20:20,pidgey:30:30,venonat:10:10,drowzee:10:10,exeggcute:5:5,hypno:5:5,venomoth:5:5,delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:20:20,hoppip:15:15,sentret:30:30,gastly:25:25,haunter:30:30,misdreavus:0:5,murkrow:5:0,marill:0:10,natu:25:25,wobbuffet:5:5,wooper:10:0,yanma:10:10,caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10,phanpy:20:20,cubone:10:10,larvitar:5:5,marowak:10:10,onix:5:5,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "ToTheSeagallop", 2025, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ToTheSeagallop_1", 2026, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_COLLECTED, "The Sevii Islands?", -1, 565, 0, -1, 0, 0, DPAD_NONE, "fearow:20:20,geodude:70:70,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:30:30,tangela:30:30,slugma:30:30,bellsprout:0:30,gloom:20:0,golduck:5:0,oddish:30:0,slowbro:0:5,weepinbell:0:20,pidgeotto:20:20,pidgey:30:30,venonat:10:10,drowzee:10:10,exeggcute:5:5,hypno:5:5,venomoth:5:5,delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:20:20,hoppip:15:15,sentret:30:30,gastly:25:25,haunter:30:30,misdreavus:0:5,murkrow:5:0,marill:0:10,natu:25:25,wobbuffet:5:5,wooper:10:0,yanma:10:10,caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10,phanpy:20:20,cubone:10:10,larvitar:5:5,marowak:10:10,onix:5:5,skarmory:5:0", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop", 2039, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_1", 2040, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ToTheSeagallop_2", 2027, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_2", 2041, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SEAGALLOP, "SeagallopToOneIsland", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "OneIsland?", -1, 133, 0, -1, 0, 0, DPAD_NONE, "fearow:20:20,geodude:70:70,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:30:30,tangela:30:30,slugma:30:30", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToNurse", 2028, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToNurse_1", 2029, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToNurse_2", 2030, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToNurse", 2042, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToNurse_1", 2043, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToNurse_2", 2044, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectKindleRoad?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "fearow:10:10,geodude:10:10,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:25:25", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_ToGrass", 2031, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_ToGrass_1", 2032, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_ToGrass", 2045, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_ToGrass_1", 2046, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_ToGrass_2", 2033, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_ToGrass_2", 2047, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectKindleRoad", -1, 30, 30, 2, 0, 4, DPAD_UP, "fearow:10:10,geodude:10:10,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:25:25", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_BackToNurse", 2034, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_BackToNurse", 2048, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_BackToNurse_1", 2035, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_BackToNurse_2", 2036, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_BackToNurse_1", 2049, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_BackToNurse_2", 2050, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectKindleRoad_Visit2?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "fearow:10:10,geodude:10:10,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:25:25", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass", 2037, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass_1", 2038, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass", 2051, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass_1", 2052, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass_2", 2039, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_ToGrass_2", 2053, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectKindleRoad_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "fearow:10:10,geodude:10:10,meowth:10:10,persian:5:5,ponyta:30:30,psyduck:5:0,rapidash:5:5,slowpoke:0:5,spearow:25:25", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse", 2040, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse", 2054, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse_1", 2041, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse_2", 2042, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse_1", 2055, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectKindleRoad_Visit2_BackToNurse_2", 2056, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectTreasureBeach?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "fearow:20:20,meowth:10:10,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:30:30,tangela:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_ToGrass", 2043, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_ToGrass_1", 2044, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_ToGrass", 2057, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_ToGrass_1", 2058, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_ToGrass_2", 2045, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_ToGrass_2", 2059, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectTreasureBeach", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "fearow:20:20,meowth:10:10,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:30:30,tangela:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_BackToNurse", 2046, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_BackToNurse", 2060, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_BackToNurse_1", 2047, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_BackToNurse_2", 2048, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_BackToNurse_1", 2061, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_BackToNurse_2", 2062, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectTreasureBeach_Visit2?", -1, 13, 0, -1, 0, 0, DPAD_NONE, "fearow:20:20,meowth:10:10,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:30:30,tangela:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass", 2049, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass_1", 2050, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass", 2063, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass_1", 2064, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass_2", 2051, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_ToGrass_2", 2065, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectTreasureBeach_Visit2", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "fearow:20:20,meowth:10:10,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:30:30,tangela:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse", 2052, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse", 2066, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse_1", 2053, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse_2", 2054, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse_1", 2067, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectTreasureBeach_Visit2_BackToNurse_2", 2068, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRubyPath?", -1, 34, 0, -1, 0, 0, DPAD_NONE, "geodude:70:70,slugma:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass", 2055, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_1", 2056, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass", 2069, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_1", 2070, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_2", 2057, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_2", 2071, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_3", 2058, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_3", 2072, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_4", 2059, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_5", 2060, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_6", 2061, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_ToGrass_7", 2062, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_4", 2073, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_5", 2074, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_6", 2075, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_ToGrass_7", 2076, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRubyPath", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "geodude:70:70,slugma:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse", 2063, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_1", 2064, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_2", 2065, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_3", 2066, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse", 2077, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_1", 2078, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_2", 2079, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_3", 2080, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_4", 2067, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_4", 2081, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_5", 2068, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_5", 2082, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_6", 2069, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_6", 2083, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_7", 2070, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_BackToNurse_8", 2071, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_7", 2084, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_BackToNurse_8", 2085, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRubyPath_Visit2?", -1, 34, 0, -1, 0, 0, DPAD_NONE, "geodude:70:70,slugma:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass", 2072, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_1", 2073, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass", 2086, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_1", 2087, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_2", 2074, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_2", 2088, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_3", 2075, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_3", 2089, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_4", 2076, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_5", 2077, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_6", 2078, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_7", 2079, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_4", 2090, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_5", 2091, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_6", 2092, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_ToGrass_7", 2093, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRubyPath_Visit2", -1, 30, 30, 2, 0, 4, DPAD_LEFT, "geodude:70:70,slugma:30:30", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse", 2080, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_1", 2081, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_2", 2082, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_3", 2083, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse", 2094, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_1", 2095, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_2", 2096, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_3", 2097, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_4", 2084, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_4", 2098, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_5", 2085, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_5", 2099, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_6", 2086, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_6", 2100, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_7", 2087, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_8", 2088, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_7", 2101, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRubyPath_Visit2_BackToNurse_8", 2102, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at OneIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToHarbor", 2089, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToHarbor_1", 2090, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "OneIsland_ToHarbor_2", 2091, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToTwoIsland", 2092, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToHarbor", 2103, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToHarbor_1", 2104, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "OneIsland_ToHarbor_2", 2105, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToTwoIsland", 2106, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToTwoIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToTwoIsland_Menu", -1, 1, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToTwoIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "TwoIsland?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:30,fearow:10:10,gloom:15:0,golduck:5:0,meowth:10:10,oddish:30:0,persian:5:5,psyduck:5:0,slowbro:0:5,slowpoke:0:5,spearow:20:20,weepinbell:0:15", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToNurse", 2093, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToNurse_1", 2094, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToNurse_2", 2095, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToNurse", 2107, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToNurse_1", 2108, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToNurse_2", 2109, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at TwoIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCapeBrink?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:30,fearow:10:10,gloom:15:0,golduck:5:0,meowth:10:10,oddish:30:0,persian:5:5,psyduck:5:0,slowbro:0:5,slowpoke:0:5,spearow:20:20,weepinbell:0:15", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_ToGrass", 2096, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_ToGrass_1", 2097, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_ToGrass", 2110, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_ToGrass_1", 2111, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCapeBrink", -1, 30, 30, 2, 0, 4, DPAD_UP, "bellsprout:0:30,fearow:10:10,gloom:15:0,golduck:5:0,meowth:10:10,oddish:30:0,persian:5:5,psyduck:5:0,slowbro:0:5,slowpoke:0:5,spearow:20:20,weepinbell:0:15", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_BackToNurse", 2098, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_BackToNurse_1", 2099, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_BackToNurse", 2112, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_BackToNurse_1", 2113, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at TwoIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCapeBrink_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:30,fearow:10:10,gloom:15:0,golduck:5:0,meowth:10:10,oddish:30:0,persian:5:5,psyduck:5:0,slowbro:0:5,slowpoke:0:5,spearow:20:20,weepinbell:0:15", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_Visit2_ToGrass", 2100, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_Visit2_ToGrass_1", 2101, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_Visit2_ToGrass", 2114, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_Visit2_ToGrass_1", 2115, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCapeBrink_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "bellsprout:0:30,fearow:10:10,gloom:15:0,golduck:5:0,meowth:10:10,oddish:30:0,persian:5:5,psyduck:5:0,slowbro:0:5,slowpoke:0:5,spearow:20:20,weepinbell:0:15", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_Visit2_BackToNurse", 2102, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCapeBrink_Visit2_BackToNurse_1", 2103, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_Visit2_BackToNurse", 2116, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCapeBrink_Visit2_BackToNurse_1", 2117, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at TwoIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToHarbor", 2104, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToHarbor_1", 2105, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "TwoIsland_ToHarbor_2", 2106, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToThreeIsland", 2107, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToHarbor", 2118, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToHarbor_1", 2119, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TwoIsland_ToHarbor_2", 2120, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToThreeIsland", 2121, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToThreeIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToThreeIsland_Menu", -1, 2, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToThreeIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "ThreeIsland?", -1, 61, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:20,gloom:20:0,meowth:10:10,oddish:20:0,persian:5:5,pidgeotto:20:20,pidgey:30:30,psyduck:5:0,slowpoke:0:5,venonat:10:10,weepinbell:0:20,drowzee:10:10,exeggcute:5:5,hypno:5:5,venomoth:5:5", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToNurse", 2108, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToNurse_1", 2109, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToNurse_2", 2110, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToNurse", 2122, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToNurse_1", 2123, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToNurse_2", 2124, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ThreeIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectBondBridge?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:20,gloom:10:0,meowth:10:10,oddish:20:0,persian:5:5,pidgeotto:15:15,pidgey:30:30,psyduck:5:0,slowpoke:0:5,venonat:5:5,weepinbell:0:10", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_ToGrass", 2111, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_ToGrass_1", 2112, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_ToGrass", 2125, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_ToGrass_1", 2126, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectBondBridge", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "bellsprout:0:20,gloom:10:0,meowth:10:10,oddish:20:0,persian:5:5,pidgeotto:15:15,pidgey:30:30,psyduck:5:0,slowpoke:0:5,venonat:5:5,weepinbell:0:10", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_BackToNurse", 2113, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_BackToNurse_1", 2114, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_BackToNurse", 2127, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_BackToNurse_1", 2128, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ThreeIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectBondBridge_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:20,gloom:10:0,meowth:10:10,oddish:20:0,persian:5:5,pidgeotto:15:15,pidgey:30:30,psyduck:5:0,slowpoke:0:5,venonat:5:5,weepinbell:0:10", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_Visit2_ToGrass", 2115, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_Visit2_ToGrass_1", 2116, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_Visit2_ToGrass", 2129, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_Visit2_ToGrass_1", 2130, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectBondBridge_Visit2", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "bellsprout:0:20,gloom:10:0,meowth:10:10,oddish:20:0,persian:5:5,pidgeotto:15:15,pidgey:30:30,psyduck:5:0,slowpoke:0:5,venonat:5:5,weepinbell:0:10", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_Visit2_BackToNurse", 2117, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBondBridge_Visit2_BackToNurse_1", 2118, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_Visit2_BackToNurse", 2131, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBondBridge_Visit2_BackToNurse_1", 2132, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ThreeIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectBerryForest?", -1, 18, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:10,drowzee:10:10,exeggcute:5:5,gloom:20:0,hypno:5:5,oddish:10:0,pidgeotto:20:20,pidgey:10:10,psyduck:5:0,slowpoke:0:5,venomoth:5:5,venonat:10:10,weepinbell:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_ToGrass", 2119, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_ToGrass_1", 2120, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_ToGrass", 2133, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_ToGrass_1", 2134, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_ToGrass_2", 2121, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_ToGrass_2", 2135, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_ToGrass_3", 2122, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_ToGrass_4", 2123, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_ToGrass_3", 2136, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_ToGrass_4", 2137, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectBerryForest", -1, 30, 30, 2, 0, 4, DPAD_UP, "bellsprout:0:10,drowzee:10:10,exeggcute:5:5,gloom:20:0,hypno:5:5,oddish:10:0,pidgeotto:20:20,pidgey:10:10,psyduck:5:0,slowpoke:0:5,venomoth:5:5,venonat:10:10,weepinbell:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_BackToNurse", 2124, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_BackToNurse_1", 2125, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_BackToNurse", 2138, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_BackToNurse_1", 2139, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_BackToNurse_2", 2126, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_BackToNurse_3", 2127, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_BackToNurse_2", 2140, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_BackToNurse_3", 2141, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ThreeIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectBerryForest_Visit2?", -1, 18, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:10,drowzee:10:10,exeggcute:5:5,gloom:20:0,hypno:5:5,oddish:10:0,pidgeotto:20:20,pidgey:10:10,psyduck:5:0,slowpoke:0:5,venomoth:5:5,venonat:10:10,weepinbell:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass", 2128, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_1", 2129, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass", 2142, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_1", 2143, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Cut tree", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Cut animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_2", 2130, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_2", 2144, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_3", 2131, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_4", 2132, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_3", 2145, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_ToGrass_4", 2146, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectBerryForest_Visit2", -1, 30, 30, 2, 0, 4, DPAD_UP, "bellsprout:0:10,drowzee:10:10,exeggcute:5:5,gloom:20:0,hypno:5:5,oddish:10:0,pidgeotto:20:20,pidgey:10:10,psyduck:5:0,slowpoke:0:5,venomoth:5:5,venonat:10:10,weepinbell:0:20", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse", 2133, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_1", 2134, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse", 2147, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_1", 2148, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_2", 2135, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_3", 2136, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_2", 2149, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectBerryForest_Visit2_BackToNurse_3", 2150, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at ThreeIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToHarbor", 2137, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToHarbor_1", 2138, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "ThreeIsland_ToHarbor_2", 2139, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToFourIsland", 2140, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToHarbor", 2151, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToHarbor_1", 2152, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ThreeIsland_ToHarbor_2", 2153, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToFourIsland", 2154, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToFourIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToFourIsland_Menu", -1, 3, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToFourIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "FourIsland?", -1, 55, 0, -1, 0, 0, DPAD_NONE, "delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToNurse", 2141, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToNurse_1", 2142, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToNurse_2", 2143, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToNurse", 2155, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToNurse_1", 2156, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToNurse_2", 2157, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FourIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectIcefallCave?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass", 2144, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass_1", 2145, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass", 2158, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass_1", 2159, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass_2", 2146, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass_3", 2147, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass_2", 2160, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass_3", 2161, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass_4", 2148, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_ToGrass_5", 2149, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass_4", 2162, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_ToGrass_5", 2163, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectIcefallCave", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse", 2150, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse_1", 2151, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse", 2164, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse_1", 2165, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse_2", 2152, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse_3", 2153, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse_2", 2166, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse_3", 2167, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse_4", 2154, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_BackToNurse_5", 2155, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse_4", 2168, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_BackToNurse_5", 2169, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FourIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectIcefallCave_Visit2?", -1, 23, 0, -1, 0, 0, DPAD_NONE, "delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass", 2156, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_1", 2157, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass", 2170, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_1", 2171, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_2", 2158, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_3", 2159, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_2", 2172, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_3", 2173, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_4", 2160, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_5", 2161, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_4", 2174, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_ToGrass_5", 2175, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectIcefallCave_Visit2", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "delibird:5:0,golbat:25:25,seel:10:10,sneasel:0:5,swinub:50:50,zubat:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse", 2162, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_1", 2163, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse", 2176, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_1", 2177, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_2", 2164, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_3", 2165, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_2", 2178, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_3", 2179, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_4", 2166, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_5", 2167, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_4", 2180, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectIcefallCave_Visit2_BackToNurse_5", 2181, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FourIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToHarbor", 2168, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToHarbor_1", 2169, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FourIsland_ToHarbor_2", 2170, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToFiveIsland", 2171, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToHarbor", 2182, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToHarbor_1", 2183, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FourIsland_ToHarbor_2", 2184, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToFiveIsland", 2185, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToFiveIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToFiveIsland_Menu", -1, 4, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToFiveIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToFiveIsland_Pick2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_COLLECTED, "FiveIsland?", -1, 85, 0, -1, 0, 0, DPAD_NONE, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5,gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToNurse", 2172, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToNurse_1", 2173, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToNurse_2", 2174, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_COLLECTED, "FiveIsland?", -1, 99, 0, -1, 0, 0, DPAD_NONE, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5,gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToNurse", 2186, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToNurse_1", 2187, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToNurse_2", 2188, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectFiveIsleMeadow?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_ToGrass", 2175, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_ToGrass_1", 2176, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_ToGrass", 2189, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_ToGrass_1", 2190, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectFiveIsleMeadow", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_BackToNurse", 2177, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_BackToNurse_1", 2178, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_BackToNurse", 2191, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_BackToNurse_1", 2192, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectFiveIsleMeadow_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_ToGrass", 2179, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_ToGrass_1", 2180, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_ToGrass", 2193, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_ToGrass_1", 2194, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectFiveIsleMeadow_Visit2", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "hoppip:15:15,meowth:10:10,persian:5:5,pidgeotto:15:15,pidgey:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_BackToNurse", 2181, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_BackToNurse_1", 2182, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_BackToNurse", 2195, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectFiveIsleMeadow_Visit2_BackToNurse_1", 2196, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_COLLECTED, "CollectLostCave?", -1, 30, 0, -1, 0, 0, DPAD_NONE, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass", 2183, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_1", 2184, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_COLLECTED, "CollectLostCave?", -1, 37, 0, -1, 0, 0, DPAD_NONE, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToShore", 2197, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToShore_1", 2198, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Channel", 2199, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_2", 2185, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Channel_1", 2200, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Row", 2201, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Beach", 2202, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToGrass", 2203, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_3", 2186, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToGrass_1", 2204, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_4", 2187, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_5", 2188, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_ToGrass_6", 2189, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToGrass_2", 2205, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToGrass_3", 2206, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_ToGrass_4", 2207, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectLostCave", -1, 30, 30, 2, 0, 3, DPAD_LEFT, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse", 2190, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_1", 2191, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_2", 2192, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_3", 2193, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore", 2208, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore_1", 2209, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore_2", 2210, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore_3", 2211, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_4", 2194, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore_4", 2212, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_5", 2195, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_ToShore_5", 2213, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_Row", 2214, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_6", 2196, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_BackToNurse_7", 2197, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_Row_1", 2215, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Back_Channel", 2216, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_BackToNurse", 2217, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_BackToNurse_1", 2218, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_COLLECTED, "CollectLostCave_Visit2?", -1, 30, 0, -1, 0, 0, DPAD_NONE, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass", 2198, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_1", 2199, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_COLLECTED, "CollectLostCave_Visit2?", -1, 37, 0, -1, 0, 0, DPAD_NONE, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToShore", 2219, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToShore_1", 2220, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Channel", 2221, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_2", 2200, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Channel_1", 2222, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Row", 2223, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Beach", 2224, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToGrass", 2225, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_3", 2201, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_1", 2226, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_4", 2202, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_5", 2203, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_6", 2204, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_2", 2227, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_3", 2228, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_ToGrass_4", 2229, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectLostCave_Visit2", -1, 30, 30, 2, 0, 3, DPAD_LEFT, "gastly:25:25,golbat:20:20,haunter:30:30,misdreavus:0:5,murkrow:5:0,zubat:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse", 2205, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_1", 2206, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_2", 2207, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_3", 2208, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore", 2230, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore_1", 2231, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore_2", 2232, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore_3", 2233, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_4", 2209, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore_4", 2234, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_5", 2210, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_ToShore_5", 2235, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_Row", 2236, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_6", 2211, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_7", 2212, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_Row_1", 2237, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_Back_Channel", 2238, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse", 2239, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectLostCave_Visit2_BackToNurse_1", 2240, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at FiveIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToHarbor", 2213, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToHarbor_1", 2214, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FiveIsland_ToHarbor_2", 2215, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToSixIsland", 2216, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToHarbor", 2241, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToHarbor_1", 2242, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FiveIsland_ToHarbor_2", 2243, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToSixIsland", 2244, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToSixIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToSixIsland_Menu", -1, 4, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToSixIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
@@ -28709,102 +28761,102 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::PRESS, "FerryToSixIsland_Pick2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "SixIsland?", -1, 95, 0, -1, 0, 0, DPAD_NONE, "fearow:15:15,marill:0:10,meowth:10:10,natu:25:25,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:20:20,wobbuffet:5:5,wooper:10:0,yanma:10:10,caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10,bellsprout:0:10,gloom:5:0,oddish:10:0,sentret:30:30,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToNurse", 2217, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToNurse_1", 2218, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToNurse_2", 2219, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToNurse", 2245, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToNurse_1", 2246, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToNurse_2", 2247, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRuinValley?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "fearow:10:10,marill:0:10,meowth:10:10,natu:25:25,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:20:20,wobbuffet:5:5,wooper:10:0,yanma:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_ToGrass", 2220, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_ToGrass_1", 2221, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_ToGrass", 2248, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_ToGrass_1", 2249, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_ToGrass_2", 2222, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_ToGrass_2", 2250, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_ToGrass_3", 2223, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_ToGrass_3", 2251, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRuinValley", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "fearow:10:10,marill:0:10,meowth:10:10,natu:25:25,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:20:20,wobbuffet:5:5,wooper:10:0,yanma:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_BackToNurse", 2224, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_BackToNurse", 2252, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_BackToNurse_1", 2225, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_BackToNurse_1", 2253, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_BackToNurse_2", 2226, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_BackToNurse_3", 2227, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_BackToNurse_2", 2254, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_BackToNurse_3", 2255, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectRuinValley_Visit2?", -1, 19, 0, -1, 0, 0, DPAD_NONE, "fearow:10:10,marill:0:10,meowth:10:10,natu:25:25,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:20:20,wobbuffet:5:5,wooper:10:0,yanma:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass", 2228, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_1", 2229, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass", 2256, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_1", 2257, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_2", 2230, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_2", 2258, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_3", 2231, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_ToGrass_3", 2259, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectRuinValley_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "fearow:10:10,marill:0:10,meowth:10:10,natu:25:25,persian:5:5,psyduck:5:0,slowpoke:0:5,spearow:20:20,wobbuffet:5:5,wooper:10:0,yanma:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse", 2232, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse", 2260, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_1", 2233, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_1", 2261, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_2", 2234, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_3", 2235, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_2", 2262, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectRuinValley_Visit2_BackToNurse_3", 2263, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPatternBush?", -1, 15, 0, -1, 0, 0, DPAD_NONE, "caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_ToGrass", 2236, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_ToGrass_1", 2237, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_ToGrass", 2264, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_ToGrass_1", 2265, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_ToGrass_2", 2238, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_ToGrass_3", 2239, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_ToGrass_2", 2266, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_ToGrass_3", 2267, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPatternBush", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_BackToNurse", 2240, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_BackToNurse_1", 2241, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_BackToNurse", 2268, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_BackToNurse_1", 2269, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_BackToNurse_2", 2242, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_BackToNurse_3", 2243, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_BackToNurse_2", 2270, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_BackToNurse_3", 2271, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectPatternBush_Visit2?", -1, 15, 0, -1, 0, 0, DPAD_NONE, "caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass", 2244, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_1", 2245, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass", 2272, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_1", 2273, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_2", 2246, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_3", 2247, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_2", 2274, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_ToGrass_3", 2275, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectPatternBush_Visit2", -1, 30, 30, 2, 0, 5, DPAD_LEFT, "caterpie:10:10,heracross:20:20,kakuna:20:20,ledyba:5:30,metapod:5:5,spinarak:30:5,weedle:10:10", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse", 2248, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_1", 2249, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse", 2276, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_1", 2277, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_2", 2250, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_3", 2251, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_2", 2278, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectPatternBush_Visit2_BackToNurse_3", 2279, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectWaterPath?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:10,fearow:15:15,gloom:5:0,meowth:10:10,oddish:10:0,persian:5:5,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_ToGrass", 2252, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_ToGrass_1", 2253, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_ToGrass", 2280, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_ToGrass_1", 2281, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectWaterPath", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "bellsprout:0:10,fearow:15:15,gloom:5:0,meowth:10:10,oddish:10:0,persian:5:5,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_BackToNurse", 2254, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_BackToNurse_1", 2255, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_BackToNurse", 2282, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_BackToNurse_1", 2283, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectWaterPath_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "bellsprout:0:10,fearow:15:15,gloom:5:0,meowth:10:10,oddish:10:0,persian:5:5,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_Visit2_ToGrass", 2256, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_Visit2_ToGrass_1", 2257, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_Visit2_ToGrass", 2284, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_Visit2_ToGrass_1", 2285, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectWaterPath_Visit2", -1, 30, 30, 2, 0, 4, DPAD_DOWN, "bellsprout:0:10,fearow:15:15,gloom:5:0,meowth:10:10,oddish:10:0,persian:5:5,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20,weepinbell:0:5", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_Visit2_BackToNurse", 2258, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectWaterPath_Visit2_BackToNurse_1", 2259, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_Visit2_BackToNurse", 2286, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectWaterPath_Visit2_BackToNurse_1", 2287, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToHarbor", 2260, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToHarbor_1", 2261, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SixIsland_ToHarbor_2", 2262, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToSevenIsland", 2263, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToHarbor", 2288, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToHarbor_1", 2289, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SixIsland_ToHarbor_2", 2290, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToSevenIsland", 2291, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToSevenIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToSevenIsland_Menu", -1, 4, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
     {StepType::PRESS, "FerryToSevenIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
@@ -28812,57 +28864,57 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::PRESS, "FerryToSevenIsland_Pick2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "SevenIsland?", -1, 39, 0, -1, 0, 0, DPAD_NONE, "fearow:15:15,meowth:10:10,persian:5:5,phanpy:20:20,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20,cubone:10:10,geodude:20:20,larvitar:5:5,marowak:10:10,onix:5:5,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToNurse", 2264, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToNurse_1", 2265, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToNurse_2", 2266, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToNurse", 2292, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToNurse_1", 2293, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToNurse_2", 2294, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCanyonEntrance?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "fearow:15:15,meowth:10:10,persian:5:5,phanpy:15:15,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_ToGrass", 2267, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_ToGrass_1", 2268, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_ToGrass", 2295, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_ToGrass_1", 2296, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCanyonEntrance", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "fearow:15:15,meowth:10:10,persian:5:5,phanpy:15:15,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_BackToNurse", 2269, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_BackToNurse_1", 2270, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_BackToNurse", 2297, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_BackToNurse_1", 2298, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectCanyonEntrance_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "fearow:15:15,meowth:10:10,persian:5:5,phanpy:15:15,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_Visit2_ToGrass", 2271, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_Visit2_ToGrass_1", 2272, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_Visit2_ToGrass", 2299, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_Visit2_ToGrass_1", 2300, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectCanyonEntrance_Visit2", -1, 30, 30, 2, 0, 4, DPAD_RIGHT, "fearow:15:15,meowth:10:10,persian:5:5,phanpy:15:15,psyduck:5:0,sentret:30:30,slowpoke:0:5,spearow:20:20", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_Visit2_BackToNurse", 2273, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectCanyonEntrance_Visit2_BackToNurse_1", 2274, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_Visit2_BackToNurse", 2301, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectCanyonEntrance_Visit2_BackToNurse_1", 2302, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSevaultCanyon?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "cubone:10:10,fearow:10:15,geodude:20:20,larvitar:5:5,marowak:10:10,meowth:10:10,onix:5:5,persian:5:5,phanpy:20:20,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_ToGrass", 2275, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_ToGrass_1", 2276, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_ToGrass", 2303, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_ToGrass_1", 2304, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSevaultCanyon", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "cubone:10:10,fearow:10:15,geodude:20:20,larvitar:5:5,marowak:10:10,meowth:10:10,onix:5:5,persian:5:5,phanpy:20:20,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_BackToNurse", 2277, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_BackToNurse_1", 2278, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_BackToNurse", 2305, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_BackToNurse_1", 2306, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_COLLECTED, "CollectSevaultCanyon_Visit2?", -1, 7, 0, -1, 0, 0, DPAD_NONE, "cubone:10:10,fearow:10:15,geodude:20:20,larvitar:5:5,marowak:10:10,meowth:10:10,onix:5:5,persian:5:5,phanpy:20:20,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_Visit2_ToGrass", 2279, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_Visit2_ToGrass_1", 2280, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_Visit2_ToGrass", 2307, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_Visit2_ToGrass_1", 2308, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::DEX, "CollectSevaultCanyon_Visit2", -1, 30, 30, 2, 0, 5, DPAD_RIGHT, "cubone:10:10,fearow:10:15,geodude:20:20,larvitar:5:5,marowak:10:10,meowth:10:10,onix:5:5,persian:5:5,phanpy:20:20,skarmory:5:0", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_Visit2_BackToNurse", 2281, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "CollectSevaultCanyon_Visit2_BackToNurse_1", 2282, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_Visit2_BackToNurse", 2309, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectSevaultCanyon_Visit2_BackToNurse_1", 2310, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToHarbor", 2283, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToHarbor_1", 2284, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "SevenIsland_ToHarbor_2", 2285, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "FerryToVermilion", 2286, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToHarbor", 2311, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToHarbor_1", 2312, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SevenIsland_ToHarbor_2", 2313, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion", 2314, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "FerryToVermilion_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::PRESS, "FerryToVermilion_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "PierToVermilionNurse", 2287, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "PierToVermilionNurse", 2315, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "PierToVermilionNurse_1", 2288, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "PierToVermilionNurse_2", 2289, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "PierToVermilionNurse_1", 2316, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "PierToVermilionNurse_2", 2317, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::WALK, "C20_11_VERMILION_SEVII_Out", 2290, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_11_VERMILION_SEVII_Out", 2318, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -28965,17 +29017,17 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C18_01_SUICUNE", "The roaming Suicune: Route 10, the MASTER BALL", 18, true, 2384, 18},
     {"C19_01_MEWTWO", "Mewtwo in Cerulean Cave (weakened, Ultra Balls)", 19, true, 2402, 64},
     {"C20_01_START", "POKeDEX collection: out of the Cerulean City Pokemon Center", 20, true, 2466, 1},
-    {"C20_01B_MONEY", "POKeDEX collection: prize money (the VS SEEKER, Lady Gillian on Five Island), POKe BALLs", 20, true, 2467, 71},
-    {"C20_02_CERULEAN", "POKeDEX collection: Route 24, Route 4, Cerulean Cave", 20, true, 2538, 144},
-    {"C20_03_MT_MOON", "POKeDEX collection: Mt. Moon, Route 3", 20, true, 2682, 50},
-    {"C20_04_VIRIDIAN", "POKeDEX collection: Viridian Forest, Route 22, Route 23", 20, true, 2732, 84},
-    {"C20_05_VICTORY_ROAD", "POKeDEX collection: Victory Road", 20, true, 2816, 26},
-    {"C20_06_ROUTE10", "POKeDEX collection: Power Plant, Rock Tunnel", 20, true, 2842, 66},
-    {"C20_07_LAVENDER", "POKeDEX collection: Pokemon Tower, Route 8, Route 12", 20, true, 2908, 136},
-    {"C20_08_CELADON", "POKeDEX collection: Route 16", 20, true, 3044, 28},
-    {"C20_09_FUCHSIA", "POKeDEX collection: Safari Zone, Routes 14, 15, 18, Seafoam Islands", 20, true, 3072, 296},
-    {"C20_10_CINNABAR", "POKeDEX collection: Pokemon Mansion, Route 21", 20, true, 3368, 74},
-    {"C20_11_VERMILION_SEVII", "POKeDEX collection: Route 11, Diglett's Cave, Route 6, the Sevii Islands", 20, true, 3442, 614},
+    {"C20_01B_MONEY", "POKeDEX collection: prize money (the VS SEEKER, Lady Gillian on Five Island), POKe BALLs", 20, true, 2467, 85},
+    {"C20_02_CERULEAN", "POKeDEX collection: Route 24, Route 4, Cerulean Cave", 20, true, 2552, 144},
+    {"C20_03_MT_MOON", "POKeDEX collection: Mt. Moon, Route 3", 20, true, 2696, 50},
+    {"C20_04_VIRIDIAN", "POKeDEX collection: Viridian Forest, Route 22, Route 23", 20, true, 2746, 84},
+    {"C20_05_VICTORY_ROAD", "POKeDEX collection: Victory Road", 20, true, 2830, 26},
+    {"C20_06_ROUTE10", "POKeDEX collection: Power Plant, Rock Tunnel", 20, true, 2856, 66},
+    {"C20_07_LAVENDER", "POKeDEX collection: Pokemon Tower, Route 8, Route 12", 20, true, 2922, 136},
+    {"C20_08_CELADON", "POKeDEX collection: Route 16", 20, true, 3058, 28},
+    {"C20_09_FUCHSIA", "POKeDEX collection: Safari Zone, Routes 14, 15, 18, Seafoam Islands", 20, true, 3086, 296},
+    {"C20_10_CINNABAR", "POKeDEX collection: Pokemon Mansion, Route 21", 20, true, 3382, 74},
+    {"C20_11_VERMILION_SEVII", "POKeDEX collection: Route 11, Diglett's Cave, Route 6, the Sevii Islands", 20, true, 3456, 628},
 };
 
 }
@@ -28993,7 +29045,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "5690723a42";
+inline constexpr const char* DATA_ID = "3a29ee7fd3";
 
 }
 }

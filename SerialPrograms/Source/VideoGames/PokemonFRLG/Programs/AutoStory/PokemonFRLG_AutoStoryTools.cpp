@@ -34,6 +34,7 @@
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_AutoStoryWalkTracker.h"
+#include "PokemonFRLG_AutoStoryBump.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStorySmallRoom.h"
@@ -1693,6 +1694,154 @@ bool walk_run(
 }
 
 
+//  A run that ends where the way is shut (RunKind::SURF_BUMP, see
+//  AutoStoryBump): from the water on, over the shore and the land behind it
+//  if they come first, until the video sees nothing move any more. The
+//  tiles are not counted: over open water the video cannot, and the timing
+//  alone came out a tile short.
+void bump_run(StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, const std::string& where){
+    using AutoStoryBump::Act;
+    using AutoStoryBump::Seen;
+    const std::string label = where + " (going " + dpad_name(run.direction) + ")";
+    const int planned = std::max(1, (int)run.count);
+    rt.console.log(
+        std::string("Going ") + dpad_name(run.direction) + " until the way is shut, about " +
+        std::to_string(planned) + " tiles: " + where,
+        COLOR_BLUE
+    );
+    if (!rt.verify_walking){
+        //  Without the video check nothing tells when the player stands:
+        //  one input for the whole run and a few tiles more (it ends
+        //  against what shuts the way), again after each battle.
+        for (int tries = 0; tries < 10; tries++){
+            RunAttempt blind = attempt_moves(
+                rt, run.direction, planned + 4, SURF_FRAMES, 1, true, leg.dark, false, true
+            );
+            if (blind.event == RunEvent::NONE){
+                break;
+            }
+            if (blind.event != RunEvent::DIALOG || !story_close_repel_text(rt)){
+                story_battle(
+                    rt, blind.event == RunEvent::DIALOG ? StoryBattleKind::TRAINER : StoryBattleKind::WILD, label
+                );
+            }
+        }
+        rt.steps += (uint64_t)planned;
+        rt.last_run_direction = run.direction;
+        rt.last_run_off = 0;
+        return;
+    }
+
+    AutoStoryBump::Run state;
+    Act act = AutoStoryBump::first(state);
+    int box_talks = 0;      //  text boxes without the arrow taken for someone talking
+    while (act != Act::DONE){
+        if (act == Act::SHUT){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "walk_leg(): The way is shut from the start: " + label +
+                ". The player is not where the route expects (not on the water?).",
+                rt.console
+            );
+        }
+        if (act == Act::ENDLESS){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "walk_leg(): The player does not come to a stop: " + label + ", after " +
+                std::to_string(state.tries) + " tries.",
+                rt.console
+            );
+        }
+        const int moves = act == Act::WHOLE ? planned : AutoStoryBump::MORE_TILES;
+        //  Timed for the water, the faster of the two: on land the same
+        //  input gets half as far, and the next try goes on from there.
+        RunAttempt a = attempt_moves(rt, run.direction, moves, SURF_FRAMES, 1, true, leg.dark, true, true);
+        //  No movement: nothing stopped the input, and the video followed
+        //  the map during it and saw it stay where it was. It is sure of
+        //  that or not (the waves next to the player can keep it from it).
+        const bool still = a.event == RunEvent::NONE && !a.lost && a.frames >= 6 && std::abs(a.pixels) <= 2;
+        const bool stood = still && a.measured && a.moves == 0;
+        rt.console.log(
+            std::string("Went ") + dpad_name(run.direction) + " (an input for " + std::to_string(moves) +
+            (stood ? "): the player stands. " :
+             still ? "): no movement seen. " :
+             a.measured ? "): " : "; the video cannot count here): ") + a.video
+        );
+
+        bool stopped = false;
+        switch (a.event){
+        case RunEvent::BATTLE_START:
+        case RunEvent::BATTLE_TEXT:
+            story_battle(rt, StoryBattleKind::WILD, label);
+            stopped = true;
+            break;
+        case RunEvent::DIALOG:
+            //  The REPEL wore off, or a trainer saw the player.
+            if (!story_close_repel_text(rt)){
+                story_battle(rt, StoryBattleKind::TRAINER, label);
+                rt.facing = DPAD_NONE;
+            }
+            stopped = true;
+            break;
+        case RunEvent::SCREEN_CHANGED:
+        case RunEvent::NONE:
+            break;
+        }
+        if (!stopped && a.lost){
+            //  The picture changed on the way and nothing showed right
+            //  after: the next map coming up, or a battle whose text comes
+            //  late. A moment for it to show.
+            BlackScreenWatcher battle_starting(COLOR_RED);
+            AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+            BattleMenuWatcher battle_menu(COLOR_RED);
+            std::vector<PeriodicInferenceCallback> callbacks{battle_text, battle_menu};
+            if (!leg.dark){
+                callbacks.emplace_back(battle_starting);
+            }
+            rt.context.wait_for_all_requests();
+            if (wait_until(rt.console, rt.context, 3000ms, callbacks) >= 0){
+                story_battle(rt, StoryBattleKind::WILD, label);
+                stopped = true;
+            }
+        }
+        if (!stopped && still){
+            //  A battle that started unseen, or someone talking, also stops
+            //  the player.
+            VideoSnapshot screen = rt.console.video().snapshot();
+            BattleMenuDetector battle_menu(COLOR_RED);
+            AdvanceBattleDialogDetector battle_text(COLOR_RED);
+            AdvanceWhiteDialogDetector talking(COLOR_RED);
+            WhiteDialogDetector text_box(COLOR_RED);
+            if (screen && (battle_menu.detect(screen) || battle_text.detect(screen))){
+                rt.console.log("A battle is on.", COLOR_ORANGE);
+                story_battle(rt, StoryBattleKind::WILD, label);
+                stopped = true;
+            }else if (screen && box_talks < 2 && (talking.detect(screen) || text_box.detect(screen))){
+                //  (A few tries only: some places look like a text box.)
+                box_talks++;
+                if (!story_close_repel_text(rt)){
+                    rt.console.log("Someone is talking.", COLOR_ORANGE);
+                    story_battle(rt, StoryBattleKind::TRAINER, label);
+                    rt.facing = DPAD_NONE;
+                }
+                stopped = true;
+            }
+        }
+        act = AutoStoryBump::next(
+            state,
+            stopped ? Seen::STOPPED : (stood ? Seen::STOOD : (still ? Seen::STILL : Seen::MOVED))
+        );
+    }
+    rt.console.log(
+        "The way is shut: there, after " + std::to_string(state.tries) + " inputs. " + where,
+        COLOR_BLUE
+    );
+    rt.steps += (uint64_t)planned;
+    rt.last_run_direction = run.direction;
+    rt.last_run_off = 0;
+}
+
+
 //  With the video check, runs one after the other in the same direction
 //  are walked as one (walking onto grass and on through it), without a stop
 //  in between. Each kind keeps its own handling otherwise.
@@ -1735,7 +1884,8 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     //  used only on the water, where a wrong guess costs a step either way.
     //  Walking, an unknown facing is allowed for (half a turn).
     if (rt.facing == DPAD_NONE && leg.start_facing != DPAD_NONE && !runs.empty() &&
-        (runs[0].kind == RunKind::SURF || runs[0].kind == RunKind::SURF_CHECKED)
+        (runs[0].kind == RunKind::SURF || runs[0].kind == RunKind::SURF_CHECKED ||
+         runs[0].kind == RunKind::SURF_BUMP)
     ){
         rt.facing = leg.start_facing;
     }
@@ -1827,6 +1977,9 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             rt.approach_made = 0;
             break;
         }
+        case RunKind::SURF_BUMP:
+            bump_run(rt, leg, run, leg.name);
+            break;
         case RunKind::SPIN:
             //  The step onto the spinner was the end of the last run. The
             //  player is carried without input, then stops.

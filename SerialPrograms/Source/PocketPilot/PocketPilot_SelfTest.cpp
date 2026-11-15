@@ -47,6 +47,7 @@
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBump.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
@@ -1407,6 +1408,169 @@ int check_ferry_talk(Logger& logger){
     return wrong;
 }
 
+
+//  The FRLG AutoStory over open water, where the video cannot count the
+//  tiles: a run that ends where the way is shut (AutoStoryBump), played
+//  against a line of water and land with a wall at its end, and the water
+//  between Five Island and Resort Gorgeous in the story's data.
+int check_bump(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    using AutoStoryBump::Act;
+    using AutoStoryBump::Seen;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+
+    struct Trip{
+        Act end = Act::PART;
+        int at = 0;         //  tiles from the start
+        int inputs = 0;
+    };
+    //  "water" tiles of water, then "land" tiles of land (the first of them
+    //  the shore), then what shuts the way. An input is timed for the
+    //  water: on land it gets half as far, and the jump onto the shore
+    //  takes as long as three tiles of water. "short_by": how many tiles
+    //  the first input falls short (the game standing still on the way).
+    //  "battle_at": a wild battle stops an input there (-1: none). "blind":
+    //  tries at the end at which the video sees no movement without being
+    //  sure of it.
+    auto travel = [&](int water, int land, int planned, int short_by, int battle_at, int blind){
+        Trip trip;
+        const int end = water + land;
+        AutoStoryBump::Run run;
+        Act act = AutoStoryBump::first(run);
+        bool battle_done = battle_at < 0;
+        bool first_input = true;
+        while (act == Act::WHOLE || act == Act::PART){
+            trip.inputs++;
+            //  In half tiles of water.
+            int budget = 2 * (act == Act::WHOLE ? planned : AutoStoryBump::MORE_TILES);
+            if (first_input){
+                budget -= 2 * short_by;
+                first_input = false;
+            }
+            const int from = trip.at;
+            bool stopped = false;
+            while (budget > 0 && trip.at < end){
+                //  A step that has begun is finished.
+                budget -= trip.at < water ? 2 : (trip.at == water && water > 0 ? 6 : 4);
+                trip.at++;
+                if (!battle_done && trip.at >= battle_at){
+                    battle_done = true;
+                    stopped = true;
+                    break;
+                }
+            }
+            Seen seen = Seen::MOVED;
+            if (stopped){
+                seen = Seen::STOPPED;
+            }else if (trip.at == from){
+                seen = blind > 0 ? Seen::STILL : Seen::STOOD;
+                blind -= blind > 0 ? 1 : 0;
+            }
+            act = AutoStoryBump::next(run, seen);
+        }
+        trip.end = act;
+        return trip;
+    };
+    auto arrived = [](const Trip& trip, int end){
+        return trip.end == Act::DONE && trip.at == end;
+    };
+
+    //  Up the channel: 29 tiles of water to a rock. As timed, one short
+    //  (what the run of 30 was each time), three short.
+    const Trip channel = travel(29, 0, 29, 1, -1, 0);
+    check(arrived(travel(29, 0, 29, 0, -1, 0), 29), "29 tiles of water to a rock, as timed");
+    check(arrived(channel, 29), "the same with the first input one tile short");
+    check(arrived(travel(29, 0, 29, 3, -1, 0), 29), "the same with it three tiles short");
+    //  Along the row to the beach and over it: 16 of water, the shore, 6 of
+    //  land. And down to Five Island: 30 of water, the shore, 9 of land.
+    const Trip beach = travel(16, 7, 23, 1, -1, 0);
+    check(arrived(beach, 23), "16 tiles of water, the shore and 6 tiles of land");
+    check(arrived(travel(30, 10, 40, 1, -1, 0), 40), "30 tiles of water, the shore and 9 tiles of land");
+    //  A wild battle anywhere on the way, and the first input short by up
+    //  to two tiles: there every time, never before the end.
+    bool all_arrive = true;
+    int ways = 0;
+    for (int short_by = 0; short_by <= 2; short_by++){
+        for (int battle_at = 0; battle_at <= 40; battle_at++){
+            ways += 3;
+            all_arrive &= arrived(travel(29, 0, 29, short_by, battle_at <= 29 ? battle_at : -1, 0), 29);
+            all_arrive &= arrived(travel(16, 7, 23, short_by, battle_at <= 23 ? battle_at : -1, 0), 23);
+            all_arrive &= arrived(travel(30, 10, 40, short_by, battle_at, 0), 40);
+        }
+    }
+    check(all_arrive, "a wild battle anywhere on the way, the first input up to two tiles short");
+    //  The video not sure at the end: once, and never (the waves): there
+    //  all the same, a few inputs later.
+    const Trip unsure = travel(29, 0, 29, 1, -1, 1);
+    const Trip never_sure = travel(29, 0, 29, 1, -1, 1000);
+    check(arrived(unsure, 29) && unsure.inputs == channel.inputs + 1, "the video not sure at the end once");
+    check(
+        arrived(never_sure, 29) && never_sure.inputs == channel.inputs + AutoStoryBump::STILL_TO_END - AutoStoryBump::SURE_TO_END,
+        "the video never sure at the end"
+    );
+    //  The way shut from the start (not on the water): an error, not an arrival.
+    check(travel(0, 0, 29, 0, -1, 0).end == Act::SHUT, "the way shut from the start");
+
+    //  The story's data: the water between Five Island and Resort Gorgeous
+    //  is crossed by such runs only (four a round trip: up the channel,
+    //  along the row to the beach, back along the row, down the channel),
+    //  each the last run of its leg; no other run over water there is
+    //  longer than a few tiles.
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    int money_bumps = 0;
+    int cave_bumps = 0;
+    bool bumps_last = true;
+    int longest_other = 0;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        const bool money = std::string(segment.id).find("_MONEY") != std::string::npos;
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type != StepType::WALK || step.leg < 0){
+                continue;
+            }
+            const StoryLeg& leg = script.leg(step.leg);
+            const StoryRun* runs = script.leg_runs(leg);
+            const bool cave = std::string(leg.name).find("LostCave") != std::string::npos;
+            for (uint16_t r = 0; r < leg.run_count; r++){
+                if (runs[r].kind == RunKind::SURF_BUMP){
+                    money_bumps += money ? 1 : 0;
+                    cave_bumps += cave ? 1 : 0;
+                    bumps_last &= r + 1 == leg.run_count && (money || cave);
+                }else if (money && (runs[r].kind == RunKind::SURF || runs[r].kind == RunKind::SURF_CHECKED)){
+                    longest_other = std::max(longest_other, (int)runs[r].count);
+                }
+            }
+        }
+    }
+    check(
+        money_bumps == 8 && bumps_last && longest_other <= 4,
+        "the money trip in the story's data: the water to Resort Gorgeous and back"
+    );
+    check(cave_bumps == 8, "the Lost Cave in the story's data: the same water");
+
+    logger.log(
+        "AutoStory test: runs that end where the way is shut (over open water the video cannot count tiles: "
+        "up the channel in " + std::to_string(channel.inputs) + " inputs with the first one a tile short, "
+        "onto the beach in " + std::to_string(beach.inputs) + "; " + std::to_string(ways) +
+        " ways with a wild battle on the way; the video not sure at the end, the way shut from the start; "
+        "in the story's data " + std::to_string(money_bumps) + " such runs on the money trip, " +
+        std::to_string(cave_bumps) + " to the Lost Cave): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1426,6 +1590,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);
+        failed += check_bump(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

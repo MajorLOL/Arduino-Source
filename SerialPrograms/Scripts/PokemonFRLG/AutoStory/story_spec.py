@@ -13,8 +13,8 @@ STARTERS = ["BULBASAUR", "SQUIRTLE", "CHARMANDER"]
 
 
 # ---------------------------------------------------------------- helpers
-def goto(map_id, tiles, label=None, trigger=False):
-    s = {"goto": {"map": map_id, "tiles": tiles, "trigger": trigger}}
+def goto(map_id, tiles, label=None, trigger=False, bump=False):
+    s = {"goto": {"map": map_id, "tiles": tiles, "trigger": trigger, "bump": bump}}
     if label:
         s["label"] = label
     return s
@@ -2543,7 +2543,7 @@ def sevii_tour():
     ] + rainbow_ferry("MAP_FOUR_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland") + [
         sevii_island("MAP_FIVE_ISLAND_HARBOR", FIVE_PC, [
             collect_place(FIVE_PC, "MAP_FIVE_ISLAND_MEADOW", WHOLE, "CollectFiveIsleMeadow"),
-            collect_place(FIVE_PC, "MAP_FIVE_ISLAND_LOST_CAVE_ROOM1", WHOLE, "CollectLostCave"),
+            collect_lost_cave(),
         ], "FiveIsland"),
     ] + rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 4, 1, "MAP_SIX_ISLAND_HARBOR", "FerryToSixIsland") + [
         sevii_island("MAP_SIX_ISLAND_HARBOR", SIX_PC, [
@@ -2596,13 +2596,60 @@ GILLIAN_PRIZE = 9800
 GILLIAN_WALK = [GILLIAN_MAP, 41, 11]
 
 
-def gillian(wins, label):
-    """Next to Lady Gillian, then battles with her until `wins` are won."""
+#  The water between Five Island and Resort Gorgeous: 30 tiles up a channel
+#  four tiles wide, over two map borders, then 16 to the east along one
+#  row. The shortest way (up column 9, east along row 12) came out a row
+#  too low four times out of four in the night of 15 to 16 November 2026:
+#  the run of 30 was one tile short, and the row below ends at two rocks
+#  (the player then stood in the water where the route had it next to Lady
+#  Gillian). Over open water the video cannot count tiles, so these runs
+#  are laid out to end against something instead (goto(..., bump=True)):
+#    - up column 8, which ends below the rock at (8, 12);
+#    - one tile right and one up, onto row 12 (rocks and the small island
+#      are in view there: single steps the video does see);
+#    - east along row 12: the shore at (26, 12), the beach, the Painter who
+#      stands at (33, 12) looking up.
+#  And back: west along row 12 to the rock at (8, 12), then down column 9,
+#  onto the shore of Five Island and on to where its land ends at (9, 12).
+def to_resort(label):
+    """From Five Island's Pokemon Center to the beach of Resort Gorgeous,
+    left of the Painter."""
     return [
+        goto("MAP_FIVE_ISLAND", [[8, 3]], label + "_ToShore"),
+        goto(GILLIAN_MAP, [[8, 13]], label + "_Channel", bump=True),
+        goto(GILLIAN_MAP, [[9, 12]], label + "_Row"),
+        goto(GILLIAN_MAP, [[32, 12]], label + "_Beach", bump=True),
+    ]
+
+
+def from_resort(label):
+    """From Resort Gorgeous back onto Five Island (the way to the nurse
+    comes after it)."""
+    return [
+        goto(GILLIAN_MAP, [[26, 12]], label + "_ToShore"),
+        goto(GILLIAN_MAP, [[9, 12]], label + "_Row", bump=True),
+        goto("MAP_FIVE_ISLAND", [[9, 12]], label + "_Channel", bump=True),
+    ]
+
+
+def collect_lost_cave():
+    """The Lost Cave (behind Resort Gorgeous), over the same water."""
+    trips = []
+    for v in range(COLLECT_VISITS):
+        label = "CollectLostCave" + ("" if v == 0 else "_Visit%d" % (v + 1))
+        steps = to_resort(label) + [collect("MAP_FIVE_ISLAND_LOST_CAVE_ROOM1", WHOLE, label)]
+        trips.append(collect_trip(FIVE_PC, steps + from_resort(label + "_Back"), label))
+    return trips
+
+
+def gillian(wins, label):
+    """Next to Lady Gillian, then battles with her until `wins` are won,
+    and back onto Five Island."""
+    return to_resort(label) + [
         talk(GILLIAN_MAP, xy=GILLIAN_XY, mode="plain", dirs=["left"], label=label + "_ToGillian"),
         {"rematch": {"wins": wins, "minutes": 45, "prize": GILLIAN_PRIZE, "far": GILLIAN_WALK, "loops": 6},
          "label": label},
-    ]
+    ] + from_resort(label + "_Back")
 
 
 def money_trip():

@@ -45,6 +45,9 @@ enum class RunKind : uint8_t{
     SURF,               //  Surfing over water without encounters.
     SURF_CHECKED,       //  Surfing over water with encounters.
     DISMOUNT,           //  From the water onto land: one step.
+    SURF_BUMP,          //  From the water on until the way is shut (a rock, a wall, someone
+                        //  standing still; over the shore and the land behind it if they
+                        //  come first): "count" tiles, about. See AutoStoryBump.
 };
 
 //  What happens at the end of a leg.

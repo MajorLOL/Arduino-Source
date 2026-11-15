@@ -6,7 +6,9 @@ A spec step is a dict with one of these keys:
   set        state change (flags, vars, defeated trainers, objects, tiles, abilities)
   pos        the player position after scripted movement {map,x,y,facing}
   goto       walk to {map, tiles:[[x,y],..]} (any of them), across warps
-             options: trigger (end on an active trigger), surf_goal
+             options: trigger (end on an active trigger), surf_goal,
+             bump (the last straight stretch, from the water on, ends where
+             the way is shut: walked until the player stands still)
   talk       walk next to {map, object | xy} and face it, then an action:
              mode = talk | yes | battle | heal | plain
   cutscene   [min_ms, max_ms]
@@ -42,6 +44,10 @@ RUN_SPIN = "SPIN"
 RUN_SURF = "SURF"
 RUN_SURF_CHECKED = "SURF_CHECKED"
 RUN_DISMOUNT = "DISMOUNT"
+#  From the water on until the way is shut (a rock, a wall, someone who
+#  stands still), over the shore and the land behind it if they come first:
+#  the tiles are not counted (see make_bump() and AutoStoryBump in the C++).
+RUN_SURF_BUMP = "SURF_BUMP"
 #  The last moves up to a trainer that turns around, inside its line of
 #  sight: if it sees the player there, it walks up and the battle happens
 #  on the way (the rest of the leg and the talk are then skipped).
@@ -594,6 +600,37 @@ class Builder:
             leg["end"] = "INTERACT"
             self.pos = (self.pos[0], self.pos[1], self.pos[2], face)
         self.close_leg(leg, out)
+
+    #  What takes the player on when a direction is held (the others need A).
+    HELD_EDGE_KINDS = ("walk", "surf", "dismount", "jump", "spin", "stepwarp", "warp")
+
+    def make_bump(self, label):
+        """The leg just emitted ends where the way is shut: its last
+        straight stretch, which starts on the water, becomes one run that
+        goes on until the player stands still (RUN_SURF_BUMP).
+
+        Over open water the video cannot count tiles, and a run timed for
+        30 came out one short every time between Five Island and Resort
+        Gorgeous (two map borders on the way). Against a rock, a wall or
+        someone who stands still, the count does not matter."""
+        leg = self.legs[-1]
+        runs = leg["runs"]
+        if leg["end"] != "STOP" or not runs:
+            raise StoryError("bump: %s does not end with a plain run (%s, %s)" % (label, leg["end"], runs))
+        d = runs[-1][0]
+        first = len(runs)
+        while first > 0 and runs[first - 1][0] == d and runs[first - 1][2] in (
+                RUN_SURF, RUN_SURF_CHECKED, RUN_DISMOUNT, RUN_WALK, RUN_CHECKED):
+            first -= 1
+        stretch = runs[first:]
+        if not stretch or stretch[0][2] not in (RUN_SURF, RUN_SURF_CHECKED):
+            raise StoryError("bump: the last stretch of %s does not start on the water: %s" % (label, runs))
+        for nxt, edge in self.engine.edges(self.node(), set()):
+            if edge["dir"] == d and edge["kind"] in Builder.HELD_EDGE_KINDS:
+                raise StoryError("bump: %s: the way goes on %s from %s (%s to %s)" % (
+                    label, d, self.pos, edge["kind"], nxt[:3]))
+        tiles = sum(r[1] for r in stretch)
+        leg["runs"] = runs[:first] + [[d, tiles, RUN_SURF_BUMP]]
 
     def mark_approach(self, out, m, target_xy, target_key):
         """
@@ -1379,11 +1416,16 @@ class Builder:
         if "goto" in step:
             g = step["goto"]
             goals = {(g["map"], x, y) for x, y in g["tiles"]}
+            legs_before = len(self.legs)
             self.walk_to(goals, step.get("label", "Goto"), out,
                          end_mode="TRIGGER" if g.get("trigger") else "STOP", shortcuts=True)
             if g.get("trigger"):
                 #  Mark the last emitted leg as ending on a trigger.
                 pass
+            if g.get("bump"):
+                if len(self.legs) == legs_before:
+                    raise StoryError("bump: no walk to %s" % step.get("label", "Goto"))
+                self.make_bump(step.get("label", "Goto"))
             return
         if "talk" in step:
             t = step["talk"]

@@ -208,11 +208,17 @@ enum class BagPocket{
 
 //  In the bag: go to a pocket, then down the list until the description of
 //  the item under the cursor has one of the words (and none of "avoid").
+//  "here_first": the item may be under the cursor already (each pocket
+//  keeps its place from the last time the bag was open): look there before
+//  going through the list from the top. (The VS SEEKER, the newest of some
+//  twenty KEY ITEMS and used again and again: 40 seconds from the top each
+//  time on 15 November 2026.)
 bool select_bag_item(
     StoryRuntime& rt, BagPocket pocket,
     const std::vector<const char*>& words,
     const std::vector<const char*>& avoid,
-    const std::string& what
+    const std::string& what,
+    bool here_first = false
 ){
     ProControllerContext& context = rt.context;
     //  The pockets do not wrap around: LEFT x3 is the first pocket.
@@ -221,6 +227,22 @@ bool select_bag_item(
     }
     for (int i = 0; i < (int)pocket; i++){
         dpad(context, DPAD_RIGHT, 500ms);
+    }
+    if (here_first){
+        pbf_wait(context, 500ms);
+        context.wait_for_all_requests();
+        const std::string here = read_bag_description(rt);
+        bool match = false;
+        for (const char* word : words){
+            match |= contains(here, word);
+        }
+        for (const char* word : avoid){
+            match &= !contains(here, word);
+        }
+        if (match){
+            rt.console.log("Found in the bag, under the cursor: " + what);
+            return true;
+        }
     }
     //  The list does not wrap around either: to the top.
     for (int i = 0; i < 30; i++){
@@ -2927,7 +2949,7 @@ SeekerUse use_vs_seeker(StoryRuntime& rt, const std::string& what){
     //  charges while traveling."
     if (!select_bag_item(
         rt, BagPocket::KEY_ITEMS,
-        {"indicates trainers", "want to battle", "battery charges", "while traveling"}, {}, "VS SEEKER"
+        {"indicates trainers", "want to battle", "battery charges", "while traveling"}, {}, "VS SEEKER", true
     )){
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
@@ -3072,6 +3094,30 @@ int story_rematch(StoryRuntime& rt, const StoryScript& script, const StoryStep& 
                  use == SeekerUse::NO_ONE ? " (the VS SEEKER found no trainer in reach)" :
                  use == SeekerUse::NOT_READY ? " (the trainer was not ready)" : "") + "."
             );
+            //  A trainer who was never beaten battles at the first talk,
+            //  and one who was wants to 7 times in 10. Three rounds without
+            //  a battle before anything was won on this trip: the player is
+            //  not at her side. (The night of 15 to 16 November 2026: the
+            //  way over the water ended a row too low, the player stood
+            //  somewhere on the beach, and eight rounds went by, 16
+            //  minutes, before the step gave up.)
+            if (rt.trip_wins == 0 && dry >= 3){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_rematch(): No battle in the first " + std::to_string(dry) +
+                    " rounds, and nothing won on this trip yet: the player is not at the trainer's side: " + label,
+                    console
+                );
+            }
+            //  At her side the VS SEEKER always has her in reach.
+            if (use == SeekerUse::NO_ONE){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_rematch(): The VS SEEKER found no trainer in reach, and no battle came: "
+                    "the player is not at the trainer's side: " + label,
+                    console
+                );
+            }
         }
         if (lead_down){
             stopped = "the lead fainted";
