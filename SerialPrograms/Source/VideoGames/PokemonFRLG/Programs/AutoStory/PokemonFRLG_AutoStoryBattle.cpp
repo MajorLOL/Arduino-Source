@@ -309,7 +309,9 @@ const Pokemon::PokemonNameReader& species_name_reader(){
 
 //  The mark at the end of the name in the foe's HP box: the male or the
 //  female one of the two NIDORANs. "seen": the name's last glyph, for the
-//  log.
+//  log. (The box has the game's small font, five by seven pixels a mark.
+//  Pokemon Automation's read_nidoran_symbol() is for the larger font of the
+//  summary and of the PC box.)
 AutoStoryNameMark::Mark read_name_mark(const ImageViewRGB32& frame, std::string& seen){
     seen.clear();
     ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
@@ -326,9 +328,38 @@ AutoStoryNameMark::Mark read_name_mark(const ImageViewRGB32& frame, std::string&
     );
 }
 
+//  What the text reading makes of the name in the foe's HP box, as it
+//  stands: its letters and digits in upper case. (The reading of
+//  WildEncounterReader, which keeps the species only.)
+std::string read_name_text(ConsoleHandle& console, const ImageViewRGB32& frame){
+    ImageViewRGB32 game = extract_box_reference(frame, GameSettings::instance().GAME_BOX);
+    if (!game){
+        return std::string();
+    }
+    ImageViewRGB32 name = extract_box_reference(game, FOE_NAME_BOX);
+    if (!name){
+        return std::string();
+    }
+    ImageRGB32 ready = preprocess_for_ocr(name);
+    OCR::StringMatchResult result = species_name_reader().read_substring(
+        console.logger(), Language::English, ready,
+        DARK_TEXT_FILTERS(),
+        0.01, 0.50, WildEncounterReader::MAX_LOG10P
+    );
+    std::string text;
+    if (!result.results.empty()){
+        for (char c : result.results.begin()->second.original_text){
+            if (std::isalnum((unsigned char)c)){
+                text += (char)std::toupper((unsigned char)c);
+            }
+        }
+    }
+    return text;
+}
+
 //  Read the opponent's species from its HP box (top left). "mark_told": it
 //  is one of the two NIDORANs, and the mark at the end of its name told
-//  which.
+//  which (the mark itself, or what the text reading made of it).
 const SpeciesInfo* read_opponent(
     ConsoleHandle& console, std::string& slug, const std::string& known = std::string(),
     bool* mark_told = nullptr
@@ -358,32 +389,67 @@ const SpeciesInfo* read_opponent(
     }
     if (slug == "nidoran-f" || slug == "nidoran-m"){
         //  The two NIDORANs have the same name but for its last sign, the
-        //  male or the female mark, and the text reading gives the same for
-        //  both (the first of the two: the female one). The mark itself
-        //  tells them apart.
+        //  male or the female mark, and the text reading gives the same
+        //  species for both (the first of the two: the female one). The
+        //  mark itself tells them apart.
+        using AutoStoryNameMark::Mark;
         std::string seen;
-        const AutoStoryNameMark::Mark mark = screen
-            ? read_name_mark(screen, seen)
-            : AutoStoryNameMark::Mark::NOT_TOLD;
+        const Mark mark = screen ? read_name_mark(screen, seen) : Mark::NOT_TOLD;
         if (seen.empty()){
             seen = "nothing";
         }
-        if (mark == AutoStoryNameMark::Mark::NOT_TOLD){
-            console.log(
-                "Opponent: NIDORAN, the male or the female one: the mark at the end of its name was not read (seen: " +
-                seen + ").",
-                COLOR_ORANGE
-            );
+        //  The text reading has a word on it too. In the runs of 14 and 15
+        //  November 2026 (a 720p capture) it had "NIDORANE" for the male
+        //  one, its mark as an E (99 times: all 27 on Route 3, where the
+        //  female one is 1 in 100, and each with the ball mark from the
+        //  moment one that read so was caught), and "NIDORAN" for the
+        //  female one (10 times, the same with the ball mark). An E is
+        //  taken as the male mark where the mark itself was not made out;
+        //  where the two readings say different things, neither counts.
+        const std::string text = screen ? read_name_text(console, screen) : std::string();
+        const bool text_male = text == "NIDORANE";
+        const bool text_female = text == "NIDORAN";
+        const std::string text_seen = "the text reading: \"" + text + "\"";
+        bool told = false;
+        bool male = false;
+        if (mark == Mark::NOT_TOLD){
+            if (text_male){
+                told = true;
+                male = true;
+                console.log(
+                    "Opponent: NIDORAN, the male one (" + text_seen + ", the mark as an E; the mark itself was not "
+                    "made out, seen: " + seen + ").",
+                    COLOR_ORANGE
+                );
+            }else{
+                console.log(
+                    "Opponent: NIDORAN, the male or the female one: the mark at the end of its name was not read "
+                    "(seen: " + seen + "; " + text_seen + ").",
+                    COLOR_ORANGE
+                );
+            }
         }else{
-            const bool male = mark == AutoStoryNameMark::Mark::MALE;
+            male = mark == Mark::MALE;
+            if (male ? text_female : text_male){
+                console.log(
+                    std::string("Opponent: NIDORAN, the male or the female one: the mark at the end of its name "
+                    "looks like the ") + (male ? "male" : "female") + " one (seen: " + seen + "), but " + text_seen +
+                    ", as for the " + (male ? "female" : "male") + " one.",
+                    COLOR_ORANGE
+                );
+            }else{
+                told = true;
+                console.log(
+                    std::string("Opponent: NIDORAN, the ") + (male ? "male" : "female") +
+                    " one (the mark at the end of its name: " + seen + "; " + text_seen + ")."
+                );
+            }
+        }
+        if (told){
             slug = male ? "nidoran-m" : "nidoran-f";
             if (mark_told != nullptr){
                 *mark_told = true;
             }
-            console.log(
-                std::string("Opponent: NIDORAN, the ") + (male ? "male" : "female") +
-                " one (the mark at the end of its name: " + seen + ")."
-            );
         }
         return find_species(slug);
     }
