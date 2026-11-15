@@ -27,6 +27,7 @@
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
+#include "PokemonFRLG_AutoStoryFerryTalk.h"
 #include "PokemonFRLG_AutoStoryActions.h"
 
 namespace PokemonAutomation{
@@ -2793,6 +2794,8 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
 
 
 void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
+    using AutoStoryFerryTalk::Act;
+    using AutoStoryFerryTalk::Look;
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     //  The menus, in the game's screen: the tickets' (MULTICHOICE_SEVII_
@@ -2805,71 +2808,98 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
         return text.find(part) != std::string::npos;
     };
     console.log("The Seagallop from Vermilion City: row " + std::to_string(row) + " of the Sevii Islands list (" + what + ").");
+    //  The sailor's text is blue, and the text reading takes dark text
+    //  only: on 15 November 2026 his first page ("Oh! That's a
+    //  MYSTICTICKET! Now that is rare.") stood there until "The sailor's
+    //  text did not come up", three times from the same save. His pages
+    //  are told by the text box and its advance arrow instead
+    //  (AutoStoryFerryTalk).
+    //
+    //  For the list's first row nothing has to be read: A is right on
+    //  every page and on both menus (SEVII ISLANDS, ONE ISLAND). Another
+    //  row needs the menus read (their text is dark), and the last page of
+    //  a text about a ticket would wait: no route asks for one.
+    AutoStoryFerryTalk::Talk talk;
     bool picked = false;
-    int quiet = 0;
     const WallClock deadline = current_time() + 90s;
     while (current_time() < deadline){
         context.wait_for_all_requests();
-        const std::string tickets = read_story_text(console, TICKET_MENU, false);
-        if (!picked && has(tickets, "sevii")){
-            console.log("The tickets' menu: SEVII ISLANDS.", COLOR_BLUE);
-            pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
-            quiet = 0;
-            continue;
-        }
-        const std::string islands = read_story_text(console, ISLAND_MENU, false);
-        if (!picked && has(islands, "island") && (has(islands, "other") || has(islands, "exit"))){
-            console.log("The Sevii Islands list: row " + std::to_string(row) + ".", COLOR_BLUE);
-            for (int i = 0; i < row; i++){
-                pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+        if (row != 0 && !picked){
+            const std::string tickets = read_story_text(console, TICKET_MENU, false);
+            if (has(tickets, "sevii") || has(tickets, "navel") || has(tickets, "birth")){
+                console.log("The tickets' menu: SEVII ISLANDS.", COLOR_BLUE);
+                pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+                talk.pressed++;
+                continue;
             }
-            pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
-            picked = true;
-            quiet = 0;
-            continue;
-        }
-        const std::string text = story_read_dialog(rt);
-        if (!text.empty()){
-            //  The sailor's pages (the tickets, "Would you like to board a
-            //  SEAGALLOP ferry?", "...departing immediately."). A menu not
-            //  read: A picks its first row (SEVII ISLANDS, ONE ISLAND),
-            //  right for row 0 only.
-            if (!picked && row != 0 && has(text, "board")){
-                pbf_wait(context, 500ms);
-                if (++quiet < 8){
-                    continue;
+            //  (The list's box also takes in the right half of the tickets'
+            //  menu: "ISLANDS", "ROCK", "ISLAND".)
+            const std::string islands = read_story_text(console, ISLAND_MENU, false);
+            if (has(islands, "island") && (has(islands, "other") || has(islands, "exit")) && !has(islands, "rock")){
+                console.log("The Sevii Islands list: row " + std::to_string(row) + ".", COLOR_BLUE);
+                for (int i = 0; i < row; i++){
+                    pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
                 }
-                OperationFailedExceptionWithScreenshot::fire(
-                    ErrorReportMode::SEND_ERROR_REPORT,
-                    "story_seagallop(): The Seagallop's destination list was not read: " + what,
-                    console
+                pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+                talk.pressed++;
+                picked = true;
+                continue;
+            }
+        }
+        VideoSnapshot screen = console.video().snapshot();
+        AdvanceWhiteDialogDetector arrow(COLOR_RED);
+        WhiteDialogDetector box(COLOR_RED);
+        Look look = Look::NO_BOX;
+        if (screen){
+            if (arrow.detect(screen)){
+                look = Look::ARROW;
+            }else if (box.detect(screen)){
+                look = Look::BOX;
+            }
+        }
+        switch (AutoStoryFerryTalk::next(talk, look, row == 0 || picked)){
+        case Act::PRESS_A:
+            //  What he says, for the log only.
+            console.log(
+                "The sailor's text, A number " + std::to_string(talk.pressed) +
+                (look == Look::ARROW
+                    ? " (the advance arrow)"
+                    : " (no arrow: the last page of a text, or a menu at its first row)") +
+                ": \"" + story_read_people(rt) + "\"",
+                COLOR_BLUE
+            );
+            pbf_press_button(context, BUTTON_A, 160ms, 1040ms);
+            break;
+        case Act::WAIT:
+            pbf_wait(context, 500ms);
+            break;
+        case Act::LEFT:
+            if (talk.long_enough()){
+                console.log(
+                    "The sailor's text box is gone after " + std::to_string(talk.pressed) +
+                    " presses: the Seagallop leaves.",
+                    COLOR_BLUE
+                );
+            }else{
+                console.log(
+                    "The sailor's text box is gone after " + std::to_string(talk.pressed) +
+                    " presses, fewer than a departure takes: taking it that the Seagallop leaves all the same.",
+                    COLOR_ORANGE
                 );
             }
-            if (has(text, "depart") || has(text, "in order")){
-                picked = true;
-            }
-            pbf_press_button(context, BUTTON_A, 160ms, 1040ms);
-            quiet = 0;
-            continue;
-        }
-        //  No text: the screen going black for the ferry (after the pick),
-        //  or a page still printing.
-        if (picked && ++quiet >= 2){
-            console.log("The Seagallop leaves.", COLOR_BLUE);
             return;
-        }
-        if (!picked && ++quiet >= 20){
+        case Act::NO_TEXT:
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::SEND_ERROR_REPORT,
                 "story_seagallop(): The sailor's text did not come up: " + what,
                 console
             );
         }
-        pbf_wait(context, 500ms);
     }
     OperationFailedExceptionWithScreenshot::fire(
         ErrorReportMode::SEND_ERROR_REPORT,
-        "story_seagallop(): Not on the Seagallop after 90 seconds: " + what,
+        "story_seagallop(): Not on the Seagallop after 90 seconds (" + std::to_string(talk.pressed) +
+        " presses on the sailor's text): " + what,
         console
     );
 }

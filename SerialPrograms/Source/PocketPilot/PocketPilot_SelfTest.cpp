@@ -49,6 +49,7 @@
 #include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySmallRoom.h"
@@ -1246,6 +1247,166 @@ int check_money_trip(Logger& logger){
     return wrong;
 }
 
+
+//  The FRLG AutoStory at the pier of Vermilion City: the sailor's talk as
+//  the game's script has it, pressed through without any of it read (his
+//  text is blue, which the text reading does not see).
+int check_ferry_talk(Logger& logger){
+    using namespace NintendoSwitch::PokemonFRLG;
+    using AutoStoryFerryTalk::Act;
+    using AutoStoryFerryTalk::Look;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+
+    //  A page of his talk, by whether it shows the advance arrow once it
+    //  is printed. A on a printed page goes to the next one; A on a page
+    //  still printing only hurries it.
+    const bool WITH_ARROW = true;
+    const bool NO_ARROW = false;
+    //  "Oh! That's a MYSTICTICKET! Now that is rare." / "We'll be happy to
+    //  take you to NAVEL ROCK anytime." (and the AURORATICKET's two pages).
+    const std::vector<bool> TICKET{WITH_ARROW, NO_ARROW};
+    //  "Would you like to board a SEAGALLOP ferry?" with the tickets' menu,
+    //  the same with the Sevii Islands list, "Okay, everything's in
+    //  order." / "SEAGALLOP HI-SPEED 7 will be departing immediately."
+    const std::vector<bool> BOARDING{NO_ARROW, NO_ARROW, WITH_ARROW, NO_ARROW};
+    auto pages_of = [&](int tickets){
+        std::vector<bool> pages;
+        for (int t = 0; t < tickets; t++){
+            pages.insert(pages.end(), TICKET.begin(), TICKET.end());
+        }
+        pages.insert(pages.end(), BOARDING.begin(), BOARDING.end());
+        return pages;
+    };
+
+    struct Run{
+        Act end = Act::WAIT;        //  WAIT: still going after 400 looks
+        int presses = 0;
+        int looks = 0;
+        size_t pages_done = 0;
+        bool pressed_at_nothing = false;    //  an A without a text box
+        bool long_enough = false;
+        double seconds = 0;
+    };
+    //  "printing": how many looks a page takes to print. "missed": the
+    //  game misses every so manieth A (0: none). "blind_at", "blind_for":
+    //  looks from that one on at which the text box is not made out.
+    auto run = [&](
+        const std::vector<bool>& pages, int printing, int missed, bool first_row,
+        int blind_at = -1, int blind_for = 0
+    ){
+        Run result;
+        AutoStoryFerryTalk::Talk talk;
+        size_t page = 0;
+        int printed = 0;
+        while (result.looks < 400){
+            const bool blind = blind_at >= 0 && result.looks >= blind_at && result.looks < blind_at + blind_for;
+            result.looks++;
+            Look look = Look::NO_BOX;
+            if (page < pages.size() && !blind){
+                look = printed >= printing && pages[page] ? Look::ARROW : Look::BOX;
+            }
+            const Act act = AutoStoryFerryTalk::next(talk, look, first_row);
+            if (act == Act::PRESS_A){
+                result.presses++;
+                result.seconds += 1.2;
+                if (look == Look::NO_BOX){
+                    result.pressed_at_nothing = true;
+                }else if (printed < printing){
+                    printed = printing;
+                }else if (missed > 0 && result.presses % missed == 0){
+                    //  Missed by the game: the page stays.
+                }else{
+                    page++;
+                    printed = 0;
+                }
+                continue;
+            }
+            if (act == Act::WAIT){
+                result.seconds += 0.5;
+                printed++;
+                continue;
+            }
+            result.end = act;
+            break;
+        }
+        result.pages_done = page;
+        result.long_enough = talk.long_enough();
+        return result;
+    };
+    auto boarded = [](const Run& r, size_t pages){
+        return r.end == Act::LEFT && r.pages_done == pages && !r.pressed_at_nothing && r.long_enough;
+    };
+
+    //  The first time with the RAINBOW PASS and both tickets: eight pages.
+    const Run first = run(pages_of(2), 0, 0, true);
+    check(boarded(first, 8) && first.presses == 8, "the first time (both tickets' texts): eight pages, eight presses");
+    check(first.seconds < 30, "the first time: well within the 90 seconds of the step");
+    //  Slow text: A's that only hurry a page.
+    const Run slow = run(pages_of(2), 3, 0, true);
+    check(boarded(slow, 8) && slow.presses > 8 && slow.seconds < 60, "the first time with slow text");
+    //  Later times, and with one ticket only.
+    const Run later = run(pages_of(0), 1, 0, true);
+    check(boarded(later, 4), "a later time: the question, the two menus, the two pages of the departure");
+    check(boarded(run(pages_of(1), 1, 0, true), 6), "with one ticket's text");
+    //  The game misses a press now and then.
+    check(boarded(run(pages_of(2), 1, 3, true), 8), "every third A missed by the game");
+    check(boarded(run(pages_of(0), 0, 2, true), 4), "every second A missed by the game");
+    //  The text box not made out for a moment, at any time of the talk
+    //  (also after the fourth press, when the talk could be over): not
+    //  taken for its end, and no A without a text box.
+    bool blinks_fine = true;
+    int blinks = 0;
+    for (int tickets = 0; tickets <= 2; tickets += 2){
+        for (int at = 0; at < 30; at++){
+            for (int looks = 1; looks < AutoStoryFerryTalk::LOOKS_TO_LEAVE; looks++){
+                blinks++;
+                blinks_fine &= boarded(run(pages_of(tickets), 1, 0, true, at, looks), (size_t)(4 + 2 * tickets));
+            }
+        }
+    }
+    check(blinks_fine, "the text box not made out for up to three looks, at any time of the talk");
+    //  No text at all: an error, without a press.
+    const Run nothing = run({}, 0, 0, true);
+    check(
+        nothing.end == Act::NO_TEXT && nothing.presses == 0 && nothing.looks == AutoStoryFerryTalk::LOOKS_FOR_TEXT,
+        "no text box at all"
+    );
+    //  A talk shorter than a departure ("The ship set sail."): over, but
+    //  only after a longer wait, and marked as too short.
+    const Run brief = run({NO_ARROW}, 0, 0, true);
+    check(
+        brief.end == Act::LEFT && !brief.long_enough && !brief.pressed_at_nothing &&
+        brief.looks >= AutoStoryFerryTalk::LOOKS_TO_LEAVE_UNSURE,
+        "a talk of one page"
+    );
+    //  Another row than the first: only the page with the arrow gets A,
+    //  the menus are for the reading.
+    const Run other_row = run(pages_of(2), 0, 0, false);
+    check(
+        other_row.end == Act::WAIT && other_row.presses == 1 && other_row.pages_done == 1,
+        "another row than the first: no A on a page without the arrow"
+    );
+
+    logger.log(
+        "AutoStory test: the sailor at the pier of Vermilion City (his pages and menus pressed through without "
+        "reading them: the first time with both tickets' texts in " + std::to_string(first.presses) +
+        " presses, slow text in " + std::to_string(slow.presses) + ", later times in " +
+        std::to_string(later.presses) + "; presses missed by the game; the text box not made out for a "
+        "moment, " + std::to_string(blinks) + " ways; no text at all): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1264,6 +1425,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_name_mark(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
+        failed += check_ferry_talk(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

@@ -392,6 +392,11 @@ std::string read_story_text(
     ConsoleHandle& console, const ImageFloatBox& box, bool bright
 );
 
+//  The same for what people say, which read_story_text() does not see: a
+//  man's words are blue, a woman's red (dark text is read as well). For the
+//  log: nothing is decided by it yet.
+std::string read_people_text(ConsoleHandle& console, const ImageFloatBox& box);
+
 
 }
 }

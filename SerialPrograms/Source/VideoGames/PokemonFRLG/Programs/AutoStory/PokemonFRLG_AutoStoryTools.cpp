@@ -2803,6 +2803,10 @@ std::string story_read_dialog(StoryRuntime& rt){
     return read_story_text(rt.console, DIALOG_TEXT_BOX, false);
 }
 
+std::string story_read_people(StoryRuntime& rt){
+    return read_people_text(rt.console, DIALOG_TEXT_BOX);
+}
+
 bool story_close_repel_text(StoryRuntime& rt){
     const std::string text = story_read_dialog(rt);
     if (text.find("wore off") == std::string::npos && text.find("effect wore") == std::string::npos){

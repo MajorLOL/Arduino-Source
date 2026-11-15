@@ -470,6 +470,10 @@ bool story_scripted_battle(StoryRuntime& rt, const std::string& opponent);
 //  The text of the overworld text box (bottom of the screen), lower case.
 std::string story_read_dialog(StoryRuntime& rt);
 
+//  The same for what someone says there (blue or red text, which
+//  story_read_dialog() does not see). For the log.
+std::string story_read_people(StoryRuntime& rt);
+
 //  A text box on the way that is "REPEL's effect wore off...": closed, and
 //  true (the walk goes on). False for anything else (a trainer...).
 //  (Rarely seen: the game itself closes that box on the next press of the

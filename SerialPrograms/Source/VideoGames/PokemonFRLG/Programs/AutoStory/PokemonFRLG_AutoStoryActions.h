@@ -177,8 +177,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step);
 //  The Seagallop from Vermilion City (StepType::SEAGALLOP), the player on
 //  the pier's trigger: through the sailor's text (on the Switch the MYSTIC
 //  and AURORA TICKETs first, and their menu: SEVII ISLANDS) to row "row"
-//  of the Sevii Islands list (0: One Island). The ferry scene is the next
-//  step.
+//  of the Sevii Islands list (0: One Island), until his text box is gone.
+//  His text is blue and not read: for row 0 every page and menu gets A
+//  (AutoStoryFerryTalk). The ferry scene is the next step.
 void story_seagallop(StoryRuntime& rt, int row, const std::string& what);
 
 //  Prize money from a trainer who battles again (StepType::REMATCH), the

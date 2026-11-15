@@ -1541,6 +1541,41 @@ std::string read_story_text(
     return read_text(console, box, bright);
 }
 
+std::string read_people_text(ConsoleHandle& console, const ImageFloatBox& box){
+    StoryMemoryScope memory_scope("reading text");
+    VideoSnapshot screen = console.video().snapshot();
+    ImageViewRGB32 image = game_box(screen, box);
+    //  The text box is white. A man's words are blue with a light blue
+    //  shadow, a woman's red with a light red one, anything else dark grey
+    //  with a light grey one: the letters have little red and green (blue,
+    //  dark), or little green and blue (red, dark), their shadows and the
+    //  box a lot of all three. (On a picture of the sailor's first page at
+    //  the pier of Vermilion City: 188 pixels as dark as read_text() wants
+    //  them, 8752 for the first of these.)
+    std::string best;
+    int most = -1;
+    for (int kind = 0; kind < 2 && most < 8; kind++){
+        ImageRGB32 bw = kind == 0
+            ? to_blackwhite_rgb32_range(image, true, combine_rgb(0, 0, 0), combine_rgb(140, 170, 255))
+            : to_blackwhite_rgb32_range(image, true, combine_rgb(0, 0, 0), combine_rgb(255, 128, 128));
+        const std::string text = OCR::ocr_read(Language::English, bw, OCR::PageSegMode::SINGLE_BLOCK);
+        std::string lower;
+        int letters = 0;
+        for (char c : text){
+            lower += c == '\n' ? ' ' : (char)std::tolower((unsigned char)c);
+            letters += std::isalpha((unsigned char)c) ? 1 : 0;
+        }
+        if (letters > most){
+            most = letters;
+            best = lower;
+        }
+    }
+    while (!best.empty() && best.back() == ' '){
+        best.pop_back();
+    }
+    return best;
+}
+
 double move_value(int move, const StoryBattleSettings& settings){
     if (move < 0){
         return 0;
