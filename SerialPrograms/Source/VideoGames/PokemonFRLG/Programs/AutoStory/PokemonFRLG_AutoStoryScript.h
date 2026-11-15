@@ -94,7 +94,10 @@ enum class StepType : uint8_t{
     TALK_YES,           //  A, answer YES
     TALK_NO,            //  A, answer NO
     HEAL,               //  talk to the nurse, heal
-    CUTSCENE,           //  p0 = min ms, p1 = max ms, text "YES": answer questions with YES
+    CUTSCENE,           //  p0 = min ms, p1 = max ms, text "YES": answer questions with YES;
+                        //  p3 > 0: the scene takes the player out of a small building (the
+                        //  Safari Zone's desk). Still in it afterwards (the game costs 500):
+                        //  skip the next p3 steps, and the money is short
     BATTLE,             //  a battle starts (or started on the way); p1 = 1: run away if wild,
                         //  p1 = 2: a legendary Pokemon, caught with the best ball; then
                         //  p2 & 1: its HP is brought down first, p2 & 2: the Master Ball
@@ -122,7 +125,8 @@ enum class StepType : uint8_t{
     PUSH,               //  push a Strength boulder toward dir
     BUY,                //  in a Poke Mart menu: p0 = item index, p1 = quantity; p2 = what it is
                         //  for the program's count of the bag (1 REVIVE, 2 FULL RESTORE or MAX
-                        //  POTION); p3 = 1: only what is missing up to p1 (the League again)
+                        //  POTION); p3 = 1: only what is missing up to p1 (the League again);
+                        //  p4 > 0: only when the money trip won p4 battles or more (REMATCH)
     HEAL_ITEMS,         //  heal the party with items from the bag; p0: 0 after a room of the
                         //  first League, 1 after a legendary Pokemon, 2 after a room of the
                         //  League again, 3 the same before the Champion
@@ -159,6 +163,11 @@ enum class StepType : uint8_t{
     SKIP_UNLESS_LEFT,   //  text = labels of legendary BATTLE steps (p2 & 4): unless the program
                         //  left one of them for later, skip the next p0 steps (the way back
                         //  to it)
+    REMATCH,            //  prize money from a trainer who battles again: next to the trainer,
+                        //  facing it. legs_a: a walk of 100 steps or more that ends there
+                        //  again (the VS SEEKER charges with the steps); then the VS SEEKER
+                        //  from the bag and A on the trainer: a battle or a line of text.
+                        //  Until p0 battles are won or p1 minutes are over; p2: what one pays
 };
 
 struct StoryStep{

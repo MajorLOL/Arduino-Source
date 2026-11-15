@@ -2876,6 +2876,194 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
 
 
 
+namespace{
+
+enum class SeekerUse{
+    NOT_IN_BAG,
+    NOT_CHARGED,    //  "The battery isn't charged enough."
+    NO_ONE,         //  "There are no TRAINERS within range who can battle..."
+    NOT_READY,      //  "The other TRAINERS don't appear to be ready for battle."
+    USED,           //  no text: someone wants a battle (or was never beaten)
+};
+
+//  The VS SEEKER from the bag, used where the player stands
+//  (FieldUseFunc_VsSeeker: the bag closes, Task_VsSeeker_0). The player is
+//  free again afterwards.
+SeekerUse use_vs_seeker(StoryRuntime& rt, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    open_bag_from_overworld(console, context);
+    //  "A device that indicates TRAINERS who want to battle. The battery
+    //  charges while traveling."
+    if (!select_bag_item(
+        rt, BagPocket::KEY_ITEMS,
+        {"indicates trainers", "want to battle", "battery charges", "while traveling"}, {}, "VS SEEKER"
+    )){
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+        return SeekerUse::NOT_IN_BAG;
+    }
+    //  A: USE / REGISTER / CANCEL, cursor on USE. A: the bag closes, and
+    //  on the map the player holds the VS SEEKER up (or a text says why
+    //  not). Trainers in reach answer with a mark over their heads; when
+    //  none of them wants a battle, a text says so after that.
+    press(context, BUTTON_A, 800ms);
+    press(context, BUTTON_A, 3500ms);
+    context.wait_for_all_requests();
+    SeekerUse result = SeekerUse::USED;
+    for (int look = 0; look < 2; look++){
+        const std::string text = story_read_dialog(rt);
+        //  (Not "battery" alone: the VS SEEKER's own description in the bag
+        //  has that word.)
+        if (contains(text, "charged enough") || contains(text, "isn't charged") ||
+            contains(text, "steps required") || contains(text, "fully charge")
+        ){
+            result = SeekerUse::NOT_CHARGED;
+        }else if (contains(text, "within range") || contains(text, "no trainers") || contains(text, "turned off")){
+            result = SeekerUse::NO_ONE;
+        }else if (contains(text, "ready for") || contains(text, "appear") || contains(text, "other trainers")){
+            result = SeekerUse::NOT_READY;
+        }
+        if (result != SeekerUse::USED){
+            console.log("The VS SEEKER (" + what + "): \"" + text + "\"");
+            break;
+        }
+        if (look == 0){
+            pbf_wait(context, 2500ms);
+            context.wait_for_all_requests();
+        }
+    }
+    //  B closes its text (two pages), and does nothing without one.
+    pbf_mash_button(context, BUTTON_B, 2500ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "VS SEEKER");
+    return result;
+}
+
+}
+
+int story_rematch(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    const std::string label = step.label;
+    const int wanted = std::max(1, (int)step.p0);
+    const auto limit = std::chrono::minutes(std::max(5, (int)step.p1));
+    const int prize = std::max(0, (int)step.p2);
+    const std::vector<int32_t> walk = script.leg_list(step.legs_a);
+    if (walk.empty()){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_rematch(): No walk for the VS SEEKER in the step's data: " + label,
+            console
+        );
+    }
+    console.log(
+        label + ": prize money. Up to " + std::to_string(wanted) + " battles with the trainer here (" +
+        std::to_string(prize) + " each): 100 steps and more, the VS SEEKER, A on the trainer, again and again. "
+        "The trainer wants a battle 7 times in 10.",
+        COLOR_BLUE
+    );
+    const WallClock start = current_time();
+    int wins = 0;
+    int uses = 0;
+    int rounds = 0;
+    int dry = 0;                //  rounds in a row without a battle
+    bool have_seeker = true;
+    bool lead_down = false;
+    std::string stopped;
+    while (wins < wanted){
+        if (current_time() - start > limit){
+            stopped = "the " + std::to_string((int)step.p1) + " minutes of this step are over";
+            break;
+        }
+        if (dry >= 8){
+            stopped = "eight rounds in a row without a battle";
+            break;
+        }
+        rounds++;
+        //  The battery: 100 steps with the VS SEEKER in the bag.
+        for (int32_t leg : walk){
+            rt.walking_leg = leg;
+            walk_leg(rt, script, leg);
+        }
+        rt.walking_leg = -1;
+        //  At the hundredth step after a use that found someone, the game
+        //  stops for a moment and the trainers stand as before
+        //  (EventScript_VsSeekerChargingDone).
+        pbf_wait(context, 1000ms);
+        context.wait_for_all_requests();
+
+        SeekerUse use = SeekerUse::NOT_IN_BAG;
+        if (have_seeker){
+            use = use_vs_seeker(rt, label);
+            if (use == SeekerUse::NOT_IN_BAG){
+                have_seeker = false;
+                console.log(
+                    label + ": no VS SEEKER in the bag (the woman left of the nurse in the Vermilion City "
+                    "Pokemon Center gives it). Without it a trainer battles only once.",
+                    COLOR_RED
+                );
+            }else{
+                uses++;
+            }
+        }
+
+        //  A on the trainer: the words before a battle, or a line of text.
+        story_talk_start(rt, label);
+        bool battle = false;
+        for (int part = 0; part < 4; part++){
+            if (!story_cutscene(rt, 0ms, 60s, false, label)){
+                break;
+            }
+            const StoryBattleResult result = story_battle(rt, StoryBattleKind::TRAINER, label);
+            if (result == StoryBattleResult::NO_BATTLE){
+                break;
+            }
+            battle = true;
+            lead_down |= result == StoryBattleResult::LEAD_FAINTED;
+        }
+        if (battle){
+            wins++;
+            rt.trip_wins++;
+            dry = 0;
+            console.log(
+                label + ": battle " + std::to_string(wins) + " of " + std::to_string(wanted) + " won (round " +
+                std::to_string(rounds) + "): " + std::to_string(prize) + " more. Battles won on this trip: " +
+                std::to_string(rt.trip_wins) + ".",
+                COLOR_BLUE
+            );
+            story_note(rt, label + ": " + std::to_string(wins) + " of " + std::to_string(wanted) + " battles won");
+        }else{
+            dry++;
+            console.log(
+                label + ": no battle this time" +
+                (use == SeekerUse::NOT_CHARGED ? " (the VS SEEKER was not charged yet)" :
+                 use == SeekerUse::NO_ONE ? " (the VS SEEKER found no trainer in reach)" :
+                 use == SeekerUse::NOT_READY ? " (the trainer was not ready)" : "") + "."
+            );
+        }
+        if (lead_down){
+            stopped = "the lead fainted";
+            break;
+        }
+        if (!have_seeker){
+            stopped = "no VS SEEKER";
+            break;
+        }
+    }
+    const auto took = std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
+    console.log(
+        label + ": " + std::to_string(wins) + " battles won in " + std::to_string(took) + " minutes (" +
+        std::to_string(uses) + " uses of the VS SEEKER): " + std::to_string((long long)wins * prize) +
+        " prize money." + (stopped.empty() ? std::string() : " Stopped: " + stopped + "."),
+        wins >= wanted ? COLOR_BLUE : COLOR_ORANGE
+    );
+    return wins;
+}
+
+
+
 }
 }
 }

@@ -36,6 +36,7 @@
 #include "PokemonFRLG_AutoStoryWalkTracker.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
+#include "PokemonFRLG_AutoStorySmallRoom.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
 namespace PokemonAutomation{
@@ -2339,6 +2340,7 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.party_order_final_at_save = rt.party_order_final;
     rt.bag_revives_at_save = rt.bag_revives;
     rt.bag_restores_at_save = rt.bag_restores;
+    rt.trip_wins_at_save = rt.trip_wins;
     rt.team_down_at_save = rt.memory.team_down;
     for (int i = 0; i < 6; i++){
         rt.team_hp_at_save[i] = rt.memory.team_hp[i];
@@ -2826,6 +2828,49 @@ void story_back_to_overworld(StoryRuntime& rt, const std::string& where){
         "Not back in the overworld: " + where,
         rt.console
     );
+}
+
+bool story_still_in_small_room(StoryRuntime& rt, const std::string& what){
+    using AutoStorySmallRoom::Sides;
+    //  The check that the scene is over opened the start menu, which
+    //  covers the right side of the picture: closed by now, but a moment
+    //  for it. A few looks: outdoors no picture has black at both sides,
+    //  so one that has it settles it.
+    pbf_wait(rt.context, 700ms);
+    rt.context.wait_for_all_requests();
+    int open_looks = 0;
+    int black_looks = 0;
+    int dark_looks = 0;
+    for (int look = 0; look < 4; look++){
+        if (look > 0){
+            rt.context.wait_for(300ms);
+        }
+        VideoSnapshot screen = rt.console.video().snapshot();
+        if (!screen){
+            continue;
+        }
+        ImageViewRGB32 game = extract_box_reference(screen, GameSettings::instance().GAME_BOX);
+        if (!game){
+            continue;
+        }
+        switch (AutoStorySmallRoom::black_sides(game.data(), game.width(), game.height(), game.bytes_per_row())){
+        case Sides::OPEN:
+            open_looks++;
+            break;
+        case Sides::BLACK:
+            black_looks++;
+            break;
+        case Sides::DARK:
+            dark_looks++;
+            break;
+        }
+    }
+    rt.console.log(
+        "After \"" + what + "\": black at both sides of the picture in " + std::to_string(black_looks) +
+        " of " + std::to_string(open_looks + black_looks + dark_looks) + " looks (the small room)" +
+        (dark_looks > 0 ? ", " + std::to_string(dark_looks) + " dark all over" : std::string()) + "."
+    );
+    return black_looks > 0;
 }
 
 

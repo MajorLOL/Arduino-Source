@@ -137,6 +137,22 @@ struct StoryRuntime{
     bool safari_over = false;
     int safari_balls_used = 0;      //  of the 30 SAFARI BALLs
     bool no_balls = false;
+    //  The POKeDEX collection (chapter 20) is short of something: a Safari
+    //  Game was not joined (500, and the attendant sent the player back),
+    //  or no ball was left for a wanted species at a place outside the
+    //  Safari Zone. Until the money trip (the segment with REMATCH) has
+    //  brought prize money and balls, the places that need what is short
+    //  are skipped; while that trip can still be made ("money_trip_open",
+    //  set by the program's loop), all places are, and the trip comes
+    //  first.
+    bool short_of_money = false;
+    bool short_of_balls = false;
+    bool money_trip_open = false;
+    //  Battles won on the money trip under way (StepType::REMATCH), and at
+    //  the last save (a reset goes back to that: the prize money of the
+    //  battles since is gone with it). What the trip buys goes by them.
+    int trip_wins = 0;
+    int trip_wins_at_save = 0;
     uint64_t dex_new = 0;
     //  Species dropped from the list of a DEX step because the game showed
     //  the ball mark (caught before, the program did not know).
@@ -464,6 +480,11 @@ bool story_close_repel_text(StoryRuntime& rt);
 
 //  Close menus and text boxes until the player can move.
 void story_back_to_overworld(StoryRuntime& rt, const std::string& where);
+
+//  After a scene that takes the player out of a small building (the Safari
+//  Zone's desk): is the player still in it? (Black at both sides of the
+//  game's picture: PokemonFRLG_AutoStorySmallRoom.h.)
+bool story_still_in_small_room(StoryRuntime& rt, const std::string& what);
 
 
 }

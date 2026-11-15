@@ -130,14 +130,15 @@ def talk_no(map_id, xy, label):
     return talk(map_id, xy=xy, mode="no", label=label)
 
 
-def buy(map_id, clerk_xy, item_index, quantity, label, item=None, kind=None, up_to=False):
+def buy(map_id, clerk_xy, item_index, quantity, label, item=None, kind=None, up_to=False, wins=0):
     """Buy from a Poke Mart clerk: item_index in the mart's list (decomp).
     item: ESCAPE_ROPE or MAX_REPEL, counted for the router (story.py,
     Builder.shortcuts). Bought before the balls "as many as the money
     allows" of the same visit.
     kind: "revive" or "restore" (FULL RESTORE, MAX POTION), the healing
     items of the League: the program keeps count of them. up_to: only what
-    is missing up to the quantity."""
+    is missing up to the quantity.
+    wins: only when the money trip won this many battles (money_trip())."""
     b = {"index": item_index, "quantity": quantity}
     if item:
         b["item"] = item
@@ -145,6 +146,8 @@ def buy(map_id, clerk_xy, item_index, quantity, label, item=None, kind=None, up_
         b["kind"] = kind
         if up_to:
             b["up_to"] = True
+    if wins:
+        b["wins"] = wins
     return [talk(map_id, xy=clerk_xy, mode="plain", label=label, counter=True),
             {"buy": b, "label": label}]
 
@@ -1849,20 +1852,29 @@ def dex(map_id, tiles, species, label, idle=25, minutes=30, safari=False):
                     "minutes": minutes, "safari": safari, "enough": DEX_NEEDED}, "label": label}
 
 
-def safari_game(area_map, tiles, species, label):
+def safari_game(area_map, tiles, species, label, catching=None):
     """One Safari Game (500): SAFARI BALLs at every species of the list until
     it is caught or flees, until the 30 balls or the 600 steps run out; the
     PA's text, then the gate (FuchsiaCity_SafariZone_Entrance_EventScript_
-    ExitWarpIn / ExitWalkIn: both end at (4, 4))."""
-    return [
-        goto("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", [[4, 3]], label + "_Desk", trigger=True),
-        cutscene(4000, 90000, "Join the Safari Game", answer="yes"),
+    ExitWarpIn / ExitWalkIn: both end at (4, 4)).
+    With less than 500 the attendant says "Oops! Not enough money!" and
+    sends the player one step back (EventScript_ForcePlayerBack, as after a
+    NO): to (4, 4) as well, facing down. The game itself is a block the
+    program skips then ("joined"): on 15 November 2026, with 146 left, it
+    walked on as if in the Safari Zone, into the counter, four times.
+    catching: the step for the game itself (collect_safari)."""
+    game = [
         setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 2}),
         pos("MAP_SAFARI_ZONE_CENTER", 26, 30, "up"),
-        dex(area_map, tiles, species, label, safari=True),
+        catching or dex(area_map, tiles, species, label, safari=True),
         cutscene(3000, 40000, "The Safari Game is over"),
         setst(vars={"VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE": 0}),
         pos("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", 4, 4, "down"),
+    ]
+    return [
+        goto("MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE", [[4, 3]], label + "_Desk", trigger=True),
+        cutscene(4000, 90000, "Join the Safari Game", answer="yes"),
+        {"joined": {"steps": game}, "label": label + "_Joined"},
     ]
 
 
@@ -2442,19 +2454,19 @@ def collect_place(pc_map, map_id, tiles, label, species=None, visits=COLLECT_VIS
 def collect_safari(area_map, label):
     """A Safari Game in one area (C14_05: the walk in, the PA's text at the
     end, the gate)."""
-    steps = safari_game(area_map, WHOLE, None, label)
-    steps = [collect(area_map, WHOLE, label, safari=True) if "dex" in s else s for s in steps]
+    steps = safari_game(area_map, WHOLE, None, label, catching=collect(area_map, WHOLE, label, safari=True))
     return collect_trip(PC["FUCHSIA"], steps, label)
 
 
-def collect_town(seg_id, title, pc_map, places, fly_to, mart=None, state=None):
-    """One town: FLY there, the nurse, POKe BALLs (mart), the places, out of
-    the Pokemon Center. Skipped as a whole when the table wants none of the
-    species of its places."""
+def collect_town(seg_id, title, pc_map, places, fly_to, state=None):
+    """One town: FLY there, the nurse, the places, out of the Pokemon Center.
+    Skipped as a whole when the table wants none of the species of its
+    places. (No Poke Mart on the way: "as many POKe BALLs as the money
+    allows" in Cerulean and Viridian City left 146 on 15 November 2026, and
+    a Safari Game is 500. The balls are bought on the money trip, with what
+    it brought.)"""
     steps = [fly(fly_to, seg_id + "_Fly", force=True)]
     steps.append(heal(pc_map, seg_id + "_ToNurse"))
-    if mart:
-        steps += poke_balls(mart, seg_id + "_BuyPokeBalls") + [heal(pc_map, seg_id + "_MartToNurse")]
     for place in places:
         steps += place if isinstance(place, list) else [place]
     out = {"outside": True, "label": seg_id + "_Out"}
@@ -2551,6 +2563,85 @@ def sevii_tour():
     ]
 
 
+#  Money for the collection. Chapter 20 starts with next to none (the ULTRA
+#  BALLs for Mewtwo are "as many as the money allows"), a Safari Game is 500
+#  and a POKe BALL 200, and the League is no source any more: since the
+#  Network Machine works (FLAG_SYS_CAN_LINK_WITH_RS) the Elite Four have
+#  their second teams, levels 63 to 75 (the team of 15 November 2026,
+#  CHARIZARD 88 and three at 61 to 64, starting from its 146: in 120
+#  simulated tries of six Leagues each it never won the fourth room, and a
+#  loss costs 120 x the highest level).
+#
+#  The VS SEEKER (a gift in the Vermilion City Pokemon Center) makes trainers
+#  who were beaten battle again: used with them on screen (7 tiles left and
+#  right, 5 up and down), each wants to 7 times in 10, after 100 steps with
+#  it in the bag. Lady Gillian on Five Island's Resort Gorgeous pays 9800
+#  each time (class money 50 x 4 x level 49: MAREEP 47, MAREEP 48, FLAAFFY
+#  49, the same team every time), stands still at (33, 8) and can be talked
+#  to from her right side, out of sight of the Painter below her. (Lady
+#  Jacki, 10000, walks about: not her.) CHARIZARD is faster and FLAMETHROWER
+#  takes each of the three at once: 15 PP are five battles without a
+#  scratch. From the sixth on the others get a turn (THUNDER, THUNDER
+#  WAVE): after seven battles in a row CHARIZARD was down in 13 of 100
+#  simulated tries, after nine in 57. So: the nurse after every five.
+GILLIAN_MAP = "MAP_FIVE_ISLAND_RESORT_GORGEOUS"
+GILLIAN_XY = [33, 8]
+GILLIAN_PRIZE = 9800
+#  The walk for the VS SEEKER's 100 steps: from her side down past the
+#  houses, along the rows below them and back, six times (20 steps each;
+#  clear of the Painter further right, who looks down and to the right).
+#  After a use that found someone the game stops the player for a moment at
+#  the hundredth step (EventScript_VsSeekerChargingDone: the trainers stand
+#  as before): that is the end of the fifth time, back at her side.
+GILLIAN_WALK = [GILLIAN_MAP, 41, 11]
+
+
+def gillian(wins, label):
+    """Next to Lady Gillian, then battles with her until `wins` are won."""
+    return [
+        talk(GILLIAN_MAP, xy=GILLIAN_XY, mode="plain", dirs=["left"], label=label + "_ToGillian"),
+        {"rematch": {"wins": wins, "minutes": 45, "prize": GILLIAN_PRIZE, "far": GILLIAN_WALK, "loops": 6},
+         "label": label},
+    ]
+
+
+def money_trip():
+    """The VS SEEKER, Five Island, nine battles with Lady Gillian (88200),
+    back to Vermilion City, POKe BALLs. Each purchase (99 for 19800) only
+    when the battles won leave 9000 or more after it: the fee of the Safari
+    Games (500 each, eight in a round of the towns)."""
+    vermilion = PC["VERMILION"]
+    mart = "MAP_VERMILION_CITY_MART"
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", "C20_01B_MONEY_Fly", force=True),
+        heal(vermilion, "C20_01B_MONEY_ToNurse"),
+        #  VermilionCity_PokemonCenter_1F_EventScript_VSSeekerWoman: the VS
+        #  SEEKER the first time, what it does after that.
+        talk(vermilion, xy=[6, 4], mode="talk", label="VsSeekerWoman"),
+        setst(flags=["FLAG_GOT_VS_SEEKER"]),
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    #  From One Island: Vermilion, Two, Three, Four, Other; then Five, Six,
+    #  Seven (DrawSeagallopDestinationMenu).
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland")
+    steps += [heal(FIVE_PC, "HarborToFiveIslandNurse"), save()]
+    steps += gillian(4, "Gillian")
+    steps += [heal(FIVE_PC, "GillianToNurse"), save()]
+    steps += gillian(5, "GillianAgain")
+    steps += [heal(FIVE_PC, "GillianAgainToNurse"), save()]
+    steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    steps += [pos("MAP_VERMILION_CITY", 23, 32)]
+    #  Each "as many as the money allows", which is 99 at most in one
+    #  purchase (Task_BuyHowManyDialogueInit).
+    for wins in (3, 5, 7, 9):
+        steps += buy(mart, [2, 3], 0, 0, "BuyPokeBalls%d" % wins, wins=wins)
+    steps += [heal(vermilion, "MartToVermilionNurse"), save(), {"outside": True, "label": "C20_01B_MONEY_Out"}]
+    return steps
+
+
 CHAPTER20 = [
     #  Mewtwo's segment ends at the nurse in Cerulean City: out first, so that
     #  every town segment starts outdoors (and the loop of "shiny only"
@@ -2560,12 +2651,21 @@ CHAPTER20 = [
         "title": "POKeDEX collection: out of the Cerulean City Pokemon Center",
         "steps": [{"outside": True, "label": "C20_01_Out"}],
     },
+    #  Like the towns: starts with FLY, ends outdoors. Once before the first
+    #  town; and again from the end of a town's segment when a Safari Game
+    #  was refused for lack of money or the POKe BALLs ran out (the program
+    #  comes here, then goes round the towns from C20_02 again).
+    {
+        "id": "C20_01B_MONEY", "chapter": 20, "no_repel": True,
+        "title": "POKeDEX collection: prize money (the VS SEEKER, Lady Gillian on Five Island), POKe BALLs",
+        "steps": money_trip(),
+    },
     collect_town("C20_02_CERULEAN", "Route 24, Route 4, Cerulean Cave", PC["CERULEAN"], [
         collect_place(PC["CERULEAN"], "MAP_ROUTE24", WHOLE, "CollectRoute24"),
         collect_place(PC["CERULEAN"], "MAP_ROUTE4", WHOLE, "CollectRoute4"),
         collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_B1F", WHOLE, "CollectCeruleanCaveB1F", visits=3),
         collect_place(PC["CERULEAN"], "MAP_CERULEAN_CAVE_1F", WHOLE, "CollectCeruleanCave1F"),
-    ], fly_to="HEAL_LOCATION_CERULEAN_CITY", mart="MAP_CERULEAN_CITY_MART"),
+    ], fly_to="HEAL_LOCATION_CERULEAN_CITY"),
     collect_town("C20_03_MT_MOON", "Mt. Moon, Route 3", PC["ROUTE4"], [
         collect_place(PC["ROUTE4"], "MAP_MT_MOON_B2F", WHOLE, "CollectMtMoon"),
         collect_place(PC["ROUTE4"], "MAP_ROUTE3", WHOLE, "CollectRoute3"),
@@ -2574,7 +2674,7 @@ CHAPTER20 = [
         collect_place(PC["VIRIDIAN"], "MAP_VIRIDIAN_FOREST", rect(3, 55, 42, 61), "CollectViridianForest"),
         collect_place(PC["VIRIDIAN"], "MAP_ROUTE22", WHOLE, "CollectRoute22"),
         collect_place(PC["VIRIDIAN"], "MAP_ROUTE23", WHOLE, "CollectRoute23"),
-    ], fly_to="HEAL_LOCATION_VIRIDIAN_CITY", mart="MAP_VIRIDIAN_CITY_MART"),
+    ], fly_to="HEAL_LOCATION_VIRIDIAN_CITY"),
     collect_town("C20_05_VICTORY_ROAD", "Victory Road", PC["INDIGO"], [
         collect_place(PC["INDIGO"], "MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), "CollectVictoryRoad"),
     ], fly_to="HEAL_LOCATION_INDIGO_PLATEAU", state=VICTORY_ROAD_RESET),
@@ -2616,7 +2716,7 @@ CHAPTER20 = [
         collect_place(PC["VERMILION"], "MAP_DIGLETTS_CAVE_B1F", WHOLE, "CollectDiglettsCave"),
         collect_place(PC["VERMILION"], "MAP_ROUTE6", WHOLE, "CollectRoute6"),
         {"unless_collected": {"steps": sevii_tour()}, "label": "The Sevii Islands?"},
-    ], fly_to="HEAL_LOCATION_VERMILION_CITY", mart="MAP_VERMILION_CITY_MART"),
+    ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
 ]
 
 

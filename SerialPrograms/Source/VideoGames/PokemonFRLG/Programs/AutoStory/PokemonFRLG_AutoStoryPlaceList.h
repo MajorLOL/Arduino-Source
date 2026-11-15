@@ -78,6 +78,28 @@ inline bool story_place_worth(int here, int best){
     return here > 0 && (here >= 10 || best <= 0 || 2 * here >= best);
 }
 
+//  Places the table still wants something from, but the collection is
+//  short of what they take: a Safari Game is 500 ("short_of_money": one
+//  was not joined), the other places take POKe BALLs ("short_of_balls":
+//  none was left for a wanted species). Are they left for now?
+//  "safari_places", "other_places": how many of each kind the steps have.
+//  "trip_open": the money trip can still be made. Then every place waits
+//  for it: the trip brings both, and the towns are gone round again after
+//  it. Without it: only steps that have nothing but places of a kind that
+//  cannot be done.
+inline bool story_places_wait(
+    int safari_places, int other_places,
+    bool short_of_money, bool short_of_balls, bool trip_open
+){
+    if ((!short_of_money && !short_of_balls) || safari_places + other_places <= 0){
+        return false;
+    }
+    if (trip_open){
+        return true;
+    }
+    return (safari_places <= 0 || short_of_money) && (other_places <= 0 || short_of_balls);
+}
+
 
 }
 }

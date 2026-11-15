@@ -48,8 +48,10 @@
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySmallRoom.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "Assistant/Assistant_Panel.h"
 #include "Assistant/Assistant_Play.h"
@@ -1103,6 +1105,147 @@ int check_collection_lists(const QString& out, Logger& logger){
     return wrong;
 }
 
+
+//  The FRLG AutoStory's money for the POKeDEX collection: whether a Safari
+//  Game was joined (the gate house has black at both sides of the
+//  picture), which places wait for the money trip, and the trip in the
+//  story's data as this build has it.
+int check_money_trip(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    using AutoStorySmallRoom::Sides;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+
+    //  Pictures of the game, 480 by 320: a room between "from" and "to" of
+    //  the width (black beside it), boxes over it.
+    const size_t DRAWN_WIDTH = 480;
+    const size_t DRAWN_HEIGHT = 320;
+    struct DrawnBox{
+        double x0, y0, x1, y1;
+        uint32_t color;
+    };
+    auto look = [&](double from, double to, const std::vector<DrawnBox>& boxes){
+        std::vector<uint32_t> picture(DRAWN_WIDTH * DRAWN_HEIGHT, 0xff000000);
+        auto fill = [&](const DrawnBox& box){
+            for (size_t y = (size_t)(box.y0 * (double)DRAWN_HEIGHT); y < (size_t)(box.y1 * (double)DRAWN_HEIGHT) && y < DRAWN_HEIGHT; y++){
+                for (size_t x = (size_t)(box.x0 * (double)DRAWN_WIDTH); x < (size_t)(box.x1 * (double)DRAWN_WIDTH) && x < DRAWN_WIDTH; x++){
+                    //  A little texture, as a map has.
+                    picture[y * DRAWN_WIDTH + x] = (x / 8 + y / 8) % 2 == 0 ? box.color : box.color - 0x00101010;
+                }
+            }
+        };
+        fill({from, 0, to, 1, 0xff60b860});
+        for (const DrawnBox& box : boxes){
+            fill(box);
+        }
+        return AutoStorySmallRoom::black_sides(picture.data(), DRAWN_WIDTH, DRAWN_HEIGHT, DRAWN_WIDTH * sizeof(uint32_t));
+    };
+    const DrawnBox money_box{0.03, 0.05, 0.63, 0.42, 0xfff8f8f8};
+    const DrawnBox text_box{0.02, 0.72, 0.98, 0.98, 0xfff8f8f8};
+    const DrawnBox start_menu{0.73, 0.00, 1.00, 0.75, 0xfff8f8f8};
+    //  The gate house of the Safari Zone is 9 of the picture's 15 tiles wide.
+    check(look(0.2, 0.8, {}) == Sides::BLACK, "the gate house, the player in its middle");
+    check(look(4.0 / 15, 13.0 / 15, {}) == Sides::BLACK, "the gate house, the player a tile to the left");
+    check(look(0.2, 0.8, {money_box, text_box}) == Sides::BLACK, "the gate house with the money box and a text box");
+    check(look(0.2, 0.8, {start_menu}) == Sides::OPEN, "the gate house with the start menu over its right side");
+    check(look(0, 1, {}) == Sides::OPEN, "outdoors");
+    check(look(0, 0, {}) == Sides::DARK, "a black picture");
+    check(look(1.0 / 15, 14.0 / 15, {}) == Sides::OPEN, "a room 13 tiles wide");
+
+    //  Short of money or balls: which places wait.
+    check(
+        !story_places_wait(1, 1, false, false, true) && !story_places_wait(0, 0, true, true, true) &&
+        story_places_wait(1, 0, true, false, true) && story_places_wait(0, 2, true, false, true) &&
+        story_places_wait(0, 1, false, true, true),
+        "with the money trip to come, every place waits for it"
+    );
+    check(
+        story_places_wait(2, 0, true, false, false) && !story_places_wait(0, 2, true, false, false) &&
+        !story_places_wait(1, 1, true, false, false) && story_places_wait(0, 3, false, true, false) &&
+        !story_places_wait(1, 0, false, true, false) && story_places_wait(1, 1, true, true, false),
+        "without it, only the places that take what is short"
+    );
+
+    //  The story's data: the walk of each REMATCH step (100 steps or more
+    //  for the VS SEEKER, back to where it starts, facing the trainer), and
+    //  the steps a Safari Game not joined skips (the game itself: one DEX
+    //  step in the Safari Zone; then a walk).
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    int rematches = 0;
+    int rematch_wins = 0;
+    int shortest_walk = 0;
+    bool walks_fine = true;
+    int joins = 0;
+    bool joins_fine = true;
+    int purchases = 0;
+    bool money_segment = false;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type == StepType::REMATCH){
+                money_segment |= std::string(segment.id).find("_MONEY") != std::string::npos;
+                const std::vector<int32_t> legs = script.leg_list(step.legs_a);
+                int walked = 0;
+                int dx = 0;
+                int dy = 0;
+                bool plain = true;
+                for (int32_t leg_index : legs){
+                    const StoryLeg& leg = script.leg(leg_index);
+                    const StoryRun* runs = script.leg_runs(leg);
+                    for (uint16_t r = 0; r < leg.run_count; r++){
+                        plain &= runs[r].kind == RunKind::WALK;
+                        walked += runs[r].count;
+                        dx += runs[r].direction == DPAD_RIGHT ? runs[r].count : runs[r].direction == DPAD_LEFT ? -(int)runs[r].count : 0;
+                        dy += runs[r].direction == DPAD_DOWN ? runs[r].count : runs[r].direction == DPAD_UP ? -(int)runs[r].count : 0;
+                    }
+                }
+                const bool faces = !legs.empty() && script.leg(legs.back()).end == LegEnd::INTERACT &&
+                    script.leg(legs.back()).face != DPAD_NONE;
+                walks_fine &= plain && walked >= 100 && dx == 0 && dy == 0 && faces && step.p0 > 0 && step.p2 > 0;
+                shortest_walk = rematches == 0 ? walked : std::min(shortest_walk, walked);
+                rematches++;
+                rematch_wins += step.p0;
+            }
+            if (step.type == StepType::BUY && step.p4 > 0){
+                purchases++;
+            }
+            if (step.type == StepType::CUTSCENE && step.p3 > 0){
+                joins++;
+                int games = 0;
+                for (size_t n = k + 1; n <= k + (size_t)step.p3 && n < segment.step_count; n++){
+                    const StoryStep& skipped = script.step(segment, n);
+                    games += skipped.type == StepType::DEX && skipped.p2 > 0 && (skipped.p2 & 1) != 0 ? 1 : 0;
+                }
+                const size_t after = k + (size_t)step.p3 + 1;
+                joins_fine &= games == 1 && after < segment.step_count && script.step(segment, after).type == StepType::WALK;
+            }
+        }
+    }
+    check(
+        money_segment && rematches == 2 && walks_fine && purchases == 4,
+        "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
+    );
+    check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
+    logger.log(
+        "AutoStory test: money for the collection (a Safari Game not joined: the gate house on drawn pictures; "
+        "which places wait; the money trip in the story's data: " + std::to_string(rematch_wins) +
+        " battles, a walk of " + std::to_string(shortest_walk) + " steps for the VS SEEKER, " +
+        std::to_string(joins) + " Safari Games): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1120,6 +1263,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_assistant(out, logger);
         failed += check_name_mark(logger);
         failed += check_collection_lists(out, logger);
+        failed += check_money_trip(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

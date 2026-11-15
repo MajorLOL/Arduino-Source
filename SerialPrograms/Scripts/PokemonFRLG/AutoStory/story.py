@@ -1260,6 +1260,51 @@ class Builder:
             if self.d.maps[self.pos[0]].map_type not in Builder.FLY_MAP_TYPES:
                 self.walk_to(MapGoals(outdoor), step.get("label", "Out"), out)
             return
+        if "joined" in step:
+            #  Steps that only follow when the scene before them took the
+            #  player along (the Safari Zone's desk: the game costs 500, and
+            #  with less the attendant sends the player one step back, as
+            #  after a NO). The CUTSCENE gets their count (p3): the program
+            #  looks where the player is after the scene, and skips them
+            #  when it is still the small building. They end where the
+            #  scene leaves a player who was not taken along.
+            sub = []
+            for s in step["joined"]["steps"]:
+                self.run_step(s, sub)
+            if not out or out[-1]["type"] != "CUTSCENE":
+                raise StoryError("joined: not after a cutscene (%s)" % step.get("label", "?"))
+            out[-1]["p3"] = len(sub)
+            out.extend(sub)
+            return
+        if "rematch" in step:
+            #  Prize money from a trainer who battles again with the VS
+            #  SEEKER. The player stands next to the trainer, facing it. A
+            #  walk of 100 steps or more that ends there again (the VS
+            #  SEEKER charges with the steps: VsSeekerResetInBagStepCounter,
+            #  100 to use it), the VS SEEKER, A on the trainer: a battle (7
+            #  times in 10, Task_VsSeeker_2) or a line of text. p0: battles
+            #  to win, p1: minutes at most, p2: the prize of one battle.
+            r = step["rematch"]
+            label = step.get("label", "Rematch")
+            spot = self.pos
+            if spot[3] is None:
+                raise StoryError("rematch: the facing at %s is not known (%s)" % (spot, label))
+            far = tuple(r["far"])
+            here = tuple(spot[:3])
+            sub = []
+            for k in range(r["loops"]):
+                self.walk_to({far}, "%s_Walk%d" % (label, k + 1), sub)
+                self.walk_to({here}, "%s_Back%d" % (label, k + 1), sub, face_map={here: spot[3]})
+            if any(s["type"] != "WALK" for s in sub):
+                raise StoryError("rematch: the walk must be plain walking: " + label)
+            legs = [s["leg"] for s in sub]
+            walked = sum(run[1] for leg in legs for run in self.legs[leg]["runs"])
+            if walked < 110:
+                raise StoryError("rematch: the walk has %d steps, the VS SEEKER needs 100: %s" % (walked, label))
+            self.pos = spot
+            out.append({"type": "REMATCH", "label": label, "p0": r["wins"], "p1": r["minutes"], "p2": r["prize"],
+                        "legs_to_grass": legs, "at": list(spot)})
+            return
         if "seagallop" in step:
             #  On the pier's trigger in Vermilion: the sailor's text, the
             #  menus (the tickets first, on the Switch), the row p0 of the
@@ -1514,6 +1559,10 @@ class Builder:
         if "buy" in step:
             b = step["buy"]
             bought = {"type": "BUY", "label": step.get("label", "Buy"), "p0": b["index"], "p1": b["quantity"]}
+            #  p4: only when the money trip won this many battles (REMATCH):
+            #  what they paid covers it, and the fee of the Safari Games stays.
+            if b.get("wins"):
+                bought["p4"] = b["wins"]
             #  p2: a healing item of the League, for the program's count of
             #  the bag (1 REVIVE, 2 FULL RESTORE or MAX POTION); p3 1: only
             #  what is missing up to the quantity.

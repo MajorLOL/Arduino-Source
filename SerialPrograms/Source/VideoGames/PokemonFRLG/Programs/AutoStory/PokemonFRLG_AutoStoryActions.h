@@ -181,6 +181,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step);
 //  step.
 void story_seagallop(StoryRuntime& rt, int row, const std::string& what);
 
+//  Prize money from a trainer who battles again (StepType::REMATCH), the
+//  player next to the trainer and facing it. In turns: the step's walk (100
+//  steps or more, back to where it starts: the VS SEEKER charges with the
+//  steps), the VS SEEKER from the KEY ITEMS pocket, A on the trainer. That
+//  is a battle 7 times in 10 (and the first time, with a trainer not
+//  beaten before), a line of text otherwise. Until p0 battles are won, p1
+//  minutes are over, or nothing comes of it (no VS SEEKER in the bag; eight
+//  uses in a row without a battle). Returns the battles won, which are
+//  added to StoryRuntime::trip_wins.
+int story_rematch(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
+
 
 }
 }

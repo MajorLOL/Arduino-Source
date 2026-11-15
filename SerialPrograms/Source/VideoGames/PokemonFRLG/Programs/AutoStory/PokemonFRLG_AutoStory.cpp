@@ -733,6 +733,23 @@ void AutoStory::run_segment(
                     rt.console
                 );
             }
+            if (step.p3 > 0 && story_still_in_small_room(rt, label)){
+                //  The Safari Zone's desk: 500 for a game. With less, "Oops!
+                //  Not enough money!" and one step back, and the scene is
+                //  over like one that ended in the Safari Zone. (15
+                //  November 2026, 146 left: the walk to the grass went into
+                //  the counter, four times.) The player stands where the
+                //  game's end would leave them: on from there.
+                rt.short_of_money = true;
+                env.log(
+                    label + ": the player is still in the gate house: the game was not joined (it costs 500; "
+                    "\"Oops! Not enough money!\"). The next " + std::to_string(step.p3) +
+                    " steps (the game itself) are skipped.",
+                    COLOR_ORANGE
+                );
+                story_note(rt, label + ": not joined (500, and less is left)", COLOR_ORANGE);
+                i += (size_t)step.p3;
+            }
             break;
         }
         case StepType::BATTLE:{
@@ -881,6 +898,10 @@ void AutoStory::run_segment(
             break;
         case StepType::DEX:
             story_dex(rt, step);
+            if (rt.no_balls && step.p2 > 0 && (step.p2 & 2) != 0 && (step.p2 & 1) == 0){
+                //  The collection: no ball for a wanted species.
+                rt.short_of_balls = true;
+            }
             break;
         case StepType::SKIP_IF_COLLECTED:{
             //  The places of the next p0 steps: does the POKeDEX table still
@@ -890,11 +911,20 @@ void AutoStory::run_segment(
             std::set<std::string> here;
             std::set<std::string> looked_for;
             std::set<std::string> in_passing;
+            //  The places: in the Safari Zone (a game is 500) and elsewhere
+            //  (the balls of the bag).
+            int safari_places = 0;
+            int other_places = 0;
             const size_t end = std::min<size_t>(segment.step_count, i + 1 + (size_t)std::max(0, (int)step.p0));
             for (size_t k = i + 1; k < end; k++){
                 const StoryStep& place_step = script.step(segment, k);
                 if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
                     continue;
+                }
+                if ((place_step.p2 & 1) != 0){
+                    safari_places++;
+                }else{
+                    other_places++;
                 }
                 const StoryPlaceWanted place = story_place_wanted(rt, place_step);
                 for (const auto& item : place.here){
@@ -923,11 +953,34 @@ void AutoStory::run_segment(
                     COLOR_BLUE
                 );
                 i += (size_t)std::max(0, (int)step.p0);
+            }else if (story_places_wait(
+                safari_places, other_places, rt.short_of_money, rt.short_of_balls, rt.money_trip_open
+            )){
+                //  Wanted, but not to be had now: no money for a Safari
+                //  Game, or no ball left.
+                const std::string why =
+                    rt.short_of_money && rt.short_of_balls
+                        ? "a Safari Game was refused for lack of money, and no ball was left for a wanted species"
+                    : rt.short_of_money
+                        ? "a Safari Game was refused for lack of money"
+                        : "no ball was left for a wanted species";
+                env.log(
+                    label + ": still wanted here: " + names(looked_for) + ". Left for now (" + why + "): " +
+                    (rt.money_trip_open
+                        ? "first the money trip, then the towns again"
+                        : "the money trip is not to be had (any more)") +
+                    ". The next " + std::to_string(step.p0) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
             }else{
                 env.log(label + ": still wanted here: " + names(looked_for) + "." + rare, COLOR_BLUE);
             }
             break;
         }
+        case StepType::REMATCH:
+            story_rematch(rt, script, step);
+            break;
         case StepType::SKIP_UNLESS_LEFT:{
             //  The way back to a legendary Pokemon the program left where
             //  it was (text: the labels of those battle steps, separated by
@@ -1047,7 +1100,23 @@ void AutoStory::run_segment(
         case StepType::BUY:
             //  p2: what it is for the program's count of the bag; p3 1: only
             //  what is missing up to p1.
+            if (step.p4 > 0 && rt.trip_wins < step.p4){
+                //  The money trip's balls: each purchase only with the
+                //  prize money for it and for the Safari Games after it.
+                env.log(
+                    label + ": for " + std::to_string(step.p4) + " battles won on the money trip or more, and " +
+                    std::to_string(rt.trip_wins) + " were won" +
+                    (rt.trip_wins == 0 ? " (as far as this run of the program knows)" : "") +
+                    ": not bought. (What the battles paid covers the purchases before this one and leaves the "
+                    "fee of the Safari Games.)",
+                    COLOR_ORANGE
+                );
+                break;
+            }
             story_buy(rt, step.p0, step.p1, label, step.p2 > 0 ? step.p2 : 0, step.p3 == 1);
+            if (step.p4 > 0){
+                rt.short_of_balls = false;
+            }
             break;
         case StepType::ESCAPE_ROPE:
             //  The next p0 steps walk out instead (when the bag has none).
@@ -1332,6 +1401,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  Legendary Pokemon the program left for later (StoryRuntime::
     //  legendary_left), as of the last save: "<starter> <label>,<label>".
     const std::string left_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Left.txt";
+    //  The battles won on the money trip (StoryRuntime::trip_wins), as of
+    //  the last save: "<starter> <segment> <battles>". What the trip buys
+    //  goes by them, and a start in the middle of the trip (after an error,
+    //  say) would not know of the battles before it.
+    const std::string trip_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Trip.txt";
     if (!new_game){
         std::string text;
         const std::string prefix = std::string(starter_name(starter)) + " ";
@@ -1393,6 +1467,14 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
         try{
             string_to_file(
+                trip_file,
+                std::string(starter_name(starter)) + " " + segment_id + " " + std::to_string(rt.trip_wins_at_save) + "\n"
+            );
+        }catch (...){
+            env.log("Could not write " + trip_file + ".", COLOR_ORANGE);
+        }
+        try{
+            string_to_file(
                 save_file,
                 std::string(starter_name(starter)) + " " + segment_id + " " + std::to_string(step) + "\n"
             );
@@ -1415,6 +1497,27 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             "Segment " + std::string(script.segments[first].id) + " has only " +
             std::to_string(script.segments[first].step_count) + " steps."
         );
+    }
+    //  A start in the middle of the money trip: the battles it had won at
+    //  the last save.
+    if (!new_game && first_step > 0 && std::string(script.segments[first].id).find("_MONEY") != std::string::npos){
+        std::string text;
+        const std::string prefix = std::string(starter_name(starter)) + " " + script.segments[first].id + " ";
+        if (read_text_file(trip_file, text) && text.rfind(prefix, 0) == 0){
+            rt.trip_wins = std::max(0, std::min(99, std::atoi(text.substr(prefix.size()).c_str())));
+            rt.trip_wins_at_save = rt.trip_wins;
+            env.log(
+                "The money trip: " + std::to_string(rt.trip_wins) + " battles won as of the last save (" +
+                trip_file + ").",
+                COLOR_BLUE
+            );
+        }else{
+            env.log(
+                "The money trip: how many battles it had won at the last save is not known (" + trip_file +
+                "). Only the battles from here on count for what it buys.",
+                COLOR_ORANGE
+            );
+        }
     }
     //  Where the start step expects the player: where its first walk starts.
     std::string start_where;
@@ -1667,6 +1770,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             string_to_file(new_game_file, where);
             string_to_file(caught_file, "\n");
             string_to_file(left_file, "\n");
+            string_to_file(trip_file, "\n");
             string_to_file(collection_file, story_collection_to_text(starter_name(starter), {}));
         }catch (...){
             env.log("Could not write the program's files in " + SETTINGS_PATH() + ".", COLOR_ORANGE);
@@ -1724,10 +1828,22 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     size_t collect_first = (size_t)-1;
     size_t collect_last = (size_t)-1;
     std::set<std::string> collect_species;
+    //  The money trip of chapter 20 (the VS SEEKER, prize money, POKe
+    //  BALLs): once in the order of the story, before the first town; and
+    //  again from the end of a town's segment when a Safari Game was
+    //  refused for lack of money or the balls ran out there, then the towns
+    //  again. Three times at most in a run, and not again after one that
+    //  brought nothing.
+    size_t money_segment = (size_t)-1;
+    int money_trips = 0;
+    bool money_trip_failed = false;
     for (size_t s = 0; s < script.segment_count; s++){
         const std::string id = script.segments[s].id;
         if (id.rfind("C20_", 0) != 0){
             continue;
+        }
+        if (id.find("_MONEY") != std::string::npos){
+            money_segment = s;
         }
         if (collect_first == (size_t)-1 && id.rfind("C20_01", 0) != 0){
             collect_first = s;
@@ -1767,6 +1883,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         };
         rt.resume_at = (size_t)-1;
         rt.next_segment_id = current_segment + 1 < script.segment_count ? script.segments[current_segment + 1].id : "";
+        rt.money_trip_open = money_segment != (size_t)-1 && !money_trip_failed && money_trips < 3;
+        if (current_segment == money_segment && current_step == 0){
+            rt.trip_wins = 0;
+            rt.trip_wins_at_save = 0;
+        }
         try{
             run_segment(env, rt, script, segment, current_step);
             stats.segments++;
@@ -1776,8 +1897,43 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 league_again_losses = 0;
             }
             take_resume();
+            const size_t done_segment = current_segment;
             current_segment++;
             current_step = 0;
+            if (done_segment == money_segment){
+                money_trips++;
+                if (rt.trip_wins >= 3){
+                    //  Money for the Safari Games, and balls.
+                    rt.short_of_money = false;
+                    rt.short_of_balls = false;
+                    env.log(
+                        "The money trip: " + std::to_string(rt.trip_wins) + " battles won. On with the towns.",
+                        COLOR_BLUE
+                    );
+                }else{
+                    money_trip_failed = true;
+                    env.log(
+                        "The money trip brought " + std::to_string(rt.trip_wins) + " battles won (three pay for "
+                        "the first POKe BALLs and leave the fee of the Safari Games): see the log above for "
+                        "what went wrong. No money trip again in this run.",
+                        COLOR_RED
+                    );
+                }
+            }else if ((rt.short_of_money || rt.short_of_balls) && rt.money_trip_open &&
+                collect_first != (size_t)-1 && done_segment >= collect_first && done_segment <= collect_last
+            ){
+                //  (Also when the run started after the money trip's place
+                //  in the story: it starts with FLY, like the towns.)
+                env.log(
+                    std::string(rt.short_of_money ? "A Safari Game was refused for lack of money" : "") +
+                    (rt.short_of_money && rt.short_of_balls ? ", and no" : rt.short_of_balls ? "No" : "") +
+                    (rt.short_of_balls ? " ball was left for a wanted species" : "") +
+                    ": the money trip (" + script.segments[money_segment].id + ") now, then the towns again from " +
+                    script.segments[collect_first].id + ".",
+                    COLOR_BLUE
+                );
+                current_segment = money_segment;
+            }
             if (rt.collect_shiny && current_segment - 1 == collect_last && collect_first < collect_last &&
                 !collect_species.empty()
             ){
@@ -2103,6 +2259,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
             rt.bag_revives = rt.bag_revives_at_save;
             rt.bag_restores = rt.bag_restores_at_save;
+            rt.trip_wins = rt.trip_wins_at_save;
             current_segment = resume_segment;
             current_step = resume_step;
         }
@@ -2113,6 +2270,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     }
     if (rt.short_grass_look){
         env.log(story_grass_look_summary(rt), COLOR_BLUE);
+    }
+    if (rt.short_of_money || rt.short_of_balls){
+        env.log(
+            std::string("The POKeDEX collection is not through: ") +
+            (rt.short_of_money ? "a Safari Game was refused for lack of money (500 each)" : "") +
+            (rt.short_of_money && rt.short_of_balls ? ", and " : "") +
+            (rt.short_of_balls ? "no ball was left for a wanted species" : "") +
+            ", and the money trip did not make up for it (see the log above). The places that need it were "
+            "left out.",
+            COLOR_RED
+        );
     }
     send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
