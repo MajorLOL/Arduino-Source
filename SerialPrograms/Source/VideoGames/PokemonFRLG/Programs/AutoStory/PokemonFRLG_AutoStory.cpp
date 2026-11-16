@@ -2282,7 +2282,44 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             COLOR_RED
         );
     }
-    send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH);
+    //  What is left of the POKeDEX table, and how much of that the route
+    //  has a place for (the run of 16 November 2026 ended with the second
+    //  CHANSEY as the only one: two Safari Games without it).
+    std::string table_at_the_end;
+    if (rt.collection != nullptr){
+        std::set<std::string> at_places;
+        for (size_t k = 0; k < script.step_count; k++){
+            const StoryStep& place_step = script.steps[k];
+            if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
+                continue;
+            }
+            const StoryPlaceWanted place = story_place_wanted(rt, place_step);
+            at_places.insert(place.wanted.begin(), place.wanted.end());
+        }
+        size_t registered, total, to_catch;
+        COLLECTION.counts_summary(registered, total, to_catch);
+        size_t on_the_route = 0;
+        std::string names;
+        for (const std::string& slug : at_places){
+            const int more = COLLECTION.needed(slug) - COLLECTION.have(slug);
+            if (more <= 0){
+                continue;
+            }
+            on_the_route += (size_t)more;
+            names += (names.empty() ? "" : ", ") + slug + (more > 1 ? " (" + std::to_string(more) + ")" : "");
+        }
+        table_at_the_end =
+            "POKeDEX table at the end (" + COLLECTION.game_name() + "): " + std::to_string(registered) + " of " +
+            std::to_string(total) + " species with at least one, " + std::to_string(to_catch) + " catches to make. " +
+            (on_the_route == 0
+                ? std::string("None of them at a place of the route")
+                : std::to_string(on_the_route) + " of them at a place of the route: " + names) +
+            (to_catch > on_the_route
+                ? "; the other " + std::to_string(to_catch - on_the_route) + " are of species the route has no place for."
+                : ".");
+        env.log(table_at_the_end, COLOR_BLUE);
+    }
+    send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH, table_at_the_end);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
 }
 

@@ -59,8 +59,13 @@ void sample_screen(
 
 //  How different "now" is from "key" when "now" is moved by (dx, dy):
 //  now(x, y) against key(x + dx, y + dy), the mean of the capped absolute
-//  differences over the part both show, leaving out the player.
-double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy);
+//  differences over the part both show, leaving out the player. Every
+//  second row is compared; "first_row" 1: the rows between them.
+double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy, int first_row = 0);
+
+//  How much the brightness of a picture varies: the mean distance of its
+//  pixels from their mean.
+double screen_spread(const Screen& screen);
 
 
 //  Where the player stands in "now" compared to "key", both taken with the
@@ -99,6 +104,18 @@ public:
     //  Add the next video frame, taken "time_ms" after the start.
     Result add(const Screen& screen, double time_ms);
 
+    //  The input of the run is over: from here on nothing moves by itself.
+    //  A frame that does not tell where the map is (several offsets fit, or
+    //  none fits as the frames before did) is taken as the map standing
+    //  still. While the input lasts, such a frame is taken as the walk going
+    //  on at its speed, or left out.
+    //  (Kindle Road, 16 November 2026, the runs down the grass: the frames
+    //  after the last step fit badly and do not tell. Left out since build
+    //  28, they kept the run from being seen to stand, and 0.3 seconds later
+    //  the speed of the walk put the map a tile or two further: "64 px (4
+    //  tiles)" in 27 of 39 runs of three tiles, "80 px" in 8.)
+    void input_over(){ m_input_over = true; }
+
     //  Pixels walked in the direction of the run, and to the side of it.
     int pixels() const{ return m_along; }
     int side_pixels() const{ return m_side; }
@@ -117,6 +134,17 @@ public:
     //  covered the map for a moment while the player walked on. (A poisoned
     //  Pokemon: every five steps the map is drawn as a mosaic for 10 frames,
     //  FldEffPoison_Start(), and the walk goes on through it.)
+    //
+    //  Not after a fade: a battle starts with the whole picture fading to
+    //  gray and back twice, a warp with a fade to black, and what follows is
+    //  not the map. The transition into a wild battle on open ground
+    //  (B_TRANSITION_SLICE) slides every second line of the picture to the
+    //  left, slowly at first, and the lines between them to the right: on
+    //  the rows that are compared, that is the map moving on in a run to the
+    //  right. (The run of 16 November 2026 with build 29: 33 runs to the
+    //  right in the grass read "167 px (10 tiles) ... lost and found 1x",
+    //  up to 308 px for four tiles, when a battle started on the way; the
+    //  battle was found a moment later, with the run counted as timed.)
     size_t flashes() const{ return m_flashes; }
 
     //  The last frames showed no movement for this long.
@@ -145,8 +173,10 @@ private:
     int m_along = 0;
     int m_side = 0;
     double m_last_time = 0;
+    double m_seen_time = 0;     //  the last frame given, used or not
     double m_speed = 0;         //  pixels per ms, recent
     double m_still_ms = 0;
+    bool m_input_over = false;
 
     double m_noise = -1;        //  mismatch of a perfect match: video noise
     double m_last_best = 0;
@@ -154,6 +184,7 @@ private:
     int m_bad_in_row = 0;
     bool m_lost = false;
     bool m_gone = false;        //  lost for good: no longer looked for
+    bool m_faded = false;       //  one of the frames that lost the screen was a fade
     double m_lost_since = 0;    //  the first frame unlike anything before
     double m_blurred_since = -1;    //  the first of the frames left out now
 

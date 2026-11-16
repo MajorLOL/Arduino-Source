@@ -51,6 +51,8 @@ WalkTracker::WalkTracker(DpadPosition direction, double frames_per_tile)
 {}
 
 void WalkTracker::stop_when_still(Milliseconds duration){
+    //  (Asked for when the input of a run is over, to see the player stand.)
+    m_tracker.input_over();
     m_stop_when_still_ms = (double)duration.count();
 }
 

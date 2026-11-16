@@ -48,6 +48,14 @@ constexpr double FIND_AGAIN_MS = 600;
 //  a battle: that is not the walk going on, and stays lost.
 constexpr int FIND_AGAIN_PIXELS = 4;
 
+//  A picture with less than this share of the contrast it had is a fade
+//  (to gray: a battle starts; to black or white: a warp), and after a fade
+//  the map is not looked for again. The mosaic keeps the contrast: each of
+//  its blocks shows one pixel of the picture as it was.
+constexpr double FADE_SPREAD = 0.6;
+//  (A picture with hardly any contrast to lose: any brightness at all.)
+constexpr double MIN_SPREAD = 4.0;
+
 //  A frame that fits much worse than the ones before it and does not tell
 //  the offset either (the first and last frames of that mosaic) is left out,
 //  for this long at most: guessed from the speed, the offset would go on
@@ -112,14 +120,14 @@ void sample_screen(
 }
 
 
-double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy){
+double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy, int first_row){
     const int xs = std::max(0, -dx);
     const int xe = std::min(SCREEN_WIDTH, SCREEN_WIDTH - dx);
     const int ys = std::max(0, -dy);
     const int ye = std::min(SCREEN_HEIGHT, SCREEN_HEIGHT - dy);
     long sum = 0;
     long count = 0;
-    for (int y = ys; y < ye; y += 2){
+    for (int y = ys + first_row; y < ye; y += 2){
         const int ky = y + dy;
         const bool player_row_now = y >= PLAYER_Y0 && y < PLAYER_Y1;
         const bool player_row_key = ky >= PLAYER_Y0 && ky < PLAYER_Y1;
@@ -142,6 +150,26 @@ double screen_mismatch(const Screen& key, const Screen& now, int dx, int dy){
         return 1e9;
     }
     return (double)sum / (double)count;
+}
+
+double screen_spread(const Screen& screen){
+    //  (Every third pixel of every third row: rows of both kinds.)
+    long sum = 0;
+    long count = 0;
+    for (int y = 1; y < SCREEN_HEIGHT; y += 3){
+        for (int x = 1; x < SCREEN_WIDTH; x += 3){
+            sum += screen.at(x, y);
+            count++;
+        }
+    }
+    const double mean = (double)sum / (double)count;
+    double distance = 0;
+    for (int y = 1; y < SCREEN_HEIGHT; y += 3){
+        for (int x = 1; x < SCREEN_WIDTH; x += 3){
+            distance += std::abs((double)screen.at(x, y) - mean);
+        }
+    }
+    return distance / (double)count;
 }
 
 
@@ -303,6 +331,8 @@ std::string Tracker::summary() const{
 
 
 Tracker::Result Tracker::add(const Screen& screen, double time_ms){
+    const double since_seen = m_has_key ? std::max(0.0, time_ms - m_seen_time) : 0.0;
+    m_seen_time = time_ms;
     if (m_lost){
         if (m_gone || time_ms - m_lost_since > FIND_AGAIN_MS){
             m_gone = true;
@@ -385,9 +415,11 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
     scan(lo, hi);
     double probe = probes();
     const bool poor = m_typical > 0 && best > m_typical * 2 + 2;
-    if ((probe < best - 1.0 || poor) && hi < lo + MAX_SPAN - 1){
+    if ((probe < best - 1.0 || poor) && hi < lo + MAX_SPAN - 1 && !m_input_over){
         //  It fits better further on, or nothing fits well: frames were
-        //  missed or the speed is off. Look further.
+        //  missed or the speed is off. Look further. (Not with the input
+        //  over: the map does not get further than its speed allows then,
+        //  and a picture that changed can fit somewhere far off by chance.)
         int old_hi = hi;
         hi = lo + MAX_SPAN - 1;
         scan(old_hi + 1, hi);
@@ -411,6 +443,10 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
 
     //  Nothing matches: the screen is not the same map any more.
     const double lost_threshold = std::max(m_noise * 3 + 6, m_noise + 14);
+    //  The picture has lost its contrast: it is fading.
+    auto faded = [&](){
+        return screen_spread(screen) < FADE_SPREAD * std::max(screen_spread(m_key), MIN_SPREAD);
+    };
     if (m_lost){
         //  Lost a moment ago. The map is back when this frame fits as well
         //  as the frames before did, at one offset only, and that offset
@@ -418,7 +454,25 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
         //  a tile further, several offsets fit: no telling, it stays lost.
         const bool fits = best <= lost_threshold && !poor;
         const bool one_offset = other - best >= std::max(1.5, m_noise);
-        if (!fits || !one_offset || best_a - prev < FIND_AGAIN_PIXELS){
+        if (!fits){
+            //  A fade: a battle or a warp begins. What comes after it is
+            //  not the map moving on.
+            if (faded()){
+                m_gone = true;
+            }
+            return Result::LOST;
+        }
+        if (!one_offset || best_a - prev < FIND_AGAIN_PIXELS){
+            return Result::LOST;
+        }
+        //  The rows between the compared ones show the map there as well.
+        //  (The transition into a wild battle slides every second line one
+        //  way and the others the other way: half a picture that moves on.)
+        int dx, dy;
+        offset_to_shift(best_a, best_s, dx, dy);
+        const double between = screen_mismatch(m_key, screen, dx, dy, 1);
+        if (between > lost_threshold || (m_typical > 0 && between > m_typical * 2 + 2)){
+            m_gone = true;
             return Result::LOST;
         }
         m_lost = false;
@@ -427,11 +481,15 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
     }else if (best > lost_threshold){
         if (m_bad_in_row == 0){
             m_lost_since = time_ms;
+            m_faded = false;
         }
         m_bad_in_row++;
         m_lost_frames++;
+        m_faded = m_faded || faded();
         if (m_bad_in_row >= 2){
             m_lost = true;
+            //  Lost in a fade: for good.
+            m_gone = m_faded;
             return Result::LOST;
         }
         m_unsure++;
@@ -441,12 +499,25 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
 
     const double margin = std::max(1.5, m_noise);
     const bool unsure = other - best < margin;
+    if (m_input_over && m_typical > 0 && best > m_typical * 2 + 2){
+        //  The input is over, and this picture fits badly wherever it is
+        //  put: it does not tell where the map is. Nothing moves by itself:
+        //  the map stands.
+        m_unsure++;
+        m_still_ms += since_seen;
+        return Result::UNSURE;
+    }
     if (poor && unsure){
         if (m_blurred_since < 0){
             m_blurred_since = time_ms;
         }
         if (time_ms - m_blurred_since <= BLURRED_MS){
             m_unsure++;
+            if (m_input_over && per_along[(size_t)(prev - lo)] <= best + margin){
+                //  The input is over, and the map may as well stand where
+                //  it stood: no movement.
+                m_still_ms += since_seen;
+            }
             return Result::UNSURE;
         }
     }else{
@@ -459,14 +530,16 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
     int chosen_s = best_s;
     if (unsure){
         //  Several offsets fit (no detail, or a repeating pattern): take the
-        //  one closest to where walking on at the same speed would be.
+        //  one closest to where walking on at the same speed would be, or,
+        //  with the input over, to where the map stood.
         m_unsure++;
+        const int toward = m_input_over ? prev : predicted;
         int closest = 1 << 30;
         for (int a = lo; a <= hi; a++){
             if (per_along[(size_t)(a - lo)] > best + margin){
                 continue;
             }
-            int distance = std::abs(a - predicted);
+            int distance = std::abs(a - toward);
             if (distance < closest){
                 closest = distance;
                 chosen_a = a;

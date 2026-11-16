@@ -1765,6 +1765,18 @@ int check_slow_steps(Logger& logger){
 //  a walk that nothing stopped goes by its timing when the map was lost on
 //  the way, found again or not; a walk that a battle stops is counted by
 //  the video up to the battle.
+//
+//  And a battle must stay a battle: after its two gray flashes the picture
+//  is cut into lines that slide apart, every second one to the left, slowly
+//  at first (B_TRANSITION_SLICE). On the rows the tracker compares that is
+//  the map moving on in a run to the right, and builds 28 and 29 found the
+//  map again in it (16 November 2026: 33 runs in the grass counted as timed
+//  with a battle on the way, up to "308 px" for four tiles).
+//
+//  And a run that is over stands: on Kindle Road the frames after a run down
+//  the grass fit badly and do not tell where the map is. Builds 28 and 29
+//  left them out, did not see the player stand, and 0.3 seconds later put
+//  the map where the walk would have got to ("64 px (4 tiles)" for three).
 int check_poison_flash(Logger& logger){
     using namespace NintendoSwitch::PokemonFRLG;
     using AutoStoryScroll::Screen;
@@ -1788,16 +1800,20 @@ int check_poison_flash(Logger& logger){
     };
     //  A map of 16 x 16 tiles as brightness values: patches of eight kinds
     //  of tile (paths, trees, water), or one kind only ("plain": ground
-    //  that looks the same a tile further).
+    //  that looks the same a tile further). "detail": how much the pixels
+    //  of a tile differ. "band": ground that repeats every 8 pixels, as
+    //  grass does, with a band of other tiles beside a walk across (1: rows
+    //  15 to 17) or a walk up or down (2: columns 20 to 22); "band_seed":
+    //  what those tiles are (water at one moment and at another).
     const int TILES_ACROSS = 60;
     const int TILES_DOWN = 40;
     const int MAP_WIDTH = TILES_ACROSS * 16;
     const int MAP_HEIGHT = TILES_DOWN * 16;
-    auto make_map = [&](uint32_t seed, bool plain){
+    auto make_map = [&](uint32_t seed, bool plain, int detail, int band, uint32_t band_seed){
         Dice dice{seed};
         std::vector<uint8_t> kinds(8 * 256);
         for (int k = 0; k < 8; k++){
-            const int spread = (k % 2 == 0 ? 14 : 50) * 3;
+            const int spread = (k % 2 == 0 ? 14 : 50) * detail;
             for (int i = 0; i < 256; i++){
                 int v = 60 + 22 * k + dice.below(spread) - spread / 2;
                 if (k >= 5 && (i % 16 < 2 || i / 16 < 2)){
@@ -1807,6 +1823,19 @@ int check_poison_flash(Logger& logger){
             }
         }
         std::vector<int> kind((size_t)(TILES_ACROSS * TILES_DOWN), 0);
+        if (band > 0){
+            for (int i = 0; i < 256; i++){
+                kinds[(size_t)i] = kinds[(size_t)(((i / 16) % 8) * 16 + (i % 16) % 8)];
+            }
+            Dice tiles{band_seed};
+            for (int ty = 0; ty < TILES_DOWN; ty++){
+                for (int tx = 0; tx < TILES_ACROSS; tx++){
+                    if ((band == 1 && ty >= 15 && ty <= 17) || (band == 2 && tx >= 20 && tx <= 22)){
+                        kind[(size_t)(ty * TILES_ACROSS + tx)] = 1 + tiles.below(7);
+                    }
+                }
+            }
+        }
         if (!plain){
             for (int n = 0; n < TILES_ACROSS * TILES_DOWN / 6; n++){
                 const int k = dice.below(8);
@@ -1833,13 +1862,22 @@ int check_poison_flash(Logger& logger){
     //  The screen with its top left at (left, top) of the map. "mosaic":
     //  blocks of that many pixels and one more, each showing its top left
     //  pixel (REG_MOSAIC). "gray": blended that far, of 16, towards one gray
-    //  (the two flashes that start a battle).
-    auto draw = [&](Screen& screen, const std::vector<uint8_t>& map, int left, int top, int mosaic, int gray, Dice& noise){
+    //  (the two flashes that start a battle). "slide": the transition after
+    //  them, every second line that many pixels to the left and the lines
+    //  between them to the right, black where a line came from
+    //  ("slide_left": 0 or 1, which lines go left).
+    auto draw = [&](
+        Screen& screen, const std::vector<uint8_t>& map, int left, int top,
+        int mosaic, int gray, int slide, int slide_left, Dice& noise
+    ){
         for (int sy = 0; sy < AutoStoryScroll::SCREEN_HEIGHT; sy++){
+            const int moved = slide == 0 ? 0 : ((sy & 1) == slide_left ? slide : -slide);
             for (int sx = 0; sx < AutoStoryScroll::SCREEN_WIDTH; sx++){
-                const int mx = (((left + sx - (mosaic > 0 ? sx % (mosaic + 1) : 0)) % MAP_WIDTH) + MAP_WIDTH) % MAP_WIDTH;
+                const int from = sx + moved;
+                const bool black = from < 0 || from >= AutoStoryScroll::SCREEN_WIDTH;
+                const int mx = (((left + from - (mosaic > 0 ? sx % (mosaic + 1) : 0)) % MAP_WIDTH) + MAP_WIDTH) % MAP_WIDTH;
                 const int my = (((top + sy - (mosaic > 0 ? sy % (mosaic + 1) : 0)) % MAP_HEIGHT) + MAP_HEIGHT) % MAP_HEIGHT;
-                int v = map[(size_t)(my * MAP_WIDTH + mx)];
+                int v = black ? 0 : map[(size_t)(my * MAP_WIDTH + mx)];
                 if (gray > 0){
                     v = (v * (16 - gray) + 110 * gray) / 16;
                 }
@@ -1855,8 +1893,13 @@ int check_poison_flash(Logger& logger){
         int tiles = 9;
         int speed = 1;          //  pixels a frame: 1 walking, 2 surfing
         int poison_every = 0;   //  steps between two mosaics (0: none)
-        int battle_after = -1;  //  steps; then the battle's flashes and another picture
+        int battle_after = -1;  //  steps; then the battle's flashes, its transition, black, another picture
+        int slide_left = 0;     //  which lines of that transition go left (0 or 1)
+        int watched = -1;       //  frames the video is looked at after the battle starts (-1: to the end)
+        int detail = 3;
         bool plain = false;
+        int band = 0;           //  see make_map(); it looks different once the player stands
+        bool settle = false;    //  as a run does: the input over, then looked at until the player stands
         uint32_t seed = 1;
     };
     struct Outcome{
@@ -1867,8 +1910,9 @@ int check_poison_flash(Logger& logger){
         size_t flashes = 0;
     };
     auto take = [&](const Walk& walk){
-        const std::vector<uint8_t> map = make_map(walk.seed, walk.plain);
-        const std::vector<uint8_t> elsewhere = make_map(walk.seed + 77, false);
+        const std::vector<uint8_t> map = make_map(walk.seed, walk.plain, walk.detail, walk.band, walk.seed * 7 + 1);
+        const std::vector<uint8_t> later = make_map(walk.seed, walk.plain, walk.detail, walk.band, walk.seed * 7 + 1001);
+        const std::vector<uint8_t> elsewhere = make_map(walk.seed + 77, false, walk.detail, 0, 0);
         Dice noise{walk.seed * 31 + 5};
         Dice jitter{walk.seed + 9};
         Tracker tracker(walk.dir_x, walk.dir_y, 16.0 / (16.0 / walk.speed) / 16.74 * 1.3);
@@ -1878,10 +1922,25 @@ int check_poison_flash(Logger& logger){
         const int stop_frame = walk.battle_after >= 0 ? walk.battle_after * step_frames : walk_frames;
         static const int MOSAIC_SIZES[10] = {2, 4, 6, 8, 10, 8, 6, 4, 2, 0};
         double next_look = 0;
+        int looks = 0;
         for (int frame = 0; frame < walk_frames + 90; frame++){
             const double time_ms = frame * 16.74;
             if (time_ms + 1e-9 < next_look){
                 continue;
+            }
+            if (walk.settle && frame >= walk_frames + 6){
+                //  As a run does: the input is over 6 frames after the last
+                //  step, and the video is looked at until the player is seen
+                //  to stand, for 0.7 seconds at most.
+                tracker.input_over();
+                if ((!tracker.lost() && looks >= 3 && tracker.still_ms() >= 150) || frame > walk_frames + 6 + 42){
+                    break;
+                }
+            }
+            looks++;
+            if (walk.battle_after >= 0 && walk.watched >= 0 && frame > stop_frame + walk.watched){
+                //  (The input is over: the run looks for the battle itself now.)
+                break;
             }
             //  (The tracker looks every 45 ms or so, not at every frame.)
             next_look = time_ms + 40 + jitter.below(11);
@@ -1894,15 +1953,48 @@ int check_poison_flash(Logger& logger){
             ){
                 mosaic = MOSAIC_SIZES[into_step];
             }
-            if (walk.battle_after >= 0 && frame >= stop_frame + 32){
-                draw(screen, elsewhere, 300 + (frame - stop_frame) * 3, 200, 0, 0, noise);
-            }else{
-                int gray = 0;
-                if (walk.battle_after >= 0 && frame >= stop_frame){
-                    const int phase = (frame - stop_frame) % 16;
+            //  A battle: two fades to gray and back (32 frames), the lines
+            //  sliding apart until nothing is left (Slice_Main(): the speed
+            //  in 1/256 pixels a frame), black, and the battle's picture.
+            int gray = 0;
+            int slide = 0;
+            bool black = false;
+            bool battle_picture = false;
+            if (walk.battle_after >= 0 && frame >= stop_frame){
+                const int into = frame - stop_frame;
+                if (into < 32){
+                    const int phase = into % 16;
                     gray = phase < 8 ? (phase + 1) * 2 : (16 - phase) * 2 - 2;
+                }else{
+                    int rate = 1 << 8;
+                    int gain = 1;
+                    int gone = 0;
+                    for (int n = 0; n <= into - 32 && gone < AutoStoryScroll::SCREEN_WIDTH; n++){
+                        gone = std::min(gone + (rate >> 8), (int)AutoStoryScroll::SCREEN_WIDTH);
+                        if (rate <= 0xfff){
+                            rate += gain;
+                        }
+                        if (gain < 128){
+                            gain <<= 1;
+                        }
+                    }
+                    slide = gone < AutoStoryScroll::SCREEN_WIDTH ? gone : 0;
+                    black = gone >= AutoStoryScroll::SCREEN_WIDTH && into < 32 + 37 + 40;
+                    battle_picture = gone >= AutoStoryScroll::SCREEN_WIDTH && !black;
                 }
-                draw(screen, map, 320 + walk.dir_x * pixels, 240 + walk.dir_y * pixels, mosaic, gray, noise);
+            }
+            if (battle_picture){
+                draw(screen, elsewhere, 300 + (frame - stop_frame) * 3, 200, 0, 0, 0, 0, noise);
+            }else if (black){
+                for (uint8_t& pixel : screen.pixels){
+                    pixel = (uint8_t)noise.below(3);
+                }
+            }else{
+                draw(
+                    screen, walk.band > 0 && frame >= walk_frames ? later : map,
+                    320 + walk.dir_x * pixels, 240 + walk.dir_y * pixels,
+                    mosaic, gray, slide, walk.slide_left, noise
+                );
             }
             tracker.add(screen, time_ms);
         }
@@ -1925,9 +2017,12 @@ int check_poison_flash(Logger& logger){
     bool none_wrong = true;         //  no wrong count where the video followed to the end
     bool timed_after_flash = true;  //  lost on the way, nothing stopped the walk: not the video's count
     bool last_step_right = true;
+    int battles = 0;
     int battles_lost = 0;
     int battles_right = 0;
+    int late_battles = 0;
     int late_battles_right = 0;
+    int stands_right = 0;
     for (uint32_t seed = 1; seed <= 2; seed++){
         for (int way = 0; way < 4; way++){
             Walk walk;
@@ -1956,21 +2051,53 @@ int check_poison_flash(Logger& logger){
             walk.tiles = 5;
             outcome = take(walk);
             last_step_right &= (!outcome.followed && !outcome.lost) || outcome.tiles == 5;
-            //  A battle after 3 steps of 14.
+            //  Battles: with either half of the lines sliding left, over
+            //  maps of little and of much detail, looked at to the end and
+            //  for 0.7 and 0.9 seconds (a run of four tiles with the battle
+            //  at its first step: the input goes on about that long).
             walk.tiles = 14;
-            walk.poison_every = 0;
-            walk.battle_after = 3;
-            outcome = take(walk);
-            battles_lost += outcome.lost ? 1 : 0;
-            battles_right += outcome.lost && outcome.tiles == 3 ? 1 : 0;
-            //  The mosaic after step 5, a battle after step 9 (Bond Bridge).
-            walk.poison_every = 5;
-            walk.battle_after = 9;
-            outcome = take(walk);
-            battles_lost += outcome.lost ? 1 : 0;
-            late_battles_right += outcome.lost && outcome.tiles == 9 ? 1 : 0;
-            //  Ground that looks the same a tile further, with the mosaic.
+            for (int detail : {1, 3}){
+                for (int slide_left = 0; slide_left < 2; slide_left++){
+                    for (int watched : {-1, 44, 56}){
+                        walk.detail = detail;
+                        walk.slide_left = slide_left;
+                        walk.watched = watched;
+                        //  A battle after 3 steps of 14.
+                        walk.poison_every = 0;
+                        walk.battle_after = 3;
+                        outcome = take(walk);
+                        battles++;
+                        battles_lost += outcome.lost ? 1 : 0;
+                        battles_right += outcome.lost && outcome.tiles == 3 ? 1 : 0;
+                        //  The mosaic after step 5, a battle after step 9 (Bond Bridge).
+                        walk.poison_every = 5;
+                        walk.battle_after = 9;
+                        outcome = take(walk);
+                        battles++;
+                        late_battles++;
+                        battles_lost += outcome.lost ? 1 : 0;
+                        late_battles_right += outcome.lost && outcome.tiles == 9 ? 1 : 0;
+                    }
+                }
+            }
+            walk.detail = 3;
+            walk.slide_left = 0;
+            walk.watched = -1;
             walk.battle_after = -1;
+            walk.poison_every = 0;
+            //  Three tiles over ground that repeats, beside water that looks
+            //  different once the player stands (Kindle Road).
+            walk.tiles = 3;
+            walk.plain = true;
+            walk.band = way < 2 ? 1 : 2;
+            walk.settle = true;
+            outcome = take(walk);
+            stands_right += !outcome.lost && outcome.tiles == 3 ? 1 : 0;
+            walk.band = 0;
+            walk.settle = false;
+            //  Ground that looks the same a tile further, with the mosaic.
+            walk.tiles = 14;
+            walk.poison_every = 5;
             walk.plain = true;
             outcome = take(walk);
             none_wrong &= !outcome.followed || outcome.tiles == 14;
@@ -1986,16 +2113,42 @@ int check_poison_flash(Logger& logger){
         "a walk that nothing stopped is counted by the video only when the map was followed all the way"
     );
     check(last_step_right, "the mosaic after the last step, the player standing: the count is right");
-    check(battles_lost == 2 * walks && battles_right >= walks - 1, "a battle on the way: the screen is lost at its step");
-    check(late_battles_right >= walks - 1, "the mosaic, then a battle four steps on: counted at the battle");
+    check(
+        battles_lost == battles && battles_right >= battles - late_battles - 1,
+        "a battle on the way: the screen is lost at its step and stays lost through the transition"
+    );
+    check(late_battles_right >= late_battles - 2, "the mosaic, then a battle four steps on: counted at the battle");
+    check(
+        stands_right == walks,
+        "the input over and frames that do not tell where the map is: the player stands, the count stays"
+    );
+    {
+        //  A fade is known by its contrast, the mosaic keeps it.
+        const std::vector<uint8_t> map = make_map(3, false, 3, 0, 0);
+        Dice noise{17};
+        Screen plain_picture, mosaic_picture, gray_picture;
+        draw(plain_picture, map, 320, 240, 0, 0, 0, 0, noise);
+        draw(mosaic_picture, map, 320, 240, 10, 0, 0, 0, noise);
+        draw(gray_picture, map, 320, 240, 0, 10, 0, 0, noise);
+        const double before = AutoStoryScroll::screen_spread(plain_picture);
+        check(
+            before > 10 &&
+            AutoStoryScroll::screen_spread(mosaic_picture) > 0.8 * before &&
+            AutoStoryScroll::screen_spread(gray_picture) < 0.5 * before,
+            "a fade to gray takes the picture's contrast, the mosaic leaves it"
+        );
+    }
 
     logger.log(
         "AutoStory test: the video tracker and the flash of a poisoned Pokemon (the map as a mosaic for 10 "
         "frames every five steps, the player walking on): of " + std::to_string(walks) + " walks with two "
         "flashes on the way " + std::to_string(followed) + " followed to the end (the map found again " +
         std::to_string(found_again) + " times), surfing " + std::to_string(surfing_followed) +
-        "; a battle four steps after a flash counted at the battle in " + std::to_string(late_battles_right) +
-        "; the flash after the last step, plain ground, a battle without poison; a walk that nothing stopped "
+        "; of " + std::to_string(battles) + " battles on the way, with the lines of their transition sliding "
+        "either way, " + std::to_string(battles_lost) + " lost for good and " +
+        std::to_string(battles_right + late_battles_right) + " counted at their step; of " +
+        std::to_string(walks) + " runs ending where the picture does not tell, " + std::to_string(stands_right) +
+        " seen to stand at their tile; the flash after the last step, plain ground; a walk that nothing stopped "
         "goes by its timing when the map was lost on the way): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
