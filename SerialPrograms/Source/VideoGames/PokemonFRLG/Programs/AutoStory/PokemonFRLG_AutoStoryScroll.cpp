@@ -38,6 +38,23 @@ constexpr long MIN_SAMPLES = 1500;
 //  The most offsets looked at for one frame (frames missed for ~1.5 s).
 constexpr int MAX_SPAN = 96;
 
+//  A screen that was lost is looked for again for this long: what covers
+//  the map for a moment and lets the player walk on is over much sooner
+//  (the mosaic of a poisoned Pokemon: 10 frames, 170 ms).
+constexpr double FIND_AGAIN_MS = 600;
+//  It is found again only further on, by this much: the player walked on
+//  through it. A battle or a trainer stops the player at the end of a step,
+//  and the map shows as it was for a moment between the flashes that start
+//  a battle: that is not the walk going on, and stays lost.
+constexpr int FIND_AGAIN_PIXELS = 4;
+
+//  A frame that fits much worse than the ones before it and does not tell
+//  the offset either (the first and last frames of that mosaic) is left out,
+//  for this long at most: guessed from the speed, the offset would go on
+//  while the player may be standing, as far as the next tile that looks the
+//  same.
+constexpr double BLURRED_MS = 300;
+
 inline int luminance(uint32_t pixel){
     int r = (int)((pixel >> 16) & 0xff);
     int g = (int)((pixel >> 8) & 0xff);
@@ -272,6 +289,9 @@ std::string Tracker::summary() const{
     if (m_unsure > 0){
         s += ", " + std::to_string(m_unsure) + " unsure";
     }
+    if (m_flashes > 0){
+        s += ", lost and found " + std::to_string(m_flashes) + "x";
+    }
     if (m_lost){
         s += ", screen changed";
     }
@@ -284,9 +304,14 @@ std::string Tracker::summary() const{
 
 Tracker::Result Tracker::add(const Screen& screen, double time_ms){
     if (m_lost){
-        return Result::LOST;
+        if (m_gone || time_ms - m_lost_since > FIND_AGAIN_MS){
+            m_gone = true;
+            return Result::LOST;
+        }
+        //  (Otherwise: is the map back, further on? See below.)
+    }else{
+        m_frames++;
     }
-    m_frames++;
     if (!m_has_key){
         m_key = screen;
         m_has_key = true;
@@ -386,7 +411,23 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
 
     //  Nothing matches: the screen is not the same map any more.
     const double lost_threshold = std::max(m_noise * 3 + 6, m_noise + 14);
-    if (best > lost_threshold){
+    if (m_lost){
+        //  Lost a moment ago. The map is back when this frame fits as well
+        //  as the frames before did, at one offset only, and that offset
+        //  is further on (FIND_AGAIN_PIXELS). On ground that looks the same
+        //  a tile further, several offsets fit: no telling, it stays lost.
+        const bool fits = best <= lost_threshold && !poor;
+        const bool one_offset = other - best >= std::max(1.5, m_noise);
+        if (!fits || !one_offset || best_a - prev < FIND_AGAIN_PIXELS){
+            return Result::LOST;
+        }
+        m_lost = false;
+        m_flashes++;
+        m_frames++;
+    }else if (best > lost_threshold){
+        if (m_bad_in_row == 0){
+            m_lost_since = time_ms;
+        }
         m_bad_in_row++;
         m_lost_frames++;
         if (m_bad_in_row >= 2){
@@ -397,11 +438,23 @@ Tracker::Result Tracker::add(const Screen& screen, double time_ms){
         return Result::UNSURE;
     }
     m_bad_in_row = 0;
-    m_last_best = best;
-    m_typical = m_typical < 0 ? best : 0.8 * m_typical + 0.2 * best;
 
     const double margin = std::max(1.5, m_noise);
     const bool unsure = other - best < margin;
+    if (poor && unsure){
+        if (m_blurred_since < 0){
+            m_blurred_since = time_ms;
+        }
+        if (time_ms - m_blurred_since <= BLURRED_MS){
+            m_unsure++;
+            return Result::UNSURE;
+        }
+    }else{
+        m_blurred_since = -1;
+    }
+    m_last_best = best;
+    m_typical = m_typical < 0 ? best : 0.8 * m_typical + 0.2 * best;
+
     int chosen_a = best_a;
     int chosen_s = best_s;
     if (unsure){

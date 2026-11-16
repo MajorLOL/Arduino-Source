@@ -53,6 +53,8 @@
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryScroll.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySlowSteps.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySmallRoom.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "Assistant/Assistant_Panel.h"
@@ -1571,6 +1573,419 @@ int check_bump(Logger& logger){
     return wrong;
 }
 
+
+//  The FRLG AutoStory over rock stairs (AutoStorySlowSteps): a step up from
+//  them or down onto them takes 23 frames, not 16. The marks of the route's
+//  data, the timing of an input over them against the game's own steps, and
+//  the walk to the grass at the Canyon Entrance.
+int check_slow_steps(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Slow = AutoStorySlowSteps;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+    auto bit = [](int step){ return (uint64_t)1 << step; };
+
+    //  The marks.
+    const uint64_t marks = bit(1) | bit(28) | bit(63);
+    check(
+        Slow::is_slow(marks, 1) && Slow::is_slow(marks, 63) && !Slow::is_slow(marks, 0) &&
+        !Slow::is_slow(marks, 64) && !Slow::is_slow(marks, -1),
+        "a step is marked or not"
+    );
+    check(
+        Slow::slow_steps(marks, 0, 40) == 2 && Slow::slow_steps(marks, 2, 26) == 0 &&
+        Slow::slow_steps(marks, 28, 1) == 1 && Slow::slow_steps(marks, 0, 100) == 3,
+        "how many steps of a part of a run are slow"
+    );
+    check(
+        Slow::from_step(marks, 28) == (bit(0) | bit(35)) && Slow::from_step(marks, 64) == 0 &&
+        Slow::from_step(marks, 0) == marks,
+        "the marks of a run from one of its steps on"
+    );
+    uint64_t joined = 0;
+    check(
+        Slow::join(bit(1), 2, bit(0), 1, joined) && joined == (bit(1) | bit(2)),
+        "two runs walked as one keep their marks"
+    );
+    check(Slow::join(marks, 70, 0, 30, joined) && joined == marks, "a run without marks joins any run");
+    check(!Slow::join(0, 60, bit(5), 10, joined), "marks that do not fit behind the first run: not joined");
+
+    //  The timing, in the game's terms: a step starts when the one before
+    //  it is over and the input is still held. An input for "moves" steps
+    //  from step "first" of a run on makes just those, with "slack" frames
+    //  to spare either way; the player turned first (8 frames) or not.
+    auto lands = [&](uint64_t slow, int first, int moves, double slack){
+        const int on_stairs = Slow::slow_steps(slow, first, moves);
+        for (int turned = 0; turned <= 1; turned++){
+            const double turn = turned * 8.0;
+            const double hold = Slow::hold_frames(turn, Slow::STEP_FRAMES, moves, on_stairs);
+            if (Slow::steps_made(slow, first, turn, hold - slack) != moves ||
+                Slow::steps_made(slow, first, turn, hold + slack) != moves
+            ){
+                return false;
+            }
+        }
+        return true;
+    };
+    auto lands_from_anywhere = [&](uint64_t slow, int count){
+        for (int first = 0; first < count; first++){
+            if (!lands(slow, first, count - first, 7)){
+                return false;
+            }
+        }
+        return true;
+    };
+    bool one_stair = true;
+    for (int at = 0; at < 19; at++){
+        one_stair &= lands_from_anywhere(bit(at), 19);
+    }
+    check(one_stair, "a run of 19 with one step on stairs, wherever it is: 7 frames to spare either way");
+    //  (Mt. Ember, down from the summit: six of 18.)
+    const uint64_t ember = bit(4) | bit(5) | bit(10) | bit(11) | bit(14) | bit(15);
+    check(lands_from_anywhere(ember, 18), "a run of 18 with six steps on stairs, and what is left of it after a stop");
+    //  Which way the player faces not known: the input allows for half a
+    //  turn (4 frames), the game takes none or 8.
+    bool unknown_facing = true;
+    for (int game_turn = 0; game_turn <= 8; game_turn += 8){
+        const double hold = Slow::hold_frames(4, Slow::STEP_FRAMES, 18, 6);
+        unknown_facing &= Slow::steps_made(ember, 0, game_turn, hold - 3) == 18;
+        unknown_facing &= Slow::steps_made(ember, 0, game_turn, hold + 3) == 18;
+    }
+    check(unknown_facing, "the same with the facing not known");
+    //  Timed without the stairs, as before: one step of 19 on stairs and
+    //  three frames lost at a map border, a tile short (the walk to the
+    //  Canyon Entrance); two steps, a tile short without a border (Nugget
+    //  Bridge); four, two tiles (Victory Road).
+    const double stall = 3;
+    check(
+        Slow::steps_made(bit(7), 0, 8 + stall, Slow::hold_frames(8, Slow::STEP_FRAMES, 19, 0)) == 18 &&
+        Slow::steps_made(bit(7), 0, 8 + stall, Slow::hold_frames(8, Slow::STEP_FRAMES, 19, 1)) == 19,
+        "one step on stairs and a map border: a tile short as it was timed, there with the stairs counted"
+    );
+    check(
+        Slow::steps_made(bit(8) | bit(35), 0, 0, Slow::hold_frames(0, Slow::STEP_FRAMES, 37, 0)) == 36 &&
+        Slow::steps_made(bit(2) | bit(4) | bit(6) | bit(8), 0, 8, Slow::hold_frames(8, Slow::STEP_FRAMES, 15, 0)) == 13,
+        "two and four steps on stairs as they were timed: one and two tiles short"
+    );
+
+    //  The route's data, all three starters: marks on walking runs only,
+    //  inside the run, and every marked run lands on its tile from any of
+    //  its steps on.
+    struct Counts{
+        int runs = 0;
+        int steps = 0;
+    };
+    auto walked = [](RunKind kind){
+        return kind == RunKind::WALK || kind == RunKind::CHECKED || kind == RunKind::CHECKED_TRAINER ||
+            kind == RunKind::APPROACH || kind == RunKind::BACK;
+    };
+    bool marks_fine = true;
+    bool all_land = true;
+    auto count_marks = [&](const StoryScript& script){
+        Counts counts;
+        for (size_t i = 0; i < script.leg_count; i++){
+            const StoryLeg& leg = script.legs[i];
+            const StoryRun* runs = script.leg_runs(leg);
+            for (uint16_t r = 0; r < leg.run_count; r++){
+                const StoryRun& run = runs[r];
+                if (run.slow == 0){
+                    continue;
+                }
+                counts.runs++;
+                counts.steps += Slow::slow_steps(run.slow, 0, Slow::BITS);
+                marks_fine &= walked(run.kind) && run.count <= Slow::BITS &&
+                    Slow::slow_steps(run.slow, 0, run.count) == Slow::slow_steps(run.slow, 0, Slow::BITS) &&
+                    (run.direction == DPAD_UP || run.direction == DPAD_DOWN);
+                all_land &= lands_from_anywhere(run.slow, run.count);
+            }
+        }
+        return counts;
+    };
+    const Counts bulbasaur = count_marks(AutoStoryData::story_BULBASAUR());
+    const Counts squirtle = count_marks(AutoStoryData::story_SQUIRTLE());
+    const Counts charmander = count_marks(AutoStoryData::story_CHARMANDER());
+    check(
+        bulbasaur.runs > 0 && squirtle.runs > 0 && charmander.runs > bulbasaur.runs && marks_fine,
+        "the route's data: steps on stairs are marked on runs up and down that are walked, inside the run"
+    );
+    check(all_land, "the route's data: every run over stairs lands on its tile");
+
+    //  The walk from the Pokemon Center of Seven Island to the grass at the
+    //  Canyon Entrance: the run of 19 down, its eighth step onto the stairs
+    //  at (8, 14); and the way back, 21 up, the twelfth step off them.
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    uint64_t to_grass = 0;
+    uint64_t to_nurse = 0;
+    for (size_t i = 0; i < script.leg_count; i++){
+        const StoryLeg& leg = script.legs[i];
+        const std::string name = leg.name;
+        const StoryRun* runs = script.leg_runs(leg);
+        for (uint16_t r = 0; r < leg.run_count; r++){
+            if (name == "CollectCanyonEntrance_ToGrass_1" && runs[r].direction == DPAD_DOWN && runs[r].count == 19){
+                to_grass = runs[r].slow;
+            }
+            if (name == "CollectCanyonEntrance_BackToNurse" && runs[r].direction == DPAD_UP && runs[r].count == 21){
+                to_nurse = runs[r].slow;
+            }
+        }
+    }
+    check(to_grass == bit(7) && to_nurse == bit(11), "the stairs south of Seven Island in the walk to the Canyon Entrance and back");
+
+    logger.log(
+        "AutoStory test: rock stairs in the timing of a walk (a step up from them or down onto them takes 23 "
+        "frames, not 16: marked in the route's data on " + std::to_string(bulbasaur.runs) + ", " +
+        std::to_string(squirtle.runs) + " and " + std::to_string(charmander.runs) +
+        " runs for the three starters, " + std::to_string(bulbasaur.steps) + ", " + std::to_string(squirtle.steps) +
+        " and " + std::to_string(charmander.steps) + " steps; each of those runs lands on its tile with 7 "
+        "frames to spare, from any of its steps on; as it was timed before, a tile short): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The FRLG AutoStory's video tracker (AutoStoryScroll) and the flash of a
+//  poisoned Pokemon: every five steps the map is drawn as a mosaic for 10
+//  frames, and the player walks on through it (FldEffPoison_Start()). The
+//  tracker took that for the end of the map and counted no further: on
+//  Bond Bridge a battle six tiles on was counted at the flash, and the
+//  walk went on from the wrong tile (16 November 2026). Walks over a
+//  made-up map of tiles, drawn as the game would draw them.
+int check_poison_flash(Logger& logger){
+    using namespace NintendoSwitch::PokemonFRLG;
+    using AutoStoryScroll::Screen;
+    using AutoStoryScroll::Tracker;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("AutoStory test: failed: ") + what, COLOR_RED);
+        }
+    };
+
+    struct Dice{
+        uint32_t state;
+        int below(int n){
+            state = state * 1664525u + 1013904223u;
+            return (int)((state >> 8) % (uint32_t)n);
+        }
+    };
+    //  A map of 16 x 16 tiles as brightness values: patches of eight kinds
+    //  of tile (paths, trees, water), or one kind only ("plain": ground
+    //  that looks the same a tile further).
+    const int TILES_ACROSS = 60;
+    const int TILES_DOWN = 40;
+    const int MAP_WIDTH = TILES_ACROSS * 16;
+    const int MAP_HEIGHT = TILES_DOWN * 16;
+    auto make_map = [&](uint32_t seed, bool plain){
+        Dice dice{seed};
+        std::vector<uint8_t> kinds(8 * 256);
+        for (int k = 0; k < 8; k++){
+            const int spread = (k % 2 == 0 ? 14 : 50) * 3;
+            for (int i = 0; i < 256; i++){
+                int v = 60 + 22 * k + dice.below(spread) - spread / 2;
+                if (k >= 5 && (i % 16 < 2 || i / 16 < 2)){
+                    v = 30 + 5 * k;
+                }
+                kinds[(size_t)(k * 256 + i)] = (uint8_t)std::min(255, std::max(0, v));
+            }
+        }
+        std::vector<int> kind((size_t)(TILES_ACROSS * TILES_DOWN), 0);
+        if (!plain){
+            for (int n = 0; n < TILES_ACROSS * TILES_DOWN / 6; n++){
+                const int k = dice.below(8);
+                const int left = dice.below(TILES_ACROSS);
+                const int top = dice.below(TILES_DOWN);
+                const int right = std::min(TILES_ACROSS, left + 1 + dice.below(5));
+                const int bottom = std::min(TILES_DOWN, top + 1 + dice.below(4));
+                for (int ty = top; ty < bottom; ty++){
+                    for (int tx = left; tx < right; tx++){
+                        kind[(size_t)(ty * TILES_ACROSS + tx)] = k;
+                    }
+                }
+            }
+        }
+        std::vector<uint8_t> map((size_t)(MAP_WIDTH * MAP_HEIGHT));
+        for (int py = 0; py < MAP_HEIGHT; py++){
+            for (int px = 0; px < MAP_WIDTH; px++){
+                const int k = kind[(size_t)((py / 16) * TILES_ACROSS + px / 16)];
+                map[(size_t)(py * MAP_WIDTH + px)] = kinds[(size_t)(k * 256 + (py % 16) * 16 + px % 16)];
+            }
+        }
+        return map;
+    };
+    //  The screen with its top left at (left, top) of the map. "mosaic":
+    //  blocks of that many pixels and one more, each showing its top left
+    //  pixel (REG_MOSAIC). "gray": blended that far, of 16, towards one gray
+    //  (the two flashes that start a battle).
+    auto draw = [&](Screen& screen, const std::vector<uint8_t>& map, int left, int top, int mosaic, int gray, Dice& noise){
+        for (int sy = 0; sy < AutoStoryScroll::SCREEN_HEIGHT; sy++){
+            for (int sx = 0; sx < AutoStoryScroll::SCREEN_WIDTH; sx++){
+                const int mx = (((left + sx - (mosaic > 0 ? sx % (mosaic + 1) : 0)) % MAP_WIDTH) + MAP_WIDTH) % MAP_WIDTH;
+                const int my = (((top + sy - (mosaic > 0 ? sy % (mosaic + 1) : 0)) % MAP_HEIGHT) + MAP_HEIGHT) % MAP_HEIGHT;
+                int v = map[(size_t)(my * MAP_WIDTH + mx)];
+                if (gray > 0){
+                    v = (v * (16 - gray) + 110 * gray) / 16;
+                }
+                v += noise.below(3) - 1;
+                screen.pixels[(size_t)(sy * AutoStoryScroll::SCREEN_WIDTH + sx)] = (uint8_t)std::min(255, std::max(0, v));
+            }
+        }
+    };
+
+    struct Walk{
+        int dir_x = 1;
+        int dir_y = 0;
+        int tiles = 9;
+        int speed = 1;          //  pixels a frame: 1 walking, 2 surfing
+        int poison_every = 0;   //  steps between two mosaics (0: none)
+        int battle_after = -1;  //  steps; then the battle's flashes and another picture
+        bool plain = false;
+        uint32_t seed = 1;
+    };
+    struct Outcome{
+        int tiles = 0;          //  as the walk counts them
+        bool lost = false;
+        bool believed = false;  //  the walk would take the count from it
+        size_t flashes = 0;
+    };
+    auto take = [&](const Walk& walk){
+        const std::vector<uint8_t> map = make_map(walk.seed, walk.plain);
+        const std::vector<uint8_t> elsewhere = make_map(walk.seed + 77, false);
+        Dice noise{walk.seed * 31 + 5};
+        Dice jitter{walk.seed + 9};
+        Tracker tracker(walk.dir_x, walk.dir_y, 16.0 / (16.0 / walk.speed) / 16.74 * 1.3);
+        Screen screen;
+        const int step_frames = 16 / walk.speed;
+        const int walk_frames = walk.tiles * step_frames;
+        const int stop_frame = walk.battle_after >= 0 ? walk.battle_after * step_frames : walk_frames;
+        static const int MOSAIC_SIZES[10] = {2, 4, 6, 8, 10, 8, 6, 4, 2, 0};
+        double next_look = 0;
+        for (int frame = 0; frame < walk_frames + 90; frame++){
+            const double time_ms = frame * 16.74;
+            if (time_ms + 1e-9 < next_look){
+                continue;
+            }
+            //  (The tracker looks every 45 ms or so, not at every frame.)
+            next_look = time_ms + 40 + jitter.below(11);
+            const int pixels = std::min(frame, stop_frame) * walk.speed;
+            int mosaic = 0;
+            const int step = frame / step_frames;
+            const int into_step = frame - step * step_frames;
+            if (walk.poison_every > 0 && frame < stop_frame + 10 && step > 0 && step <= walk.tiles &&
+                step % walk.poison_every == 0 && into_step < 10 && (walk.battle_after < 0 || frame < stop_frame)
+            ){
+                mosaic = MOSAIC_SIZES[into_step];
+            }
+            if (walk.battle_after >= 0 && frame >= stop_frame + 32){
+                draw(screen, elsewhere, 300 + (frame - stop_frame) * 3, 200, 0, 0, noise);
+            }else{
+                int gray = 0;
+                if (walk.battle_after >= 0 && frame >= stop_frame){
+                    const int phase = (frame - stop_frame) % 16;
+                    gray = phase < 8 ? (phase + 1) * 2 : (16 - phase) * 2 - 2;
+                }
+                draw(screen, map, 320 + walk.dir_x * pixels, 240 + walk.dir_y * pixels, mosaic, gray, noise);
+            }
+            tracker.add(screen, time_ms);
+        }
+        Outcome outcome;
+        outcome.lost = tracker.lost();
+        //  (attempt_moves(): a tile from 10 px on when the screen changed.)
+        outcome.tiles = outcome.lost ? (tracker.pixels() + 6) / 16 : tracker.tiles();
+        outcome.believed = !tracker.lost() && tracker.reliable();
+        outcome.flashes = tracker.flashes();
+        return outcome;
+    };
+
+    static const int WAYS[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    int walks = 0;
+    int plain_walks_right = 0;
+    int followed = 0;
+    int surfing_followed = 0;
+    size_t found_again = 0;
+    bool none_wrong = true;         //  no count the walk would believe is wrong
+    bool last_step_right = true;
+    int battles_lost = 0;
+    int battles_right = 0;
+    int late_battles_right = 0;
+    for (uint32_t seed = 1; seed <= 2; seed++){
+        for (int way = 0; way < 4; way++){
+            Walk walk;
+            walk.seed = seed;
+            walk.dir_x = WAYS[way][0];
+            walk.dir_y = WAYS[way][1];
+            walks++;
+            //  Nothing on the way.
+            Outcome outcome = take(walk);
+            plain_walks_right += outcome.believed && outcome.tiles == 9 ? 1 : 0;
+            //  The mosaic after steps 5 and 10 of 14, walking and surfing.
+            walk.tiles = 14;
+            walk.poison_every = 5;
+            outcome = take(walk);
+            followed += outcome.believed && outcome.tiles == 14 ? 1 : 0;
+            found_again += outcome.flashes;
+            none_wrong &= !outcome.believed || outcome.tiles == 14;
+            walk.speed = 2;
+            outcome = take(walk);
+            surfing_followed += outcome.believed && outcome.tiles == 14 ? 1 : 0;
+            none_wrong &= !outcome.believed || outcome.tiles == 14;
+            walk.speed = 1;
+            //  The mosaic after the last step: the player stands.
+            walk.tiles = 5;
+            outcome = take(walk);
+            last_step_right &= (!outcome.believed && !outcome.lost) || outcome.tiles == 5;
+            //  A battle after 3 steps of 14.
+            walk.tiles = 14;
+            walk.poison_every = 0;
+            walk.battle_after = 3;
+            outcome = take(walk);
+            battles_lost += outcome.lost ? 1 : 0;
+            battles_right += outcome.lost && outcome.tiles == 3 ? 1 : 0;
+            //  The mosaic after step 5, a battle after step 9 (Bond Bridge).
+            walk.poison_every = 5;
+            walk.battle_after = 9;
+            outcome = take(walk);
+            battles_lost += outcome.lost ? 1 : 0;
+            late_battles_right += outcome.lost && outcome.tiles == 9 ? 1 : 0;
+            //  Ground that looks the same a tile further, with the mosaic.
+            walk.battle_after = -1;
+            walk.plain = true;
+            outcome = take(walk);
+            none_wrong &= !outcome.believed || outcome.tiles == 14;
+        }
+    }
+    check(plain_walks_right == walks, "a walk of 9 tiles with nothing on the way is counted");
+    check(followed >= walks - 1 && found_again >= (size_t)walks, "the mosaic on the way: the walk is followed to its end");
+    check(none_wrong, "the mosaic on the way, walking, surfing and over plain ground: no wrong count that the walk would believe");
+    check(last_step_right, "the mosaic after the last step, the player standing: the count is right");
+    check(battles_lost == 2 * walks && battles_right >= walks - 1, "a battle on the way: the screen is lost at its step");
+    check(late_battles_right >= walks - 1, "the mosaic, then a battle four steps on: counted at the battle");
+
+    logger.log(
+        "AutoStory test: the video tracker and the flash of a poisoned Pokemon (the map as a mosaic for 10 "
+        "frames every five steps, the player walking on): of " + std::to_string(walks) + " walks with two "
+        "flashes on the way " + std::to_string(followed) + " followed to the end (the map found again " +
+        std::to_string(found_again) + " times), surfing " + std::to_string(surfing_followed) +
+        "; a battle four steps after a flash counted at the battle in " + std::to_string(late_battles_right) +
+        "; the flash after the last step, plain ground, a battle without poison): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -1591,6 +2006,8 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);
         failed += check_bump(logger);
+        failed += check_slow_steps(logger);
+        failed += check_poison_flash(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

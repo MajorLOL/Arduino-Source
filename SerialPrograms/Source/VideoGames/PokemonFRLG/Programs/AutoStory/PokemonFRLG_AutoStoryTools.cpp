@@ -37,6 +37,7 @@
 #include "PokemonFRLG_AutoStoryBump.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
+#include "PokemonFRLG_AutoStorySlowSteps.h"
 #include "PokemonFRLG_AutoStorySmallRoom.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
@@ -58,6 +59,8 @@ namespace{
 //    - A walking step takes 16 frames, a ledge jump 32 frames (2 tiles), a
 //      step while surfing 8 frames (same speed as running), a tile on a
 //      spinner 8 frames.
+//    - A step up from rock stairs, or down onto them, takes 23 frames
+//      (PlayerWalkSlow()): the route marks those, see AutoStorySlowSteps.
 //    - The game reads the d-pad when a step finishes. If a direction is
 //      held then, the player keeps going that way without stopping.
 constexpr double FRAME_MS = 16.74;
@@ -371,17 +374,23 @@ struct RunAttempt{
 //  shows up. With "track", the video tells how many moves were made.
 //  "trainer_watch": in the dark, how long to watch after a step where a
 //  trainer may see the player.
+//  "on_stairs": how many of the moves are walking steps on rock stairs,
+//  23 frames each (see AutoStorySlowSteps).
 RunAttempt attempt_moves(
     StoryRuntime& rt, DpadPosition direction, int moves,
     double frames, int tiles_per_move, bool surf, bool dark, bool track,
     bool battles = false, Milliseconds trainer_watch = Milliseconds(0),
-    bool run = false
+    bool run = false, int on_stairs = 0
 ){
     //  Running: B held with the d-pad, 8-frame steps. Single moves walk
     //  (their presses are timed for walking).
     const bool running = run && moves > 1 && !surf && tiles_per_move == 1;
     if (running){
         frames = RUN_FRAMES;
+    }
+    //  (Legs with rock stairs are not run: the generator's can_run().)
+    if (running || surf || tiles_per_move != 1){
+        on_stairs = 0;
     }
     BlackScreenWatcher battle_starting(COLOR_RED);
     WalkTracker tracker(direction, frames / tiles_per_move);
@@ -466,13 +475,18 @@ RunAttempt attempt_moves(
         rt.console, rt.context,
         [&](ProControllerContext& context){
             if (moves == 1){
-                single_move(context, facing, direction, frames, surf);
+                single_move(
+                    context, facing, direction,
+                    frames + AutoStorySlowSteps::EXTRA_FRAMES * on_stairs, surf
+                );
             }else{
                 //  Released halfway through the last move: the player stops
                 //  at the end of it. Not knowing which way the player faces,
-                //  half a turn: within the last move either way.
+                //  half a turn: within the last move either way. (Steps on
+                //  rock stairs take 7 frames more each: 15 frames into a
+                //  slow last step then, with 8 to go.)
                 double turn = direction == facing ? 0 : (facing == DPAD_NONE ? TURN_FRAMES / 2 : TURN_FRAMES);
-                double hold = turn + frames * moves - frames / 2;
+                double hold = AutoStorySlowSteps::hold_frames(turn, frames, moves, on_stairs);
                 if (running){
                     pbf_controller_state(context, BUTTON_B, direction, {0, 0}, {0, 0}, frames_to_ms(hold));
                     pbf_wait(context, frames_to_ms(frames / 2 + 6));
@@ -1252,10 +1266,12 @@ bool step_back_onto_route(StoryRuntime& rt, DpadPosition direction, bool short_f
     return false;
 }
 
+//  Walks "count" steps of "run", from its step "first" on (the ones before
+//  it are made already: a walk around someone took them).
 bool walk_run(
     StoryRuntime& rt, const StoryLeg& leg, const StoryRun& run, uint16_t count,
     bool track, bool scene_at_end, bool warp_at_end, const std::string& where,
-    DpadPosition next_direction, uint16_t& next_reduce
+    DpadPosition next_direction, uint16_t& next_reduce, uint16_t first = 0
 ){
     //  For the next run: this one, and whether it may have ended one tile
     //  off (see StoryRuntime::last_run_off).
@@ -1334,15 +1350,21 @@ bool walk_run(
         //  plain and the encounter tiles of a leg that allows it.
         const bool running = rt.running && track && leg.run && moves > 1 &&
             (run.kind == RunKind::WALK || run.kind == RunKind::CHECKED);
+        //  The steps of this try on rock stairs (23 frames each, not 16).
+        const int on_stairs = surf || run.kind == RunKind::JUMP
+            ? 0
+            : AutoStorySlowSteps::slow_steps(run.slow, (int)first + ((int)count - remaining), moves);
         RunAttempt a = attempt_moves(
             rt, run.direction, moves, frames, tiles_per_move, surf, leg.dark, track, encounters,
-            trainer ? rt.trainer_check : Milliseconds(0), running
+            trainer ? rt.trainer_check : Milliseconds(0), running, on_stairs
         );
         if (track){
             rt.console.log(
                 std::string(running ? "Ran " : "Walked ") + dpad_name(run.direction) + ": " +
                 std::to_string(a.moves) + " of " + std::to_string(moves) +
-                (a.measured ? "" : " (video unsure)") + " - " + a.video
+                (a.measured ? "" : " (video unsure)") +
+                (on_stairs > 0 ? " (" + std::to_string(on_stairs) + " on stairs)" : std::string()) +
+                " - " + a.video
             );
         }
         int made = a.moves;
@@ -1854,12 +1876,17 @@ std::vector<StoryRun> merge_runs(const StoryRun* runs, uint16_t count, bool merg
     };
     for (uint16_t r = 0; r < count; r++){
         const StoryRun& run = runs[r];
+        //  (The steps on rock stairs keep their place in the whole. If
+        //  the marks do not fit, the two are walked one after the other.)
+        uint64_t slow = 0;
         if (merge && !result.empty() &&
             result.back().direction == run.direction &&
-            mergeable(result.back().kind, run.kind)
+            mergeable(result.back().kind, run.kind) &&
+            AutoStorySlowSteps::join(result.back().slow, result.back().count, run.slow, run.count, slow)
         ){
             StoryRun& back = result.back();
             back.count = (uint16_t)(back.count + run.count);
+            back.slow = slow;
             if (run.kind == RunKind::CHECKED || run.kind == RunKind::SURF_CHECKED){
                 back.kind = run.kind;
             }
@@ -1931,8 +1958,10 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             //  would see that too.
             const bool track = rt.verify_walking && next != RunKind::SPIN;
             const bool onto_warp = last && leg.end == LegEnd::WARP_STEP && run.kind != RunKind::JUMP;
-            uint16_t count = onto_warp ? (uint16_t)(run.count - 1) : run.count;
-            count = (uint16_t)(count - std::min(count, reduce_next));
+            const uint16_t whole = onto_warp ? (uint16_t)(run.count - 1) : run.count;
+            //  (A walk around someone made the first steps of this run.)
+            const uint16_t made_before = std::min(whole, reduce_next);
+            const uint16_t count = (uint16_t)(whole - made_before);
             reduce_next = 0;
             const bool scene_at_end = last && leg.end == LegEnd::TRIGGER;
             const bool warp_at_end = last && leg.end == LegEnd::WARP_PUSH;
@@ -1940,13 +1969,17 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
             if (count > 0){
                 warped_early = walk_run(
                     rt, leg, run, count, track, scene_at_end, warp_at_end, leg.name,
-                    next_direction, reduce_next
+                    next_direction, reduce_next, made_before
                 );
             }
             if (onto_warp){
                 const bool surf = run.kind == RunKind::SURF || run.kind == RunKind::SURF_CHECKED;
+                const double step_frames = surf
+                    ? SURF_FRAMES
+                    : WALK_FRAMES + (AutoStorySlowSteps::is_slow(run.slow, (int)run.count - 1)
+                        ? AutoStorySlowSteps::EXTRA_FRAMES : 0);
                 step_onto_warp(
-                    rt, run.direction, surf ? SURF_FRAMES : WALK_FRAMES, surf,
+                    rt, run.direction, step_frames, surf,
                     leg.dark || leg.dest_dark, leg.preview, leg.name
                 );
                 warped = true;
@@ -1969,7 +2002,11 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
                 );
             }
             if (back > 0){
-                StoryRun plain{run.direction, (uint16_t)back, RunKind::WALK};
+                //  (The last "back" steps of the way back as planned.)
+                StoryRun plain{
+                    run.direction, (uint16_t)back, RunKind::WALK,
+                    AutoStorySlowSteps::from_step(run.slow, (int)run.count - back)
+                };
                 uint16_t no_reduce = 0;
                 walk_run(rt, leg, plain, (uint16_t)back, rt.verify_walking, false, false, leg.name, DPAD_NONE, no_reduce);
             }

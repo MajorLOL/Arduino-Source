@@ -87,6 +87,8 @@ bool WalkTracker::process_frame(const VideoSnapshot& frame){
         }
         return m_stop_when_lost;
     }
+    //  (Found again further on: see AutoStoryScroll::Tracker::flashes().)
+    m_lost_at_ms = -1;
     return !m_tracker.lost() &&
         m_stop_when_still_ms > 0 &&
         m_tracker.frames() >= 3 &&

@@ -632,6 +632,81 @@ class Builder:
         tiles = sum(r[1] for r in stretch)
         leg["runs"] = runs[:first] + [[d, tiles, RUN_SURF_BUMP]]
 
+    # ------------------------------------------------------------ rock stairs
+    #  A step up from rock stairs, or down onto them, is walked slowly
+    #  (PlayerNotOnBikeMoving(): PlayerIsMovingOnRockStairs() ->
+    #  PlayerWalkSlow(); UpdateWalkSlowAnim() moves a pixel in two frames
+    #  of three: 23 frames a tile instead of 16). Sideways they are walked
+    #  as any tile. An input timed at 16 frames a tile ends 7 frames early
+    #  for each such step, and it has 8 to spare: a tile short from two of
+    #  them on, and from one when anything else on the way takes a few
+    #  frames (a map border). The video sees that and the walk makes it up,
+    #  where it can follow. On 16 November 2026 it could not on the way
+    #  south from Seven Island (the sea all around the path): the stairs at
+    #  (8, 14) and the border after them made the run of 19 one short, and
+    #  the grass at the Canyon Entrance was walked along a row too high,
+    #  for half an hour. (The logs up to then, where the video followed a
+    #  plain run to its end: with two steps on stairs 676 of 680 a tile
+    #  short, with one 2 of 276; without stairs, over a map border, 1 of
+    #  1,434.)
+    WALKED_KINDS = (RUN_WALK, RUN_CHECKED, RUN_CHECKED_TRAINER, RUN_APPROACH, RUN_BACK)
+    SLOW_BITS = 64      # the steps of a run the data can mark (StoryRun::slow)
+
+    def mark_slow_steps(self):
+        """leg["slow"]: for each run of each leg, the steps of it the game
+        walks slowly, as bits (bit i = step i of the run; the C++ holds
+        the input 7 frames longer for each). A run with one further on
+        than the bits reach is cut in two."""
+        stairs = self.d.behaviors.by_name.get("MB_ROCK_STAIRS", -1)
+
+        def is_stairs(m, x, y):
+            return m.in_bounds(x, y) and self.engine.view(m.id).tile(x, y)[3] == stairs
+
+        for leg in self.legs:
+            leg["slow"] = [0] * len(leg["runs"])
+            #  Up from one or down onto one: either way the leg stands on it.
+            if not any(is_stairs(self.d.maps[mid], x, y) for mid, x, y in leg["points"]):
+                continue
+            m = self.d.maps[leg["start"][0]]
+            x, y = leg["start"][1], leg["start"][2]
+            before = (m.id, x, y)
+            runs, slow = [], []
+            for d, count, kind in leg["runs"]:
+                if kind == RUN_SPIN:
+                    #  (Spinners turn the player on the way: not a straight line.)
+                    raise StoryError("rock stairs on a leg with spinner tiles: %s" % leg["name"])
+                steps = []
+                for i in range(count * (2 if kind == RUN_JUMP else 1)):
+                    t = self.engine.neighbor_tile(m, x, y, d)
+                    if t is None:
+                        raise StoryError("rock stairs: %s leaves the map at %s (%d,%d) going %s" % (
+                            leg["name"], m.id, x, y, d))
+                    m2, x2, y2 = t
+                    if kind in Builder.WALKED_KINDS and (
+                            (d == "up" and is_stairs(m, x, y)) or (d == "down" and is_stairs(m2, x2, y2))):
+                        steps.append(i)
+                    before = (m.id, x, y)
+                    m, x, y = m2, x2, y2
+                base = 0
+                while True:
+                    part = count - base
+                    if any(s - base >= Builder.SLOW_BITS for s in steps):
+                        part = Builder.SLOW_BITS
+                    runs.append([d, part, kind])
+                    slow.append(sum(1 << (s - base) for s in steps if base <= s < base + part))
+                    base += part
+                    if base >= count:
+                        break
+            #  (The step onto a warp tile is a run of the leg, not a point of
+            #  its way: the way goes on behind the warp.)
+            at = before if leg["end"] == "WARP_STEP" else (m.id, x, y)
+            end = leg["points"][-1]
+            if at != (end[0], end[1], end[2]):
+                raise StoryError("rock stairs: the runs of %s end at %s, its way at %s" % (
+                    leg["name"], (at,), (end,)))
+            leg["runs"] = runs
+            leg["slow"] = slow
+
     def mark_approach(self, out, m, target_xy, target_key):
         """
         The leg just emitted ends next to a trainer that turns around, and
@@ -2326,4 +2401,5 @@ class Builder:
                 "steps": out, "start": list(start_pos), "end": list(self.pos),
                 "notes": seg.get("notes", ""),
             })
+        self.mark_slow_steps()
         return self.segments

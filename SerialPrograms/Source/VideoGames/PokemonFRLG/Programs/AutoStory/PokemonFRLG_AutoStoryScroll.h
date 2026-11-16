@@ -109,8 +109,15 @@ public:
     //  The offset was measured well all along.
     bool reliable() const;
 
-    //  Lost the screen (two frames in a row unlike anything before).
+    //  Lost the screen (two frames in a row unlike anything before), and
+    //  not found again since.
     bool lost() const{ return m_lost; }
+
+    //  How often the screen was lost and found again further on: something
+    //  covered the map for a moment while the player walked on. (A poisoned
+    //  Pokemon: every five steps the map is drawn as a mosaic for 10 frames,
+    //  FldEffPoison_Start(), and the walk goes on through it.)
+    size_t flashes() const{ return m_flashes; }
 
     //  The last frames showed no movement for this long.
     double still_ms() const{ return m_still_ms; }
@@ -146,10 +153,14 @@ private:
     double m_typical = -1;      //  recent mismatch of the matches found
     int m_bad_in_row = 0;
     bool m_lost = false;
+    bool m_gone = false;        //  lost for good: no longer looked for
+    double m_lost_since = 0;    //  the first frame unlike anything before
+    double m_blurred_since = -1;    //  the first of the frames left out now
 
     size_t m_frames = 0;
     size_t m_unsure = 0;
     size_t m_lost_frames = 0;
+    size_t m_flashes = 0;
 };
 
 

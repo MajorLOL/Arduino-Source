@@ -2706,6 +2706,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     //  that does not end at all.
     const std::chrono::minutes safari_limit(75);
     const WallClock deadline = start + (safari ? safari_limit : std::chrono::minutes(minutes_limit));
+    //  No wild Pokemon at all: the player is not on the grass. (Canyon
+    //  Entrance, 16 November 2026: the walk there ended a row above the
+    //  grass, and the row was walked up and down for the 30 minutes of the
+    //  visit, 1,416 steps without a battle.) On the rarest ground of the
+    //  game (the first room of the Lost Cave: 1 step in 100, and more with
+    //  every step without one, StandardWildEncounter()) 400 steps go by
+    //  without a wild Pokemon once in some 3,000 visits; on water with its
+    //  2 in 100 once in ten million, on grass never. No REPEL is on at
+    //  these steps (the generator's no_repel_here()).
+    const std::chrono::minutes nothing_limit(6);
+    const uint64_t nothing_steps = 400;
     try{
         while (current_time() < deadline && !rt.safari_over){
             if (!safari && (!any_looked_for() || idle >= idle_limit || rt.no_balls)){
@@ -2725,6 +2736,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 break;
             }
             if (result == StoryBattleResult::NO_BATTLE){
+                if (!safari && battles == 0 && spot.steps() >= nothing_steps &&
+                    current_time() - start > nothing_limit
+                ){
+                    OperationFailedExceptionWithScreenshot::fire(
+                        ErrorReportMode::SEND_ERROR_REPORT,
+                        "story_dex(): No wild Pokemon in " + std::to_string((int)nothing_limit.count()) +
+                        " minutes and " + std::to_string(spot.steps()) + " steps: the player is not on the grass "
+                        "(or the water, or the cave floor) that the route walks here: " + label,
+                        console
+                    );
+                }
                 continue;
             }
             battles++;
@@ -2986,6 +3008,14 @@ SeekerUse use_vs_seeker(StoryRuntime& rt, const std::string& what){
             context.wait_for_all_requests();
         }
     }
+    if (result == SeekerUse::USED){
+        //  (GetVsSeekerResponseInArea(): a text only when no trainer in
+        //  reach wants a battle and none of them is one never beaten.)
+        console.log(
+            "The VS SEEKER (" + what + "): no text after it. A trainer wants a battle, or one in reach was "
+            "never beaten."
+        );
+    }
     //  B closes its text (two pages), and does nothing without one.
     pbf_mash_button(context, BUTTON_B, 2500ms);
     context.wait_for_all_requests();
@@ -3063,6 +3093,15 @@ int story_rematch(StoryRuntime& rt, const StoryScript& script, const StoryStep& 
 
         //  A on the trainer: the words before a battle, or a line of text.
         story_talk_start(rt, label);
+        //  What the trainer says, for the log only: the words before a
+        //  rematch, or the line of one who does not want it. (16 November
+        //  2026: one battle, then eight rounds in a row without, where the
+        //  game gives 7 in 10 each time (vs_seeker.c) - once in 15,000 by
+        //  chance - and the rounds looked the same as those with a battle
+        //  in every line of the log.)
+        pbf_wait(context, 600ms);
+        context.wait_for_all_requests();
+        console.log(label + ": the trainer says: \"" + story_read_people(rt) + "\"");
         bool battle = false;
         for (int part = 0; part < 4; part++){
             if (!story_cutscene(rt, 0ms, 60s, false, label)){

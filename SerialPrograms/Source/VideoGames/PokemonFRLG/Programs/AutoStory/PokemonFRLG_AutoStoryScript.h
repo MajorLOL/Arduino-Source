@@ -72,6 +72,10 @@ struct StoryRun{
     DpadPosition direction;
     uint16_t count;
     RunKind kind;
+    //  The steps of the run that the game walks slowly (up from rock stairs
+    //  or down onto them, 23 frames instead of 16): bit i = step i. See
+    //  AutoStorySlowSteps.
+    uint64_t slow = 0;
 };
 
 struct StoryLeg{

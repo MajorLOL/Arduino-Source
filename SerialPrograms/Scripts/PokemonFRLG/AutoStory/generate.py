@@ -79,8 +79,13 @@ def write_cpp(results, path, decomp):
         n = 0
         for leg in legs:
             run_index.append(n)
-            for d, c, k in leg["runs"]:
-                L.append("    {%s, %d, RunKind::%s}," % (DPAD[d], c, k))
+            for (d, c, k), slow in zip(leg["runs"], leg["slow"]):
+                #  (The steps on rock stairs, see Builder.mark_slow_steps():
+                #  written only where there are any.)
+                if slow:
+                    L.append("    {%s, %d, RunKind::%s, 0x%xull}," % (DPAD[d], c, k, slow))
+                else:
+                    L.append("    {%s, %d, RunKind::%s}," % (DPAD[d], c, k))
                 n += 1
         if n == 0:
             L.append("    {DPAD_NONE, 0, RunKind::WALK},")
