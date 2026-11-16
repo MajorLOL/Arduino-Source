@@ -2303,8 +2303,8 @@ StoryBattleResult run_story_battle(
                     //  of Safari actions has it for this species and the
                     //  balls left. (Balls alone catch a CHANSEY 10 times in
                     //  100, the table 19 times: two Safari Games on 16
-                    //  November 2026, six CHANSEY, each gone after one or
-                    //  two balls. PokemonFRLG_AutoStorySafari.h.)
+                    //  November 2026, six CHANSEY, each gone after one to
+                    //  four balls. PokemonFRLG_AutoStorySafari.h.)
                     if (!safari_actions_read){
                         safari_actions_read = true;
                         safari_actions = safari_table_actions(console, memory.shiny_species, settings.safari_balls_left);

@@ -7,8 +7,9 @@
  *  Up to PocketPilot build 30 the AutoStory threw SAFARI BALLs at a species
  *  it wanted and nothing else. The run of 16 November 2026 played two
  *  Safari Games in the north area for the second CHANSEY: six came, and
- *  each fled after one or two balls. That is how the game has it: a CHANSEY
- *  flees 45 times in 100 each turn, and a ball catches it 5 times in 100.
+ *  each fled after one to four balls (12 in all). That is how the game has
+ *  it: a CHANSEY flees 45 times in 100 each turn, and a ball catches it 5
+ *  times in 100.
  *
  *  Pokemon Automation has a table of what to do instead (its Packages:
  *  Resources/PokemonFRLG/SafariOptimalAction, one file per species, read by
