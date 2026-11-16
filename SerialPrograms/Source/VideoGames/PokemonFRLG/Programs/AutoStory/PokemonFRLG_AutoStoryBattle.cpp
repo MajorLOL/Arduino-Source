@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <functional>
 #include <string>
+#include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "Common/Cpp/Json/JsonValue.h"
@@ -44,9 +45,11 @@
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_OcrPreprocessing.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_WildEncounterReader.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_BattleMenuNavigation.h"
+#include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_SafariOptimalAction.h"
 #include "Pokemon/Inference/Pokemon_NameReader.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryNameMark.h"
+#include "PokemonFRLG_AutoStorySafari.h"
 #include "PokemonFRLG_AutoStoryBattle.h"
 
 namespace PokemonAutomation{
@@ -939,6 +942,48 @@ void fight_one_turn(
         return;
     }
     use_best_move(console, context, settings, memory, opponent);
+}
+
+//  What Pokemon Automation's table of Safari actions has for a species and
+//  the SAFARI BALLs left: the actions turn by turn, balls after them. Empty:
+//  the species is not in the table, or the table was not read (then balls
+//  only, as up to build 30).
+std::vector<SafariBattleMenuOption> safari_table_actions(
+    ConsoleHandle& console, const std::string& slug, int balls_left
+){
+    const std::string name = AutoStorySafari::table_name(slug);
+    if (SAFARI_ZONE_POKEMON_SUBSET.count(name) == 0){
+        return {};
+    }
+    std::string problem;
+    try{
+        //  Read once (23 small files). If that fails it is tried again at
+        //  the next battle.
+        static const SafariOptimalAction table(Language::English);
+        const auto actions = table.get_optimal_actions(
+            console, name, std::max(1, std::min(AutoStorySafari::BALLS_A_GAME, balls_left))
+        );
+        if (actions.has_value()){
+            std::vector<SafariBattleMenuOption> list = actions->get();
+            //  A wanted Pokemon is not run from, whatever the table says.
+            for (SafariBattleMenuOption& action : list){
+                if (action == SafariBattleMenuOption::RUN){
+                    action = SafariBattleMenuOption::BALL;
+                }
+            }
+            return list;
+        }
+        problem = "nothing in it for " + name;
+    }catch (const FileException& e){
+        problem = e.to_str();
+    }catch (const ParseException& e){
+        problem = e.to_str();
+    }
+    console.log(
+        "Pokemon Automation's table of Safari actions was not read (" + problem + "): SAFARI BALLs only.",
+        COLOR_ORANGE
+    );
+    return {};
 }
 
 void run_from_battle(ConsoleHandle& console, ProControllerContext& context, bool safari){
@@ -1887,6 +1932,12 @@ StoryBattleResult run_story_battle(
     double balls_from_hp = -1;      //  its HP when the balls began
     int balls_thrown = 0;
     int throw_failures = 0;
+    //  In the Safari Zone: what Pokemon Automation's table of Safari
+    //  actions has for this species (read at the first turn), and the turns
+    //  of it that are done.
+    std::vector<SafariBattleMenuOption> safari_actions;
+    bool safari_actions_read = false;
+    size_t safari_turn = 0;
     int heals_used = 0;
     int heal_failures = 0;
     //  "Faster battles" (settings.fast_end): fades to black in this battle
@@ -2248,10 +2299,52 @@ StoryBattleResult run_story_battle(
                 }()){
                     break;
                 }else if (shiny_safari){
-                    if (move_cursor_to_option(console, context, SafariBattleMenuOption::BALL)){
-                        balls_thrown++;
-                        memory.safari_balls++;
-                        console.log("SAFARI BALL " + std::to_string(balls_thrown) + (dex_catch ? "." : " at the shiny."), COLOR_BLUE);
+                    //  Bait, a rock or a ball: as Pokemon Automation's table
+                    //  of Safari actions has it for this species and the
+                    //  balls left. (Balls alone catch a CHANSEY 10 times in
+                    //  100, the table 19 times: two Safari Games on 16
+                    //  November 2026, six CHANSEY, each gone after one or
+                    //  two balls. PokemonFRLG_AutoStorySafari.h.)
+                    if (!safari_actions_read){
+                        safari_actions_read = true;
+                        safari_actions = safari_table_actions(console, memory.shiny_species, settings.safari_balls_left);
+                        size_t others = 0;
+                        std::string first;
+                        for (size_t i = 0; i < safari_actions.size(); i++){
+                            const SafariBattleMenuOption action = safari_actions[i];
+                            others += action == SafariBattleMenuOption::BALL ? 0 : 1;
+                            if (i < 12){
+                                first += std::string(i == 0 ? "" : ", ") + (
+                                    action == SafariBattleMenuOption::BAIT ? "bait" :
+                                    action == SafariBattleMenuOption::ROCK ? "rock" : "ball"
+                                );
+                            }
+                        }
+                        if (others > 0){
+                            console.log(
+                                "The Safari table for " + AutoStorySafari::table_name(memory.shiny_species) + " with " +
+                                std::to_string(std::max(1, std::min(AutoStorySafari::BALLS_A_GAME, settings.safari_balls_left))) +
+                                " SAFARI BALLs left: " + first + (safari_actions.size() > 12 ? ", ..." : "") + " (" +
+                                std::to_string(safari_actions.size()) + " turns, balls after them).",
+                                COLOR_BLUE
+                            );
+                        }
+                    }
+                    const SafariBattleMenuOption action = safari_turn < safari_actions.size()
+                        ? safari_actions[safari_turn] : SafariBattleMenuOption::BALL;
+                    if (move_cursor_to_option(console, context, action)){
+                        safari_turn++;
+                        if (action == SafariBattleMenuOption::BALL){
+                            balls_thrown++;
+                            memory.safari_balls++;
+                            console.log("SAFARI BALL " + std::to_string(balls_thrown) + (dex_catch ? "." : " at the shiny."), COLOR_BLUE);
+                        }else{
+                            console.log(
+                                std::string(action == SafariBattleMenuOption::BAIT ? "BAIT" : "A ROCK") +
+                                " (turn " + std::to_string(safari_turn) + " of the Safari table).",
+                                COLOR_BLUE
+                            );
+                        }
                         pbf_press_button(context, BUTTON_A, 160ms, 1840ms);
                         context.wait_for_all_requests();
                     }else{

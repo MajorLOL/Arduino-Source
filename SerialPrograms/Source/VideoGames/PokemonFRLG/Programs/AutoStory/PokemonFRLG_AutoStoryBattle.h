@@ -175,8 +175,10 @@ struct StoryBattleSettings{
     //  yet) is caught with the cheapest ball in the bag (POKe BALL first,
     //  then GREAT, then ULTRA; never the Master Ball), up to
     //  "dex_max_throws" balls a battle, at full HP (the team would knock it
-    //  out). In the Safari Zone: SAFARI BALLs until it is caught or flees.
-    //  The others are run from (StoryBattleKind::CATCH).
+    //  out). In the Safari Zone: bait, rocks and SAFARI BALLs as Pokemon
+    //  Automation's table of Safari actions has them (safari_balls_left),
+    //  until it is caught or flees. The others are run from
+    //  (StoryBattleKind::CATCH).
     std::set<std::string> dex_species;
     int dex_max_throws = 20;
     //  All species of the DEX step, caught or not as the program knows: the
@@ -188,6 +190,12 @@ struct StoryBattleSettings{
     //  Only shiny ones of dex_species (the collection's "Shiny only"): the
     //  others are run from, the ball mark does not matter.
     bool dex_shiny_only = false;
+    //  In a Safari Game: the SAFARI BALLs left of its 30. Pokemon
+    //  Automation's table of Safari actions goes by them: for a species
+    //  that is wanted it says what to do turn by turn (bait first for the
+    //  ones that are hard to catch and quick to flee, a rock before the
+    //  last ball). See PokemonFRLG_AutoStorySafari.h.
+    int safari_balls_left = 30;
 
     //  The roaming legendary (StepType::ROAM): met, it gets the MASTER BALL
     //  at once (it flees on its first turn; a ball goes before any move).

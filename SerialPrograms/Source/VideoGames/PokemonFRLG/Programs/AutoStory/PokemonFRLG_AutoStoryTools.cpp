@@ -652,6 +652,9 @@ StoryBattleResult story_battle(
     //  A shiny takes the next free party slot. Until the whole team is in,
     //  keep the slots the team still needs.
     rt.battle.shiny_catch = rt.catch_shinies && (rt.party_order_final || (int)rt.team.size() + rt.party_extras < 6);
+    //  The SAFARI BALLs left of the 30 of a Safari Game: what to do in a
+    //  battle there goes by them.
+    rt.battle.safari_balls_left = rt.in_safari ? std::max(1, 30 - rt.safari_balls_used) : 30;
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
     //  The program's count of the bag: the FULL RESTOREs and MAX POTIONs
     //  the battle used.

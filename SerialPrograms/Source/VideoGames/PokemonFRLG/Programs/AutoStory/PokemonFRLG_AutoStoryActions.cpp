@@ -2687,6 +2687,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     rt.safari_over = false;
     rt.safari_balls_used = 0;
     rt.no_balls = false;
+    rt.dex_visits++;
     const uint64_t new_before = rt.dex_new;
     const uint64_t marked_before = rt.dex_owned_by_mark;
 

@@ -36,8 +36,10 @@
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "Common/Cpp/Json/JsonValue.h"
+#include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "CommonFramework/AudioPipeline/AudioOption.h"
+#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
@@ -53,10 +55,12 @@
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySafari.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryScroll.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySlowSteps.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySmallRoom.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
+#include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_SafariOptimalAction.h"
 #include "Assistant/Assistant_Panel.h"
 #include "Assistant/Assistant_Play.h"
 #include "Assistant/Assistant_SelfTest.h"
@@ -1178,6 +1182,28 @@ int check_money_trip(Logger& logger){
         "without it, only the places that take what is short"
     );
 
+    //  The last town is through: round the towns once more?
+    check(
+        //  16 November: the round brought four catches, the second CHANSEY
+        //  was left.
+        story_another_round(1, true, true, false, 2, false) &&
+        //  ... and the round after it, if it brings nothing, is the last.
+        !story_another_round(1, true, false, false, 3, false) &&
+        //  Nothing left at a place of the route.
+        !story_another_round(0, true, true, false, 2, false),
+        "another round of the towns after a round that brought a catch, none after one that brought nothing"
+    );
+    check(
+        //  Started again where the last run stopped: once round.
+        story_another_round(1, false, false, false, 1, false) &&
+        !story_another_round(1, false, false, true, 2, false) &&
+        //  Short of money or balls with no money trip left, and the most
+        //  rounds of a run.
+        !story_another_round(3, true, true, false, 2, true) &&
+        !story_another_round(3, true, true, false, STORY_MOST_ROUNDS, false),
+        "a run that starts at the end goes round once; not when short of money or balls, not for ever"
+    );
+
     //  The story's data: the walk of each REMATCH step (100 steps or more
     //  for the VS SEEKER, back to where it starts, facing the trainer), and
     //  the steps a Safari Game not joined skips (the game itself: one DEX
@@ -2156,6 +2182,163 @@ int check_poison_flash(Logger& logger){
     return wrong;
 }
 
+
+
+//  Bait, rocks and balls in the Safari Zone: Pokemon Automation's table of
+//  Safari actions, which the AutoStory follows for a species it wants,
+//  against the game's own rules (PokemonFRLG_AutoStorySafari.h). The files
+//  are read here as SafariOptimalAction reads them, from the resources this
+//  build is packaged with.
+int check_safari_table(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Safari = AutoStorySafari;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+
+    //  The game's numbers.
+    auto about = [](double value, double wanted){ return std::abs(value - wanted) < 0.0006; };
+    check(
+        Safari::catch_factor(30) == 2 && Safari::catch_factor(45) == 3 && Safari::catch_factor(255) == 20 &&
+        Safari::escape_factor(125) == 9 && Safari::escape_factor(25) == 2,
+        "the catch factor and the escape factor of a species"
+    );
+    check(
+        about(Safari::ball_chance(2), 0.0490) && about(Safari::ball_chance(3), 0.0809) &&
+        about(Safari::ball_chance(20), 0.5028),
+        "what a SAFARI BALL catches at full HP"
+    );
+    check(
+        about(Safari::flee_chance(9, 0, 0), 0.45) && about(Safari::flee_chance(9, 3, 0), 0.10) &&
+        about(Safari::flee_chance(9, 0, 3), 0.90) && about(Safari::flee_chance(2, 3, 0), 0.05),
+        "how often a wild Pokemon flees: as it is, eating, angry"
+    );
+    check(
+        Safari::table_name("nidoran-f") == "nidoran" && Safari::table_name("nidoran-m") == "nidoran" &&
+        Safari::table_name("nidorina") == "nidorina" && Safari::table_name("chansey") == "chansey",
+        "the two NIDORANs are one in the table"
+    );
+    {
+        //  One turn, by hand: a ball at a CHANSEY with one ball left, and
+        //  bait before it (it stays 55 times in 100, and the ball is then
+        //  thrown at catch factor 3).
+        const double ball = Safari::catch_odds(30, 125, {}, 1);
+        const double bait_first = Safari::catch_odds(30, 125, {Safari::Action::BAIT}, 1);
+        check(
+            about(ball, Safari::ball_chance(2)) && about(bait_first, 0.55 * Safari::ball_chance(3)),
+            "the odds of one ball, and of bait and one ball"
+        );
+    }
+
+    //  The table.
+    std::set<std::string> known;
+    for (const Safari::Species& one : Safari::species()){
+        known.insert(one.name);
+    }
+    check(known == SAFARI_ZONE_POKEMON_SUBSET, "the species of the table are the ones whose rates are known here");
+
+    const std::string folder = RESOURCE_PATH() + "PokemonFRLG/SafariOptimalAction/International/";
+    size_t files = 0;
+    size_t cases = 0;
+    size_t worse = 0;
+    size_t odd_rows = 0;
+    double chansey_table = 0;
+    double chansey_balls = 0;
+    double least_gain_45 = 1;
+    bool chansey_bait_first = false;
+    bool nidoran_balls_only = false;
+    std::string problem;
+    for (const Safari::Species& one : Safari::species()){
+        const std::string path = folder + one.name + ".json";
+        std::vector<std::vector<Safari::Action>> table;
+        try{
+            JsonValue json = load_json_file(path);
+            for (const JsonValue& row_value : json.to_array_throw(path)){
+                std::vector<Safari::Action>& row = table.emplace_back();
+                for (const JsonValue& action_value : row_value.to_array_throw(path)){
+                    const int64_t action = action_value.to_integer_throw(path);
+                    if (action < 0 || action > 2){
+                        odd_rows++;
+                    }
+                    row.emplace_back(
+                        action == 1 ? Safari::Action::BAIT : (action == 2 ? Safari::Action::ROCK : Safari::Action::BALL)
+                    );
+                }
+            }
+        }catch (const Exception& e){
+            problem = e.to_str();
+            continue;
+        }
+        if ((int)table.size() != Safari::BALLS_A_GAME){
+            problem = path + ": " + std::to_string(table.size()) + " rows";
+            continue;
+        }
+        files++;
+        for (int balls = 1; balls <= Safari::BALLS_A_GAME; balls++){
+            const std::vector<Safari::Action>& row = table[(size_t)balls - 1];
+            const double with_table = Safari::catch_odds(one.catch_rate, one.flee_rate, row, balls);
+            const double balls_alone = Safari::catch_odds(one.catch_rate, one.flee_rate, {}, balls);
+            cases++;
+            if (with_table < balls_alone - 1e-9){
+                worse++;
+            }
+            if (balls != Safari::BALLS_A_GAME){
+                continue;
+            }
+            const std::string name = one.name;
+            if (name == "chansey"){
+                chansey_table = with_table;
+                chansey_balls = balls_alone;
+                chansey_bait_first = row.size() > 2 && row[0] == Safari::Action::BAIT && row[1] == Safari::Action::BAIT;
+            }
+            if (name == "nidoran"){
+                nidoran_balls_only = std::count(row.begin(), row.end(), Safari::Action::BAIT) == 0;
+            }
+            if (one.catch_rate == 45 && one.flee_rate == 125){
+                least_gain_45 = std::min(least_gain_45, with_table - balls_alone);
+            }
+        }
+    }
+    check(
+        files == Safari::species().size() && odd_rows == 0,
+        "Pokemon Automation's table of Safari actions: a file for each species, 30 rows each, balls, bait and "
+        "rocks" + (problem.empty() ? std::string() : " (" + problem + ")")
+    );
+    check(
+        files > 0 && worse == 0,
+        "by the game's rules the table is never worse than balls alone (" + std::to_string(worse) + " of " +
+        std::to_string(cases) + " cases)"
+    );
+    check(
+        chansey_bait_first && chansey_table > 0.185 && chansey_balls < 0.105 && chansey_table > 1.8 * chansey_balls,
+        "a CHANSEY with 30 balls: bait first, and caught nearly twice as often as with balls alone"
+    );
+    check(
+        least_gain_45 > 0.02 && least_gain_45 < 0.5,
+        "the species with catch rate 45 that flee as fast (KANGASKHAN, TAUROS, SCYTHER, PINSIR, DRAGONAIR): "
+        "caught more often with the table"
+    );
+    check(nidoran_balls_only, "a NIDORAN: balls only, as before");
+
+    logger.log(
+        "AutoStory test: bait, rocks and balls in the Safari Zone (Pokemon Automation's table of Safari actions "
+        "by the game's own rules: " + std::to_string(files) + " species, 1 to 30 SAFARI BALLs left, worse than "
+        "balls alone in " + std::to_string(worse) + " of " + std::to_string(cases) + " cases; with 30 balls a "
+        "CHANSEY is caught " + std::to_string((int)(chansey_table * 1000 + 0.5)) + " times in 1000, with balls "
+        "alone " + std::to_string((int)(chansey_balls * 1000 + 0.5)) + " times): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -2178,6 +2361,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_bump(logger);
         failed += check_slow_steps(logger);
         failed += check_poison_flash(logger);
+        failed += check_safari_table(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

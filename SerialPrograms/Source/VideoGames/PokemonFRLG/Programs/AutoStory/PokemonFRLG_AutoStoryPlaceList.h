@@ -100,6 +100,34 @@ inline bool story_places_wait(
     return (safari_places <= 0 || short_of_money) && (other_places <= 0 || short_of_balls);
 }
 
+//  The last town of the collection is through. Round the towns once more?
+//  (The run of 16 November 2026 ended with one catch left that the route
+//  has a place for, the second CHANSEY, after a round that had brought
+//  four catches; the program stopped there, and to go on the game had to
+//  be saved by hand in front of a Pokemon Center.)
+//    "left": catches the table still wants at places where the species is
+//        looked for.
+//    "visited", "caught": the round that just ended went to a place; it
+//        brought a catch.
+//    "start_round_used": a round was already started without a catch
+//        before it.
+//    "rounds": rounds so far in this run.
+//    "short": a Safari Game was refused or the balls ran out, and the money
+//        trip did not make up for it.
+//  Yes while the rounds bring something: after a round with a catch. And
+//  once for a run that starts at the end (it has been to no place yet): so
+//  a program started again where the last run stopped goes round for what
+//  is left, and stops after a round that brought nothing.
+const int STORY_MOST_ROUNDS = 8;
+inline bool story_another_round(
+    size_t left, bool visited, bool caught, bool start_round_used, int rounds, bool short_of_something
+){
+    if (left == 0 || short_of_something || rounds >= STORY_MOST_ROUNDS){
+        return false;
+    }
+    return caught || (!visited && !start_round_used);
+}
+
 
 }
 }

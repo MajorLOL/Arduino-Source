@@ -160,6 +160,9 @@ struct StoryRuntime{
     //  Pokemon caught for the POKeDEX (a DEX step's list, extra ones to
     //  evolve included).
     uint64_t dex_catches = 0;
+    //  Visits of a place made for the POKeDEX (DEX steps that went on to
+    //  catch: something was wanted there).
+    uint64_t dex_visits = 0;
     //  The POKeDEX table (the program's option): what is caught, what is
     //  still wanted in the chosen game. Not null while the program runs.
     StoryCollectionTable* collection = nullptr;

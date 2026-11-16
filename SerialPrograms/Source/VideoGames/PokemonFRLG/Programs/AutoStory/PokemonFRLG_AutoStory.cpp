@@ -1858,6 +1858,39 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
     int collect_rounds = 1;
+    //  What the table still wants at the places of the route where it is
+    //  looked for: how many catches, and of which species.
+    auto left_on_route = [&](std::string& names){
+        names.clear();
+        size_t catches = 0;
+        if (rt.collection == nullptr){
+            return catches;
+        }
+        std::set<std::string> at_places;
+        for (size_t k = 0; k < script.step_count; k++){
+            const StoryStep& place_step = script.steps[k];
+            if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
+                continue;
+            }
+            const StoryPlaceWanted place = story_place_wanted(rt, place_step);
+            at_places.insert(place.looked_for.begin(), place.looked_for.end());
+        }
+        for (const std::string& slug : at_places){
+            const int more = COLLECTION.needed(slug) - COLLECTION.have(slug);
+            if (more <= 0){
+                continue;
+            }
+            catches += (size_t)more;
+            names += (names.empty() ? "" : ", ") + slug + (more > 1 ? " (" + std::to_string(more) + ")" : "");
+        }
+        return catches;
+    };
+    //  Not "Shiny only": the towns once more while a round brings a catch
+    //  and a place of the route still has something (story_another_round()).
+    //  The catches and the visits at the start of the round under way.
+    uint64_t round_catches = rt.dex_catches;
+    uint64_t round_visits = rt.dex_visits;
+    bool start_round_used = false;
 
     while (current_segment <= last){
         const StorySegment& segment = script.segments[current_segment];
@@ -1933,6 +1966,9 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                     COLOR_BLUE
                 );
                 current_segment = money_segment;
+                //  The towns after it are a round of their own.
+                round_catches = rt.dex_catches;
+                round_visits = rt.dex_visits;
             }
             if (rt.collect_shiny && current_segment - 1 == collect_last && collect_first < collect_last &&
                 !collect_species.empty()
@@ -1953,6 +1989,41 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                     current_segment = collect_first;
                 }else{
                     env.log("Shiny only: every species of chapter 20's places has its shiny ones.", COLOR_BLUE);
+                }
+            }
+            if (!rt.collect_shiny && current_segment - 1 == collect_last && collect_first < collect_last){
+                //  The last town is through, and nothing sent the program
+                //  on the money trip.
+                std::string names;
+                const size_t left = left_on_route(names);
+                const uint64_t caught = rt.dex_catches - round_catches;
+                const bool visited = rt.dex_visits > round_visits;
+                if (story_another_round(
+                    left, visited, caught > 0, start_round_used, collect_rounds,
+                    rt.short_of_money || rt.short_of_balls
+                )){
+                    collect_rounds++;
+                    start_round_used = start_round_used || caught == 0;
+                    env.log(
+                        "The POKeDEX table still wants " + std::to_string(left) + (left == 1 ? " catch" : " catches") +
+                        " at a place of the route (" + names + "), and " +
+                        (caught > 0
+                            ? "the round that ends here brought " + std::to_string(caught) + ": "
+                            : "this run has not been to a place yet: ") +
+                        "the towns again from " + script.segments[collect_first].id + " (round " +
+                        std::to_string(collect_rounds) + ").",
+                        COLOR_BLUE
+                    );
+                    current_segment = collect_first;
+                    round_catches = rt.dex_catches;
+                    round_visits = rt.dex_visits;
+                }else if (left > 0 && visited && caught == 0){
+                    env.log(
+                        "The round that ends here brought no catch: what the route still has a place for (" +
+                        names + ") stays for another run. Started again as it stands, the program goes round "
+                        "the towns once more for it.",
+                        COLOR_BLUE
+                    );
                 }
             }
             if (STOP_AFTER_CURRENT.should_stop()){
@@ -2287,27 +2358,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  CHANSEY as the only one: two Safari Games without it).
     std::string table_at_the_end;
     if (rt.collection != nullptr){
-        std::set<std::string> at_places;
-        for (size_t k = 0; k < script.step_count; k++){
-            const StoryStep& place_step = script.steps[k];
-            if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
-                continue;
-            }
-            const StoryPlaceWanted place = story_place_wanted(rt, place_step);
-            at_places.insert(place.wanted.begin(), place.wanted.end());
-        }
         size_t registered, total, to_catch;
         COLLECTION.counts_summary(registered, total, to_catch);
-        size_t on_the_route = 0;
         std::string names;
-        for (const std::string& slug : at_places){
-            const int more = COLLECTION.needed(slug) - COLLECTION.have(slug);
-            if (more <= 0){
-                continue;
-            }
-            on_the_route += (size_t)more;
-            names += (names.empty() ? "" : ", ") + slug + (more > 1 ? " (" + std::to_string(more) + ")" : "");
-        }
+        const size_t on_the_route = left_on_route(names);
         table_at_the_end =
             "POKeDEX table at the end (" + COLLECTION.game_name() + "): " + std::to_string(registered) + " of " +
             std::to_string(total) + " species with at least one, " + std::to_string(to_catch) + " catches to make. " +
