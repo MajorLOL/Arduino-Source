@@ -192,13 +192,40 @@ class GameData:
         #  a place's 12 slots are not equally likely (20, 20, 10, 10, 10, 10,
         #  5, 5, 4, 4, 1, 1 of 100).
         self.land_share = {}
+        #  The same for the water of a map (surfing: five slots, 60, 30, 5,
+        #  4, 1 of 100), and for fishing there with each rod (0 OLD ROD, 1
+        #  GOOD ROD, 2 SUPER ROD: each rod has slots of its own that add up
+        #  to 100): {map: {slug: [FireRed, LeafGreen]}} and
+        #  {map: {rod: {slug: [FireRed, LeafGreen]}}}.
+        self.water_share = {}
+        self.fish_share = {}
+        #  ... and for what is under the rocks ROCK SMASH breaks there (five
+        #  slots as on the water).
+        self.rock_share = {}
         slot_share = None
+        water_slots = None
+        rock_slots = None
+        fish_slots = None
+        rod_slots = None
         for g in groups:
             for field in g.get("fields", []):
                 if field["type"] == "land_mons":
                     slot_share = field["encounter_rates"]
+                elif field["type"] == "water_mons":
+                    water_slots = field["encounter_rates"]
+                elif field["type"] == "rock_smash_mons":
+                    rock_slots = field["encounter_rates"]
+                elif field["type"] == "fishing_mons":
+                    fish_slots = field["encounter_rates"]
+                    rod_slots = [field["groups"][rod] for rod in ("old_rod", "good_rod", "super_rod")]
         if not slot_share or sum(slot_share) != 100:
             raise EngineError("wild_encounters.json: no land_mons encounter_rates that add up to 100")
+        if not water_slots or sum(water_slots) != 100:
+            raise EngineError("wild_encounters.json: no water_mons encounter_rates that add up to 100")
+        if not rock_slots or sum(rock_slots) != 100:
+            raise EngineError("wild_encounters.json: no rock_smash_mons encounter_rates that add up to 100")
+        if not rod_slots or any(sum(fish_slots[i] for i in slots) != 100 for slots in rod_slots):
+            raise EngineError("wild_encounters.json: the fishing_mons encounter_rates of a rod do not add up to 100")
         #  The highest level of a wild Pokemon in the grass (or cave) of a map.
         self.wild_max_level = {}
         #  The encounter rates of a map: of 100 steps on its grass (cave
@@ -231,6 +258,31 @@ class GameData:
                             self.land_share.setdefault(e["map"], {}).setdefault(slug, [0, 0])[game] += slot_share[slot]
                 if "water_mons" in e:
                     self.water_encounters.add(e["map"])
+                label = e.get("base_label", "")
+                game = 0 if "FireRed" in label else 1 if "LeafGreen" in label else None
+                if game is None:
+                    continue
+                for kind, slots, shares in (("water_mons", water_slots, self.water_share),
+                                            ("rock_smash_mons", rock_slots, self.rock_share)):
+                    if kind not in e:
+                        continue
+                    mons = e[kind]["mons"]
+                    if len(mons) != len(slots):
+                        raise EngineError("wild_encounters.json: %s has %d %s slots, not %d" % (
+                            label, len(mons), kind, len(slots)))
+                    for slot, mon in enumerate(mons):
+                        slug = mon["species"][8:].lower().replace("_", "-")
+                        shares.setdefault(e["map"], {}).setdefault(slug, [0, 0])[game] += slots[slot]
+                if "fishing_mons" in e:
+                    mons = e["fishing_mons"]["mons"]
+                    if len(mons) != len(fish_slots):
+                        raise EngineError("wild_encounters.json: %s has %d fishing slots, not %d" % (
+                            label, len(mons), len(fish_slots)))
+                    for rod, slots in enumerate(rod_slots):
+                        for slot in slots:
+                            slug = mons[slot]["species"][8:].lower().replace("_", "-")
+                            share = self.fish_share.setdefault(e["map"], {}).setdefault(rod, {})
+                            share.setdefault(slug, [0, 0])[game] += fish_slots[slot]
         #  Flags set by EventScript_ResetAllMapFlags (new game).
         text = open(os.path.join(root, "data/event_scripts.s")).read()
         m = re.search(r"EventScript_ResetAllMapFlags::(.*?)\n\tend", text, re.S)

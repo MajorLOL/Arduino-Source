@@ -8,6 +8,7 @@
 #include "Common/Compiler.h"
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -53,6 +54,7 @@
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFishing.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryPlaceList.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySafari.h"
@@ -1556,6 +1558,9 @@ int check_bump(Logger& logger){
     const StoryScript& script = AutoStoryData::story_CHARMANDER();
     int money_bumps = 0;
     int cave_bumps = 0;
+    //  ... and the laps for the POKeDEX off Five Island (build 32): up the
+    //  same channel and down the column next to it.
+    int lap_bumps = 0;
     bool bumps_last = true;
     int longest_other = 0;
     for (size_t s = 0; s < script.segment_count; s++){
@@ -1569,11 +1574,13 @@ int check_bump(Logger& logger){
             const StoryLeg& leg = script.leg(step.leg);
             const StoryRun* runs = script.leg_runs(leg);
             const bool cave = std::string(leg.name).find("LostCave") != std::string::npos;
+            const bool lap = std::string(leg.name).rfind("SurfFiveIsland", 0) == 0;
             for (uint16_t r = 0; r < leg.run_count; r++){
                 if (runs[r].kind == RunKind::SURF_BUMP){
                     money_bumps += money ? 1 : 0;
                     cave_bumps += cave ? 1 : 0;
-                    bumps_last &= r + 1 == leg.run_count && (money || cave);
+                    lap_bumps += lap ? 1 : 0;
+                    bumps_last &= r + 1 == leg.run_count && (money || cave || lap);
                 }else if (money && (runs[r].kind == RunKind::SURF || runs[r].kind == RunKind::SURF_CHECKED)){
                     longest_other = std::max(longest_other, (int)runs[r].count);
                 }
@@ -1584,7 +1591,7 @@ int check_bump(Logger& logger){
         money_bumps == 8 && bumps_last && longest_other <= 4,
         "the money trip in the story's data: the water to Resort Gorgeous and back"
     );
-    check(cave_bumps == 8, "the Lost Cave in the story's data: the same water");
+    check(cave_bumps == 8 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
 
     logger.log(
         "AutoStory test: runs that end where the way is shut (over open water the video cannot count tiles: "
@@ -1592,7 +1599,7 @@ int check_bump(Logger& logger){
         "onto the beach in " + std::to_string(beach.inputs) + "; " + std::to_string(ways) +
         " ways with a wild battle on the way; the video not sure at the end, the way shut from the start; "
         "in the story's data " + std::to_string(money_bumps) + " such runs on the money trip, " +
-        std::to_string(cave_bumps) + " to the Lost Cave): " +
+        std::to_string(cave_bumps) + " to the Lost Cave, " + std::to_string(lap_bumps) + " on the laps off Five Island): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
@@ -2339,6 +2346,263 @@ int check_safari_table(Logger& logger){
     return wrong;
 }
 
+
+//  The next steps of the POKeDEX collection (experimental): fishing, laps
+//  over the water and from rock to rock, Pokemon that are given. What a
+//  cast of a rod says (PokemonFRLG_AutoStoryFishing.h), and the story's
+//  data as the program plays it: the places fished at, the laps and their
+//  steps, the ways to the rods, the scenes of the gifts. And the segments
+//  before them, step for step where they were: a save made in one of them
+//  with an earlier build goes on where it was.
+int check_next_steps(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Fishing = AutoStoryFishing;
+    using Fishing::Cast;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+
+    //  The rods: their descriptions in the bag, as the program reads them.
+    const std::string old_rod = "an old and beat-up fishing rod. use it by any body of water to fish for wild pok\xc3\xa9mon.";
+    const std::string good_rod = "a new, good-quality fishing rod. use it by any body of water to fish for wild pok\xc3\xa9mon.";
+    const std::string super_rod = "an awesome, high-tech fishing rod. use it by any body of water to fish for wild pok\xc3\xa9mon.";
+    const std::string rods[3] = {old_rod, good_rod, super_rod};
+    check(
+        Fishing::is_rod(0) && Fishing::is_rod(2) && !Fishing::is_rod(-1) && !Fishing::is_rod(3) &&
+        std::string(Fishing::rod_name(1)) == "GOOD ROD" && std::string(Fishing::rod_name(2)) == "SUPER ROD",
+        "the rods by their numbers"
+    );
+    {
+        bool own = true;
+        bool others = true;
+        for (int rod = 0; rod < Fishing::ROD_COUNT; rod++){
+            for (int text = 0; text < Fishing::ROD_COUNT; text++){
+                const bool match = Fishing::is_rod_description(rod, rods[text]);
+                (rod == text ? own : others) &= rod == text ? match : !match;
+            }
+        }
+        check(own, "each rod is found by its own description");
+        check(others, "no rod is taken for another");
+    }
+    check(
+        Fishing::is_rod_description(1, "a new, good quality fishing rod. use it by any body of water") &&
+        Fishing::is_rod_description(2, "an awesome, high tech fishing rod.") &&
+        Fishing::is_rod_description(0, "an old and beat up fishing rod."),
+        "a rod's description with its hyphen read as a space"
+    );
+    check(
+        !Fishing::is_rod_description(1, "a device that indicates trainers who want to battle. the battery charges while traveling.") &&
+        !Fishing::is_rod_description(2, "a folding bicycle that is faster than the running shoes.") &&
+        !Fishing::is_rod_description(1, "") && !Fishing::is_rod_description(7, good_rod),
+        "other key items are no rod"
+    );
+
+    //  A cast.
+    check(
+        Fishing::read_cast("not even a nibble\xe2\x80\xa5") == Cast::NO_BITE &&
+        Fishing::read_cast("not even a nibble..") == Cast::NO_BITE &&
+        Fishing::read_cast("it got away..") == Cast::NO_BITE,
+        "a cast without a bite"
+    );
+    check(
+        Fishing::read_cast("a pok\xc3\xa9mon's on the hook!") == Cast::BITE &&
+        Fishing::read_cast("a pokemon s on the hook") == Cast::BITE,
+        "a bite"
+    );
+    check(
+        Fishing::read_cast("") == Cast::NOTHING_YET && Fishing::read_cast(". . . .") == Cast::NOTHING_YET &&
+        Fishing::read_cast("\xc2\xb7 \xc2\xb7 \xc2\xb7 e") == Cast::NOTHING_YET &&
+        Fishing::read_cast(super_rod) == Cast::NOTHING_YET,
+        "the dots of a cast, and the bag still closing"
+    );
+    check(
+        Fishing::read_cast("oak: red! there's a time and place for everything! but not now.") == Cast::NOT_HERE &&
+        Fishing::read_cast("repel's effect wore off...") == Cast::OTHER,
+        "where no rod can be cast, and a text that is not of fishing"
+    );
+    check(
+        !Fishing::no_bite_at_all(0) && !Fishing::no_bite_at_all(Fishing::CASTS_WITHOUT_A_BITE - 1) &&
+        Fishing::no_bite_at_all(Fishing::CASTS_WITHOUT_A_BITE) && Fishing::CASTS_WITHOUT_A_BITE >= 18,
+        "casts in a row without a bite"
+    );
+
+    //  A fishing place's list, and which species it is worth a wait for.
+    {
+        const char* vermilion_good_rod = "horsea:60:20,krabby:20:60,magikarp:20:20";
+        const char* five_island = "gyarados:15:15,horsea:40:0,kingler:0:4,seadra:4:0,shellder:40:0,staryu:0:40";
+        const std::map<std::string, int> fire_red = story_place_species(five_island, 0);
+        const std::map<std::string, int> leaf_green = story_place_species(five_island, 1);
+        check(
+            story_place_species(vermilion_good_rod, 0).size() == 3 && fire_red.size() == 4 && leaf_green.size() == 3 &&
+            fire_red.count("seadra") != 0 && leaf_green.count("seadra") == 0 && leaf_green.count("kingler") != 0,
+            "a fishing place's list in each game"
+        );
+        //  SEADRA: 4 in 100 where it bites at all (waited for); a PSYDUCK
+        //  that bites 5 in 100 and is 3 in 10 in the grass elsewhere: not.
+        check(story_place_worth(4, 4) && !story_place_worth(5, 30) && story_place_worth(15, 15), "a rare one that is rare everywhere is waited for");
+    }
+
+    //  The story's data.
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    auto leg_faces = [&](const StoryStep& walk, DpadPosition direction){
+        if (walk.type != StepType::WALK || walk.leg < 0 || (size_t)walk.leg >= script.leg_count){
+            return false;
+        }
+        const StoryLeg& leg = script.leg(walk.leg);
+        return leg.end == LegEnd::INTERACT && leg.face == direction;
+    };
+    int fishing_places = 0;
+    bool fishing_fine = true;
+    int lap_places = 0;
+    int lap_steps = 0;
+    bool laps_fine = true;
+    int rod_ways = 0;
+    bool rod_ways_fine = true;
+    int gifts = 0;
+    bool gifts_fine = true;
+    int patient_talks = 0;
+    bool patient_fine = true;
+    int woken = 0;
+    std::string gift_names;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type == StepType::DEX && step.p2 > 0 && (step.p2 & 4) != 0){
+                //  Fishing: for the table, a rod the story fetches, the
+                //  walk before it ending with the player facing the water.
+                fishing_places++;
+                fishing_fine &= step.p2 == 6 && (step.p4 == 1 || step.p4 == 2) && step.dir != DPAD_NONE &&
+                    !story_place_species(step.text, 0).empty() && step.p0 > 0 && step.p1 > 0 &&
+                    k > 0 && leg_faces(script.step(segment, k - 1), step.dir);
+            }
+            if (step.type == StepType::DEX && step.p2 > 0 && (step.p2 & 8) != 0){
+                //  Laps: for the table, their steps in the same segment,
+                //  walks and YES answers (SURF, ROCK SMASH) and waits only,
+                //  and a step after them (the way back).
+                lap_places++;
+                const size_t count = (size_t)std::max(0, (int)step.p4);
+                bool fine = step.p2 == 10 && count > 0 && k + count + 1 < segment.step_count &&
+                    !story_place_species(step.text, 0).empty() && step.p0 > 0 && step.p1 > 0;
+                bool walks = false;
+                for (size_t n = 1; fine && n <= count; n++){
+                    const StoryStep& lap = script.step(segment, k + n);
+                    fine &= lap.type == StepType::WALK || lap.type == StepType::TALK_YES || lap.type == StepType::WAIT;
+                    walks |= lap.type == StepType::WALK;
+                }
+                laps_fine &= fine && walks;
+                lap_steps += (int)count;
+            }
+            if (step.type == StepType::SKIP_IF_ITEM){
+                //  The way to a rod: skipped when nothing is fished for with
+                //  it (the step before), and when the bag has it. Both skip
+                //  to the segment's end; the one who gives it may have given
+                //  it before.
+                rod_ways++;
+                bool fine = k == 1 && step.p2 >= 2 && step.p2 <= 3 && step.p1 == 1 &&
+                    k + 1 + (size_t)std::max(0, (int)step.p0) == segment.step_count;
+                if (fine){
+                    const StoryStep& before = script.step(segment, 0);
+                    fine = before.type == StepType::SKIP_IF_COLLECTED && before.p1 == step.p2 && before.p0 == step.p0 + 1;
+                }
+                bool asked = false;
+                bool places = false;
+                for (size_t n = k + 1; n < segment.step_count; n++){
+                    const StoryStep& later = script.step(segment, n);
+                    asked |= later.type == StepType::TALK_YES && later.p0 > 0 && (later.p0 & 1) != 0;
+                }
+                for (size_t n = 0; n < script.step_count; n++){
+                    const StoryStep& place = script.steps[n];
+                    places |= place.type == StepType::DEX && place.p2 > 0 && (place.p2 & 4) != 0 && place.p4 == step.p2 - 1;
+                }
+                rod_ways_fine &= fine && asked && places;
+            }
+            if (step.type == StepType::GOT){
+                //  A gift: counted after the scene that hands it over, in a
+                //  segment that is skipped as a whole once the table has it.
+                gifts++;
+                gift_names += (gift_names.empty() ? "" : ", ") + std::string(step.text);
+                const StoryStep& first = script.step(segment, 0);
+                gifts_fine &= k > 0 && script.step(segment, k - 1).type == StepType::CUTSCENE &&
+                    script.step(segment, k - 1).p4 == 1 &&
+                    first.type == StepType::SKIP_IF_OWNED && std::string(first.text) == step.text && first.p1 == 1 &&
+                    1 + (size_t)std::max(0, (int)first.p0) == segment.step_count;
+            }
+            if ((step.type == StepType::TALK || step.type == StepType::TALK_YES) && step.p1 > 0){
+                //  Someone who walks around: A where he comes by.
+                patient_talks++;
+                patient_fine &= step.p1 >= 60 && step.p2 != 1 && k > 0 &&
+                    script.step(segment, k - 1).type == StepType::WALK &&
+                    script.leg(script.step(segment, k - 1).leg).end == LegEnd::INTERACT;
+            }
+            if (step.type == StepType::BATTLE && step.p1 == 2 && step.p2 > 0 && (step.p2 & 4) != 0 && k >= 2 &&
+                script.step(segment, k - 1).type == StepType::CUTSCENE &&
+                script.step(segment, k - 2).type == StepType::TALK_YES &&
+                script.step(segment, 0).type == StepType::SKIP_IF_OWNED
+            ){
+                //  One that is woken with a YES and may be left asleep.
+                woken++;
+            }
+        }
+    }
+    check(fishing_places == 12 && fishing_fine, "the places fished at, in the story's data");
+    check(lap_places == 4 && laps_fine, "the laps and their steps, in the story's data");
+    check(rod_ways == 2 && rod_ways_fine, "the ways to the fishing rods");
+    check(gifts == 3 && gifts_fine, "the Pokemon that are given, and their scenes");
+    check(patient_talks == 4 && patient_fine, "the talks with someone who walks around");
+    check(woken == 1, "the SNORLAX that may be left asleep");
+
+    //  The towns before the next steps: as many steps as in build 31 (a
+    //  save in one of them is at the same step).
+    {
+        struct Town{
+            const char* id;
+            size_t steps;
+        };
+        const Town towns[] = {
+            {"C20_01_START", 1}, {"C20_01B_MONEY", 85}, {"C20_02_CERULEAN", 144}, {"C20_03_MT_MOON", 50},
+            {"C20_04_VIRIDIAN", 84}, {"C20_05_VICTORY_ROAD", 26}, {"C20_06_ROUTE10", 66}, {"C20_07_LAVENDER", 136},
+            {"C20_08_CELADON", 28}, {"C20_09_FUCHSIA", 296}, {"C20_10_CINNABAR", 74}, {"C20_11_VERMILION_SEVII", 628},
+        };
+        bool same = true;
+        size_t found = 0;
+        size_t last_town = 0;
+        size_t next_steps = 0;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const std::string id = script.segments[s].id;
+            for (const Town& town : towns){
+                if (id == town.id){
+                    found++;
+                    last_town = s;
+                    same &= script.segments[s].step_count == town.steps;
+                }
+            }
+        }
+        for (size_t s = last_town + 1; s < script.segment_count; s++){
+            next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
+        }
+        check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
+        check(next_steps == 11 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+    }
+
+    logger.log(
+        "AutoStory test: the next steps of the collection (what a cast of a rod says; in the story's data " +
+        std::to_string(fishing_places) + " visits of places fished at, " + std::to_string(lap_places) +
+        " of laps with " + std::to_string(lap_steps) + " steps, " + std::to_string(rod_ways) + " ways to a rod, " +
+        std::to_string(gifts) + " gifts (" + gift_names + "), " + std::to_string(woken) + " woken with the POKe FLUTE): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -2362,6 +2626,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_slow_steps(logger);
         failed += check_poison_flash(logger);
         failed += check_safari_table(logger);
+        failed += check_next_steps(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

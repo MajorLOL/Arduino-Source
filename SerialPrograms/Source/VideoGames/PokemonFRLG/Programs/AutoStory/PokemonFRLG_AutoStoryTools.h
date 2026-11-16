@@ -42,6 +42,35 @@ using ProControllerContext = ControllerContext<ProController>;
 namespace PokemonFRLG{
 
 
+//  Laps for the POKeDEX (StepType::DEX with p2 & 8) under way: the steps of
+//  a lap (walks over water, rocks smashed) are played again and again by the
+//  segment's loop, catching what the table wants of the wild Pokemon on the
+//  way (story_laps_begin(), story_laps_again(), story_laps_end()).
+struct StoryLaps{
+    bool on = false;
+    std::string label;
+    //  The battle settings as they were before the laps.
+    StoryBattleSettings saved;
+    //  What the place is worth laps for, and what is only caught when one
+    //  comes (rare here, more common at another place).
+    std::set<std::string> looked_for;
+    std::set<std::string> in_passing;
+    int idle_limit = 0;         //  battles in a row without a catch
+    int idle = 0;
+    int battles = 0;
+    int laps = 0;
+    size_t caught = 0;
+    WallClock start = WallClock::min();
+    WallClock deadline = WallClock::max();
+    //  The counters at the start of the laps, and of the lap under way.
+    uint64_t new_before = 0;
+    uint64_t marked_before = 0;
+    uint64_t wild_before_lap = 0;
+    uint64_t catches_before_lap = 0;
+    size_t left_before_lap = 0;
+};
+
+
 //  Everything the story steps share while the program runs.
 struct StoryRuntime{
     StoryRuntime(ConsoleHandle& p_console, ProControllerContext& p_context)
@@ -186,6 +215,24 @@ struct StoryRuntime{
     bool catch_shinies = true;
     //  A DEX step catching for the table (StepType::DEX, p2 & 2).
     bool collecting = false;
+    //  Laps for the table under way (StepType::DEX, p2 & 8).
+    StoryLaps laps;
+    //  Fishing rods (0 OLD ROD, 1 GOOD ROD, 2 SUPER ROD) the bag is known
+    //  to have: seen there by a look, or by a cast. At the last save (a
+    //  reset goes back to that: a rod got since is gone with it). And rods
+    //  a look did not find when a place wanted to fish with them: those
+    //  places are left out until the way to the rod has been gone again.
+    std::set<int> rods_in_bag;
+    std::set<int> rods_in_bag_at_save;
+    std::set<int> rods_missing;
+    //  The scene of a gift (CUTSCENE with p4 = 1): its texts are read, and
+    //  one of them told of a Pokemon handed over ("received", "nickname",
+    //  "transferred"), or its YES/NO box came up (the nickname).
+    bool gift_watch = false;
+    bool gift_seen = false;
+    //  The last TALK_YES whose question may not come (p0 & 1) found text
+    //  and no question: what it gives was given before.
+    bool given_before = false;
 
     //  The POKeDEX as the game counts it: the caught species on the load
     //  menu ("POKeDEX", read at each soft reset; -1: not read), and the
@@ -416,13 +463,21 @@ struct StoryTalkAlt{
 };
 //  "may_be_gone": an item ball on the way that the player may have picked
 //  up by hand: one A, and no text is fine (false, the player stays put).
+//  "patience": the one talked to walks around, and the player faces a tile
+//  it comes by: A there again and again, without turning (a turn toward a
+//  free tile is a step), for that many seconds at most.
 bool story_talk_start(
     StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt(),
-    bool may_be_gone = false
+    bool may_be_gone = false, int patience = 0
 );
 
 //  Press A to talk, read until the YES/NO box and answer it.
-void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt());
+//  "may_be_given": the question may not come (what it gives was given
+//  before, and a line of text says so): that text is closed, false.
+bool story_talk_answer(
+    StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt = StoryTalkAlt(),
+    bool may_be_given = false, int patience = 0
+);
 
 //  Talk to the nurse in front of the player (across the counter) and heal.
 //  Then save (unless the next step saves anyway). "mid_step": the running

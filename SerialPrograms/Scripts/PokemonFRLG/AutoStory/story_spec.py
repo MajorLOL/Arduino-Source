@@ -25,7 +25,8 @@ CELIO_AT_MACHINE = [15, 6]
 CELIO_BY_STOOLS = [14, 8]
 
 
-def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=False, alt_xy=None):
+def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=False, alt_xy=None,
+         given=False, patience=0):
     t = {"map": map_id, "mode": mode, "counter": counter}
     if obj is not None:
         t["object"] = obj
@@ -36,16 +37,27 @@ def talk(map_id, obj=None, xy=None, mode="talk", label=None, dirs=None, counter=
     if alt_xy is not None:
         #  Where it may stand instead: tried when no text box comes up.
         t["alt_xy"] = alt_xy
+    if given:
+        #  mode "yes": the question may not come (what it gives was given
+        #  before: a line of text in its place, which is closed).
+        t["given"] = True
+    if patience:
+        #  The one talked to walks around: xy is a tile it comes by, and A
+        #  is pressed there again and again, for that many seconds at most.
+        t["patience"] = patience
     s = {"talk": t}
     if label:
         s["label"] = label
     return s
 
 
-def cutscene(min_ms, max_ms, label=None, answer=None, battles=0):
+def cutscene(min_ms, max_ms, label=None, answer=None, battles=0, gift=False):
     s = {"cutscene": [min_ms, max_ms]}
     if answer:
         s["answer"] = answer
+    if gift:
+        #  A Pokemon is handed over in it ({"got": species} comes next).
+        s["gift"] = True
     if battles:
         #  The scene is a failure with fewer battles (a NO to its question).
         s["battles"] = battles
@@ -2415,11 +2427,14 @@ CHAPTER19 = [
 #  of the Pokemon Center: a town skipped leaves the player where the town
 #  before ended, and the next FLY starts from there. With "shiny only" the
 #  program goes round the towns again and again (C20_02 after the last).
-#  Surfing, fishing, Rock Smash, gifts, trades and breeding: later. Not yet
-#  either: Mt. Ember's grass (behind Rock Smash rocks and Strength boulders
-#  the routes do not move: MAGMAR in LeafGreen), the Tanoby Chambers (UNOWN
-#  only once the Tanoby Key puzzle is solved), Three Isle Port (DUNSPARCE:
-#  through the Dunsparce Tunnel, which the routes do not pass).
+#  Fishing, the water, Rock Smash and the first Pokemon that are given: the
+#  segments after the towns (C20_12 on, "the next steps" below). Trades, the
+#  Game Corner, eggs and evolving: later (they need the PC's boxes). Not
+#  yet either: Mt. Ember's grass (behind Rock Smash rocks and Strength
+#  boulders the routes do not move: MAGMAR in LeafGreen), the Tanoby
+#  Chambers (UNOWN only once the Tanoby Key puzzle is solved), Three Isle
+#  Port (DUNSPARCE: through the Dunsparce Tunnel, which the routes do not
+#  pass).
 
 COLLECT_IDLE = 30       # Battles in a row without a catch: the visit ends.
 COLLECT_MINUTES = 30    # The longest visit.
@@ -2764,6 +2779,266 @@ CHAPTER20 = [
         collect_place(PC["VERMILION"], "MAP_ROUTE6", WHOLE, "CollectRoute6"),
         {"unless_collected": {"steps": sevii_tour()}, "label": "The Sevii Islands?"},
     ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
+]
+
+
+# --------------------------------------------- chapter 20, the next steps
+#  EXPERIMENTAL (PocketPilot build 32, not run on a console when written).
+#  What the grass, the caves and the Safari Zone do not have: fishing, the
+#  water, Rock Smash, and Pokemon that are given or stand on the map once.
+#  All as segments of their own after the towns (a save in a town's segment
+#  keeps its step number), part of the same rounds: each starts with FLY,
+#  ends outdoors, and is skipped as a whole when the table wants nothing of
+#  it.
+#
+#  Fishing (src/field_player_avatar.c, Task_Fishing): on land facing water,
+#  the rod from the bag; no button at the right moment in these games, a
+#  bite on half the casts. The rod's own species: the OLD ROD only MAGIKARP
+#  (not fetched: the GOOD ROD has it 1 in 5 everywhere), the GOOD ROD
+#  (Fuchsia City) and the SUPER ROD (Route 12) the rest. In FireRed:
+#    Viridian City   SUPER  POLIWAG 40, POLIWHIRL 40, GYARADOS 15
+#    Vermilion City  GOOD   HORSEA 60, KRABBY 20, MAGIKARP 20
+#                    SUPER  SHELLDER 40, HORSEA 44, GYARADOS 15
+#    Fuchsia City    SUPER  GOLDEEN 40, SEAKING 40, GYARADOS 15
+#    Five Isle Meadow SUPER QWILFISH 40, HORSEA 40, GYARADOS 15, SEADRA 4
+#    Five Island     SUPER  SHELLDER 40, HORSEA 40, GYARADOS 15, SEADRA 4
+#  (LeafGreen has KRABBY, STARYU, REMORAID, KINGLER and SLOWPOKE in their
+#  places: the lists are of both games, as everywhere.)
+#
+#  The water: TENTACOOL 65, HOPPIP 30, TENTACRUEL 5 between Five Island and
+#  Resort Gorgeous, the channel the money trip crosses: laps up column 8
+#  and down column 9, each a run that ends where the way is shut.
+#
+#  Rock Smash: GRAVELER is under 35 of 100 rocks in Cerulean Cave (GEODUDE
+#  the others; half the rocks have a Pokemon under them). The six rocks of
+#  the room at the bottom left of 1F, then up the ladder and down again:
+#  the rocks are back (their flags are temporary).
+ROD_GOOD = 1
+ROD_SUPER = 2
+
+
+def rod_segment(seg_id, rod, where, fly_to, house, guru_xy, flag):
+    """FLY, into the house, the one who gives the rod ("Do you like to
+    fish?" YES; given before: a line of text), out. Skipped when nothing is
+    fished for with that rod, or the bag has it."""
+    name = ("OLD ROD", "GOOD ROD", "SUPER ROD")[rod]
+    short = name.title().replace(" ", "")
+    steps = [
+        fly(fly_to, seg_id + "_Fly", force=True),
+        talk(house, xy=guru_xy, mode="yes", given=True, label=short + "Guru"),
+        cutscene(1000, 60000, "The " + name),
+        setst(flags=[flag]),
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: the %s (%s)" % (name, where),
+            "steps": [{"rod_wanted": {"rod": rod, "steps": steps},
+                       "label": "Anything to fish for with the %s?" % name}]}
+
+
+def collect_fish(pc_map, map_id, tiles, rod, label, visits=COLLECT_VISITS):
+    """Fishing for the POKeDEX table: a round trip from the nurse to the
+    water of map_id, where the rod is cast until the table has what the
+    place is fished for (or the battles in a row without a catch, or the
+    minutes, are through)."""
+    trips = []
+    for v in range(visits):
+        name = label + ("" if v == 0 else "_Visit%d" % (v + 1))
+        place = {"dex": {"map": map_id, "tiles": tiles, "species": None, "idle": COLLECT_IDLE,
+                         "minutes": COLLECT_MINUTES, "enough": 0, "collect": True, "fish": rod}, "label": name}
+        trips.append(collect_trip(pc_map, [place], name))
+    return trips
+
+
+def collect_laps(pc_map, map_id, ground, to_start, lap, label, visits=COLLECT_VISITS):
+    """Laps for the POKeDEX table: a round trip from the nurse to where the
+    lap starts (to_start(name): steps), then the lap (lap(name): steps that
+    end where they start) again and again, catching what the table wants of
+    the wild Pokemon on the way."""
+    trips = []
+    for v in range(visits):
+        name = label + ("" if v == 0 else "_Visit%d" % (v + 1))
+        place = {"dex": {"map": map_id, "species": None, "idle": COLLECT_IDLE, "minutes": COLLECT_MINUTES,
+                         "enough": 0, "collect": True, "laps": lap(name), "ground": ground}, "label": name}
+        trips.append(collect_trip(pc_map, to_start(name) + [place], name))
+    return trips
+
+
+FIVE_SHORE = ["MAP_FIVE_ISLAND", 8, 3]
+
+
+def five_island_lap(name):
+    """From Five Island's shore up the channel to the rock at the top (30
+    tiles, over two map borders), one tile over, down the next column onto
+    the island and on to where its land ends, back to the shore."""
+    return [
+        goto(GILLIAN_MAP, [[8, 13]], name + "_Up", bump=True),
+        goto(GILLIAN_MAP, [[9, 13]], name + "_Over"),
+        goto(FIVE_SHORE[0], [[9, 12]], name + "_Down", bump=True),
+        goto(FIVE_SHORE[0], [FIVE_SHORE[1:]], name + "_ToShore"),
+    ]
+
+
+def five_island_water():
+    """Vermilion -> One Island -> Five Island (as the money trip), fishing
+    in the Meadow and off the town, laps over the water, back to Vermilion
+    City. Starts and ends at the nurse of the Vermilion Pokemon Center."""
+    steps = [
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland")
+    steps += [heal(FIVE_PC, "HarborToFiveIslandNurse"), save()]
+    steps += collect_fish(FIVE_PC, "MAP_FIVE_ISLAND_MEADOW", WHOLE, ROD_SUPER, "FishFiveIsleMeadow")
+    steps += collect_fish(FIVE_PC, "MAP_FIVE_ISLAND", WHOLE, ROD_SUPER, "FishFiveIsland")
+    steps += collect_laps(
+        FIVE_PC, "MAP_FIVE_ISLAND", "water",
+        lambda name: [goto(FIVE_SHORE[0], [FIVE_SHORE[1:]], name + "_FromNurse")],
+        five_island_lap, "SurfFiveIsland")
+    steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    steps += [pos("MAP_VERMILION_CITY", 23, 32), heal(PC["VERMILION"], "PierToVermilionNurse"), save()]
+    return steps
+
+
+#  Cerulean Cave 1F, the room at the bottom left: its six rocks, and the
+#  ladder above it, (5, 15), which goes to (7, 14) on 2F. A lap starts on
+#  that ladder, come down from 2F: the rocks are all there then, also the
+#  one the way in from the cave's lake goes through, (9, 18).
+CAVE_1F = "MAP_CERULEAN_CAVE_1F"
+CAVE_2F = "MAP_CERULEAN_CAVE_2F"
+CAVE_ROCKS = [[5, 20], [7, 21], [9, 18], [11, 21], [13, 21], [14, 20]]
+CAVE_LADDER_1F = [5, 15]
+CAVE_LADDER_2F = [7, 14]
+
+
+def cave_ladder(name):
+    """Up the ladder and down again: onto its tile on 1F."""
+    return [
+        goto(CAVE_2F, [CAVE_LADDER_2F], name + "_Up"),
+        goto(CAVE_1F, [CAVE_LADDER_1F], name + "_Down"),
+    ]
+
+
+def cave_rocks_lap(name):
+    steps = [{"smash": {"map": CAVE_1F, "xy": xy}, "label": "%s_Rock%d" % (name, k + 1)}
+             for k, xy in enumerate(CAVE_ROCKS)]
+    return steps + cave_ladder(name)
+
+
+def gift_segment(seg_id, title, species, fly_to, steps):
+    """A Pokemon that is there once (a gift, one that stands on the map):
+    FLY, the steps, out, a save. Skipped when the table has the species."""
+    body = [fly(fly_to, seg_id + "_Fly", force=True)] + steps + [{"outside": True, "label": seg_id + "_Out"}, save()]
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "title": "POKeDEX collection: " + title,
+            "steps": [{"unless_owned": {"species": species, "count": 1, "steps": body, "segment": True},
+                       "label": "%s in the table?" % species.upper()}]}
+
+
+DOJO = "MAP_SAFFRON_CITY_DOJO"
+LAB_ROOM = "MAP_CINNABAR_ISLAND_POKEMON_LAB_EXPERIMENT_ROOM"
+LAB_HALL = "MAP_CINNABAR_ISLAND_POKEMON_LAB_ENTRANCE"
+#  The doctor of the Experiment Room walks around (12, 3), one tile each
+#  way where the room lets him: (11, 3) is one of his tiles, talked to from
+#  (10, 3), outside them.
+LAB_DOCTOR = [11, 3]
+
+
+def revive(fossil, species, label):
+    """CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_FossilScientist:
+    four pages, then his menu of the fossils in the bag over the last one
+    (the first row: A, which the scene gives a page that stays without its
+    arrow), three more pages and "make it live again?" YES. Out of the room
+    and in again (the Lab's entrance sets the fossil ready,
+    CinnabarIsland_PokemonLab_Entrance_EventScript_ReadyFossil). He hands
+    the Pokemon over ("nickname?" NO; the party is full: to the PC)."""
+    return [
+        talk(LAB_ROOM, xy=LAB_DOCTOR, mode="talk", dirs=["right"], patience=180, label=label + "_Doctor"),
+        cutscene(1000, 90000, "The %s handed over" % fossil, answer="yes"),
+        goto(LAB_HALL, WHOLE, label + "_OutOfTheRoom"),
+        talk(LAB_ROOM, xy=LAB_DOCTOR, mode="talk", dirs=["right"], patience=180, label=label + "_DoctorAgain"),
+        cutscene(1000, 60000, species.upper() + " from the doctor", gift=True),
+        {"got": species, "label": label},
+    ]
+
+
+CHAPTER20 += [
+    rod_segment("C20_12_GOOD_ROD", ROD_GOOD, "Fuchsia City", "HEAL_LOCATION_FUCHSIA_CITY",
+                "MAP_FUCHSIA_CITY_HOUSE2", [6, 5], "FLAG_GOT_GOOD_ROD"),
+    rod_segment("C20_13_SUPER_ROD", ROD_SUPER, "Route 12", "HEAL_LOCATION_LAVENDER_TOWN",
+                "MAP_ROUTE12_FISHING_HOUSE", [4, 4], "FLAG_GOT_SUPER_ROD"),
+    collect_town("C20_14_FISH_VIRIDIAN", "fishing in Viridian City", PC["VIRIDIAN"], [
+        collect_fish(PC["VIRIDIAN"], "MAP_VIRIDIAN_CITY", WHOLE, ROD_SUPER, "FishViridian"),
+    ], fly_to="HEAL_LOCATION_VIRIDIAN_CITY"),
+    collect_town("C20_15_FISH_VERMILION", "fishing in Vermilion City", PC["VERMILION"], [
+        collect_fish(PC["VERMILION"], "MAP_VERMILION_CITY", WHOLE, ROD_GOOD, "FishVermilionGoodRod"),
+        collect_fish(PC["VERMILION"], "MAP_VERMILION_CITY", WHOLE, ROD_SUPER, "FishVermilion"),
+    ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
+    collect_town("C20_16_FISH_FUCHSIA", "fishing in Fuchsia City", PC["FUCHSIA"], [
+        collect_fish(PC["FUCHSIA"], "MAP_FUCHSIA_CITY", WHOLE, ROD_SUPER, "FishFuchsia"),
+    ], fly_to="HEAL_LOCATION_FUCHSIA_CITY"),
+    collect_town("C20_17_FIVE_ISLAND_WATER", "fishing and surfing on Five Island", PC["VERMILION"], [
+        {"unless_collected": {"steps": five_island_water()}, "label": "Five Island's water?"},
+    ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
+    collect_town("C20_18_CAVE_ROCKS", "Rock Smash in Cerulean Cave", PC["CERULEAN"], [
+        collect_laps(
+            PC["CERULEAN"], CAVE_1F, "rocks",
+            lambda name: cave_ladder(name + "_ToRocks"),
+            cave_rocks_lap, "SmashCeruleanCave"),
+    ], fly_to="HEAL_LOCATION_CERULEAN_CITY"),
+    #  The Fighting Dojo. Its four BLACK BELTs look along rows 8 and 10 from
+    #  both walls (seven tiles: columns 2 and 3 are seen from the left wall
+    #  only), the Karate Master down the middle. Two of them and the Master,
+    #  each talked to; then the ball at (5, 3)
+    #  (SaffronCity_Dojo_EventScript_HitmonleeBall: "You want the hard-
+    #  kicking HITMONLEE?" YES; "nickname?" NO).
+    gift_segment("C20_19_DOJO", "HITMONLEE from the Fighting Dojo in Saffron City", "hitmonlee",
+                 "HEAL_LOCATION_SAFFRON_CITY", [
+        heal(PC["SAFFRON"], "C20_19_DOJO_ToNurse"),
+        save(),
+        talk(DOJO, xy=[1, 10], mode="battle", dirs=["up", "down"], label="BlackBeltHideki"),
+        talk(DOJO, xy=[1, 8], mode="battle", dirs=["up", "down"], label="BlackBeltMike"),
+        talk(DOJO, "LOCALID_KARATE_MASTER", mode="battle", dirs=["up"], label="MasterKoichi"),
+        setst(vars={"VAR_MAP_SCENE_SAFFRON_CITY_DOJO": 1}),
+        talk(DOJO, xy=[5, 3], mode="yes", dirs=["up"], label="HitmonleeBall"),
+        cutscene(2000, 60000, "HITMONLEE from the Karate Master", gift=True),
+        {"got": "hitmonlee", "label": "Hitmonlee"},
+        setst(flags=["FLAG_HIDE_DOJO_HITMONLEE_BALL", "FLAG_GOT_HITMON_FROM_DOJO"]),
+    ]),
+    #  The SNORLAX of Route 16 (Route16_EventScript_Snorlax, as the one of
+    #  Route 12 in C6_01, which was run from): the POKe FLUTE, a wild battle,
+    #  level 30. The balls at full HP (the lead's weakest move would make
+    #  it faint): a POKe BALL catches it 3 times in 100, an ULTRA BALL 6.
+    #  "later": with fewer than ten POKe BALLs' worth in the bag it is left
+    #  asleep (the save in front of it once more, its steps passed over),
+    #  the money trip brings balls, and the next round comes back.
+    gift_segment("C20_20_SNORLAX", "SNORLAX on Route 16", "snorlax", "HEAL_LOCATION_CELADON_CITY", [
+        heal(PC["CELADON"], "C20_20_SNORLAX_ToNurse"),
+        save(),
+        goto("MAP_ROUTE16", [[32, 13]], "ToSnorlax"),
+        save(),
+        talk("MAP_ROUTE16", xy=[31, 13], mode="yes", dirs=["left"], label="Snorlax"),
+        cutscene(3000, 30000, "Poke Flute"),
+        {"battle": 60000, "label": "Snorlax", "legendary": True, "weaken": False, "later": True},
+        setst(flags=["FLAG_HIDE_ROUTE_16_SNORLAX"]),
+    ]),
+    #  The DOME FOSSIL of Mt. Moon (C2), brought to life in the Cinnabar Lab.
+    gift_segment("C20_21_KABUTO", "KABUTO from the DOME FOSSIL (Cinnabar Lab)", "kabuto",
+                 "HEAL_LOCATION_CINNABAR_ISLAND",
+                 revive("DOME FOSSIL", "kabuto", "Kabuto") + [setst(flags=["FLAG_REVIVED_DOME"])]),
+    #  The OLD AMBER: from the man in the back room of the Pewter Museum
+    #  (behind the tree to cut, PewterCity_Museum_1F_EventScript_OldAmberScientist),
+    #  then the same doctor.
+    gift_segment("C20_22_AERODACTYL", "AERODACTYL from the OLD AMBER (Pewter Museum, Cinnabar Lab)", "aerodactyl",
+                 "HEAL_LOCATION_PEWTER_CITY", [
+        talk("MAP_PEWTER_CITY_MUSEUM_1F", xy=[21, 3], mode="talk", dirs=["up"], label="OldAmberMan"),
+        setst(flags=["FLAG_GOT_OLD_AMBER", "FLAG_HIDE_OLD_AMBER"]),
+        {"outside": True, "label": "C20_22_AERODACTYL_OutOfTheMuseum"},
+        save(),
+        fly("HEAL_LOCATION_CINNABAR_ISLAND", "C20_22_AERODACTYL_FlyToCinnabar", force=True),
+    ] + revive("OLD AMBER", "aerodactyl", "Aerodactyl") + [setst(flags=["FLAG_REVIVED_AMBER"])]),
 ]
 
 

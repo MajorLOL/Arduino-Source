@@ -40,6 +40,7 @@
 #include "PokemonFRLG_AutoStoryData.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 #include "PokemonFRLG_AutoStoryActions.h"
+#include "PokemonFRLG_AutoStoryFishing.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryNewGame.h"
 #include "PokemonFRLG_AutoStory.h"
@@ -572,6 +573,21 @@ void AutoStory::run_segment(
     rt.no_revives = false;
     rt.no_full_restores = false;
 
+    //  Laps for the POKeDEX (a DEX step with p2 & 8): the first and the last
+    //  step of the lap under way. A step of it that fails takes the list of
+    //  the laps away again.
+    size_t lap_first = 0;
+    size_t lap_last = 0;
+    struct LapsOver{
+        StoryRuntime& rt;
+        ~LapsOver(){
+            try{
+                story_laps_end(rt, true);
+            }catch (...){
+            }
+        }
+    } laps_over{rt};
+
     //  Started in the middle of the segment (the program started from a
     //  save in it, the one after an Elite Four room for one): team play as
     //  the steps before set it. Without this the rooms after such a start
@@ -665,7 +681,14 @@ void AutoStory::run_segment(
                 if (next_battle){
                     break;
                 }
-                story_battle(rt, StoryBattleKind::TRAINER, label);
+                //  In a lap for the POKeDEX, the battle after ROCK SMASH is
+                //  the wild Pokemon from under the rock: caught if the
+                //  table wants it, run from otherwise.
+                story_battle(
+                    rt,
+                    rt.laps.on && label == "Rock Smash" ? StoryBattleKind::WILD : StoryBattleKind::TRAINER,
+                    label
+                );
                 min_time = 0ms;
             }
             return battles;
@@ -696,7 +719,10 @@ void AutoStory::run_segment(
                 skip_battle = true;
                 break;
             }
-            if (!story_talk_start(rt, label, talk_alt(step), label.rfind("Pick up item", 0) == 0)){
+            //  p1: the one talked to walks around, A for that many seconds.
+            if (!story_talk_start(
+                rt, label, talk_alt(step), label.rfind("Pick up item", 0) == 0, std::max(0, (int)step.p1)
+            )){
                 break;
             }
             if (!next_scene){
@@ -705,7 +731,36 @@ void AutoStory::run_segment(
             break;
         case StepType::TALK_YES:
         case StepType::TALK_NO:
-            story_talk_answer(rt, step.type == StepType::TALK_YES, label, talk_alt(step));
+            if (step.type == StepType::TALK_YES && next != nullptr && next->type == StepType::CUTSCENE &&
+                i + 2 < segment.step_count
+            ){
+                //  A Pokemon that is woken with a YES (SNORLAX: the POKe
+                //  FLUTE), its scene, its battle: left where it is for now
+                //  (too few balls in the bag when it was tried), all three
+                //  are passed over.
+                const StoryStep& after = script.step(segment, i + 2);
+                if (after.type == StepType::BATTLE && after.p1 == 2 && after.p2 > 0 && (after.p2 & 4) != 0 &&
+                    rt.legendary_left.count(after.label) != 0
+                ){
+                    env.log(
+                        std::string(after.label) + " stays where it is for now (too few balls, or too many "
+                        "tries): the next round of the collection comes back for it.",
+                        COLOR_BLUE
+                    );
+                    i += 2;
+                    break;
+                }
+            }
+            //  p0 & 1 (YES): the question may not come (given before).
+            if (step.type == StepType::TALK_YES && (step.p0 & 1) != 0){
+                rt.given_before = !story_talk_answer(
+                    rt, true, label, talk_alt(step), true, std::max(0, (int)step.p1)
+                );
+            }else{
+                story_talk_answer(
+                    rt, step.type == StepType::TALK_YES, label, talk_alt(step), false, std::max(0, (int)step.p1)
+                );
+            }
             if (!next_scene){
                 finish_scene(0ms, 60s, false);
             }
@@ -718,6 +773,16 @@ void AutoStory::run_segment(
             }
             break;
         case StepType::CUTSCENE:{
+            //  p4 = 1: a Pokemon is handed over in this scene. Its texts are
+            //  read for it, and the GOT step after it goes by that.
+            struct GiftWatch{
+                StoryRuntime& rt;
+                GiftWatch(StoryRuntime& p_rt, bool on) : rt(p_rt){
+                    rt.gift_watch = on;
+                    rt.gift_seen = false;
+                }
+                ~GiftWatch(){ rt.gift_watch = false; }
+            } gift_watch(rt, step.p4 == 1);
             int battles = finish_scene(
                 Milliseconds(step.p0), Milliseconds(step.p1),
                 std::string(step.text) == "YES"
@@ -804,6 +869,11 @@ void AutoStory::run_segment(
                         if (can_wait && worth < 10.0){
                             rt.legendary_left.insert(label);
                             rt.legendary_left_now = true;
+                            if (std::string(segment.id).rfind("C20_", 0) == 0){
+                                //  The collection: the money trip brings
+                                //  balls, and the rounds come back here.
+                                rt.short_of_balls = true;
+                            }
                             OperationFailedExceptionWithScreenshot::fire(
                                 ErrorReportMode::NO_ERROR_REPORT,
                                 label + " was not caught. " + odds + " It is left where it is: the story comes back "
@@ -897,6 +967,24 @@ void AutoStory::run_segment(
             story_catch(rt, step);
             break;
         case StepType::DEX:
+            if (step.p2 > 0 && (step.p2 & 8) != 0){
+                //  Laps: the next p4 steps, again and again (the end of the
+                //  loop below sees to that).
+                const size_t lap_steps = (size_t)std::max(0, (int)step.p4);
+                if (lap_steps == 0 || i + lap_steps >= segment.step_count){
+                    throw InternalProgramError(
+                        &env.logger(), PA_CURRENT_FUNCTION,
+                        "Laps without their steps: " + label
+                    );
+                }
+                if (story_laps_begin(rt, step)){
+                    lap_first = i + 1;
+                    lap_last = i + lap_steps;
+                }else{
+                    i += lap_steps;
+                }
+                break;
+            }
             story_dex(rt, step);
             if (rt.no_balls && step.p2 > 0 && (step.p2 & 2) != 0 && (step.p2 & 1) == 0){
                 //  The collection: no ball for a wanted species.
@@ -915,11 +1003,16 @@ void AutoStory::run_segment(
             //  (the balls of the bag).
             int safari_places = 0;
             int other_places = 0;
-            const size_t end = std::min<size_t>(segment.step_count, i + 1 + (size_t)std::max(0, (int)step.p0));
-            for (size_t k = i + 1; k < end; k++){
-                const StoryStep& place_step = script.step(segment, k);
+            //  Places fished at with a rod that was not in the bag: left
+            //  out (until the way to the rod has been gone again).
+            int no_rod_places = 0;
+            auto take_place = [&](const StoryStep& place_step){
                 if (place_step.type != StepType::DEX || place_step.p2 <= 0 || (place_step.p2 & 2) == 0){
-                    continue;
+                    return;
+                }
+                if ((place_step.p2 & 4) != 0 && step.p1 <= 0 && rt.rods_missing.count((int)place_step.p4) != 0){
+                    no_rod_places++;
+                    return;
                 }
                 if ((place_step.p2 & 1) != 0){
                     safari_places++;
@@ -932,6 +1025,23 @@ void AutoStory::run_segment(
                 }
                 looked_for.insert(place.looked_for.begin(), place.looked_for.end());
                 in_passing.insert(place.in_passing.begin(), place.in_passing.end());
+            };
+            if (step.p1 > 0){
+                //  The way to a fishing rod (p1 - 1): the places are all
+                //  those of the story fished at with it.
+                for (size_t k = 0; k < script.step_count; k++){
+                    const StoryStep& place_step = script.steps[k];
+                    if (place_step.type == StepType::DEX && place_step.p2 > 0 && (place_step.p2 & 4) != 0 &&
+                        place_step.p4 == step.p1 - 1
+                    ){
+                        take_place(place_step);
+                    }
+                }
+            }else{
+                const size_t end = std::min<size_t>(segment.step_count, i + 1 + (size_t)std::max(0, (int)step.p0));
+                for (size_t k = i + 1; k < end; k++){
+                    take_place(script.step(segment, k));
+                }
             }
             auto names = [](const std::set<std::string>& species){
                 std::string list;
@@ -944,8 +1054,12 @@ void AutoStory::run_segment(
             for (const std::string& slug : looked_for){
                 in_passing.erase(slug);
             }
-            const std::string rare = in_passing.empty() ? std::string() :
+            std::string rare = in_passing.empty() ? std::string() :
                 " (Rare here and more common at another place, so not a reason to come: " + names(in_passing) + ".)";
+            if (no_rod_places > 0){
+                rare += " (" + std::to_string(no_rod_places) + (no_rod_places == 1 ? " place is" : " places are") +
+                    " left out: the rod to fish there with was not in the bag.)";
+            }
             if (looked_for.empty()){
                 env.log(
                     label + ": the POKeDEX table wants none of the " + std::to_string(here.size()) +
@@ -981,6 +1095,108 @@ void AutoStory::run_segment(
         case StepType::REMATCH:
             story_rematch(rt, script, step);
             break;
+        case StepType::SKIP_IF_ITEM:{
+            //  The way to an item, for a bag that has it already. A fishing
+            //  rod (p2 - 1) seen in the bag before is not looked for again.
+            const int rod = step.p2 > 0 ? (int)step.p2 - 1 : -1;
+            const bool known = rod >= 0 && rt.rods_in_bag.count(rod) != 0;
+            const bool have = known || story_bag_has(rt, step.p1, rod, step.text, step.text);
+            if (have){
+                env.log(
+                    label + ": " + std::string(step.text) + " is in the bag" +
+                    (known ? " (seen there before)" : "") + ": the next " + std::to_string(step.p0) +
+                    " steps (the way to it) are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
+            }else{
+                env.log(label + ": " + std::string(step.text) + " is not in the bag: the next steps go and get it.", COLOR_BLUE);
+                if (rod >= 0){
+                    //  The places fished at with it count again.
+                    rt.rods_missing.erase(rod);
+                }
+            }
+            break;
+        }
+        case StepType::SKIP_IF_OWNED:{
+            //  A Pokemon that is there once (a gift, one that stands on the
+            //  map): the table has it from a run before.
+            const std::string slug = step.text;
+            const int need = std::max(1, (int)step.p1);
+            const int have = rt.collection != nullptr ? rt.collection->caught(slug) : (rt.caught.count(slug) != 0 ? 1 : 0);
+            if (have >= need){
+                env.log(
+                    label + ": the POKeDEX table has " + std::to_string(have) + " " + slug + ": the next " +
+                    std::to_string(step.p0) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
+            }else{
+                env.log(label + ": the POKeDEX table has no " + slug + " yet: the next steps go and get it.", COLOR_BLUE);
+                //  One that was left where it is (too few balls) in a round
+                //  or a run before: a new try. (Left by the label of its
+                //  battle step, which is the species' name.)
+                for (auto iter = rt.legendary_left.begin(); iter != rt.legendary_left.end();){
+                    std::string name;
+                    for (char c : *iter){
+                        name += (char)std::tolower((unsigned char)c);
+                    }
+                    if (name == slug){
+                        env.log(*iter + " was left for later: tried again now.", COLOR_BLUE);
+                        iter = rt.legendary_left.erase(iter);
+                    }else{
+                        ++iter;
+                    }
+                }
+            }
+            break;
+        }
+        case StepType::GOT:{
+            //  The scene before this step (CUTSCENE with p4 = 1) handed the
+            //  Pokemon over, if it showed the words of it. Without them it
+            //  did not (no fossil in the bag, the question answered NO):
+            //  the save before it again, not a Pokemon in the table that
+            //  the game does not have.
+            const std::string slug = step.text;
+            if (!rt.gift_seen && rt.given_before){
+                //  Its question did not come: taken before (and the table
+                //  did not know: a table that is not the one of this save).
+                rt.given_before = false;
+                rt.caught.insert(slug);
+                if (rt.collection != nullptr){
+                    rt.collection->at_least(slug, 1);
+                }
+                env.log(
+                    label + ": " + slug + " was given before (no question, a line of text): the POKeDEX table "
+                    "has it now.",
+                    COLOR_ORANGE
+                );
+                break;
+            }
+            if (!rt.gift_seen){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "The scene before \"" + label + "\" did not show that " + slug + " was handed over (no "
+                    "\"received\", no nickname question, no \"transferred\"). Going back to the last save.",
+                    rt.console
+                );
+            }
+            rt.gift_seen = false;
+            rt.caught.insert(slug);
+            std::string table;
+            if (rt.collection != nullptr){
+                rt.collection->add_caught(slug, false, false);
+                const int needed = rt.collection->needed(slug);
+                if (needed > 0){
+                    table = " The POKeDEX table: " + std::to_string(rt.collection->have(slug)) + " of " +
+                        std::to_string(needed) + ".";
+                }
+            }
+            rt.dex_new_since_load.insert(slug);
+            env.log("Got for the POKeDEX: " + slug + " (given)." + table, COLOR_BLUE);
+            story_note(rt, "Got " + slug, COLOR_GREEN);
+            break;
+        }
         case StepType::SKIP_UNLESS_LEFT:{
             //  The way back to a legendary Pokemon the program left where
             //  it was (text: the labels of those battle steps, separated by
@@ -1203,6 +1419,16 @@ void AutoStory::run_segment(
         stats.trainer_battles += rt.trainer_battles - trainer_before;
         stats.shinies += rt.shinies - shinies_before;
         env.update_stats();
+
+        if (rt.laps.on && i == lap_last){
+            //  The last step of a lap for the POKeDEX: once more from its
+            //  first step, or on with the steps after it.
+            if (story_laps_again(rt)){
+                i = lap_first - 1;
+            }else{
+                story_laps_end(rt);
+            }
+        }
     }
 }
 
@@ -1330,6 +1556,42 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
         }else{
             env.log("No save of the program's yet (" + save_file + "): starting at the segment and step chosen.");
+        }
+    }
+
+    //  "End after segment" is kept in the settings by the segment's name. A
+    //  story that got more segments at its end (build 32: the next steps of
+    //  the POKeDEX collection, after C20_11) would stop where it used to
+    //  end, though that end was never chosen. The last segment of the story
+    //  the program last ran with is kept in a file: an end that is that
+    //  segment moves to the story's new last one, once. (Chosen again after
+    //  that, it stays.)
+    {
+        const std::string end_file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-End.txt";
+        const std::string story_end = script.segments[script.segment_count - 1].id;
+        std::string before;
+        if (read_text_file(end_file, before)){
+            while (!before.empty() && std::isspace((unsigned char)before.back())){
+                before.pop_back();
+            }
+        }else{
+            //  No file yet: the builds before it had this last segment.
+            before = "C20_11_VERMILION_SEVII";
+        }
+        const size_t chosen = END_SEGMENT.current_value();
+        if (before != story_end && chosen + 1 < script.segment_count && before == script.segments[chosen].id){
+            END_SEGMENT.set_value(script.segment_count - 1);
+            env.log(
+                "\"End after segment\" was " + before + ", the last segment of the story so far. The story has "
+                "more segments now: the end is its new last one, " + story_end + ". (To stop earlier, choose "
+                "the end segment again: it stays as chosen from now on.)",
+                COLOR_BLUE
+            );
+        }
+        try{
+            string_to_file(end_file, story_end + "\n");
+        }catch (...){
+            env.log("Could not write " + end_file + ".", COLOR_ORANGE);
         }
     }
 
@@ -2330,6 +2592,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             }
             rt.bag_revives = rt.bag_revives_at_save;
             rt.bag_restores = rt.bag_restores_at_save;
+            rt.rods_in_bag = rt.rods_in_bag_at_save;
             rt.trip_wins = rt.trip_wins_at_save;
             current_segment = resume_segment;
             current_step = resume_step;
@@ -2350,6 +2613,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             (rt.short_of_balls ? "no ball was left for a wanted species" : "") +
             ", and the money trip did not make up for it (see the log above). The places that need it were "
             "left out.",
+            COLOR_RED
+        );
+    }
+    for (int rod : rt.rods_missing){
+        env.log(
+            std::string("The ") + AutoStoryFishing::rod_name(rod) + " was not in the bag when a place wanted to fish "
+            "with it (" + AutoStoryFishing::rod_giver(rod) + " gives it): the places fished with it were left out.",
             COLOR_RED
         );
     }

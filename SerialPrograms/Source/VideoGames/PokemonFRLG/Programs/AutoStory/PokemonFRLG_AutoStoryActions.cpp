@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
+#include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_BattleDialogs.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Map/PokemonFRLG_MapDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_BagDetector.h"
@@ -28,6 +30,7 @@
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStoryFerryTalk.h"
+#include "PokemonFRLG_AutoStoryFishing.h"
 #include "PokemonFRLG_AutoStoryActions.h"
 
 namespace PokemonAutomation{
@@ -213,14 +216,33 @@ enum class BagPocket{
 //  going through the list from the top. (The VS SEEKER, the newest of some
 //  twenty KEY ITEMS and used again and again: 40 seconds from the top each
 //  time on 15 November 2026.)
+//  "as_opened": the bag may even have opened on it (it opens on the pocket
+//  and the place of the last time): look before moving at all. (A fishing
+//  rod, used a hundred times in a row.)
 bool select_bag_item(
     StoryRuntime& rt, BagPocket pocket,
     const std::vector<const char*>& words,
     const std::vector<const char*>& avoid,
     const std::string& what,
-    bool here_first = false
+    bool here_first = false,
+    bool as_opened = false
 ){
     ProControllerContext& context = rt.context;
+    if (as_opened){
+        pbf_wait(context, 300ms);
+        context.wait_for_all_requests();
+        const std::string here = read_bag_description(rt);
+        bool match = false;
+        for (const char* word : words){
+            match |= contains(here, word);
+        }
+        for (const char* word : avoid){
+            match &= !contains(here, word);
+        }
+        if (match){
+            return true;
+        }
+    }
     //  The pockets do not wrap around: LEFT x3 is the first pocket.
     for (int i = 0; i < 3; i++){
         dpad(context, DPAD_LEFT, 500ms);
@@ -2561,9 +2583,325 @@ void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& st
     spot.to_first_tile();
 }
 
+namespace{
+
+//  Where a DEX step catches: a line of grass (cave floor) walked along, or
+//  the water in front of the player with a rod.
+class DexSpot{
+public:
+    virtual ~DexSpot() = default;
+    //  The route has just brought the player there.
+    virtual void arrived() = 0;
+    //  The next try: a run along the grass, a cast of the rod.
+    virtual StoryBattleResult step(StoryBattleKind kind) = 0;
+    //  The tries so far: steps on the grass, casts.
+    virtual uint64_t steps() const = 0;
+    //  After a battle: the player where the count has them.
+    virtual void check() = 0;
+    //  Back to where the routes there and back meet.
+    virtual void to_first_tile() = 0;
+};
+
+class GrassDexSpot : public DexSpot{
+public:
+    GrassDexSpot(StoryRuntime& rt, DpadPosition forth, int length, const std::string& where)
+        : m_spot(rt, forth, length, StoryBattleKind::CATCH, where)
+    {}
+    virtual void arrived() override{ m_spot.arrived(); }
+    virtual StoryBattleResult step(StoryBattleKind kind) override{ return m_spot.step(kind); }
+    virtual uint64_t steps() const override{ return m_spot.steps(); }
+    virtual void check() override{ m_spot.check(); }
+    virtual void to_first_tile() override{ m_spot.to_first_tile(); }
+
+private:
+    GrassSpot m_spot;
+};
+
+
+//  What a cast of a rod came to.
+enum class CastEnd{
+    NO_BITE,        //  "Not even a nibble..."
+    BATTLE,         //  a bite, and the battle it brought is over
+    NO_ROD,         //  the rod is not in the bag
+    NOT_HERE,       //  no rod can be cast where the player stands
+    UNCLEAR,        //  neither a text nor a battle came of it
+};
+
+//  One cast where the player stands, on land facing the water: the rod
+//  from the KEY ITEMS pocket (USE: the bag closes, FieldUseFunc_Rod), then
+//  the text the cast ends with (PokemonFRLG_AutoStoryFishing.h). A bite: B
+//  on its text, and the wild battle is run ("battle": how it ended). The
+//  player is free again afterwards.
+//  (From the bag each time, not registered to SELECT: the item's menu
+//  reads REGISTER or DESELECT in the same place, and what is registered
+//  now is not known. The bag opens on the rod from the second cast on.)
+CastEnd cast_rod(
+    StoryRuntime& rt, int rod, StoryBattleKind kind, const std::string& where,
+    StoryBattleResult& battle, std::string& said
+){
+    using AutoStoryFishing::Cast;
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    battle = StoryBattleResult::NO_BATTLE;
+    said.clear();
+    const AutoStoryFishing::RodWords words = AutoStoryFishing::rod_words(rod);
+    open_bag_from_overworld(console, context);
+    if (!select_bag_item(
+        rt, BagPocket::KEY_ITEMS, words.words, words.avoid, AutoStoryFishing::rod_name(rod), true, true
+    )){
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "bag");
+        return CastEnd::NO_ROD;
+    }
+    rt.rods_in_bag.insert(rod);
+    rt.rods_missing.erase(rod);
+    //  A: USE / REGISTER / CANCEL, the cursor on USE. A: the bag closes and
+    //  the rod is cast; where it cannot be, the bag stays, with PROF. OAK's
+    //  words.
+    press(context, BUTTON_A, 800ms);
+    press(context, BUTTON_A, 1200ms);
+    context.wait_for_all_requests();
+
+    const WallClock cast_start = current_time();
+    const WallClock deadline = cast_start + std::chrono::seconds(AutoStoryFishing::CAST_SECONDS + 4);
+    int other_texts = 0;
+    while (current_time() < deadline){
+        WhiteDialogWatcher dialog(COLOR_RED);
+        AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+        BattleMenuWatcher battle_menu(COLOR_RED);
+        context.wait_for_all_requests();
+        int ret = wait_until(console, context, 500ms, { dialog, battle_text, battle_menu });
+        if (ret == 1 || ret == 2){
+            //  A battle is on already. (Unless it is the white text box of
+            //  the cast that the battle's detectors took for theirs: that
+            //  is read below.)
+            VideoSnapshot screen = console.video().snapshot();
+            WhiteDialogDetector white(COLOR_RED);
+            if (screen && white.detect(screen)){
+                ret = 0;
+            }else{
+                battle = story_battle(rt, kind, where);
+                return battle == StoryBattleResult::NO_BATTLE ? CastEnd::UNCLEAR : CastEnd::BATTLE;
+            }
+        }
+        if (current_time() - cast_start > 2500ms){
+            //  Still the bag: the rod was not cast.
+            VideoSnapshot screen = console.video().snapshot();
+            BagDetector bag(COLOR_RED);
+            if (screen && bag.detect(screen)){
+                said = read_bag_description(rt);
+                pbf_mash_button(context, BUTTON_B, 3000ms);
+                context.wait_for_all_requests();
+                story_back_to_overworld(rt, "bag");
+                return CastEnd::NOT_HERE;
+            }
+        }
+        if (ret != 0){
+            continue;
+        }
+        const std::string text = story_read_dialog(rt);
+        switch (AutoStoryFishing::read_cast(text)){
+        case Cast::NOTHING_YET:
+            //  The dots.
+            pbf_wait(context, 200ms);
+            break;
+        case Cast::NOT_HERE:
+            said = text;
+            pbf_mash_button(context, BUTTON_B, 3000ms);
+            context.wait_for_all_requests();
+            story_back_to_overworld(rt, "bag");
+            return CastEnd::NOT_HERE;
+        case Cast::NO_BITE:
+            said = text;
+            pbf_wait(context, 200ms);
+            pbf_press_button(context, BUTTON_B, 160ms, 1040ms);
+            context.wait_for_all_requests();
+            return CastEnd::NO_BITE;
+        case Cast::BITE:
+            said = text;
+            pbf_wait(context, 200ms);
+            //  B, and the wild battle starts (FishingWildEncounter()).
+            for (int n = 0; n < 4; n++){
+                BlackScreenWatcher battle_starting(COLOR_RED);
+                AdvanceBattleDialogWatcher battle_started(COLOR_RED);
+                BattleMenuWatcher menu(COLOR_RED);
+                context.wait_for_all_requests();
+                const int seen = run_until<ProControllerContext>(
+                    console, context,
+                    [](ProControllerContext& commands){
+                        pbf_press_button(commands, BUTTON_B, 160ms, 2840ms);
+                    },
+                    { battle_starting, battle_started, menu }
+                );
+                if (seen >= 0){
+                    battle = story_battle(rt, kind, where);
+                    return battle == StoryBattleResult::NO_BATTLE ? CastEnd::UNCLEAR : CastEnd::BATTLE;
+                }
+            }
+            console.log(where + ": a bite, but no battle after it.", COLOR_ORANGE);
+            story_back_to_overworld(rt, "after a bite");
+            return CastEnd::UNCLEAR;
+        case Cast::OTHER:
+            //  Some other text: B on it, a few times.
+            if (other_texts < 3){
+                console.log(where + ": a text after the cast that is not of fishing: \"" + text + "\". B.", COLOR_ORANGE);
+            }
+            other_texts++;
+            said = text;
+            pbf_press_button(context, BUTTON_B, 160ms, 640ms);
+            break;
+        }
+    }
+    story_back_to_overworld(rt, "after a cast");
+    return CastEnd::UNCLEAR;
+}
+
+//  Fishing: the player stands on land and faces the water ("toward"). A
+//  try is a cast.
+class FishDexSpot : public DexSpot{
+public:
+    FishDexSpot(StoryRuntime& rt, int rod, DpadPosition toward, const std::string& where)
+        : m_rt(rt)
+        , m_rod(rod)
+        , m_toward(toward)
+        , m_where(where)
+    {}
+
+    virtual void arrived() override{
+        story_face(m_rt, m_toward);
+    }
+    virtual StoryBattleResult step(StoryBattleKind kind) override{
+        if (m_rt.facing != m_toward){
+            story_face(m_rt, m_toward);
+        }
+        m_casts++;
+        StoryBattleResult battle = StoryBattleResult::NO_BATTLE;
+        std::string said;
+        const CastEnd end = cast_rod(m_rt, m_rod, kind, m_where, battle, said);
+        const std::string cast = m_where + ": cast " + std::to_string(m_casts);
+        switch (end){
+        case CastEnd::NO_ROD:
+            m_no_rod = true;
+            return StoryBattleResult::NO_BATTLE;
+        case CastEnd::NOT_HERE:
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                std::string("The ") + AutoStoryFishing::rod_name(m_rod) + " cannot be cast here (\"" + said +
+                "\"): the player does not stand facing the water the route fishes in: " + m_where,
+                m_rt.console
+            );
+        case CastEnd::UNCLEAR:
+            m_rt.console.log(cast + ": neither a text nor a battle came of it.", COLOR_ORANGE);
+            if (++m_unclear >= 3){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "Three casts in a row brought neither a text nor a battle: " + m_where,
+                    m_rt.console
+                );
+            }
+            return StoryBattleResult::NO_BATTLE;
+        case CastEnd::NO_BITE:
+            m_unclear = 0;
+            m_dry++;
+            m_rt.console.log(cast + ": no bite (" + std::to_string(m_bites) + " so far).");
+            if (AutoStoryFishing::no_bite_at_all(m_dry)){
+                //  Half the casts bring one wherever anything bites.
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    std::to_string(m_dry) + " casts in a row without a bite, where every other cast brings one: "
+                    "the player does not fish where the route has it: " + m_where,
+                    m_rt.console
+                );
+            }
+            return StoryBattleResult::NO_BATTLE;
+        case CastEnd::BATTLE:
+            m_unclear = 0;
+            m_dry = 0;
+            m_bites++;
+            return battle;
+        }
+        return StoryBattleResult::NO_BATTLE;
+    }
+    virtual uint64_t steps() const override{ return m_casts; }
+    virtual void check() override{}
+    virtual void to_first_tile() override{}
+
+    bool no_rod() const{ return m_no_rod; }
+    uint64_t bites() const{ return m_bites; }
+
+private:
+    StoryRuntime& m_rt;
+    int m_rod;
+    DpadPosition m_toward;
+    std::string m_where;
+    uint64_t m_casts = 0;
+    uint64_t m_bites = 0;
+    int m_dry = 0;          //  casts in a row without a bite
+    int m_unclear = 0;
+    bool m_no_rod = false;
+};
+
+}
+
+
+
+bool story_bag_has(StoryRuntime& rt, int pocket, int rod, const std::string& words, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    //  One of the words and none of those to avoid: a rod's own, or
+    //  "a|b|!c" (c: not with it).
+    std::vector<std::string> parts;
+    std::vector<const char*> any;
+    std::vector<const char*> avoid;
+    if (AutoStoryFishing::is_rod(rod)){
+        const AutoStoryFishing::RodWords own = AutoStoryFishing::rod_words(rod);
+        any = own.words;
+        avoid = own.avoid;
+    }else{
+        size_t start = 0;
+        while (start <= words.size()){
+            const size_t bar = words.find('|', start);
+            parts.emplace_back(words.substr(start, bar == std::string::npos ? std::string::npos : bar - start));
+            if (bar == std::string::npos){
+                break;
+            }
+            start = bar + 1;
+        }
+        for (const std::string& part : parts){
+            if (part.size() > 1 && part[0] == '!'){
+                avoid.push_back(part.c_str() + 1);
+            }else if (!part.empty() && part[0] != '!'){
+                any.push_back(part.c_str());
+            }
+        }
+    }
+    if (any.empty()){
+        console.log("Looking in the bag for " + what + ": no words to find it by.", COLOR_RED);
+        return false;
+    }
+    console.log("Looking in the bag for: " + what);
+    open_bag_from_overworld(console, context);
+    const BagPocket where = pocket == 1 ? BagPocket::KEY_ITEMS : (pocket == 2 ? BagPocket::POKE_BALLS : BagPocket::ITEMS);
+    const bool found = select_bag_item(rt, where, any, avoid, what, true);
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "bag");
+    if (found && AutoStoryFishing::is_rod(rod)){
+        rt.rods_in_bag.insert(rod);
+        rt.rods_missing.erase(rod);
+    }
+    return found;
+}
+
+
+
 void story_dex(StoryRuntime& rt, const StoryStep& step){
     ConsoleHandle& console = rt.console;
     const bool safari = step.p2 > 0 && (step.p2 & 1) != 0;
+    //  Fishing (p2 & 4): the rod p4, cast from where the player stands.
+    const bool fishing = step.p2 > 0 && (step.p2 & 4) != 0;
+    const int rod = fishing ? (int)step.p4 : -1;
     //  For the POKeDEX table: what it still wants of the list, in its game.
     const bool collect = step.p2 > 0 && (step.p2 & 2) != 0 && rt.collection != nullptr;
     const std::string label = step.label;
@@ -2642,7 +2980,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         throw UserSetupError(console, "\"Shiny only\" needs the shiny sound: the program could not listen to the game.");
     }
     console.log(
-        label + ": for the POKeDEX, catching " + (shiny_only ? "shiny " : "") + species_names(looked_for) +
+        label + ": for the POKeDEX, " +
+        (fishing ? std::string("fishing with the ") + AutoStoryFishing::rod_name(rod) + " for " : std::string("catching ")) +
+        (shiny_only ? "shiny " : "") + species_names(looked_for) +
         (collect ? " (" + rt.collection->game_name() + ", the table: " + counts + ")" : std::string()) +
         (safari ? " (the Safari Game, until it is over)." :
             shiny_only ? " (all others are run from; at most " + std::to_string(minutes_limit) + " minutes)." :
@@ -2659,6 +2999,14 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 ? ": all of them were caught already."
                 : ": nothing left that this place is looked at for."),
             COLOR_BLUE
+        );
+        return;
+    }
+    if (fishing && (!AutoStoryFishing::is_rod(rod) || rt.rods_missing.count(rod) != 0)){
+        console.log(
+            label + ": the " + AutoStoryFishing::rod_name(rod) + " was not in the bag when it was last looked for: "
+            "not fished here.",
+            COLOR_ORANGE
         );
         return;
     }
@@ -2691,7 +3039,15 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     const uint64_t new_before = rt.dex_new;
     const uint64_t marked_before = rt.dex_owned_by_mark;
 
-    GrassSpot spot(rt, step.dir, std::max(2, (int)(step.p4 & 0xff)), StoryBattleKind::CATCH, label);
+    std::unique_ptr<DexSpot> spot_here;
+    FishDexSpot* fish = nullptr;
+    if (fishing){
+        fish = new FishDexSpot(rt, rod, step.dir, label);
+        spot_here.reset(fish);
+    }else{
+        spot_here.reset(new GrassDexSpot(rt, step.dir, std::max(2, (int)(step.p4 & 0xff)), label));
+    }
+    DexSpot& spot = *spot_here;
     spot.arrived();
     int idle = 0;
     int battles = 0;
@@ -2737,8 +3093,21 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
                 caught_here += (size_t)(rt.dex_catches - catches_before);
                 break;
             }
+            if (fish != nullptr && fish->no_rod()){
+                //  Nothing to fish with: the places of this rod are left
+                //  out until the way to it has been gone again.
+                rt.rods_in_bag.erase(rod);
+                rt.rods_missing.insert(rod);
+                console.log(
+                    label + ": the " + AutoStoryFishing::rod_name(rod) + " is not in the bag (" +
+                    AutoStoryFishing::rod_giver(rod) + " gives it). The places fished with it are left out for now.",
+                    COLOR_RED
+                );
+                break;
+            }
             if (result == StoryBattleResult::NO_BATTLE){
-                if (!safari && battles == 0 && spot.steps() >= nothing_steps &&
+                //  (Casts without a bite have a limit of their own.)
+                if (!safari && !fishing && battles == 0 && spot.steps() >= nothing_steps &&
                     current_time() - start > nothing_limit
                 ){
                     OperationFailedExceptionWithScreenshot::fire(
@@ -2819,7 +3188,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
             " Not waited for here: " + species_names(left_in_passing) + ".") +
         (rt.no_balls ? " No balls left." : "") +
         (safari ? " " + std::to_string(spot.steps()) + " steps on the grass (the game ends after 600, with those "
-            "of the way there)." : std::string()),
+            "of the way there)." : std::string()) +
+        (fish != nullptr ? " " + std::to_string(spot.steps()) + " casts, " + std::to_string(fish->bites()) + " bites."
+            : std::string()),
         COLOR_BLUE
     );
     if (safari){
@@ -2835,6 +3206,197 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         return;
     }
     spot.to_first_tile();
+}
+
+
+
+namespace{
+
+bool laps_any_looked_for(const StoryRuntime& rt){
+    for (const std::string& slug : rt.laps.looked_for){
+        if (rt.battle.dex_species.count(slug) != 0){
+            return true;
+        }
+    }
+    return false;
+}
+
+void laps_mark_lap(StoryRuntime& rt){
+    rt.laps.wild_before_lap = rt.wild_battles;
+    rt.laps.catches_before_lap = rt.dex_catches;
+    rt.laps.left_before_lap = rt.battle.dex_species.size();
+}
+
+}
+
+bool story_laps_begin(StoryRuntime& rt, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    const std::string label = step.label;
+    rt.laps = StoryLaps();
+    if (rt.collection == nullptr){
+        console.log(label + ": no POKeDEX table: the laps are left out.", COLOR_ORANGE);
+        return false;
+    }
+    const StoryPlaceWanted place = story_place_wanted(rt, step);
+    std::set<std::string> listed;
+    for (const auto& item : place.here){
+        listed.insert(item.first);
+    }
+    std::set<std::string> extra;
+    std::string counts;
+    for (const std::string& slug : place.wanted){
+        if (rt.collection->wants_more_than_one(slug)){
+            extra.insert(slug);
+        }
+        counts += (counts.empty() ? "" : ", ") + slug + " " +
+            std::to_string(rt.collection->caught(slug)) + "/" + std::to_string(rt.collection->needed(slug));
+    }
+    if (place.looked_for.empty()){
+        console.log(
+            label + (place.wanted.empty()
+                ? ": all of them were caught already."
+                : ": nothing left that this place is looked at for."),
+            COLOR_BLUE
+        );
+        return false;
+    }
+    //  "Shiny only", as in story_dex(): only shiny ones of the wanted
+    //  species, for a while.
+    const bool shiny_only = rt.collect_shiny;
+    if (shiny_only && !rt.shiny_watch){
+        throw UserSetupError(console, "\"Shiny only\" needs the shiny sound: the program could not listen to the game.");
+    }
+    const int idle_limit = shiny_only ? 1000000 : std::max(1, (int)step.p0);
+    const int minutes_limit = shiny_only ? std::max(1, rt.collect_shiny_minutes) : std::max(1, (int)step.p1);
+    console.log(
+        label + ": for the POKeDEX, laps of the next " + std::to_string((int)step.p4) + " steps, catching " +
+        (shiny_only ? "shiny " : "") + species_names(place.looked_for) + " on the way (" +
+        rt.collection->game_name() + ", the table: " + counts + "; the others are run from; " +
+        (shiny_only ? std::string() : "until " + std::to_string(idle_limit) + " battles in a row bring none, ") +
+        "at most " + std::to_string(minutes_limit) + " minutes, and a lap under way is walked to its end)." +
+        (place.in_passing.empty() ? std::string() :
+            " Also caught if one comes, but not waited for: " + species_names(place.in_passing) + "."),
+        COLOR_BLUE
+    );
+
+    StoryLaps& laps = rt.laps;
+    laps.on = true;
+    laps.label = label;
+    laps.saved = rt.battle;
+    laps.looked_for = place.looked_for;
+    laps.in_passing = place.in_passing;
+    laps.idle_limit = idle_limit;
+    laps.start = current_time();
+    laps.deadline = laps.start + std::chrono::minutes(minutes_limit);
+    laps.new_before = rt.dex_new;
+    laps.marked_before = rt.dex_owned_by_mark;
+
+    rt.battle.dex_species = place.wanted;
+    rt.battle.dex_all = listed;
+    rt.battle.dex_extra = extra;
+    rt.battle.dex_shiny_only = shiny_only;
+    rt.battle.catch_species.clear();
+    //  What is not wanted is run from, as in a visit of the grass.
+    rt.battle.wild_run = true;
+    rt.collecting = true;
+    rt.in_safari = false;
+    rt.safari_over = false;
+    rt.no_balls = false;
+    rt.dex_visits++;
+    laps_mark_lap(rt);
+    return true;
+}
+
+bool story_laps_again(StoryRuntime& rt){
+    StoryLaps& laps = rt.laps;
+    if (!laps.on){
+        return false;
+    }
+    ConsoleHandle& console = rt.console;
+    laps.laps++;
+    const int battles = (int)(rt.wild_battles - laps.wild_before_lap);
+    const uint64_t catches = rt.dex_catches - laps.catches_before_lap;
+    laps.battles += battles;
+    laps.caught += (size_t)catches;
+    if (catches > 0 || rt.battle.dex_species.size() < laps.left_before_lap){
+        laps.idle = 0;      //  A catch, or one found caught before (the ball mark).
+    }else{
+        laps.idle += battles;
+    }
+    console.log(
+        laps.label + ": lap " + std::to_string(laps.laps) + " brought " + std::to_string(battles) +
+        (battles == 1 ? " wild battle" : " wild battles") +
+        (catches > 0 ? " and " + std::to_string(catches) + (catches == 1 ? " catch." : " catches.") : std::string(".")) +
+        " Still looked for: " + species_names(rt.battle.dex_species) + "."
+    );
+    std::string why;
+    if (!laps_any_looked_for(rt)){
+        why = "nothing left that the place is looked at for";
+    }else if (laps.idle >= laps.idle_limit){
+        why = std::to_string(laps.idle) + " battles in a row without a catch";
+    }else if (rt.no_balls){
+        why = "no ball left for a wanted species";
+    }else if (current_time() >= laps.deadline){
+        why = "the minutes of this visit are over";
+    }else if (rt.shiny_unsaved){
+        why = "a shiny Pokemon is caught: to the nurse first, to save it";
+    }else if (rt.lead_fainted || (rt.memory.player_hp >= 0 && rt.memory.player_hp < 0.35)){
+        why = rt.lead_fainted ? std::string("the lead fainted")
+            : "the lead is at " + std::to_string((int)(rt.memory.player_hp * 100 + 0.5)) + "% HP";
+    }
+    if (!why.empty()){
+        console.log(laps.label + ": no more laps: " + why + ".", COLOR_BLUE);
+        return false;
+    }
+    //  A lap is some sixty tiles of water, or six rocks: a dozen of them
+    //  without a single wild Pokemon is not chance (once in 20,000 on the
+    //  water with the fewest).
+    if (laps.battles == 0 && laps.laps >= 12){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_laps_again(): " + std::to_string(laps.laps) + " laps without a single wild Pokemon: the player "
+            "is not where the route walks them: " + laps.label,
+            console
+        );
+    }
+    laps_mark_lap(rt);
+    return true;
+}
+
+void story_laps_end(StoryRuntime& rt, bool failed){
+    StoryLaps& laps = rt.laps;
+    if (!laps.on){
+        return;
+    }
+    std::set<std::string> left;
+    std::set<std::string> left_in_passing;
+    for (const std::string& slug : rt.battle.dex_species){
+        (laps.in_passing.count(slug) != 0 ? left_in_passing : left).insert(slug);
+    }
+    const bool no_balls = rt.no_balls;
+    rt.collecting = false;
+    rt.battle = laps.saved;
+    laps.on = false;
+    if (failed){
+        return;
+    }
+    if (no_balls){
+        //  The collection: no ball for a wanted species.
+        rt.short_of_balls = true;
+    }
+    const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - laps.start).count();
+    const uint64_t marked = rt.dex_owned_by_mark - laps.marked_before;
+    rt.console.log(
+        laps.label + ": " + std::to_string(laps.caught) + " caught (" +
+        std::to_string(rt.dex_new - laps.new_before) + " new to the POKeDEX)" +
+        (marked > 0 ? ", " + std::to_string(marked) + " found caught before (the ball mark)" : std::string()) +
+        " in " + std::to_string(laps.battles) + " battles, " + std::to_string(laps.laps) + " laps, " +
+        std::to_string(minutes) + " minutes. Not caught: " + species_names(left) + "." +
+        (left_in_passing.empty() ? std::string() :
+            " Not waited for here: " + species_names(left_in_passing) + ".") +
+        (no_balls ? " No balls left." : ""),
+        COLOR_BLUE
+    );
 }
 
 

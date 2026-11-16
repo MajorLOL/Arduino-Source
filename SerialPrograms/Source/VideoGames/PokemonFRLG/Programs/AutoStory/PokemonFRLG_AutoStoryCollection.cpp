@@ -136,7 +136,10 @@ StoryCollectionTable::StoryCollectionTable(StaticTextOption& summary)
         "caught (keep one, evolve the others); \"evolve\": only by evolving. "
         "After Mewtwo (chapter 20) the program catches what is still needed in the grass, the caves and "
         "the Safari Zone of Kanto and the Sevii Islands, and skips the places where nothing is needed. "
-        "Surfing, fishing, Rock Smash, gifts, trades, breeding and the evolving itself: not yet. "
+        "Experimental, after those places: fishing with the GOOD ROD and the SUPER ROD (it fetches them), "
+        "the water off Five Island, ROCK SMASH in Cerulean Cave, and four Pokemon that are there once "
+        "(HITMONLEE from the Fighting Dojo, the SNORLAX of Route 16, KABUTO from the DOME FOSSIL, AERODACTYL "
+        "from the OLD AMBER). Trades, the Game Corner, eggs and the evolving itself: not yet. "
         "A new game (\"Start a new game\" or the start at C0_01) sets all counts back to 0.",
         LockMode::LOCK_WHILE_RUNNING,
         false,  //  No load/save buttons: the rows follow the game and starter.

@@ -2157,11 +2157,28 @@ bool story_cutscene(
                     yes = false;
                 }
             }
+            if (rt.gift_watch && !rt.gift_seen && !answer_yes){
+                //  The scene of a gift: its one question is the nickname.
+                rt.gift_seen = true;
+                rt.console.log("A YES/NO box in the scene of a gift (the nickname): the Pokemon was handed over.", COLOR_BLUE);
+            }
             pbf_wait(rt.context, 300ms);
             pbf_press_button(rt.context, yes ? BUTTON_A : BUTTON_B, 160ms, 840ms);
             break;
         }
         case 1:{
+            if (rt.gift_watch && !rt.gift_seen){
+                //  "<player> received the HITMONLEE from the KARATE MASTER.",
+                //  "Do you want to give a nickname to this KABUTO?",
+                //  "KABUTO was transferred to BILL'S PC."
+                const std::string text = story_read_dialog(rt);
+                if (text.find("received") != std::string::npos || text.find("nickname") != std::string::npos ||
+                    text.find("transferred") != std::string::npos || text.find("was sent") != std::string::npos
+                ){
+                    rt.gift_seen = true;
+                    rt.console.log("The Pokemon was handed over: \"" + text + "\"", COLOR_BLUE);
+                }
+            }
             //  Answering YES, not this check: it presses START and then B,
             //  and B goes to the text (Oak's aide on Route 15: five pages,
             //  the B's of the check went through them and said NO).
@@ -2316,9 +2333,44 @@ void go_to_talk_alt(StoryRuntime& rt, const StoryTalkAlt& alt, const std::string
 
 }
 
-bool story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt, bool may_be_gone){
+bool story_talk_start(
+    StoryRuntime& rt, const std::string& what, const StoryTalkAlt& alt, bool may_be_gone, int patience
+){
     rt.console.log("Talking: " + what);
     int ret = -1;
+    if (patience > 0){
+        //  The one to talk to walks around (the doctor of the Cinnabar Lab:
+        //  one tile each way from where he starts, a step every second or
+        //  two). The player faces a tile he comes by, from outside his
+        //  tiles: A there until he is on it. No turning again: toward a
+        //  free tile that is a step.
+        const WallClock deadline = current_time() + std::chrono::seconds(patience);
+        int presses = 0;
+        while (ret < 0 && current_time() < deadline){
+            WhiteDialogWatcher dialog(COLOR_RED);
+            AdvanceBattleDialogWatcher battle_text(COLOR_RED);
+            rt.context.wait_for_all_requests();
+            ret = run_until<ProControllerContext>(
+                rt.console, rt.context,
+                [](ProControllerContext& context){
+                    pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+                },
+                { dialog, battle_text }
+            );
+            presses++;
+        }
+        if (ret < 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_talk_start(): The one to talk to walks around and did not come by in " +
+                std::to_string(patience) + " seconds (" + std::to_string(presses) + " presses of A): " + what +
+                ". The player is probably not where the route expects.",
+                rt.console
+            );
+        }
+        rt.console.log(what + ": came by at press " + std::to_string(presses) + " of A.");
+        return true;
+    }
     for (int spot = 0; spot < (alt.on ? 2 : 1) && ret < 0; spot++){
         if (spot == 1){
             go_to_talk_alt(rt, alt, what);
@@ -2363,21 +2415,30 @@ bool story_talk_start(StoryRuntime& rt, const std::string& what, const StoryTalk
 }
 
 
-void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt){
+bool story_talk_answer(
+    StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt,
+    bool may_be_given, int patience
+){
     rt.console.log(std::string(yes ? "Talking and answering YES: " : "Talking and answering NO: ") + what);
     //  One A starts the conversation, more A advance the text. They are
     //  spaced out so the YES/NO box is seen before an A answers it. If no
     //  text comes up at all, the player is turned again.
     int ret = -1;
+    //  The one talked to walks around (see story_talk_start()): A until it
+    //  comes by, without turning again.
+    const WallClock patient_until = current_time() + std::chrono::seconds(std::max(0, patience));
     for (int spot = 0; spot < (alt.on ? 2 : 1) && ret < 0; spot++){
         if (spot == 1){
             go_to_talk_alt(rt, alt, what);
         }
         //  With another spot, one try here (turning again is a step when
         //  no one is there).
-        const int attempts = alt.on && spot == 0 ? 1 : 3;
+        const int attempts = patience > 0 ? 1000000 : (alt.on && spot == 0 ? 1 : 3);
         for (int attempt = 0; attempt < attempts; attempt++){
-            if (attempt > 0){
+            if (patience > 0 && attempt > 0 && current_time() >= patient_until){
+                break;
+            }
+            if (attempt > 0 && patience <= 0){
                 face_again(rt, what);
             }
             SelectionDialogWatcher yes_no(COLOR_RED);
@@ -2420,7 +2481,17 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, cons
         rt.console.log("Strength is on already: no question. Going on.", COLOR_ORANGE);
         pbf_mash_button(rt.context, BUTTON_B, 2000ms);
         rt.context.wait_for_all_requests();
-        return;
+        return false;
+    }
+    if (ret < 0 && text_seen && may_be_given){
+        //  What the question gives was given before (a fishing rod: "How are
+        //  the fish biting?"): a line of text and no question. The A's that
+        //  looked for it closed that text and may have opened it again: B
+        //  closes it, and the scene after this step sees to the rest.
+        rt.console.log(what + ": text, but no question: given before. Going on.", COLOR_ORANGE);
+        pbf_mash_button(rt.context, BUTTON_B, 2500ms);
+        rt.context.wait_for_all_requests();
+        return false;
     }
     if (ret < 0){
         OperationFailedExceptionWithScreenshot::fire(
@@ -2433,6 +2504,7 @@ void story_talk_answer(StoryRuntime& rt, bool yes, const std::string& what, cons
     pbf_wait(rt.context, 300ms);
     pbf_press_button(rt.context, yes ? BUTTON_A : BUTTON_B, 160ms, 840ms);
     rt.context.wait_for_all_requests();
+    return true;
 }
 
 
@@ -2535,6 +2607,7 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
     rt.party_order_final_at_save = rt.party_order_final;
     rt.bag_revives_at_save = rt.bag_revives;
     rt.bag_restores_at_save = rt.bag_restores;
+    rt.rods_in_bag_at_save = rt.rods_in_bag;
     rt.trip_wins_at_save = rt.trip_wins;
     rt.team_down_at_save = rt.memory.team_down;
     for (int i = 0; i < 6; i++){

@@ -11,7 +11,10 @@ A spec step is a dict with one of these keys:
              the way is shut: walked until the player stands still)
   talk       walk next to {map, object | xy} and face it, then an action:
              mode = talk | yes | battle | heal | plain
-  cutscene   [min_ms, max_ms]
+             options: given (mode yes: the question may not come, what it
+             gives was given before), patience (seconds: the one talked to
+             walks around, xy is a tile it comes by)
+  cutscene   [min_ms, max_ms]; gift: a Pokemon is handed over in it
   battle     a trainer battle that starts on its own (after a trigger/talk)
   rival1     the first rival battle (scripted, Oak's tutorial)
   heal       talk to the nurse (must be standing below the nurse)
@@ -19,6 +22,16 @@ A spec step is a dict with one of these keys:
   save       {dex: bool}
   teach      {hm, party_slot, move}
   catch      {species, map, tiles}
+  dex        for the POKeDEX: {map, tiles, species, idle, minutes, collect};
+             fish: a rod (0 OLD, 1 GOOD, 2 SUPER ROD) cast from the shore of
+             the map; laps + ground (water | rocks): steps that end where
+             they start, played again and again, catching on the way
+  smash      {map, xy}: ROCK SMASH on that rock (for what is under it)
+  rod_wanted {rod, steps}: the way to a fishing rod, skipped when nothing
+             is fished for with it or the bag has it
+  unless_owned {species, count, steps}: steps for a Pokemon that is there
+             once, skipped when the POKeDEX table has it
+  got        species: the player was just given it (after cutscene gift)
   wait       ms
   puzzle     name
   press      {button, times, wait}
@@ -1366,6 +1379,70 @@ class Builder:
                         "text": ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)})
             out.extend(sub)
             return
+        if "rod_wanted" in step:
+            #  The way to a fishing rod (a whole segment: FLY, the house of
+            #  the one who gives it, out again). Skipped when the POKeDEX
+            #  table wants nothing of the places fished at with that rod
+            #  (SKIP_IF_COLLECTED with p1 = rod + 1: the places are all the
+            #  DEX steps of the story that fish with it), and when the rod
+            #  is in the bag already (SKIP_IF_ITEM: the KEY ITEMS pocket is
+            #  looked through once in a run).
+            u = step["rod_wanted"]
+            rod = u["rod"]
+            sub = []
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            label = step.get("label", "The %s?" % Builder.RODS[rod])
+            out.append({"type": "SKIP_IF_COLLECTED", "label": label, "p0": len(sub) + 1, "p1": rod + 1,
+                        "text": Builder.RODS[rod]})
+            out.append({"type": "SKIP_IF_ITEM", "label": "%s in the bag?" % Builder.RODS[rod], "p0": len(sub),
+                        "p1": 1, "p2": rod + 1, "text": Builder.RODS[rod]})
+            out.extend(sub)
+            return
+        if "unless_owned" in step:
+            #  Steps for a Pokemon that is there once (a gift, a Pokemon
+            #  that stands on the map): skipped when the program's POKeDEX
+            #  table has "count" of the species (text) already. "segment":
+            #  a whole segment, which starts with FLY and ends outdoors;
+            #  else they end where they start.
+            u = step["unless_owned"]
+            sub = []
+            start = self.pos
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if not u.get("segment") and self.pos[:3] != start[:3]:
+                raise StoryError("unless_owned: the steps end at %s, not %s" % (self.pos, start))
+            out.append({"type": "SKIP_IF_OWNED", "label": step.get("label", "Owned already?"), "p0": len(sub),
+                        "p1": u.get("count", 1), "text": u["species"]})
+            out.extend(sub)
+            return
+        if "got" in step:
+            #  The player has this Pokemon now (a gift): one more in the
+            #  program's POKeDEX table.
+            if not out or out[-1]["type"] != "CUTSCENE" or out[-1].get("p4") != 1:
+                raise StoryError("got: not after the scene that hands the Pokemon over (cutscene(..., gift=True)): %s"
+                                 % step.get("label", step["got"]))
+            out.append({"type": "GOT", "label": step.get("label", "Got " + step["got"]), "text": step["got"]})
+            return
+        if "smash" in step:
+            #  ROCK SMASH on one rock (for the wild Pokemon under it; the
+            #  rocks on the way of a walk are smashed by the walk): next to
+            #  it, facing it, YES. The scene after it fights or catches
+            #  what comes out.
+            sm = step["smash"]
+            m = self.d.map(sm["map"])
+            xy = tuple(sm["xy"])
+            if xy not in self.engine.view(m.id).smash_rocks:
+                raise StoryError("smash: no Rock Smash rock (left) at %s %s" % (m.id, xy))
+            if not self.state.abilities.get("rock_smash"):
+                raise StoryError("smash: no ROCK SMASH yet (%s)" % step.get("label", "?"))
+            goals_face = self.interact_goals(m, xy[0], xy[1])
+            self.walk_to(set(goals_face.keys()), step.get("label", "Rock") + "_ToRock", out, face_map=goals_face)
+            out.append({"type": "TALK_YES", "label": "Rock Smash"})
+            out.append({"type": "WAIT", "label": "Rock Smash animation", "p0": 2500})
+            self.state.smash_done.setdefault(m.id, set()).add(xy)
+            self.engine.invalidate()
+            return
         if "outside" in step:
             #  Out of the building, onto the first tile outdoors.
             outdoor = [mid for mid, m in self.d.maps.items() if m.map_type in Builder.FLY_MAP_TYPES]
@@ -1543,6 +1620,16 @@ class Builder:
                 ts = {"type": kind, "label": label}
                 if t.get("alt_xy") is not None and kind in ("TALK", "TALK_YES", "TALK_NO"):
                     ts.update(self.talk_alt(m, (tx, ty), tuple(t["alt_xy"]), label))
+                #  p0 & 1: the question may not come (given before). p1: the
+                #  one talked to walks around, A for that many seconds.
+                if t.get("given"):
+                    if kind != "TALK_YES":
+                        raise StoryError("talk: \"given\" is for mode \"yes\" (%s)" % label)
+                    ts["p0"] = 1
+                if t.get("patience"):
+                    if kind not in ("TALK", "TALK_YES") or "p2" in ts:
+                        raise StoryError("talk: \"patience\" is for a plain talk or a YES (%s)" % label)
+                    ts["p1"] = int(t["patience"])
                 out.append(ts)
             if mode == "battle":
                 out.append({"type": "BATTLE", "label": label, "p0": 30000})
@@ -1555,6 +1642,11 @@ class Builder:
                   "text": "YES" if step.get("answer") == "yes" else ""}
             if step.get("battles"):
                 cs["p2"] = step["battles"]
+            if step.get("gift"):
+                #  A Pokemon is handed over in this scene: the program looks
+                #  for the words of it ("received", "nickname", "transferred"),
+                #  and the GOT step after it counts the Pokemon only then.
+                cs["p4"] = 1
             out.append(cs)
             return
         if "battle" in step:
@@ -2308,6 +2400,12 @@ class Builder:
         program skips those it caught already)."""
         c = step["dex"]
         label = step.get("label", "Dex")
+        if c.get("fish") is not None:
+            self.dex_fish(step, out)
+            return
+        if c.get("laps") is not None:
+            self.dex_laps(step, out)
+            return
         have = self.gd.land_slugs.get(c["map"], set())
         #  No list (the POKeDEX collection): every species of the place,
         #  both games.
@@ -2344,6 +2442,123 @@ class Builder:
                     "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
                     "p2": (1 if c.get("safari") else 0) | (2 if c.get("collect") else 0),
                     "p3": c.get("enough", 0), "dir": osc, "p4": length})
+
+    #  The rods, in the order the data counts them (a DEX step that fishes:
+    #  p4; SKIP_IF_ITEM and SKIP_IF_COLLECTED: the rod + 1).
+    RODS = ("OLD ROD", "GOOD ROD", "SUPER ROD")
+    FISH_EDGE = 1
+
+    def fish_spots(self, map_id, tiles):
+        """Where a rod can be cast on a map: {(map, x, y): facing}. Land at
+        the height the game fishes from, with water in front that could be
+        surfed onto from there (FieldUseFunc_Rod -> CanFish ->
+        IsPlayerFacingSurfableFishableWater: the tile in front has the
+        water terrain, the way onto it is shut by its height alone, and
+        the player stands at height 3). Not in the grass, not where a
+        trainer looks, someone walks, a script waits or a warp is next
+        door: the player stands there for the whole visit."""
+        v = self.engine.view(map_id)
+        m = self.d.maps[map_id]
+        warps = {(w["x"], w["y"]) for w in m.warps}
+        spots = {}
+        #  Not on the map's last row or column either: a walk that ends a
+        #  tile short would stand on the next map, which has wild Pokemon
+        #  of its own (Five Isle Meadow's QWILFISH, the town's SHELLDER).
+        edge = Builder.FISH_EDGE
+        for x, y in tiles:
+            if not (edge <= x < m.width - edge and edge <= y < m.height - edge):
+                continue
+            t = v.tile(x, y)
+            if t[1] or t[2] != 3 or t[4] or m.terrain(x, y):
+                continue
+            if (x, y) in v.blocked or (x, y) in v.sight or (x, y) in v.triggers or (x, y) in v.soft:
+                continue
+            if (x, y) in warps or any((x + dx, y + dy) in warps for dx, dy in DIRS.values()):
+                continue
+            for dname in ("up", "down", "left", "right"):
+                if t[3] in self.engine.blocked_dirs[dname]:
+                    continue
+                dx, dy = DIRS[dname]
+                wx, wy = x + dx, y + dy
+                #  (The water of the map itself: the wild Pokemon are those
+                #  of the map the player stands on.)
+                if not m.in_bounds(wx, wy) or (wx, wy) in v.blocked:
+                    continue
+                wt = v.tile(wx, wy)
+                if wt[1] or wt[2] in (0, 3, 15) or m.terrain(wx, wy) != 2:
+                    continue
+                if wt[3] in self.engine.blocked_dirs[OPPOSITE[dname]]:
+                    continue
+                spots[(map_id, x, y)] = dname
+                break
+        return spots
+
+    def dex_fish(self, step, out):
+        """For the POKeDEX, with a rod: to the water of the place, then a
+        DEX step that casts the rod there again and again (p2 & 4; p4 the
+        rod, dir the way to the water) catching what the list has."""
+        c = step["dex"]
+        label = step.get("label", "Fish")
+        rod = c["fish"]
+        share = self.gd.fish_share.get(c["map"], {}).get(rod, {})
+        species = c["species"] if c["species"] is not None else sorted(share)
+        if not species:
+            raise StoryError("%s: nothing bites the %s on %s" % (label, Builder.RODS[rod], c["map"]))
+        missing = [s for s in species if s not in share]
+        if missing:
+            raise StoryError("%s: not on the %s of %s: %s" % (label, Builder.RODS[rod], c["map"], missing))
+        spots = self.fish_spots(c["map"], c["tiles"])
+        if not spots:
+            raise StoryError("%s: no tile to fish from on %s" % (label, c["map"]))
+        self.walk_to(set(spots.keys()), label + "_ToWater", out, face_map=spots)
+        here = tuple(self.pos[:3])
+        if here not in spots or self.pos[3] != spots[here] or self.surfing or self.node()[3] != 3:
+            raise StoryError("%s: the walk to the water ends at %s (%s)" % (label, self.pos, spots.get(here)))
+        text = ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)
+        out.append({"type": "DEX", "label": label, "text": text,
+                    "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
+                    "p2": 4 | (2 if c.get("collect") else 0),
+                    "p3": c.get("enough", 0), "dir": spots[here], "p4": rod})
+
+    def dex_laps(self, step, out):
+        """For the POKeDEX, on the way: a DEX step (p2 & 8) and after it
+        the steps of a lap (p4: how many), which the program walks again
+        and again from where the player stands, catching what the list has
+        of the wild Pokemon that come on the way: over the water of the
+        place ("ground": "water"), or smashing its rocks ("rocks"). The lap
+        ends where it starts."""
+        c = step["dex"]
+        label = step.get("label", "Laps")
+        ground = c.get("ground", "water")
+        share = (self.gd.water_share if ground == "water" else self.gd.rock_share).get(c["map"], {})
+        species = c["species"] if c["species"] is not None else sorted(share)
+        if not species:
+            raise StoryError("%s: no wild Pokemon on the %s of %s" % (label, ground, c["map"]))
+        missing = [s for s in species if s not in share]
+        if missing:
+            raise StoryError("%s: not on the %s of %s: %s" % (label, ground, c["map"], missing))
+        start = self.pos
+        surfing = self.surfing
+        sub = []
+        for s in c["laps"]:
+            self.run_step(s, sub)
+        if self.pos[:3] != start[:3] or self.surfing != surfing:
+            raise StoryError("%s: the lap ends at %s, not %s" % (label, self.pos, start))
+        allowed = ("WALK", "TALK_YES", "WAIT")
+        other = [s["type"] for s in sub if s["type"] not in allowed]
+        if other or not sub:
+            raise StoryError("%s: a lap is walks, YES answers and waits, not %s" % (label, other or "nothing"))
+        if ground == "rocks":
+            #  The rocks come back when the map is entered again by a warp
+            #  (their flags are temporary): the lap must leave it.
+            if self.state.smash_done.get(c["map"]):
+                raise StoryError("%s: the lap ends with rocks still smashed on %s" % (label, c["map"]))
+        text = ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)
+        out.append({"type": "DEX", "label": label, "text": text,
+                    "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
+                    "p2": 8 | (2 if c.get("collect") else 0),
+                    "p3": c.get("enough", 0), "p4": len(sub)})
+        out.extend(sub)
 
     def catch(self, step, out):
         c = step["catch"]

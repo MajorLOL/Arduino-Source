@@ -171,8 +171,33 @@ void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& st
 
 //  For the POKeDEX (StepType::DEX): back and forth in the grass (cave,
 //  water) of a place, catching the species of the step not caught yet with
-//  the cheapest balls; the others are run from.
+//  the cheapest balls; the others are run from. With p2 & 4: fishing, the
+//  rod p4 cast from where the player stands until the same ends
+//  (PokemonFRLG_AutoStoryFishing.h).
 void story_dex(StoryRuntime& rt, const StoryStep& step);
+
+//  For the POKeDEX, laps (StepType::DEX with p2 & 8): the steps after the
+//  step are a lap that ends where it starts (walks over water, rocks
+//  smashed), and the segment's loop plays them again and again. What the
+//  table wants of the step's list is caught in the wild battles on the way
+//  (the others are run from).
+//    story_laps_begin(): the list is set up. False: nothing to catch there
+//        (the lap's steps are skipped).
+//    story_laps_again(): after the last step of a lap: another one? Not
+//        when nothing looked for is left, p0 battles in a row brought no
+//        catch, p1 minutes are over, the balls ran out, the lead is low.
+//    story_laps_end(): the battle settings as before, and what the laps
+//        brought ("failed": a step of the lap failed, no summary).
+bool story_laps_begin(StoryRuntime& rt, const StoryStep& step);
+bool story_laps_again(StoryRuntime& rt);
+void story_laps_end(StoryRuntime& rt, bool failed = false);
+
+//  Is an item in the bag (StepType::SKIP_IF_ITEM)? Opens the bag, goes
+//  through "pocket" (0 ITEMS, 1 KEY ITEMS, 2 POKe BALLS) reading the
+//  descriptions, closes it again. "rod" 0 to 2: that fishing rod, by its
+//  own words (and StoryRuntime::rods_in_bag keeps it); else "words": one
+//  of them enough, "a|b", and "!c": not with c.
+bool story_bag_has(StoryRuntime& rt, int pocket, int rod, const std::string& words, const std::string& what);
 
 //  The Seagallop from Vermilion City (StepType::SEAGALLOP), the player on
 //  the pier's trigger: through the sailor's text (on the Switch the MYSTIC

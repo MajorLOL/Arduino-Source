@@ -97,8 +97,10 @@ struct StoryLeg{
 
 enum class StepType : uint8_t{
     WALK,               //  leg
-    TALK,               //  A, read through the text
-    TALK_YES,           //  A, answer YES
+    TALK,               //  A, read through the text; p1 > 0: the one talked to walks
+                        //  around: A again and again where it comes by, p1 seconds at most
+    TALK_YES,           //  A, answer YES; p1 as for TALK; p0 & 1: the question may not come
+                        //  (what it gives was given before: a line of text, closed)
     TALK_NO,            //  A, answer NO
     HEAL,               //  talk to the nurse, heal
     CUTSCENE,           //  p0 = min ms, p1 = max ms, text "YES": answer questions with YES;
@@ -148,7 +150,12 @@ enum class StepType : uint8_t{
     DEX,                //  for the POKeDEX: back and forth (dir, p4 = line length) catching the
                         //  species of text not caught yet, until p0 battles in a row bring none
                         //  or p1 minutes are over; p2 & 1: the Safari Zone (until the game ends);
-                        //  p2 & 2: what the POKeDEX table still wants of text (extra ones to evolve)
+                        //  p2 & 2: what the POKeDEX table still wants of text (extra ones to evolve);
+                        //  p2 & 4: fishing: on land facing the water (dir), the rod p4 (0 OLD
+                        //  ROD, 1 GOOD ROD, 2 SUPER ROD) cast again and again;
+                        //  p2 & 8: laps: the next p4 steps (walks over water, rocks smashed)
+                        //  end where they start, and are played again and again, catching
+                        //  what comes on the way
     SKIP_IF_DEX,        //  text = species surely caught (the team...): with those and the ones
                         //  caught by the program at least p1 species, skip the next p0 steps;
                         //  p2 & 1: fewer stop the program
@@ -164,7 +171,8 @@ enum class StepType : uint8_t{
                         //  right before the first tile with wild Pokemon of the walk
     SKIP_IF_COLLECTED,  //  text = the species of the places of the next p0 steps: the program's
                         //  POKeDEX table wants none of them (in its game, with its starter):
-                        //  skip those steps
+                        //  skip those steps; p1 > 0: the places are all the DEX steps of the
+                        //  story that fish with the rod p1 - 1 (the way to that rod)
     SEAGALLOP,          //  on the pier's trigger in Vermilion City: through the sailor's text and
                         //  menus (the tickets' menu first) to row p0 of the Sevii Islands list
     SKIP_UNLESS_LEFT,   //  text = labels of legendary BATTLE steps (p2 & 4): unless the program
@@ -175,6 +183,14 @@ enum class StepType : uint8_t{
                         //  again (the VS SEEKER charges with the steps); then the VS SEEKER
                         //  from the bag and A on the trainer: a battle or a line of text.
                         //  Until p0 battles are won or p1 minutes are over; p2: what one pays
+    SKIP_IF_ITEM,       //  the bag has the item: skip the next p0 steps (the way to it). p2 > 0:
+                        //  the fishing rod p2 - 1; else text = words of its description, one of
+                        //  them enough ("a|b", "!c": not with c); p1 = the pocket (0 ITEMS, 1 KEY
+                        //  ITEMS, 2 POKe BALLS)
+    SKIP_IF_OWNED,      //  text = a species: the program's POKeDEX table has p1 of it or more
+                        //  (a gift taken before): skip the next p0 steps
+    GOT,                //  text = a species the player was just given: one more in the POKeDEX
+                        //  table
 };
 
 struct StoryStep{

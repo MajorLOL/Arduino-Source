@@ -13,6 +13,7 @@ Block format (include/global.fieldmap.h):
   bits 12-15 elevation
 Metatile attributes (src/fieldmap.c, sMetatileAttrMasks):
   bits 0-8   behavior (include/constants/metatile_behaviors.h)
+  bits 9-13  terrain (water: what a rod can be cast into)
   bits 24-26 encounter type
 """
 
@@ -122,6 +123,13 @@ class MapData:
         behavior = attrs & 0x1FF
         encounter = (attrs >> 24) & 0x7
         return metatile, collision, elevation, behavior, encounter
+
+    def terrain(self, x, y):
+        """The tile's terrain (METATILE_ATTRIBUTE_TERRAIN, bits 9-13 of the
+        metatile's attributes): 0 normal, 1 grass, 2 water, 3 waterfall."""
+        block = self.layout.block(x, y)
+        attrs = self.decomp.metatile_attributes(self.layout, block & 0x3FF)
+        return (attrs >> 9) & 0x1F
 
     def warp_at(self, x, y):
         for i, w in enumerate(self.warps):
