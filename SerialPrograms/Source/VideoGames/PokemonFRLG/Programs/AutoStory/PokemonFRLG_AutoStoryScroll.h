@@ -164,6 +164,25 @@ private:
 };
 
 
+//  Whether the tiles of a run that nothing stopped (no battle, no one
+//  talking) are the video's to count: it followed the map to the end, well,
+//  and never lost it on the way. A run that was lost and found again went
+//  on as it was timed, and the timing counts it, as it did when a lost map
+//  stayed lost. Finding the map again is for a run that something stops
+//  later: there the video's count up to that moment is all there is.
+//
+//  After a gap the count is right on ground with detail, but it can be off
+//  where the picture is mostly water, which moves by itself. South of Seven
+//  Island the path runs between the sea, and the name of the place slides
+//  in at the map border: the picture is lost there. In the recording of 16
+//  November 2026 (the walk back up, 16 tiles, 10 frames a second) it was
+//  found again two frames later and came to 251 px for the 256 walked:
+//  right, with 3 px to spare. The same walk played backwards: 256.
+inline bool counts_run(bool lost, bool reliable, size_t flashes){
+    return !lost && reliable && flashes == 0;
+}
+
+
 
 }
 }

@@ -27,6 +27,13 @@
  *  lost the picture there, and the grass was walked along a row too high
  *  for half an hour.
  *
+ *  Measured on the recording that came with that night's report (the walk
+ *  back up the same path, 16 tiles, 10 frames a second; the land in the
+ *  picture compared frame to frame): 256 pixels in all, the step off the
+ *  stairs 7 frames longer than the others, the step over the border 2. So
+ *  that run of 19 needed 9 frames more than it was timed for, with 8 to
+ *  spare; with the stairs counted it has 6 left for the border.
+ *
  *  The route's data marks those steps (generate.py, Builder.
  *  mark_slow_steps()): bit i of StoryRun::slow is step i of the run. The
  *  input lasts 7 frames longer for each: let go 15 frames into a slow last

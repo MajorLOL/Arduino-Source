@@ -2708,13 +2708,14 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     const WallClock deadline = start + (safari ? safari_limit : std::chrono::minutes(minutes_limit));
     //  No wild Pokemon at all: the player is not on the grass. (Canyon
     //  Entrance, 16 November 2026: the walk there ended a row above the
-    //  grass, and the row was walked up and down for the 30 minutes of the
-    //  visit, 1,416 steps without a battle.) On the rarest ground of the
-    //  game (the first room of the Lost Cave: 1 step in 100, and more with
-    //  every step without one, StandardWildEncounter()) 400 steps go by
-    //  without a wild Pokemon once in some 3,000 visits; on water with its
-    //  2 in 100 once in ten million, on grass never. No REPEL is on at
-    //  these steps (the generator's no_repel_here()).
+    //  grass, and the row was walked back and forth for the 30 minutes of
+    //  the visit, 1,413 steps without a battle; four times in a row, and
+    //  the fourth error on the way back ended the program.) On the rarest
+    //  ground of the game (the first room of the Lost Cave: 1 step in 100,
+    //  and more with every step without one, StandardWildEncounter()) 400
+    //  steps go by without a wild Pokemon once in some 3,000 visits; on
+    //  water with its 2 in 100 once in ten million, on grass never. No
+    //  REPEL is on at these steps (the generator's no_repel_here()).
     const std::chrono::minutes nothing_limit(6);
     const uint64_t nothing_steps = 400;
     try{

@@ -1760,6 +1760,11 @@ int check_slow_steps(Logger& logger){
 //  Bond Bridge a battle six tiles on was counted at the flash, and the
 //  walk went on from the wrong tile (16 November 2026). Walks over a
 //  made-up map of tiles, drawn as the game would draw them.
+//
+//  Whose count a walk is, is the other half (AutoStoryScroll::counts_run()):
+//  a walk that nothing stopped goes by its timing when the map was lost on
+//  the way, found again or not; a walk that a battle stops is counted by
+//  the video up to the battle.
 int check_poison_flash(Logger& logger){
     using namespace NintendoSwitch::PokemonFRLG;
     using AutoStoryScroll::Screen;
@@ -1855,9 +1860,10 @@ int check_poison_flash(Logger& logger){
         uint32_t seed = 1;
     };
     struct Outcome{
-        int tiles = 0;          //  as the walk counts them
+        int tiles = 0;          //  as the video counts them
         bool lost = false;
-        bool believed = false;  //  the walk would take the count from it
+        bool followed = false;  //  the video followed the map to the end, well
+        bool believed = false;  //  a walk that nothing stopped takes its count from the video
         size_t flashes = 0;
     };
     auto take = [&](const Walk& walk){
@@ -1904,7 +1910,8 @@ int check_poison_flash(Logger& logger){
         outcome.lost = tracker.lost();
         //  (attempt_moves(): a tile from 10 px on when the screen changed.)
         outcome.tiles = outcome.lost ? (tracker.pixels() + 6) / 16 : tracker.tiles();
-        outcome.believed = !tracker.lost() && tracker.reliable();
+        outcome.followed = !tracker.lost() && tracker.reliable();
+        outcome.believed = AutoStoryScroll::counts_run(tracker.lost(), tracker.reliable(), tracker.flashes());
         outcome.flashes = tracker.flashes();
         return outcome;
     };
@@ -1915,7 +1922,8 @@ int check_poison_flash(Logger& logger){
     int followed = 0;
     int surfing_followed = 0;
     size_t found_again = 0;
-    bool none_wrong = true;         //  no count the walk would believe is wrong
+    bool none_wrong = true;         //  no wrong count where the video followed to the end
+    bool timed_after_flash = true;  //  lost on the way, nothing stopped the walk: not the video's count
     bool last_step_right = true;
     int battles_lost = 0;
     int battles_right = 0;
@@ -1934,18 +1942,20 @@ int check_poison_flash(Logger& logger){
             walk.tiles = 14;
             walk.poison_every = 5;
             outcome = take(walk);
-            followed += outcome.believed && outcome.tiles == 14 ? 1 : 0;
+            followed += outcome.followed && outcome.tiles == 14 ? 1 : 0;
             found_again += outcome.flashes;
-            none_wrong &= !outcome.believed || outcome.tiles == 14;
+            none_wrong &= !outcome.followed || outcome.tiles == 14;
+            timed_after_flash &= outcome.flashes == 0 || !outcome.believed;
             walk.speed = 2;
             outcome = take(walk);
-            surfing_followed += outcome.believed && outcome.tiles == 14 ? 1 : 0;
-            none_wrong &= !outcome.believed || outcome.tiles == 14;
+            surfing_followed += outcome.followed && outcome.tiles == 14 ? 1 : 0;
+            none_wrong &= !outcome.followed || outcome.tiles == 14;
+            timed_after_flash &= outcome.flashes == 0 || !outcome.believed;
             walk.speed = 1;
             //  The mosaic after the last step: the player stands.
             walk.tiles = 5;
             outcome = take(walk);
-            last_step_right &= (!outcome.believed && !outcome.lost) || outcome.tiles == 5;
+            last_step_right &= (!outcome.followed && !outcome.lost) || outcome.tiles == 5;
             //  A battle after 3 steps of 14.
             walk.tiles = 14;
             walk.poison_every = 0;
@@ -1963,12 +1973,18 @@ int check_poison_flash(Logger& logger){
             walk.battle_after = -1;
             walk.plain = true;
             outcome = take(walk);
-            none_wrong &= !outcome.believed || outcome.tiles == 14;
+            none_wrong &= !outcome.followed || outcome.tiles == 14;
         }
     }
-    check(plain_walks_right == walks, "a walk of 9 tiles with nothing on the way is counted");
+    check(plain_walks_right == walks, "a walk of 9 tiles with nothing on the way is counted by the video");
     check(followed >= walks - 1 && found_again >= (size_t)walks, "the mosaic on the way: the walk is followed to its end");
-    check(none_wrong, "the mosaic on the way, walking, surfing and over plain ground: no wrong count that the walk would believe");
+    check(none_wrong, "the mosaic on the way, walking, surfing and over plain ground: no wrong count where the video followed to the end");
+    check(
+        timed_after_flash &&
+        AutoStoryScroll::counts_run(false, true, 0) && !AutoStoryScroll::counts_run(false, true, 1) &&
+        !AutoStoryScroll::counts_run(true, true, 0) && !AutoStoryScroll::counts_run(false, false, 0),
+        "a walk that nothing stopped is counted by the video only when the map was followed all the way"
+    );
     check(last_step_right, "the mosaic after the last step, the player standing: the count is right");
     check(battles_lost == 2 * walks && battles_right >= walks - 1, "a battle on the way: the screen is lost at its step");
     check(late_battles_right >= walks - 1, "the mosaic, then a battle four steps on: counted at the battle");
@@ -1979,7 +1995,8 @@ int check_poison_flash(Logger& logger){
         "flashes on the way " + std::to_string(followed) + " followed to the end (the map found again " +
         std::to_string(found_again) + " times), surfing " + std::to_string(surfing_followed) +
         "; a battle four steps after a flash counted at the battle in " + std::to_string(late_battles_right) +
-        "; the flash after the last step, plain ground, a battle without poison): " +
+        "; the flash after the last step, plain ground, a battle without poison; a walk that nothing stopped "
+        "goes by its timing when the map was lost on the way): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

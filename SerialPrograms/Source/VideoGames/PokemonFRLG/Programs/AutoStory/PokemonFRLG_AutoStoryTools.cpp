@@ -591,13 +591,15 @@ RunAttempt attempt_moves(
         //  that moment: the best guess there is, even unsure.
         result.moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
         result.measured = t.reliable();
-    }else if (!t.lost() && t.reliable()){
+    }else if (AutoStoryScroll::counts_run(t.lost(), t.reliable(), t.flashes())){
         result.moves = std::max(0, (tiles + tiles_per_move / 2) / tiles_per_move);
         result.measured = true;
     }else{
         //  The picture changed on the way without a battle (a fade, a text
-        //  box), or has too little detail (open water, darkness): the run
-        //  went on as timed.
+        //  box), or has too little detail (open water, darkness), or was
+        //  lost for a moment and found again (the flash of a poisoned
+        //  Pokemon, the name of a place sliding in over a path between
+        //  water): the run went on as timed.
         result.moves = moves;
     }
     return result;
