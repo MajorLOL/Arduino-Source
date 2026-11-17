@@ -559,7 +559,74 @@ bool league_again_segment(const std::string& id){
 //  A segment for something that is done once (story_once_segment()), as a
 //  place for the failures of a run: by its first step.
 std::string once_place_of(const StoryStep& check){
-    return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() : story_once_place(check.text);
+    return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() :
+        check.type == StepType::SKIP_IF_NO_STONES ? story_stones_place() : story_once_place(check.text);
+}
+
+const char* const BOXES_FILE = "PokemonFRLG-AutoStory-Boxes.txt";
+
+//  The list of the PC's boxes as a file, next to the program's other ones,
+//  with what there is to evolve as comment lines.
+std::vector<std::string> write_boxes_file(
+    SingleSwitchProgramEnvironment& env, StoryRuntime& rt, const std::string& label, bool say
+){
+    std::vector<std::string> lines;
+    size_t wanted = 0;
+    if (rt.collection != nullptr){
+        const std::vector<AutoStoryBoxes::EvolveLine> plan =
+            AutoStoryBoxes::evolve_plan(story_evolve_table(rt), rt.boxes);
+        wanted = plan.size();
+        lines = AutoStoryBoxes::evolve_summary(plan);
+        if (say){
+            env.log(
+                label + ": the POKeDEX table (" + rt.collection->game_name() + ") still wants " +
+                std::to_string(wanted) + " species that only come by evolving" +
+                (plan.empty() ? "." : ". What the boxes have for them:"),
+                COLOR_BLUE
+            );
+            for (const std::string& line : lines){
+                env.log(label + ": " + line, COLOR_BLUE);
+            }
+        }
+    }
+    const std::string file = SETTINGS_PATH() + BOXES_FILE;
+    std::string text = AutoStoryBoxes::census_to_text(rt.boxes);
+    for (const std::string& line : lines){
+        text += "# " + line + "\n";
+    }
+    try{
+        string_to_file(file, text);
+        if (say){
+            env.log(label + ": the list of the boxes is in " + file + ".", COLOR_BLUE);
+        }
+    }catch (...){
+        env.log("Could not write " + file + ".", COLOR_ORANGE);
+    }
+    return lines;
+}
+
+//  Is there a list of the PC's boxes? The one read in this run, else the
+//  file an earlier run left. (What a list says of a cell is read again on
+//  the screen before anything is pressed there.)
+bool boxes_list_known(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, const std::string& label){
+    if (rt.boxes_known){
+        return true;
+    }
+    const std::string file = SETTINGS_PATH() + BOXES_FILE;
+    std::string text;
+    AutoStoryBoxes::BoxCensus census;
+    if (!read_text_file(file, text) || !AutoStoryBoxes::census_from_text(text, census) || !census.closed){
+        return false;
+    }
+    rt.boxes = census;
+    rt.boxes_known = true;
+    env.log(
+        label + ": the list of the PC's boxes is the one an earlier run left (" + file + ": " +
+        std::to_string(census.pokemon.size()) + " Pokemon in " + std::to_string(census.boxes_used()) +
+        " boxes). What it says of a cell is read again on the screen before anything is pressed there.",
+        COLOR_BLUE
+    );
+    return true;
 }
 
 //  StepType::BOXES (experimental): the PC's boxes are read. Then, for the
@@ -583,50 +650,8 @@ void read_boxes_step(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, cons
         error = std::current_exception();
         closed = rt.boxes.closed;
     }
-    std::vector<std::string> lines;
-    if (rt.collection != nullptr){
-        size_t count = 0;
-        const AutoStoryDex::CollectionEntry* entries = AutoStoryDex::collection(count);
-        const int game = rt.collection->game() == 1 ? 1 : 0;
-        std::vector<AutoStoryBoxes::TableRow> table;
-        for (size_t k = 0; k < count; k++){
-            const AutoStoryDex::CollectionEntry& entry = entries[k];
-            const int needed = rt.collection->needed(entry.slug);
-            if (needed < 0){
-                continue;       //  Not in this game with this starter.
-            }
-            AutoStoryBoxes::TableRow row;
-            row.slug = entry.slug;
-            row.name = entry.name;
-            row.needed = needed;
-            row.have = rt.collection->caught(entry.slug);
-            row.how = entry.how[game];
-            table.push_back(row);
-        }
-        const std::vector<AutoStoryBoxes::EvolveLine> plan = AutoStoryBoxes::evolve_plan(table, rt.boxes);
-        lines = AutoStoryBoxes::evolve_summary(plan);
-        env.log(
-            label + ": the POKeDEX table (" + rt.collection->game_name() + ") still wants " +
-            std::to_string(plan.size()) + " species that only come by evolving" +
-            (plan.empty() ? "." : ". What the boxes have for them (nothing is evolved yet: a later step of the route):"),
-            COLOR_BLUE
-        );
-        for (const std::string& line : lines){
-            env.log(label + ": " + line, COLOR_BLUE);
-        }
-    }
-    //  The list as a file, next to the program's other ones.
-    const std::string file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Boxes.txt";
-    std::string text = AutoStoryBoxes::census_to_text(rt.boxes);
-    for (const std::string& line : lines){
-        text += "# " + line + "\n";
-    }
-    try{
-        string_to_file(file, text);
-        env.log(label + ": the list of the boxes is in " + file + ".", COLOR_BLUE);
-    }catch (...){
-        env.log("Could not write " + file + ".", COLOR_ORANGE);
-    }
+    //  What there is to evolve, and the list as a file.
+    write_boxes_file(env, rt, label, true);
     if (!closed){
         env.log(
             label + ": the list may have a box twice or miss one (see above): it is kept, with that said in its "
@@ -682,11 +707,14 @@ void AutoStory::run_segment(
                 once + " failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row (see the errors "
                 "above). Left out for this run: " +
                 (leave == OnceLeave::WALK_OUT_FIRST ? "out of the Pokemon Center, then " : "") +
+                (leave == OnceLeave::PAST_STEP ? "the steps after this one, with " : "") +
                 "the segment's last step, its save, and on with what comes after it.",
                 COLOR_ORANGE
             );
             if (leave == OnceLeave::WALK_OUT_FIRST){
                 jump_after = first_step;
+            }else if (leave == OnceLeave::PAST_STEP){
+                begin = first_step + 1;
             }else{
                 begin = segment.step_count - 1;
             }
@@ -1402,6 +1430,96 @@ void AutoStory::run_segment(
         case StepType::BOXES:
             read_boxes_step(env, rt, label);
             break;
+        case StepType::SKIP_IF_NO_STONES:{
+            //  Evolution stones (experimental): the species the POKeDEX
+            //  table does not have and whose earlier form lies in a box,
+            //  with a stone that is in the bag or sold.
+            const std::string place = story_stones_place();
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            //  The bag is looked at anew each time the segment starts.
+            rt.stones_in_bag.clear();
+            rt.stones_out.clear();
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(
+                    label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
+                    "one): nothing is evolved. The next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += skip;
+                break;
+            }
+            const size_t all = story_stone_targets(rt).size();
+            const std::vector<AutoStoryBoxes::StoneTarget> targets = story_stones_not_sold(rt, label);
+            if (targets.empty()){
+                env.log(
+                    label + ": " +
+                    (all == 0
+                        ? std::string("the boxes have no Pokemon that evolves with a stone into a species the "
+                            "POKeDEX table still wants")
+                        : "the stones for the " + std::to_string(all) + " of the boxes that could evolve are "
+                            "not in the bag and not sold") +
+                    ": the next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += skip;
+            }else if (i == 0 && skip > 0 && story_once_segment(script, segment) && rt.places.place_out(place)){
+                env.log(
+                    label + ": " + place + " failed " + std::to_string(STORY_PLACE_FAILURES) +
+                    " times in a row (see the errors above). Left out for this run. The next " +
+                    std::to_string(skip - 1) + " steps are skipped; the game is saved here.",
+                    COLOR_ORANGE
+                );
+                i += skip - 1;
+            }else{
+                env.log(
+                    label + ": " + std::to_string(targets.size()) + " of the boxes can evolve with a stone "
+                    "(experimental): " + AutoStoryBoxes::stone_targets_text(targets) + ".",
+                    COLOR_BLUE
+                );
+                if (i == 0 && story_once_segment(script, segment)){
+                    //  A failure from here to the segment's end counts for it.
+                    rt.trip_place = place;
+                    rt.trip_last = i + skip;
+                    rt.trip_fishing = false;
+                }
+            }
+            break;
+        }
+        case StepType::SKIP_IF_STONES_IN_BAG:{
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                i += skip;
+                break;
+            }
+            const std::vector<std::pair<std::string, int>> buy = story_stones_to_buy(rt);
+            if (buy.empty()){
+                env.log(
+                    label + ": every stone that is sold and wanted is in the bag: the next " +
+                    std::to_string(skip) + " steps (the prize money, the Celadon Department Store) are skipped.",
+                    COLOR_BLUE
+                );
+                i += skip;
+            }else{
+                env.log(
+                    label + ": to buy: " + story_stones_text(buy) + " (2100 each). First the prize money for "
+                    "them (Lady Gillian on Five Island), then the Celadon Department Store.",
+                    COLOR_BLUE
+                );
+            }
+            break;
+        }
+        case StepType::BUY_STONES:
+            if (rt.collection != nullptr && boxes_list_known(env, rt, label)){
+                story_buy_stones(rt, label);
+            }
+            break;
+        case StepType::STONES:
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(label + ": no list of the PC's boxes: nothing is evolved.", COLOR_ORANGE);
+                break;
+            }
+            story_stones(rt, label, [&]{ write_boxes_file(env, rt, label, false); });
+            break;
         case StepType::GOT:{
             //  The scene before this step (CUTSCENE with p4 = 1) handed the
             //  Pokemon over, if it showed the words of it. Without them it
@@ -1856,10 +1974,44 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     }
 
-    const size_t first = START_SEGMENT.current_value();
+    //  A save can be the last step of a segment: "start at segment X, step
+    //  N + 1" of its N steps. That is the first step of the segment after
+    //  it. (The last save of build 34, at the end of the story as it was:
+    //  with more segments after it, "Segment C20_24_PC_BOXES has only 7
+    //  steps.")
+    size_t start_segment = START_SEGMENT.current_value();
+    size_t start_step = (size_t)(uint16_t)START_STEP - 1;
+    if (!new_game && start_segment < script.segment_count &&
+        start_step == script.segments[start_segment].step_count
+    ){
+        if (start_segment + 1 >= script.segment_count){
+            throw UserSetupError(
+                env.console,
+                "The game was saved after the last step of the story's last segment (" +
+                std::string(script.segments[start_segment].id) + "): with this save and this build nothing is "
+                "left to play. To play a segment again, choose it with step 1 and turn off \"Check the start "
+                "against the program's last save\" (the game must be saved where that segment starts: its "
+                "first step says where)."
+            );
+        }
+        env.log(
+            "The start (segment " + std::string(script.segments[start_segment].id) + ", step " +
+            std::to_string(start_step + 1) + ") is past that segment's last step: the game was saved at its end. "
+            "Starting with the segment after it, " + script.segments[start_segment + 1].id + ".",
+            COLOR_BLUE
+        );
+        start_segment++;
+        start_step = 0;
+    }
+    const size_t first = start_segment;
     const size_t last = END_SEGMENT.current_value();
     if (last < first){
-        throw UserSetupError(env.console, "The end segment is before the start segment.");
+        throw UserSetupError(
+            env.console,
+            "The end segment (" + std::string(script.segments[std::min(last, script.segment_count - 1)].id) +
+            ") is before the start segment (" + script.segments[first].id + "). Choose \"End after segment\": the "
+            "story's last one is " + script.segments[script.segment_count - 1].id + "."
+        );
     }
     if (last >= script.segment_count){
         throw InternalProgramError(&env.logger(), PA_CURRENT_FUNCTION, "Segment out of range.");
@@ -2013,7 +2165,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         }
     };
 
-    const size_t first_step = (size_t)START_STEP - 1;
+    const size_t first_step = start_step;
     if (first_step >= script.segments[first].step_count){
         throw UserSetupError(
             env.console,

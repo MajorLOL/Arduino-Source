@@ -28,10 +28,14 @@
  *  Pokemon under the hand: its name, its species, its level. B asks
  *  "Continue BOX operations?", and B again leaves.
  *
- *  A is never pressed in the box view: nothing is picked up, moved or
- *  released. The box the PC is on is where the game starts to look for room
- *  for a caught Pokemon (SendMonToPC): after the last of the 14 boxes the
- *  view is back on the box it started on (RIGHT goes round).
+ *  To read the boxes, A is never pressed in the box view: nothing is picked
+ *  up, moved or released. The box the PC is on is where the game starts to
+ *  look for room for a caught Pokemon (SendMonToPC): after the last of the
+ *  14 boxes the view is back on the box it started on (RIGHT goes round).
+ *
+ *  Since build 35 a Pokemon of a box can change places with the last one of
+ *  the party (for an evolution stone): see "A Pokemon of a box into the
+ *  party" at the end of this file.
  *
  *  This part has no dependencies on the rest of the program so it can be
  *  tested on its own.
@@ -44,7 +48,9 @@
 #include <algorithm>
 #include <cstdlib>
 #include <map>
+#include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace PokemonAutomation{
@@ -254,6 +260,44 @@ struct BoxCensus{
             used += in_box(box) > 0 ? 1 : 0;
         }
         return used;
+    }
+    //  Those of a box, cell by cell (row by row from the top left).
+    std::vector<BoxPokemon> by_cell(int box) const{
+        std::vector<BoxPokemon> list;
+        for (const BoxPokemon& one : pokemon){
+            if (one.box == box){
+                list.push_back(one);
+            }
+        }
+        std::stable_sort(list.begin(), list.end(), [](const BoxPokemon& a, const BoxPokemon& b){
+            return a.cell < b.cell;
+        });
+        return list;
+    }
+    //  What lies in a cell (nullptr: nothing).
+    const BoxPokemon* at(int box, int cell) const{
+        for (const BoxPokemon& one : pokemon){
+            if (one.box == box && one.cell == cell){
+                return &one;
+            }
+        }
+        return nullptr;
+    }
+    //  Another Pokemon in a cell (or the first one in an empty cell).
+    void put(int box, int cell, const std::string& slug, int level){
+        for (BoxPokemon& one : pokemon){
+            if (one.box == box && one.cell == cell){
+                one.slug = slug;
+                one.level = level;
+                return;
+            }
+        }
+        BoxPokemon one;
+        one.box = box;
+        one.cell = cell;
+        one.slug = slug;
+        one.level = level;
+        pokemon.push_back(one);
     }
     //  Those of a species, the highest level first (then as they lie).
     std::vector<BoxPokemon> of(const std::string& slug) const{
@@ -562,6 +606,149 @@ inline std::vector<std::string> evolve_summary(const std::vector<EvolveLine>& pl
         );
     }
     return lines;
+}
+
+
+
+//  ---- A Pokemon of a box into the party and back, a stone on it (build 35) --
+//
+//  MOVE POKeMON, with a party of six whose last one is not of the team:
+//      the hand onto the cell                      the panel: its species
+//      A (its menu, MOVE first), A                 the hand holds it
+//      to the bottom row's left half, DOWN         the hand on PARTY POKeMON
+//      A                                           the party slides in, the hand on
+//                                                  its last one (SetCursorInParty:
+//                                                  a full party while one is held)
+//      A (the menu, SHIFT first), A                the two change places: the hand
+//                                                  holds the party's one
+//      B                                           the party slides away, the hand
+//                                                  on the first cell; the panel: the
+//                                                  one it holds (SetShiftedMonData)
+//      the hand onto the cell, now empty
+//      A (the menu, PLACE first), A                the party's one lies there
+//  Only A and B besides the D-pad, and the D-pad never while a menu is up:
+//  RELEASE is the fifth entry of those menus, and asks with NO under its
+//  cursor. Then, outside the PC, the stone on party slot 6, a look at what
+//  slot 6 is now, and the same change again: the evolved one into the cell,
+//  the party's own one back in its place. The game is saved after that and
+//  never in between: an error resets it to before the first press.
+
+//  The evolution stones: as the POKeDEX table names them, as the game does,
+//  words of their description in the bag (the last of its three lines; the
+//  first two are the same for all six), and their place in the list of the
+//  Celadon Department Store's fourth floor (-1: not sold anywhere).
+struct StoneKind{
+    const char* name;
+    const char* item;
+    const char* words;
+    int mart;
+};
+inline const std::vector<StoneKind>& stone_kinds(){
+    static const std::vector<StoneKind> kinds{
+        {"Fire Stone", "FIRE STONE", "colored orange|orange", 2},
+        {"Thunder Stone", "THUNDER STONE", "thunderbolt", 3},
+        {"Water Stone", "WATER STONE", "light blue|clear light", 4},
+        {"Leaf Stone", "LEAF STONE", "leaf pattern|a leaf", 5},
+        {"Moon Stone", "MOON STONE", "night sky|black as", -1},
+        {"Sun Stone", "SUN STONE", "as the sun|red as", -1},
+    };
+    return kinds;
+}
+inline const StoneKind* stone_kind(const std::string& name){
+    for (const StoneKind& kind : stone_kinds()){
+        if (name == kind.name){
+            return &kind;
+        }
+    }
+    return nullptr;
+}
+
+//  One evolution with a stone that can be made: the Pokemon is in a box.
+struct StoneTarget{
+    std::string slug;       //  What it becomes.
+    std::string name;
+    std::string from_slug;  //  What it is.
+    std::string stone;      //  "Moon Stone".
+    int box = -1;
+    int cell = -1;
+    int level = -1;
+};
+
+//  Those of a plan (evolve_plan()), in the order of the table, without the
+//  stones in "without" (not in the bag and not sold, or bought and still
+//  not there).
+inline std::vector<StoneTarget> stone_targets(
+    const std::vector<EvolveLine>& plan, const std::set<std::string>& without = std::set<std::string>()
+){
+    std::vector<StoneTarget> targets;
+    for (const EvolveLine& line : plan){
+        if (line.how.by != EvolveBy::STONE || line.box < 0 || line.cell < 0 || line.from_slug.empty()){
+            continue;
+        }
+        if (stone_kind(line.how.stone) == nullptr || without.count(line.how.stone) != 0){
+            continue;
+        }
+        StoneTarget target;
+        target.slug = line.slug;
+        target.name = line.name;
+        target.from_slug = line.from_slug;
+        target.stone = line.how.stone;
+        target.box = line.box;
+        target.cell = line.cell;
+        target.level = line.level;
+        targets.push_back(target);
+    }
+    return targets;
+}
+
+//  How many of each stone they take, in the order of stone_kinds().
+inline std::vector<std::pair<std::string, int>> stones_needed(const std::vector<StoneTarget>& targets){
+    std::vector<std::pair<std::string, int>> needed;
+    for (const StoneKind& kind : stone_kinds()){
+        int count = 0;
+        for (const StoneTarget& target : targets){
+            count += target.stone == kind.name ? 1 : 0;
+        }
+        if (count > 0){
+            needed.emplace_back(kind.name, count);
+        }
+    }
+    return needed;
+}
+
+//  They as one line for the log: "Arcanine (GROWLITHE, box 2 cell 10, FIRE STONE), ...".
+inline std::string stone_targets_text(const std::vector<StoneTarget>& targets){
+    std::string text;
+    for (const StoneTarget& target : targets){
+        const StoneKind* kind = stone_kind(target.stone);
+        std::string from;
+        for (char ch : target.from_slug){
+            from += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+        }
+        text += (text.empty() ? "" : ", ") + target.name + " (" + from + ", box " + std::to_string(target.box + 1) +
+            " cell " + std::to_string(target.cell + 1) + ", " + (kind != nullptr ? kind->item : target.stone.c_str()) + ")";
+    }
+    return text;
+}
+
+//  What to buy: of each stone that is sold, what the targets take less the
+//  ones the bag is known to have (a look in the bag tells that there is one,
+//  not how many: one is counted).
+inline std::vector<std::pair<std::string, int>> stones_to_buy(
+    const std::vector<StoneTarget>& targets, const std::set<std::string>& in_bag
+){
+    std::vector<std::pair<std::string, int>> buy;
+    for (const std::pair<std::string, int>& need : stones_needed(targets)){
+        const StoneKind* kind = stone_kind(need.first);
+        if (kind == nullptr || kind->mart < 0){
+            continue;
+        }
+        const int count = need.second - (in_bag.count(need.first) != 0 ? 1 : 0);
+        if (count > 0){
+            buy.emplace_back(need.first, count);
+        }
+    }
+    return buy;
 }
 
 

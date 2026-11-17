@@ -167,6 +167,11 @@ inline std::string story_boxes_place(){
     return "the PC's boxes";
 }
 
+//  And the segment of the evolution stones.
+inline std::string story_stones_place(){
+    return "the evolution stones";
+}
+
 //  A trip that fails is tried again from the last save. After this many
 //  failures in a row at the same place, that place is left out for the rest
 //  of the run and the program goes on with the next one. (16 November 2026:

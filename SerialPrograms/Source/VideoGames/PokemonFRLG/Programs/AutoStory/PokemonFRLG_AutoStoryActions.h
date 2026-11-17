@@ -11,7 +11,10 @@
 #ifndef PokemonAutomation_PokemonFRLG_AutoStoryActions_H
 #define PokemonAutomation_PokemonFRLG_AutoStoryActions_H
 
+#include <functional>
 #include <string>
+#include <utility>
+#include <vector>
 #include "PokemonFRLG_AutoStoryScript.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 
@@ -92,6 +95,7 @@ void story_check_lead(StoryRuntime& rt);
 //  Use an item from the bag's ITEMS pocket (found by a word of its
 //  description) on a party slot (1-6): an evolution stone.
 //  give: GIVE (to hold) in place of USE; party slot 1 is the starter then.
+//  (words: "a|b" for one of several.)
 void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give = false);
 
 //  Use up to "count" Rare Candies from the bag on party slot 1, in the
@@ -205,6 +209,33 @@ void story_laps_end(StoryRuntime& rt, bool failed = false);
 //  be left on another box, or the player does not get free again.
 //  (PokemonFRLG_AutoStoryBoxScan.cpp)
 bool story_boxes(StoryRuntime& rt, const std::string& label);
+
+//  Evolution stones (build 35, experimental; PokemonFRLG_AutoStoryBoxScan.cpp).
+//  The rows of the POKeDEX table as far as evolving goes, and what can be
+//  evolved with a stone: the species the table does not have, whose earlier
+//  form lies in a box (StoryRuntime::boxes), without the stones known to be
+//  missing (StoryRuntime::stones_out).
+std::vector<AutoStoryBoxes::TableRow> story_evolve_table(StoryRuntime& rt);
+std::vector<AutoStoryBoxes::StoneTarget> story_stone_targets(StoryRuntime& rt);
+//  A look in the bag for each stone they take that is not sold (MOON STONE,
+//  SUN STONE): without one, its targets are left out. Returns what stays.
+std::vector<AutoStoryBoxes::StoneTarget> story_stones_not_sold(StoryRuntime& rt, const std::string& label);
+//  A look in the bag for each stone they take that is sold; what is still
+//  to buy (one in the bag is counted as one), and that as text.
+std::vector<std::pair<std::string, int>> story_stones_to_buy(StoryRuntime& rt);
+std::string story_stones_text(const std::vector<std::pair<std::string, int>>& stones);
+//  In front of the clerk of the Celadon Department Store's fourth floor:
+//  what is still to buy, as far as the money goes.
+void story_buy_stones(StoryRuntime& rt, const std::string& label);
+//  In front of the PC of a Pokemon Center, facing it, with a party of six
+//  whose last one is not of the team. For each target with its stone in the
+//  bag: the Pokemon of the box changes places with the party's sixth, gets
+//  the stone, is looked at (it must be the evolved species), changes back,
+//  and the game is saved (to go on at this step). "changed" is called after
+//  each of them. An error (the game is then reset, nothing of the round
+//  under way is saved) when anything is not as expected. Returns how many
+//  evolved.
+int story_stones(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed);
 
 //  Is an item in the bag (StepType::SKIP_IF_ITEM)? Opens the bag, goes
 //  through "pocket" (0 ITEMS, 1 KEY ITEMS, 2 POKe BALLS) reading the

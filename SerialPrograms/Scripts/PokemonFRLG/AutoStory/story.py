@@ -1449,6 +1449,61 @@ class Builder:
                 raise StoryError("boxes: not after the walk to the PC (%s)" % step.get("label", "?"))
             out.append({"type": "BOXES", "label": step.get("label", "The PC's boxes")})
             return
+        if "unless_no_stones" in step:
+            #  The steps of the evolution stones (a whole segment: it starts
+            #  with FLY and ends outdoors with its save): skipped when the
+            #  boxes have nothing that evolves with a stone of the bag or of
+            #  the Department Store.
+            u = step["unless_no_stones"]
+            sub = []
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if not sub or sub[0]["type"] != "FLY" or sub[-1]["type"] != "SAVE":
+                raise StoryError("unless_no_stones: the steps start with FLY and end with a save (%s)"
+                                 % step.get("label", "?"))
+            if sum(1 for s in sub if s["type"] == "STONES") != 1:
+                raise StoryError("unless_no_stones: one step for the stones (%s)" % step.get("label", "?"))
+            out.append({"type": "SKIP_IF_NO_STONES", "label": step.get("label", "Anything to evolve with a stone?"),
+                        "p0": len(sub)})
+            out.extend(sub)
+            return
+        if "unless_stones_in_bag" in step:
+            #  The way to the stones that are sold (prize money, the
+            #  Department Store): skipped when the bag has them. The steps
+            #  end outdoors, and a FLY follows them: skipped or not, the
+            #  player is where that FLY lands.
+            u = step["unless_stones_in_bag"]
+            sub = []
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if sum(1 for s in sub if s["type"] == "BUY_STONES") != 1:
+                raise StoryError("unless_stones_in_bag: one purchase of stones (%s)" % step.get("label", "?"))
+            if self.d.maps[self.pos[0]].map_type not in Builder.FLY_MAP_TYPES:
+                raise StoryError("unless_stones_in_bag: the steps do not end outdoors (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            out.append({"type": "SKIP_IF_STONES_IN_BAG", "label": step.get("label", "Stones to buy?"),
+                        "p0": len(sub)})
+            out.extend(sub)
+            return
+        if "buy_stones" in step:
+            #  In front of the clerk who sells the stones (the walk before
+            #  this step ended there: talk(..., mode="plain", counter=True)).
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("buy_stones: not after the walk to the clerk (%s)" % step.get("label", "?"))
+            out.append({"type": "BUY_STONES", "label": step.get("label", "Buy stones")})
+            return
+        if "stones" in step:
+            #  In front of the PC of a Pokemon Center, facing it (as "boxes").
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("stones: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("stones: not after the walk to the PC (%s)" % step.get("label", "?"))
+            out.append({"type": "STONES", "label": step.get("label", "Stones")})
+            return
         if "got" in step:
             #  The player has this Pokemon now (a gift): one more in the
             #  program's POKeDEX table.

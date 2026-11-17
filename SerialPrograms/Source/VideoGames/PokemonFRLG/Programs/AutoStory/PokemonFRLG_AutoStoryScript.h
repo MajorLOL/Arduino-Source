@@ -196,6 +196,15 @@ enum class StepType : uint8_t{
     BOXES,              //  in front of the PC of a Pokemon Center, facing it: the PC's boxes
                         //  are read (which Pokemon is in which cell, its level). Nothing in
                         //  them is changed
+    SKIP_IF_NO_STONES,  //  nothing in the boxes evolves with a stone that is in the bag or
+                        //  sold (or the boxes were never read): skip the next p0 steps
+    SKIP_IF_STONES_IN_BAG,  //  every stone that is sold and wanted is in the bag: skip the next
+                        //  p0 steps (the prize money, the Celadon Department Store)
+    BUY_STONES,         //  in front of the clerk of the Department Store's fourth floor: the
+                        //  stones still to buy
+    STONES,             //  in front of the PC of a Pokemon Center, facing it: each Pokemon of
+                        //  the boxes that evolves with a stone of the bag changes places with
+                        //  the party's sixth, gets the stone and goes back; a save after each
 };
 
 struct StoryStep{
@@ -327,13 +336,15 @@ inline bool story_rod_way(const StoryScript& script, const StorySegment& segment
 //  Is the segment one for a Pokemon that is there once? Its first step is
 //  the SKIP_IF_OWNED over all its other steps, the next one is FLY (so the
 //  segment starts outdoors), and its last step is a save. The same shape
-//  with SKIP_IF_BOXES: the segment that reads the PC's boxes.
+//  with SKIP_IF_BOXES: the segment that reads the PC's boxes; and with
+//  SKIP_IF_NO_STONES: the one of the evolution stones.
 inline bool story_once_segment(const StoryScript& script, const StorySegment& segment){
     if (segment.step_count < 3){
         return false;
     }
     const StoryStep& check = script.step(segment, 0);
-    return (check.type == StepType::SKIP_IF_OWNED || check.type == StepType::SKIP_IF_BOXES) && check.p0 > 0 &&
+    return (check.type == StepType::SKIP_IF_OWNED || check.type == StepType::SKIP_IF_BOXES ||
+            check.type == StepType::SKIP_IF_NO_STONES) && check.p0 > 0 &&
         (size_t)check.p0 + 1 == segment.step_count &&
         script.step(segment, 1).type == StepType::FLY &&
         script.step(segment, segment.step_count - 1).type == StepType::SAVE;
@@ -369,15 +380,22 @@ inline bool story_outdoors(const std::string& map_name){
 //                      that walk, then the segment's last step, its save.
 //      FROM_HERE       The player is outdoors (the step is FLY, or a walk
 //                      that starts in a town or on a route): the save.
+//      PAST_STEP       The step is the one of the evolution stones, which
+//                      saves by itself in front of the PC: the steps after
+//                      it (out of the Pokemon Center, the save).
 //      NO              Not known: the segment is not given up.
 enum class OnceLeave : uint8_t{
     NO,
     WALK_OUT_FIRST,
     FROM_HERE,
+    PAST_STEP,
 };
 inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment& segment, size_t index){
     if (!story_once_segment(script, segment) || index < 2 || index + 1 >= segment.step_count){
         return OnceLeave::NO;
+    }
+    if (script.step(segment, index).type == StepType::STONES){
+        return OnceLeave::PAST_STEP;
     }
     if (script.step(segment, index - 1).type != StepType::SAVE){
         return OnceLeave::NO;

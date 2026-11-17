@@ -247,6 +247,15 @@ struct StoryRuntime{
     bool boxes_read = false;
     uint64_t boxes_catches = 0;
     uint64_t boxes_readings = 0;
+    //  The list is in "boxes" (read in this run, or taken from the file of
+    //  an earlier one: what it says of a cell is read again on the screen
+    //  before anything is pressed there).
+    bool boxes_known = false;
+    //  Evolution stones (build 35), by their names in the POKeDEX table
+    //  ("Moon Stone"): seen in the bag in this run (at least one), and not
+    //  to be had (not in the bag and not sold, or not there after buying).
+    std::set<std::string> stones_in_bag;
+    std::set<std::string> stones_out;
     //  The scene of a gift (CUTSCENE with p4 = 1): its texts are read, and
     //  one of them told of a Pokemon handed over ("received", "nickname",
     //  "transferred"), or its YES/NO box came up (the nickname).

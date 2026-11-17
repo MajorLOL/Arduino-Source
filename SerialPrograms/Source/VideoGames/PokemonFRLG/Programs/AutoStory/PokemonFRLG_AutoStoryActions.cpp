@@ -988,8 +988,25 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
         //  The starter (Charizard and the EXP. SHARE): in slot 1.
         story_check_lead(rt);
     }
+    //  "a|b": one of the words (an evolution stone by the last line of its
+    //  description, as the text reading may have it).
+    std::vector<std::string> parts;
+    for (size_t start = 0; start <= words.size();){
+        const size_t bar = words.find('|', start);
+        parts.emplace_back(words.substr(start, bar == std::string::npos ? std::string::npos : bar - start));
+        if (bar == std::string::npos){
+            break;
+        }
+        start = bar + 1;
+    }
+    std::vector<const char*> any;
+    for (const std::string& part : parts){
+        if (!part.empty()){
+            any.push_back(part.c_str());
+        }
+    }
     open_bag_from_overworld(console, context);
-    if (!select_bag_item(rt, BagPocket::ITEMS, {words.c_str()}, {}, what)){
+    if (!select_bag_item(rt, BagPocket::ITEMS, any, {}, what)){
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
         story_back_to_overworld(rt, "bag");

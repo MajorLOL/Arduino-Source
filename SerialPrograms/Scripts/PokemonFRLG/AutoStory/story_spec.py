@@ -3117,6 +3117,76 @@ CHAPTER20 += [
 ]
 
 
+# ------------------------------------------- chapter 20, evolution stones
+#  EXPERIMENTAL (PocketPilot build 35, not run on a console when written).
+#  The boxes were read on 17 November 2026 (build 34: 134 Pokemon). Eleven
+#  of them evolve with a stone into a species the table does not have:
+#  ARCANINE (FIRE STONE), VILEPLUME and EXEGGUTOR (LEAF STONE), RAICHU
+#  (THUNDER STONE), POLIWRATH and CLOYSTER (WATER STONE): six stones of the
+#  Celadon Department Store's fourth floor, 2100 each; NIDOQUEEN, NIDOKING,
+#  CLEFABLE and WIGGLYTUFF (MOON STONE: not sold; the story has one, from
+#  Lostelle's father); BELLOSSOM (the SUN STONE of Ruin Valley, not picked
+#  up yet).
+#
+#  The segment: the prize money for the stones to buy (two battles with
+#  Lady Gillian, 19600: the money trip spends all it earns on POKe BALLs),
+#  the Department Store, then the PC of Viridian City (the way to it ran on
+#  17 November). There, for each one (PokemonFRLG_AutoStoryBoxes.h): the
+#  Pokemon of the box changes places with the party's sixth one (not of the
+#  team: ARTICUNO), gets its stone, is looked at, changes back, and the game
+#  is saved. Which ones, how many stones: worked out by the program from
+#  the list of the boxes and the POKeDEX table (StepType::SKIP_IF_NO_STONES,
+#  SKIP_IF_STONES_IN_BAG, BUY_STONES, STONES).
+STONE_CLERK = ("MAP_CELADON_CITY_DEPARTMENT_STORE_4F", [3, 13])
+
+
+def stones_segment(seg_id):
+    vermilion = PC["VERMILION"]
+    #  As the money trip goes to Lady Gillian and comes back, but without a
+    #  save on Five Island: the game is saved in Vermilion City again, from
+    #  where the next FLY starts if the segment is given up (no FLY leaves
+    #  the islands). A failure before that starts the segment again.
+    to_buy = [
+        heal(vermilion, seg_id + "_ToNurse"),
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    to_buy += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland")
+    to_buy += [heal(FIVE_PC, "HarborToFiveIslandNurse")]
+    to_buy += gillian(2, "GillianStones")
+    to_buy += [heal(FIVE_PC, "GillianStonesToNurse")]
+    to_buy += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    to_buy += [
+        pos("MAP_VERMILION_CITY", 23, 32),
+        heal(vermilion, "PierToVermilionNurse"),
+        save(),
+        {"outside": True, "label": seg_id + "_OutVermilion"},
+        fly("HEAL_LOCATION_CELADON_CITY", seg_id + "_FlyCeladon", force=True),
+        talk(STONE_CLERK[0], xy=STONE_CLERK[1], mode="plain", label="ToTheStoneClerk", counter=True),
+        {"buy_stones": True, "label": "BuyStones"},
+        {"outside": True, "label": seg_id + "_OutStore"},
+    ]
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+        {"unless_stones_in_bag": {"steps": to_buy}, "label": "Stones to buy?"},
+        fly("HEAL_LOCATION_VIRIDIAN_CITY", seg_id + "_FlyViridian", force=True),
+        talk(PC["VIRIDIAN"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"stones": True, "label": "Stones"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: evolution stones (the Celadon Department Store, the PC in Viridian City)",
+            "steps": [{"unless_no_stones": {"steps": steps}, "label": "Anything to evolve with a stone?"}]}
+
+
+CHAPTER20 += [
+    stones_segment("C20_25_STONES"),
+]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

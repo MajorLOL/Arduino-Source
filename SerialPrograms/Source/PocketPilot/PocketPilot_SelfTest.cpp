@@ -1264,8 +1264,10 @@ int check_money_trip(Logger& logger){
             }
         }
     }
+    //  (Two REMATCH steps on the money trip; a third one since build 35,
+    //  two battles for the evolution stones.)
     check(
-        money_segment && rematches == 2 && walks_fine && purchases == 4,
+        money_segment && rematches == 3 && rematch_wins == 11 && walks_fine && purchases == 4,
         "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
     );
     check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
@@ -1559,6 +1561,7 @@ int check_bump(Logger& logger){
     //  longer than a few tiles.
     const StoryScript& script = AutoStoryData::story_CHARMANDER();
     int money_bumps = 0;
+    int stones_bumps = 0;
     int cave_bumps = 0;
     //  ... and the laps for the POKeDEX off Five Island (build 32): up the
     //  same channel and down the column next to it.
@@ -1568,6 +1571,9 @@ int check_bump(Logger& logger){
     for (size_t s = 0; s < script.segment_count; s++){
         const StorySegment& segment = script.segments[s];
         const bool money = std::string(segment.id).find("_MONEY") != std::string::npos;
+        //  The prize money for the evolution stones (build 35): the same
+        //  way to Lady Gillian, once.
+        const bool stones = std::string(segment.id).find("_STONES") != std::string::npos;
         for (size_t k = 0; k < segment.step_count; k++){
             const StoryStep& step = script.step(segment, k);
             if (step.type != StepType::WALK || step.leg < 0){
@@ -1580,9 +1586,10 @@ int check_bump(Logger& logger){
             for (uint16_t r = 0; r < leg.run_count; r++){
                 if (runs[r].kind == RunKind::SURF_BUMP){
                     money_bumps += money ? 1 : 0;
+                    stones_bumps += stones ? 1 : 0;
                     cave_bumps += cave ? 1 : 0;
                     lap_bumps += lap ? 1 : 0;
-                    bumps_last &= r + 1 == leg.run_count && (money || cave || lap);
+                    bumps_last &= r + 1 == leg.run_count && (money || stones || cave || lap);
                 }else if (money && (runs[r].kind == RunKind::SURF || runs[r].kind == RunKind::SURF_CHECKED)){
                     longest_other = std::max(longest_other, (int)runs[r].count);
                 }
@@ -1590,7 +1597,7 @@ int check_bump(Logger& logger){
         }
     }
     check(
-        money_bumps == 8 && bumps_last && longest_other <= 4,
+        money_bumps == 8 && stones_bumps == 4 && bumps_last && longest_other <= 4,
         "the money trip in the story's data: the water to Resort Gorgeous and back"
     );
     check(cave_bumps == 8 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
@@ -2605,7 +2612,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 13 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 14 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2820,17 +2827,20 @@ int check_leave_out(Logger& logger){
                 //  starts on another map, a town.
                 const StoryLeg& out = script.leg(script.step(segment, i).leg);
                 const StoryStep& after = script.step(segment, i + 1);
+                //  (Or the step after it is FLY: only outdoors.)
                 const bool fine =
-                    after.type == StepType::WALK && after.leg >= 0 && (size_t)after.leg < script.leg_count &&
+                    after.type == StepType::FLY ||
+                    (after.type == StepType::WALK && after.leg >= 0 && (size_t)after.leg < script.leg_count &&
                     script.leg(after.leg).start_map != out.start_map &&
                     script.leg(after.leg).start_map < script.map_name_count &&
-                    story_outdoors(script.map_names[script.leg(after.leg).start_map]);
+                    story_outdoors(script.map_names[script.leg(after.leg).start_map]));
                 walks_out_wrong += fine ? 0 : 1;
                 break;
             }
             case OnceLeave::FROM_HERE:
                 saves_outdoors++;
                 break;
+            case OnceLeave::PAST_STEP:
             case OnceLeave::NO:
                 saves_unknown++;
                 break;
@@ -2838,13 +2848,14 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 5 && once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES",
-        "the four segments of Pokemon that are there once, and the one that reads the PC's boxes"
+        once == 6 &&
+        once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES",
+        "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the stones"
     );
     check(
-        saves_at_a_nurse == 2 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
+        saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
         "from every save in such a segment the player gets outdoors: at a nurse by the walk out of the Pokemon "
-        "Center (2), or the save is outdoors (2)"
+        "Center (3), or the save is outdoors (2)"
     );
     check(
         story_once_leave(script, script.segments[0], 2) == OnceLeave::NO &&
@@ -3262,7 +3273,7 @@ int check_boxes(Logger& logger){
             looks++;
             where = segment.id;
             bool fine = k > 0 && script.step(segment, k - 1).type == StepType::WALK &&
-                s + 1 == script.segment_count && story_once_segment(script, segment) &&
+                story_once_segment(script, segment) &&
                 script.step(segment, 0).type == StepType::SKIP_IF_BOXES;
             if (fine){
                 const StoryLeg& leg = script.leg(script.step(segment, k - 1).leg);
@@ -3278,16 +3289,166 @@ int check_boxes(Logger& logger){
     check(
         looks == 1 && skips == 1 && looks_fine && where == "C20_24_PC_BOXES" &&
         story_boxes_place() == "the PC's boxes",
-        "the story's last segment reads the PC's boxes, in front of the PC of a Pokemon Center"
+        "one segment of the story reads the PC's boxes, in front of the PC of a Pokemon Center"
     );
 
+    //  Evolution stones (build 35). The six stones: found in the bag by the
+    //  last line of their description, which no other stone has.
+    {
+        const std::vector<std::pair<std::string, std::string>> last_lines{
+            {"Fire Stone", "it is colored orange."}, {"Thunder Stone", "it has a thunderbolt pattern."},
+            {"Water Stone", "it is a clear light blue."}, {"Leaf Stone", "it has a leaf pattern."},
+            {"Moon Stone", "it is as black as the night sky."}, {"Sun Stone", "it is as red as the sun."},
+        };
+        bool own = true;
+        bool no_other = true;
+        size_t words = 0;
+        for (const Boxes::StoneKind& kind : Boxes::stone_kinds()){
+            const std::string all = kind.words;
+            for (size_t start = 0; start <= all.size();){
+                const size_t bar = all.find('|', start);
+                const std::string word = all.substr(start, bar == std::string::npos ? std::string::npos : bar - start);
+                words++;
+                for (const std::pair<std::string, std::string>& line : last_lines){
+                    const bool in_line = !word.empty() && line.second.find(word) != std::string::npos;
+                    if (line.first == kind.name){
+                        own &= in_line;
+                    }else{
+                        no_other &= !in_line;
+                    }
+                }
+                if (bar == std::string::npos){
+                    break;
+                }
+                start = bar + 1;
+            }
+        }
+        const Boxes::StoneKind* fire = Boxes::stone_kind("Fire Stone");
+        const Boxes::StoneKind* thunder = Boxes::stone_kind("Thunder Stone");
+        const Boxes::StoneKind* water = Boxes::stone_kind("Water Stone");
+        const Boxes::StoneKind* leaf = Boxes::stone_kind("Leaf Stone");
+        const Boxes::StoneKind* moon = Boxes::stone_kind("Moon Stone");
+        const Boxes::StoneKind* sun = Boxes::stone_kind("Sun Stone");
+        check(
+            Boxes::stone_kinds().size() == 6 && words == 11 && own && no_other &&
+            fire != nullptr && thunder != nullptr && water != nullptr && leaf != nullptr && moon != nullptr &&
+            sun != nullptr && Boxes::stone_kind("King's Rock") == nullptr &&
+            fire->mart == 2 && thunder->mart == 3 && water->mart == 4 && leaf->mart == 5 &&
+            moon->mart == -1 && sun->mart == -1 && std::string(moon->item) == "MOON STONE",
+            "the six evolution stones: their words in the bag, their place in the Department Store's list"
+        );
+    }
+    //  Which Pokemon of the boxes get a stone, and what is to buy.
+    {
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(table, census);
+        const std::vector<Boxes::StoneTarget> targets = Boxes::stone_targets(plan);
+        const std::vector<std::pair<std::string, int>> needed = Boxes::stones_needed(targets);
+        const std::vector<std::pair<std::string, int>> buy = Boxes::stones_to_buy(targets, {});
+        const std::vector<std::pair<std::string, int>> buy_less = Boxes::stones_to_buy(targets, {"Water Stone", "Moon Stone"});
+        const std::vector<Boxes::StoneTarget> no_moon = Boxes::stone_targets(plan, {"Moon Stone"});
+        check(
+            targets.size() == 3 && targets[0].slug == "nidoqueen" && targets[0].from_slug == "nidorina" &&
+            targets[0].box == 1 && targets[0].cell == 7 && targets[0].stone == "Moon Stone" &&
+            targets[1].slug == "vaporeon" && targets[1].from_slug == "eevee" && targets[1].cell == 1 &&
+            targets[2].slug == "jolteon" && targets[2].cell == 0 && targets[2].stone == "Thunder Stone",
+            "the Pokemon of the boxes that evolve with a stone, in the table's order (FLAREON has no EEVEE left)"
+        );
+        check(
+            needed.size() == 3 && needed[0] == std::make_pair(std::string("Thunder Stone"), 1) &&
+            needed[1] == std::make_pair(std::string("Water Stone"), 1) &&
+            needed[2] == std::make_pair(std::string("Moon Stone"), 1) &&
+            buy.size() == 2 && buy[0].first == "Thunder Stone" && buy[1].first == "Water Stone" &&
+            buy_less.size() == 1 && buy_less[0] == std::make_pair(std::string("Thunder Stone"), 1) &&
+            no_moon.size() == 2 && no_moon[0].slug == "vaporeon",
+            "the stones they take; to buy: those that are sold, less the ones the bag has; none of a stone that is out"
+        );
+        check(
+            Boxes::stone_targets_text(targets) ==
+                "Nidoqueen (NIDORINA, box 2 cell 8, MOON STONE), Vaporeon (EEVEE, box 3 cell 2, WATER STONE), "
+                "Jolteon (EEVEE, box 3 cell 1, THUNDER STONE)",
+            "they as the log says them"
+        );
+        //  After the first one evolved: the table has NIDOQUEEN, the cell has
+        //  her, and the other NIDORINA stays what it is.
+        std::vector<Boxes::TableRow> table_after = table;
+        for (Boxes::TableRow& row : table_after){
+            row.have += row.slug == "nidoqueen" ? 1 : 0;
+        }
+        Boxes::BoxCensus census_after = census;
+        census_after.put(1, 7, "nidoqueen", 31);
+        const std::vector<Boxes::StoneTarget> then = Boxes::stone_targets(Boxes::evolve_plan(table_after, census_after));
+        const Boxes::BoxPokemon* there = census_after.at(1, 7);
+        Boxes::BoxCensus one_more = census;
+        one_more.put(13, 29, "articuno", 50);
+        const std::vector<Boxes::BoxPokemon> row_by_row = census.by_cell(0);
+        bool in_order = !row_by_row.empty();
+        for (size_t k = 1; k < row_by_row.size(); k++){
+            in_order &= row_by_row[k - 1].cell < row_by_row[k].cell;
+        }
+        check(
+            then.size() == 2 && then[0].slug == "vaporeon" && there != nullptr && there->slug == "nidoqueen" &&
+            census_after.pokemon.size() == census.pokemon.size() && census_after.count("nidorina") == 1 &&
+            census.at(1, 7) != nullptr && census.at(1, 7)->slug == "nidorina" && census.at(5, 5) == nullptr &&
+            one_more.pokemon.size() == census.pokemon.size() + 1 && one_more.at(13, 29) != nullptr &&
+            in_order && (int)row_by_row.size() == census.in_box(0),
+            "the list after an evolution: another Pokemon in the cell, and the one evolved is not looked for again"
+        );
+    }
+    //  The story's data: the last segment is the one of the stones.
+    {
+        const StorySegment& segment = script.segments[script.segment_count - 1];
+        size_t stones_at = 0;
+        size_t bag_at = 0;
+        int stones = 0;
+        int bags = 0;
+        int buys = 0;
+        int rematches = 0;
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            if (step.type == StepType::STONES){
+                stones++;
+                stones_at = k;
+            }
+            if (step.type == StepType::SKIP_IF_STONES_IN_BAG){
+                bags++;
+                bag_at = k;
+            }
+        }
+        bool way_fine = bags == 1 && bag_at + (size_t)std::max(0, (int)script.step(segment, bag_at).p0) + 1 < segment.step_count;
+        if (way_fine){
+            const size_t skipped = (size_t)script.step(segment, bag_at).p0;
+            for (size_t k = bag_at + 1; k <= bag_at + skipped; k++){
+                buys += script.step(segment, k).type == StepType::BUY_STONES ? 1 : 0;
+                rematches += script.step(segment, k).type == StepType::REMATCH ? 1 : 0;
+            }
+            //  Skipped or not, a FLY comes next.
+            way_fine = script.step(segment, bag_at + skipped + 1).type == StepType::FLY;
+        }
+        bool pc_fine = stones == 1 && stones_at > 0 && script.step(segment, stones_at - 1).type == StepType::WALK;
+        if (pc_fine){
+            const StoryLeg& leg = script.leg(script.step(segment, stones_at - 1).leg);
+            pc_fine = leg.end == LegEnd::INTERACT && leg.face == DPAD_UP && leg.start_map < script.map_name_count &&
+                std::string(script.map_names[leg.start_map]).find("Pokemon Center 1F") != std::string::npos;
+        }
+        check(
+            std::string(segment.id) == "C20_25_STONES" && story_once_segment(script, segment) &&
+            script.step(segment, 0).type == StepType::SKIP_IF_NO_STONES && way_fine && buys == 1 && rematches == 1 &&
+            pc_fine && story_once_leave(script, segment, stones_at) == OnceLeave::PAST_STEP &&
+            story_stones_place() == "the evolution stones",
+            "the story's last segment is the one of the stones: the prize money and the purchase (skipped with "
+            "the stones in the bag), then the PC of a Pokemon Center; given up from its own save past its step"
+        );
+    }
+
     logger.log(
-        "AutoStory test: the PC's boxes are read (the PC's texts, the cells, the list as a file; of the " +
+        "AutoStory test: the PC's boxes are read, and what is in them gets its stone (the PC's texts, the cells, "
+        "the list as a file, the six stones; of the " +
         std::to_string(table.size()) + " species of FireRed with Charmander " +
         std::to_string(by_level + by_stone + by_friendship + by_other) + " only come by evolving: " +
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
-        std::to_string(hows) + " ways of evolving in the table; in the story's data the segment " + where + "): " +
+        std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
+        " and " + script.segments[script.segment_count - 1].id + "): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
