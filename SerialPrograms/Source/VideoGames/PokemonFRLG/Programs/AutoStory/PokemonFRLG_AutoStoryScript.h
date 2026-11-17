@@ -191,6 +191,11 @@ enum class StepType : uint8_t{
                         //  (a gift taken before): skip the next p0 steps
     GOT,                //  text = a species the player was just given: one more in the POKeDEX
                         //  table
+    SKIP_IF_BOXES,      //  the program read the PC's boxes in this run, and caught nothing for
+                        //  the POKeDEX since: skip the next p0 steps (the way to the PC)
+    BOXES,              //  in front of the PC of a Pokemon Center, facing it: the PC's boxes
+                        //  are read (which Pokemon is in which cell, its level). Nothing in
+                        //  them is changed
 };
 
 struct StoryStep{
@@ -321,13 +326,14 @@ inline bool story_rod_way(const StoryScript& script, const StorySegment& segment
 
 //  Is the segment one for a Pokemon that is there once? Its first step is
 //  the SKIP_IF_OWNED over all its other steps, the next one is FLY (so the
-//  segment starts outdoors), and its last step is a save.
+//  segment starts outdoors), and its last step is a save. The same shape
+//  with SKIP_IF_BOXES: the segment that reads the PC's boxes.
 inline bool story_once_segment(const StoryScript& script, const StorySegment& segment){
     if (segment.step_count < 3){
         return false;
     }
     const StoryStep& check = script.step(segment, 0);
-    return check.type == StepType::SKIP_IF_OWNED && check.p0 > 0 &&
+    return (check.type == StepType::SKIP_IF_OWNED || check.type == StepType::SKIP_IF_BOXES) && check.p0 > 0 &&
         (size_t)check.p0 + 1 == segment.step_count &&
         script.step(segment, 1).type == StepType::FLY &&
         script.step(segment, segment.step_count - 1).type == StepType::SAVE;

@@ -2429,12 +2429,21 @@ CHAPTER19 = [
 #  program goes round the towns again and again (C20_02 after the last).
 #  Fishing, the water, Rock Smash and the first Pokemon that are given: the
 #  segments after the towns (C20_12 on, "the next steps" below). Trades, the
-#  Game Corner, eggs and evolving: later (they need the PC's boxes). Not
-#  yet either: Mt. Ember's grass (behind Rock Smash rocks and Strength
-#  boulders the routes do not move: MAGMAR in LeafGreen), the Tanoby
-#  Chambers (UNOWN only once the Tanoby Key puzzle is solved), Three Isle
-#  Port (DUNSPARCE: through the Dunsparce Tunnel, which the routes do not
-#  pass).
+#  Game Corner, eggs and evolving: later (they need the PC's boxes, which
+#  C20_23 reads). Not yet either: Mt. Ember's grass (behind Rock Smash rocks
+#  and Strength boulders the routes do not move: MAGMAR in LeafGreen), the
+#  Tanoby Chambers (UNOWN only once the Tanoby Key puzzle is solved).
+#
+#
+#  Three Isle Port (PocketPilot build 34, experimental): DUNSPARCE, the only
+#  wild Pokemon of its grass, which lies behind the Dunsparce Tunnel. The
+#  tunnel is dug through once the National POKeDEX is on
+#  (ThreeIsland_DunsparceTunnel_OnTransition: its other layout), and has no
+#  wild Pokemon itself. The grass has them on 1 step in 100 (and more with
+#  every step without one), like the first room of the Lost Cave. A segment
+#  of its own after the others (C20_23), not one more place of Three Island
+#  in the tour of C20_11: the steps of that segment stay as they are.
+DUNSPARCE_TUNNEL_DUG = {"MAP_THREE_ISLAND_DUNSPARCE_TUNNEL": "LAYOUT_THREE_ISLAND_DUNSPARCE_TUNNEL_DUG_OUT"}
 
 COLLECT_IDLE = 30       # Battles in a row without a catch: the visit ends.
 COLLECT_MINUTES = 30    # The longest visit.
@@ -3039,6 +3048,72 @@ CHAPTER20 += [
         save(),
         fly("HEAL_LOCATION_CINNABAR_ISLAND", "C20_22_AERODACTYL_FlyToCinnabar", force=True),
     ] + revive("OLD AMBER", "aerodactyl", "Aerodactyl") + [setst(flags=["FLAG_REVIVED_AMBER"])]),
+]
+
+
+# -------------------------------------------- chapter 20, Three Isle Port
+def three_isle_port():
+    """Vermilion -> One Island -> Three Island (the Seagallop, as to Five
+    Island in C20_17), the grass behind the Dunsparce Tunnel, back to
+    Vermilion City. Starts and ends at the nurse of the Vermilion Pokemon
+    Center."""
+    steps = [
+        setst(layouts=DUNSPARCE_TUNNEL_DUG),
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 2, None, "MAP_THREE_ISLAND_HARBOR", "FerryToThreeIsland")
+    steps += [heal(THREE_PC, "HarborToThreeIslandNurse"), save()]
+    steps += collect_place(THREE_PC, "MAP_THREE_ISLAND_PORT", WHOLE, "CollectThreeIslePort")
+    steps += rainbow_ferry("MAP_THREE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    steps += [pos("MAP_VERMILION_CITY", 23, 32), heal(PC["VERMILION"], "PierToVermilionNurse"), save()]
+    return steps
+
+
+CHAPTER20 += [
+    collect_town("C20_23_THREE_ISLE_PORT", "Three Isle Port (behind the Dunsparce Tunnel)", PC["VERMILION"], [
+        {"unless_collected": {"steps": three_isle_port()}, "label": "Three Isle Port?"},
+    ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
+]
+
+
+# ---------------------------------------------- chapter 20, the PC's boxes
+#  EXPERIMENTAL (PocketPilot build 34, not run on a console when written).
+#  What the story caught lies in the PC's boxes. Evolving it (41 species of
+#  the FireRed table with Charmander only come that way: 23 by level, 14 by
+#  a stone, 3 by friendship, HITMONTOP by level and stats) and giving it away
+#  in the game's trades starts with knowing what is in which box: this
+#  segment reads them, cell by cell
+#  (PokemonFRLG_AutoStoryBoxes.h: no A in the box view, nothing is moved),
+#  and says for which of those species the one to evolve is there. Nothing
+#  is evolved yet.
+#
+#  Every Pokemon Center has the PC at (11, 1) of its 1F (MB_PC), used from
+#  the tile below it. Viridian City: nobody walks about near it (a
+#  GENTLEMAN stands still at (12, 5)).
+PC_TILE = [11, 1]
+
+
+def boxes_segment(seg_id, town, pc_map, fly_to):
+    """FLY, into the Pokemon Center and to its PC, the boxes read, out, a
+    save. Skipped when they were read in this run and nothing was caught
+    since."""
+    steps = [
+        fly(fly_to, seg_id + "_Fly", force=True),
+        talk(pc_map, xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"boxes": True, "label": "The PC's boxes"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: the PC's boxes are read (%s)" % town,
+            "steps": [{"unless_boxes": {"steps": steps}, "label": "The PC's boxes read?"}]}
+
+
+CHAPTER20 += [
+    boxes_segment("C20_24_PC_BOXES", "Viridian City", PC["VIRIDIAN"], "HEAL_LOCATION_VIRIDIAN_CITY"),
 ]
 
 

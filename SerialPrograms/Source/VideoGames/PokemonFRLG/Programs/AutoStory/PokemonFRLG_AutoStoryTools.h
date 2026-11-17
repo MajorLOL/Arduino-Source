@@ -27,6 +27,7 @@
 #include "PokemonFRLG_AutoStoryScroll.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStoryPlaceList.h"
+#include "PokemonFRLG_AutoStoryBoxes.h"
 
 namespace PokemonAutomation{
 
@@ -236,6 +237,16 @@ struct StoryRuntime{
     size_t trip_last = 0;
     bool trip_fishing = false;
     StoryPlaceFailures places;
+    //  The PC's boxes as the program read them last in this run
+    //  (StepType::BOXES, PokemonFRLG_AutoStoryBoxes.h), and the catches
+    //  for the POKeDEX it had made by then: with more since, the boxes are
+    //  read again when the story comes by. "boxes_read": read, every box
+    //  once (one whose round did not close is read again). "boxes_readings":
+    //  how many times a list was taken, whatever came after it.
+    AutoStoryBoxes::BoxCensus boxes;
+    bool boxes_read = false;
+    uint64_t boxes_catches = 0;
+    uint64_t boxes_readings = 0;
     //  The scene of a gift (CUTSCENE with p4 = 1): its texts are read, and
     //  one of them told of a Pokemon handed over ("received", "nickname",
     //  "transferred"), or its YES/NO box came up (the nickname).

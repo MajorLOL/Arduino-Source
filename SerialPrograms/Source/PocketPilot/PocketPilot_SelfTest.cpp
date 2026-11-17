@@ -50,9 +50,11 @@
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBoxes.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBump.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryDexCollection.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFishing.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryNameMark.h"
@@ -2416,6 +2418,20 @@ int check_next_steps(Logger& logger){
         Fishing::read_cast("a pokemon s on the hook") == Cast::BITE,
         "a bite"
     );
+    //  The bite's text while it still prints (17 November: read as another
+    //  text 30 times, with a B on it): the beginning of it is waited for.
+    check(
+        Fishing::bite_printing("a pokemon") && Fishing::bite_printing("a pokamon's on the h") &&
+        Fishing::bite_printing("a pok\xc3\xa9mon's on t") && Fishing::bite_printing("a pokemon\"") &&
+        Fishing::bite_printing("a pokemon's on the hoo") &&
+        !Fishing::bite_printing("a pok") && !Fishing::bite_printing("a pokedex") &&
+        !Fishing::bite_printing("a pokemon center") && !Fishing::bite_printing("") &&
+        !Fishing::bite_printing("repel's effect wore off...") &&
+        Fishing::read_cast("a pokemon's on") == Cast::NOTHING_YET &&
+        Fishing::read_cast("a pokamon's on the ho") == Cast::NOTHING_YET &&
+        Fishing::read_cast("a pokemon's on the hook!") == Cast::BITE,
+        "the bite's text while it still prints is waited for"
+    );
     check(
         Fishing::read_cast("") == Cast::NOTHING_YET && Fishing::read_cast(". . . .") == Cast::NOTHING_YET &&
         Fishing::read_cast("\xc2\xb7 \xc2\xb7 \xc2\xb7 e") == Cast::NOTHING_YET &&
@@ -2589,7 +2605,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 11 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 13 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2756,13 +2772,13 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        trips == 103 && trips_not_named == 0 && others_named == 0,
-        "every visit of a place of the collection is one trip (103), and nothing else is"
+        trips == 105 && trips_not_named == 0 && others_named == 0,
+        "every visit of a place of the collection is one trip (105), and nothing else is"
     );
     check(at_a_nurse == trips, "every trip starts at the nurse it ends at");
     check(fishing_trips == 12 && lap_trips == 4, "the trips to fish (12) and to walk laps (4)");
-    check(others == 24, "the checks of a segment (15) and of an island or a group (9) are not trips");
-    check(places.size() == 55, "the places of the trips (47 with two visits or three, 8 Safari Games)");
+    check(others == 26, "the checks of a segment (16) and of an island or a group (10) are not trips");
+    check(places.size() == 56, "the places of the trips (48 with two visits or three, 8 Safari Games)");
     check(rod_ways == 2 && rod_ways_in_place == 2, "the two ways to a rod, each a segment of its own that ends with its save");
 
     //  The segments of the Pokemon that are there once: given up from any
@@ -2822,8 +2838,8 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 4 && once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL",
-        "the four segments of Pokemon that are there once"
+        once == 5 && once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES",
+        "the four segments of Pokemon that are there once, and the one that reads the PC's boxes"
     );
     check(
         saves_at_a_nurse == 2 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -2842,8 +2858,436 @@ int check_leave_out(Logger& logger){
         std::to_string(trips) + " trips to " + std::to_string(places.size()) + " places, " +
         std::to_string(fishing_trips) + " of them to fish and " + std::to_string(lap_trips) + " to walk laps; " +
         std::to_string(others) + " checks that are not one trip; " + std::to_string(rod_ways) + " ways to a rod; " +
-        std::to_string(once) + " segments of Pokemon that are there once, with " +
+        std::to_string(once) + " segments for what is done once, with " +
         std::to_string(saves_at_a_nurse + saves_outdoors) + " saves to give them up from): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+//  The PC's boxes read (build 34): what the PC's text box says and what is
+//  pressed on it, the order of the cells, the list as a file, what the
+//  POKeDEX table says of evolving; and in the story's data the segment that
+//  reads the boxes.
+int check_boxes(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Boxes = AutoStoryBoxes;
+    using Boxes::PcText;
+    using Boxes::PcPress;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+
+    //  The PC's texts, as the program reads them (lower case).
+    check(
+        Boxes::read_pc_text("ash booted up the pc.") == PcText::BOOTED &&
+        Boxes::read_pc_text("which pc should be accessed?") == PcText::WHICH_PC &&
+        Boxes::read_pc_text("accessed bill's pc.") == PcText::ACCESSED &&
+        Boxes::read_pc_text("accessed someone's pc.") == PcText::ACCESSED &&
+        Boxes::read_pc_text("pok\xc3\xa9mon storage system opened.") == PcText::OPENED &&
+        Boxes::read_pc_text("pokemon storage system opened") == PcText::OPENED,
+        "the PC's texts on the way to its storage menu"
+    );
+    check(
+        Boxes::read_pc_text("you can withdraw a pok\xc3\xa9mon if you have any in a box.") == PcText::WITHDRAW &&
+        Boxes::read_pc_text("you can deposit your party pok\xc3\xa9mon in any box.") == PcText::DEPOSIT &&
+        Boxes::read_pc_text("you can move pok\xc3\xa9mon that are stored in any box.") == PcText::MOVE_MONS &&
+        Boxes::read_pc_text("you can move items held by any pok\xc3\xa9mon in a box or your party.") == PcText::MOVE_ITEMS &&
+        Boxes::read_pc_text("see you later!") == PcText::SEE_YA,
+        "the five entries of the storage menu, by what the text box says of them"
+    );
+    check(
+        Boxes::read_pc_text("can't take any more pok\xc3\xa9mon.") == PcText::CANNOT &&
+        Boxes::read_pc_text("can't deposit the last pok\xc3\xa9mon!") == PcText::CANNOT &&
+        Boxes::read_pc_text("continue box operations?") == PcText::BOX_QUESTION &&
+        Boxes::read_pc_text("exit from the box?") == PcText::BOX_QUESTION &&
+        Boxes::read_pc_text("") == PcText::NONE && Boxes::read_pc_text(". .") == PcText::NONE &&
+        Boxes::read_pc_text("ash boo") == PcText::OTHER &&
+        Boxes::read_pc_text("repel's effect wore off...") == PcText::OTHER,
+        "what the menu refuses, the box view's question, no text, another text"
+    );
+    check(
+        Boxes::pc_press_in(PcText::NONE) == PcPress::WAIT && Boxes::pc_press_in(PcText::OTHER) == PcPress::FAIL &&
+        Boxes::pc_press_in(PcText::BOX_QUESTION) == PcPress::FAIL &&
+        Boxes::pc_press_in(PcText::WITHDRAW) == PcPress::DOWN && Boxes::pc_press_in(PcText::DEPOSIT) == PcPress::DOWN &&
+        Boxes::pc_press_in(PcText::MOVE_ITEMS) == PcPress::UP && Boxes::pc_press_in(PcText::SEE_YA) == PcPress::UP &&
+        Boxes::pc_enters_boxes(PcText::MOVE_MONS) && !Boxes::pc_enters_boxes(PcText::WITHDRAW) &&
+        !Boxes::pc_enters_boxes(PcText::DEPOSIT) && !Boxes::pc_enters_boxes(PcText::MOVE_ITEMS),
+        "A is pressed on no entry of the storage menu but MOVE POKeMON"
+    );
+    //  The way in, played against the PC as the game has it (pc.inc,
+    //  Task_PCMainMenu): from every entry the menu's cursor may be on, with
+    //  a party that is full (WITHDRAW refused) or not.
+    {
+        struct Pc{
+            int state = 0;      //  0 "booted", 1 the list, 2 "accessed", 3 "opened", 4 the storage menu, 5 a box view, 6 off
+            int cursor = 0;
+            int entered = -1;
+            bool refused = false;
+            bool party_full = false;
+            PcText text() const{
+                static const PcText entries[5] = {
+                    PcText::WITHDRAW, PcText::DEPOSIT, PcText::MOVE_MONS, PcText::MOVE_ITEMS, PcText::SEE_YA,
+                };
+                switch (state){
+                case 0:     return PcText::BOOTED;
+                case 1:     return PcText::WHICH_PC;
+                case 2:     return PcText::ACCESSED;
+                case 3:     return PcText::OPENED;
+                case 4:     return refused ? PcText::CANNOT : entries[cursor];
+                default:    return PcText::NONE;
+                }
+            }
+            void press(PcPress button){
+                const bool a = button == PcPress::A;
+                const bool b = button == PcPress::B;
+                switch (state){
+                case 0:
+                case 2:
+                case 3:
+                    state += a || b ? 1 : 0;
+                    break;
+                case 1:
+                    state = a ? 2 : b ? 6 : 1;
+                    break;
+                case 4:
+                    if (refused){
+                        refused = !(a || b);
+                    }else if (button == PcPress::UP){
+                        cursor = (cursor + 4) % 5;
+                    }else if (button == PcPress::DOWN){
+                        cursor = (cursor + 1) % 5;
+                    }else if (b || (a && cursor == 4)){
+                        state = 1;
+                    }else if (a && cursor == 0 && party_full){
+                        refused = true;
+                    }else if (a){
+                        state = 5;
+                        entered = cursor;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        };
+        bool all_in = true;
+        int most = 0;
+        for (int cursor = 0; cursor < 5; cursor++){
+            for (int full = 0; full < 2; full++){
+                Pc pc;
+                pc.party_full = full == 1;
+                int presses = 0;
+                bool menu_set = false;
+                while (presses < 20 && pc.state < 5){
+                    if (pc.state == 4 && !menu_set){
+                        pc.cursor = cursor;
+                        menu_set = true;
+                    }
+                    const PcPress button = Boxes::pc_press_in(pc.text());
+                    if (button == PcPress::WAIT || button == PcPress::FAIL){
+                        break;
+                    }
+                    pc.press(button);
+                    presses++;
+                }
+                all_in &= pc.state == 5 && pc.entered == 2;
+                most = std::max(most, presses);
+            }
+        }
+        check(all_in && most <= 7, "from the PC's first text to the box view, always by MOVE POKeMON");
+    }
+
+    //  The cells of a box.
+    {
+        const std::vector<Boxes::Cell>& order = Boxes::scan_order();
+        std::set<int> numbers;
+        bool one_step = true;
+        for (size_t k = 0; k < order.size(); k++){
+            numbers.insert(Boxes::cell_number(order[k]));
+            one_step &= Boxes::cell_in_box(order[k]) &&
+                (k == 0 || Boxes::cell_moves(order[k - 1], order[k]).size() == 1);
+        }
+        check(
+            order.size() == (size_t)Boxes::BOX_CELLS && numbers.size() == order.size() &&
+            *numbers.begin() == 0 && *numbers.rbegin() == Boxes::BOX_CELLS - 1 && one_step &&
+            order.front() == Boxes::Cell{0, 2} && order.back() == Boxes::Cell{0, 5},
+            "the thirty cells of a box in one line: from where DOWN from the box's name puts the hand to the "
+            "top row, each one step from the one before"
+        );
+        //  The moves from any cell to any other, by the game's rules: UP from
+        //  the top row and DOWN from the bottom row leave the cells, LEFT
+        //  and RIGHT go round at the edges.
+        bool arrive = true;
+        for (int from = 0; from < Boxes::BOX_CELLS; from++){
+            for (int to = 0; to < Boxes::BOX_CELLS; to++){
+                Boxes::Cell at{from / Boxes::BOX_COLUMNS, from % Boxes::BOX_COLUMNS};
+                const Boxes::Cell target{to / Boxes::BOX_COLUMNS, to % Boxes::BOX_COLUMNS};
+                const std::string moves = Boxes::cell_moves(at, target);
+                bool left_cells = false;
+                for (char move : moves){
+                    if (move == 'U' || move == 'D'){
+                        at.row += move == 'U' ? -1 : 1;
+                        left_cells |= at.row < 0 || at.row >= Boxes::BOX_ROWS;
+                    }else{
+                        left_cells |= move == 'L' ? at.column == 0 : at.column == Boxes::BOX_COLUMNS - 1;
+                        at.column = (at.column + (move == 'L' ? Boxes::BOX_COLUMNS - 1 : 1)) % Boxes::BOX_COLUMNS;
+                    }
+                }
+                arrive &= !left_cells && at == target &&
+                    moves.size() == (size_t)(std::abs(from / Boxes::BOX_COLUMNS - to / Boxes::BOX_COLUMNS) +
+                        std::abs(from % Boxes::BOX_COLUMNS - to % Boxes::BOX_COLUMNS));
+            }
+        }
+        check(
+            arrive && Boxes::cell_moves(Boxes::Cell{4, 5}, Boxes::Cell{0, 0}) == "LLLLLUUUU" &&
+            Boxes::cell_moves(Boxes::Cell{2, 2}, Boxes::Cell{2, 2}).empty() &&
+            Boxes::cell_moves(Boxes::Cell{5, 0}, Boxes::Cell{0, 0}).empty(),
+            "the hand from any cell to any other without leaving the cells"
+        );
+    }
+
+    //  What was read, and its file.
+    Boxes::BoxCensus census;
+    census.boxes = Boxes::BOX_COUNT;
+    census.closed = true;
+    auto put = [&](int box, int cell, const char* slug, int level){
+        Boxes::BoxPokemon one;
+        one.box = box;
+        one.cell = cell;
+        one.slug = slug;
+        one.level = level;
+        census.pokemon.push_back(one);
+    };
+    put(0, 3, "nidorina", 25);
+    put(0, 4, "metapod", 8);
+    put(0, 5, "pidgeotto", 40);
+    put(0, 9, "golbat", 30);
+    put(0, 10, "", -1);
+    put(1, 7, "nidorina", 31);
+    put(2, 0, "eevee", 5);
+    put(2, 1, "eevee", 25);
+    {
+        const std::vector<Boxes::BoxPokemon> eevees = census.of("eevee");
+        check(
+            census.count("eevee") == 2 && census.count("mew") == 0 && census.unread() == 1 &&
+            census.in_box(0) == 5 && census.in_box(3) == 0 && census.boxes_used() == 3 &&
+            eevees.size() == 2 && eevees[0].level == 25 && eevees[0].cell == 1 && eevees[1].level == 5,
+            "what the boxes have of a species, the highest level first"
+        );
+        const std::string text = Boxes::census_to_text(census);
+        Boxes::BoxCensus back;
+        const bool read_back = Boxes::census_from_text(text + "# By level (2): a line of the program.\n", back);
+        bool same = read_back && back.boxes == census.boxes && back.closed == census.closed &&
+            back.pokemon.size() == census.pokemon.size();
+        for (size_t k = 0; same && k < census.pokemon.size(); k++){
+            same = back.pokemon[k].box == census.pokemon[k].box && back.pokemon[k].cell == census.pokemon[k].cell &&
+                back.pokemon[k].slug == census.pokemon[k].slug && back.pokemon[k].level == census.pokemon[k].level;
+        }
+        check(same && text.find("\n0 10 ? -1\n") != std::string::npos, "the list of the boxes as a file, and read back");
+        Boxes::BoxCensus none;
+        check(
+            !Boxes::census_from_text("", none) && !Boxes::census_from_text("hello\n", none) &&
+            !Boxes::census_from_text("boxes 14 closed 1 pokemon 2\n0 0 pidgey 3\n", none) &&
+            !Boxes::census_from_text("boxes 14 closed 1 pokemon 1\n0 30 pidgey 3\n", none) &&
+            !Boxes::census_from_text("boxes 2 closed 1 pokemon 1\n2 0 pidgey 3\n", none) &&
+            !Boxes::census_from_text("boxes 14 closed 1 pokemon 1\n0 0 pidgey 101\n", none) &&
+            none.pokemon.empty() && none.boxes == 0 &&
+            Boxes::census_from_text("boxes 14 closed 0 pokemon 0\n", none) && !none.closed && none.boxes == 14,
+            "a file that is not such a list is not taken for one"
+        );
+    }
+
+    //  Evolving, from the POKeDEX table: every way of evolving the table
+    //  has is understood, in both games.
+    size_t count = 0;
+    const AutoStoryDex::CollectionEntry* entries = AutoStoryDex::collection(count);
+    std::set<std::string> names;
+    for (size_t k = 0; k < count; k++){
+        names.insert(entries[k].name);
+    }
+    int hows = 0;
+    int understood = 0;
+    for (size_t k = 0; k < count; k++){
+        for (int game = 0; game < 2; game++){
+            const std::string how = entries[k].how[game];
+            if (how.rfind("evolve from", 0) != 0){
+                continue;
+            }
+            hows++;
+            Boxes::EvolveHow way;
+            understood += Boxes::read_evolve_how(how, way) && names.count(way.from) != 0 ? 1 : 0;
+        }
+    }
+    check(hows >= 80 && understood == hows, "every \"evolve from\" of the POKeDEX table is understood");
+    {
+        Boxes::EvolveHow level;
+        Boxes::EvolveHow stone;
+        Boxes::EvolveHow sun;
+        Boxes::EvolveHow friendship;
+        Boxes::EvolveHow stats;
+        Boxes::EvolveHow none;
+        check(
+            Boxes::read_evolve_how("evolve from Metapod: level 10", level) && level.from == "Metapod" &&
+            level.by == Boxes::EvolveBy::LEVEL && level.level == 10 &&
+            Boxes::read_evolve_how("evolve from Nidorina: Moon Stone", stone) && stone.from == "Nidorina" &&
+            stone.by == Boxes::EvolveBy::STONE && stone.stone == "Moon Stone" &&
+            Boxes::read_evolve_how("evolve from Gloom: Sun Stone (the only one: Ruin Valley, Six Island) (National Dex)", sun) &&
+            sun.by == Boxes::EvolveBy::STONE && sun.stone == "Sun Stone" &&
+            Boxes::read_evolve_how("evolve from Golbat: level up with high friendship (220+) (National Dex)", friendship) &&
+            friendship.by == Boxes::EvolveBy::FRIENDSHIP &&
+            Boxes::read_evolve_how("evolve from Tyrogue: level 20 with Attack = Defense (National Dex)", stats) &&
+            stats.by == Boxes::EvolveBy::OTHER && stats.level == 20 &&
+            !Boxes::read_evolve_how("Grass/cave: Route 1", none) && !Boxes::read_evolve_how("evolve from : level 10", none) &&
+            !Boxes::read_evolve_how("evolve from Metapod: level 0", none) && !Boxes::read_evolve_how("evolve from Metapod", none),
+            "a level, a stone, friendship, a level and its stats"
+        );
+    }
+    //  FireRed with Charmander: what only comes by evolving, with nothing in
+    //  the table yet and with the boxes above.
+    std::vector<Boxes::TableRow> table;
+    for (size_t k = 0; k < count; k++){
+        if ((entries[k].available & (1 << 2)) == 0){
+            continue;
+        }
+        Boxes::TableRow row;
+        row.slug = entries[k].slug;
+        row.name = entries[k].name;
+        row.needed = entries[k].copies[0];
+        row.how = entries[k].how[0];
+        table.push_back(row);
+    }
+    int by_level = 0;
+    int by_stone = 0;
+    int by_friendship = 0;
+    int by_other = 0;
+    {
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(table, Boxes::BoxCensus());
+        bool none_there = true;
+        bool all_named = true;
+        for (const Boxes::EvolveLine& line : plan){
+            none_there &= line.box < 0 && line.in_boxes == 0;
+            all_named &= !line.from_slug.empty();
+            switch (line.how.by){
+            case Boxes::EvolveBy::LEVEL:        by_level++; break;
+            case Boxes::EvolveBy::STONE:        by_stone++; break;
+            case Boxes::EvolveBy::FRIENDSHIP:   by_friendship++; break;
+            case Boxes::EvolveBy::OTHER:        by_other++; break;
+            }
+        }
+        check(
+            table.size() == 175 && plan.size() == 41 && none_there && all_named &&
+            by_level == 23 && by_stone == 14 && by_friendship == 3 && by_other == 1,
+            "FireRed with Charmander: the 41 species of the table that only come by evolving, and how"
+        );
+        const std::vector<std::string> lines = Boxes::evolve_summary(plan);
+        check(
+            lines.size() == 1 && lines[0].find("is not in a box (41;") != std::string::npos &&
+            lines[0].find("Butterfree (Metapod)") != std::string::npos,
+            "with empty boxes every one of them is still to come"
+        );
+    }
+    {
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(table, census);
+        auto line_of = [&](const std::string& slug){
+            for (const Boxes::EvolveLine& line : plan){
+                if (line.slug == slug){
+                    return line;
+                }
+            }
+            return Boxes::EvolveLine();
+        };
+        const Boxes::EvolveLine nidoqueen = line_of("nidoqueen");
+        const Boxes::EvolveLine butterfree = line_of("butterfree");
+        const Boxes::EvolveLine pidgeot = line_of("pidgeot");
+        const Boxes::EvolveLine vaporeon = line_of("vaporeon");
+        const Boxes::EvolveLine jolteon = line_of("jolteon");
+        const Boxes::EvolveLine flareon = line_of("flareon");
+        const Boxes::EvolveLine crobat = line_of("crobat");
+        check(
+            nidoqueen.from_slug == "nidorina" && nidoqueen.in_boxes == 2 && nidoqueen.box == 1 &&
+            nidoqueen.cell == 7 && nidoqueen.level == 31 && nidoqueen.how.stone == "Moon Stone" &&
+            butterfree.box == 0 && butterfree.cell == 4 && butterfree.level == 8 && butterfree.how.level == 10 &&
+            pidgeot.level == 40 && pidgeot.how.level == 36 && crobat.box == 0 && crobat.cell == 9 &&
+            crobat.how.by == Boxes::EvolveBy::FRIENDSHIP,
+            "for a species that comes by evolving: the one of the boxes to evolve, the highest level first"
+        );
+        check(
+            vaporeon.box == 2 && vaporeon.cell == 1 && vaporeon.level == 25 &&
+            jolteon.box == 2 && jolteon.cell == 0 && jolteon.level == 5 &&
+            flareon.box < 0 && flareon.in_boxes == 2 && flareon.from_slug == "eevee",
+            "one Pokemon of the boxes is for one species only (two EEVEEs: no FLAREON)"
+        );
+        const std::vector<std::string> lines = Boxes::evolve_summary(plan);
+        std::string all;
+        for (const std::string& line : lines){
+            all += line + "\n";
+        }
+        check(
+            all.find("With a Moon Stone (1), the one to use it on is in a box: Nidoqueen (NIDORINA Lv 31, box 2 cell 8).") != std::string::npos &&
+            all.find("Butterfree (METAPOD Lv 8, box 1 cell 5: 2 more to level 10)") != std::string::npos &&
+            all.find("Pidgeot (PIDGEOTTO Lv 40, box 1 cell 6: at its next level)") != std::string::npos &&
+            all.find("Crobat (GOLBAT Lv 30, box 1 cell 10: friendship)") != std::string::npos &&
+            all.find("Flareon (Eevee: the 2 in the boxes are for others)") != std::string::npos &&
+            all.find("With a Water Stone (1)") != std::string::npos && all.find("With a Thunder Stone (1)") != std::string::npos,
+            "what the boxes have for evolving, as the log says it"
+        );
+    }
+
+    //  The story's data: one segment reads the boxes, the last one. The
+    //  walk before the look ends in a Pokemon Center, the player facing up
+    //  (the PC is in the wall above); the segment is skipped as a whole,
+    //  starts with FLY and has its only save at its end.
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    int looks = 0;
+    int skips = 0;
+    bool looks_fine = true;
+    std::string where;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        for (size_t k = 0; k < segment.step_count; k++){
+            const StoryStep& step = script.step(segment, k);
+            skips += step.type == StepType::SKIP_IF_BOXES ? 1 : 0;
+            if (step.type != StepType::BOXES){
+                continue;
+            }
+            looks++;
+            where = segment.id;
+            bool fine = k > 0 && script.step(segment, k - 1).type == StepType::WALK &&
+                s + 1 == script.segment_count && story_once_segment(script, segment) &&
+                script.step(segment, 0).type == StepType::SKIP_IF_BOXES;
+            if (fine){
+                const StoryLeg& leg = script.leg(script.step(segment, k - 1).leg);
+                fine = leg.end == LegEnd::INTERACT && leg.face == DPAD_UP && leg.start_map < script.map_name_count &&
+                    std::string(script.map_names[leg.start_map]).find("Pokemon Center 1F") != std::string::npos;
+            }
+            for (size_t n = 0; fine && n + 1 < segment.step_count; n++){
+                fine = script.step(segment, n).type != StepType::SAVE;
+            }
+            looks_fine &= fine;
+        }
+    }
+    check(
+        looks == 1 && skips == 1 && looks_fine && where == "C20_24_PC_BOXES" &&
+        story_boxes_place() == "the PC's boxes",
+        "the story's last segment reads the PC's boxes, in front of the PC of a Pokemon Center"
+    );
+
+    logger.log(
+        "AutoStory test: the PC's boxes are read (the PC's texts, the cells, the list as a file; of the " +
+        std::to_string(table.size()) + " species of FireRed with Charmander " +
+        std::to_string(by_level + by_stone + by_friendship + by_other) + " only come by evolving: " +
+        std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
+        std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
+        std::to_string(hows) + " ways of evolving in the table; in the story's data the segment " + where + "): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
@@ -2875,6 +3319,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_safari_table(logger);
         failed += check_next_steps(logger);
         failed += check_leave_out(logger);
+        failed += check_boxes(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

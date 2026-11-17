@@ -106,7 +106,7 @@ inline bool is_rod_description(int rod, const std::string& text){
 //  What the text box says after a cast (the text as the program reads it,
 //  lower case).
 enum class Cast{
-    NOTHING_YET,    //  The dots, or nothing readable yet.
+    NOTHING_YET,    //  The dots, nothing readable yet, or a text still printing.
     NO_BITE,        //  "Not even a nibble..." ("It got away...")
     BITE,           //  "A POKeMON's on the hook!"
     NOT_HERE,       //  PROF. OAK's words: no rod can be cast here.
@@ -119,6 +119,34 @@ inline int letters_in(const std::string& text){
         letters += (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ? 1 : 0;
     }
     return letters;
+}
+
+//  The bite's text while it still prints (two frames a letter): "a pokemon",
+//  "a pokamon's on the h". The beginning of "A POKeMON's on the hook!", its
+//  letters alone (the E with its accent is read as "e", as "a", or as no
+//  letter at all), one of them read wrong at most. (17 November: read 30
+//  times as "a text after the cast that is not of fishing", with a B on it.)
+inline bool bite_printing(const std::string& text){
+    std::string letters;
+    for (char ch : text){
+        if (ch >= 'a' && ch <= 'z'){
+            letters += ch;
+        }
+    }
+    for (const char* full : {"apokemonsonthehook", "apokmonsonthehook"}){
+        const std::string whole = full;
+        if (letters.size() < 5 || letters.size() > whole.size()){
+            continue;
+        }
+        int wrong = 0;
+        for (size_t i = 0; i < letters.size(); i++){
+            wrong += letters[i] != whole[i] ? 1 : 0;
+        }
+        if (wrong <= 1){
+            return true;
+        }
+    }
+    return false;
 }
 
 inline Cast read_cast(const std::string& text){
@@ -136,6 +164,10 @@ inline Cast read_cast(const std::string& text){
     }
     //  The bag is still closing: the rod's own description.
     if (has("fishing rod") || has("body of water") || has("to fish for")){
+        return Cast::NOTHING_YET;
+    }
+    //  The bite's text is still printing: read again when it is whole.
+    if (bite_printing(text)){
         return Cast::NOTHING_YET;
     }
     //  The dots are read as nothing, or as a few stray characters.

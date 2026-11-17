@@ -1897,6 +1897,17 @@ StoryBattleResult run_story_battle(
     //  on the S.S. Anne, for a text box.)
     bool battle_confirmed = false;
     int text_only_in_row = 0;   //  turns with only a text box (no arrow) seen
+    //  A wild battle before its first battle menu was looked at: what is
+    //  done with the foe (caught, run from, fought) is decided at that menu.
+    //  Times a text box without the arrow was waited out there instead of
+    //  an A, and times the move list, open before the menu was looked at,
+    //  was closed again with B. (17 November: the INTIMIDATE of a wild
+    //  GYARADOS takes its text past the six seconds waited for the menu. The
+    //  A for "only a text box" came as the menu did, on FIGHT, and each of
+    //  the 32 GYARADOS of that day was hit with the best move instead of
+    //  caught or run from. The first one wanted fainted.)
+    int early_text_waits = 0;
+    int early_list_backs = 0;
     //  Turns with only a white text box seen, one after the other.
     int white_in_row = 0;
     bool white_last = false;
@@ -2910,6 +2921,22 @@ StoryBattleResult run_story_battle(
                     battle_confirmed = true;
                     last_activity = current_time();
                     unknown_in_row = 0;
+                    if (wild && !shiny_checked && early_list_backs < 3){
+                        //  The battle menu of this wild battle was not
+                        //  looked at yet (an A that came as the menu did):
+                        //  back to it, where the foe is looked at first. A
+                        //  few times at most: a battle menu that is never
+                        //  recognized goes on as before, with a move.
+                        early_list_backs++;
+                        console.log(
+                            "The move list is open before the battle menu was looked at: back to the battle menu.",
+                            COLOR_ORANGE
+                        );
+                        pbf_press_button(context, BUTTON_B, 160ms, 840ms);
+                        context.wait_for_all_requests();
+                        pressed_blind = false;
+                        break;
+                    }
                     if (shiny_catching){
                         //  Catching: back to the battle menu, where the
                         //  weakening or the next ball is picked. The best
@@ -2962,6 +2989,16 @@ StoryBattleResult run_story_battle(
                 }
                 seen_battle = true;
                 last_activity = current_time();
+                if (wild && !shiny_checked && early_text_waits < 2){
+                    //  Before the first battle menu of a wild battle no text
+                    //  without the arrow needs an A ("Go! CHARIZARD!", the
+                    //  foe's INTIMIDATE, the weather): the menu comes by
+                    //  itself, and an A now would be one on FIGHT. Waited for
+                    //  twice; after that A as before.
+                    early_text_waits++;
+                    console.log("Only a text box before the first battle menu: waiting for the menu, no A.");
+                    break;
+                }
                 pbf_press_button(context, BUTTON_A, 160ms, 840ms);
                 context.wait_for_all_requests();
                 break;

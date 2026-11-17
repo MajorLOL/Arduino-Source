@@ -655,6 +655,7 @@ StoryBattleResult story_battle(
     //  The SAFARI BALLs left of the 30 of a Safari Game: what to do in a
     //  battle there goes by them.
     rt.battle.safari_balls_left = rt.in_safari ? std::max(1, 30 - rt.safari_balls_used) : 30;
+    const uint64_t lead_faints_before = rt.memory.lead_faints;
     StoryBattleResult result = run_story_battle(rt.console, rt.context, kind, rt.battle, rt.memory);
     //  The program's count of the bag: the FULL RESTOREs and MAX POTIONs
     //  the battle used.
@@ -868,6 +869,15 @@ StoryBattleResult story_battle(
         }
         break;
     default:
+        //  The lead fainted and the battle went on with the next one, to
+        //  another end (run from, caught, won): fainted all the same. (17
+        //  November: QWILFISH and TENTACRUEL brought the lead down while the
+        //  balls flew, the battle ended "ran away", and the visit went on
+        //  with whoever was second in the party.)
+        if (rt.memory.lead_faints > lead_faints_before){
+            rt.console.log("The lead fainted in this battle (it went on with the next of the party).", COLOR_ORANGE);
+            rt.lead_fainted = true;
+        }
         break;
     }
     return result;

@@ -21,6 +21,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
@@ -40,6 +41,8 @@
 #include "PokemonFRLG_AutoStoryData.h"
 #include "PokemonFRLG_AutoStoryTools.h"
 #include "PokemonFRLG_AutoStoryActions.h"
+#include "PokemonFRLG_AutoStoryBoxes.h"
+#include "PokemonFRLG_AutoStoryDexCollection.h"
 #include "PokemonFRLG_AutoStoryFishing.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryNewGame.h"
@@ -553,6 +556,89 @@ bool league_again_segment(const std::string& id){
         (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos);
 }
 
+//  A segment for something that is done once (story_once_segment()), as a
+//  place for the failures of a run: by its first step.
+std::string once_place_of(const StoryStep& check){
+    return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() : story_once_place(check.text);
+}
+
+//  StepType::BOXES (experimental): the PC's boxes are read. Then, for the
+//  log and the file: which of the species that only come by evolving the
+//  table still wants, and for which of them the Pokemon to evolve is in a
+//  box. (Nothing is evolved yet: this is what the next step of the route
+//  will work from.)
+void read_boxes_step(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, const std::string& label){
+    const uint64_t readings = rt.boxes_readings;
+    bool closed = false;
+    std::exception_ptr error;
+    try{
+        closed = story_boxes(rt, label);
+    }catch (OperationFailedException&){
+        if (rt.boxes_readings == readings){
+            throw;      //  Nothing was read.
+        }
+        //  Read, but the way out of the PC failed (or the PC was not on its
+        //  box again): what was read is said and written all the same, then
+        //  the error goes on (the game is reset).
+        error = std::current_exception();
+        closed = rt.boxes.closed;
+    }
+    std::vector<std::string> lines;
+    if (rt.collection != nullptr){
+        size_t count = 0;
+        const AutoStoryDex::CollectionEntry* entries = AutoStoryDex::collection(count);
+        const int game = rt.collection->game() == 1 ? 1 : 0;
+        std::vector<AutoStoryBoxes::TableRow> table;
+        for (size_t k = 0; k < count; k++){
+            const AutoStoryDex::CollectionEntry& entry = entries[k];
+            const int needed = rt.collection->needed(entry.slug);
+            if (needed < 0){
+                continue;       //  Not in this game with this starter.
+            }
+            AutoStoryBoxes::TableRow row;
+            row.slug = entry.slug;
+            row.name = entry.name;
+            row.needed = needed;
+            row.have = rt.collection->caught(entry.slug);
+            row.how = entry.how[game];
+            table.push_back(row);
+        }
+        const std::vector<AutoStoryBoxes::EvolveLine> plan = AutoStoryBoxes::evolve_plan(table, rt.boxes);
+        lines = AutoStoryBoxes::evolve_summary(plan);
+        env.log(
+            label + ": the POKeDEX table (" + rt.collection->game_name() + ") still wants " +
+            std::to_string(plan.size()) + " species that only come by evolving" +
+            (plan.empty() ? "." : ". What the boxes have for them (nothing is evolved yet: a later step of the route):"),
+            COLOR_BLUE
+        );
+        for (const std::string& line : lines){
+            env.log(label + ": " + line, COLOR_BLUE);
+        }
+    }
+    //  The list as a file, next to the program's other ones.
+    const std::string file = SETTINGS_PATH() + "PokemonFRLG-AutoStory-Boxes.txt";
+    std::string text = AutoStoryBoxes::census_to_text(rt.boxes);
+    for (const std::string& line : lines){
+        text += "# " + line + "\n";
+    }
+    try{
+        string_to_file(file, text);
+        env.log(label + ": the list of the boxes is in " + file + ".", COLOR_BLUE);
+    }catch (...){
+        env.log("Could not write " + file + ".", COLOR_ORANGE);
+    }
+    if (!closed){
+        env.log(
+            label + ": the list may have a box twice or miss one (see above): it is kept, with that said in its "
+            "first line (\"closed 0\"), and the boxes are read again when the story comes by.",
+            COLOR_ORANGE
+        );
+    }
+    if (error){
+        std::rethrow_exception(error);
+    }
+}
+
 }
 
 
@@ -589,7 +675,7 @@ void AutoStory::run_segment(
     size_t begin = first_step;
     size_t jump_after = (size_t)-1;
     if (first_step > 0 && story_once_segment(script, segment)){
-        const std::string once = story_once_place(script.step(segment, 0).text);
+        const std::string once = once_place_of(script.step(segment, 0));
         const OnceLeave leave = story_once_leave(script, segment, first_step);
         if (rt.places.place_out(once) && leave != OnceLeave::NO){
             env.log(
@@ -1275,6 +1361,47 @@ void AutoStory::run_segment(
             }
             break;
         }
+        case StepType::SKIP_IF_BOXES:{
+            //  The PC's boxes (experimental): read once in a run, and again
+            //  when something was caught for the POKeDEX since.
+            const std::string place = story_boxes_place();
+            if (rt.boxes_read && rt.dex_catches == rt.boxes_catches){
+                env.log(
+                    label + ": the PC's boxes were read in this run (" + std::to_string(rt.boxes.pokemon.size()) +
+                    " Pokemon), and nothing was caught for the POKeDEX since: the next " +
+                    std::to_string(step.p0) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p0);
+            }else if (i == 0 && story_once_segment(script, segment) && rt.places.place_out(place)){
+                //  Failed twice in a row in this run: left out. The
+                //  segment's last step, its save, is made where the player
+                //  stands (outdoors: the segment starts with FLY).
+                env.log(
+                    label + ": " + place + " failed " + std::to_string(STORY_PLACE_FAILURES) +
+                    " times in a row (see the errors above). Left out for this run. The next " +
+                    std::to_string(step.p0 - 1) + " steps are skipped; the game is saved here.",
+                    COLOR_ORANGE
+                );
+                i += (size_t)std::max(0, (int)step.p0 - 1);
+            }else{
+                env.log(
+                    label + ": the next steps go to the PC of a Pokemon Center and read its boxes (experimental; "
+                    "nothing in them is changed).",
+                    COLOR_BLUE
+                );
+                if (i == 0 && story_once_segment(script, segment)){
+                    //  A failure from here to the segment's end counts for it.
+                    rt.trip_place = place;
+                    rt.trip_last = i + (size_t)step.p0;
+                    rt.trip_fishing = false;
+                }
+            }
+            break;
+        }
+        case StepType::BOXES:
+            read_boxes_step(env, rt, label);
+            break;
         case StepType::GOT:{
             //  The scene before this step (CUTSCENE with p4 = 1) handed the
             //  Pokemon over, if it showed the words of it. Without them it

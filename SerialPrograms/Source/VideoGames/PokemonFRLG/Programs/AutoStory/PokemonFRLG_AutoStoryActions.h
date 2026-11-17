@@ -192,6 +192,20 @@ bool story_laps_begin(StoryRuntime& rt, const StoryStep& step);
 bool story_laps_again(StoryRuntime& rt);
 void story_laps_end(StoryRuntime& rt, bool failed = false);
 
+//  The PC's boxes read (StepType::BOXES, experimental), the player in
+//  front of the PC of a Pokemon Center and facing it: BILL's PC, MOVE
+//  POKeMON, every cell of the 14 boxes looked at (the species and the level
+//  of what is in it, with the readers of Pokemon Automation's Box Sorter),
+//  out again. A is not pressed in the box view: nothing in the boxes
+//  changes, and the PC is left on the box it was on. What was read is in
+//  StoryRuntime::boxes (boxes_readings counts it, also when an error comes
+//  after it). False: the boxes were read, but their round did not close (a
+//  box may have been passed over or read twice). An error (the game is then
+//  reset) when the box view does not open, the hand is lost, the PC would
+//  be left on another box, or the player does not get free again.
+//  (PokemonFRLG_AutoStoryBoxScan.cpp)
+bool story_boxes(StoryRuntime& rt, const std::string& label);
+
 //  Is an item in the bag (StepType::SKIP_IF_ITEM)? Opens the bag, goes
 //  through "pocket" (0 ITEMS, 1 KEY ITEMS, 2 POKe BALLS) reading the
 //  descriptions, closes it again. "rod" 0 to 2: that fishing rod, by its

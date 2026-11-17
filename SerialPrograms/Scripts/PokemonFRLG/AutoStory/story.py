@@ -1416,6 +1416,39 @@ class Builder:
                         "p1": u.get("count", 1), "text": u["species"]})
             out.extend(sub)
             return
+        if "unless_boxes" in step:
+            #  The steps that read the PC's boxes (a whole segment: it starts
+            #  with FLY and ends outdoors with its save): skipped when the
+            #  program read the boxes in this run and caught nothing for the
+            #  POKeDEX since.
+            u = step["unless_boxes"]
+            sub = []
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if not sub or sub[0]["type"] != "FLY" or sub[-1]["type"] != "SAVE":
+                raise StoryError("unless_boxes: the steps start with FLY and end with a save (%s)"
+                                 % step.get("label", "?"))
+            if sum(1 for s in sub if s["type"] == "BOXES") != 1 or any(s["type"] == "SAVE" for s in sub[:-1]):
+                raise StoryError("unless_boxes: one look at the boxes, and no save before the last step (%s)"
+                                 % step.get("label", "?"))
+            out.append({"type": "SKIP_IF_BOXES", "label": step.get("label", "The PC's boxes read?"),
+                        "p0": len(sub)})
+            out.extend(sub)
+            return
+        if "boxes" in step:
+            #  The PC's boxes are read (nothing in them is changed). The
+            #  player stands in front of the PC of a Pokemon Center and faces
+            #  it: the walk before this step ended so (talk(..., mode="plain")).
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("boxes: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("boxes: not after the walk to the PC (%s)" % step.get("label", "?"))
+            out.append({"type": "BOXES", "label": step.get("label", "The PC's boxes")})
+            return
         if "got" in step:
             #  The player has this Pokemon now (a gift): one more in the
             #  program's POKeDEX table.
