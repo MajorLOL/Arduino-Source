@@ -2715,7 +2715,20 @@ CastEnd cast_rod(
         case Cast::NO_BITE:
             said = text;
             pbf_wait(context, 200ms);
-            pbf_press_button(context, BUTTON_B, 160ms, 1040ms);
+            //  B closes the text. A press that comes while its last letters
+            //  still print only speeds them up (the text is read as soon as
+            //  "Not even" is there), and the text stays: B again until the
+            //  text box is gone.
+            for (int n = 0; n < 4; n++){
+                pbf_press_button(context, BUTTON_B, 160ms, 640ms);
+                context.wait_for_all_requests();
+                VideoSnapshot screen = console.video().snapshot();
+                WhiteDialogDetector white(COLOR_RED);
+                if (!screen || !white.detect(screen)){
+                    break;
+                }
+            }
+            pbf_wait(context, 300ms);
             context.wait_for_all_requests();
             return CastEnd::NO_BITE;
         case Cast::BITE:

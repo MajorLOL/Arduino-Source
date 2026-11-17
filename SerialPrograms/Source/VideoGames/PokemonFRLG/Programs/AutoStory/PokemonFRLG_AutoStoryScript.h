@@ -260,6 +260,139 @@ struct StoryScript{
 };
 
 
+//  Is step "index" of the segment the check of one trip to a place of the
+//  POKeDEX collection? A SKIP_IF_COLLECTED over steps that have one place
+//  (a DEX step with p2 & 2), no check of their own, and end with the nurse
+//  and a save, their only save. Leaving such a trip out and making that
+//  save leaves the game as the trip would have: at the nurse, saved there.
+//  (The checks of a whole segment or of an island are not trips: they have
+//  the trips in them.)
+inline bool story_plain_trip(const StoryScript& script, const StorySegment& segment, size_t index){
+    if (index >= segment.step_count){
+        return false;
+    }
+    const StoryStep& check = script.step(segment, index);
+    if (check.type != StepType::SKIP_IF_COLLECTED || check.p1 > 0 || check.p0 < 3){
+        return false;
+    }
+    const size_t last = index + (size_t)check.p0;
+    if (last >= segment.step_count){
+        return false;
+    }
+    int places = 0;
+    for (size_t k = index + 1; k <= last; k++){
+        const StoryStep& step = script.step(segment, k);
+        if (step.type == StepType::SKIP_IF_COLLECTED || (step.type == StepType::SAVE && k != last)){
+            return false;
+        }
+        if (step.type == StepType::DEX && step.p2 > 0 && (step.p2 & 2) != 0){
+            places++;
+        }
+    }
+    return places == 1 &&
+        script.step(segment, last).type == StepType::SAVE &&
+        script.step(segment, last - 1).type == StepType::HEAL;
+}
+
+//  Is step "index" the check of the way to a fishing rod? A SKIP_IF_ITEM
+//  for a rod (p2 > 0) over steps that start with FLY (so the player is
+//  outdoors at the check) and end with a save, their only save. Leaving
+//  the way out and making that save leaves the player outdoors, where the
+//  next segment's FLY starts.
+inline bool story_rod_way(const StoryScript& script, const StorySegment& segment, size_t index){
+    if (index >= segment.step_count){
+        return false;
+    }
+    const StoryStep& check = script.step(segment, index);
+    if (check.type != StepType::SKIP_IF_ITEM || check.p2 <= 0 || check.p0 < 2){
+        return false;
+    }
+    const size_t last = index + (size_t)check.p0;
+    if (last >= segment.step_count || script.step(segment, index + 1).type != StepType::FLY){
+        return false;
+    }
+    for (size_t k = index + 1; k < last; k++){
+        if (script.step(segment, k).type == StepType::SAVE){
+            return false;
+        }
+    }
+    return script.step(segment, last).type == StepType::SAVE;
+}
+
+//  Is the segment one for a Pokemon that is there once? Its first step is
+//  the SKIP_IF_OWNED over all its other steps, the next one is FLY (so the
+//  segment starts outdoors), and its last step is a save.
+inline bool story_once_segment(const StoryScript& script, const StorySegment& segment){
+    if (segment.step_count < 3){
+        return false;
+    }
+    const StoryStep& check = script.step(segment, 0);
+    return check.type == StepType::SKIP_IF_OWNED && check.p0 > 0 &&
+        (size_t)check.p0 + 1 == segment.step_count &&
+        script.step(segment, 1).type == StepType::FLY &&
+        script.step(segment, segment.step_count - 1).type == StepType::SAVE;
+}
+
+//  A town or a route of Kanto by its name ("Saffron City", "Route 16"): the
+//  player is outdoors there.
+inline bool story_outdoors(const std::string& map_name){
+    auto ends_with = [&](const std::string& tail){
+        return map_name.size() > tail.size() &&
+            map_name.compare(map_name.size() - tail.size(), tail.size(), tail) == 0;
+    };
+    if (ends_with(" City") || ends_with(" Town")){
+        return true;
+    }
+    const std::string route = "Route ";
+    if (map_name.size() <= route.size() || map_name.compare(0, route.size(), route) != 0){
+        return false;
+    }
+    for (size_t k = route.size(); k < map_name.size(); k++){
+        if (map_name[k] < '0' || map_name[k] > '9'){
+            return false;
+        }
+    }
+    return true;
+}
+
+//  Such a segment is given up from the save it was continued from, at step
+//  "index" (the step after that save): how does the player get to where the
+//  next segment's FLY can start?
+//      WALK_OUT_FIRST  The save is at a nurse (the nurse, the save, then a
+//                      walk that leaves the Pokemon Center by its door):
+//                      that walk, then the segment's last step, its save.
+//      FROM_HERE       The player is outdoors (the step is FLY, or a walk
+//                      that starts in a town or on a route): the save.
+//      NO              Not known: the segment is not given up.
+enum class OnceLeave : uint8_t{
+    NO,
+    WALK_OUT_FIRST,
+    FROM_HERE,
+};
+inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment& segment, size_t index){
+    if (!story_once_segment(script, segment) || index < 2 || index + 1 >= segment.step_count){
+        return OnceLeave::NO;
+    }
+    if (script.step(segment, index - 1).type != StepType::SAVE){
+        return OnceLeave::NO;
+    }
+    const StoryStep& step = script.step(segment, index);
+    if (step.type == StepType::FLY){
+        return OnceLeave::FROM_HERE;
+    }
+    if (step.type != StepType::WALK || step.leg < 0 || (size_t)step.leg >= script.leg_count){
+        return OnceLeave::NO;
+    }
+    const StoryLeg& leg = script.leg(step.leg);
+    if (script.step(segment, index - 2).type == StepType::HEAL){
+        return leg.end == LegEnd::WARP_PUSH || leg.end == LegEnd::WARP_STEP
+            ? OnceLeave::WALK_OUT_FIRST : OnceLeave::NO;
+    }
+    return leg.start_map < script.map_name_count && story_outdoors(script.map_names[leg.start_map])
+        ? OnceLeave::FROM_HERE : OnceLeave::NO;
+}
+
+
 }
 }
 }

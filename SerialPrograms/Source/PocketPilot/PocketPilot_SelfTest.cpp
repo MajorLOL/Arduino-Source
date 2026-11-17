@@ -2603,6 +2603,253 @@ int check_next_steps(Logger& logger){
     return wrong;
 }
 
+//  A place of the collection whose visit fails twice in a row is left out
+//  for the run, and so is the way to a fishing rod (build 33): the place of
+//  a check, the count of the failures, and in the story's data which checks
+//  are one trip from a nurse and back.
+int check_leave_out(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+
+    check(
+        story_trip_place("FishViridian?") == "FishViridian" &&
+        story_trip_place("FishViridian_Visit2?") == "FishViridian" &&
+        story_trip_place("CollectCeruleanCaveB1F_Visit3?") == "CollectCeruleanCaveB1F" &&
+        story_trip_place("CollectSafariCenter2?") == "CollectSafariCenter2" &&
+        story_trip_place("CollectRoute3") == "CollectRoute3",
+        "the place of a trip: its check without the question mark and the number of the visit"
+    );
+    check(
+        story_trip_place("_Visit2?") == "_Visit2" && story_trip_place("Route_Visit?") == "Route_Visit" &&
+        story_trip_place("Route_Visitor?") == "Route_Visitor" && story_trip_place("?").empty() &&
+        story_trip_place("").empty(),
+        "the place of a trip: labels that only look like a visit's"
+    );
+    check(
+        STORY_PLACE_FAILURES == 2 && !story_place_fails_out(0) && !story_place_fails_out(1) &&
+        story_place_fails_out(2) && story_place_fails_out(3) &&
+        !story_fishing_off(0) && !story_fishing_off(1) && story_fishing_off(2),
+        "left out after two failures in a row; fishing after two of its places"
+    );
+    {
+        StoryPlaceFailures places;
+        const bool first = places.failed("FishViridian", true);
+        const bool out_after_one = places.place_out("FishViridian");
+        const bool second = places.failed("FishViridian", true);
+        check(
+            !first && !out_after_one && second && places.place_out("FishViridian") &&
+            places.failures("FishViridian") == 2,
+            "a place is left out at its second failure in a row, not at the first"
+        );
+        check(
+            !places.place_out("FishVermilion") && !places.fishing_out() && places.fishing_left_out == 1,
+            "one fishing place left out leaves the other places in"
+        );
+        places.failed("FishFuchsia", true);
+        const bool fourth = places.failed("FishFuchsia", true);
+        check(
+            fourth && places.fishing_out() && !places.place_out("FishVermilion") &&
+            !places.place_out("SurfFiveIsland"),
+            "two fishing places left out: fishing is off, and the places themselves are not marked"
+        );
+    }
+    {
+        StoryPlaceFailures places;
+        places.failed("CollectRoute3", false);
+        places.went_well("CollectRoute3");
+        const bool again = places.failed("CollectRoute3", false);
+        check(
+            !again && !places.place_out("CollectRoute3") && places.failures("CollectRoute3") == 1,
+            "a visit that goes well in between: the failures are not in a row"
+        );
+        places.failed("CollectRoute3", false);
+        places.failed("the way to the GOOD ROD", false);
+        const bool way = places.failed("the way to the GOOD ROD", false);
+        check(
+            places.place_out("CollectRoute3") && way && places.place_out("the way to the GOOD ROD") &&
+            !places.fishing_out() && places.fishing_left_out == 0,
+            "places that are not fished at (and the way to a rod) do not turn fishing off"
+        );
+        const bool once_more = places.failed("CollectRoute3", false);
+        check(!once_more && places.left_out.size() == 2, "a place is left out once");
+        //  All that build 32 added can be left out; more than that stops
+        //  the program.
+        for (int k = 0; k < STORY_MOST_PLACES_LEFT_OUT - 2; k++){
+            const std::string place = "Place" + std::to_string(k);
+            places.failed(place, false);
+            places.failed(place, false);
+        }
+        const bool at_most = !places.too_many() && places.left_out.size() == (size_t)STORY_MOST_PLACES_LEFT_OUT;
+        places.failed("OneMore", false);
+        places.failed("OneMore", false);
+        check(
+            STORY_MOST_PLACES_LEFT_OUT >= 2 + 2 + 2 + 4 && at_most && places.too_many(),
+            "more places left out than all the new ones together: the program stops"
+        );
+    }
+
+    //  The story's data: the checks that are one trip, and the others.
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    size_t trips = 0;
+    size_t fishing_trips = 0;
+    size_t lap_trips = 0;
+    size_t at_a_nurse = 0;
+    size_t trips_not_named = 0;
+    size_t others = 0;
+    size_t others_named = 0;
+    size_t rod_ways = 0;
+    size_t rod_ways_in_place = 0;
+    std::set<std::string> places;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        for (size_t i = 0; i < segment.step_count; i++){
+            const StoryStep& step = script.step(segment, i);
+            if (step.type == StepType::SKIP_IF_ITEM){
+                if (story_rod_way(script, segment, i)){
+                    rod_ways++;
+                    //  The way is the whole segment: the check of the rod's
+                    //  places, the look into the bag, the way, the save.
+                    const bool whole = i == 1 && i + (size_t)step.p0 + 1 == segment.step_count &&
+                        script.step(segment, 0).type == StepType::SKIP_IF_COLLECTED &&
+                        script.step(segment, 0).p1 == step.p2;
+                    rod_ways_in_place += whole ? 1 : 0;
+                }
+                continue;
+            }
+            if (step.type != StepType::SKIP_IF_COLLECTED || step.p1 > 0){
+                continue;
+            }
+            const std::string label = step.label;
+            const bool named =
+                label.rfind("Collect", 0) == 0 || label.rfind("Fish", 0) == 0 ||
+                label.rfind("Surf", 0) == 0 || label.rfind("Smash", 0) == 0;
+            if (!story_plain_trip(script, segment, i)){
+                others++;
+                others_named += named ? 1 : 0;
+                continue;
+            }
+            trips++;
+            trips_not_named += named ? 0 : 1;
+            places.insert(story_trip_place(label));
+            for (size_t k = i + 1; k <= i + (size_t)step.p0; k++){
+                const StoryStep& in = script.step(segment, k);
+                if (in.type == StepType::DEX && in.p2 > 0 && (in.p2 & 4) != 0){
+                    fishing_trips++;
+                }
+                if (in.type == StepType::DEX && in.p2 > 0 && (in.p2 & 8) != 0){
+                    lap_trips++;
+                }
+            }
+            //  The trip starts where it ends: at the nurse (the step before
+            //  is the nurse, or the save of the trip before).
+            const StepType before = i > 0 ? script.step(segment, i - 1).type : StepType::WALK;
+            at_a_nurse += before == StepType::HEAL || before == StepType::SAVE ? 1 : 0;
+        }
+    }
+    check(
+        trips == 103 && trips_not_named == 0 && others_named == 0,
+        "every visit of a place of the collection is one trip (103), and nothing else is"
+    );
+    check(at_a_nurse == trips, "every trip starts at the nurse it ends at");
+    check(fishing_trips == 12 && lap_trips == 4, "the trips to fish (12) and to walk laps (4)");
+    check(others == 24, "the checks of a segment (15) and of an island or a group (9) are not trips");
+    check(places.size() == 55, "the places of the trips (47 with two visits or three, 8 Safari Games)");
+    check(rod_ways == 2 && rod_ways_in_place == 2, "the two ways to a rod, each a segment of its own that ends with its save");
+
+    //  The segments of the Pokemon that are there once: given up from any
+    //  of their saves, the player gets to where the next segment's FLY can
+    //  start.
+    check(
+        story_once_place("hitmonlee") == "the segment for HITMONLEE" &&
+        story_once_place("mr-mime") == "the segment for MR-MIME",
+        "the segment of a Pokemon that is there once, as a place"
+    );
+    check(
+        story_outdoors("Saffron City") && story_outdoors("Route 16") && story_outdoors("Pallet Town") &&
+        !story_outdoors("Saffron City Pokemon Center 1F") && !story_outdoors("Route 16 House") &&
+        !story_outdoors("Route ") && !story_outdoors(" City") && !story_outdoors("Cinnabar Island") &&
+        !story_outdoors(""),
+        "the towns and routes of Kanto by their names"
+    );
+    size_t once = 0;
+    std::string once_ids;
+    size_t saves_at_a_nurse = 0;
+    size_t saves_outdoors = 0;
+    size_t saves_unknown = 0;
+    size_t walks_out_wrong = 0;
+    for (size_t s = 0; s < script.segment_count; s++){
+        const StorySegment& segment = script.segments[s];
+        if (!story_once_segment(script, segment)){
+            continue;
+        }
+        once++;
+        once_ids += (once_ids.empty() ? "" : ", ") + std::string(segment.id);
+        for (size_t i = 2; i + 1 < segment.step_count; i++){
+            if (script.step(segment, i - 1).type != StepType::SAVE){
+                continue;
+            }
+            switch (story_once_leave(script, segment, i)){
+            case OnceLeave::WALK_OUT_FIRST:{
+                saves_at_a_nurse++;
+                //  The walk leaves the Pokemon Center: the walk after it
+                //  starts on another map, a town.
+                const StoryLeg& out = script.leg(script.step(segment, i).leg);
+                const StoryStep& after = script.step(segment, i + 1);
+                const bool fine =
+                    after.type == StepType::WALK && after.leg >= 0 && (size_t)after.leg < script.leg_count &&
+                    script.leg(after.leg).start_map != out.start_map &&
+                    script.leg(after.leg).start_map < script.map_name_count &&
+                    story_outdoors(script.map_names[script.leg(after.leg).start_map]);
+                walks_out_wrong += fine ? 0 : 1;
+                break;
+            }
+            case OnceLeave::FROM_HERE:
+                saves_outdoors++;
+                break;
+            case OnceLeave::NO:
+                saves_unknown++;
+                break;
+            }
+        }
+    }
+    check(
+        once == 4 && once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL",
+        "the four segments of Pokemon that are there once"
+    );
+    check(
+        saves_at_a_nurse == 2 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
+        "from every save in such a segment the player gets outdoors: at a nurse by the walk out of the Pokemon "
+        "Center (2), or the save is outdoors (2)"
+    );
+    check(
+        story_once_leave(script, script.segments[0], 2) == OnceLeave::NO &&
+        !story_once_segment(script, script.segments[0]) && !story_plain_trip(script, script.segments[0], 0) &&
+        !story_rod_way(script, script.segments[0], 0),
+        "a segment of the story is none of these"
+    );
+
+    logger.log(
+        "AutoStory test: a place that fails twice in a row is left out for the run (in the story's data " +
+        std::to_string(trips) + " trips to " + std::to_string(places.size()) + " places, " +
+        std::to_string(fishing_trips) + " of them to fish and " + std::to_string(lap_trips) + " to walk laps; " +
+        std::to_string(others) + " checks that are not one trip; " + std::to_string(rod_ways) + " ways to a rod; " +
+        std::to_string(once) + " segments of Pokemon that are there once, with " +
+        std::to_string(saves_at_a_nurse + saves_outdoors) + " saves to give them up from): " +
+        std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
 }
 
 
@@ -2627,6 +2874,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_poison_flash(logger);
         failed += check_safari_table(logger);
         failed += check_next_steps(logger);
+        failed += check_leave_out(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

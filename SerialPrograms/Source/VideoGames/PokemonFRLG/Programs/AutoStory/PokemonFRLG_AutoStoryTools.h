@@ -225,6 +225,17 @@ struct StoryRuntime{
     std::set<int> rods_in_bag;
     std::set<int> rods_in_bag_at_save;
     std::set<int> rods_missing;
+    //  The trip to a place of the collection (or the way to a fishing rod)
+    //  that is under way: its place (story_trip_place(); "" = none), the
+    //  last of its steps in the segment, and whether the place is fished
+    //  at. A failure with a trip under way counts for its place ("places":
+    //  failures in a row, which a trip that ends well clears; after
+    //  STORY_PLACE_FAILURES of them the place is left out for the rest of
+    //  the run).
+    std::string trip_place;
+    size_t trip_last = 0;
+    bool trip_fishing = false;
+    StoryPlaceFailures places;
     //  The scene of a gift (CUTSCENE with p4 = 1): its texts are read, and
     //  one of them told of a Pokemon handed over ("received", "nickname",
     //  "transferred"), or its YES/NO box came up (the nickname).

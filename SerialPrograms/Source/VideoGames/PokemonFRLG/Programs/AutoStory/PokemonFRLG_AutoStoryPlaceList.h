@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <map>
+#include <set>
 #include <string>
 
 namespace PokemonAutomation{
@@ -127,6 +128,108 @@ inline bool story_another_round(
     }
     return caught || (!visited && !start_round_used);
 }
+
+//  A place of the collection is one trip from a nurse and back: its check
+//  ("FishViridian?", "FishViridian_Visit2?"), the way there, the place, the
+//  way back, the nurse, a save. The place a check is for: its label without
+//  the question mark and without the number of the visit.
+inline std::string story_trip_place(const std::string& label){
+    std::string place = label;
+    while (!place.empty() && (place.back() == '?' || place.back() == ' ')){
+        place.pop_back();
+    }
+    const std::string visit = "_Visit";
+    const size_t at = place.rfind(visit);
+    if (at != std::string::npos && at > 0 && at + visit.size() < place.size()){
+        bool digits = true;
+        for (size_t k = at + visit.size(); k < place.size(); k++){
+            digits = digits && place[k] >= '0' && place[k] <= '9';
+        }
+        if (digits){
+            place.resize(at);
+        }
+    }
+    return place;
+}
+
+//  The segment of a Pokemon that is there once (a gift, one that stands on
+//  the map) counts as a place too: "the segment for HITMONLEE".
+inline std::string story_once_place(const std::string& slug){
+    std::string name = "the segment for ";
+    for (char ch : slug){
+        name += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+    }
+    return name;
+}
+
+//  A trip that fails is tried again from the last save. After this many
+//  failures in a row at the same place, that place is left out for the rest
+//  of the run and the program goes on with the next one. (16 November 2026:
+//  a place that could not be reached failed four times the same way, two
+//  hours and a quarter, and the program stopped with the rest of the night
+//  not used. And a new kind of place that does not work should not keep the
+//  run from the other kinds.) The same for the way to a fishing rod, and
+//  for the segment of a Pokemon that is there once.
+const int STORY_PLACE_FAILURES = 2;
+inline bool story_place_fails_out(int failures_in_a_row){
+    return failures_in_a_row >= STORY_PLACE_FAILURES;
+}
+
+//  Fishing is the same at every place (the bag, the rod, the text a cast
+//  ends with): with this many fishing places left out for failures, the
+//  other fishing places of the run are left out too.
+const int STORY_FISHING_PLACES_FAILED = 2;
+inline bool story_fishing_off(int fishing_places_left_out){
+    return fishing_places_left_out >= STORY_FISHING_PLACES_FAILED;
+}
+
+//  Places left out are for a run in which most places work. With more than
+//  this many left out, something else is wrong (and each one costs two
+//  failures): the next failure stops the program, as the failures of one
+//  place did before. (All that build 32 added can fail and stay under it:
+//  two ways to a rod, two fishing places, two places of laps, four segments
+//  of Pokemon that are there once.)
+const int STORY_MOST_PLACES_LEFT_OUT = 12;
+
+//  The failures of a run by place.
+struct StoryPlaceFailures{
+    std::map<std::string, int> in_a_row;
+    std::set<std::string> left_out;
+    int fishing_left_out = 0;
+
+    //  A trip to "place" (fished at or not) failed. Is the place left out
+    //  by this failure?
+    bool failed(const std::string& place, bool fishing){
+        const int count = ++in_a_row[place];
+        if (!story_place_fails_out(count) || !left_out.insert(place).second){
+            return false;
+        }
+        if (fishing){
+            fishing_left_out++;
+        }
+        return true;
+    }
+    //  A trip to "place" ended well.
+    void went_well(const std::string& place){
+        in_a_row.erase(place);
+    }
+    int failures(const std::string& place) const{
+        auto iter = in_a_row.find(place);
+        return iter == in_a_row.end() ? 0 : iter->second;
+    }
+    //  Left out for its own failures; and a place fished at, for those of
+    //  fishing.
+    bool place_out(const std::string& place) const{
+        return left_out.count(place) != 0;
+    }
+    bool fishing_out() const{
+        return story_fishing_off(fishing_left_out);
+    }
+    //  Too many places left out for the run to go on like this.
+    bool too_many() const{
+        return left_out.size() > (size_t)STORY_MOST_PLACES_LEFT_OUT;
+    }
+};
 
 
 }

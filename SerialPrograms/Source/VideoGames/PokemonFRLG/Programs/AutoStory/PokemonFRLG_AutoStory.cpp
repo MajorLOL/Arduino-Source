@@ -335,7 +335,8 @@ AutoStory::AutoStory()
     )
     , RETRIES(
         "<b>Retries:</b><br>How many times in a row a failed step is retried (soft reset to the last save) "
-        "before stopping.",
+        "before stopping. In the POKeDEX collection (chapter 20), a place whose visit fails twice in a row is "
+        "left out for the rest of the run instead, and the program goes on with the next place.",
         LockMode::LOCK_WHILE_RUNNING,
         3, 0, 20
     )
@@ -573,6 +574,43 @@ void AutoStory::run_segment(
     rt.no_revives = false;
     rt.no_full_restores = false;
 
+    //  No trip to a place of the collection is under way yet: a trip starts
+    //  at its check (a retry after a reset comes by that check again).
+    rt.trip_place.clear();
+
+    //  The segment of a Pokemon that is there once, continued from a save
+    //  in it (a retry after a reset does not come by its check again): a
+    //  failure counts for the segment, and after two in a row the segment
+    //  is given up for this run. From a save at a nurse: the walk out of
+    //  the Pokemon Center first; then (or from a save outdoors at once) the
+    //  segment's last step, its save, so that the next segment's FLY can
+    //  start. Where the player is not known to get outdoors that way, the
+    //  segment is tried again as before.
+    size_t begin = first_step;
+    size_t jump_after = (size_t)-1;
+    if (first_step > 0 && story_once_segment(script, segment)){
+        const std::string once = story_once_place(script.step(segment, 0).text);
+        const OnceLeave leave = story_once_leave(script, segment, first_step);
+        if (rt.places.place_out(once) && leave != OnceLeave::NO){
+            env.log(
+                once + " failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row (see the errors "
+                "above). Left out for this run: " +
+                (leave == OnceLeave::WALK_OUT_FIRST ? "out of the Pokemon Center, then " : "") +
+                "the segment's last step, its save, and on with what comes after it.",
+                COLOR_ORANGE
+            );
+            if (leave == OnceLeave::WALK_OUT_FIRST){
+                jump_after = first_step;
+            }else{
+                begin = segment.step_count - 1;
+            }
+        }else{
+            rt.trip_place = once;
+            rt.trip_last = segment.step_count - 1;
+            rt.trip_fishing = false;
+        }
+    }
+
     //  Laps for the POKeDEX (a DEX step with p2 & 8): the first and the last
     //  step of the lap under way. A step of it that fails takes the list of
     //  the laps away again.
@@ -612,7 +650,7 @@ void AutoStory::run_segment(
         }
     }
 
-    for (size_t i = first_step; i < segment.step_count; i++){
+    for (size_t i = begin; i < segment.step_count; i++){
         const StoryStep& step = script.step(segment, i);
         const StoryStep* next = i + 1 < segment.step_count ? &script.step(segment, i + 1) : nullptr;
         const bool came = skip_talk;
@@ -622,6 +660,13 @@ void AutoStory::run_segment(
         const bool next_battle = next != nullptr && next->type == StepType::BATTLE;
         const bool next_scene = next != nullptr && (next->type == StepType::BATTLE || next->type == StepType::CUTSCENE);
         const std::string label = step.label;
+
+        //  The trip to a place of the collection is through, its save made:
+        //  the place's failures in a row are over.
+        if (!rt.trip_place.empty() && i > rt.trip_last){
+            rt.places.went_well(rt.trip_place);
+            rt.trip_place.clear();
+        }
 
         rt.segment_id = segment.id;
         rt.segment_steps = segment.step_count;
@@ -1088,7 +1133,43 @@ void AutoStory::run_segment(
                 );
                 i += (size_t)std::max(0, (int)step.p0);
             }else{
-                env.log(label + ": still wanted here: " + names(looked_for) + "." + rare, COLOR_BLUE);
+                //  One trip to one place (not the check of a segment or of
+                //  an island): a place whose trip failed twice in a row is
+                //  left out for the run, and so is fishing after two places
+                //  of it. The trip's last step, the save, is made all the
+                //  same: the player is at the nurse the trip ends at, and a
+                //  failure after this counts from here.
+                const bool trip = step.p1 <= 0 && story_plain_trip(script, segment, i);
+                const std::string place = story_trip_place(label);
+                bool fishing = false;
+                if (trip){
+                    for (size_t k = i + 1; k <= i + (size_t)step.p0; k++){
+                        const StoryStep& place_step = script.step(segment, k);
+                        fishing = fishing ||
+                            (place_step.type == StepType::DEX && place_step.p2 > 0 && (place_step.p2 & 4) != 0);
+                    }
+                }
+                const bool failed_here = trip && rt.places.place_out(place);
+                const bool no_fishing = trip && fishing && rt.places.fishing_out();
+                if (failed_here || no_fishing){
+                    env.log(
+                        label + ": still wanted here: " + names(looked_for) + ". Left out for this run: " +
+                        (failed_here
+                            ? "the visit failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row"
+                            : "fishing failed at " + std::to_string(rt.places.fishing_left_out) + " places") +
+                        " (see the errors above). The next " + std::to_string(step.p0 - 1) +
+                        " steps are skipped; the game is saved here, as after a visit.",
+                        COLOR_ORANGE
+                    );
+                    i += (size_t)std::max(0, (int)step.p0 - 1);
+                }else{
+                    env.log(label + ": still wanted here: " + names(looked_for) + "." + rare, COLOR_BLUE);
+                    if (trip){
+                        rt.trip_place = place;
+                        rt.trip_last = i + (size_t)step.p0;
+                        rt.trip_fishing = fishing;
+                    }
+                }
             }
             break;
         }
@@ -1099,6 +1180,31 @@ void AutoStory::run_segment(
             //  The way to an item, for a bag that has it already. A fishing
             //  rod (p2 - 1) seen in the bag before is not looked for again.
             const int rod = step.p2 > 0 ? (int)step.p2 - 1 : -1;
+            //  The way to a fishing rod counts as a place: after two
+            //  failures in a row it is left out for the run (and the places
+            //  fished at with that rod with it). Its last step, the save,
+            //  is made where the player stands: outdoors, where the next
+            //  segment's FLY starts.
+            const bool way = rod >= 0 && story_rod_way(script, segment, i);
+            const std::string way_name = std::string("the way to the ") + step.text;
+            if (way && rt.places.place_out(way_name)){
+                env.log(
+                    label + ": " + way_name + " failed " + std::to_string(STORY_PLACE_FAILURES) +
+                    " times in a row (see the errors above). Left out for this run, and the places fished at "
+                    "with the " + std::string(step.text) + " with it. The next " + std::to_string(step.p0 - 1) +
+                    " steps are skipped; the game is saved here.",
+                    COLOR_ORANGE
+                );
+                rt.rods_missing.insert(rod);
+                i += (size_t)std::max(0, (int)step.p0 - 1);
+                break;
+            }
+            if (way){
+                //  (From the look into the bag on: that can fail too.)
+                rt.trip_place = way_name;
+                rt.trip_last = i + (size_t)step.p0;
+                rt.trip_fishing = false;
+            }
             const bool known = rod >= 0 && rt.rods_in_bag.count(rod) != 0;
             const bool have = known || story_bag_has(rt, step.p1, rod, step.text, step.text);
             if (have){
@@ -1131,8 +1237,26 @@ void AutoStory::run_segment(
                     COLOR_BLUE
                 );
                 i += (size_t)std::max(0, (int)step.p0);
+            }else if (i == 0 && story_once_segment(script, segment) && rt.places.place_out(story_once_place(slug))){
+                //  Its segment failed twice in a row in this run: left out.
+                //  The segment's last step, its save, is made where the
+                //  player stands (outdoors: the segment starts with FLY).
+                env.log(
+                    label + ": the POKeDEX table has no " + slug + " yet, but " + story_once_place(slug) +
+                    " failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row (see the errors above). "
+                    "Left out for this run. The next " + std::to_string(step.p0 - 1) +
+                    " steps are skipped; the game is saved here.",
+                    COLOR_ORANGE
+                );
+                i += (size_t)std::max(0, (int)step.p0 - 1);
             }else{
                 env.log(label + ": the POKeDEX table has no " + slug + " yet: the next steps go and get it.", COLOR_BLUE);
+                if (i == 0 && story_once_segment(script, segment)){
+                    //  A failure from here to the segment's end counts for it.
+                    rt.trip_place = story_once_place(slug);
+                    rt.trip_last = i + (size_t)step.p0;
+                    rt.trip_fishing = false;
+                }
                 //  One that was left where it is (too few balls) in a round
                 //  or a run before: a new try. (Left by the label of its
                 //  battle step, which is the species' name.)
@@ -1429,6 +1553,16 @@ void AutoStory::run_segment(
                 story_laps_end(rt);
             }
         }
+        if (i == jump_after){
+            //  Out of the Pokemon Center: on to the segment's last step.
+            jump_after = (size_t)-1;
+            i = segment.step_count - 2;
+        }
+    }
+    //  (A trip that ends with the segment.)
+    if (!rt.trip_place.empty()){
+        rt.places.went_well(rt.trip_place);
+        rt.trip_place.clear();
     }
 }
 
@@ -1940,12 +2074,21 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         for (size_t s = 0; s <= first; s++){
             const StorySegment& segment = script.segments[s];
             const size_t end = s == first ? first_step : segment.step_count;
+            //  The steps of a Pokemon that is there once and is gone for
+            //  only when the table has it (SKIP_IF_OWNED): the table alone
+            //  says whether it was caught. A start after them does not (a
+            //  segment of the collection started by hand, with the SNORLAX
+            //  of the segment before still asleep).
+            size_t by_the_table_until = 0;
             for (size_t k = 0; k < end; k++){
                 const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::SKIP_IF_OWNED){
+                    by_the_table_until = std::max(by_the_table_until, k + (size_t)std::max(0, (int)step.p0) + 1);
+                }
                 std::set<std::string> species;
                 if (step.type == StepType::CATCH || step.type == StepType::SKIP_IF_DEX || step.type == StepType::ROAM){
                     species = story_species_list(step.text);
-                }else if (step.type == StepType::BATTLE && step.p1 == 2 &&
+                }else if (step.type == StepType::BATTLE && step.p1 == 2 && k >= by_the_table_until &&
                     rt.legendary_left.count(step.label) == 0
                 ){
                     //  (Not one that was left for later.)
@@ -2301,6 +2444,46 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 std::to_string(failures + 1),
                 COLOR_RED
             );
+            //  A trip to a place of the collection (or the way to a fishing
+            //  rod) was under way: the failure counts for that place, and
+            //  after two in a row the place is left out for the run.
+            bool place_left_now = false;
+            if (!rt.trip_place.empty() && rt.legendary_missed){
+                //  (A legendary Pokemon that was not caught: its tries are
+                //  counted below, not as failures of the place.)
+                rt.trip_place.clear();
+            }
+            if (!rt.trip_place.empty()){
+                const std::string place = rt.trip_place;
+                rt.trip_place.clear();
+                place_left_now = rt.places.failed(place, rt.trip_fishing);
+                const int in_a_row = rt.places.failures(place);
+                if (place_left_now){
+                    env.log(
+                        place + ": failed " + std::to_string(in_a_row) + " times in a row. Left out for the rest "
+                        "of this run: after the reset the program goes on with what comes after it." +
+                        (rt.trip_fishing && rt.places.fishing_out()
+                            ? " Fishing has failed at " + std::to_string(rt.places.fishing_left_out) +
+                                " places now: the other fishing places are left out too."
+                            : std::string()),
+                        COLOR_RED
+                    );
+                }else if (rt.places.place_out(place)){
+                    //  (A segment for a Pokemon that is there once, from a
+                    //  save where the player is not known to get outdoors.)
+                    env.log(
+                        place + ": failure " + std::to_string(in_a_row) + " in a row. It cannot be given up from "
+                        "this save: tried again.",
+                        COLOR_ORANGE
+                    );
+                }else{
+                    env.log(
+                        place + ": failure " + std::to_string(in_a_row) + " in a row (after " +
+                        std::to_string(STORY_PLACE_FAILURES) + " it is left out for the run).",
+                        COLOR_ORANGE
+                    );
+                }
+            }
             const std::string id = segment.id;
             const bool league = id.rfind("C10_03", 0) == 0 || id.rfind("C10_04", 0) == 0;
             if (rt.whited_out && league && league_training != (size_t)-1 && league_losses < 6){
@@ -2540,6 +2723,20 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 }
                 rt.legendary_can_wait.clear();
             }else{
+                //  (A place that was just left out is not tried again: what
+                //  comes after the reset is not one more try of the same.)
+                if (place_left_now){
+                    failures = 0;
+                }
+                if (rt.places.too_many()){
+                    env.log(
+                        std::to_string(rt.places.left_out.size()) + " places were left out in this run after " +
+                        std::to_string(STORY_PLACE_FAILURES) + " failures in a row each: something else is "
+                        "wrong. The program stops here.",
+                        COLOR_RED
+                    );
+                    throw;
+                }
                 failures++;
                 if (failures > RETRIES){
                     if (!saved_since_start && !start_where.empty()){
@@ -2613,6 +2810,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             (rt.short_of_balls ? "no ball was left for a wanted species" : "") +
             ", and the money trip did not make up for it (see the log above). The places that need it were "
             "left out.",
+            COLOR_RED
+        );
+    }
+    if (!rt.places.left_out.empty()){
+        std::string names;
+        for (const std::string& place : rt.places.left_out){
+            names += (names.empty() ? "" : ", ") + place;
+        }
+        env.log(
+            "Left out in this run after " + std::to_string(STORY_PLACE_FAILURES) + " failures in a row: " + names +
+            " (see the errors above). A new run tries them again.",
             COLOR_RED
         );
     }
