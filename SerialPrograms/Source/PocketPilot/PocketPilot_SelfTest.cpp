@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 18 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 23 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2975,11 +2975,13 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 10 &&
+        once == 15 &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
-            "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG",
+            "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
+            "C20_30_MOON_STONE_MANSION, C20_31_MOON_STONE_HIDEOUT, C20_32_MOON_STONE_MT_MOON_1F, "
+            "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
-        "stones, the four trades"
+        "stones, the four trades, the five that fetch a stone"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3013,6 +3015,8 @@ int check_leave_out(Logger& logger){
         const size_t jynx = index_of("C20_27_TRADE_JYNX");
         const size_t mime = index_of("C20_28_TRADE_MR_MIME");
         const size_t lickitung = index_of("C20_29_TRADE_LICKITUNG");
+        const size_t mansion = index_of("C20_30_MOON_STONE_MANSION");
+        const size_t sun_stone = index_of("C20_34_SUN_STONE_RUIN_VALLEY");
         std::set<std::string> missing = {"farfetch-d", "jynx", "mr-mime", "lickitung"};
         auto have = [&](const std::string& slug){
             return missing.count(slug) != 0 ? 0 : 1;
@@ -3020,7 +3024,7 @@ int check_leave_out(Logger& logger){
         std::vector<size_t> left_open;
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
-            lickitung + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            lickitung + 1 == mansion && sun_stone + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3036,12 +3040,14 @@ int check_leave_out(Logger& logger){
         check(
             story_once_open_before(script, story_end, have) == jynx &&
             story_once_open_before(script, lickitung, have) == jynx &&
+            story_once_open_before(script, mansion, have) == jynx &&
             story_once_open_before(script, jynx, have) == jynx,
             "one trade left open among others that were made"
         );
         missing.clear();
         check(
             story_once_open_before(script, story_end, have) == story_end &&
+            story_once_open_before(script, mansion, have) == mansion &&
             story_once_open_before(script, pc_boxes, have) == pc_boxes &&
             story_once_open_before(script, 0, have) == 0 &&
             story_once_open_before(script, story_end + 5, have) == story_end,
@@ -3555,6 +3561,15 @@ int check_boxes(Logger& logger){
             no_moon.size() == 2 && no_moon[0].slug == "vaporeon",
             "the stones they take; to buy: those that are sold, less the ones the bag has; none of a stone that is out"
         );
+        //  The segment that fetches one stone counts only the ones that take it (build 41).
+        check(
+            Boxes::stone_targets_only(targets, "Moon Stone").size() == 1 &&
+            Boxes::stone_targets_only(targets, "Moon Stone")[0].slug == "nidoqueen" &&
+            Boxes::stone_targets_only(targets, "Sun Stone").empty() &&
+            Boxes::stone_targets_only(targets, "").size() == targets.size() &&
+            Boxes::stone_targets_only(no_moon, "Moon Stone").empty(),
+            "only the Pokemon that take the one stone of a segment that fetches it; none of a stone that is out"
+        );
         check(
             Boxes::stone_targets_text(targets) ==
                 "Nidoqueen (NIDORINA, box 2 cell 8, MOON STONE), Vaporeon (EEVEE, box 3 cell 2, WATER STONE), "
@@ -3636,6 +3651,86 @@ int check_boxes(Logger& logger){
             story_stones_place() == "the evolution stones",
             "the segment of the stones: the prize money and the purchase (skipped with the stones in the bag), "
             "then the PC of a Pokemon Center; given up from its own save past its step"
+        );
+    }
+
+    //  The segments that fetch a stone that is not sold (build 41): the
+    //  check carries the stone and the place ("Moon Stone in Mt. Moon 1F"),
+    //  one pick-up that may find nothing, the PC of a Pokemon Center, and
+    //  the segment's save.
+    {
+        check(
+            story_stone_fetch_stone("Moon Stone in Mt. Moon 1F") == "Moon Stone" &&
+            story_stone_fetch_stone("Sun Stone in Ruin Valley") == "Sun Stone" &&
+            story_stone_fetch_stone("").empty() && story_stone_fetch_stone("Moon Stone").empty() &&
+            story_stone_fetch_stone(" in the cave").empty() &&
+            story_stone_fetch_place("Moon Stone in Mt. Moon 1F") == "the Moon Stone in Mt. Moon 1F" &&
+            story_item_may_be_gone("Pick up item (FLAG_HIDE_MT_MOON_1F_POTION)") &&
+            story_item_may_be_gone("Pick up stone: Moon Stone (Mt. Moon 1F)") &&
+            !story_item_may_be_gone("RareCandyMtMoon") && !story_item_may_be_gone(""),
+            "the text of the check of a segment that fetches a stone: the stone, its place; the pick-ups that may find nothing"
+        );
+        std::string fetch_ids;
+        std::set<std::string> fetch_places;
+        int moon_ones = 0;
+        int sun_ones = 0;
+        bool fetch_shape = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            const StoryStep& first = script.step(segment, 0);
+            if (segment.step_count < 3 || first.type != StepType::SKIP_IF_NO_STONES || first.text == nullptr ||
+                first.text[0] == '\0'
+            ){
+                continue;
+            }
+            fetch_ids += (fetch_ids.empty() ? "" : ", ") + std::string(segment.id);
+            const std::string stone = story_stone_fetch_stone(first.text);
+            const Boxes::StoneKind* kind = Boxes::stone_kind(stone);
+            fetch_places.insert(story_stone_fetch_place(first.text));
+            moon_ones += stone == "Moon Stone" ? 1 : 0;
+            sun_ones += stone == "Sun Stone" ? 1 : 0;
+            int picks = 0;
+            int pcs = 0;
+            size_t pick_at = 0;
+            size_t pc_at = 0;
+            for (size_t k = 1; k < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::TALK && step.label != nullptr &&
+                    std::string(step.label).rfind("Pick up stone", 0) == 0
+                ){
+                    picks++;
+                    pick_at = k;
+                }
+                if (step.type == StepType::STONES){
+                    pcs++;
+                    pc_at = k;
+                }
+            }
+            fetch_shape = fetch_shape && story_once_segment(script, segment) && kind != nullptr && kind->mart < 0 &&
+                picks == 1 && pcs == 1 && pick_at < pc_at &&
+                story_item_may_be_gone(script.step(segment, pick_at).label) &&
+                story_once_leave(script, segment, pc_at) == OnceLeave::PAST_STEP;
+        }
+        check(
+            fetch_ids == "C20_30_MOON_STONE_MANSION, C20_31_MOON_STONE_HIDEOUT, C20_32_MOON_STONE_MT_MOON_1F, "
+                "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY" &&
+            moon_ones == 4 && sun_ones == 1 && fetch_places.size() == 5 && fetch_shape,
+            "the five segments that fetch a stone (4 Moon Stones, the Sun Stone): each its own place, one pick-up, "
+            "one PC, given up from its own save past it"
+        );
+        const StoryStep& plain = script.step(script.segments[0], 0);
+        size_t all_stones = script.segment_count;
+        for (size_t s = 0; s < script.segment_count; s++){
+            if (std::string(script.segments[s].id) == "C20_25_STONES"){
+                all_stones = s;
+            }
+        }
+        check(
+            plain.type != StepType::SKIP_IF_NO_STONES && all_stones < script.segment_count &&
+            script.step(script.segments[all_stones], 0).type == StepType::SKIP_IF_NO_STONES &&
+            (script.step(script.segments[all_stones], 0).text == nullptr ||
+                script.step(script.segments[all_stones], 0).text[0] == '\0'),
+            "the segment of all the stones has no text in its check: it is not one that fetches"
         );
     }
 
@@ -3763,7 +3858,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES and four of trades): " +
+        ", C20_25_STONES, four of trades and five that fetch a stone): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

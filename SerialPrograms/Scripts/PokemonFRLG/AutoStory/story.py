@@ -1491,6 +1491,10 @@ class Builder:
             #  with FLY and ends outdoors with its save): skipped when the
             #  boxes have nothing that evolves with a stone of the bag or of
             #  the Department Store.
+            #  With "fetch" ("Moon Stone in Mt. Moon": the stone, then where
+            #  the steps pick it up) the segment is for that one stone: it is
+            #  skipped when nothing in the boxes evolves with it, and only
+            #  that stone is used at its PC step.
             u = step["unless_no_stones"]
             sub = []
             for s in u["steps"]:
@@ -1500,8 +1504,15 @@ class Builder:
                                  % step.get("label", "?"))
             if sum(1 for s in sub if s["type"] == "STONES") != 1:
                 raise StoryError("unless_no_stones: one step for the stones (%s)" % step.get("label", "?"))
-            out.append({"type": "SKIP_IF_NO_STONES", "label": step.get("label", "Anything to evolve with a stone?"),
-                        "p0": len(sub)})
+            check = {"type": "SKIP_IF_NO_STONES", "label": step.get("label", "Anything to evolve with a stone?"),
+                     "p0": len(sub)}
+            fetch = u.get("fetch")
+            if fetch:
+                if " in " not in fetch or fetch.split(" in ")[0] not in ("Moon Stone", "Sun Stone"):
+                    raise StoryError("unless_no_stones: fetch is \"Moon Stone in <place>\" or \"Sun Stone in "
+                                     "<place>\" (%s: %s)" % (step.get("label", "?"), fetch))
+                check["text"] = fetch
+            out.append(check)
             out.extend(sub)
             return
         if "unless_stones_in_bag" in step:
@@ -2360,9 +2371,15 @@ class Builder:
         goal_origin = tuple(bp["from"]) if bp.get("from") else None
         v0 = self.engine.view(mid)
         keys = {}
+        balls = set()
         for o in self.state.objects(m):
             if o["graphics"].endswith("PUSHABLE_BOULDER"):
                 keys[(o["x"], o["y"])] = o["key"]
+            elif o["graphics"].endswith("ITEM_BALL"):
+                #  An object on the tile: a boulder is not pushed onto it
+                #  (TryPushBoulder: GetCollisionAtCoords). The Sun Stone of
+                #  Ruin Valley lies at the end of a dead end of boulders.
+                balls.add((o["x"], o["y"]))
         start_cfg = frozenset(keys.keys())
 
         #  Walk graph of this map without boulders (computed once).
@@ -2405,7 +2422,7 @@ class Builder:
                 return None
             t = v0.tile(nx, ny)
             beh = self.d.behaviors.name(t[3])
-            if (nx, ny) in cfg or (nx, ny) in v0.blocked:
+            if (nx, ny) in cfg or (nx, ny) in v0.blocked or (nx, ny) in balls:
                 return None
             if beh == "MB_FALL_WARP":
                 return (nx, ny)

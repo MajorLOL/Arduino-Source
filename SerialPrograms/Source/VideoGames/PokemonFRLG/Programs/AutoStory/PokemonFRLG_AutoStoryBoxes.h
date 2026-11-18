@@ -701,6 +701,20 @@ inline std::vector<StoneTarget> stone_targets(
     return targets;
 }
 
+//  Of those, the ones that take this stone (all of them without one).
+inline std::vector<StoneTarget> stone_targets_only(const std::vector<StoneTarget>& targets, const std::string& stone){
+    if (stone.empty()){
+        return targets;
+    }
+    std::vector<StoneTarget> only;
+    for (const StoneTarget& target : targets){
+        if (target.stone == stone){
+            only.push_back(target);
+        }
+    }
+    return only;
+}
+
 //  How many of each stone they take, in the order of stone_kinds().
 inline std::vector<std::pair<std::string, int>> stones_needed(const std::vector<StoneTarget>& targets){
     std::vector<std::pair<std::string, int>> needed;

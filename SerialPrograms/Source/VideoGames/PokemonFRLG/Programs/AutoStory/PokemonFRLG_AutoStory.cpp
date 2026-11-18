@@ -561,7 +561,9 @@ bool league_again_segment(const std::string& id){
 //  place for the failures of a run: by its first step.
 std::string once_place_of(const StoryStep& check){
     return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() :
-        check.type == StepType::SKIP_IF_NO_STONES ? story_stones_place() : story_once_place(check.text);
+        check.type == StepType::SKIP_IF_NO_STONES
+            ? (check.text != nullptr && check.text[0] != '\0' ? story_stone_fetch_place(check.text) : story_stones_place())
+            : story_once_place(check.text);
 }
 
 const char* const BOXES_FILE = "PokemonFRLG-AutoStory-Boxes.txt";
@@ -882,7 +884,7 @@ void AutoStory::run_segment(
             }
             //  p1: the one talked to walks around, A for that many seconds.
             if (!story_talk_start(
-                rt, label, talk_alt(step), label.rfind("Pick up item", 0) == 0, std::max(0, (int)step.p1)
+                rt, label, talk_alt(step), story_item_may_be_gone(label), std::max(0, (int)step.p1)
             )){
                 break;
             }
@@ -1436,11 +1438,19 @@ void AutoStory::run_segment(
             //  Evolution stones (experimental): the species the POKeDEX
             //  table does not have and whose earlier form lies in a box,
             //  with a stone that is in the bag or sold.
-            const std::string place = story_stones_place();
+            //  With a text ("Moon Stone in Mt. Moon", build 41) the segment
+            //  fetches that one stone where the game has it and evolves
+            //  with it: skipped when nothing in the boxes takes it. The
+            //  bag is not looked at (the stone is picked up on the way).
+            const std::string fetch = step.text != nullptr ? std::string(step.text) : std::string();
+            const std::string only = story_stone_fetch_stone(fetch);
+            const bool fetching = !only.empty();
+            const std::string place = fetching ? story_stone_fetch_place(fetch) : story_stones_place();
             const size_t skip = (size_t)std::max(0, (int)step.p0);
             //  The bag is looked at anew each time the segment starts.
             rt.stones_in_bag.clear();
             rt.stones_out.clear();
+            rt.stones_only = only;
             if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
                 env.log(
                     label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
@@ -1451,13 +1461,15 @@ void AutoStory::run_segment(
                 break;
             }
             const size_t all = story_stone_targets(rt).size();
-            const std::vector<AutoStoryBoxes::StoneTarget> targets = story_stones_not_sold(rt, label);
+            const std::vector<AutoStoryBoxes::StoneTarget> targets =
+                fetching ? story_stone_targets(rt) : story_stones_not_sold(rt, label);
             if (targets.empty()){
                 env.log(
                     label + ": " +
                     (all == 0
-                        ? std::string("the boxes have no Pokemon that evolves with a stone into a species the "
-                            "POKeDEX table still wants")
+                        ? std::string("the boxes have no Pokemon that evolves with ") +
+                            (fetching ? "a " + only : std::string("a stone")) + " into a species the "
+                            "POKeDEX table still wants"
                         : "the stones for the " + std::to_string(all) + " of the boxes that could evolve are "
                             "not in the bag and not sold") +
                     ": the next " + std::to_string(skip) + " steps are skipped.",
@@ -1474,8 +1486,9 @@ void AutoStory::run_segment(
                 i += skip - 1;
             }else{
                 env.log(
-                    label + ": " + std::to_string(targets.size()) + " of the boxes can evolve with a stone "
-                    "(experimental): " + AutoStoryBoxes::stone_targets_text(targets) + ".",
+                    label + ": " + std::to_string(targets.size()) + " of the boxes can evolve with " +
+                    (fetching ? "a " + only + ", to pick up at the way (" + place + ")" : std::string("a stone")) +
+                    " (experimental): " + AutoStoryBoxes::stone_targets_text(targets) + ".",
                     COLOR_BLUE
                 );
                 if (i == 0 && story_once_segment(script, segment)){
@@ -1521,6 +1534,7 @@ void AutoStory::run_segment(
                 break;
             }
             story_stones(rt, label, [&]{ write_boxes_file(env, rt, label, false); });
+            rt.stones_only.clear();
             break;
         case StepType::BOX_OUT:{
             //  A Pokemon of a box into the party's sixth place (experimental).

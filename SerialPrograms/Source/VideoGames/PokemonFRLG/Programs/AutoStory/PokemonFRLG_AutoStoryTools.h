@@ -276,6 +276,9 @@ struct StoryRuntime{
     //  to be had (not in the bag and not sold, or not there after buying).
     std::set<std::string> stones_in_bag;
     std::set<std::string> stones_out;
+    //  The segment that fetches one stone (build 41): only that stone counts
+    //  (story_stone_targets()), from its check to its PC step. Empty: all.
+    std::string stones_only;
     //  The scene of a gift (CUTSCENE with p4 = 1): its texts are read, and
     //  one of them told of a Pokemon handed over ("received", "nickname",
     //  "transferred"), or its YES/NO box came up (the nickname).

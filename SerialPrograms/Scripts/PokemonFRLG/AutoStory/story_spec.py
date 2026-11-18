@@ -3234,6 +3234,114 @@ def trade_segment(seg_id, get, give, fly_to, pc_map, trader_map, trader_xy, titl
 CHAPTER20 += [trade_segment(*trade) for trade in TRADES]
 
 
+# ------------------------------------- chapter 20, the stones that are not sold
+#  EXPERIMENTAL (PocketPilot build 41, not run on a console when written).
+#  The Celadon Department Store sells no MOON STONE and no SUN STONE, and
+#  the stones segment (C20_25) leaves what needs them: Clefable (CLEFAIRY),
+#  Wigglytuff (JIGGLYPUFF), Bellossom (GLOOM). The game has them to pick up
+#  (data/maps/*/map.json; the item ball or hidden item, with its flag):
+#      MOON STONE   Pokemon Mansion 1F       hidden item at (2, 21)
+#                   Rocket Hideout B2F       item ball at (2, 5)
+#                   Mt. Moon 1F              item ball at (3, 2)
+#                   Mt. Moon B2F             hidden item at (20, 16), by Surf
+#      SUN STONE    Six Island, Ruin Valley  item ball at (43, 32)
+#  (A fifth MOON STONE, from Lostelle's father at the Joyful Game Corner,
+#  the story takes itself.) One segment for each place, in this order, each
+#  skipped when nothing in the boxes takes that stone (StepType::
+#  SKIP_IF_NO_STONES with the stone as its text: the second Moon Stone
+#  place is only visited when the first one did not make the last one).
+#  A place that is empty already (taken in an earlier playthrough: the
+#  item is not there, "Pick up stone" is tolerant like "Pick up item")
+#  costs the way and no more: the next place is tried. Each segment
+#  evolves at once with the stone it picked up (PC of Viridian City, as the
+#  stones segment).
+def stone_pick(map_id, xy, flag, place):
+    """The stone is an item ball or a hidden item: A facing its tile. The
+    label's start makes the program take "nothing there" as "taken before"
+    (story_item_may_be_gone())."""
+    return [talk(map_id, xy=xy, mode="talk", label="Pick up stone: " + place), setst(flags=[flag])]
+
+
+def stone_fetch_segment(seg_id, fetch, fly_to, way, title):
+    """FLY to a town near the stone, the way and the pick-up (way), out,
+    FLY to Viridian City, the PC, the stone is used, out, save."""
+    steps = [fly(fly_to, seg_id + "_Fly", force=True)] + way + [
+        {"outside": True, "label": seg_id + "_OutCave"},
+        fly("HEAL_LOCATION_VIRIDIAN_CITY", seg_id + "_FlyViridian", force=True),
+        talk(PC["VIRIDIAN"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"stones": True, "label": "Stones"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "title": title,
+            "steps": [{"unless_no_stones": {"steps": steps, "fetch": fetch}, "label": "A stone to fetch?"}]}
+
+
+def sun_stone_segment(seg_id):
+    """The Sun Stone lies on Six Island (Ruin Valley): the Seagallop from
+    Vermilion City to One Island, the Rainbow Pass ferry to Six Island, the
+    way back to Vermilion City (as the stones segment's way to Five Island).
+    No save on the islands: from one a failed segment would start from a
+    save where FLY does not work (no FLY leaves the islands), so the
+    game stays saved where the segment before it ended."""
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+        heal(PC["VERMILION"], seg_id + "_ToNurse"),
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 1, "MAP_SIX_ISLAND_HARBOR", "FerryToSixIsland")
+    steps += [heal(SIX_PC, "HarborToSixIslandNurse")]
+    #  The ball lies behind three boulders (41,32), (41,33) and (42,33) in
+    #  a dead end: A east, the one below it south, the third one east, A
+    #  north (the puzzle solver finds that). They stand as they were when
+    #  Ruin Valley loads again.
+    steps += [goto("MAP_SIX_ISLAND_RUIN_VALLEY", [[40, 32]], "ToSunStoneBoulders"),
+              {"boulder": {"open_to": [[42, 32], [43, 33]]}, "label": "SunStoneBoulders"}]
+    steps += stone_pick("MAP_SIX_ISLAND_RUIN_VALLEY", [43, 32], "FLAG_HIDE_SIX_ISLAND_RUIN_VALLEY_SUN_STONE",
+                        "Sun Stone (Ruin Valley)")
+    steps += [heal(SIX_PC, "RuinValleyToNurse")]
+    steps += rainbow_ferry("MAP_SIX_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    steps += [
+        pos("MAP_VERMILION_CITY", 23, 32),
+        fly("HEAL_LOCATION_VIRIDIAN_CITY", seg_id + "_FlyViridian", force=True),
+        talk(PC["VIRIDIAN"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"stones": True, "label": "Stones"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: the Sun Stone of Ruin Valley (Six Island), then evolving with it",
+            "steps": [{"unless_no_stones": {"steps": steps, "fetch": "Sun Stone in Ruin Valley"},
+                       "label": "A stone to fetch?"}]}
+
+
+CHAPTER20 += [
+    stone_fetch_segment(
+        "C20_30_MOON_STONE_MANSION", "Moon Stone in the Pokemon Mansion", "HEAL_LOCATION_CINNABAR_ISLAND",
+        stone_pick("MAP_POKEMON_MANSION_1F", [2, 21], "FLAG_HIDDEN_ITEM_POKEMON_MANSION_1F_MOON_STONE",
+                   "Moon Stone (Pokemon Mansion 1F)"),
+        "POKeDEX collection: a Moon Stone of the Pokemon Mansion, then evolving with it"),
+    stone_fetch_segment(
+        "C20_31_MOON_STONE_HIDEOUT", "Moon Stone in the Rocket Hideout", "HEAL_LOCATION_CELADON_CITY",
+        stone_pick("MAP_ROCKET_HIDEOUT_B2F", [2, 5], "FLAG_HIDE_ROCKET_HIDEOUT_B2F_MOON_STONE",
+                   "Moon Stone (Rocket Hideout B2F)"),
+        "POKeDEX collection: a Moon Stone of the Rocket Hideout, then evolving with it"),
+    stone_fetch_segment(
+        "C20_32_MOON_STONE_MT_MOON_1F", "Moon Stone in Mt. Moon 1F", "HEAL_LOCATION_ROUTE4",
+        stone_pick("MAP_MT_MOON_1F", [3, 2], "FLAG_HIDE_MT_MOON_1F_MOON_STONE", "Moon Stone (Mt. Moon 1F)"),
+        "POKeDEX collection: a Moon Stone of Mt. Moon 1F, then evolving with it"),
+    stone_fetch_segment(
+        "C20_33_MOON_STONE_MT_MOON_B2F", "Moon Stone in Mt. Moon B2F", "HEAL_LOCATION_CERULEAN_CITY",
+        stone_pick("MAP_MT_MOON_B2F", [20, 16], "FLAG_HIDDEN_ITEM_MT_MOON_B2F_MOON_STONE",
+                   "Moon Stone (Mt. Moon B2F)"),
+        "POKeDEX collection: a Moon Stone of Mt. Moon B2F (by Surf), then evolving with it"),
+    sun_stone_segment("C20_34_SUN_STONE_RUIN_VALLEY"),
+]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

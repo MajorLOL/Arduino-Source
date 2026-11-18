@@ -896,7 +896,7 @@ std::vector<AutoStoryBoxes::TableRow> story_evolve_table(StoryRuntime& rt){
 }
 
 std::vector<AutoStoryBoxes::StoneTarget> story_stone_targets(StoryRuntime& rt){
-    return stone_targets(evolve_plan(story_evolve_table(rt), rt.boxes), rt.stones_out);
+    return stone_targets_only(stone_targets(evolve_plan(story_evolve_table(rt), rt.boxes), rt.stones_out), rt.stones_only);
 }
 
 namespace{
@@ -982,6 +982,20 @@ void story_buy_stones(StoryRuntime& rt, const std::string& label){
 
 int story_stones(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed){
     ConsoleHandle& console = rt.console;
+    //  The segment that fetched one stone: without it in the bag (the place
+    //  was empty already, or the way did not end there) nothing is done.
+    if (!rt.stones_only.empty()){
+        const StoneKind* only = stone_kind(rt.stones_only);
+        if (only == nullptr || !stone_in_bag(rt, *only)){
+            console.log(
+                label + ": no " + (only != nullptr ? std::string(only->item) : rt.stones_only) +
+                " in the bag (it was not at the place, or taken before): nothing is evolved.",
+                COLOR_ORANGE
+            );
+            return 0;
+        }
+        rt.stones_in_bag.insert(rt.stones_only);
+    }
     //  The one that makes room: the party's sixth, when it is not of the team.
     std::string extra;
     const int extra_level = story_read_slot(rt, 6, &extra);

@@ -7039,6 +7039,11 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -7170,6 +7175,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_27_TRADE_JYNX", "POKeDEX collection: the game's trades: Jynx for a Poliwhirl (Cerulean City)", 20, true, 1665, 1},
     {"C20_28_TRADE_MR_MIME", "POKeDEX collection: the game's trades: Mr. Mime for an Abra (the house on Route 2)", 20, true, 1666, 1},
     {"C20_29_TRADE_LICKITUNG", "POKeDEX collection: the game's trades: Lickitung for a Golduck (the gate of Route 18)", 20, true, 1667, 1},
+    {"C20_30_MOON_STONE_MANSION", "POKeDEX collection: a Moon Stone of the Pokemon Mansion, then evolving with it", 20, true, 1668, 1},
+    {"C20_31_MOON_STONE_HIDEOUT", "POKeDEX collection: a Moon Stone of the Rocket Hideout, then evolving with it", 20, true, 1669, 1},
+    {"C20_32_MOON_STONE_MT_MOON_1F", "POKeDEX collection: a Moon Stone of Mt. Moon 1F, then evolving with it", 20, true, 1670, 1},
+    {"C20_33_MOON_STONE_MT_MOON_B2F", "POKeDEX collection: a Moon Stone of Mt. Moon B2F (by Surf), then evolving with it", 20, true, 1671, 1},
+    {"C20_34_SUN_STONE_RUIN_VALLEY", "POKeDEX collection: the Sun Stone of Ruin Valley (Six Island), then evolving with it", 20, true, 1672, 1},
 };
 
 }
@@ -14226,6 +14236,11 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -14357,6 +14372,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_27_TRADE_JYNX", "POKeDEX collection: the game's trades: Jynx for a Poliwhirl (Cerulean City)", 20, true, 1666, 1},
     {"C20_28_TRADE_MR_MIME", "POKeDEX collection: the game's trades: Mr. Mime for an Abra (the house on Route 2)", 20, true, 1667, 1},
     {"C20_29_TRADE_LICKITUNG", "POKeDEX collection: the game's trades: Lickitung for a Golduck (the gate of Route 18)", 20, true, 1668, 1},
+    {"C20_30_MOON_STONE_MANSION", "POKeDEX collection: a Moon Stone of the Pokemon Mansion, then evolving with it", 20, true, 1669, 1},
+    {"C20_31_MOON_STONE_HIDEOUT", "POKeDEX collection: a Moon Stone of the Rocket Hideout, then evolving with it", 20, true, 1670, 1},
+    {"C20_32_MOON_STONE_MT_MOON_1F", "POKeDEX collection: a Moon Stone of Mt. Moon 1F, then evolving with it", 20, true, 1671, 1},
+    {"C20_33_MOON_STONE_MT_MOON_B2F", "POKeDEX collection: a Moon Stone of Mt. Moon B2F (by Surf), then evolving with it", 20, true, 1672, 1},
+    {"C20_34_SUN_STONE_RUIN_VALLEY", "POKeDEX collection: the Sun Stone of Ruin Valley (Six Island), then evolving with it", 20, true, 1673, 1},
 };
 
 }
@@ -23080,6 +23100,233 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_DOWN, 3, RunKind::WALK},
     {DPAD_LEFT, 4, RunKind::WALK},
     {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 7, RunKind::WALK},
+    {DPAD_UP, 7, RunKind::WALK},
+    {DPAD_LEFT, 13, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_UP, 10, RunKind::CHECKED},
+    {DPAD_LEFT, 5, RunKind::CHECKED},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 7, RunKind::CHECKED},
+    {DPAD_RIGHT, 5, RunKind::CHECKED},
+    {DPAD_DOWN, 5, RunKind::CHECKED},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_LEFT, 7, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_LEFT, 7, RunKind::WALK},
+    {DPAD_UP, 9, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_RIGHT, 5, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 11, RunKind::WALK},
+    {DPAD_LEFT, 17, RunKind::SPIN},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::SPIN},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 8, RunKind::SPIN},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::SPIN},
+    {DPAD_RIGHT, 13, RunKind::WALK},
+    {DPAD_UP, 6, RunKind::WALK},
+    {DPAD_LEFT, 5, RunKind::WALK},
+    {DPAD_LEFT, 5, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 7, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 12, RunKind::CHECKED},
+    {DPAD_RIGHT, 8, RunKind::CHECKED},
+    {DPAD_UP, 11, RunKind::CHECKED},
+    {DPAD_RIGHT, 9, RunKind::CHECKED},
+    {DPAD_UP, 5, RunKind::CHECKED},
+    {DPAD_LEFT, 6, RunKind::CHECKED},
+    {DPAD_LEFT, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_LEFT, 10, RunKind::CHECKED},
+    {DPAD_DOWN, 9, RunKind::CHECKED},
+    {DPAD_LEFT, 15, RunKind::CHECKED},
+    {DPAD_UP, 15, RunKind::CHECKED},
+    {DPAD_DOWN, 15, RunKind::CHECKED},
+    {DPAD_RIGHT, 15, RunKind::CHECKED},
+    {DPAD_UP, 9, RunKind::CHECKED},
+    {DPAD_RIGHT, 9, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_RIGHT, 7, RunKind::CHECKED},
+    {DPAD_DOWN, 6, RunKind::CHECKED},
+    {DPAD_LEFT, 11, RunKind::CHECKED},
+    {DPAD_DOWN, 10, RunKind::CHECKED},
+    {DPAD_LEFT, 6, RunKind::CHECKED},
+    {DPAD_DOWN, 12, RunKind::CHECKED},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_LEFT, 11, RunKind::WALK},
+    {DPAD_UP, 9, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_UP, 8, RunKind::WALK},
+    {DPAD_RIGHT, 13, RunKind::WALK},
+    {DPAD_UP, 37, RunKind::WALK, 0x800000100ull},
+    {DPAD_LEFT, 5, RunKind::WALK},
+    {DPAD_DOWN, 28, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 14, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 9, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 31, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::JUMP},
+    {DPAD_LEFT, 14, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::JUMP},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_LEFT, 15, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_LEFT, 9, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 5, RunKind::CHECKED},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::CHECKED},
+    {DPAD_UP, 4, RunKind::CHECKED, 0x8ull},
+    {DPAD_RIGHT, 9, RunKind::CHECKED},
+    {DPAD_DOWN, 10, RunKind::CHECKED, 0x20ull},
+    {DPAD_RIGHT, 6, RunKind::CHECKED},
+    {DPAD_LEFT, 6, RunKind::CHECKED},
+    {DPAD_UP, 10, RunKind::CHECKED, 0x10ull},
+    {DPAD_LEFT, 9, RunKind::CHECKED},
+    {DPAD_DOWN, 4, RunKind::CHECKED, 0x1ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 5, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 12, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 11, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 1, RunKind::DISMOUNT},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 11, RunKind::WALK, 0x8ull},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_RIGHT, 22, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 1, RunKind::DISMOUNT},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 12, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::CHECKED},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 12, RunKind::WALK, 0x20ull},
+    {DPAD_LEFT, 11, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_DOWN, 8, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::CHECKED},
+    {DPAD_LEFT, 1, RunKind::CHECKED},
+    {DPAD_UP, 3, RunKind::CHECKED},
+    {DPAD_UP, 8, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::CHECKED},
+    {DPAD_RIGHT, 5, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 9, RunKind::WALK},
+    {DPAD_UP, 12, RunKind::WALK, 0x10ull},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::CHECKED},
+    {DPAD_UP, 11, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK, 0x2ull},
+    {DPAD_LEFT, 21, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 11, RunKind::WALK, 0x80ull},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
 };
 
 inline constexpr const char* MAP_NAMES[] = {
@@ -25952,6 +26199,65 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_29_TRADE_LICKITUNG_BackToThePC_2", 8693, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 126, 48, 9},  //  2633
     {"C20_29_TRADE_LICKITUNG_BackToThePC_3", 8698, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 50, 7, 8},  //  2634
     {"C20_29_TRADE_LICKITUNG_Out", 8701, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 11, 2},  //  2635
+    {"Pick up stone: Moon Stone (Pokemon Mansion 1F)", 8704, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 23, 14, 12},  //  2636
+    {"Pick up stone: Moon Stone (Pokemon Mansion 1F)_1", 8708, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 94, 8, 33},  //  2637
+    {"C20_30_MOON_STONE_MANSION_OutCave", 8711, 3, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 94, 3, 21},  //  2638
+    {"ToThePC", 8714, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 26, 27},  //  2639
+    {"ToThePC_1", 8714, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 7, 8},  //  2640
+    {"C20_30_MOON_STONE_MANSION_Out", 8717, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 11, 2},  //  2641
+    {"Pick up stone: Moon Stone (Rocket Hideout B2F)", 8720, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 0, 48, 12},  //  2642
+    {"Pick up stone: Moon Stone (Rocket Hideout B2F)_1", 8724, 4, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 10, 9, 13},  //  2643
+    {"Pick up stone: Moon Stone (Rocket Hideout B2F)_2", 8728, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 106, 12, 2},  //  2644
+    {"Pick up stone: Moon Stone (Rocket Hideout B2F)_3", 8729, 5, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 107, 28, 2},  //  2645
+    {"C20_31_MOON_STONE_HIDEOUT_OutCave", 8734, 11, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 107, 2, 4},  //  2646
+    {"C20_31_MOON_STONE_HIDEOUT_OutCave_1", 8745, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 106, 17, 2},  //  2647
+    {"C20_31_MOON_STONE_HIDEOUT_OutCave_2", 8746, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 10, 15, 2},  //  2648
+    {"ToThePC", 8750, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 26, 27},  //  2649
+    {"ToThePC_1", 8750, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 7, 8},  //  2650
+    {"C20_31_MOON_STONE_HIDEOUT_Out", 8753, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 11, 2},  //  2651
+    {"Pick up stone: Moon Stone (Mt. Moon 1F)", 8756, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 144, 12, 6},  //  2652
+    {"Pick up stone: Moon Stone (Mt. Moon 1F)_1", 8758, 11, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 72, 18, 37},  //  2653
+    {"C20_32_MOON_STONE_MT_MOON_1F_OutCave", 8769, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 72, 3, 3},  //  2654
+    {"ToThePC", 8780, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 26, 27},  //  2655
+    {"ToThePC_1", 8780, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 7, 8},  //  2656
+    {"C20_32_MOON_STONE_MT_MOON_1F_Out", 8783, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 11, 2},  //  2657
+    {"Pick up stone: Moon Stone (Mt. Moon B2F)", 8786, 10, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 16, 22, 20},  //  2658
+    {"Pick up stone: Moon Stone (Mt. Moon B2F)_1", 8796, 17, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 137, 6, 16},  //  2659
+    {"Pick up stone: Moon Stone (Mt. Moon B2F)_2", 8813, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 73, 45, 4},  //  2660
+    {"Pick up stone: Moon Stone (Mt. Moon B2F)_3", 8815, 5, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 74, 5, 10},  //  2661
+    {"C20_33_MOON_STONE_MT_MOON_B2F_OutCave", 8820, 5, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 74, 19, 16},  //  2662
+    {"C20_33_MOON_STONE_MT_MOON_B2F_OutCave_1", 8825, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 73, 39, 4},  //  2663
+    {"ToThePC", 8827, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 26, 27},  //  2664
+    {"ToThePC_1", 8827, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 7, 8},  //  2665
+    {"C20_33_MOON_STONE_MT_MOON_B2F_Out", 8830, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 11, 2},  //  2666
+    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse", 8833, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 217, 15, 7},  //  2667
+    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse_1", 8833, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 221, 7, 8},  //  2668
+    {"ToTheSeagallop", 8834, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 7, 4},  //  2669
+    {"ToTheSeagallop_1", 8835, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 217, 15, 7},  //  2670
+    {"ToTheSeagallop_2", 8840, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 217, 24, 26},  //  2671
+    {"FerryToSixIsland", 8845, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 76, 8, 5},  //  2672
+    {"HarborToSixIslandNurse", 8845, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 189, 8, 5},  //  2673
+    {"HarborToSixIslandNurse_1", 8846, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 11, 23},  //  2674
+    {"HarborToSixIslandNurse_2", 8847, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 191, 7, 8},  //  2675
+    {"ToSunStoneBoulders", 8848, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 191, 7, 4},  //  2676
+    {"ToSunStoneBoulders_1", 8849, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 181, 11, 12},  //  2677
+    {"ToSunStoneBoulders_2", 8852, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 193, 13, 56},  //  2678
+    {"ToSunStoneBoulders_3", 8855, 27, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 193, 17, 61},  //  2679
+    {"SunStoneBoulders_Push1", 8882, 0, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 192, 40, 32},  //  2680
+    {"SunStoneBoulders_Push2", 8882, 1, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 192, 40, 32},  //  2681
+    {"SunStoneBoulders_Push3", 8883, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 192, 41, 32},  //  2682
+    {"SunStoneBoulders_Push4", 8884, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 192, 41, 33},  //  2683
+    {"Pick up stone: Sun Stone (Ruin Valley)", 8885, 1, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 192, 42, 33},  //  2684
+    {"RuinValleyToNurse", 8886, 23, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 192, 42, 32},  //  2685
+    {"RuinValleyToNurse_1", 8909, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 193, 18, 73},  //  2686
+    {"RuinValleyToNurse_2", 8914, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 193, 13, 60},  //  2687
+    {"RuinValleyToNurse_3", 8921, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 191, 7, 8},  //  2688
+    {"FerryToVermilion", 8922, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 191, 7, 4},  //  2689
+    {"FerryToVermilion_1", 8923, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 181, 11, 12},  //  2690
+    {"FerryToVermilion_2", 8924, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 189, 8, 3},  //  2691
+    {"ToThePC", 8925, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 26, 27},  //  2692
+    {"ToThePC_1", 8925, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 7, 8},  //  2693
+    {"C20_34_SUN_STONE_RUIN_VALLEY_Out", 8928, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 11, 2},  //  2694
 };
 
 inline constexpr int32_t LEG_LISTS[] = {
@@ -30667,6 +30973,127 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::BOX_IN, "Into the box: lickitung", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_29_TRADE_LICKITUNG_Out", 2635, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_NO_STONES, "A stone to fetch?", -1, 11, 0, -1, 0, 0, DPAD_NONE, "Moon Stone in the Pokemon Mansion", 0, 0, 0},
+    {StepType::FLY, "C20_30_MOON_STONE_MANSION_Fly_Fly", -1, 11, 1, -1, 0, 0, DPAD_NONE, "MAP_CINNABAR_ISLAND", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Pokemon Mansion 1F)", 2636, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Pokemon Mansion 1F)_1", 2637, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "Pick up stone: Moon Stone (Pokemon Mansion 1F)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_30_MOON_STONE_MANSION_OutCave", 2638, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::FLY, "C20_30_MOON_STONE_MANSION_FlyViridian_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
+    {StepType::WALK, "ToThePC", 2639, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToThePC_1", 2640, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_30_MOON_STONE_MANSION_Out", 2641, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_NO_STONES, "A stone to fetch?", -1, 15, 0, -1, 0, 0, DPAD_NONE, "Moon Stone in the Rocket Hideout", 0, 0, 0},
+    {StepType::FLY, "C20_31_MOON_STONE_HIDEOUT_Fly_Fly", -1, 8, 1, -1, 0, 0, DPAD_NONE, "MAP_CELADON_CITY", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Rocket Hideout B2F)", 2642, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Rocket Hideout B2F)_1", 2643, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Rocket Hideout B2F)_2", 2644, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Rocket Hideout B2F)_3", 2645, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "Pick up stone: Moon Stone (Rocket Hideout B2F)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_31_MOON_STONE_HIDEOUT_OutCave", 2646, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_31_MOON_STONE_HIDEOUT_OutCave_1", 2647, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_31_MOON_STONE_HIDEOUT_OutCave_2", 2648, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::FLY, "C20_31_MOON_STONE_HIDEOUT_FlyViridian_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
+    {StepType::WALK, "ToThePC", 2649, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToThePC_1", 2650, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_31_MOON_STONE_HIDEOUT_Out", 2651, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_NO_STONES, "A stone to fetch?", -1, 11, 0, -1, 0, 0, DPAD_NONE, "Moon Stone in Mt. Moon 1F", 0, 0, 0},
+    {StepType::FLY, "C20_32_MOON_STONE_MT_MOON_1F_Fly_Fly", -1, 3, 1, -1, 0, 0, DPAD_NONE, "MAP_ROUTE4", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon 1F)", 2652, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon 1F)_1", 2653, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "Pick up stone: Moon Stone (Mt. Moon 1F)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_32_MOON_STONE_MT_MOON_1F_OutCave", 2654, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::FLY, "C20_32_MOON_STONE_MT_MOON_1F_FlyViridian_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
+    {StepType::WALK, "ToThePC", 2655, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToThePC_1", 2656, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_32_MOON_STONE_MT_MOON_1F_Out", 2657, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_NO_STONES, "A stone to fetch?", -1, 16, 0, -1, 0, 0, DPAD_NONE, "Moon Stone in Mt. Moon B2F", 0, 0, 0},
+    {StepType::FLY, "C20_33_MOON_STONE_MT_MOON_B2F_Fly_Fly", -1, 4, 1, -1, 0, 0, DPAD_NONE, "MAP_CERULEAN_CITY", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon B2F)", 2658, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon B2F)_1", 2659, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon B2F)_2", 2660, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Moon Stone (Mt. Moon B2F)_3", 2661, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "Pick up stone: Moon Stone (Mt. Moon B2F)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_33_MOON_STONE_MT_MOON_B2F_OutCave", 2662, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_33_MOON_STONE_MT_MOON_B2F_OutCave_1", 2663, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::FLY, "C20_33_MOON_STONE_MT_MOON_B2F_FlyViridian_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
+    {StepType::WALK, "ToThePC", 2664, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToThePC_1", 2665, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_33_MOON_STONE_MT_MOON_B2F_Out", 2666, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_NO_STONES, "A stone to fetch?", -1, 63, 0, -1, 0, 0, DPAD_NONE, "Sun Stone in Ruin Valley", 0, 0, 0},
+    {StepType::FLY, "C20_34_SUN_STONE_RUIN_VALLEY_Fly_Fly", -1, 5, 1, -1, 0, 0, DPAD_NONE, "MAP_VERMILION_CITY", 0, 0, 0},
+    {StepType::WALK, "C20_34_SUN_STONE_RUIN_VALLEY_ToNurse", 2667, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_34_SUN_STONE_RUIN_VALLEY_ToNurse_1", 2668, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop", 2669, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_1", 2670, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_2", 2671, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SEAGALLOP, "SeagallopToOneIsland", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToSixIsland", 2672, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "FerryToSixIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "FerryToSixIsland_Menu", -1, 4, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
+    {StepType::PRESS, "FerryToSixIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "FerryToSixIsland_Menu2", -1, 1, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
+    {StepType::PRESS, "FerryToSixIsland_Pick2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSixIslandNurse", 2673, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSixIslandNurse_1", 2674, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSixIslandNurse_2", 2675, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToSunStoneBoulders", 2676, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToSunStoneBoulders_1", 2677, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToSunStoneBoulders_2", 2678, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToSunStoneBoulders_3", 2679, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "SunStoneBoulders_Push1", 2680, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Use Strength", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::CUTSCENE, "Strength", -1, 1500, 20000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "SunStoneBoulders_Push2", 2681, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder down", -1, 0, 0, -1, 0, 0, DPAD_DOWN, "down", 0, 0, 0},
+    {StepType::WALK, "SunStoneBoulders_Push3", 2682, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "SunStoneBoulders_Push4", 2683, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "Pick up stone: Sun Stone (Ruin Valley)", 2684, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK, "Pick up stone: Sun Stone (Ruin Valley)", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "RuinValleyToNurse", 2685, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "RuinValleyToNurse_1", 2686, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "RuinValleyToNurse_2", 2687, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "RuinValleyToNurse_3", 2688, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at SixIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion", 2689, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion_1", 2690, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToVermilion_2", 2691, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "FerryToVermilion_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "FerryToVermilion_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::FLY, "C20_34_SUN_STONE_RUIN_VALLEY_FlyViridian_Fly", -1, 1, 1, -1, 0, 0, DPAD_NONE, "MAP_VIRIDIAN_CITY", 0, 0, 0},
+    {StepType::WALK, "ToThePC", 2692, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToThePC_1", 2693, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_34_SUN_STONE_RUIN_VALLEY_Out", 2694, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -30798,6 +31225,11 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_27_TRADE_JYNX", "POKeDEX collection: the game's trades: Jynx for a Poliwhirl (Cerulean City)", 20, true, 4638, 15},
     {"C20_28_TRADE_MR_MIME", "POKeDEX collection: the game's trades: Mr. Mime for an Abra (the house on Route 2)", 20, true, 4653, 21},
     {"C20_29_TRADE_LICKITUNG", "POKeDEX collection: the game's trades: Lickitung for a Golduck (the gate of Route 18)", 20, true, 4674, 17},
+    {"C20_30_MOON_STONE_MANSION", "POKeDEX collection: a Moon Stone of the Pokemon Mansion, then evolving with it", 20, true, 4691, 12},
+    {"C20_31_MOON_STONE_HIDEOUT", "POKeDEX collection: a Moon Stone of the Rocket Hideout, then evolving with it", 20, true, 4703, 16},
+    {"C20_32_MOON_STONE_MT_MOON_1F", "POKeDEX collection: a Moon Stone of Mt. Moon 1F, then evolving with it", 20, true, 4719, 12},
+    {"C20_33_MOON_STONE_MT_MOON_B2F", "POKeDEX collection: a Moon Stone of Mt. Moon B2F (by Surf), then evolving with it", 20, true, 4731, 17},
+    {"C20_34_SUN_STONE_RUIN_VALLEY", "POKeDEX collection: the Sun Stone of Ruin Valley (Six Island), then evolving with it", 20, true, 4748, 64},
 };
 
 }
@@ -30815,7 +31247,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "968a229633";
+inline constexpr const char* DATA_ID = "19c88f46bd";
 
 }
 }

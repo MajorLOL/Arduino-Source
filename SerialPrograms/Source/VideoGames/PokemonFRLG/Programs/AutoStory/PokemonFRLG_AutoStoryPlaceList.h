@@ -172,6 +172,26 @@ inline std::string story_stones_place(){
     return "the evolution stones";
 }
 
+//  The segment that fetches one evolution stone where the game has it
+//  (build 41, experimental): the text of its first step is "Moon Stone in
+//  Mt. Moon". The stone is the part before " in " (empty when the text has
+//  no such part: the segment of all the stones), and the whole text is its
+//  place for the failures of a run: "the Moon Stone in Mt. Moon".
+inline std::string story_stone_fetch_stone(const std::string& text){
+    const size_t at = text.find(" in ");
+    return at == std::string::npos || at == 0 ? std::string() : text.substr(0, at);
+}
+inline std::string story_stone_fetch_place(const std::string& text){
+    return "the " + text;
+}
+
+//  A TALK step for an item that may be gone (taken in an earlier
+//  playthrough): no text after A is then no error, the walk goes on ("Pick
+//  up item" on the way, "Pick up stone" for a stone that is fetched).
+inline bool story_item_may_be_gone(const std::string& label){
+    return label.rfind("Pick up item", 0) == 0 || label.rfind("Pick up stone", 0) == 0;
+}
+
 //  A trip that fails is tried again from the last save. After this many
 //  failures in a row at the same place, that place is left out for the rest
 //  of the run and the program goes on with the next one. (16 November 2026:
