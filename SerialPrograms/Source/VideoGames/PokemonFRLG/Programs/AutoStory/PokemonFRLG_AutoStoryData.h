@@ -30599,7 +30599,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::STONES, "Stones", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_25_STONES_Out", 2595, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::SKIP_IF_OWNED, "FARFETCHD in the table?", -1, 14, 1, -1, 0, 0, DPAD_NONE, "farfetchd", 0, 0, 0},
+    {StepType::SKIP_IF_OWNED, "FARFETCH-D in the table?", -1, 14, 1, -1, 0, 0, DPAD_NONE, "farfetch-d", 0, 0, 0},
     {StepType::FLY, "C20_26_TRADE_FARFETCHD_Fly_Fly", -1, 5, 1, -1, 0, 0, DPAD_NONE, "MAP_VERMILION_CITY", 0, 0, 0},
     {StepType::WALK, "ToThePC", 2596, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "ToThePC_1", 2597, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -30607,11 +30607,11 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_ToTheTrader", 2598, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_ToTheTrader_1", 2599, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_ToTheTrader_2", 2600, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TRADE, "Trade for farfetchd", -1, 0, 0, -1, 0, 0, DPAD_NONE, "farfetchd", 0, 0, 0},
+    {StepType::TRADE, "Trade for farfetch-d", -1, 0, 0, -1, 0, 0, DPAD_NONE, "farfetch-d", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_BackToThePC", 2601, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_BackToThePC_1", 2602, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_BackToThePC_2", 2603, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::BOX_IN, "Into the box: farfetchd", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::BOX_IN, "Into the box: farfetch-d", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_26_TRADE_FARFETCHD_Out", 2604, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SKIP_IF_OWNED, "JYNX in the table?", -1, 14, 1, -1, 0, 0, DPAD_NONE, "jynx", 0, 0, 0},
@@ -30622,7 +30622,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "C20_27_TRADE_JYNX_ToTheTrader", 2607, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_27_TRADE_JYNX_ToTheTrader_1", 2608, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_27_TRADE_JYNX_ToTheTrader_2", 2609, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TRADE, "Trade for jynx", -1, 0, 0, -1, 0, 0, DPAD_NONE, "jynx", 0, 0, 0},
+    {StepType::TRADE, "Trade for jynx", -1, 1, 0, -1, 0, 0, DPAD_NONE, "jynx", 0, 0, 0},
     {StepType::WALK, "C20_27_TRADE_JYNX_BackToThePC", 2610, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_27_TRADE_JYNX_BackToThePC_1", 2611, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_27_TRADE_JYNX_BackToThePC_2", 2612, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -30815,7 +30815,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "5f3f58ac45";
+inline constexpr const char* DATA_ID = "968a229633";
 
 }
 }

@@ -3207,7 +3207,7 @@ CHAPTER20 += [
 #  stand still. After the trade they only say how the old one is doing.
 TRADES = [
     #  id, what it gives, what it takes, FLY to, the Pokemon Center, the trader's map and tile
-    ("C20_26_TRADE_FARFETCHD", "farfetchd", "spearow", "HEAL_LOCATION_VERMILION_CITY", PC["VERMILION"],
+    ("C20_26_TRADE_FARFETCHD", "farfetch-d", "spearow", "HEAL_LOCATION_VERMILION_CITY", PC["VERMILION"],
      "MAP_VERMILION_CITY_HOUSE2", [4, 4], "Farfetch'd for a Spearow (Vermilion City)"),
     ("C20_27_TRADE_JYNX", "jynx", "poliwhirl", "HEAL_LOCATION_CERULEAN_CITY", PC["CERULEAN"],
      "MAP_CERULEAN_CITY_HOUSE3", [2, 2], "Jynx for a Poliwhirl (Cerulean City)"),

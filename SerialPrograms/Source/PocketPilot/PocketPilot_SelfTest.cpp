@@ -52,10 +52,12 @@
 #include "CommonFramework/Tools/GlobalThreadPools.h"
 #include "CommonFramework/Windows/MainWindow.h"
 #include "Pokemon/Pokemon_Strings.h"
+#include "Pokemon/Resources/Pokemon_PokemonSlugs.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBoxes.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBump.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryDex.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryDexCollection.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFerryTalk.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryFishing.h"
@@ -3011,7 +3013,7 @@ int check_leave_out(Logger& logger){
         const size_t jynx = index_of("C20_27_TRADE_JYNX");
         const size_t mime = index_of("C20_28_TRADE_MR_MIME");
         const size_t lickitung = index_of("C20_29_TRADE_LICKITUNG");
-        std::set<std::string> missing = {"farfetchd", "jynx", "mr-mime", "lickitung"};
+        std::set<std::string> missing = {"farfetch-d", "jynx", "mr-mime", "lickitung"};
         auto have = [&](const std::string& slug){
             return missing.count(slug) != 0 ? 0 : 1;
         };
@@ -3646,6 +3648,8 @@ int check_boxes(Logger& logger){
         int trades = 0;
         bool shape = true;
         bool table_says = true;
+        bool mail_fine = true;
+        std::string mails;
         for (size_t s = 0; s < script.segment_count; s++){
             const StorySegment& segment = script.segments[s];
             if (std::string(segment.id).find("_TRADE_") == std::string::npos){
@@ -3719,13 +3723,26 @@ int check_boxes(Logger& logger){
             }
             table_says &= found;
             trade_gets += (trade_gets.empty() ? "" : ", ") + get;
+            //  What the game's table of trades gives with a MAIL on it (the
+            //  generator reads it from there): the JYNX, a FAB MAIL. The
+            //  PC does not take it into a box, nor close the party with it
+            //  in the hand, until the MAIL is off it.
+            const bool holds_mail = script.step(segment, trade_at).p0 != 0;
+            mail_fine &= holds_mail == (get == "jynx");
+            if (holds_mail){
+                mails += (mails.empty() ? "" : ", ") + get;
+            }
         }
         check(
-            trades == 4 && shape && trade_gets == "farfetchd, jynx, mr-mime, lickitung",
+            trades == 4 && shape && trade_gets == "farfetch-d, jynx, mr-mime, lickitung",
             "the four trades in the story's data: out of a box at a PC, the trader, into the box at the same PC, "
             "no save, nurse or FLY in between; without the one to give, on past all of it"
         );
         check(table_says, "each trade gives a species the FireRed table has from a trade for what the step takes out");
+        check(
+            mail_fine && mails == "jynx",
+            "the trade that gives a Pokemon with a MAIL on it (the JYNX) says so, the others do not"
+        );
     }
 
     logger.log(
@@ -3738,6 +3755,92 @@ int check_boxes(Logger& logger){
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
         ", C20_25_STONES and four of trades): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+//  What the program calls a species is what Pokemon Automation calls it:
+//  its readers of the summary and of the box give those names back, and the
+//  program compares them with its own (18 November, build 38: "farfetch-d"
+//  read, "farfetchd" in the table, and the trade of the FARFETCH'D failed
+//  with the Pokemon in the party). Against the list of Pokemon Automation's
+//  (Resources/Pokemon/Pokedex/Pokedex-National.json): the species the
+//  program knows, the POKeDEX table with its numbers, the species the
+//  story's steps name.
+int check_species_names(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    const std::map<std::string, size_t>* dex = nullptr;
+    try{
+        dex = &Pokemon::SLUGS_TO_NATIONAL_DEX();
+    }catch (const Exception& e){
+        logger.log("AutoStory test: the species names were not compared: " + e.to_str(), COLOR_ORANGE);
+        return 0;
+    }catch (const std::exception& e){
+        logger.log(std::string("AutoStory test: the species names were not compared: ") + e.what(), COLOR_ORANGE);
+        return 0;
+    }
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+    auto unknown = [&](const std::string& slug){
+        return dex->count(slug) == 0;
+    };
+
+    std::string not_known;
+    size_t known_species = 0;
+    for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
+        known_species++;
+        if (unknown(info.slug)){
+            not_known += (not_known.empty() ? "" : ", ") + std::string(info.slug);
+        }
+    }
+    check(known_species > 300 && not_known.empty(), "species the program knows that Pokemon Automation names otherwise: " + not_known);
+
+    size_t rows = 0;
+    std::string table_wrong;
+    {
+        size_t count = 0;
+        const AutoStoryDex::CollectionEntry* entries = AutoStoryDex::collection(count);
+        for (size_t k = 0; k < count; k++){
+            rows++;
+            auto iter = dex->find(entries[k].slug);
+            if (iter == dex->end() || iter->second != (size_t)entries[k].dex){
+                table_wrong += (table_wrong.empty() ? "" : ", ") + std::string(entries[k].slug);
+            }
+        }
+    }
+    check(rows > 150 && table_wrong.empty(), "POKeDEX table rows whose name or number is not Pokemon Automation's: " + table_wrong);
+
+    //  The steps that name one species: the table asked (SKIP_IF_OWNED),
+    //  the one a trade gives, the one a box gives out.
+    size_t named = 0;
+    std::string steps_wrong;
+    const StoryScript& script = AutoStoryData::story_CHARMANDER();
+    for (size_t k = 0; k < script.step_count; k++){
+        const StoryStep& step = script.steps[k];
+        if (step.type != StepType::SKIP_IF_OWNED && step.type != StepType::TRADE && step.type != StepType::BOX_OUT){
+            continue;
+        }
+        named++;
+        if (unknown(step.text)){
+            steps_wrong += (steps_wrong.empty() ? "" : ", ") + std::string(step.text);
+        }
+    }
+    check(named > 5 && steps_wrong.empty(), "species the story's steps name that Pokemon Automation names otherwise: " + steps_wrong);
+
+    logger.log(
+        "AutoStory test: the species names are Pokemon Automation's (" + std::to_string(known_species) + " species, " +
+        std::to_string(rows) + " rows of the POKeDEX table with their numbers, " + std::to_string(named) +
+        " species the story's steps name): " + std::to_string(checks - wrong) + " of " + std::to_string(checks) +
+        " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -3770,6 +3873,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_next_steps(logger);
         failed += check_leave_out(logger);
         failed += check_boxes(logger);
+        failed += check_species_names(logger);
         return failed == 0 ? 0 : 1;
     }catch (const Exception& e){
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);

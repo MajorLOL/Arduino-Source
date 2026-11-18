@@ -44,6 +44,7 @@ and plans trainer battles that the route cannot avoid.
 import copy
 import json
 import os
+import re
 
 from frlg_data import DIRS, OPPOSITE
 from engine import MapGoals, Engine, WorldState, fixed_facing, EngineError, REPEL_MARGIN
@@ -107,6 +108,42 @@ def frame_scenes(decomp):
 
 class StoryError(Exception):
     pass
+
+
+_TRADE_HELD = None
+
+
+def trade_holds_mail(root, species):
+    """True when the Pokemon an in-game trade of FireRed gives (src/data/ingame_trades.h)
+    holds a MAIL: the PC's box view will not take it (and will not even close
+    the party with it in the hand: "Please remove the MAIL.") until the MAIL
+    is taken off it in the party menu. Jynx comes with a FAB MAIL."""
+    global _TRADE_HELD
+    if _TRADE_HELD is None:
+        with open(os.path.join(root, "src/data/ingame_trades.h")) as f:
+            text = f.read()
+        held = {}
+        for body in re.findall(r"\[INGAME_TRADE_\w+\]\s*=\s*\{(.*?)\n    \}", text, re.S):
+            if "#if defined(FIRERED)" in body:
+                #  The FireRed side: what is before the #if, and the first branch.
+                before, rest = body.split("#if defined(FIRERED)", 1)
+                first = rest.split("#elif defined(LEAFGREEN)")[0]
+                after = rest.split("#endif", 1)[1] if "#endif" in rest else ""
+                body = before + first + after
+            sp = re.search(r"\.species\s*=\s*SPECIES_(\w+)", body)
+            item = re.search(r"\.heldItem\s*=\s*(ITEM_\w+)", body)
+            if sp and item:
+                held[sp.group(1)] = item.group(1)
+        _TRADE_HELD = held
+    #  (The game's names have no dash: FARFETCHD, MR_MIME.)
+    key = species.upper().replace("-", "")
+    item = None
+    for name, held_item in _TRADE_HELD.items():
+        if name.replace("_", "") == key:
+            item = held_item
+    if item is None:
+        raise StoryError("trade: %s is not given by any in-game trade of FireRed" % species)
+    return item.endswith("_MAIL")
 
 
 class Builder:
@@ -1539,8 +1576,10 @@ class Builder:
             #  step ended there): the species the trade gives.
             if not out or out[-1]["type"] != "WALK":
                 raise StoryError("trade: not after the walk to the trader (%s)" % step.get("label", "?"))
+            #  p0 = 1: what it gives holds a MAIL (taken off it in the party menu
+            #  before it goes into a box).
             out.append({"type": "TRADE", "label": step.get("label", "Trade for " + step["trade"]),
-                        "text": step["trade"]})
+                        "text": step["trade"], "p0": 1 if trade_holds_mail(self.d.root, step["trade"]) else 0})
             return
         if "got" in step:
             #  The player has this Pokemon now (a gift): one more in the

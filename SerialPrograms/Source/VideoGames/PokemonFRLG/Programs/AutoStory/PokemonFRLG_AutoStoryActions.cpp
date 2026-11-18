@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <initializer_list>
 #include <memory>
 #include <set>
 #include <string>
@@ -976,7 +977,90 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 
 
 
-bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get){
+void story_take_mail(StoryRuntime& rt, int party_slot, const std::string& label){
+    StoryMemoryScope memory_scope("party menu");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log(
+        label + ": the Pokemon in party slot " + std::to_string(party_slot) + " holds a MAIL (the trade gives it "
+        "with one): the MAIL goes to the PC's mailbox, since the PC's box view does not take a Pokemon that holds one."
+    );
+    //  The message of the party menu, as lower case text, after a moment for
+    //  it to be printed.
+    auto message = [&]() -> std::string{
+        pbf_wait(context, 1300ms);
+        context.wait_for_all_requests();
+        const std::string text = lower(read_story_text(console, PARTY_MESSAGE_BOX, false));
+        console.log(label + ": the party menu says: \"" + text + "\"");
+        return text;
+    };
+    //  Not what the game shows at this point: nothing more is pressed that
+    //  could do something else (the cursor is not where it was meant to
+    //  be); out of the menus, and the error resets the game.
+    auto give_up = [&](const std::string& why){
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "party menu");
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_take_mail(): " + why + ": " + label,
+            console
+        );
+    };
+    auto says = [&](const std::string& text, std::initializer_list<const char*> words){
+        for (const char* word : words){
+            if (contains(text, word)){
+                return true;
+            }
+        }
+        return false;
+    };
+
+    open_party_menu_from_overworld(console, context);
+    //  LEFT from any slot on the right goes to slot 1.
+    dpad(context, DPAD_LEFT, 500ms);
+    for (int i = 1; i < party_slot; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    //  The actions: SUMMARY, (field moves), SWITCH, MAIL, CANCEL (with a
+    //  MAIL held, ITEM is MAIL: SetPartyMonFieldSelectionActions). Up from
+    //  the top wraps around to CANCEL, then MAIL, as story_swap_party() goes
+    //  to SWITCH.
+    press(context, BUTTON_A, 800ms);
+    dpad(context, DPAD_UP, 300ms);
+    dpad(context, DPAD_UP, 300ms);
+    press(context, BUTTON_A, 900ms);
+    //  "Do what with the MAIL?": READ, TAKE MAIL, CANCEL (the cursor on READ).
+    if (!says(message(), {"mail", "mai1", "mall"})){
+        give_up("the party menu does not ask what to do with a MAIL (the Pokemon holds none, or the cursor was elsewhere)");
+    }
+    dpad(context, DPAD_DOWN, 300ms);
+    press(context, BUTTON_A, 900ms);
+    //  "Send the removed MAIL to your PC?" YES / NO, the cursor on YES.
+    if (!says(message(), {"send", "remov", "pc"})){
+        give_up("the party menu does not ask whether the MAIL goes to the PC");
+    }
+    press(context, BUTTON_A, 900ms);
+    //  "The MAIL was sent to your PC." or "Your PC's MAILBOX is full."
+    const std::string result = message();
+    if (says(result, {"full"})){
+        give_up("the PC's MAILBOX is full (the MAIL cannot go there: take one out of it by hand)");
+    }
+    if (!says(result, {"sent", "pc"})){
+        console.log(
+            label + ": the message after YES was not read as \"The MAIL was sent to your PC.\": the box view tells if "
+            "the MAIL is still there.",
+            COLOR_ORANGE
+        );
+    }
+    press(context, BUTTON_A, 900ms);        //  The text waits for a press.
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "party menu");
+    console.log(label + ": the MAIL is off it.", COLOR_BLUE);
+}
+
+bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get, bool holds_mail){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     if (rt.out_now.empty()){
@@ -1083,6 +1167,11 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
             get + ": " + label,
             console
         );
+    }
+    //  (Before the list and the table take it as done: the error of a
+    //  MAIL that stays resets the game to the save before the trade.)
+    if (holds_mail){
+        story_take_mail(rt, 6, label);
     }
     rt.out_now = get;
     rt.caught.insert(get);

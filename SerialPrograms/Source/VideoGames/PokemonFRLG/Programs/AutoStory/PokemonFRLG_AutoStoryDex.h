@@ -525,7 +525,9 @@ inline const std::vector<SpeciesInfo>& species(){
         {"slowbro", "SLOWBRO", Type::WATER, Type::PSYCHIC, 95, 75, 110, 100, 80, 30},
         {"magnemite", "MAGNEMITE", Type::ELECTRIC, Type::STEEL, 25, 35, 70, 95, 55, 45},
         {"magneton", "MAGNETON", Type::ELECTRIC, Type::STEEL, 50, 60, 95, 120, 70, 70},
-        {"farfetchd", "FARFETCH'D", Type::NORMAL, Type::FLYING, 52, 65, 55, 58, 62, 60},
+        //  (Pokemon Automation's name of it has the dash: what its readers
+        //  of the summary and of the box give back.)
+        {"farfetch-d", "FARFETCH'D", Type::NORMAL, Type::FLYING, 52, 65, 55, 58, 62, 60},
         {"doduo", "DODUO", Type::NORMAL, Type::FLYING, 35, 85, 45, 35, 35, 75},
         {"dodrio", "DODRIO", Type::NORMAL, Type::FLYING, 60, 110, 70, 60, 60, 100},
         {"seel", "SEEL", Type::WATER, Type::WATER, 65, 45, 55, 45, 70, 45},

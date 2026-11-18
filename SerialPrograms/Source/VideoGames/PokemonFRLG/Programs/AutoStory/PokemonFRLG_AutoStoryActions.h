@@ -250,9 +250,20 @@ void story_box_in(StoryRuntime& rt, const std::string& label);
 //  Facing someone who trades in the game ("Do you have a SPEAROW? Want to
 //  trade it for my FARFETCH'D?"): YES, the party's sixth one, the trade's
 //  scene, and a look at what the sixth is now: it must be "get" (one more
-//  in the POKeDEX table). False when the trader asks nothing (the trade
-//  was made before) or nothing was taken out of a box for it.
-bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get);
+//  in the POKeDEX table). "holds_mail": what the trade gives holds a MAIL
+//  (the JYNX of Cerulean City: a FAB MAIL), which is taken off it (see
+//  story_take_mail()) before it is put into a box. False when the trader
+//  asks nothing (the trade was made before) or nothing was taken out of a
+//  box for it.
+bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get, bool holds_mail);
+
+//  In the overworld: the MAIL that the Pokemon in party slot "party_slot"
+//  holds goes to the PC's mailbox (party menu: the Pokemon's actions, MAIL,
+//  TAKE MAIL, YES). The box view of the PC does not take a Pokemon with a
+//  MAIL, and does not even close the party with one in the hand ("Please
+//  remove the MAIL."). Throws (nothing is saved) when a text on the way
+//  is not the one the game shows at that point, or the mailbox is full.
+void story_take_mail(StoryRuntime& rt, int party_slot, const std::string& label);
 
 //  Is an item in the bag (StepType::SKIP_IF_ITEM)? Opens the bag, goes
 //  through "pocket" (0 ITEMS, 1 KEY ITEMS, 2 POKe BALLS) reading the

@@ -209,7 +209,8 @@ enum class StepType : uint8_t{
                         //  boxes changes places with the party's sixth one. None there (or the
                         //  sixth is of the team): skip the next p0 steps
     TRADE,              //  facing someone who trades in the game: YES, the party's sixth one;
-                        //  after the trade it is the species "text" (one more in the table)
+                        //  after the trade it is the species "text" (one more in the table).
+                        //  p0 = 1: it holds a MAIL (the game's table of trades), taken off it
     BOX_IN,             //  in front of a PC, facing it: what the party's sixth place holds
                         //  since BOX_OUT goes into the box, the party's own sixth comes back
 };

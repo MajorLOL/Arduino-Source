@@ -639,6 +639,23 @@ int swap_with_party(
     pbf_press_button(context, BUTTON_B, 160ms, 1840ms);     //  The party slides away: the hand on the first cell.
     context.wait_for_all_requests();
 
+    //  A Pokemon that holds a MAIL does not go out of the party's view in the
+    //  hand: "Please remove the MAIL." (HandleInput, INPUT_HIDE_PARTY), and
+    //  the party stays. (18 November, build 38: the JYNX of the trade, a FAB
+    //  MAIL on it; the moves that were to take the hand back to its cell
+    //  were made in the party.) The MAIL is taken off it before (the step
+    //  of the trade); this tells it if one is still there.
+    {
+        const std::string text = story_read_dialog(rt);
+        if (text.find("mail") != std::string::npos && (text.find("remove") != std::string::npos || text.find("please") != std::string::npos)){
+            fail(
+                rt,
+                label + ": " + upper(in_party) + " holds a MAIL (\"" + text + "\"): the PC does not close the party with it in "
+                "the hand. Nothing is saved: the game is reset."
+            );
+        }
+    }
+
     //  What the hand holds now: the party's last one, as it was read before.
     const Panel holds = read_panel(rt, in_party);
     if (!holds.pokemon || holds.slug != in_party){

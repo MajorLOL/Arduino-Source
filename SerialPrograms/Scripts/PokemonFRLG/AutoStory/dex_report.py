@@ -319,6 +319,9 @@ def slug_of(n):
     s = n.lower()
     s = s.replace("♀", "-f").replace("♂", "-m")
     s = s.replace(". ", "-").replace(".", "").replace("'", "").replace(" ", "-")
+    #  As Pokemon Automation has it (see gen_dex.py).
+    if s == "farfetchd":
+        s = "farfetch-d"
     return s
 
 

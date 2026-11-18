@@ -92,6 +92,10 @@ def slug_of(name):
     s = s.replace("♀", "-f").replace("♂", "-m")
     s = s.replace("{female}", "-f").replace("{male}", "-m")
     s = s.replace(". ", "-").replace(".", "").replace("'", "").replace(" ", "-")
+    #  As Pokemon Automation has it (its readers of the summary and of the
+    #  box give that back): the one name whose slug is not made this way.
+    if s == "farfetchd":
+        s = "farfetch-d"
     return s
 
 

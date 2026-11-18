@@ -1539,7 +1539,7 @@ void AutoStory::run_segment(
             break;
         }
         case StepType::TRADE:
-            story_trade(rt, label, step.text);
+            story_trade(rt, label, step.text, step.p0 != 0);
             break;
         case StepType::BOX_IN:
             story_box_in(rt, label);
