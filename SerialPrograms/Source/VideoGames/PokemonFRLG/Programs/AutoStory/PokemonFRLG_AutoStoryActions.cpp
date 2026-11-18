@@ -1014,10 +1014,16 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
     //  STATE_END_LINK_TRADE: a trade in the game, not over a cable). Its
     //  text box is black, the trader's thanks after it come in the white
     //  one of the map: A every second and a half until a white text box
-    //  with text in it is up. (An A that closes the thanks before they are
-    //  seen talks to the trader again: "How is my old ...?", white too.)
+    //  is up and stays. (An A that closes the thanks before they are seen
+    //  talks to the trader again: "How is my old ...?", white too.)
     //  Another species than asked for: "This is no SPEAROW." at once, and
     //  no scene; the look at the sixth one below tells.
+    //  (The run of 18 November, build 36: the scene took half a minute and
+    //  never looked like a text box; the 20th A ended it, "Thank you!" came
+    //  a second and a half later. Build 36 then read the box with the
+    //  reader for dark text, and what people say is coloured, a woman's
+    //  words red and a man's blue: nothing read, so A again, which closed
+    //  the thanks and asked her again, for three minutes.)
     const WallClock scene_until = current_time() + std::chrono::seconds(240);
     for (bool text_up = false; !text_up;){
         if (current_time() >= scene_until){
@@ -1041,8 +1047,10 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
         if (ret != 0){
             continue;
         }
-        //  Text, not a bright moment of the scene.
-        const std::string words = story_read_dialog(rt);
+        //  A text box, not a bright moment of the scene: its words (in the
+        //  colours people speak in), or a box that is still there at a
+        //  second look. Nothing is pressed in between.
+        const std::string words = story_read_people(rt);
         int letters = 0;
         for (char ch : words){
             letters += std::isalpha((unsigned char)ch) ? 1 : 0;
@@ -1050,8 +1058,18 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
         if (letters >= 4){
             console.log(label + ": after the trade: \"" + words + "\"");
             text_up = true;
-        }else{
-            pbf_wait(context, 500ms);
+            continue;
+        }
+        pbf_wait(context, 300ms);
+        context.wait_for_all_requests();
+        VideoSnapshot screen = console.video().snapshot();
+        WhiteDialogDetector box(COLOR_RED);
+        if (screen && box.detect(screen)){
+            console.log(
+                label + ": after the trade: a text box that stays (its words were not read: \"" + words + "\").",
+                COLOR_ORANGE
+            );
+            text_up = true;
         }
     }
     //  The text closed (B), the player free again.

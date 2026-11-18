@@ -2866,6 +2866,70 @@ int check_leave_out(Logger& logger){
         "a segment of the story is none of these"
     );
 
+    //  A start from a save that is past segments an earlier run left out
+    //  (build 37): back to the first of them the table has nothing from.
+    {
+        auto index_of = [&](const char* id){
+            for (size_t s = 0; s < script.segment_count; s++){
+                if (std::string(script.segments[s].id) == id){
+                    return s;
+                }
+            }
+            return script.segment_count;
+        };
+        const size_t story_end = script.segment_count;
+        const size_t dojo = index_of("C20_19_DOJO");
+        const size_t kabuto = index_of("C20_21_KABUTO");
+        const size_t port = index_of("C20_23_THREE_ISLE_PORT");
+        const size_t pc_boxes = index_of("C20_24_PC_BOXES");
+        const size_t farfetchd = index_of("C20_26_TRADE_FARFETCHD");
+        const size_t jynx = index_of("C20_27_TRADE_JYNX");
+        const size_t mime = index_of("C20_28_TRADE_MR_MIME");
+        const size_t lickitung = index_of("C20_29_TRADE_LICKITUNG");
+        std::set<std::string> missing = {"farfetchd", "jynx", "mr-mime", "lickitung"};
+        auto have = [&](const std::string& slug){
+            return missing.count(slug) != 0 ? 0 : 1;
+        };
+        std::vector<size_t> left_open;
+        const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
+        check(
+            lickitung + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
+            "a save at the story's end with the four trades left out: the start goes back to the first of them"
+        );
+        left_open.clear();
+        const size_t from_mime = story_once_open_before(script, mime, have, &left_open);
+        check(
+            from_mime == farfetchd && left_open.size() == 2 &&
+            story_once_open_before(script, jynx, have) == farfetchd &&
+            story_once_open_before(script, farfetchd, have) == farfetchd,
+            "a save between two of them: only the ones before it are gone back to"
+        );
+        missing = {"jynx"};
+        check(
+            story_once_open_before(script, story_end, have) == jynx &&
+            story_once_open_before(script, lickitung, have) == jynx &&
+            story_once_open_before(script, jynx, have) == jynx,
+            "one trade left open among others that were made"
+        );
+        missing.clear();
+        check(
+            story_once_open_before(script, story_end, have) == story_end &&
+            story_once_open_before(script, pc_boxes, have) == pc_boxes &&
+            story_once_open_before(script, 0, have) == 0 &&
+            story_once_open_before(script, story_end + 5, have) == story_end,
+            "nothing left open: the start stays where it is"
+        );
+        missing = {"hitmonlee", "snorlax"};
+        check(
+            dojo < kabuto && kabuto < port && port < pc_boxes &&
+            story_once_open_before(script, story_end, have) == story_end &&
+            story_once_open_before(script, port, have) == dojo &&
+            story_once_open_before(script, kabuto, have) == dojo,
+            "only the segments right before the start count, not ones behind a segment of another kind"
+        );
+    }
+
     logger.log(
         "AutoStory test: a place that fails twice in a row is left out for the run (in the story's data " +
         std::to_string(trips) + " trips to " + std::to_string(places.size()) + " places, " +

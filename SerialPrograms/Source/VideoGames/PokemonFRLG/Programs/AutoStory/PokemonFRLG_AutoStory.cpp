@@ -1919,7 +1919,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  settings were days old at every start; the start and the end in them
     //  stopped the program three times before a run.)
     bool settings_older = false;
+    //  The POKeDEX table as the run will have it: the one in the settings
+    //  with the larger counts of the last save's.
+    std::map<std::string, StoryCollectionCount> table_at_start;
     if (!new_game){
+        table_at_start = COLLECTION.snapshot();
         std::string text;
         std::map<std::string, StoryCollectionCount> saved;
         if (read_text_file(SETTINGS_PATH() + "PokemonFRLG-AutoStory-Collection.txt", text) &&
@@ -1927,9 +1931,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         ){
             std::map<std::string, StoryCollectionCount> counts = COLLECTION.snapshot();
             settings_older = story_collection_merge(counts, saved) > 0;
+            table_at_start = std::move(counts);
         }
     }
 
+    //  Is the start the program's own last save (and not one chosen by
+    //  hand)?
+    bool start_is_save = false;
     if (CONTINUE_FROM_SAVE && !new_game){
         std::string text;
         if (read_text_file(save_file, text)){
@@ -1973,6 +1981,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 );
                 START_SEGMENT.set_value(segment);
                 START_STEP.set((uint16_t)step);
+                start_is_save = true;
             }else if (segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP){
                 //  Not taken over without a word: a start chosen by hand for
                 //  a save made by hand (C15_04 step 7 in Fuchsia) went to
@@ -1989,6 +1998,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 );
             }else{
                 env.log("The start is where the program last saved.", COLOR_BLUE);
+                start_is_save = true;
             }
         }else{
             env.log("No save of the program's yet (" + save_file + "): starting at the segment and step chosen.");
@@ -2038,27 +2048,75 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
     //  steps.")
     size_t start_segment = START_SEGMENT.current_value();
     size_t start_step = (size_t)(uint16_t)START_STEP - 1;
+    //  The save is the last step of the story's last segment.
+    bool story_played = false;
     if (!new_game && start_segment < script.segment_count &&
         start_step == script.segments[start_segment].step_count
     ){
         if (start_segment + 1 >= script.segment_count){
-            throw UserSetupError(
-                env.console,
-                "The game was saved after the last step of the story's last segment (" +
-                std::string(script.segments[start_segment].id) + "): with this save and this build nothing is "
-                "left to play. To play a segment again, choose it with step 1 and turn off \"Check the start "
-                "against the program's last save\" (the game must be saved where that segment starts: its "
-                "first step says where)."
+            story_played = true;
+        }else{
+            env.log(
+                "The start (segment " + std::string(script.segments[start_segment].id) + ", step " +
+                std::to_string(start_step + 1) + ") is past that segment's last step: the game was saved at its "
+                "end. Starting with the segment after it, " + script.segments[start_segment + 1].id + ".",
+                COLOR_BLUE
             );
+            start_segment++;
+            start_step = 0;
         }
-        env.log(
-            "The start (segment " + std::string(script.segments[start_segment].id) + ", step " +
-            std::to_string(start_step + 1) + ") is past that segment's last step: the game was saved at its end. "
-            "Starting with the segment after it, " + script.segments[start_segment + 1].id + ".",
-            COLOR_BLUE
+    }
+    //  A segment for what is there once (a gift, a trade) that a run left
+    //  out after two failures, or that failed until the run was stopped:
+    //  the run saved after it, and a start from that save is past it. The
+    //  POKeDEX table tells: it has nothing from that segment yet. The
+    //  start goes back to the first of them. (Build 36, 18 November: the
+    //  trade for Farfetch'd was made, but the program did not see the
+    //  trader's thanks; left to itself the run leaves all four trades out
+    //  and saves at the story's end, "nothing is left to play".) Only from
+    //  the program's own save: a start chosen by hand stays as chosen.
+    if (start_is_save && !new_game && (story_played || start_step == 0)){
+        std::vector<size_t> left_open;
+        const size_t at = story_played ? script.segment_count : start_segment;
+        const size_t back = story_once_open_before(
+            script, at,
+            [&](const std::string& slug){
+                auto iter = table_at_start.find(slug);
+                return iter == table_at_start.end() ? 0 : (int)iter->second.caught;
+            },
+            &left_open
         );
-        start_segment++;
-        start_step = 0;
+        if (back < at){
+            std::string ids;
+            for (size_t s : left_open){
+                ids += (ids.empty() ? "" : ", ") + std::string(script.segments[s].id);
+            }
+            env.log(
+                std::string(story_played
+                    ? "The game was saved at the end of the story's last segment"
+                    : "The start is segment " + std::string(script.segments[start_segment].id)) +
+                ", but the POKeDEX table has nothing yet from " + std::to_string(left_open.size()) +
+                (left_open.size() == 1 ? " segment" : " segments") + " for what is there once before " +
+                (story_played ? "that" : "it") + " (left out or not finished in an earlier run): " + ids +
+                ". Each of them starts with FLY, from where the game was saved: starting with the first, " +
+                script.segments[back].id + ". (To start where the program last saved instead, choose that "
+                "segment and step and turn off \"Check the start against the program's last save\".)",
+                COLOR_BLUE
+            );
+            start_segment = back;
+            start_step = 0;
+            story_played = false;
+        }
+    }
+    if (story_played){
+        throw UserSetupError(
+            env.console,
+            "The game was saved after the last step of the story's last segment (" +
+            std::string(script.segments[start_segment].id) + "): with this save and this build nothing is "
+            "left to play. To play a segment again, choose it with step 1 and turn off \"Check the start "
+            "against the program's last save\" (the game must be saved where that segment starts: its "
+            "first step says where)."
+        );
     }
     const size_t first = start_segment;
     if (settings_older && END_SEGMENT.current_value() < first){

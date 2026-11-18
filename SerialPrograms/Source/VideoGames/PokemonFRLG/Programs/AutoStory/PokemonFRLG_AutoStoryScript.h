@@ -357,6 +357,45 @@ inline bool story_once_segment(const StoryScript& script, const StorySegment& se
         script.step(segment, segment.step_count - 1).type == StepType::SAVE;
 }
 
+//  The segments for what is there once that lie right before segment "at"
+//  (the story's segment count: before its end), one after the other with no
+//  other kind of segment between them. Each starts with FLY and ends with a
+//  save outdoors, so a save at the start of one of them, or after the last,
+//  is a place any of them can start from. Of these, the ones whose check is
+//  "X in the table?" and that the table has too few of ("have": the count
+//  of a species): left out or not finished in an earlier run. Returns the
+//  first of them, or "at" when there is none; "all" gets every one.
+//  (A run that leaves a segment out saves after it, and the next start goes
+//  on from that save: without this, it would never come by it again.)
+template <class Have>
+inline size_t story_once_open_before(
+    const StoryScript& script, size_t at, Have&& have, std::vector<size_t>* all = nullptr
+){
+    at = at < script.segment_count ? at : script.segment_count;
+    size_t block = at;
+    while (block > 0 && story_once_segment(script, script.segments[block - 1])){
+        block--;
+    }
+    size_t first = at;
+    for (size_t s = block; s < at; s++){
+        const StoryStep& check = script.step(script.segments[s], 0);
+        if (check.type != StepType::SKIP_IF_OWNED){
+            continue;
+        }
+        const int need = check.p1 > 1 ? (int)check.p1 : 1;
+        if (have(std::string(check.text)) >= need){
+            continue;
+        }
+        if (first == at){
+            first = s;
+        }
+        if (all != nullptr){
+            all->push_back(s);
+        }
+    }
+    return first;
+}
+
 //  A town or a route of Kanto by its name ("Saffron City", "Route 16"): the
 //  player is outdoors there.
 inline bool story_outdoors(const std::string& map_name){
