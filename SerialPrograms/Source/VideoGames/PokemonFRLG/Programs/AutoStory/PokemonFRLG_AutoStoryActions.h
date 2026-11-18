@@ -237,6 +237,23 @@ void story_buy_stones(StoryRuntime& rt, const std::string& label);
 //  evolved.
 int story_stones(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed);
 
+//  A Pokemon of a box into the party for a while (build 36, experimental).
+//  In front of a PC, facing it. story_box_out(): one "give" of the boxes
+//  (the lowest level, and not the one the list of what evolves has set
+//  aside) changes places with the party's sixth one, which must not be of
+//  the team; false, and nothing pressed, when there is none. story_box_in():
+//  what the sixth place holds now (StoryRuntime::out_now) goes into that
+//  cell, the party's own sixth one comes back. The game must not be saved
+//  between the two.
+bool story_box_out(StoryRuntime& rt, const std::string& label, const std::string& give);
+void story_box_in(StoryRuntime& rt, const std::string& label);
+//  Facing someone who trades in the game ("Do you have a SPEAROW? Want to
+//  trade it for my FARFETCH'D?"): YES, the party's sixth one, the trade's
+//  scene, and a look at what the sixth is now: it must be "get" (one more
+//  in the POKeDEX table). False when the trader asks nothing (the trade
+//  was made before) or nothing was taken out of a box for it.
+bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get);
+
 //  Is an item in the bag (StepType::SKIP_IF_ITEM)? Opens the bag, goes
 //  through "pocket" (0 ITEMS, 1 KEY ITEMS, 2 POKe BALLS) reading the
 //  descriptions, closes it again. "rod" 0 to 2: that fishing rod, by its

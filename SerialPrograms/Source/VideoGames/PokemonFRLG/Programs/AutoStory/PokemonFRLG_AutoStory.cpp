@@ -619,6 +619,7 @@ bool boxes_list_known(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, con
         return false;
     }
     rt.boxes = census;
+    rt.boxes_at_save = census;
     rt.boxes_known = true;
     env.log(
         label + ": the list of the PC's boxes is the one an earlier run left (" + file + ": " +
@@ -1520,6 +1521,28 @@ void AutoStory::run_segment(
             }
             story_stones(rt, label, [&]{ write_boxes_file(env, rt, label, false); });
             break;
+        case StepType::BOX_OUT:{
+            //  A Pokemon of a box into the party's sixth place (experimental).
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(
+                    label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
+                    "one). The next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += skip;
+            }else if (!story_box_out(rt, label, step.text)){
+                env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+                i += skip;
+            }
+            break;
+        }
+        case StepType::TRADE:
+            story_trade(rt, label, step.text);
+            break;
+        case StepType::BOX_IN:
+            story_box_in(rt, label);
+            break;
         case StepType::GOT:{
             //  The scene before this step (CUTSCENE with p4 = 1) handed the
             //  Pokemon over, if it showed the words of it. Without them it
@@ -1888,6 +1911,25 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         START_STEP.set(1);
     }
 
+    //  Are the settings older than the program's last save? The settings
+    //  are written when the program's window closes, the files of the last
+    //  save at each save: a window that was not closed, or settings copied
+    //  before it was. Told by the POKeDEX table: the one of the last save
+    //  has more than the one in the settings. (17 and 18 November 2026: the
+    //  settings were days old at every start; the start and the end in them
+    //  stopped the program three times before a run.)
+    bool settings_older = false;
+    if (!new_game){
+        std::string text;
+        std::map<std::string, StoryCollectionCount> saved;
+        if (read_text_file(SETTINGS_PATH() + "PokemonFRLG-AutoStory-Collection.txt", text) &&
+            story_collection_from_text(text, starter_name(starter), saved)
+        ){
+            std::map<std::string, StoryCollectionCount> counts = COLLECTION.snapshot();
+            settings_older = story_collection_merge(counts, saved) > 0;
+        }
+    }
+
     if (CONTINUE_FROM_SAVE && !new_game){
         std::string text;
         if (read_text_file(save_file, text)){
@@ -1916,6 +1958,21 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             const int step = words.size() == 3 ? std::atoi(words[2].c_str()) : 0;
             if (segment == (size_t)-1 || step < 1 || words[0] != starter_name(starter)){
                 env.log("The program's last save (" + save_file + ") is not for this story: \"" + text + "\". Starting at the segment and step chosen.", COLOR_ORANGE);
+            }else if ((segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP) && settings_older){
+                //  The start in the settings is as old as the rest of them:
+                //  the program's own save tells where to go on.
+                env.log(
+                    "The start in the settings (segment " +
+                    std::string(script.segments[START_SEGMENT.current_value()].id) + ", step " +
+                    std::to_string((uint16_t)START_STEP) + ") is not where the program last saved, and the settings "
+                    "are older than that save (its POKeDEX table has more: the settings were not written when the "
+                    "program last closed). Starting where the program last saved: segment " +
+                    script.segments[segment].id + ", step " + std::to_string(step) + ". (To start somewhere else, "
+                    "turn off \"Check the start against the program's last save\".)",
+                    COLOR_BLUE
+                );
+                START_SEGMENT.set_value(segment);
+                START_STEP.set((uint16_t)step);
             }else if (segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP){
                 //  Not taken over without a word: a start chosen by hand for
                 //  a save made by hand (C15_04 step 7 in Fuchsia) went to
@@ -2004,6 +2061,17 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         start_step = 0;
     }
     const size_t first = start_segment;
+    if (settings_older && END_SEGMENT.current_value() < first){
+        //  As old as the start was: an end before where the program last
+        //  saved was not chosen for this run.
+        env.log(
+            "\"End after segment\" in the settings (" + std::string(script.segments[END_SEGMENT.current_value()].id) +
+            ") is before where the program last saved, and the settings are older than that save: the end is "
+            "the story's last segment, " + script.segments[script.segment_count - 1].id + ".",
+            COLOR_BLUE
+        );
+        END_SEGMENT.set_value(script.segment_count - 1);
+    }
     const size_t last = END_SEGMENT.current_value();
     if (last < first){
         throw UserSetupError(
@@ -2155,6 +2223,10 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             );
         }catch (...){
             env.log("Could not write " + save_file + ".", COLOR_ORANGE);
+        }
+        if (rt.boxes_known){
+            //  The list of the PC's boxes as this save has them.
+            write_boxes_file(env, rt, "The PC's boxes", false);
         }
         for (size_t i = 0; i < script.segment_count; i++){
             if (segment_id == script.segments[i].id){
@@ -3049,6 +3121,15 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 //  The catches since the save are lost with it.
                 rt.collection->restore(rt.collection_at_save);
             }
+            if (rt.boxes_known){
+                //  And what was changed in the boxes since.
+                rt.boxes = rt.boxes_at_save;
+            }
+            rt.out_box = -1;
+            rt.out_cell = -1;
+            rt.out_extra.clear();
+            rt.out_give.clear();
+            rt.out_now.clear();
             if (rt.shiny_unsaved){
                 env.log("The shiny Pokemon caught after the last save is lost with this reset.", COLOR_RED);
                 rt.shiny_unsaved = false;

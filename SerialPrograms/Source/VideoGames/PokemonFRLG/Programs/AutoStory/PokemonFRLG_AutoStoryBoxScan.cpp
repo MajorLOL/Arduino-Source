@@ -801,6 +801,8 @@ bool story_boxes(StoryRuntime& rt, const std::string& label){
     rt.boxes = census;
     rt.boxes_read = census.closed;
     rt.boxes_known = census.closed;
+    //  (Reading changes nothing in the game: this is how its save has them.)
+    rt.boxes_at_save = census;
     rt.boxes_catches = rt.dex_catches;
     rt.boxes_readings++;
 
@@ -1027,9 +1029,9 @@ int story_stones(StoryRuntime& rt, const std::string& label, const std::function
             rt.collection->add_caught(target.slug, false, false);
         }
         rt.dex_new_since_load.insert(target.slug);
+        rt.boxes.put(target.box, target.cell, target.slug, level > 0 ? level : target.level);
         story_save(rt, true);
         story_saved(rt, rt.step_index);
-        rt.boxes.put(target.box, target.cell, target.slug, level > 0 ? level : target.level);
         evolved++;
         console.log(
             "Evolved for the POKeDEX: " + target.slug + " (" + from + " with a " + kind->item + "). It lies in " +
@@ -1060,6 +1062,99 @@ int story_stones(StoryRuntime& rt, const std::string& label, const std::function
         COLOR_BLUE
     );
     return evolved;
+}
+
+
+//  ---- A Pokemon of a box into the party for a while (build 36) -------------
+
+bool story_box_out(StoryRuntime& rt, const std::string& label, const std::string& give){
+    ConsoleHandle& console = rt.console;
+    rt.out_box = -1;
+    rt.out_cell = -1;
+    rt.out_extra.clear();
+    rt.out_give.clear();
+    rt.out_now.clear();
+    //  One of that species: the lowest level, and not the one that is set
+    //  aside to evolve into a species the table still wants.
+    const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
+    const std::vector<BoxPokemon> ones = rt.boxes.of(give);
+    const BoxPokemon* pick = nullptr;
+    for (size_t k = ones.size(); k-- > 0;){
+        bool aside = false;
+        for (const EvolveLine& line : plan){
+            aside |= line.box == ones[k].box && line.cell == ones[k].cell;
+        }
+        if (!aside){
+            pick = &ones[k];
+            break;
+        }
+    }
+    if (pick == nullptr){
+        console.log(
+            label + ": " + (ones.empty()
+                ? "no " + upper(give) + " in the boxes (as they were read)"
+                : "the only " + upper(give) + " of the boxes is the one to evolve") +
+            ": nothing is taken out.",
+            COLOR_ORANGE
+        );
+        return false;
+    }
+    //  The one that makes room: the party's sixth, when it is not of the team.
+    std::string extra;
+    const int extra_level = story_read_slot(rt, 6, &extra);
+    if (extra_level < 0 || extra.empty()){
+        console.log(
+            label + ": party slot 6 has no Pokemon (or it was not read): with fewer than six in the party, "
+            "nothing is taken out of a box.",
+            COLOR_ORANGE
+        );
+        return false;
+    }
+    for (const StoryTeamMember& member : rt.team){
+        if (member.line.count(extra) != 0){
+            console.log(
+                label + ": party slot 6 is " + upper(extra) + ", one of the team: it is not put in a box.",
+                COLOR_ORANGE
+            );
+            return false;
+        }
+    }
+    const int box = pick->box;
+    const int cell = pick->cell;
+    console.log(
+        label + ": " + upper(give) + " (" + cell_text(box, cell) + ") comes into the party; " + upper(extra) +
+        " waits in its cell (experimental).",
+        COLOR_BLUE
+    );
+    box_swap(rt, label, box, cell, give, extra);
+    rt.out_box = box;
+    rt.out_cell = cell;
+    rt.out_extra = extra;
+    rt.out_give = give;
+    rt.out_now = give;
+    //  The list follows the game (and goes back with it on a reset).
+    rt.boxes.put(box, cell, extra, extra_level);
+    return true;
+}
+
+void story_box_in(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    if (rt.out_box < 0 || rt.out_now.empty() || rt.out_extra.empty()){
+        console.log(label + ": nothing was taken out of a box: nothing to put back.", COLOR_ORANGE);
+        return;
+    }
+    const int level = box_swap(rt, label, rt.out_box, rt.out_cell, rt.out_extra, rt.out_now);
+    rt.boxes.put(rt.out_box, rt.out_cell, rt.out_now, level);
+    console.log(
+        label + ": " + upper(rt.out_now) + " lies in " + cell_text(rt.out_box, rt.out_cell) + "; " +
+        upper(rt.out_extra) + " is back in the party.",
+        COLOR_BLUE
+    );
+    rt.out_box = -1;
+    rt.out_cell = -1;
+    rt.out_extra.clear();
+    rt.out_give.clear();
+    rt.out_now.clear();
 }
 
 

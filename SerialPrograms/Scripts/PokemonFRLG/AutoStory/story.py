@@ -1504,6 +1504,44 @@ class Builder:
                 raise StoryError("stones: not after the walk to the PC (%s)" % step.get("label", "?"))
             out.append({"type": "STONES", "label": step.get("label", "Stones")})
             return
+        if "box_trip" in step:
+            #  In front of the PC of a Pokemon Center, facing it: a Pokemon
+            #  of a box comes into the party's sixth place, the steps do
+            #  something with it (a trade), and what is in that place then
+            #  goes into the box at the same PC. The game is not saved in
+            #  between (a nurse saves too): a reset undoes all of it.
+            b = step["box_trip"]
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("box_trip: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("box_trip: not after the walk to the PC (%s)" % step.get("label", "?"))
+            start = (self.pos[0], self.pos[1], self.pos[2], self.pos[3])
+            sub = []
+            for s in b["steps"]:
+                self.run_step(s, sub)
+            if (self.pos[0], self.pos[1], self.pos[2], self.pos[3]) != start:
+                raise StoryError("box_trip: the steps do not end in front of the PC they start at (%s: %s, not %s)"
+                                 % (step.get("label", "?"), self.pos, start))
+            if not sub or sub[-1]["type"] != "WALK" or any(s["type"] in ("SAVE", "HEAL", "FLY") for s in sub):
+                raise StoryError("box_trip: walks only, the last one to the PC; no save, nurse or FLY (%s)"
+                                 % step.get("label", "?"))
+            out.append({"type": "BOX_OUT", "label": step.get("label", "Out of the box: " + b["give"]),
+                        "text": b["give"], "p0": len(sub) + 1})
+            out.extend(sub)
+            out.append({"type": "BOX_IN", "label": b.get("in_label", "Into the box")})
+            return
+        if "trade" in step:
+            #  Facing someone who trades in the game (the walk before this
+            #  step ended there): the species the trade gives.
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("trade: not after the walk to the trader (%s)" % step.get("label", "?"))
+            out.append({"type": "TRADE", "label": step.get("label", "Trade for " + step["trade"]),
+                        "text": step["trade"]})
+            return
         if "got" in step:
             #  The player has this Pokemon now (a gift): one more in the
             #  program's POKeDEX table.

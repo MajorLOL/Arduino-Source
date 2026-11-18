@@ -3187,6 +3187,53 @@ CHAPTER20 += [
 ]
 
 
+# ------------------------------------------- chapter 20, the game's trades
+#  EXPERIMENTAL (PocketPilot build 36, not run on a console when written).
+#  Four species of the FireRed table come only from someone in the game who
+#  trades (data/maps/*/scripts.inc, EventScript_GetInGameTradeSpeciesInfo):
+#      FARFETCH'D   for a SPEAROW    Vermilion City, the house of Elyssa
+#      JYNX         for a POLIWHIRL  Cerulean City, the house of Dontae
+#      MR. MIME     for an ABRA      the house on Route 2 (Reyley)
+#      LICKITUNG    for a GOLDUCK    the gate of Route 18, upstairs (Haden)
+#  All four to give lie in the boxes (read on 17 November 2026). The one to
+#  give comes into the party's sixth place at the PC of the nearest Pokemon
+#  Center (StepType::BOX_OUT: the change with the party that the stones
+#  made eight times on 18 November), the trader is asked ("Do you have a
+#  SPEAROW? Want to trade it for my FARFETCH'D?" YES, the party's sixth
+#  one; the scene takes no button; "Thank you!"), the summary of the sixth
+#  is read (StepType::TRADE), and back at the PC the new one goes into the
+#  cell, the party's own sixth one comes home (BOX_IN). Then the save: no
+#  save, nurse or FLY in between, so a reset undoes all of it. The traders
+#  stand still. After the trade they only say how the old one is doing.
+TRADES = [
+    #  id, what it gives, what it takes, FLY to, the Pokemon Center, the trader's map and tile
+    ("C20_26_TRADE_FARFETCHD", "farfetchd", "spearow", "HEAL_LOCATION_VERMILION_CITY", PC["VERMILION"],
+     "MAP_VERMILION_CITY_HOUSE2", [4, 4], "Farfetch'd for a Spearow (Vermilion City)"),
+    ("C20_27_TRADE_JYNX", "jynx", "poliwhirl", "HEAL_LOCATION_CERULEAN_CITY", PC["CERULEAN"],
+     "MAP_CERULEAN_CITY_HOUSE3", [2, 2], "Jynx for a Poliwhirl (Cerulean City)"),
+    ("C20_28_TRADE_MR_MIME", "mr-mime", "abra", "HEAL_LOCATION_PEWTER_CITY", PC["PEWTER"],
+     "MAP_ROUTE2_HOUSE", [7, 2], "Mr. Mime for an Abra (the house on Route 2)"),
+    ("C20_29_TRADE_LICKITUNG", "lickitung", "golduck", "HEAL_LOCATION_FUCHSIA_CITY", PC["FUCHSIA"],
+     "MAP_ROUTE18_EAST_ENTRANCE_2F", [5, 3], "Lickitung for a Golduck (the gate of Route 18)"),
+]
+
+
+def trade_segment(seg_id, get, give, fly_to, pc_map, trader_map, trader_xy, title):
+    trip = [
+        talk(trader_map, xy=trader_xy, mode="plain", label=seg_id + "_ToTheTrader"),
+        {"trade": get, "label": "Trade for " + get},
+        talk(pc_map, xy=PC_TILE, mode="plain", dirs=["up"], label=seg_id + "_BackToThePC"),
+    ]
+    return gift_segment(seg_id, "the game's trades: " + title, get, fly_to, [
+        talk(pc_map, xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"box_trip": {"give": give, "steps": trip, "in_label": "Into the box: " + get},
+         "label": "Out of the box: " + give},
+    ])
+
+
+CHAPTER20 += [trade_segment(*trade) for trade in TRADES]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

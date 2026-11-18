@@ -2612,7 +2612,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 14 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 18 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2848,9 +2848,11 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 6 &&
-        once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES",
-        "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the stones"
+        once == 10 &&
+        once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
+            "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG",
+        "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
+        "stones, the four trades"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3394,9 +3396,15 @@ int check_boxes(Logger& logger){
             "the list after an evolution: another Pokemon in the cell, and the one evolved is not looked for again"
         );
     }
-    //  The story's data: the last segment is the one of the stones.
+    //  The story's data: the segment of the stones.
     {
-        const StorySegment& segment = script.segments[script.segment_count - 1];
+        size_t stones_segment = 0;
+        for (size_t s = 0; s < script.segment_count; s++){
+            if (std::string(script.segments[s].id) == "C20_25_STONES"){
+                stones_segment = s;
+            }
+        }
+        const StorySegment& segment = script.segments[stones_segment];
         size_t stones_at = 0;
         size_t bag_at = 0;
         int stones = 0;
@@ -3435,20 +3443,111 @@ int check_boxes(Logger& logger){
             script.step(segment, 0).type == StepType::SKIP_IF_NO_STONES && way_fine && buys == 1 && rematches == 1 &&
             pc_fine && story_once_leave(script, segment, stones_at) == OnceLeave::PAST_STEP &&
             story_stones_place() == "the evolution stones",
-            "the story's last segment is the one of the stones: the prize money and the purchase (skipped with "
-            "the stones in the bag), then the PC of a Pokemon Center; given up from its own save past its step"
+            "the segment of the stones: the prize money and the purchase (skipped with the stones in the bag), "
+            "then the PC of a Pokemon Center; given up from its own save past its step"
         );
     }
 
+    //  The game's trades (build 36): the one to give out of a box at a PC,
+    //  the trader, what the trade gave into the box at the same PC, and no
+    //  save in between.
+    std::string trade_gets;
+    {
+        //  ("entries", "count": the POKeDEX table, from above.)
+        int trades = 0;
+        bool shape = true;
+        bool table_says = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (std::string(segment.id).find("_TRADE_") == std::string::npos){
+                continue;
+            }
+            trades++;
+            size_t out_at = 0;
+            size_t trade_at = 0;
+            size_t in_at = 0;
+            int outs = 0;
+            int deals = 0;
+            int ins = 0;
+            for (size_t k = 0; k < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::BOX_OUT){
+                    outs++;
+                    out_at = k;
+                }
+                if (step.type == StepType::TRADE){
+                    deals++;
+                    trade_at = k;
+                }
+                if (step.type == StepType::BOX_IN){
+                    ins++;
+                    in_at = k;
+                }
+            }
+            //  SKIP_IF_OWNED (what the trade gives), FLY, ..., BOX_OUT (not
+            //  there: on past BOX_IN), ..., TRADE, ..., BOX_IN, the walk
+            //  out, the save.
+            bool fine = story_once_segment(script, segment) &&
+                script.step(segment, 0).type == StepType::SKIP_IF_OWNED &&
+                outs == 1 && deals == 1 && ins == 1 && out_at > 1 && out_at < trade_at && trade_at < in_at &&
+                in_at + 3 == segment.step_count &&
+                out_at + (size_t)std::max(0, (int)script.step(segment, out_at).p0) == in_at &&
+                std::string(script.step(segment, 0).text) == script.step(segment, trade_at).text;
+            if (fine){
+                const StoryStep& to_out = script.step(segment, out_at - 1);
+                const StoryStep& to_trade = script.step(segment, trade_at - 1);
+                const StoryStep& to_in = script.step(segment, in_at - 1);
+                fine = to_out.type == StepType::WALK && to_trade.type == StepType::WALK && to_in.type == StepType::WALK;
+                if (fine){
+                    const StoryLeg& a = script.leg(to_out.leg);
+                    const StoryLeg& b = script.leg(to_trade.leg);
+                    const StoryLeg& c = script.leg(to_in.leg);
+                    fine = a.end == LegEnd::INTERACT && a.face == DPAD_UP && c.end == LegEnd::INTERACT &&
+                        c.face == DPAD_UP && a.start_map == c.start_map && a.start_map < script.map_name_count &&
+                        std::string(script.map_names[a.start_map]).find("Pokemon Center 1F") != std::string::npos &&
+                        b.end == LegEnd::INTERACT;
+                }
+                for (size_t k = out_at + 1; k < in_at; k++){
+                    const StepType type = script.step(segment, k).type;
+                    fine &= type != StepType::SAVE && type != StepType::HEAL && type != StepType::FLY;
+                }
+            }
+            shape &= fine;
+            //  The table: what the trade gives is a species that comes
+            //  from a trade for what is taken out of the box.
+            const std::string get = script.step(segment, trade_at).text;
+            const std::string give = script.step(segment, out_at).text;
+            bool found = false;
+            for (size_t k = 0; k < count; k++){
+                if (get != entries[k].slug){
+                    continue;
+                }
+                std::string how;
+                for (const char* p = entries[k].how[0]; *p != 0; p++){
+                    how += *p >= 'A' && *p <= 'Z' ? (char)(*p - 'A' + 'a') : *p;
+                }
+                found = entries[k].copies[0] == 1 && how.find("in-game trade (give " + give + ")") != std::string::npos;
+            }
+            table_says &= found;
+            trade_gets += (trade_gets.empty() ? "" : ", ") + get;
+        }
+        check(
+            trades == 4 && shape && trade_gets == "farfetchd, jynx, mr-mime, lickitung",
+            "the four trades in the story's data: out of a box at a PC, the trader, into the box at the same PC, "
+            "no save, nurse or FLY in between; without the one to give, on past all of it"
+        );
+        check(table_says, "each trade gives a species the FireRed table has from a trade for what the step takes out");
+    }
+
     logger.log(
-        "AutoStory test: the PC's boxes are read, and what is in them gets its stone (the PC's texts, the cells, "
-        "the list as a file, the six stones; of the " +
+        "AutoStory test: the PC's boxes are read, and what is in them gets its stone or is traded (the PC's "
+        "texts, the cells, the list as a file, the six stones, the trades for " + trade_gets + "; of the " +
         std::to_string(table.size()) + " species of FireRed with Charmander " +
         std::to_string(by_level + by_stone + by_friendship + by_other) + " only come by evolving: " +
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        " and " + script.segments[script.segment_count - 1].id + "): " +
+        ", C20_25_STONES and four of trades): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

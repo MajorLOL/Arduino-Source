@@ -205,6 +205,13 @@ enum class StepType : uint8_t{
     STONES,             //  in front of the PC of a Pokemon Center, facing it: each Pokemon of
                         //  the boxes that evolves with a stone of the bag changes places with
                         //  the party's sixth, gets the stone and goes back; a save after each
+    BOX_OUT,            //  in front of a PC, facing it: a Pokemon of the species "text" in the
+                        //  boxes changes places with the party's sixth one. None there (or the
+                        //  sixth is of the team): skip the next p0 steps
+    TRADE,              //  facing someone who trades in the game: YES, the party's sixth one;
+                        //  after the trade it is the species "text" (one more in the table)
+    BOX_IN,             //  in front of a PC, facing it: what the party's sixth place holds
+                        //  since BOX_OUT goes into the box, the party's own sixth comes back
 };
 
 struct StoryStep{

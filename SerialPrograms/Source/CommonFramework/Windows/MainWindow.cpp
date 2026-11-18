@@ -442,6 +442,16 @@ int32_t move_y_within_screen_bounds(int32_t y_pos){
 
 
 void MainWindow::closeEvent(QCloseEvent* event){
+    //  PocketPilot: the options of the panel that is open are written here,
+    //  before anything is taken down. They were written only when the window
+    //  was destroyed, after the assistant's panel: a close that did not get
+    //  that far kept the settings of days before (the AutoStory's start and
+    //  end, 17 and 18 November 2026).
+    if (m_current_panel != nullptr){
+        try{
+            m_current_panel->save_settings();
+        }catch (...){}
+    }
     close_all_windows();
     QMainWindow::closeEvent(event);
 }

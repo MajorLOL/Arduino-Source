@@ -251,6 +251,19 @@ struct StoryRuntime{
     //  an earlier one: what it says of a cell is read again on the screen
     //  before anything is pressed there).
     bool boxes_known = false;
+    //  The list as the game has it at its last save: back to it when the
+    //  game is reset (build 36).
+    AutoStoryBoxes::BoxCensus boxes_at_save;
+    //  A Pokemon of a box that is in the party's sixth place for a while
+    //  (StepType::BOX_OUT to BOX_IN, never across a save): the cell the
+    //  party's own sixth one waits in, what that one is, what was taken
+    //  out, and what the sixth place holds now (the same, or what a trade
+    //  gave for it).
+    int out_box = -1;
+    int out_cell = -1;
+    std::string out_extra;
+    std::string out_give;
+    std::string out_now;
     //  Evolution stones (build 35), by their names in the POKeDEX table
     //  ("Moon Stone"): seen in the bag in this run (at least one), and not
     //  to be had (not in the bag and not sold, or not there after buying).

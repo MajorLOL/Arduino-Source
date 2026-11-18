@@ -976,6 +976,114 @@ void story_buy(StoryRuntime& rt, int index, int quantity, const std::string& wha
 
 
 
+bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& get){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    if (rt.out_now.empty()){
+        console.log(label + ": no Pokemon was taken out of a box for this trade: the trader is not asked.", COLOR_ORANGE);
+        return false;
+    }
+    const std::string give = rt.out_now;
+    //  "Do you have a SPEAROW? Want to trade it for my FARFETCH'D?" YES.
+    //  After the trade the trader only says how the old one is doing.
+    if (!story_talk_answer(rt, true, label, StoryTalkAlt(), true)){
+        console.log(label + ": the trader asks nothing: the trade was made before.", COLOR_ORANGE);
+        return false;
+    }
+    //  ChoosePartyMon: the party comes up with its first one under the
+    //  cursor; A on one picks it and closes the party.
+    context.wait_for_all_requests();
+    {
+        PartyMenuWatcher party(COLOR_RED);
+        if (wait_until(console, context, 10000ms, { party }) != 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_trade(): The party did not come up after YES: " + label,
+                console
+            );
+        }
+    }
+    pbf_wait(context, 500ms);
+    dpad(context, DPAD_LEFT, 500ms);
+    for (int i = 1; i < 6; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    press(context, BUTTON_A, 3000ms);
+    //  The scene of the trade. It takes no button until its end: after
+    //  "Take good care of CH'DING!" it waits for A (trade_scene.c,
+    //  STATE_END_LINK_TRADE: a trade in the game, not over a cable). Its
+    //  text box is black, the trader's thanks after it come in the white
+    //  one of the map: A every second and a half until a white text box
+    //  with text in it is up. (An A that closes the thanks before they are
+    //  seen talks to the trader again: "How is my old ...?", white too.)
+    //  Another species than asked for: "This is no SPEAROW." at once, and
+    //  no scene; the look at the sixth one below tells.
+    const WallClock scene_until = current_time() + std::chrono::seconds(240);
+    for (bool text_up = false; !text_up;){
+        if (current_time() >= scene_until){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_trade(): No text of the trader's after the trade: " + label,
+                console
+            );
+        }
+        WhiteDialogWatcher text(COLOR_RED);
+        context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            console, context,
+            [](ProControllerContext& ctx){
+                for (int i = 0; i < 20; i++){
+                    pbf_press_button(ctx, BUTTON_A, 160ms, 1340ms);
+                }
+            },
+            { text }
+        );
+        if (ret != 0){
+            continue;
+        }
+        //  Text, not a bright moment of the scene.
+        const std::string words = story_read_dialog(rt);
+        int letters = 0;
+        for (char ch : words){
+            letters += std::isalpha((unsigned char)ch) ? 1 : 0;
+        }
+        if (letters >= 4){
+            console.log(label + ": after the trade: \"" + words + "\"");
+            text_up = true;
+        }else{
+            pbf_wait(context, 500ms);
+        }
+    }
+    //  The text closed (B), the player free again.
+    story_cutscene(rt, 0ms, 60000ms, false, label);
+    std::string now;
+    story_read_slot(rt, 6, &now);
+    if (now != get){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_trade(): Party slot 6 is " + (now.empty() ? std::string("not read") : now) + " after the trade, not " +
+            get + ": " + label,
+            console
+        );
+    }
+    rt.out_now = get;
+    rt.caught.insert(get);
+    if (rt.collection != nullptr){
+        rt.collection->add_caught(get, false, false);
+    }
+    rt.dex_new_since_load.insert(get);
+    console.log(
+        "Got for the POKeDEX: " + get + " (traded for the " + give + " of the boxes)." +
+        (rt.collection != nullptr
+            ? " The POKeDEX table: " + std::to_string(rt.collection->caught(get)) + " of " +
+                std::to_string(std::max(0, rt.collection->needed(get))) + "."
+            : std::string()),
+        COLOR_BLUE
+    );
+    story_note(rt, "Got " + get, COLOR_GREEN);
+    return true;
+}
+
 void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
