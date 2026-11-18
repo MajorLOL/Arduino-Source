@@ -24,6 +24,7 @@
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/PersistentSettings.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/Logging/LoggerWindow.h"
 #include "CommonFramework/Options/ResolutionOption.h"
@@ -229,9 +230,23 @@ MainWindow::MainWindow(QWidget* parent)
     GlobalSettings::instance().WALLPAPER.add_listener(*this);
     SystemSleepController::instance().add_listener(*this);
     update_wallpaper();
+
+    //  A program asks for its options to be written to the settings file
+    //  (request_panel_settings_save(), from its own thread): done here, on
+    //  the interface's thread, like every other write of the settings.
+    set_panel_settings_saver([this]{
+        QMetaObject::invokeMethod(this, [this]{
+            if (m_current_panel != nullptr){
+                try{
+                    m_current_panel->save_settings();
+                }catch (...){}
+            }
+        }, Qt::QueuedConnection);
+    });
 //    cout << "Done constructing" << endl;
 }
 MainWindow::~MainWindow(){
+    set_panel_settings_saver(nullptr);
     //  The panel before what it shows.
     delete m_assistant_panel;
     m_assistant_panel = nullptr;

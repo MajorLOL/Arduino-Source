@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <thread>
 #include <string>
 #include <vector>
 #include <QAbstractItemView>
@@ -42,6 +43,7 @@
 #include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
+#include "CommonFramework/PersistentSettings.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/Logging/Logger.h"
@@ -850,6 +852,129 @@ int check_program_list(MainWindow& window, Logger& logger){
         failed == 0 ? COLOR_BLUE : COLOR_RED
     );
     return failed;
+}
+
+
+//  The settings file while the program is open (build 37). It is put in its
+//  place in one step. And a program asks, from its own thread, for the
+//  options of the panel that is open to be written: the main window does
+//  that on the interface's thread. (The AutoStory asks at its start and at
+//  each save of the game.) On the build machine, with the real file.
+int check_settings_file(MainWindow& window, Logger& logger){
+    const std::string GAME = Pokemon::STRING_POKEMON + " FireRed and LeafGreen";
+    const std::string PROGRAM = "AutoStory";
+    const std::string KEY = "PocketPilot:SettingsTest";
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("Settings test: failed: " + what, COLOR_RED);
+        }
+    };
+    //  What the file on the disk has under the test's key, and how many
+    //  panels.
+    size_t panels_in_file = 0;
+    auto in_file = [&]() -> std::string{
+        panels_in_file = 0;
+        try{
+            JsonValue json = load_json_file(PROGRAM_SETTING_JSON_PATH());
+            const JsonObject* root = json.to_object();
+            const JsonObject* panels = root == nullptr ? nullptr : root->get_object("99-Panels");
+            if (panels == nullptr){
+                return "(no panels)";
+            }
+            panels_in_file = panels->size();
+            const std::string* value = panels->get_string(KEY);
+            return value == nullptr ? std::string("(not there)") : *value;
+        }catch (...){
+            return "(not read)";
+        }
+    };
+    auto left_beside = [&]{
+        size_t files = 0;
+        for (const QString& name : QDir(QString::fromStdString(SETTINGS_PATH())).entryList(QDir::Files)){
+            if (name.contains(".new-")){
+                files++;
+            }
+        }
+        return files;
+    };
+    const size_t one_step_before = PERSISTENT_SETTINGS().writes_in_one_step;
+    const size_t old_way_before = PERSISTENT_SETTINGS().writes_the_old_way;
+    auto ask_from_another_thread = [&]{
+        std::thread other([]{
+            request_panel_settings_save();
+        });
+        other.join();
+    };
+
+    //  No program open.
+    window.show_games();
+    let_run(200);
+    PERSISTENT_SETTINGS().panels[KEY] = "first";
+    PERSISTENT_SETTINGS().write();
+    check(in_file() == "first", "the settings file is written");
+    PERSISTENT_SETTINGS().panels[KEY] = "second";
+    PERSISTENT_SETTINGS().write();
+    check(in_file() == "second", "the settings file is replaced by a newer one");
+    check(left_beside() == 0, "nothing is left beside the settings file");
+
+    PERSISTENT_SETTINGS().panels[KEY] = "third";
+    ask_from_another_thread();
+    let_run(300);
+    check(in_file() == "second", "asked for with no program open: nothing is written");
+
+    if (window.open_program(GAME, PROGRAM)){
+        let_run(300);
+        PERSISTENT_SETTINGS().panels[KEY] = "fourth";
+        ask_from_another_thread();
+        //  Not on the thread that asked: this one has not come to it yet.
+        check(in_file() != "fourth", "asked for from another thread: not written on that thread");
+        let_run(300);
+        check(
+            in_file() == "fourth" && panels_in_file >= 2,
+            "asked for from another thread with a program open: its options are in the file a moment later"
+        );
+        check(left_beside() == 0, "nothing is left beside the settings file after that either");
+    }else{
+        check(false, "could not open " + GAME + ", " + PROGRAM);
+    }
+    window.show_games();
+    let_run(300);
+
+    //  The test's key out of the settings again.
+    {
+        JsonObject without;
+        for (const auto& item : PERSISTENT_SETTINGS().panels){
+            if (item.first != KEY){
+                without[item.first] = item.second.clone();
+            }
+        }
+        PERSISTENT_SETTINGS().panels = std::move(without);
+        PERSISTENT_SETTINGS().write();
+    }
+    check(in_file() == "(not there)", "the file as it is without the test's own entry");
+
+    //  Put in place in one step: every time, bar one that something else on
+    //  the machine may have got in the way of.
+    const size_t one_step = PERSISTENT_SETTINGS().writes_in_one_step - one_step_before;
+    const size_t old_way = PERSISTENT_SETTINGS().writes_the_old_way - old_way_before;
+    check(
+        one_step >= 3 && old_way <= 1,
+        "the settings file is put in its place in one step (" + std::to_string(one_step) + " times, " +
+        std::to_string(old_way) + " times written the old way)"
+    );
+
+    logger.log(
+        "Settings test: the settings file is replaced in one step (" + std::to_string(one_step) + " writes, " +
+        std::to_string(old_way) + " the old way), and a program's request writes the open panel's options on "
+        "the interface's thread: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) +
+        " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
 }
 
 
@@ -3631,6 +3756,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     try{
         int failed = take_pictures(application, window, out, logger);
         failed += check_program_list(window, logger);
+        failed += check_settings_file(window, logger);
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
         failed += check_name_mark(logger);

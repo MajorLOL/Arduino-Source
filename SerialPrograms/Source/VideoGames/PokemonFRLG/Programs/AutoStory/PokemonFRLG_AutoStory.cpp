@@ -28,6 +28,7 @@
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Globals.h"
+#include "CommonFramework/PersistentSettings.h"
 #include "CommonFramework/Exceptions/OperationFailedException.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Exceptions/ProgramFinishedException.h"
@@ -2290,9 +2291,13 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             if (segment_id == script.segments[i].id){
                 START_SEGMENT.set_value(i);
                 START_STEP.set((uint16_t)std::min<size_t>(step, 999));
-                return;
+                break;
             }
         }
+        //  The options as they are with this save (the start, the species
+        //  caught, the POKeDEX table) go to the settings file now: a copy
+        //  of UserSettings made while the program is open has them.
+        request_panel_settings_save();
     };
 
     const size_t first_step = start_step;
@@ -2562,6 +2567,12 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             std::to_string(total) + " species with at least one, " + std::to_string(to_catch) + " catches to make.",
             COLOR_BLUE
         );
+    }
+    //  The options as this run starts with them (what was set by hand, and
+    //  what came from the files of the last save) are written to the
+    //  settings file. Not for a new game: its options change in a moment.
+    if (!new_game){
+        request_panel_settings_save();
     }
 
     story_check_memory_at_start(rt);
