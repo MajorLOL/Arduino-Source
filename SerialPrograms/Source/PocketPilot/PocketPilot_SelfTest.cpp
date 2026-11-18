@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 23 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 22 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2975,13 +2975,14 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 15 &&
+        once == 14 &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
-            "C20_30_MOON_STONE_MANSION, C20_31_MOON_STONE_HIDEOUT, C20_32_MOON_STONE_MT_MOON_1F, "
+            "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
             "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
-        "stones, the four trades, the five that fetch a stone"
+        "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
+        "the story itself)"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3712,10 +3713,10 @@ int check_boxes(Logger& logger){
                 story_once_leave(script, segment, pc_at) == OnceLeave::PAST_STEP;
         }
         check(
-            fetch_ids == "C20_30_MOON_STONE_MANSION, C20_31_MOON_STONE_HIDEOUT, C20_32_MOON_STONE_MT_MOON_1F, "
+            fetch_ids == "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
                 "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY" &&
-            moon_ones == 4 && sun_ones == 1 && fetch_places.size() == 5 && fetch_shape,
-            "the five segments that fetch a stone (4 Moon Stones, the Sun Stone): each its own place, one pick-up, "
+            moon_ones == 3 && sun_ones == 1 && fetch_places.size() == 4 && fetch_shape,
+            "the four segments that fetch a stone (3 Moon Stones, the Sun Stone): each its own place, one pick-up, "
             "one PC, given up from its own save past it"
         );
         const StoryStep& plain = script.step(script.segments[0], 0);
@@ -3858,7 +3859,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades and five that fetch a stone): " +
+        ", C20_25_STONES, four of trades and four that fetch a stone): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

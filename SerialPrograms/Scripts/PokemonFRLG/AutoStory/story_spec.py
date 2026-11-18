@@ -3235,18 +3235,25 @@ CHAPTER20 += [trade_segment(*trade) for trade in TRADES]
 
 
 # ------------------------------------- chapter 20, the stones that are not sold
-#  EXPERIMENTAL (PocketPilot build 41, not run on a console when written).
+#  EXPERIMENTAL (PocketPilot build 41). Ran on a console on 18 November
+#  (Mansion, Mt. Moon 1F and Ruin Valley: Clefable, Wigglytuff and
+#  Bellossom evolved; the Hideout place was gone, see below).
 #  The Celadon Department Store sells no MOON STONE and no SUN STONE, and
 #  the stones segment (C20_25) leaves what needs them: Clefable (CLEFAIRY),
 #  Wigglytuff (JIGGLYPUFF), Bellossom (GLOOM). The game has them to pick up
 #  (data/maps/*/map.json; the item ball or hidden item, with its flag):
 #      MOON STONE   Pokemon Mansion 1F       hidden item at (2, 21)
-#                   Rocket Hideout B2F       item ball at (2, 5)
+#                   Rocket Hideout B2F       item ball at (2, 5): the story
+#                                            takes it itself (C5_02), no
+#                                            segment (build 41 went there on
+#                                            a console: "No text", the ball
+#                                            was gone; C20_31 is not used)
 #                   Mt. Moon 1F              item ball at (3, 2)
 #                   Mt. Moon B2F             hidden item at (20, 16), by Surf
 #      SUN STONE    Six Island, Ruin Valley  item ball at (43, 32)
-#  (A fifth MOON STONE, from Lostelle's father at the Joyful Game Corner,
-#  the story takes itself.) One segment for each place, in this order, each
+#  (Two more MOON STONES, the one of the Hideout above and the one from
+#  Lostelle's father at the Joyful Game Corner, the story takes itself.)
+#  One segment for each place, in this order, each
 #  skipped when nothing in the boxes takes that stone (StepType::
 #  SKIP_IF_NO_STONES with the stone as its text: the second Moon Stone
 #  place is only visited when the first one did not make the last one).
@@ -3324,11 +3331,6 @@ CHAPTER20 += [
         stone_pick("MAP_POKEMON_MANSION_1F", [2, 21], "FLAG_HIDDEN_ITEM_POKEMON_MANSION_1F_MOON_STONE",
                    "Moon Stone (Pokemon Mansion 1F)"),
         "POKeDEX collection: a Moon Stone of the Pokemon Mansion, then evolving with it"),
-    stone_fetch_segment(
-        "C20_31_MOON_STONE_HIDEOUT", "Moon Stone in the Rocket Hideout", "HEAL_LOCATION_CELADON_CITY",
-        stone_pick("MAP_ROCKET_HIDEOUT_B2F", [2, 5], "FLAG_HIDE_ROCKET_HIDEOUT_B2F_MOON_STONE",
-                   "Moon Stone (Rocket Hideout B2F)"),
-        "POKeDEX collection: a Moon Stone of the Rocket Hideout, then evolving with it"),
     stone_fetch_segment(
         "C20_32_MOON_STONE_MT_MOON_1F", "Moon Stone in Mt. Moon 1F", "HEAL_LOCATION_ROUTE4",
         stone_pick("MAP_MT_MOON_1F", [3, 2], "FLAG_HIDE_MT_MOON_1F_MOON_STONE", "Moon Stone (Mt. Moon 1F)"),
