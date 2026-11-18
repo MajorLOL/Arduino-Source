@@ -3649,6 +3649,7 @@ int check_boxes(Logger& logger){
         bool shape = true;
         bool table_says = true;
         bool mail_fine = true;
+        bool before_fine = true;
         std::string mails;
         for (size_t s = 0; s < script.segment_count; s++){
             const StorySegment& segment = script.segments[s];
@@ -3729,6 +3730,10 @@ int check_boxes(Logger& logger){
             //  in the hand, until the MAIL is off it.
             const bool holds_mail = script.step(segment, trade_at).p0 != 0;
             mail_fine &= holds_mail == (get == "jynx");
+            //  What a BOX_OUT looks for in its cell, for a trade made before.
+            before_fine &= story_trade_after(script, segment, out_at) == get &&
+                story_trade_after(script, segment, in_at).empty() &&
+                story_trade_after(script, segment, trade_at).empty();
             if (holds_mail){
                 mails += (mails.empty() ? "" : ", ") + get;
             }
@@ -3742,6 +3747,11 @@ int check_boxes(Logger& logger){
         check(
             mail_fine && mails == "jynx",
             "the trade that gives a Pokemon with a MAIL on it (the JYNX) says so, the others do not"
+        );
+        check(
+            before_fine,
+            "the step that takes the Pokemon to give out of a box finds the species its segment's trade gives "
+            "(what its cell holds when the trade was made before), and none after the trade or at the box"
         );
     }
 

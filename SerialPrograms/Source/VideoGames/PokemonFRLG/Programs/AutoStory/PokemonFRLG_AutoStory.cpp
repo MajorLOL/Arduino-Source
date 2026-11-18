@@ -1532,8 +1532,17 @@ void AutoStory::run_segment(
                     COLOR_ORANGE
                 );
                 i += skip;
-            }else if (!story_box_out(rt, label, step.text)){
-                env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+            }else if (!story_box_out(rt, label, step.text, story_trade_after(script, segment, i))){
+                if (rt.out_made_before){
+                    rt.out_made_before = false;
+                    env.log(
+                        label + ": the trade was made before: the next " + std::to_string(skip) +
+                        " steps (the way to the trader and back) are skipped.",
+                        COLOR_BLUE
+                    );
+                }else{
+                    env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+                }
                 i += skip;
             }
             break;

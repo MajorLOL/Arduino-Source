@@ -592,6 +592,18 @@ int swap_with_party(
     //  What the list has there, read again before anything is pressed.
     const Panel lies = read_panel(rt, in_cell);
     if (!lies.pokemon || lies.slug != in_cell){
+        if (lies.pokemon && !rt.out_watch.empty() && lies.slug == rt.out_watch){
+            //  What the segment's trade gives lies where the one to give
+            //  lay: the trade was made before. Nothing is pressed.
+            console.log(
+                label + ": " + where + " has " + upper(lies.slug) + " (the trade of this segment gives it), and the "
+                "list of the boxes has " + upper(in_cell) + " there: the trade was made before. Nothing is changed.",
+                COLOR_BLUE
+            );
+            rt.out_made_before = true;
+            rt.out_made_level = lies.level;
+            return lies.level;
+        }
         fail(
             rt,
             label + ": " + where + " has " + panel_text(lies) + ", and the list of the boxes has " + upper(in_cell) +
@@ -1084,8 +1096,13 @@ int story_stones(StoryRuntime& rt, const std::string& label, const std::function
 
 //  ---- A Pokemon of a box into the party for a while (build 36) -------------
 
-bool story_box_out(StoryRuntime& rt, const std::string& label, const std::string& give){
+bool story_box_out(
+    StoryRuntime& rt, const std::string& label, const std::string& give, const std::string& trade_get
+){
     ConsoleHandle& console = rt.console;
+    rt.out_made_before = false;
+    rt.out_made_level = -1;
+    rt.out_watch.clear();
     rt.out_box = -1;
     rt.out_cell = -1;
     rt.out_extra.clear();
@@ -1143,7 +1160,35 @@ bool story_box_out(StoryRuntime& rt, const std::string& label, const std::string
         " waits in its cell (experimental).",
         COLOR_BLUE
     );
-    box_swap(rt, label, box, cell, give, extra);
+    rt.out_watch = trade_get;
+    try{
+        box_swap(rt, label, box, cell, give, extra);
+    }catch (...){
+        rt.out_watch.clear();
+        throw;
+    }
+    rt.out_watch.clear();
+    if (rt.out_made_before){
+        //  The cell held what the trade gives: the list follows the game,
+        //  and the POKeDEX table has it (the game's own count of the
+        //  Pokedex has it from before: not counted again as new).
+        rt.boxes.put(box, cell, trade_get, rt.out_made_level);
+        rt.caught.insert(trade_get);
+        if (rt.collection != nullptr){
+            rt.collection->add_caught(trade_get, false, false);
+        }
+        console.log(
+            "Got for the POKeDEX: " + trade_get + " (it lies in " + cell_text(box, cell) + " already: the trade was "
+            "made before)." +
+            (rt.collection != nullptr
+                ? " The POKeDEX table: " + std::to_string(rt.collection->caught(trade_get)) + " of " +
+                    std::to_string(std::max(0, rt.collection->needed(trade_get))) + "."
+                : std::string()),
+            COLOR_BLUE
+        );
+        story_note(rt, "Got " + trade_get, COLOR_GREEN);
+        return false;
+    }
     rt.out_box = box;
     rt.out_cell = cell;
     rt.out_extra = extra;

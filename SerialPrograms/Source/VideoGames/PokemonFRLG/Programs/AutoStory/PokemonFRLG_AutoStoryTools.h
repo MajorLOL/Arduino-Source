@@ -264,6 +264,13 @@ struct StoryRuntime{
     std::string out_extra;
     std::string out_give;
     std::string out_now;
+    //  A trade may have been made before (by hand, or in a run whose list of
+    //  the boxes was not kept): while StepType::BOX_OUT looks at its cell,
+    //  "out_watch" is the species the segment's trade gives. If the cell
+    //  holds that one, "out_made_before" is set, with its level.
+    std::string out_watch;
+    bool out_made_before = false;
+    int out_made_level = -1;
     //  Evolution stones (build 35), by their names in the POKeDEX table
     //  ("Moon Stone"): seen in the bag in this run (at least one), and not
     //  to be had (not in the bag and not sold, or not there after buying).

@@ -241,11 +241,17 @@ int story_stones(StoryRuntime& rt, const std::string& label, const std::function
 //  In front of a PC, facing it. story_box_out(): one "give" of the boxes
 //  (the lowest level, and not the one the list of what evolves has set
 //  aside) changes places with the party's sixth one, which must not be of
-//  the team; false, and nothing pressed, when there is none. story_box_in():
+//  the team; false, and nothing pressed, when there is none. "trade_get": the
+//  species the segment's trade gives. If the cell holds that one (the trade
+//  was made before: by hand, or in a run whose list was not kept), nothing is
+//  pressed either: the list and the POKeDEX table take it, and false comes
+//  back with StoryRuntime::out_made_before set. story_box_in():
 //  what the sixth place holds now (StoryRuntime::out_now) goes into that
 //  cell, the party's own sixth one comes back. The game must not be saved
 //  between the two.
-bool story_box_out(StoryRuntime& rt, const std::string& label, const std::string& give);
+bool story_box_out(
+    StoryRuntime& rt, const std::string& label, const std::string& give, const std::string& trade_get
+);
 void story_box_in(StoryRuntime& rt, const std::string& label);
 //  Facing someone who trades in the game ("Do you have a SPEAROW? Want to
 //  trade it for my FARFETCH'D?"): YES, the party's sixth one, the trade's

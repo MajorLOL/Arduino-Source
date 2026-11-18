@@ -207,7 +207,8 @@ enum class StepType : uint8_t{
                         //  the party's sixth, gets the stone and goes back; a save after each
     BOX_OUT,            //  in front of a PC, facing it: a Pokemon of the species "text" in the
                         //  boxes changes places with the party's sixth one. None there (or the
-                        //  sixth is of the team): skip the next p0 steps
+                        //  sixth is of the team): skip the next p0 steps. The same when its cell
+                        //  holds what the segment's TRADE gives: the trade was made before
     TRADE,              //  facing someone who trades in the game: YES, the party's sixth one;
                         //  after the trade it is the species "text" (one more in the table).
                         //  p0 = 1: it holds a MAIL (the game's table of trades), taken off it
@@ -281,6 +282,23 @@ struct StoryScript{
     }
 };
 
+
+//  The species the trade after step "index" gives: the text of the first
+//  TRADE step after it, up to the segment's BOX_IN or SAVE (empty: none).
+//  A BOX_OUT looks for it in its cell: a Pokemon that was traded for before
+//  lies where the one given lay (build 40).
+inline std::string story_trade_after(const StoryScript& script, const StorySegment& segment, size_t index){
+    for (size_t k = index + 1; k < segment.step_count; k++){
+        const StoryStep& step = script.step(segment, k);
+        if (step.type == StepType::TRADE){
+            return step.text != nullptr ? std::string(step.text) : std::string();
+        }
+        if (step.type == StepType::BOX_IN || step.type == StepType::SAVE){
+            break;
+        }
+    }
+    return std::string();
+}
 
 //  Is step "index" of the segment the check of one trip to a place of the
 //  POKeDEX collection? A SKIP_IF_COLLECTED over steps that have one place
