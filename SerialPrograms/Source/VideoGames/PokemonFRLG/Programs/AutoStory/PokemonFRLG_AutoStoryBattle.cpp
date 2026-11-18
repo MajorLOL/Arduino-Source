@@ -1224,6 +1224,11 @@ void handle_move_learning(
     const StoryBattleSettings& settings, StoryBattleMemory& memory,
     const std::string& question
 ){
+    if (settings.never_learn){
+        console.log("Not learning a new move (the training for an evolution).");
+        answer(context, false);     //  NO -> "Stop learning X?"
+        return;
+    }
     //  Find the longest move name contained in the question.
     int new_move = -1;
     size_t best_len = 0;

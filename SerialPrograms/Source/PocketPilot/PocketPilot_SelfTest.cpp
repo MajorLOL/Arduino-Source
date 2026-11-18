@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 22 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 39 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2975,14 +2975,17 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 14 &&
+        once == 31 &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
-            "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY",
+            "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY, C20_35_LEVEL_01, C20_36_LEVEL_02, "
+            "C20_37_LEVEL_03, C20_38_LEVEL_04, C20_39_LEVEL_05, C20_40_LEVEL_06, C20_41_LEVEL_07, "
+            "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
+            "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
-        "the story itself)"
+        "the story itself), the seventeen that evolve by level"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3025,7 +3028,8 @@ int check_leave_out(Logger& logger){
         std::vector<size_t> left_open;
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
-            lickitung + 1 == mansion && sun_stone + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_35_LEVEL_01") &&
+            index_of("C20_51_LEVEL_17") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3851,6 +3855,110 @@ int check_boxes(Logger& logger){
         );
     }
 
+    //  Evolving by level (build 43): which of the boxes, in which order, and
+    //  the file of a training under way.
+    {
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(table, census);
+        const std::vector<Boxes::LevelTarget> targets = Boxes::level_targets(plan);
+        const std::vector<Boxes::LevelTarget> without = Boxes::level_targets(plan, {"pidgeot"});
+        check(
+            targets.size() == 2 && targets[0].slug == "pidgeot" && targets[0].from_slug == "pidgeotto" &&
+            targets[0].level == 40 && targets[0].evolves_at == 36 && targets[0].goal == 41 &&
+            targets[1].slug == "butterfree" && targets[1].from_slug == "metapod" && targets[1].box == 0 &&
+            targets[1].cell == 4 && targets[1].level == 8 && targets[1].goal == 10 &&
+            without.size() == 1 && without[0].slug == "butterfree",
+            "the Pokemon of the boxes that evolve by a level: the fewest levels to go first, one at its next level"
+        );
+        check(
+            Boxes::level_goal(8, 10) == 10 && Boxes::level_goal(10, 10) == 11 && Boxes::level_goal(40, 36) == 41 &&
+            Boxes::level_goal(-1, 16) == 16 && Boxes::level_goal(100, 36) == 0 && Boxes::level_goal(99, 36) == 100 &&
+            Boxes::level_goal(5, 1) == 0 && Boxes::level_goal(5, 101) == 0 &&
+            Boxes::levels_to_go(targets[0]) == 1 && Boxes::levels_to_go(targets[1]) == 2,
+            "the level a Pokemon is trained to, and the levels still to go"
+        );
+        check(
+            Boxes::level_targets_text(targets) ==
+                "Pidgeot (PIDGEOTTO Lv 40, box 1 cell 6, to level 41), Butterfree (METAPOD Lv 8, box 1 cell 5, to level 10)",
+            "the targets as one line for the log"
+        );
+        Boxes::RaiseFile file;
+        file.out = true;
+        file.box = 2;
+        file.cell = 17;
+        file.extra = "articuno";
+        file.from = "mr-mime";
+        file.becomes = "pidgeot";
+        file.goal = 36;
+        Boxes::RaiseFile back;
+        const std::string text = Boxes::raise_to_text(file);
+        const bool same = Boxes::raise_from_text(text, back) && back.out && back.box == 2 && back.cell == 17 &&
+            back.extra == "articuno" && back.from == "mr-mime" && back.becomes == "pidgeot" && back.goal == 36;
+        Boxes::RaiseFile none;
+        none.out = true;
+        const bool off = Boxes::raise_from_text(Boxes::raise_to_text(Boxes::RaiseFile()), none) && !none.out;
+        Boxes::RaiseFile bad;
+        check(
+            text == "raise 1 2 17 articuno mr-mime pidgeot 36\n" && same && off &&
+            !Boxes::raise_from_text("", bad) && !Boxes::raise_from_text("raise", bad) &&
+            !Boxes::raise_from_text("raise 1 2 17 articuno mr-mime pidgeot", bad) &&
+            !Boxes::raise_from_text("raise 1 2 17 articuno mr-mime pidgeot 1", bad) &&
+            !Boxes::raise_from_text("raise 1 x 17 articuno mr-mime pidgeot 36", bad) &&
+            !Boxes::raise_from_text("raise 0 1", bad) && !Boxes::raise_from_text("other 1 2 17 a b c 36", bad) &&
+            Boxes::raise_from_text("  raise 1 0 0 zapdos eevee jolteon 100\r\n", bad) && bad.out && bad.goal == 100,
+            "the file of a training under way, and what is not taken from it"
+        );
+    }
+    {
+        int segments = 0;
+        bool shape = true;
+        bool legs_there = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (segment.step_count < 3 || script.step(segment, 0).type != StepType::SKIP_IF_NO_LEVELS){
+                continue;
+            }
+            segments++;
+            size_t out_at = 0;
+            size_t raise_at = 0;
+            size_t in_at = 0;
+            int outs = 0;
+            int raises = 0;
+            int ins = 0;
+            int saves = 0;
+            for (size_t k = 0; k < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::LEVEL_OUT){
+                    out_at = k;
+                    outs++;
+                }else if (step.type == StepType::RAISE){
+                    raise_at = k;
+                    raises++;
+                    legs_there &= step.legs_a != 0 && step.legs_b != 0 && step.legs_c != 0 && step.p3 > 0;
+                }else if (step.type == StepType::LEVEL_IN){
+                    in_at = k;
+                    ins++;
+                }else if (step.type == StepType::SAVE){
+                    saves++;
+                }
+            }
+            shape &= story_once_segment(script, segment) && outs == 1 && raises == 1 && ins == 1 && saves == 1 &&
+                out_at < raise_at && raise_at < in_at &&
+                (size_t)script.step(segment, out_at).p0 == in_at - out_at &&
+                script.step(segment, 1).type == StepType::FLY &&
+                script.step(segment, segment.step_count - 1).type == StepType::SAVE &&
+                script.step(segment, in_at + 1).type == StepType::WALK;
+            //  Given up from a save in it: not possible (the Pokemon is out of its box).
+            for (size_t i = 2; i + 1 < segment.step_count; i++){
+                shape &= story_once_leave(script, segment, i) == OnceLeave::NO;
+            }
+        }
+        check(
+            segments == 17 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
+            story_levels_place() == "the evolving by level",
+            "the seventeen segments that evolve by level: FLY, the PC, the training, the PC, a save at the end only"
+        );
+    }
+
     logger.log(
         "AutoStory test: the PC's boxes are read, and what is in them gets its stone or is traded (the PC's "
         "texts, the cells, the list as a file, the six stones, the trades for " + trade_gets + "; of the " +
@@ -3859,7 +3967,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades and four that fetch a stone): " +
+        ", C20_25_STONES, four of trades, four that fetch a stone and seventeen of levels): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

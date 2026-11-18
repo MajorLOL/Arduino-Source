@@ -264,6 +264,13 @@ struct StoryRuntime{
     std::string out_extra;
     std::string out_give;
     std::string out_now;
+    //  Evolving by level (build 43): the same, but across saves (the
+    //  training heals at a nurse, which saves). What it evolves into and the
+    //  level it is trained to; the rest is in out_*. Kept in a file as well
+    //  (AutoStoryBoxes::RaiseFile), for a program started again from such a
+    //  save. out_box < 0: no training under way.
+    std::string out_becomes;
+    int out_goal = 0;
     //  A trade may have been made before (by hand, or in a run whose list of
     //  the boxes was not kept): while StepType::BOX_OUT looks at its cell,
     //  "out_watch" is the species the segment's trade gives. If the cell

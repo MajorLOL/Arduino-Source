@@ -140,6 +140,10 @@ struct StoryBattleSettings{
     AutoStoryDex::Type share_type1 = AutoStoryDex::Type::NORMAL;
     AutoStoryDex::Type share_type2 = AutoStoryDex::Type::NORMAL;
     std::set<std::string> share_members;
+    //  A Pokemon in training for its evolution (StepType::RAISE) learns no new
+    //  move: NO to every "make it forget a move?" (its moves are not known to
+    //  the program, and no move is worth less than the evolution).
+    bool never_learn = false;
 
     //  The species and level of the one that fights, if known (training):
     //  the moves are then valued by the damage they do with its stats

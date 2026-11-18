@@ -1234,6 +1234,176 @@ void story_box_in(StoryRuntime& rt, const std::string& label){
 }
 
 
+//  ---- Evolving by level (build 43) -------------------------------------------
+
+std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt){
+    const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
+    //  One that failed twice in a row in this run is left for the next run.
+    std::set<std::string> without;
+    for (const EvolveLine& line : plan){
+        if (rt.places.place_out(story_level_place(line.slug))){
+            without.insert(line.slug);
+        }
+    }
+    return level_targets(plan, without);
+}
+
+bool story_level_out(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed){
+    ConsoleHandle& console = rt.console;
+    rt.out_box = -1;
+    rt.out_cell = -1;
+    rt.out_extra.clear();
+    rt.out_give.clear();
+    rt.out_now.clear();
+    rt.out_becomes.clear();
+    rt.out_goal = 0;
+    const std::vector<LevelTarget> targets = story_level_targets(rt);
+    if (targets.empty()){
+        console.log(label + ": nothing in the boxes is left to evolve by a level: nothing is taken out.", COLOR_BLUE);
+        return false;
+    }
+    const LevelTarget target = targets.front();
+    console.log(
+        label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level (the fewest levels to go "
+        "first): " + level_targets_text(targets) + ".",
+        COLOR_BLUE
+    );
+    //  The one that makes room: the party's sixth, when it is not of the team.
+    std::string extra;
+    const int extra_level = story_read_slot(rt, 6, &extra);
+    if (extra_level < 0 || extra.empty()){
+        console.log(
+            label + ": party slot 6 has no Pokemon (or it was not read): with fewer than six in the party, "
+            "nothing is taken out of a box.",
+            COLOR_ORANGE
+        );
+        return false;
+    }
+    for (const StoryTeamMember& member : rt.team){
+        if (member.line.count(extra) != 0){
+            console.log(
+                label + ": party slot 6 is " + upper(extra) + ", one of the team: it is not put in a box.",
+                COLOR_ORANGE
+            );
+            return false;
+        }
+    }
+    const std::string from = upper(target.from_slug);
+    story_note(rt, label + ": " + target.name);
+    console.log(
+        label + ": " + from + " (" + cell_text(target.box, target.cell) + (target.level > 0 ? ", level " +
+        std::to_string(target.level) : std::string()) + ") comes into the party, to be trained to level " +
+        std::to_string(target.goal) + " for " + target.name + "; " + upper(extra) + " waits in its cell (experimental).",
+        COLOR_BLUE
+    );
+    box_swap(rt, label, target.box, target.cell, target.from_slug, extra);
+    //  What is there now, and the level it has really.
+    std::string now;
+    const int level = story_read_slot(rt, 6, &now);
+    if (now != target.from_slug){
+        fail(
+            rt,
+            label + ": party slot 6 is " + (now.empty() ? std::string("not read") : upper(now)) + " after the change, "
+            "not " + from + ". Nothing is saved: the game is reset."
+        );
+    }
+    int goal = target.goal;
+    if (level > 0){
+        goal = level_goal(level, target.evolves_at);
+    }
+    rt.out_box = target.box;
+    rt.out_cell = target.cell;
+    rt.out_extra = extra;
+    rt.out_give = target.from_slug;
+    rt.out_now = target.from_slug;
+    rt.out_becomes = target.slug;
+    rt.out_goal = goal;
+    //  The list follows the game (and goes back with it on a reset).
+    rt.boxes.put(target.box, target.cell, extra, extra_level);
+    if (goal <= 0){
+        //  (Level 100: it cannot go up.) Back where it was.
+        console.log(label + ": " + from + " is at level " + std::to_string(level) + ": it cannot be trained.", COLOR_ORANGE);
+        box_swap(rt, label, target.box, target.cell, extra, target.from_slug);
+        rt.boxes.put(target.box, target.cell, target.from_slug, level);
+        rt.out_box = -1;
+        rt.out_cell = -1;
+        rt.out_extra.clear();
+        rt.out_give.clear();
+        rt.out_now.clear();
+        rt.out_becomes.clear();
+        return false;
+    }
+    if (changed){
+        changed();
+    }
+    return true;
+}
+
+void story_level_in(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed){
+    ConsoleHandle& console = rt.console;
+    if (rt.out_box < 0 || rt.out_extra.empty() || rt.out_give.empty()){
+        console.log(label + ": nothing was taken out of a box for a training: nothing to put back.", COLOR_ORANGE);
+        return;
+    }
+    std::string now;
+    const int level = story_read_slot(rt, 6, &now);
+    if (now.empty() || (now != rt.out_give && now != rt.out_becomes)){
+        fail(
+            rt,
+            label + ": party slot 6 is " + (now.empty() ? std::string("not read") : upper(now)) + ", not " +
+            upper(rt.out_give) + " or " + upper(rt.out_becomes) + ". Nothing is saved: the game is reset."
+        );
+    }
+    const std::string where = cell_text(rt.out_box, rt.out_cell);
+    const std::string waiting = rt.out_extra;
+    const std::string was = rt.out_give;
+    const std::string becomes = rt.out_becomes;
+    const int goal = rt.out_goal;
+    box_swap(rt, label, rt.out_box, rt.out_cell, rt.out_extra, now);
+    if (rt.boxes_known){
+        rt.boxes.put(rt.out_box, rt.out_cell, now, level);
+    }
+    rt.out_box = -1;
+    rt.out_cell = -1;
+    rt.out_extra.clear();
+    rt.out_give.clear();
+    rt.out_now.clear();
+    rt.out_becomes.clear();
+    rt.out_goal = 0;
+    if (now == becomes && now != was){
+        //  One more in the POKeDEX table, the game saved.
+        rt.caught.insert(now);
+        if (rt.collection != nullptr){
+            rt.collection->add_caught(now, false, false);
+        }
+        rt.dex_new_since_load.insert(now);
+        console.log(
+            "Evolved for the POKeDEX: " + now + " (" + upper(was) + " by level " +
+            (level > 0 ? std::to_string(level) : std::string("?")) + "). It lies in " + where + "; " + upper(waiting) +
+            " is back in the party." +
+            (rt.collection != nullptr
+                ? " The POKeDEX table: " + std::to_string(rt.collection->caught(now)) + " of " +
+                    std::to_string(std::max(0, rt.collection->needed(now))) + "."
+                : std::string()),
+            COLOR_BLUE
+        );
+        story_note(rt, "Evolved: " + now, COLOR_GREEN);
+    }else{
+        console.log(
+            label + ": " + upper(now) + " is at level " + (level > 0 ? std::to_string(level) : std::string("?")) +
+            ", the goal was " + std::to_string(goal) + ": it did not evolve. It lies in " + where + "; " +
+            upper(waiting) + " is back in the party. The next segment goes on with the list as it is now.",
+            COLOR_ORANGE
+        );
+    }
+    story_save(rt, true);
+    story_saved(rt, rt.step_index + 1);
+    if (changed){
+        changed();
+    }
+}
+
+
 }
 }
 }

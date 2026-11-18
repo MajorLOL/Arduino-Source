@@ -214,6 +214,20 @@ enum class StepType : uint8_t{
                         //  p0 = 1: it holds a MAIL (the game's table of trades), taken off it
     BOX_IN,             //  in front of a PC, facing it: what the party's sixth place holds
                         //  since BOX_OUT goes into the box, the party's own sixth comes back
+    SKIP_IF_NO_LEVELS,  //  nothing in the boxes evolves by a level into a species the POKeDEX
+                        //  table still wants (or the boxes were never read): skip the next p0
+                        //  steps
+    LEVEL_OUT,          //  in front of a PC, facing it: the Pokemon of the boxes with the
+                        //  fewest levels to go to its evolution changes places with the
+                        //  party's sixth one. None (or the sixth is of the team): skip the
+                        //  next p0 steps
+    RAISE,              //  as GRIND (the legs, the grass line, the nurse), for the Pokemon in
+                        //  the party's sixth place: in front for the training, the lead
+                        //  comes in and fights, the experience is shared, the EXP. SHARE is
+                        //  on it. Until it is at the level LEVEL_OUT chose (p0 is not used)
+    LEVEL_IN,           //  in front of a PC, facing it: what the party's sixth place holds
+                        //  since LEVEL_OUT (evolved or not) goes into its cell, the party's
+                        //  own sixth comes back; an evolved species is one more in the table
 };
 
 struct StoryStep{
@@ -363,14 +377,16 @@ inline bool story_rod_way(const StoryScript& script, const StorySegment& segment
 //  the SKIP_IF_OWNED over all its other steps, the next one is FLY (so the
 //  segment starts outdoors), and its last step is a save. The same shape
 //  with SKIP_IF_BOXES: the segment that reads the PC's boxes; and with
-//  SKIP_IF_NO_STONES: the one of the evolution stones.
+//  SKIP_IF_NO_STONES: the one of the evolution stones, and with
+//  SKIP_IF_NO_LEVELS: the ones that evolve by level.
 inline bool story_once_segment(const StoryScript& script, const StorySegment& segment){
     if (segment.step_count < 3){
         return false;
     }
     const StoryStep& check = script.step(segment, 0);
     return (check.type == StepType::SKIP_IF_OWNED || check.type == StepType::SKIP_IF_BOXES ||
-            check.type == StepType::SKIP_IF_NO_STONES) && check.p0 > 0 &&
+            check.type == StepType::SKIP_IF_NO_STONES || check.type == StepType::SKIP_IF_NO_LEVELS) &&
+        check.p0 > 0 &&
         (size_t)check.p0 + 1 == segment.step_count &&
         script.step(segment, 1).type == StepType::FLY &&
         script.step(segment, segment.step_count - 1).type == StepType::SAVE;

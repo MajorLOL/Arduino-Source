@@ -172,6 +172,21 @@ inline std::string story_stones_place(){
     return "the evolution stones";
 }
 
+//  The segments that evolve by level (build 43, experimental): all of them
+//  count as one place when a run starts in the middle of one, and the one
+//  Pokemon that is trained counts as a place of its own ("raising PIDGEOT"):
+//  if that fails twice in a row, the next segment takes another one.
+inline std::string story_levels_place(){
+    return "the evolving by level";
+}
+inline std::string story_level_place(const std::string& slug){
+    std::string name = "raising ";
+    for (char ch : slug){
+        name += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+    }
+    return name;
+}
+
 //  The segment that fetches one evolution stone where the game has it
 //  (build 41, experimental): the text of its first step is "Moon Stone in
 //  Mt. Moon". The stone is the part before " in " (empty when the text has

@@ -96,11 +96,14 @@ def only(variants, steps):
     return {"only": {"variants": variants, "steps": steps}}
 
 
-def grind(map_id, tiles, pc, level, label, every=6, slot=None, line=None, candies=False):
+def grind(map_id, tiles, pc, level, label, every=6, slot=None, line=None, candies=False, raise_=False):
     """Train until a level. slot/line: a team member (party slot, its
     evolution line as slugs) trains in front instead of the lead. candies:
-    first the Rare Candies in the bag, as many as the level needs."""
+    first the Rare Candies in the bag, as many as the level needs. raise_:
+    the Pokemon the program took out of a box (RAISE: it chooses the level)."""
     g = {"map": map_id, "tiles": tiles, "pc": pc, "level": level, "every": every}
+    if raise_:
+        g["raise"] = True
     if slot is not None:
         g["slot"] = slot
         g["line"] = line
@@ -3342,6 +3345,52 @@ CHAPTER20 += [
         "POKeDEX collection: a Moon Stone of Mt. Moon B2F (by Surf), then evolving with it"),
     sun_stone_segment("C20_34_SUN_STONE_RUIN_VALLEY"),
 ]
+
+
+# ------------------------------------------------ chapter 20, evolving by level
+#  EXPERIMENTAL (PocketPilot build 43, not run on a console when written).
+#  The table of the FireRed game with Charmander has 23 species that only
+#  come by evolving by a level (the same table, as the stones and the
+#  trades: PokemonFRLG_AutoStoryDexCollection.h). Where the one that
+#  evolves lies in a box, it is trained here: one Pokemon in each segment,
+#  the one with the fewest levels to go first (StepType::SKIP_IF_NO_LEVELS
+#  skips the segment when the boxes have none left).
+#
+#  Each segment: FLY to the Indigo Plateau, the PC (StepType::LEVEL_OUT: the
+#  Pokemon of the box changes places with the party's sixth one, ARTICUNO,
+#  as the stones do), the walk to the nurse and the training at Victory
+#  Road (StepType::RAISE, the grass of the League training: the Pokemon in
+#  training in front and the lead coming in, so the experience is shared as
+#  it is for the team members; the EXP. SHARE on it, which makes three
+#  quarters of each battle's experience its own), a nurse every few
+#  battles (the game is saved there), the PC again (StepType::LEVEL_IN: it
+#  goes back into its cell, evolved or not, the one that waited comes
+#  back), out, the save. A level of the evolution not reached after 600
+#  battles leaves the Pokemon in its cell with the levels it got: the next
+#  segment goes on with it (or with one that has fewer levels to go).
+LEVEL_SEGMENTS = 17
+#  The Indigo Plateau's Pokemon Center is a bigger room than the others: its
+#  PC is at (17, 9), used from the tile below it (the nurse is at (13, 10)).
+INDIGO_PC_TILE = [17, 9]
+
+
+def level_segment(seg_id):
+    steps = [
+        fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_Fly", force=True),
+        talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"level_trip": {"steps": [
+            grind("MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), PC["INDIGO"], 0, seg_id + "_Raise", raise_=True),
+            talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label=seg_id + "_BackToThePC"),
+        ], "in_label": "Into the box"}, "label": "Out of the box"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "state": VICTORY_ROAD_RESET,
+            "title": "POKeDEX collection: evolving by level (a Pokemon of the PC trained at Victory Road)",
+            "steps": [{"unless_no_levels": {"steps": steps}, "label": "Anything to evolve by a level?"}]}
+
+
+CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (35 + k, k + 1)) for k in range(LEVEL_SEGMENTS)]
 
 
 def fly_only(segments):

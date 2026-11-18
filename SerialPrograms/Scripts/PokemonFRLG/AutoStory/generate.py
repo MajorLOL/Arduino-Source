@@ -33,7 +33,7 @@ def cstr(s):
     return '"' + str(s).replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-DIR_STEPS = ("GRIND", "OSCILLATE", "PUSH")
+DIR_STEPS = ("GRIND", "RAISE", "OSCILLATE", "PUSH")
 
 
 def readable_map_name(name):

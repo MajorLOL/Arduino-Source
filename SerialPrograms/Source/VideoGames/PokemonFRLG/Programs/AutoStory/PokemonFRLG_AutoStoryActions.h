@@ -96,7 +96,37 @@ void story_check_lead(StoryRuntime& rt);
 //  description) on a party slot (1-6): an evolution stone.
 //  give: GIVE (to hold) in place of USE; party slot 1 is the starter then.
 //  (words: "a|b" for one of several.)
-void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give = false);
+//  "tolerant": no such item in the bag is no error (false comes back, the
+//  bag is closed); true: the item was used or given.
+bool story_use_item(
+    StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what,
+    bool give = false, bool tolerant = false
+);
+//  The party menu: the item party slot "party_slot" holds goes back to the
+//  bag. False: it holds none ("is not holding anything"). An error when the
+//  menu is not what it is expected to be.
+bool story_take_item(StoryRuntime& rt, int party_slot, const std::string& label);
+
+//  Evolving by level (build 43, experimental; PokemonFRLG_AutoStoryBoxScan.cpp
+//  and PokemonFRLG_AutoStoryActions.cpp). The species of the boxes that
+//  evolve by a level into one the POKeDEX table still wants, the one with
+//  the fewest levels to go first.
+std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt);
+//  In front of a PC, facing it, with a party of six whose last one is not of
+//  the team (StepType::LEVEL_OUT): the first of those changes places with the
+//  party's sixth one (StoryRuntime::out_*, out_becomes, out_goal say which).
+//  "changed" is called once it is done. False, and nothing pressed, when
+//  there is none.
+bool story_level_out(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed);
+//  Back at the PC (StepType::LEVEL_IN): what the sixth place holds goes into
+//  the cell, the party's own sixth one comes back; an evolved species is one
+//  more in the table; the game is saved. "changed" is called after that.
+void story_level_in(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed);
+//  The training (StepType::RAISE): the one in the party's sixth place
+//  trains in front of the lead, with the EXP. SHARE, in the grass of the
+//  step (as StepType::GRIND), until it is at StoryRuntime::out_goal. Ends
+//  healed at the nurse, the party in its order, the EXP. SHARE on the lead.
+void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
 
 //  Use up to "count" Rare Candies from the bag on party slot 1, in the
 //  overworld. A move it wants to learn is not learned. Returns how many

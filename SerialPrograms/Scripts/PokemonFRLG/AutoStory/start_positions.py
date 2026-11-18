@@ -205,7 +205,7 @@ def first_walk_start(steps, k):
     for st in steps[k:]:
         if st["type"] == "WALK":
             return legs[st["leg"]]["start"]
-        if st["type"] == "GRIND":
+        if st["type"] in ("GRIND", "RAISE"):
             return None
     return None
 
@@ -233,7 +233,7 @@ for si, seg in enumerate(segs):
             if i + 1 < len(steps) and steps[i + 1]["type"] == "SAVE":
                 continue
             resume = [(i + 1, "heal")]
-        elif t == "GRIND":
+        elif t in ("GRIND", "RAISE"):
             resume = [(i, "grind"), (i + 1, "grind_done")]
         elif t == "TEAM" and st.get("p0") == 1:
             resume = [(i + 1, "team")]

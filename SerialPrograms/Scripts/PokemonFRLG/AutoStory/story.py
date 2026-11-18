@@ -1515,6 +1515,55 @@ class Builder:
             out.append(check)
             out.extend(sub)
             return
+        if "unless_no_levels" in step:
+            #  The steps of one Pokemon that evolves by a level (a whole
+            #  segment: it starts with FLY and ends outdoors with its save):
+            #  skipped when the boxes have nothing left that evolves by a
+            #  level into a species the POKeDEX table wants.
+            u = step["unless_no_levels"]
+            sub = []
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if not sub or sub[0]["type"] != "FLY" or sub[-1]["type"] != "SAVE":
+                raise StoryError("unless_no_levels: the steps start with FLY and end with a save (%s)"
+                                 % step.get("label", "?"))
+            for kind in ("LEVEL_OUT", "RAISE", "LEVEL_IN"):
+                if sum(1 for s in sub if s["type"] == kind) != 1:
+                    raise StoryError("unless_no_levels: one %s step (%s)" % (kind, step.get("label", "?")))
+            out.append({"type": "SKIP_IF_NO_LEVELS", "label": step.get("label", "Anything to evolve by a level?"),
+                        "p0": len(sub)})
+            out.extend(sub)
+            return
+        if "level_trip" in step:
+            #  In front of the PC of a Pokemon Center, facing it: the Pokemon
+            #  of a box with the fewest levels to go comes into the party's
+            #  sixth place (LEVEL_OUT), the steps train it (RAISE, a nurse on
+            #  the way: the game is saved there), and back at the same PC it
+            #  goes into its cell (LEVEL_IN).
+            b = step["level_trip"]
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("level_trip: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("level_trip: not after the walk to the PC (%s)" % step.get("label", "?"))
+            start = (self.pos[0], self.pos[1], self.pos[2], self.pos[3])
+            sub = []
+            for s in b["steps"]:
+                self.run_step(s, sub)
+            if (self.pos[0], self.pos[1], self.pos[2], self.pos[3]) != start:
+                raise StoryError("level_trip: the steps do not end in front of the PC they start at (%s: %s, not %s)"
+                                 % (step.get("label", "?"), self.pos, start))
+            if not sub or sub[-1]["type"] != "WALK" or sum(1 for s in sub if s["type"] == "RAISE") != 1 \
+                    or any(s["type"] in ("SAVE", "FLY") for s in sub):
+                raise StoryError("level_trip: one RAISE, the last step a walk to the PC, no save (the nurse "
+                                 "saves) or FLY (%s)" % step.get("label", "?"))
+            out.append({"type": "LEVEL_OUT", "label": step.get("label", "Out of the box"), "p0": len(sub) + 1})
+            out.extend(sub)
+            out.append({"type": "LEVEL_IN", "label": b.get("in_label", "Into the box")})
+            return
         if "unless_stones_in_bag" in step:
             #  The way to the stones that are sold (prize money, the
             #  Department Store): skipped when the bag has them. The steps
@@ -2228,11 +2277,14 @@ class Builder:
             raise StoryError("Grind route back to grass must be plain walking: " + label)
 
         out.append({
-            "type": "GRIND", "label": label, "p0": g["level"], "p1": g.get("every", 6), "dir": osc,
+            #  "raise": the Pokemon the program took out of a box for its
+            #  evolution (RAISE: the level is chosen by the program).
+            "type": "RAISE" if g.get("raise") else "GRIND", "label": label, "p0": g["level"],
+            "p1": g.get("every", 6), "dir": osc,
             "p2": g.get("slot", -1), "text": g.get("line", ""),
             #  A team member below the level of the strongest wild Pokemon
             #  here only takes part (shared experience) until it gets there.
-            "p3": self.gd.wild_max_level.get(g["map"], 0) if g.get("slot") else 0,
+            "p3": self.gd.wild_max_level.get(g["map"], 0) if (g.get("slot") or g.get("raise")) else 0,
             #  The grass line walked along: this many tiles from the start;
             #  0x100: Rare Candies first.
             "p4": length | (0x100 if g.get("candies") else 0),

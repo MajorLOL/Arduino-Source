@@ -561,6 +561,7 @@ bool league_again_segment(const std::string& id){
 //  place for the failures of a run: by its first step.
 std::string once_place_of(const StoryStep& check){
     return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() :
+        check.type == StepType::SKIP_IF_NO_LEVELS ? story_levels_place() :
         check.type == StepType::SKIP_IF_NO_STONES
             ? (check.text != nullptr && check.text[0] != '\0' ? story_stone_fetch_place(check.text) : story_stones_place())
             : story_once_place(check.text);
@@ -628,6 +629,55 @@ bool boxes_list_known(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, con
         label + ": the list of the PC's boxes is the one an earlier run left (" + file + ": " +
         std::to_string(census.pokemon.size()) + " Pokemon in " + std::to_string(census.boxes_used()) +
         " boxes). What it says of a cell is read again on the screen before anything is pressed there.",
+        COLOR_BLUE
+    );
+    return true;
+}
+
+const char* const RAISE_FILE = "PokemonFRLG-AutoStory-Raise.txt";
+
+//  The Pokemon that is out of its box for its training (StepType::LEVEL_OUT
+//  to LEVEL_IN), as a file: the training spans saves, and a program started
+//  again from one of them (or a game reset to it) must know where the
+//  Pokemon belongs and what it is trained for.
+void write_raise_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt){
+    AutoStoryBoxes::RaiseFile file;
+    file.out = rt.out_box >= 0 && !rt.out_give.empty() && !rt.out_becomes.empty();
+    if (file.out){
+        file.box = rt.out_box;
+        file.cell = rt.out_cell;
+        file.extra = rt.out_extra;
+        file.from = rt.out_give;
+        file.becomes = rt.out_becomes;
+        file.goal = rt.out_goal;
+    }
+    const std::string path = SETTINGS_PATH() + RAISE_FILE;
+    try{
+        string_to_file(path, AutoStoryBoxes::raise_to_text(file));
+    }catch (...){
+        env.log("Could not write " + path + ".", COLOR_ORANGE);
+    }
+}
+
+bool load_raise_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, const std::string& label){
+    const std::string path = SETTINGS_PATH() + RAISE_FILE;
+    std::string text;
+    AutoStoryBoxes::RaiseFile file;
+    if (!read_text_file(path, text) || !AutoStoryBoxes::raise_from_text(text, file) || !file.out){
+        env.log(label + ": no training under way in " + path + ".", COLOR_ORANGE);
+        return false;
+    }
+    rt.out_box = file.box;
+    rt.out_cell = file.cell;
+    rt.out_extra = file.extra;
+    rt.out_give = file.from;
+    rt.out_now = file.from;
+    rt.out_becomes = file.becomes;
+    rt.out_goal = file.goal;
+    env.log(
+        label + ": the training under way is the one of " + path + ": " + file.from + " to level " +
+        std::to_string(file.goal) + " (" + file.becomes + "), " + file.extra + " waits in box " +
+        std::to_string(file.box + 1) + " cell " + std::to_string(file.cell + 1) + ".",
         COLOR_BLUE
     );
     return true;
@@ -1566,6 +1616,89 @@ void AutoStory::run_segment(
             break;
         case StepType::BOX_IN:
             story_box_in(rt, label);
+            break;
+        case StepType::SKIP_IF_NO_LEVELS:{
+            //  Evolving by level (experimental): the species the POKeDEX
+            //  table does not have and that come by a level of one that lies
+            //  in a box. One of them in each segment.
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(
+                    label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
+                    "one): nothing is evolved by a level. The next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += skip;
+                break;
+            }
+            const std::vector<AutoStoryBoxes::LevelTarget> targets = story_level_targets(rt);
+            if (targets.empty()){
+                env.log(
+                    label + ": nothing in the boxes is left to evolve by a level into a species the POKeDEX table "
+                    "still wants: the next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += skip;
+                break;
+            }
+            env.log(
+                label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level (experimental): " +
+                AutoStoryBoxes::level_targets_text(targets) + ". The first one now.",
+                COLOR_BLUE
+            );
+            if (i == 0 && story_once_segment(script, segment)){
+                //  A failure from here to the segment's end counts for that one.
+                rt.trip_place = story_level_place(targets.front().slug);
+                rt.trip_last = i + skip;
+                rt.trip_fishing = false;
+            }
+            break;
+        }
+        case StepType::LEVEL_OUT:{
+            //  The one with the fewest levels to go changes places with the
+            //  party's sixth one (experimental).
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(
+                    label + ": no list of the PC's boxes. The next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += skip;
+            }else if (!story_level_out(rt, label, [&]{
+                write_boxes_file(env, rt, label, false);
+                write_raise_file(env, rt);
+            })){
+                env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+                i += skip;
+            }
+            break;
+        }
+        case StepType::RAISE:
+            if (rt.out_box < 0){
+                //  A start in the middle of the training (a save at a nurse).
+                load_raise_file(env, rt, label);
+            }
+            //  (The list of the boxes, for what LEVEL_IN changes in it later.)
+            if (rt.collection != nullptr){
+                boxes_list_known(env, rt, label);
+            }
+            story_raise(rt, script, step);
+            break;
+        case StepType::LEVEL_IN:
+            if (rt.out_box < 0){
+                load_raise_file(env, rt, label);
+            }
+            if (rt.collection != nullptr){
+                boxes_list_known(env, rt, label);
+            }
+            story_level_in(rt, label, [&]{
+                //  Not without the list: a file with one Pokemon in it would
+                //  take the place of the real one.
+                if (rt.boxes_known){
+                    write_boxes_file(env, rt, label, false);
+                }
+                write_raise_file(env, rt);
+            });
             break;
         case StepType::GOT:{
             //  The scene before this step (CUTSCENE with p4 = 1) handed the
@@ -3232,6 +3365,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.out_extra.clear();
             rt.out_give.clear();
             rt.out_now.clear();
+            rt.out_becomes.clear();
+            rt.out_goal = 0;
             if (rt.shiny_unsaved){
                 env.log("The shiny Pokemon caught after the last save is lost with this reset.", COLOR_RED);
                 rt.shiny_unsaved = false;
@@ -3242,6 +3377,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.battle.lead_type1 = rt.lead_type1;
             rt.battle.lead_type2 = rt.lead_type2;
             rt.battle.share_position = 0;
+            rt.battle.never_learn = false;
             rt.memory.member_moves_known = false;
             rt.memory.no_heal_items = false;
             //  The team and the bag as the save has them.

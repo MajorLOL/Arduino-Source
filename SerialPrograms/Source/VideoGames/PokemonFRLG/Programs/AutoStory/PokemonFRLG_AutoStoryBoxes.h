@@ -766,6 +766,169 @@ inline std::vector<std::pair<std::string, int>> stones_to_buy(
 }
 
 
+//  ---- Evolving by level (build 43, experimental) ----------------------------
+//
+//  The species the table does not have and that come by a level of the one
+//  before it ("evolve from Pidgeotto: level 36"), where that one lies in a
+//  box: it comes into the party, trains at Victory Road until the level,
+//  evolves there, and goes back into its cell (the stones do the same with
+//  a stone). One of them in each segment, the one that has the fewest
+//  levels to go first.
+struct LevelTarget{
+    std::string slug;       //  What it becomes.
+    std::string name;
+    std::string from_slug;  //  What it is.
+    int box = -1;
+    int cell = -1;
+    int level = -1;         //  Its level as the list has it (-1: not known).
+    int evolves_at = 0;     //  The level the table names.
+    int goal = 0;           //  The level to train it to.
+};
+
+//  A Pokemon that is at the level of the evolution already (or above: it
+//  was caught so, or a level was skipped) evolves at its next level.
+//  0: not to train (level 100 cannot go up).
+inline int level_goal(int level, int evolves_at){
+    if (evolves_at < 2 || evolves_at > 100 || level >= 100){
+        return 0;
+    }
+    return level >= evolves_at ? level + 1 : evolves_at;
+}
+
+//  The levels still to go. A level that is not known counts as the first.
+inline int levels_to_go(const LevelTarget& target){
+    return target.goal - (target.level > 0 ? target.level : 1);
+}
+
+//  Those of a plan (evolve_plan()) that come by a level and whose earlier
+//  form lies in a box, the one with the fewest levels to go first, without
+//  the species in "without" (left out after failures).
+inline std::vector<LevelTarget> level_targets(
+    const std::vector<EvolveLine>& plan, const std::set<std::string>& without = std::set<std::string>()
+){
+    std::vector<LevelTarget> targets;
+    for (const EvolveLine& line : plan){
+        if (line.how.by != EvolveBy::LEVEL || line.box < 0 || line.cell < 0 || line.from_slug.empty()){
+            continue;
+        }
+        if (without.count(line.slug) != 0){
+            continue;
+        }
+        LevelTarget target;
+        target.slug = line.slug;
+        target.name = line.name;
+        target.from_slug = line.from_slug;
+        target.box = line.box;
+        target.cell = line.cell;
+        target.level = line.level;
+        target.evolves_at = line.how.level;
+        target.goal = level_goal(line.level, line.how.level);
+        if (target.goal <= 0){
+            continue;
+        }
+        targets.push_back(target);
+    }
+    std::stable_sort(targets.begin(), targets.end(), [](const LevelTarget& a, const LevelTarget& b){
+        return levels_to_go(a) < levels_to_go(b);
+    });
+    return targets;
+}
+
+//  They as one line for the log: "Pidgeot (PIDGEOTTO Lv 30, box 2 cell 10, to level 36), ...".
+inline std::string level_targets_text(const std::vector<LevelTarget>& targets){
+    std::string text;
+    for (const LevelTarget& target : targets){
+        std::string from;
+        for (char ch : target.from_slug){
+            from += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+        }
+        text += (text.empty() ? "" : ", ") + target.name + " (" + from +
+            (target.level > 0 ? " Lv " + std::to_string(target.level) : std::string()) + ", box " +
+            std::to_string(target.box + 1) + " cell " + std::to_string(target.cell + 1) + ", to level " +
+            std::to_string(target.goal) + ")";
+    }
+    return text;
+}
+
+//  What a training under way needs to go on after the game was reset to a
+//  save made in the middle of it (the program is stopped, or the game
+//  reset): the Pokemon of the box is in the party, the one it changed
+//  places with waits in its cell. A file of one line:
+//      raise 1 <box> <cell> <waiting species> <species out> <becomes> <level to train to>
+//      raise 0
+//  (Species as slugs, which have no spaces; the cell as the program counts it.)
+struct RaiseFile{
+    bool out = false;
+    int box = -1;
+    int cell = -1;
+    std::string extra;      //  What waits in the cell.
+    std::string from;       //  What came out of it.
+    std::string becomes;    //  What it evolves into.
+    int goal = 0;
+};
+
+inline std::string raise_to_text(const RaiseFile& file){
+    if (!file.out){
+        return "raise 0\n";
+    }
+    return "raise 1 " + std::to_string(file.box) + " " + std::to_string(file.cell) + " " + file.extra + " " +
+        file.from + " " + file.becomes + " " + std::to_string(file.goal) + "\n";
+}
+
+inline bool raise_from_text(const std::string& text, RaiseFile& out){
+    out = RaiseFile();
+    std::vector<std::string> words;
+    std::string word;
+    for (char ch : text){
+        if (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n'){
+            if (!word.empty()){
+                words.push_back(word);
+                word.clear();
+            }
+            continue;
+        }
+        word += ch;
+    }
+    if (!word.empty()){
+        words.push_back(word);
+    }
+    if (words.size() < 2 || words[0] != "raise"){
+        return false;
+    }
+    if (words[1] == "0"){
+        return words.size() == 2;
+    }
+    if (words[1] != "1" || words.size() != 8){
+        return false;
+    }
+    auto number = [](const std::string& s, int& value){
+        if (s.empty() || s.size() > 4){
+            return false;
+        }
+        for (char ch : s){
+            if (ch < '0' || ch > '9'){
+                return false;
+            }
+        }
+        value = std::atoi(s.c_str());
+        return true;
+    };
+    RaiseFile file;
+    if (!number(words[2], file.box) || !number(words[3], file.cell) || !number(words[7], file.goal)){
+        return false;
+    }
+    file.out = true;
+    file.extra = words[4];
+    file.from = words[5];
+    file.becomes = words[6];
+    if (file.box < 0 || file.cell < 0 || file.goal < 2 || file.goal > 100){
+        return false;
+    }
+    out = file;
+    return true;
+}
+
+
 }
 }
 }

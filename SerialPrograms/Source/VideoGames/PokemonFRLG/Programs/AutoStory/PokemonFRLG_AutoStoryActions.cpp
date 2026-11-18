@@ -1191,7 +1191,9 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
     return true;
 }
 
-void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give){
+bool story_use_item(
+    StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give, bool tolerant
+){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     console.log(
@@ -1225,6 +1227,10 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
         pbf_mash_button(context, BUTTON_B, 3000ms);
         context.wait_for_all_requests();
         story_back_to_overworld(rt, "bag");
+        if (tolerant){
+            console.log("Not in the bag: " + what, COLOR_ORANGE);
+            return false;
+        }
         OperationFailedExceptionWithScreenshot::fire(
             ErrorReportMode::SEND_ERROR_REPORT,
             "story_use_item(): Not in the bag: " + what,
@@ -1275,6 +1281,73 @@ void story_use_item(StoryRuntime& rt, int party_slot, const std::string& words, 
     pbf_mash_button(context, BUTTON_B, 3000ms);
     context.wait_for_all_requests();
     story_back_to_overworld(rt, "bag");
+    return true;
+}
+
+bool story_take_item(StoryRuntime& rt, int party_slot, const std::string& label){
+    StoryMemoryScope memory_scope("party menu");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log(label + ": the item of party slot " + std::to_string(party_slot) + " goes back to the bag.");
+    //  The message of the party menu, as lower case text, after a moment for
+    //  it to be printed.
+    auto message = [&]() -> std::string{
+        pbf_wait(context, 1300ms);
+        context.wait_for_all_requests();
+        const std::string text = lower(read_story_text(console, PARTY_MESSAGE_BOX, false));
+        console.log(label + ": the party menu says: \"" + text + "\"");
+        return text;
+    };
+    auto says = [&](const std::string& text, std::initializer_list<const char*> words){
+        for (const char* word : words){
+            if (contains(text, word)){
+                return true;
+            }
+        }
+        return false;
+    };
+
+    open_party_menu_from_overworld(console, context);
+    //  LEFT from any slot on the right goes to slot 1.
+    dpad(context, DPAD_LEFT, 500ms);
+    for (int i = 1; i < party_slot; i++){
+        dpad(context, DPAD_DOWN);
+    }
+    //  The actions: SUMMARY, (field moves), SWITCH, ITEM, CANCEL. Up from the
+    //  top wraps around to CANCEL, then ITEM (as story_take_mail() goes to
+    //  MAIL, which takes ITEM's place when a MAIL is held).
+    press(context, BUTTON_A, 800ms);
+    dpad(context, DPAD_UP, 300ms);
+    dpad(context, DPAD_UP, 300ms);
+    press(context, BUTTON_A, 900ms);
+    //  "Do what with an item?": GIVE, TAKE, CANCEL (the cursor on GIVE).
+    const std::string asked = message();
+    if (!says(asked, {"item", "do wh"})){
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, "party menu");
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_take_item(): the party menu does not ask what to do with an item: " + label,
+            console
+        );
+    }
+    dpad(context, DPAD_DOWN, 300ms);
+    press(context, BUTTON_A, 900ms);
+    //  "Received the EXP. SHARE from CHARIZARD." (it waits for a press), or
+    //  "CHARIZARD isn't holding anything."
+    const std::string result = message();
+    const bool none = says(result, {"holding", "anything"});
+    const bool took = !none && says(result, {"received", "share", "from"});
+    if (!none && !took){
+        console.log(label + ": the message was not read as \"Received ...\" or \"isn't holding anything\".", COLOR_ORANGE);
+    }
+    press(context, BUTTON_A, 900ms);
+    pbf_mash_button(context, BUTTON_B, 3000ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, "party menu");
+    console.log(label + (took ? ": the item is in the bag." : ": nothing was taken."), took ? COLOR_BLUE : COLOR_ORANGE);
+    return took;
 }
 
 
@@ -2541,6 +2614,155 @@ void story_grind(
     }
 }
 
+
+
+//  ---- Evolving by level (build 43) -------------------------------------------
+
+namespace{
+
+//  The EXP. SHARE's description in the bag ("...a share of EXP. points
+//  without having to battle"): the words story C15_04 found it by.
+const char* const EXP_SHARE_WORDS = "share of";
+
+//  The EXP. SHARE from the lead to the party slot of the Pokemon in
+//  training. A holder gets half of what a battle gives (the game splits the
+//  rest between the Pokemon that were sent out); with the lead holding it,
+//  the Pokemon in training would get a quarter. Not essential: when the
+//  menus are not what they are expected to be, the training goes on without
+//  (slower), and the item is looked for again at the end.
+void exp_share_to(StoryRuntime& rt, int from_slot, int to_slot, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    try{
+        story_take_item(rt, from_slot, label + ": EXP. SHARE off party slot " + std::to_string(from_slot));
+        if (!story_use_item(rt, to_slot, EXP_SHARE_WORDS, "EXP. SHARE to party slot " + std::to_string(to_slot), true, true)){
+            console.log(label + ": the bag has no EXP. SHARE: the training goes on without.", COLOR_ORANGE);
+        }
+    }catch (OperationFailedException&){
+        console.log(
+            label + ": the EXP. SHARE could not be moved (see the error above): the training goes on as it is.",
+            COLOR_ORANGE
+        );
+        try{
+            story_back_to_overworld(rt, "party menu");
+        }catch (OperationFailedException&){
+        }
+    }
+}
+
+}
+
+
+void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    const std::string where = step.label;
+    if (rt.out_box < 0 || rt.out_give.empty() || rt.out_becomes.empty() || rt.out_goal < 2){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_raise(): No training is under way (nothing was taken out of a box, and no file of one): " + where,
+            console
+        );
+    }
+    const std::string from = rt.out_give;
+    const std::string becomes = rt.out_becomes;
+    const int goal = rt.out_goal;
+    const std::set<std::string> line{from, becomes};
+    console.log(
+        where + ": training " + from + " (" + becomes + " at level " + std::to_string(goal) + ", experimental).",
+        COLOR_BLUE
+    );
+
+    //  Where it is: in the party's sixth place (from LEVEL_OUT, or from a save
+    //  made before the training began), or in front (a save made at a nurse
+    //  in the middle of it, which has it there).
+    std::string front;
+    for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
+        story_read_slot(rt, 1, &front);
+    }
+    if (line.count(front) == 0){
+        std::string sixth;
+        for (int attempt = 0; attempt < 3 && sixth.empty(); attempt++){
+            story_read_slot(rt, 6, &sixth);
+        }
+        if (line.count(sixth) == 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_raise(): Party slot 6 is " + (sixth.empty() ? std::string("not read") : sixth) + " (slot 1: " +
+                (front.empty() ? std::string("not read") : front) + "), not " + from + " or " + becomes + ": " + where,
+                console
+            );
+        }
+        exp_share_to(rt, 1, 6, where);
+        story_swap_party(rt, 1, 6);
+        front.clear();
+        for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
+            story_read_slot(rt, 1, &front);
+        }
+        if (line.count(front) == 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_raise(): " + from + " did not come to the front: " + front + ": " + where,
+                console
+            );
+        }
+    }
+
+    //  The same state as the training of a team member in front
+    //  (story_grind()), with the lead (now in the sixth place) coming in.
+    const AutoStoryDex::SpeciesInfo* info = dex_species(front);
+    if (info != nullptr){
+        rt.battle.lead_type1 = info->type1;
+        rt.battle.lead_type2 = info->type2;
+    }
+    rt.battle.lead_species = info;
+    rt.memory.no_pp = 0;
+    for (int& m : rt.memory.moves){
+        m = -1;
+    }
+    rt.battle.share_type1 = rt.lead_type1;
+    rt.battle.share_type2 = rt.lead_type2;
+    rt.battle.share_members = line;
+    rt.memory.member_moves_known = false;
+    //  No new move for it: nothing in it is valued, and it may be one of
+    //  the Pokemon whose moves the program does not know.
+    rt.battle.never_learn = true;
+
+    StoryStep trained = step;
+    trained.p0 = goal;
+    trained.p2 = 6;
+    trained.text = "";
+    grind_front(rt, script, trained, 0, true, 5);
+
+    rt.battle.never_learn = false;
+    rt.battle.share_position = 0;
+    rt.battle.slow_share_position = 0;
+    rt.battle.lead_species = nullptr;
+    rt.battle.lead_level = 0;
+    rt.battle.lead_type1 = rt.lead_type1;
+    rt.battle.lead_type2 = rt.lead_type2;
+    rt.memory.no_pp = 0;
+    for (int& m : rt.memory.moves){
+        m = -1;
+    }
+    rt.memory.member_moves_known = false;
+
+    //  Back in order: the lead in front, the one in training in the sixth
+    //  place, the EXP. SHARE on the lead. (After an evolution the party's
+    //  front is of its line, too.)
+    story_swap_party(rt, 1, 6);
+    front.clear();
+    for (int attempt = 0; attempt < 3 && front.empty(); attempt++){
+        story_read_slot(rt, 1, &front);
+    }
+    if (!front.empty() && line.count(front) != 0){
+        console.log("The party is still out of order. Swapping again.", COLOR_ORANGE);
+        story_swap_party(rt, 1, 6);
+    }
+    exp_share_to(rt, 6, 1, where);
+    if (rt.save_after_heal){
+        story_save(rt, rt.has_dex);
+        story_saved(rt, rt.step_index + 1);
+    }
+}
 
 
 void story_train_at(StoryRuntime& rt, const StoryScript& script, const StoryStep& place, int level){
