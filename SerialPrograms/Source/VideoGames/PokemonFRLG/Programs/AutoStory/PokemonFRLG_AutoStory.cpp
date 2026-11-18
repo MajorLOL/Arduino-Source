@@ -1987,15 +1987,25 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 //  Not taken over without a word: a start chosen by hand for
                 //  a save made by hand (C15_04 step 7 in Fuchsia) went to
                 //  the program's last save instead, and the start options
-                //  shown were changed with it.
+                //  shown were changed with it. But not left for the user to
+                //  type in either (18 November: the start in the settings
+                //  was that morning's, the program had saved four times
+                //  since, and the message named a start that nobody had
+                //  spoken of). The start is set to the program's save, the
+                //  message says so, and a second press of Start goes on
+                //  from there.
+                const std::string was =
+                    "segment " + std::string(script.segments[START_SEGMENT.current_value()].id) + ", step " +
+                    std::to_string((uint16_t)START_STEP);
+                START_SEGMENT.set_value(segment);
+                START_STEP.set((uint16_t)step);
                 throw UserSetupError(
                     env.console,
-                    "The start (segment " + std::string(script.segments[START_SEGMENT.current_value()].id) +
-                    ", step " + std::to_string((uint16_t)START_STEP) + ") is not where the program last saved "
-                    "(segment " + script.segments[segment].id + ", step " + std::to_string(step) + "). "
-                    "To go on from that save, choose segment " + script.segments[segment].id + ", step " +
-                    std::to_string(step) + ". If the game was saved by hand where the chosen step starts, "
-                    "turn off \"Check the start against the program's last save\"."
+                    "The start was " + was + ", but the program last saved at segment " +
+                    script.segments[segment].id + ", step " + std::to_string(step) + ". The start is now set to "
+                    "that save: press Start again to go on from it. (Only if the game was saved by hand where "
+                    "the step you chose starts: choose that segment and step again and turn off \"Check the "
+                    "start against the program's last save\".)"
                 );
             }else{
                 env.log("The start is where the program last saved.", COLOR_BLUE);
