@@ -3365,13 +3365,30 @@ CHAPTER20 += [
 #  quarters of each battle's experience its own), a nurse every few
 #  battles (the game is saved there), the PC again (StepType::LEVEL_IN: it
 #  goes back into its cell, evolved or not, the one that waited comes
-#  back), out, the save. A level of the evolution not reached after 600
+#  back), out, the save. A level of the evolution not reached after 800
 #  battles leaves the Pokemon in its cell with the levels it got: the next
 #  segment goes on with it (or with one that has fewer levels to go).
-LEVEL_SEGMENTS = 17
+#
+#  Nineteen segments: the 17 Pokemon of the boxes that evolve by a level in
+#  the first run of build 43 (on a console on 18 and 19 November: all 17
+#  evolved, none failed for good) and the two that only come after another
+#  evolved: JUMPLUFF (SKIPLOOM, which took the place of KABUTO in that run)
+#  and TYRANITAR (PUPITAR). With a segment too many the check skips it.
+LEVEL_SEGMENTS = 19
 #  The Indigo Plateau's Pokemon Center is a bigger room than the others: its
 #  PC is at (17, 9), used from the tile below it (the nurse is at (13, 10)).
 INDIGO_PC_TILE = [17, 9]
+
+
+#  The state of these segments: Victory Road as it is reset for the League
+#  training, and the COOLTRAINER M of the Indigo Plateau's Pokemon Center,
+#  who is there after the Hall of Fame (EventScript_SetDefeatedEliteFourFlagsVars
+#  clears FLAG_HIDE_POSTGAME_GOSSIPERS) and wanders around (16, 15), on the way
+#  to the PC: in the run of build 43 he stood in the way 47 times in 18 walks
+#  to the PC (and 8 times on one way out), and once for five tries, a failed
+#  segment. The routes keep to the tiles he cannot walk on.
+LEVEL_STATE = dict(VICTORY_ROAD_RESET)
+LEVEL_STATE["clear_flags"] = list(VICTORY_ROAD_RESET["clear_flags"]) + ["FLAG_HIDE_POSTGAME_GOSSIPERS"]
 
 
 def level_segment(seg_id):
@@ -3385,7 +3402,7 @@ def level_segment(seg_id):
         {"outside": True, "label": seg_id + "_Out"},
         save(),
     ]
-    return {"id": seg_id, "chapter": 20, "no_repel": True, "state": VICTORY_ROAD_RESET,
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "state": LEVEL_STATE,
             "title": "POKeDEX collection: evolving by level (a Pokemon of the PC trained at Victory Road)",
             "steps": [{"unless_no_levels": {"steps": steps}, "label": "Anything to evolve by a level?"}]}
 

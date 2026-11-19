@@ -1377,14 +1377,20 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
             rt.collection->add_caught(now, false, false);
         }
         rt.dex_new_since_load.insert(now);
+        std::string table;
+        if (rt.collection != nullptr){
+            size_t registered = 0;
+            size_t total = 0;
+            size_t to_catch = 0;
+            rt.collection->counts_summary(registered, total, to_catch);
+            table = " The POKeDEX table: " + std::to_string(registered) + " of " + std::to_string(total) +
+                " species with at least one.";
+        }
         console.log(
             "Evolved for the POKeDEX: " + now + " (" + upper(was) + " by level " +
             (level > 0 ? std::to_string(level) : std::string("?")) + "). It lies in " + where + "; " + upper(waiting) +
             " is back in the party." +
-            (rt.collection != nullptr
-                ? " The POKeDEX table: " + std::to_string(rt.collection->caught(now)) + " of " +
-                    std::to_string(std::max(0, rt.collection->needed(now))) + "."
-                : std::string()),
+            table,
             COLOR_BLUE
         );
         story_note(rt, "Evolved: " + now, COLOR_GREEN);

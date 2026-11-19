@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 39 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 41 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2975,17 +2975,18 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 31 &&
+        once == 33 &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
             "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY, C20_35_LEVEL_01, C20_36_LEVEL_02, "
             "C20_37_LEVEL_03, C20_38_LEVEL_04, C20_39_LEVEL_05, C20_40_LEVEL_06, C20_41_LEVEL_07, "
             "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
-            "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17",
+            "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17, "
+            "C20_52_LEVEL_18, C20_53_LEVEL_19",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
-        "the story itself), the seventeen that evolve by level"
+        "the story itself), the nineteen that evolve by level"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3029,7 +3030,7 @@ int check_leave_out(Logger& logger){
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
             lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_35_LEVEL_01") &&
-            index_of("C20_51_LEVEL_17") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_53_LEVEL_19") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3953,9 +3954,9 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            segments == 17 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
+            segments == 19 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
             story_levels_place() == "the evolving by level",
-            "the seventeen segments that evolve by level: FLY, the PC, the training, the PC, a save at the end only"
+            "the nineteen segments that evolve by level: FLY, the PC, the training, the PC, a save at the end only"
         );
     }
 
@@ -3967,7 +3968,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone and seventeen of levels): " +
+        ", C20_25_STONES, four of trades, four that fetch a stone and nineteen of levels): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

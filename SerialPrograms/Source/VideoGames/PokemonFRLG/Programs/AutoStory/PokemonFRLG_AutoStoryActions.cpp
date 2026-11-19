@@ -2331,7 +2331,7 @@ int read_training_level(StoryRuntime& rt){
 //  is a team member put in front for this (see story_grind()).
 void grind_front(
     StoryRuntime& rt, const StoryScript& script, const StoryStep& step,
-    int extra_levels, bool member, int share_position = 0
+    int extra_levels, bool member, int share_position = 0, uint64_t max_battles = 400
 ){
     ConsoleHandle& console = rt.console;
     const int target = step.p0 + extra_levels;
@@ -2388,7 +2388,7 @@ void grind_front(
     spot.arrived();
 
     //  If the level cannot be read, stop after a fixed number of battles.
-    const uint64_t battle_cap = level < 0 ? 40 : 400;
+    const uint64_t battle_cap = level < 0 ? 40 : max_battles;
     uint64_t battles = 0;
     uint64_t steps_without_battle = 0;
     int since_heal = 0;
@@ -2730,7 +2730,9 @@ void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& s
     trained.p0 = goal;
     trained.p2 = 6;
     trained.text = "";
-    grind_front(rt, script, trained, 0, true, 5);
+    //  800 battles: a Tyranitar from a Pupitar of level 30 is some 400 of
+    //  them (about 450 experience points a battle at 75%, 90 seconds each).
+    grind_front(rt, script, trained, 0, true, 5, 800);
 
     rt.battle.never_learn = false;
     rt.battle.share_position = 0;
