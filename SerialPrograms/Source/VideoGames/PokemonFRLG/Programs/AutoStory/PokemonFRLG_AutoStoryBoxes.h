@@ -46,6 +46,7 @@
 #define PokemonAutomation_PokemonFRLG_AutoStoryBoxes_H
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <map>
 #include <set>
@@ -783,6 +784,12 @@ struct LevelTarget{
     int level = -1;         //  Its level as the list has it (-1: not known).
     int evolves_at = 0;     //  The level the table names.
     int goal = 0;           //  The level to train it to.
+    //  Evolving by friendship (build 45): walked with first, then trained
+    //  the one level (goal = its level + 1) that the evolution waits for.
+    bool friendship = false;
+    int blocks = 0;         //  The blocks of 128 steps to walk (in all) before the level.
+    int walked = 0;         //  The blocks walked so far.
+    int tests = 0;          //  The levels trained after walking that did not evolve it.
 };
 
 //  A Pokemon that is at the level of the evolution already (or above: it
@@ -850,12 +857,208 @@ inline std::string level_targets_text(const std::vector<LevelTarget>& targets){
     return text;
 }
 
+//  ---- Evolving by friendship (build 45) --------------------------------------
+//
+//  The species the table wants that come by a level up with a friendship of
+//  220 or more: CROBAT (GOLBAT), BLISSEY (CHANSEY), TOGETIC (TOGEPI). The game
+//  does not show the friendship, and no memory is read, so the program
+//  counts. The friendship goes up by one for every Pokemon of the party that
+//  is not an egg, with a chance of one in two, every 128 steps (the game's
+//  UpdateFriendshipStepCounter and AdjustFriendship, FRIENDSHIP_EVENT_WALKING).
+//  What it starts from is what the species has when it is caught (GOLBAT
+//  70, CHANSEY 140), or hatched (TOGEPI 120). More than that is possible (it
+//  was in the party for a while): then the walking is more than needed, and
+//  the level that is trained after it is the test.
+constexpr int FRIEND_EVOLVES = 220;
+constexpr int FRIEND_BLOCK_STEPS = 128;
+//  The tests: how often a level was trained after walking and the Pokemon
+//  did not evolve. After this many the Pokemon is left alone.
+constexpr int FRIEND_TESTS = 6;
+
+inline int friend_base(const std::string& slug){
+    if (slug == "chansey"){
+        return 140;
+    }
+    if (slug == "togepi"){
+        return 120;
+    }
+    return 70;
+}
+
+inline int friend_need(const std::string& slug){
+    return std::max(0, FRIEND_EVOLVES - friend_base(slug));
+}
+
+//  How many blocks of 128 steps make at least "need" points, with the chance
+//  that "sigmas" standard deviations stand for (1.28: 90 in 100). Each block
+//  gives a point with a chance of one in two: n blocks give n / 2 points, with
+//  a deviation of sqrt(n) / 2, so the least n with n / 2 - sigmas * sqrt(n) / 2
+//  >= need.
+inline int friend_blocks(int need, double sigmas){
+    if (need <= 0){
+        return 0;
+    }
+    const double root = (sigmas + std::sqrt(sigmas * sigmas + 8.0 * (double)need)) / 2.0;
+    //  (Less a hair: 300.00000000000006 blocks are 300.)
+    return (int)std::ceil(root * root - 1e-6);
+}
+
+//  The blocks for the next level that is trained, after "tests" that did not
+//  evolve it: a wider margin each time.
+inline int friend_blocks_wanted(const std::string& slug, int tests){
+    static const double SIGMAS[FRIEND_TESTS] = {1.28, 2.05, 3.0, 4.0, 4.5, 5.0};
+    const int index = std::max(0, std::min(tests, FRIEND_TESTS - 1));
+    return friend_blocks(friend_need(slug), SIGMAS[index]);
+}
+
+//  What was walked with a species of the boxes, and how often it was tried:
+//  as a file of its own, written at each save made on the walk (the game's
+//  save and the file agree: a game reset to its last save goes back to it).
+//      friend <species> <blocks walked> <levels trained without it evolving>
+struct FriendRecord{
+    int blocks = 0;
+    int tests = 0;
+};
+using FriendRecords = std::map<std::string, FriendRecord>;
+
+inline std::string friend_to_text(const FriendRecords& records){
+    std::string text;
+    for (const auto& item : records){
+        if (item.second.blocks <= 0 && item.second.tests <= 0){
+            continue;
+        }
+        text += "friend " + item.first + " " + std::to_string(item.second.blocks) + " " +
+            std::to_string(item.second.tests) + "\n";
+    }
+    return text;
+}
+
+inline bool friend_from_text(const std::string& text, FriendRecords& out){
+    out.clear();
+    FriendRecords records;
+    size_t at = 0;
+    while (at < text.size()){
+        size_t end = text.find('\n', at);
+        if (end == std::string::npos){
+            end = text.size();
+        }
+        std::vector<std::string> words;
+        std::string word;
+        for (size_t k = at; k < end; k++){
+            const char ch = text[k];
+            if (ch == ' ' || ch == '\t' || ch == '\r'){
+                if (!word.empty()){
+                    words.push_back(word);
+                    word.clear();
+                }
+                continue;
+            }
+            word += ch;
+        }
+        if (!word.empty()){
+            words.push_back(word);
+        }
+        at = end + 1;
+        if (words.empty() || words[0][0] == '#'){
+            continue;
+        }
+        if (words.size() != 4 || words[0] != "friend"){
+            return false;
+        }
+        auto number = [](const std::string& s, int& value){
+            if (s.empty() || s.size() > 6){
+                return false;
+            }
+            for (char ch : s){
+                if (ch < '0' || ch > '9'){
+                    return false;
+                }
+            }
+            value = std::atoi(s.c_str());
+            return true;
+        };
+        FriendRecord record;
+        if (!number(words[2], record.blocks) || !number(words[3], record.tests)){
+            return false;
+        }
+        records[words[1]] = record;
+    }
+    out = records;
+    return true;
+}
+
+//  Those of a plan (evolve_plan()) that come by friendship and whose earlier
+//  form lies in a box, the one with the fewest blocks still to walk first,
+//  without the species in "without" (left out after failures). The one to
+//  train is at its level plus one.
+inline std::vector<LevelTarget> friend_targets(
+    const std::vector<EvolveLine>& plan, const FriendRecords& records,
+    const std::set<std::string>& without = std::set<std::string>()
+){
+    std::vector<LevelTarget> targets;
+    for (const EvolveLine& line : plan){
+        if (line.how.by != EvolveBy::FRIENDSHIP || line.box < 0 || line.cell < 0 || line.from_slug.empty()){
+            continue;
+        }
+        if (without.count(line.slug) != 0){
+            continue;
+        }
+        LevelTarget target;
+        target.slug = line.slug;
+        target.name = line.name;
+        target.from_slug = line.from_slug;
+        target.box = line.box;
+        target.cell = line.cell;
+        target.level = line.level;
+        target.friendship = true;
+        auto found = records.find(line.from_slug);
+        if (found != records.end()){
+            target.walked = found->second.blocks;
+            target.tests = found->second.tests;
+        }
+        if (target.tests >= FRIEND_TESTS){
+            continue;
+        }
+        target.goal = line.level >= 100 ? 0 : (line.level > 0 ? line.level + 1 : 2);
+        if (target.goal <= 0){
+            continue;
+        }
+        target.blocks = friend_blocks_wanted(line.from_slug, target.tests);
+        targets.push_back(target);
+    }
+    std::stable_sort(targets.begin(), targets.end(), [](const LevelTarget& a, const LevelTarget& b){
+        return std::max(0, a.blocks - a.walked) < std::max(0, b.blocks - b.walked);
+    });
+    return targets;
+}
+
+//  They as one line for the log.
+inline std::string friend_targets_text(const std::vector<LevelTarget>& targets){
+    std::string text;
+    for (const LevelTarget& target : targets){
+        std::string from;
+        for (char ch : target.from_slug){
+            from += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+        }
+        text += (text.empty() ? "" : ", ") + target.name + " (" + from +
+            (target.level > 0 ? " Lv " + std::to_string(target.level) : std::string()) + ", box " +
+            std::to_string(target.box + 1) + " cell " + std::to_string(target.cell + 1) + ", " +
+            std::to_string(target.walked) + " of " + std::to_string(target.blocks) + " blocks of " +
+            std::to_string(FRIEND_BLOCK_STEPS) + " steps walked" +
+            (target.tests > 0 ? ", " + std::to_string(target.tests) + " levels trained without it" : std::string()) +
+            ")";
+    }
+    return text;
+}
+
+
 //  What a training under way needs to go on after the game was reset to a
 //  save made in the middle of it (the program is stopped, or the game
 //  reset): the Pokemon of the box is in the party, the one it changed
 //  places with waits in its cell. A file of one line:
-//      raise 1 <box> <cell> <waiting species> <species out> <becomes> <level to train to>
+//      raise 1 <box> <cell> <waiting species> <species out> <becomes> <level to train to> [friend]
 //      raise 0
+//  ("friend": the training is the one of evolving by friendship, after the walk.)
 //  (Species as slugs, which have no spaces; the cell as the program counts it.)
 struct RaiseFile{
     bool out = false;
@@ -865,6 +1068,7 @@ struct RaiseFile{
     std::string from;       //  What came out of it.
     std::string becomes;    //  What it evolves into.
     int goal = 0;
+    bool friendship = false;
 };
 
 inline std::string raise_to_text(const RaiseFile& file){
@@ -872,7 +1076,7 @@ inline std::string raise_to_text(const RaiseFile& file){
         return "raise 0\n";
     }
     return "raise 1 " + std::to_string(file.box) + " " + std::to_string(file.cell) + " " + file.extra + " " +
-        file.from + " " + file.becomes + " " + std::to_string(file.goal) + "\n";
+        file.from + " " + file.becomes + " " + std::to_string(file.goal) + (file.friendship ? " friend" : "") + "\n";
 }
 
 inline bool raise_from_text(const std::string& text, RaiseFile& out){
@@ -898,7 +1102,7 @@ inline bool raise_from_text(const std::string& text, RaiseFile& out){
     if (words[1] == "0"){
         return words.size() == 2;
     }
-    if (words[1] != "1" || words.size() != 8){
+    if (words[1] != "1" || (words.size() != 8 && words.size() != 9) || (words.size() == 9 && words[8] != "friend")){
         return false;
     }
     auto number = [](const std::string& s, int& value){
@@ -921,6 +1125,7 @@ inline bool raise_from_text(const std::string& text, RaiseFile& out){
     file.extra = words[4];
     file.from = words[5];
     file.becomes = words[6];
+    file.friendship = words.size() == 9;
     if (file.box < 0 || file.cell < 0 || file.goal < 2 || file.goal > 100){
         return false;
     }

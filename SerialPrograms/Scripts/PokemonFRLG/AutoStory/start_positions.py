@@ -235,6 +235,9 @@ for si, seg in enumerate(segs):
             resume = [(i + 1, "heal")]
         elif t in ("GRIND", "RAISE"):
             resume = [(i, "grind"), (i + 1, "grind_done")]
+        elif t == "PACE":
+            #  Saves in the middle of its walk (and one at its end).
+            resume = [(i, "pace"), (i + 1, "pace_done")]
         elif t == "TEAM" and st.get("p0") == 1:
             resume = [(i + 1, "team")]
         else:

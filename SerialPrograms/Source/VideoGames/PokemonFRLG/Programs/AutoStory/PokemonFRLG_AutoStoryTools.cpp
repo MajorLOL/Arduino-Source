@@ -2614,6 +2614,7 @@ void story_saved(StoryRuntime& rt, size_t resume_at){
         rt.collection_at_save = rt.collection->snapshot();
     }
     rt.boxes_at_save = rt.boxes;
+    rt.friend_at_save = rt.friend_records;
     rt.party_extras_at_save = rt.party_extras;
     rt.party_order_final_at_save = rt.party_order_final;
     rt.bag_revives_at_save = rt.bag_revives;

@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 41 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 49 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2975,7 +2975,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 33 &&
+        once == 41 &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -2983,10 +2983,11 @@ int check_leave_out(Logger& logger){
             "C20_37_LEVEL_03, C20_38_LEVEL_04, C20_39_LEVEL_05, C20_40_LEVEL_06, C20_41_LEVEL_07, "
             "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
             "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17, "
-            "C20_52_LEVEL_18, C20_53_LEVEL_19",
+            "C20_52_LEVEL_18, C20_53_LEVEL_19, C20_54_FRIEND_01, C20_55_FRIEND_02, C20_56_FRIEND_03, "
+            "C20_57_FRIEND_04, C20_58_FRIEND_05, C20_59_FRIEND_06, C20_60_FRIEND_07, C20_61_FRIEND_08",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
-        "the story itself), the nineteen that evolve by level"
+        "the story itself), the nineteen that evolve by level, the eight that evolve by friendship"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3030,7 +3031,8 @@ int check_leave_out(Logger& logger){
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
             lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_35_LEVEL_01") &&
-            index_of("C20_53_LEVEL_19") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_53_LEVEL_19") + 1 == index_of("C20_54_FRIEND_01") &&
+            index_of("C20_61_FRIEND_08") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3915,7 +3917,8 @@ int check_boxes(Logger& logger){
         bool legs_there = true;
         for (size_t s = 0; s < script.segment_count; s++){
             const StorySegment& segment = script.segments[s];
-            if (segment.step_count < 3 || script.step(segment, 0).type != StepType::SKIP_IF_NO_LEVELS){
+            if (segment.step_count < 3 || script.step(segment, 0).type != StepType::SKIP_IF_NO_LEVELS ||
+                script.step(segment, 0).p1 != 0){
                 continue;
             }
             segments++;
@@ -3960,6 +3963,193 @@ int check_boxes(Logger& logger){
         );
     }
 
+    //  Evolving by friendship (build 45): the steps to walk, the file of what
+    //  was walked, which of the boxes comes first, and the segments.
+    {
+        check(
+            Boxes::friend_base("golbat") == 70 && Boxes::friend_base("chansey") == 140 &&
+            Boxes::friend_base("togepi") == 120 && Boxes::friend_base("zubat") == 70 &&
+            Boxes::friend_need("golbat") == 150 && Boxes::friend_need("chansey") == 80 &&
+            Boxes::friend_need("togepi") == 100 && Boxes::FRIEND_EVOLVES == 220 && Boxes::FRIEND_BLOCK_STEPS == 128,
+            "the friendship a species starts from, and how many points it needs for 220"
+        );
+        //  A block gives a point with a chance of one in two: for 150 points,
+        //  324 blocks are 92 chances in 100 (exact: 0.9176), 378 are all but
+        //  sure.
+        check(
+            Boxes::friend_blocks(0, 1.28) == 0 && Boxes::friend_blocks(-5, 1.28) == 0 &&
+            Boxes::friend_blocks(150, 0.0) == 300 && Boxes::friend_blocks(150, 1.28) == 324 &&
+            Boxes::friend_blocks(80, 1.28) == 178 && Boxes::friend_blocks(100, 1.28) == 219 &&
+            Boxes::friend_blocks(150, 4.0) == 378 &&
+            Boxes::friend_blocks(150, 2.0) > Boxes::friend_blocks(150, 1.0) &&
+            Boxes::friend_blocks(151, 1.28) > Boxes::friend_blocks(150, 1.28),
+            "the blocks of 128 steps to walk for the friendship a species needs"
+        );
+        bool wider = true;
+        for (int tests = 0; tests + 1 < Boxes::FRIEND_TESTS; tests++){
+            wider &= Boxes::friend_blocks_wanted("golbat", tests + 1) > Boxes::friend_blocks_wanted("golbat", tests);
+        }
+        check(
+            wider && Boxes::friend_blocks_wanted("golbat", 0) == 324 && Boxes::friend_blocks_wanted("golbat", 3) == 378 &&
+            Boxes::friend_blocks_wanted("golbat", 5) == 400 &&
+            Boxes::friend_blocks_wanted("golbat", 99) == Boxes::friend_blocks_wanted("golbat", 5) &&
+            Boxes::friend_blocks_wanted("golbat", -1) == Boxes::friend_blocks_wanted("golbat", 0) &&
+            Boxes::friend_blocks_wanted("chansey", 0) == 178 && Boxes::friend_blocks_wanted("togepi", 0) == 219,
+            "a wider margin of steps after each level trained without the evolution"
+        );
+
+        Boxes::FriendRecords records;
+        records["golbat"].blocks = 120;
+        records["golbat"].tests = 1;
+        records["chansey"].blocks = 0;
+        records["chansey"].tests = 0;
+        const std::string text = Boxes::friend_to_text(records);
+        Boxes::FriendRecords back;
+        Boxes::FriendRecords bad;
+        check(
+            text == "friend golbat 120 1\n" && Boxes::friend_from_text(text, back) && back.size() == 1 &&
+            back["golbat"].blocks == 120 && back["golbat"].tests == 1 &&
+            Boxes::friend_from_text("", bad) && bad.empty() &&
+            Boxes::friend_from_text("# a comment\r\n\r\nfriend togepi 5 0\r\nfriend golbat 7 2", bad) && bad.size() == 2 &&
+            bad["togepi"].blocks == 5 && bad["golbat"].tests == 2 &&
+            !Boxes::friend_from_text("friend golbat 1", bad) && !Boxes::friend_from_text("friend golbat x 1", bad) &&
+            !Boxes::friend_from_text("friend golbat 1 -1", bad) && !Boxes::friend_from_text("walked golbat 1 1", bad) &&
+            !Boxes::friend_from_text("friend golbat 1 1 1", bad) && bad.empty(),
+            "the file of what was walked for the friendship, and what is not taken from it"
+        );
+
+        //  The boxes of the level test, with a CHANSEY more.
+        Boxes::BoxCensus with_chansey = census;
+        {
+            Boxes::BoxPokemon one;
+            one.box = 1;
+            one.cell = 10;
+            one.slug = "chansey";
+            one.level = 20;
+            with_chansey.pokemon.push_back(one);
+        }
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(table, with_chansey);
+        const std::vector<Boxes::LevelTarget> only_golbat = Boxes::friend_targets(Boxes::evolve_plan(table, census), Boxes::FriendRecords());
+        const std::vector<Boxes::LevelTarget> fresh = Boxes::friend_targets(plan, Boxes::FriendRecords());
+        Boxes::FriendRecords nearly;
+        nearly["golbat"].blocks = 320;
+        Boxes::FriendRecords all_tried;
+        all_tried["golbat"].tests = Boxes::FRIEND_TESTS;
+        const std::vector<Boxes::LevelTarget> golbat_near = Boxes::friend_targets(plan, nearly);
+        const std::vector<Boxes::LevelTarget> golbat_out = Boxes::friend_targets(plan, all_tried);
+        const std::vector<Boxes::LevelTarget> chansey_out = Boxes::friend_targets(plan, Boxes::FriendRecords(), {"blissey"});
+        check(
+            only_golbat.size() == 1 && only_golbat[0].slug == "crobat" && only_golbat[0].from_slug == "golbat" &&
+            only_golbat[0].friendship && only_golbat[0].level == 30 && only_golbat[0].goal == 31 &&
+            only_golbat[0].blocks == 324 && only_golbat[0].walked == 0 && only_golbat[0].tests == 0 &&
+            fresh.size() == 2 && fresh[0].slug == "blissey" && fresh[0].goal == 21 && fresh[0].blocks == 178 &&
+            fresh[1].slug == "crobat" &&
+            golbat_near.size() == 2 && golbat_near[0].slug == "crobat" && golbat_near[0].walked == 320 &&
+            golbat_near[1].slug == "blissey" &&
+            golbat_out.size() == 1 && golbat_out[0].slug == "blissey" &&
+            chansey_out.size() == 1 && chansey_out[0].slug == "crobat" &&
+            Boxes::level_targets(plan).size() == 2,
+            "the Pokemon of the boxes that evolve by friendship: the fewest blocks still to walk first, one at its "
+            "next level, left out after six levels without it, and not mixed with those that evolve by a level"
+        );
+        check(
+            Boxes::friend_targets_text(fresh) ==
+                "Blissey (CHANSEY Lv 20, box 2 cell 11, 0 of 178 blocks of 128 steps walked), "
+                "Crobat (GOLBAT Lv 30, box 1 cell 10, 0 of 324 blocks of 128 steps walked)" &&
+            Boxes::friend_targets_text(golbat_near).find("320 of 324 blocks") != std::string::npos,
+            "the targets as one line for the log"
+        );
+
+        Boxes::RaiseFile file;
+        file.out = true;
+        file.box = 0;
+        file.cell = 9;
+        file.extra = "articuno";
+        file.from = "golbat";
+        file.becomes = "crobat";
+        file.goal = 31;
+        file.friendship = true;
+        Boxes::RaiseFile read;
+        Boxes::RaiseFile plain;
+        plain.out = true;
+        plain.box = 0;
+        plain.cell = 9;
+        plain.extra = "articuno";
+        plain.from = "golbat";
+        plain.becomes = "crobat";
+        plain.goal = 31;
+        Boxes::RaiseFile other;
+        check(
+            Boxes::raise_to_text(file) == "raise 1 0 9 articuno golbat crobat 31 friend\n" &&
+            Boxes::raise_from_text(Boxes::raise_to_text(file), read) && read.out && read.friendship && read.goal == 31 &&
+            Boxes::raise_to_text(plain) == "raise 1 0 9 articuno golbat crobat 31\n" &&
+            Boxes::raise_from_text(Boxes::raise_to_text(plain), read) && read.out && !read.friendship &&
+            !Boxes::raise_from_text("raise 1 0 9 articuno golbat crobat 31 level", other) &&
+            !Boxes::raise_from_text("raise 1 0 9 articuno golbat crobat 31 friend more", other),
+            "the file of a training under way says when it is the one after a walk for friendship"
+        );
+        check(
+            story_friends_place() == "the evolving by friendship" && story_friend_place("crobat") == "walking for CROBAT" &&
+            story_friend_place("crobat") != story_level_place("crobat"),
+            "the places of the friendship segments for the failures of a run"
+        );
+
+        int friends = 0;
+        bool shape = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (segment.step_count < 3 || script.step(segment, 0).type != StepType::SKIP_IF_NO_LEVELS ||
+                script.step(segment, 0).p1 != 1){
+                continue;
+            }
+            friends++;
+            size_t out_at = 0;
+            size_t pace_at = 0;
+            size_t raise_at = 0;
+            size_t in_at = 0;
+            int outs = 0;
+            int paces = 0;
+            int raises = 0;
+            int ins = 0;
+            int saves = 0;
+            for (size_t k = 0; k < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::LEVEL_OUT){
+                    out_at = k;
+                    outs++;
+                    shape &= step.p1 == 1;
+                }else if (step.type == StepType::PACE){
+                    pace_at = k;
+                    paces++;
+                    //  A line of 3 tiles or more between two walls, and the direction along it.
+                    shape &= step.p1 >= 3 && step.dir != DPAD_NONE;
+                }else if (step.type == StepType::RAISE){
+                    raise_at = k;
+                    raises++;
+                }else if (step.type == StepType::LEVEL_IN){
+                    in_at = k;
+                    ins++;
+                }else if (step.type == StepType::SAVE){
+                    saves++;
+                }
+            }
+            shape &= story_once_segment(script, segment) && outs == 1 && paces == 1 && raises == 1 && ins == 1 &&
+                saves == 1 && out_at < pace_at && pace_at < raise_at && raise_at < in_at &&
+                (size_t)script.step(segment, out_at).p0 == in_at - out_at &&
+                script.step(segment, 1).type == StepType::FLY &&
+                script.step(segment, segment.step_count - 1).type == StepType::SAVE &&
+                script.step(segment, pace_at + 1).type == StepType::WALK;
+            //  Given up from a save in it: not possible (the Pokemon is out of its box).
+            for (size_t i = 2; i + 1 < segment.step_count; i++){
+                shape &= story_once_leave(script, segment, i) == OnceLeave::NO;
+            }
+        }
+        check(
+            friends == 8 && shape,
+            "the eight segments that evolve by friendship: FLY, the PC, the walk, the training, the PC, a save at the end only"
+        );
+    }
+
     logger.log(
         "AutoStory test: the PC's boxes are read, and what is in them gets its stone or is traded (the PC's "
         "texts, the cells, the list as a file, the six stones, the trades for " + trade_gets + "; of the " +
@@ -3968,7 +4158,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone and nineteen of levels): " +
+        ", C20_25_STONES, four of trades, four that fetch a stone, nineteen of levels and eight of friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

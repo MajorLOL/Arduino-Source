@@ -3410,6 +3410,55 @@ def level_segment(seg_id):
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (35 + k, k + 1)) for k in range(LEVEL_SEGMENTS)]
 
 
+# ------------------------------------------------ chapter 20, evolving by friendship
+#  EXPERIMENTAL (PocketPilot build 45, not run on a console when written).
+#  The table of the FireRed game with Charmander has three species that
+#  only come by a level up with a friendship of 220 or more: CROBAT (of
+#  GOLBAT), BLISSEY (of CHANSEY) and TOGETIC (of TOGEPI, which comes of an
+#  egg: not in this stage's reach yet; when one lies in a box, it is done
+#  here as well). The friendship goes up by walking: every 128 steps, with a
+#  chance of one in two, by one point for each Pokemon of the party that is
+#  not an egg. The game shows no friendship (no memory is read), so the
+#  program counts the steps and walks for the base friendship of the
+#  species (GOLBAT 70, CHANSEY 140) with a margin; then it trains the
+#  Pokemon one level at Victory Road, which is the level up the evolution
+#  waits for. Not evolved: more steps, and again (up to six times).
+#
+#  Each segment: FLY to the Indigo Plateau, the PC (StepType::LEVEL_OUT with
+#  p1 = 1: the one with the fewest steps to go changes places with the
+#  party's sixth), out to the Plateau's plaza, StepType::PACE (running
+#  along its longest line between two walls, the steps counted, a save
+#  every 40 blocks of 128 steps), the nurse, the training of one level
+#  (StepType::RAISE), the PC again (LEVEL_IN), out, the save. As many
+#  segments as it takes at most; the check skips the ones that are left.
+FRIEND_SEGMENTS = 8
+#  The line the Pokemon walks along: the plaza's row 9, between the walls
+#  at x = 6 and x = 16 (nobody there, no wild Pokemon, running allowed).
+PACE_TILES = [[x, 9] for x in range(7, 16)]
+
+
+def friend_segment(seg_id):
+    steps = [
+        fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_Fly", force=True),
+        talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"level_trip": {"friendship": True, "steps": [
+            {"oscillate": {"map": "MAP_INDIGO_PLATEAU_EXTERIOR", "tiles": PACE_TILES, "pace": True},
+             "label": seg_id + "_Pace"},
+            grind("MAP_VICTORY_ROAD_2F", rect(39, 10, 46, 11), PC["INDIGO"], 0, seg_id + "_Raise", raise_=True),
+            talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label=seg_id + "_BackToThePC"),
+        ], "in_label": "Into the box"}, "label": "Out of the box"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "state": LEVEL_STATE,
+            "title": "POKeDEX collection: evolving by friendship (a Pokemon of the PC walked with, then trained a level)",
+            "steps": [{"unless_no_levels": {"steps": steps, "friendship": True},
+                       "label": "Anything to evolve by friendship?"}]}
+
+
+CHAPTER20 += [friend_segment("C20_%d_FRIEND_%02d" % (35 + LEVEL_SEGMENTS + k, k + 1)) for k in range(FRIEND_SEGMENTS)]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

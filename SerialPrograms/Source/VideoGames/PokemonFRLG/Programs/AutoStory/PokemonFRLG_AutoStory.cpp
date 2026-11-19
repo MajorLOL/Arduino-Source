@@ -561,7 +561,7 @@ bool league_again_segment(const std::string& id){
 //  place for the failures of a run: by its first step.
 std::string once_place_of(const StoryStep& check){
     return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() :
-        check.type == StepType::SKIP_IF_NO_LEVELS ? story_levels_place() :
+        check.type == StepType::SKIP_IF_NO_LEVELS ? (check.p1 == 1 ? story_friends_place() : story_levels_place()) :
         check.type == StepType::SKIP_IF_NO_STONES
             ? (check.text != nullptr && check.text[0] != '\0' ? story_stone_fetch_place(check.text) : story_stones_place())
             : story_once_place(check.text);
@@ -650,6 +650,7 @@ void write_raise_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt){
         file.from = rt.out_give;
         file.becomes = rt.out_becomes;
         file.goal = rt.out_goal;
+        file.friendship = rt.out_friend;
     }
     const std::string path = SETTINGS_PATH() + RAISE_FILE;
     try{
@@ -674,13 +675,58 @@ bool load_raise_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, cons
     rt.out_now = file.from;
     rt.out_becomes = file.becomes;
     rt.out_goal = file.goal;
+    rt.out_friend = file.friendship;
     env.log(
         label + ": the training under way is the one of " + path + ": " + file.from + " to level " +
-        std::to_string(file.goal) + " (" + file.becomes + "), " + file.extra + " waits in box " +
-        std::to_string(file.box + 1) + " cell " + std::to_string(file.cell + 1) + ".",
+        std::to_string(file.goal) + " (" + file.becomes + (file.friendship ? ", after the walk for its friendship" : "") +
+        "), " + file.extra + " waits in box " + std::to_string(file.box + 1) + " cell " +
+        std::to_string(file.cell + 1) + ".",
         COLOR_BLUE
     );
     return true;
+}
+
+const char* const FRIEND_FILE = "PokemonFRLG-AutoStory-Friendship.txt";
+
+//  What was walked with the species of the boxes for their friendship
+//  (build 45): as a file, written right after each save made on the walk, so
+//  that a program started again from that save (or a game reset to it) goes
+//  on from there. Read once in a run.
+void load_friend_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt, const std::string& label){
+    if (rt.friend_known){
+        return;
+    }
+    const std::string path = SETTINGS_PATH() + FRIEND_FILE;
+    std::string text;
+    AutoStoryBoxes::FriendRecords records;
+    rt.friend_known = true;
+    rt.friend_records.clear();
+    if (read_text_file(path, text) && AutoStoryBoxes::friend_from_text(text, records)){
+        rt.friend_records = records;
+        for (const auto& item : records){
+            env.log(
+                label + ": " + item.first + " has " + std::to_string(item.second.blocks) + " blocks of " +
+                std::to_string(AutoStoryBoxes::FRIEND_BLOCK_STEPS) + " steps walked with it, " +
+                std::to_string(item.second.tests) + " levels trained without it evolving (" + path + ").",
+                COLOR_BLUE
+            );
+        }
+    }else{
+        env.log(label + ": nothing walked for friendship yet (no usable " + path + ").", COLOR_BLUE);
+    }
+    rt.friend_at_save = rt.friend_records;
+}
+
+void write_friend_file(SingleSwitchProgramEnvironment& env, StoryRuntime& rt){
+    if (!rt.friend_known){
+        return;
+    }
+    const std::string path = SETTINGS_PATH() + FRIEND_FILE;
+    try{
+        string_to_file(path, AutoStoryBoxes::friend_to_text(rt.friend_records));
+    }catch (...){
+        env.log("Could not write " + path + ".", COLOR_ORANGE);
+    }
 }
 
 //  StepType::BOXES (experimental): the PC's boxes are read. Then, for the
@@ -1622,19 +1668,25 @@ void AutoStory::run_segment(
             //  table does not have and that come by a level of one that lies
             //  in a box. One of them in each segment.
             const size_t skip = (size_t)std::max(0, (int)step.p0);
+            const bool friendship = step.p1 == 1;
+            const std::string by = friendship ? "friendship" : "a level";
             if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
                 env.log(
                     label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
-                    "one): nothing is evolved by a level. The next " + std::to_string(skip) + " steps are skipped.",
+                    "one): nothing is evolved by " + by + ". The next " + std::to_string(skip) + " steps are skipped.",
                     COLOR_ORANGE
                 );
                 i += skip;
                 break;
             }
-            const std::vector<AutoStoryBoxes::LevelTarget> targets = story_level_targets(rt);
+            if (friendship){
+                load_friend_file(env, rt, label);
+            }
+            const std::vector<AutoStoryBoxes::LevelTarget> targets =
+                friendship ? story_friend_targets(rt) : story_level_targets(rt);
             if (targets.empty()){
                 env.log(
-                    label + ": nothing in the boxes is left to evolve by a level into a species the POKeDEX table "
+                    label + ": nothing in the boxes is left to evolve by " + by + " into a species the POKeDEX table "
                     "still wants: the next " + std::to_string(skip) + " steps are skipped.",
                     COLOR_BLUE
                 );
@@ -1642,13 +1694,15 @@ void AutoStory::run_segment(
                 break;
             }
             env.log(
-                label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level (experimental): " +
-                AutoStoryBoxes::level_targets_text(targets) + ". The first one now.",
+                label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by " + by +
+                " (experimental): " +
+                (friendship ? AutoStoryBoxes::friend_targets_text(targets) : AutoStoryBoxes::level_targets_text(targets)) +
+                ". The first one now.",
                 COLOR_BLUE
             );
             if (i == 0 && story_once_segment(script, segment)){
                 //  A failure from here to the segment's end counts for that one.
-                rt.trip_place = story_level_place(targets.front().slug);
+                rt.trip_place = friendship ? story_friend_place(targets.front().slug) : story_level_place(targets.front().slug);
                 rt.trip_last = i + skip;
                 rt.trip_fishing = false;
             }
@@ -1664,15 +1718,33 @@ void AutoStory::run_segment(
                     COLOR_ORANGE
                 );
                 i += skip;
-            }else if (!story_level_out(rt, label, [&]{
-                write_boxes_file(env, rt, label, false);
-                write_raise_file(env, rt);
-            })){
-                env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
-                i += skip;
+            }else{
+                const bool friendship = step.p1 == 1;
+                if (friendship){
+                    load_friend_file(env, rt, label);
+                }
+                if (!story_level_out(rt, label, friendship, [&]{
+                    write_boxes_file(env, rt, label, false);
+                    write_raise_file(env, rt);
+                })){
+                    env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+                    i += skip;
+                }
             }
             break;
         }
+        case StepType::PACE:
+            //  The walk for the friendship (build 45, experimental); after a
+            //  reset to a save made on it, the Pokemon and what was walked
+            //  come from the files.
+            if (rt.out_box < 0){
+                load_raise_file(env, rt, label);
+            }
+            load_friend_file(env, rt, label);
+            story_pace(rt, step.dir, step.p1, label, [&]{
+                write_friend_file(env, rt);
+            });
+            break;
         case StepType::RAISE:
             if (rt.out_box < 0){
                 //  A start in the middle of the training (a save at a nurse).
@@ -1698,6 +1770,7 @@ void AutoStory::run_segment(
                     write_boxes_file(env, rt, label, false);
                 }
                 write_raise_file(env, rt);
+                write_friend_file(env, rt);
             });
             break;
         case StepType::GOT:{
@@ -3367,6 +3440,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.out_now.clear();
             rt.out_becomes.clear();
             rt.out_goal = 0;
+            rt.out_friend = false;
+            if (rt.friend_known){
+                //  What was walked since the save is lost with it.
+                rt.friend_records = rt.friend_at_save;
+            }
             if (rt.shiny_unsaved){
                 env.log("The shiny Pokemon caught after the last save is lost with this reset.", COLOR_RED);
                 rt.shiny_unsaved = false;

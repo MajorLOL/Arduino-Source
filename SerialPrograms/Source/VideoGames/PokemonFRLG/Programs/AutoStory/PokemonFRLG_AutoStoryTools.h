@@ -271,6 +271,16 @@ struct StoryRuntime{
     //  save. out_box < 0: no training under way.
     std::string out_becomes;
     int out_goal = 0;
+    //  Evolving by friendship (build 45): the training under way is the one
+    //  of a Pokemon that is walked with first (StepType::PACE), then trained
+    //  a level. What was walked with each species (the steps are counted in
+    //  blocks of 128), by its slug: as the game has it at its last save
+    //  ("friend_at_save": back to it when the game is reset), and as a file
+    //  of its own (AutoStoryBoxes::FriendRecords), read once in a run.
+    bool out_friend = false;
+    AutoStoryBoxes::FriendRecords friend_records;
+    AutoStoryBoxes::FriendRecords friend_at_save;
+    bool friend_known = false;
     //  A trade may have been made before (by hand, or in a run whose list of
     //  the boxes was not kept): while StepType::BOX_OUT looks at its cell,
     //  "out_watch" is the species the segment's trade gives. If the cell

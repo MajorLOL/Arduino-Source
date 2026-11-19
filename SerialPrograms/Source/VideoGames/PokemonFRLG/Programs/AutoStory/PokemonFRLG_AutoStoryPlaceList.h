@@ -187,6 +187,20 @@ inline std::string story_level_place(const std::string& slug){
     return name;
 }
 
+//  The same for the segments that evolve by friendship (build 45,
+//  experimental): the Pokemon walked with is a place of its own
+//  ("walking for CROBAT").
+inline std::string story_friends_place(){
+    return "the evolving by friendship";
+}
+inline std::string story_friend_place(const std::string& slug){
+    std::string name = "walking for ";
+    for (char ch : slug){
+        name += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+    }
+    return name;
+}
+
 //  The segment that fetches one evolution stone where the game has it
 //  (build 41, experimental): the text of its first step is "Moon Stone in
 //  Mt. Moon". The stone is the part before " in " (empty when the text has

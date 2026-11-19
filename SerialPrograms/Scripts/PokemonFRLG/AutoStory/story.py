@@ -1530,8 +1530,14 @@ class Builder:
             for kind in ("LEVEL_OUT", "RAISE", "LEVEL_IN"):
                 if sum(1 for s in sub if s["type"] == kind) != 1:
                     raise StoryError("unless_no_levels: one %s step (%s)" % (kind, step.get("label", "?")))
+            #  "friendship" (build 45): the Pokemon that evolves by a level up
+            #  with high friendship (p1 = 1), walked with first (one PACE).
+            friendship = bool(u.get("friendship"))
+            if sum(1 for s in sub if s["type"] == "PACE") != (1 if friendship else 0):
+                raise StoryError("unless_no_levels: %s PACE step (%s)" % ("one" if friendship else "no",
+                                                                           step.get("label", "?")))
             out.append({"type": "SKIP_IF_NO_LEVELS", "label": step.get("label", "Anything to evolve by a level?"),
-                        "p0": len(sub)})
+                        "p0": len(sub), "p1": 1 if friendship else 0})
             out.extend(sub)
             return
         if "level_trip" in step:
@@ -1560,7 +1566,8 @@ class Builder:
                     or any(s["type"] in ("SAVE", "FLY") for s in sub):
                 raise StoryError("level_trip: one RAISE, the last step a walk to the PC, no save (the nurse "
                                  "saves) or FLY (%s)" % step.get("label", "?"))
-            out.append({"type": "LEVEL_OUT", "label": step.get("label", "Out of the box"), "p0": len(sub) + 1})
+            out.append({"type": "LEVEL_OUT", "label": step.get("label", "Out of the box"), "p0": len(sub) + 1,
+                        "p1": 1 if b.get("friendship") else 0})
             out.extend(sub)
             out.append({"type": "LEVEL_IN", "label": b.get("in_label", "Into the box")})
             return
@@ -2088,9 +2095,21 @@ class Builder:
                 n, ends = best
                 self.walk_to(set(ends.keys()), step.get("label", "Oscillate") + "_ToLine", out)
                 here = (self.pos[0], self.pos[1], self.pos[2])
+                if o.get("pace"):
+                    #  PACE (build 45): the same run along the line, for a
+                    #  number of steps the program counts (friendship), not
+                    #  until a scene starts. The player ends on the tile it
+                    #  started from, in the direction of the wall behind it.
+                    out.append({"type": "PACE", "label": step.get("label", "Pace"), "dir": ends[here],
+                                "p1": n, "at": [self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]]]})
+                    self.pos = (self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]])
+                    return
                 out.append({"type": "OSCILLATE", "label": step.get("label", "Oscillate"), "dir": ends[here],
                             "p0": o.get("max_ms", 600000), "p1": n})
                 return
+            if o.get("pace"):
+                raise StoryError("pace: no straight line with a wall at both ends on %s (%s)"
+                                 % (m.id, step.get("label", "Pace")))
             spots = {}
             for x, y in o["tiles"]:
                 if not plain(x, y):

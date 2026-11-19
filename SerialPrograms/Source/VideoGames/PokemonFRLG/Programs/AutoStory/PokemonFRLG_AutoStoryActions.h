@@ -117,7 +117,17 @@ std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt);
 //  party's sixth one (StoryRuntime::out_*, out_becomes, out_goal say which).
 //  "changed" is called once it is done. False, and nothing pressed, when
 //  there is none.
-bool story_level_out(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed);
+//  "friendship" (build 45): the one of those that evolve by friendship, with
+//  the fewest blocks of steps still to walk (story_friend_targets()); its goal
+//  is its level plus one.
+bool story_level_out(
+    StoryRuntime& rt, const std::string& label, bool friendship, const std::function<void()>& changed
+);
+//  Evolving by friendship (build 45, experimental): the species of the boxes
+//  that evolve by a level up with high friendship, the one with the fewest
+//  blocks of steps still to walk first (rt.friend_records says what was
+//  walked).
+std::vector<AutoStoryBoxes::LevelTarget> story_friend_targets(StoryRuntime& rt);
 //  Back at the PC (StepType::LEVEL_IN): what the sixth place holds goes into
 //  the cell, the party's own sixth one comes back; an evolved species is one
 //  more in the table; the game is saved. "changed" is called after that.
@@ -151,6 +161,17 @@ void story_push_boulder(StoryRuntime& rt, DpadPosition direction);
 //  length >= 3: a line of that many tiles with a wall at both ends, run
 //  along (B held) each way until bumping into the wall.
 void story_oscillate(StoryRuntime& rt, DpadPosition direction, int length, Milliseconds max_time, const std::string& what);
+//  StepType::PACE (build 45): the Pokemon out of its box for its friendship
+//  (rt.out_*, out_friend) walks back and forth along a line of "length" tiles
+//  between two walls, run along as story_oscillate() does, until its blocks
+//  of 128 steps are the ones its evolution wants (AutoStoryBoxes::
+//  friend_blocks_wanted). The steps are counted, the position checked on the
+//  video at each end of a round, the game saved every 40 blocks and at the
+//  end; "on_saved" is called after each save.
+void story_pace(
+    StoryRuntime& rt, DpadPosition direction, int length, const std::string& what,
+    const std::function<void()>& on_saved
+);
 
 //  The Vermilion Gym trash cans. Starts and ends at the hub tile.
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);

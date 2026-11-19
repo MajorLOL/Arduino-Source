@@ -1248,7 +1248,21 @@ std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt){
     return level_targets(plan, without);
 }
 
-bool story_level_out(StoryRuntime& rt, const std::string& label, const std::function<void()>& changed){
+std::vector<AutoStoryBoxes::LevelTarget> story_friend_targets(StoryRuntime& rt){
+    const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
+    //  One that failed twice in a row in this run is left for the next run.
+    std::set<std::string> without;
+    for (const EvolveLine& line : plan){
+        if (rt.places.place_out(story_friend_place(line.slug))){
+            without.insert(line.slug);
+        }
+    }
+    return friend_targets(plan, rt.friend_records, without);
+}
+
+bool story_level_out(
+    StoryRuntime& rt, const std::string& label, bool friendship, const std::function<void()>& changed
+){
     ConsoleHandle& console = rt.console;
     rt.out_box = -1;
     rt.out_cell = -1;
@@ -1257,17 +1271,30 @@ bool story_level_out(StoryRuntime& rt, const std::string& label, const std::func
     rt.out_now.clear();
     rt.out_becomes.clear();
     rt.out_goal = 0;
-    const std::vector<LevelTarget> targets = story_level_targets(rt);
+    rt.out_friend = false;
+    const std::vector<LevelTarget> targets = friendship ? story_friend_targets(rt) : story_level_targets(rt);
     if (targets.empty()){
-        console.log(label + ": nothing in the boxes is left to evolve by a level: nothing is taken out.", COLOR_BLUE);
+        console.log(
+            label + ": nothing in the boxes is left to evolve by " + (friendship ? "friendship" : "a level") +
+            ": nothing is taken out.",
+            COLOR_BLUE
+        );
         return false;
     }
     const LevelTarget target = targets.front();
-    console.log(
-        label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level (the fewest levels to go "
-        "first): " + level_targets_text(targets) + ".",
-        COLOR_BLUE
-    );
+    if (friendship){
+        console.log(
+            label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by friendship (the fewest blocks "
+            "of steps to walk first): " + friend_targets_text(targets) + ".",
+            COLOR_BLUE
+        );
+    }else{
+        console.log(
+            label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level (the fewest levels "
+            "to go first): " + level_targets_text(targets) + ".",
+            COLOR_BLUE
+        );
+    }
     //  The one that makes room: the party's sixth, when it is not of the team.
     std::string extra;
     const int extra_level = story_read_slot(rt, 6, &extra);
@@ -1292,7 +1319,10 @@ bool story_level_out(StoryRuntime& rt, const std::string& label, const std::func
     story_note(rt, label + ": " + target.name);
     console.log(
         label + ": " + from + " (" + cell_text(target.box, target.cell) + (target.level > 0 ? ", level " +
-        std::to_string(target.level) : std::string()) + ") comes into the party, to be trained to level " +
+        std::to_string(target.level) : std::string()) + ") comes into the party, " +
+        (friendship ? "to walk " + std::to_string(std::max(0, target.blocks - target.walked)) + " more blocks of " +
+            std::to_string(FRIEND_BLOCK_STEPS) + " steps for its friendship and then be trained to level " :
+            std::string("to be trained to level ")) +
         std::to_string(target.goal) + " for " + target.name + "; " + upper(extra) + " waits in its cell (experimental).",
         COLOR_BLUE
     );
@@ -1309,8 +1339,9 @@ bool story_level_out(StoryRuntime& rt, const std::string& label, const std::func
     }
     int goal = target.goal;
     if (level > 0){
-        goal = level_goal(level, target.evolves_at);
+        goal = friendship ? (level >= 100 ? 0 : level + 1) : level_goal(level, target.evolves_at);
     }
+    rt.out_friend = friendship;
     rt.out_box = target.box;
     rt.out_cell = target.cell;
     rt.out_extra = extra;
@@ -1331,6 +1362,7 @@ bool story_level_out(StoryRuntime& rt, const std::string& label, const std::func
         rt.out_give.clear();
         rt.out_now.clear();
         rt.out_becomes.clear();
+        rt.out_friend = false;
         return false;
     }
     if (changed){
@@ -1359,6 +1391,7 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
     const std::string was = rt.out_give;
     const std::string becomes = rt.out_becomes;
     const int goal = rt.out_goal;
+    const bool friendship = rt.out_friend;
     box_swap(rt, label, rt.out_box, rt.out_cell, rt.out_extra, now);
     if (rt.boxes_known){
         rt.boxes.put(rt.out_box, rt.out_cell, now, level);
@@ -1370,6 +1403,24 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
     rt.out_now.clear();
     rt.out_becomes.clear();
     rt.out_goal = 0;
+    rt.out_friend = false;
+    //  What was walked with it (evolving by friendship): done with when it
+    //  evolved, one more level trained without it when it did not (the next
+    //  segment walks a wider margin).
+    int walked = 0;
+    int tests = 0;
+    if (friendship){
+        const auto found = rt.friend_records.find(was);
+        if (found != rt.friend_records.end()){
+            walked = found->second.blocks;
+            tests = found->second.tests;
+        }
+        if (now == becomes && now != was){
+            rt.friend_records.erase(was);
+        }else{
+            rt.friend_records[was].tests = tests + 1;
+        }
+    }
     if (now == becomes && now != was){
         //  One more in the POKeDEX table, the game saved.
         rt.caught.insert(now);
@@ -1387,7 +1438,9 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
                 " species with at least one.";
         }
         console.log(
-            "Evolved for the POKeDEX: " + now + " (" + upper(was) + " by level " +
+            "Evolved for the POKeDEX: " + now + " (" + upper(was) +
+            (friendship ? " by friendship, after " + std::to_string(walked) + " blocks of " +
+                std::to_string(FRIEND_BLOCK_STEPS) + " steps walked, at level " : std::string(" by level ")) +
             (level > 0 ? std::to_string(level) : std::string("?")) + "). It lies in " + where + "; " + upper(waiting) +
             " is back in the party." +
             table,
@@ -1398,7 +1451,11 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
         console.log(
             label + ": " + upper(now) + " is at level " + (level > 0 ? std::to_string(level) : std::string("?")) +
             ", the goal was " + std::to_string(goal) + ": it did not evolve. It lies in " + where + "; " +
-            upper(waiting) + " is back in the party. The next segment goes on with the list as it is now.",
+            upper(waiting) + " is back in the party. " +
+            (friendship ? "Its friendship was not 220 yet (" + std::to_string(walked) + " blocks of " +
+                std::to_string(FRIEND_BLOCK_STEPS) + " steps walked, " + std::to_string(tests + 1) +
+                " levels trained without it): the next segment walks more. " : std::string()) +
+            "The next segment goes on with the list as it is now.",
             COLOR_ORANGE
         );
     }

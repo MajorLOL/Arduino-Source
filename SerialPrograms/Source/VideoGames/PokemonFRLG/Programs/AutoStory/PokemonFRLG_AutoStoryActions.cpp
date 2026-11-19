@@ -1903,6 +1903,161 @@ void story_oscillate(StoryRuntime& rt, DpadPosition direction, int length, Milli
 }
 
 
+void story_pace(
+    StoryRuntime& rt, DpadPosition direction, int length, const std::string& what,
+    const std::function<void()>& on_saved
+){
+    ConsoleHandle& console = rt.console;
+    if (rt.out_box < 0 || !rt.out_friend || rt.out_give.empty()){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_pace(): No walk for friendship is under way (nothing was taken out of a box for it, and no "
+            "file of one): " + what,
+            console
+        );
+    }
+    if (length < 3 || direction == DPAD_NONE){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_pace(): The step has no line to walk along: " + what,
+            console
+        );
+    }
+    std::string name;
+    for (char ch : rt.out_give){
+        name += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+    }
+    AutoStoryBoxes::FriendRecord& record = rt.friend_records[rt.out_give];
+    const int wanted = AutoStoryBoxes::friend_blocks_wanted(rt.out_give, record.tests);
+    const int start = record.blocks;
+    if (start >= wanted){
+        console.log(
+            what + ": " + name + " has walked " + std::to_string(start) + " of " + std::to_string(wanted) +
+            " blocks of " + std::to_string(AutoStoryBoxes::FRIEND_BLOCK_STEPS) + " steps: nothing to walk.",
+            COLOR_BLUE
+        );
+        return;
+    }
+
+    //  As story_oscillate(): along a line between two walls, B held, each way
+    //  a little longer than the line, so it ends bumping into the wall (no
+    //  drift). A bump is no step: a leg is length - 1 steps.
+    const DpadPosition back = opposite(direction);
+    const int64_t per_leg = length - 1;
+    const Milliseconds leg = Milliseconds((int64_t)((8 + 8 * (length - 1) + 12) * 1000 / 60));
+    //  Legs in a round (an even number: the round ends where it started), and
+    //  the blocks between two saves.
+    constexpr int64_t LEGS_PER_ROUND = 60;
+    constexpr int SAVE_EVERY = 40;
+    const int64_t total = (int64_t)(wanted - start) * AutoStoryBoxes::FRIEND_BLOCK_STEPS;
+    const int64_t legs_total = (total + per_leg - 1) / per_leg;
+    const int64_t minutes = legs_total * (leg.count() + 50) / 60000;
+    console.log(
+        what + ": walking " + name + " for its friendship: " + std::to_string(start) + " of " + std::to_string(wanted) +
+        " blocks of " + std::to_string(AutoStoryBoxes::FRIEND_BLOCK_STEPS) + " steps walked (" +
+        std::to_string(record.tests) + " levels trained without it evolving), " + std::to_string(total) +
+        " steps to go: about " + std::to_string(minutes) + " minutes, running along a line of " +
+        std::to_string(length) + " tiles (experimental).",
+        COLOR_BLUE
+    );
+    story_note(rt, what + ": " + name + " " + std::to_string(start) + " of " + std::to_string(wanted) + " blocks");
+
+    int64_t steps = 0;
+    int saved_at = start;
+    int rounds = 0;
+    int hits = 0;
+    AutoStoryScroll::Screen reference;
+    const bool check = story_take_picture(rt, reference);
+    while (record.blocks < wanted){
+        const int64_t remaining = (int64_t)(wanted - record.blocks) * AutoStoryBoxes::FRIEND_BLOCK_STEPS;
+        int64_t legs = std::min<int64_t>(LEGS_PER_ROUND, (remaining + per_leg - 1) / per_leg);
+        legs += legs % 2;
+        WhiteDialogWatcher dialog(COLOR_RED);
+        BlackScreenWatcher black(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                for (int64_t i = 0; i < legs; i++){
+                    pbf_controller_state(context, BUTTON_B, i % 2 == 0 ? direction : back, {0, 0}, {0, 0}, leg);
+                    pbf_wait(context, 50ms);
+                }
+                context.wait_for_all_requests();
+            },
+            { dialog, black }
+        );
+        rt.facing = DPAD_NONE;
+        if (ret >= 0){
+            //  Nothing on the plaza starts a text box or a screen change, so
+            //  this may be the detector seeing things in the white of the
+            //  stones: once or twice, back to the start of the line (B held
+            //  against the wall behind it, which closes a text box) and on,
+            //  without counting the round. Three in a row: an error.
+            hits++;
+            if (hits >= 3){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_pace(): A text box or a black screen came up in " + std::to_string(hits) +
+                    " rounds in a row while " + name + " walked: " + what,
+                    console
+                );
+            }
+            console.log(
+                what + ": a text box or a black screen came up while " + name + " walked (" + std::to_string(hits) +
+                " in a row): back to the start of the line, the round is not counted.",
+                COLOR_ORANGE
+            );
+            pbf_controller_state(rt.context, BUTTON_B, back, {0, 0}, {0, 0}, leg);
+            pbf_wait(rt.context, 500ms);
+            rt.context.wait_for_all_requests();
+            continue;
+        }
+        hits = 0;
+        steps += legs * per_leg;
+        record.blocks = start + (int)(steps / AutoStoryBoxes::FRIEND_BLOCK_STEPS);
+        rounds++;
+
+        //  Back where the round started: the screen is the one of the first
+        //  round's start. A clear offset of a tile or more means the player
+        //  is elsewhere (somebody stood in the way, or the run fell short).
+        if (check){
+            AutoStoryScroll::Screen now;
+            if (story_take_picture(rt, now)){
+                const AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(reference, now, 2);
+                if (offset.clear && (offset.x != 0 || offset.y != 0)){
+                    OperationFailedExceptionWithScreenshot::fire(
+                        ErrorReportMode::SEND_ERROR_REPORT,
+                        "story_pace(): The player is " + offset.summary() + " from where the walk started after " +
+                        std::to_string(steps) + " steps: " + what,
+                        console
+                    );
+                }
+            }
+        }
+        story_note(rt, what + ": " + name + " " + std::to_string(record.blocks) + " of " + std::to_string(wanted) + " blocks");
+        if (rounds % 4 == 0 || record.blocks >= wanted){
+            console.log(
+                what + ": " + name + " has walked " + std::to_string(record.blocks) + " of " + std::to_string(wanted) +
+                " blocks (" + std::to_string(steps) + " steps counted in this walk).",
+                COLOR_BLUE
+            );
+        }
+        const bool done = record.blocks >= wanted;
+        if (rt.save_after_heal && (done || record.blocks - saved_at >= SAVE_EVERY)){
+            //  The save and the file agree: after a reset, the walk goes on
+            //  from here.
+            story_save(rt, rt.has_dex);
+            story_saved(rt, done ? rt.step_index + 1 : rt.step_index);
+            saved_at = record.blocks;
+            if (on_saved){
+                on_saved();
+            }
+        }
+    }
+    console.log(what + ": " + name + " has walked " + std::to_string(record.blocks) + " blocks: done.", COLOR_BLUE);
+}
+
+
 
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
     std::vector<int32_t> to_can = script.leg_list(step.legs_a);

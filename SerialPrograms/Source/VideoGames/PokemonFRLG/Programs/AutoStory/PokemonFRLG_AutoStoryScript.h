@@ -216,11 +216,12 @@ enum class StepType : uint8_t{
                         //  since BOX_OUT goes into the box, the party's own sixth comes back
     SKIP_IF_NO_LEVELS,  //  nothing in the boxes evolves by a level into a species the POKeDEX
                         //  table still wants (or the boxes were never read): skip the next p0
-                        //  steps
+                        //  steps. p1 = 1 (build 45): by a level up with high friendship
     LEVEL_OUT,          //  in front of a PC, facing it: the Pokemon of the boxes with the
                         //  fewest levels to go to its evolution changes places with the
                         //  party's sixth one. None (or the sixth is of the team): skip the
-                        //  next p0 steps
+                        //  next p0 steps. p1 = 1 (build 45): the one with the fewest steps to go
+                        //  to the friendship its evolution wants
     RAISE,              //  as GRIND (the legs, the grass line, the nurse), for the Pokemon in
                         //  the party's sixth place: in front for the training, the lead
                         //  comes in and fights, the experience is shared, the EXP. SHARE is
@@ -228,6 +229,11 @@ enum class StepType : uint8_t{
     LEVEL_IN,           //  in front of a PC, facing it: what the party's sixth place holds
                         //  since LEVEL_OUT (evolved or not) goes into its cell, the party's
                         //  own sixth comes back; an evolved species is one more in the table
+    PACE,               //  (build 45) the Pokemon that LEVEL_OUT (p1 = 1) took out walks for
+                        //  its friendship: back and forth (dir) along a line of p1 tiles with
+                        //  a wall at both ends, run along (B held) as OSCILLATE does, until
+                        //  the steps its evolution wants are counted. A save every 40 blocks
+                        //  of 128 steps, one at the end
 };
 
 struct StoryStep{
