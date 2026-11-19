@@ -1260,10 +1260,24 @@ std::vector<AutoStoryBoxes::LevelTarget> story_friend_targets(StoryRuntime& rt){
     return friend_targets(plan, rt.friend_records, without);
 }
 
+std::vector<AutoStoryBoxes::LevelTarget> story_exp_targets(StoryRuntime& rt){
+    const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
+    //  One that failed twice in a row in this run is left for the next run.
+    std::set<std::string> without;
+    for (const EvolveLine& line : plan){
+        if (rt.places.place_out(story_exp_place(line.slug))){
+            without.insert(line.slug);
+        }
+    }
+    return exp_targets(plan, without);
+}
+
 bool story_level_out(
-    StoryRuntime& rt, const std::string& label, bool friendship, const std::function<void()>& changed
+    StoryRuntime& rt, const std::string& label, LevelMode mode, const std::function<void()>& changed
 ){
     ConsoleHandle& console = rt.console;
+    const bool friendship = mode == LevelMode::FRIENDSHIP;
+    const bool by_exp = mode == LevelMode::EXP;
     rt.out_box = -1;
     rt.out_cell = -1;
     rt.out_extra.clear();
@@ -1272,17 +1286,25 @@ bool story_level_out(
     rt.out_becomes.clear();
     rt.out_goal = 0;
     rt.out_friend = false;
-    const std::vector<LevelTarget> targets = friendship ? story_friend_targets(rt) : story_level_targets(rt);
+    const std::vector<LevelTarget> targets =
+        by_exp ? story_exp_targets(rt) : friendship ? story_friend_targets(rt) : story_level_targets(rt);
     if (targets.empty()){
         console.log(
             label + ": nothing in the boxes is left to evolve by " + (friendship ? "friendship" : "a level") +
-            ": nothing is taken out.",
+            (by_exp ? " that is worth a round of the Elite Four" : "") + ": nothing is taken out.",
             COLOR_BLUE
         );
         return false;
     }
     const LevelTarget target = targets.front();
-    if (friendship){
+    if (by_exp){
+        console.log(
+            label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by a level and have " +
+            std::to_string(EXP_ROUND_MIN) + " experience points to go or more (the most first): " +
+            exp_targets_text(targets) + ".",
+            COLOR_BLUE
+        );
+    }else if (friendship){
         console.log(
             label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by friendship (the fewest blocks "
             "of steps to walk first): " + friend_targets_text(targets) + ".",
@@ -1320,7 +1342,9 @@ bool story_level_out(
     console.log(
         label + ": " + from + " (" + cell_text(target.box, target.cell) + (target.level > 0 ? ", level " +
         std::to_string(target.level) : std::string()) + ") comes into the party, " +
-        (friendship ? "to walk " + std::to_string(std::max(0, target.blocks - target.walked)) + " more blocks of " +
+        (by_exp ? "to ride through the Elite Four with the EXP. SHARE (about " + std::to_string(target.exp) +
+            " experience points to go) up to level " :
+         friendship ? "to walk " + std::to_string(std::max(0, target.blocks - target.walked)) + " more blocks of " +
             std::to_string(FRIEND_BLOCK_STEPS) + " steps for its friendship and then be trained to level " :
             std::string("to be trained to level ")) +
         std::to_string(target.goal) + " for " + target.name + "; " + upper(extra) + " waits in its cell (experimental).",
@@ -1351,9 +1375,20 @@ bool story_level_out(
     rt.out_goal = goal;
     //  The list follows the game (and goes back with it on a reset).
     rt.boxes.put(target.box, target.cell, extra, extra_level);
-    if (goal <= 0){
+    //  The Elite Four for experience: the list had an older level of it, and
+    //  what it has to go is not worth a round (the list has the real level
+    //  from now on, so the next round takes another one).
+    const bool too_little = by_exp && goal > 0 && level > 0 && exp_to_go(level, goal) < EXP_ROUND_MIN;
+    if (goal <= 0 || too_little){
         //  (Level 100: it cannot go up.) Back where it was.
-        console.log(label + ": " + from + " is at level " + std::to_string(level) + ": it cannot be trained.", COLOR_ORANGE);
+        console.log(
+            label + ": " + from + " is at level " + std::to_string(level) + ": " +
+            (too_little
+                ? "only about " + std::to_string(exp_to_go(level, goal)) + " experience points to go for level " +
+                    std::to_string(goal) + ", too little for a round of the Elite Four (Victory Road is as quick)."
+                : std::string("it cannot be trained.")),
+            COLOR_ORANGE
+        );
         box_swap(rt, label, target.box, target.cell, extra, target.from_slug);
         rt.boxes.put(target.box, target.cell, target.from_slug, level);
         rt.out_box = -1;

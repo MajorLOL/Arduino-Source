@@ -2807,6 +2807,11 @@ void exp_share_to(StoryRuntime& rt, int from_slot, int to_slot, const std::strin
 }
 
 
+void story_exp_share(StoryRuntime& rt, int from_slot, int to_slot, const std::string& label){
+    exp_share_to(rt, from_slot, to_slot, label);
+}
+
+
 void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
     ConsoleHandle& console = rt.console;
     const std::string where = step.label;

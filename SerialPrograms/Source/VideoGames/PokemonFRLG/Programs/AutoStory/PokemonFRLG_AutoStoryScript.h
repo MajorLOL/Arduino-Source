@@ -216,12 +216,16 @@ enum class StepType : uint8_t{
                         //  since BOX_OUT goes into the box, the party's own sixth comes back
     SKIP_IF_NO_LEVELS,  //  nothing in the boxes evolves by a level into a species the POKeDEX
                         //  table still wants (or the boxes were never read): skip the next p0
-                        //  steps. p1 = 1 (build 45): by a level up with high friendship
+                        //  steps. p1 = 1 (build 45): by a level up with high friendship;
+                        //  p1 = 2 (build 46): by a level, with 20000 experience points to go
+                        //  or more (a round of the Elite Four for experience)
     LEVEL_OUT,          //  in front of a PC, facing it: the Pokemon of the boxes with the
                         //  fewest levels to go to its evolution changes places with the
                         //  party's sixth one. None (or the sixth is of the team): skip the
                         //  next p0 steps. p1 = 1 (build 45): the one with the fewest steps to go
-                        //  to the friendship its evolution wants
+                        //  to the friendship its evolution wants; p1 = 2 (build 46): the one with
+                        //  the most experience points to go, with the EXP. SHARE on it for the
+                        //  League's rounds (the segment goes on with the League, not a RAISE)
     RAISE,              //  as GRIND (the legs, the grass line, the nurse), for the Pokemon in
                         //  the party's sixth place: in front for the training, the lead
                         //  comes in and fights, the experience is shared, the EXP. SHARE is
@@ -480,6 +484,13 @@ enum class OnceLeave : uint8_t{
 inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment& segment, size_t index){
     if (!story_once_segment(script, segment) || index < 2 || index + 1 >= segment.step_count){
         return OnceLeave::NO;
+    }
+    //  A Pokemon is out of its box (LEVEL_OUT came before this step): the
+    //  segment cannot be given up from here, the Pokemon would stay in the party.
+    for (size_t k = 2; k < index; k++){
+        if (script.step(segment, k).type == StepType::LEVEL_OUT){
+            return OnceLeave::NO;
+        }
     }
     if (script.step(segment, index).type == StepType::STONES){
         return OnceLeave::PAST_STEP;

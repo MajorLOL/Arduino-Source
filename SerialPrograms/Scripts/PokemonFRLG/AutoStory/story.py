@@ -1527,17 +1527,25 @@ class Builder:
             if not sub or sub[0]["type"] != "FLY" or sub[-1]["type"] != "SAVE":
                 raise StoryError("unless_no_levels: the steps start with FLY and end with a save (%s)"
                                  % step.get("label", "?"))
+            #  "exp" (build 46): a round of the Elite Four with the EXP. SHARE
+            #  on the Pokemon of the PC that has the most levels to go (p1 = 2):
+            #  no training (no RAISE), the League's steps in place of it.
+            exp = bool(u.get("exp"))
             for kind in ("LEVEL_OUT", "RAISE", "LEVEL_IN"):
-                if sum(1 for s in sub if s["type"] == kind) != 1:
-                    raise StoryError("unless_no_levels: one %s step (%s)" % (kind, step.get("label", "?")))
+                if sum(1 for s in sub if s["type"] == kind) != (0 if exp and kind == "RAISE" else 1):
+                    raise StoryError("unless_no_levels: %s %s step (%s)"
+                                     % ("no" if exp and kind == "RAISE" else "one", kind, step.get("label", "?")))
             #  "friendship" (build 45): the Pokemon that evolves by a level up
             #  with high friendship (p1 = 1), walked with first (one PACE).
             friendship = bool(u.get("friendship"))
+            if exp and friendship:
+                raise StoryError("unless_no_levels: exp and friendship do not go together (%s)"
+                                 % step.get("label", "?"))
             if sum(1 for s in sub if s["type"] == "PACE") != (1 if friendship else 0):
                 raise StoryError("unless_no_levels: %s PACE step (%s)" % ("one" if friendship else "no",
                                                                            step.get("label", "?")))
             out.append({"type": "SKIP_IF_NO_LEVELS", "label": step.get("label", "Anything to evolve by a level?"),
-                        "p0": len(sub), "p1": 1 if friendship else 0})
+                        "p0": len(sub), "p1": 2 if exp else 1 if friendship else 0})
             out.extend(sub)
             return
         if "level_trip" in step:
@@ -1562,12 +1570,23 @@ class Builder:
             if (self.pos[0], self.pos[1], self.pos[2], self.pos[3]) != start:
                 raise StoryError("level_trip: the steps do not end in front of the PC they start at (%s: %s, not %s)"
                                  % (step.get("label", "?"), self.pos, start))
-            if not sub or sub[-1]["type"] != "WALK" or sum(1 for s in sub if s["type"] == "RAISE") != 1 \
+            #  "exp" (build 46): the Pokemon rides through the League (the
+            #  EXP. SHARE on it) instead of a training: no RAISE, and saves
+            #  and a FLY (to the Indigo Plateau again, after Oak's rating) are
+            #  part of the way.
+            exp = bool(b.get("exp"))
+            if exp:
+                if not sub or sub[-1]["type"] != "WALK" or any(s["type"] == "RAISE" for s in sub) \
+                        or not any(s["type"] == "HEAL" for s in sub) or not any(s["type"] == "FLY" for s in sub):
+                    raise StoryError("level_trip (exp): no RAISE, a nurse (the loss of a room starts over after "
+                                     "the first), a FLY, the last step a walk to the PC (%s)"
+                                     % step.get("label", "?"))
+            elif not sub or sub[-1]["type"] != "WALK" or sum(1 for s in sub if s["type"] == "RAISE") != 1 \
                     or any(s["type"] in ("SAVE", "FLY") for s in sub):
                 raise StoryError("level_trip: one RAISE, the last step a walk to the PC, no save (the nurse "
                                  "saves) or FLY (%s)" % step.get("label", "?"))
             out.append({"type": "LEVEL_OUT", "label": step.get("label", "Out of the box"), "p0": len(sub) + 1,
-                        "p1": 1 if b.get("friendship") else 0})
+                        "p1": 2 if exp else 1 if b.get("friendship") else 0})
             out.extend(sub)
             out.append({"type": "LEVEL_IN", "label": b.get("in_label", "Into the box")})
             return

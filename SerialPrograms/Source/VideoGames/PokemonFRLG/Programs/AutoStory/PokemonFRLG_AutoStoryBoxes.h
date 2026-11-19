@@ -790,6 +790,9 @@ struct LevelTarget{
     int blocks = 0;         //  The blocks of 128 steps to walk (in all) before the level.
     int walked = 0;         //  The blocks walked so far.
     int tests = 0;          //  The levels trained after walking that did not evolve it.
+    //  The Elite Four for experience (build 46): the experience points to go,
+    //  as exp_to_go() counts them.
+    int exp = 0;
 };
 
 //  A Pokemon that is at the level of the evolution already (or above: it
@@ -1047,6 +1050,67 @@ inline std::string friend_targets_text(const std::vector<LevelTarget>& targets){
             std::to_string(FRIEND_BLOCK_STEPS) + " steps walked" +
             (target.tests > 0 ? ", " + std::to_string(target.tests) + " levels trained without it" : std::string()) +
             ")";
+    }
+    return text;
+}
+
+
+//  ---- The Elite Four for experience (build 46, experimental) -----------------
+//
+//  A Pokemon that needs a lot of experience (PUPITAR from level 43 to 55 is
+//  108585 points) is trained at Victory Road at some 20000 points an hour.
+//  The League again gives much more: its 26 Pokemon (level 63 to 75, of the
+//  four Elite Four members and the Champion) give 48034 points before the game's factor,
+//  and a Pokemon of the party's sixth place that holds the EXP. SHARE and is
+//  never sent out gets half of each battle (and the factor of 1.5 for
+//  trainers' battles): some 36000 points for a round of the five rooms, in 30
+//  to 35 minutes, three times as fast per hour. A round is worth it from some
+//  20000 points to go (the walk to the Indigo Plateau and back, Oak's rating
+//  and the nurse take their time as well); for less, Victory Road is as
+//  quick. The growth group of a species is not in the program's data: the
+//  points are counted on the curve of the medium fast group (level to the
+//  third), which is within a quarter of the others' (the slow group needs a
+//  quarter more: a Pupitar from 43 to 55 is 108585, counted 86868).
+const int EXP_ROUND_MIN = 20000;
+
+//  The experience points from level "level" to level "goal" (0: not known or
+//  not to go up).
+inline int exp_to_go(int level, int goal){
+    if (level < 1 || goal <= level || goal > 100){
+        return 0;
+    }
+    return goal * goal * goal - level * level * level;
+}
+
+//  Those of the level targets that have EXP_ROUND_MIN points to go or more
+//  (the level in the list must be known), the one with the most first.
+inline std::vector<LevelTarget> exp_targets(
+    const std::vector<EvolveLine>& plan, const std::set<std::string>& without = std::set<std::string>()
+){
+    std::vector<LevelTarget> targets;
+    for (LevelTarget& target : level_targets(plan, without)){
+        target.exp = exp_to_go(target.level, target.goal);
+        if (target.level > 0 && target.exp >= EXP_ROUND_MIN){
+            targets.push_back(target);
+        }
+    }
+    std::stable_sort(targets.begin(), targets.end(), [](const LevelTarget& a, const LevelTarget& b){
+        return a.exp > b.exp;
+    });
+    return targets;
+}
+
+//  They as one line for the log.
+inline std::string exp_targets_text(const std::vector<LevelTarget>& targets){
+    std::string text;
+    for (const LevelTarget& target : targets){
+        std::string from;
+        for (char ch : target.from_slug){
+            from += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+        }
+        text += (text.empty() ? "" : ", ") + target.name + " (" + from + " Lv " + std::to_string(target.level) +
+            ", box " + std::to_string(target.box + 1) + " cell " + std::to_string(target.cell + 1) + ", to level " +
+            std::to_string(target.goal) + ", about " + std::to_string(target.exp) + " points to go)";
     }
     return text;
 }

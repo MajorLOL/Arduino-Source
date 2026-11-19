@@ -112,17 +112,35 @@ bool story_take_item(StoryRuntime& rt, int party_slot, const std::string& label)
 //  evolve by a level into one the POKeDEX table still wants, the one with
 //  the fewest levels to go first.
 std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt);
+//  What a trip of StepType::LEVEL_OUT to LEVEL_IN is for (the step's p1).
+enum class LevelMode : int{
+    LEVEL = 0,          //  Trained at Victory Road until its level (build 43).
+    FRIENDSHIP = 1,     //  Walked with, then trained one level (build 45).
+    EXP = 2,            //  Through the Elite Four with the EXP. SHARE on it (build 46).
+};
 //  In front of a PC, facing it, with a party of six whose last one is not of
 //  the team (StepType::LEVEL_OUT): the first of those changes places with the
 //  party's sixth one (StoryRuntime::out_*, out_becomes, out_goal say which).
 //  "changed" is called once it is done. False, and nothing pressed, when
 //  there is none.
-//  "friendship" (build 45): the one of those that evolve by friendship, with
+//  FRIENDSHIP (build 45): the one of those that evolve by friendship, with
 //  the fewest blocks of steps still to walk (story_friend_targets()); its goal
 //  is its level plus one.
+//  EXP (build 46): the one of those with the most experience points to go
+//  (story_exp_targets()), only when it is still that far on its real level.
 bool story_level_out(
-    StoryRuntime& rt, const std::string& label, bool friendship, const std::function<void()>& changed
+    StoryRuntime& rt, const std::string& label, LevelMode mode, const std::function<void()>& changed
 );
+//  The Elite Four for experience (build 46, experimental): the species of the
+//  boxes that evolve by a level into one the POKeDEX table still wants and
+//  that have AutoStoryBoxes::EXP_ROUND_MIN points to go or more, the one with
+//  the most first.
+std::vector<AutoStoryBoxes::LevelTarget> story_exp_targets(StoryRuntime& rt);
+//  The EXP. SHARE from the party slot "from_slot" to "to_slot" (the lead to
+//  the Pokemon that rides through the League, and back). Not essential: when
+//  the menus are not what they are expected to be, it is logged and the trip
+//  goes on as it is.
+void story_exp_share(StoryRuntime& rt, int from_slot, int to_slot, const std::string& label);
 //  Evolving by friendship (build 45, experimental): the species of the boxes
 //  that evolve by a level up with high friendship, the one with the fewest
 //  blocks of steps still to walk first (rt.friend_records says what was

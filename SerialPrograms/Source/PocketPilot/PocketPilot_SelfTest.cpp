@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 49 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 54 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2936,6 +2936,7 @@ int check_leave_out(Logger& logger){
     size_t saves_outdoors = 0;
     size_t saves_unknown = 0;
     size_t walks_out_wrong = 0;
+    bool exp_leave_no = true;
     for (size_t s = 0; s < script.segment_count; s++){
         const StorySegment& segment = script.segments[s];
         if (!story_once_segment(script, segment)){
@@ -2943,6 +2944,14 @@ int check_leave_out(Logger& logger){
         }
         once++;
         once_ids += (once_ids.empty() ? "" : ", ") + std::string(segment.id);
+        //  A round of the Elite Four for experience (build 46) has the Pokemon
+        //  out of its box from its PC to its save: given up from none of them.
+        if (script.step(segment, 0).type == StepType::SKIP_IF_NO_LEVELS && script.step(segment, 0).p1 == 2){
+            for (size_t i = 2; i + 1 < segment.step_count; i++){
+                exp_leave_no &= story_once_leave(script, segment, i) == OnceLeave::NO;
+            }
+            continue;
+        }
         for (size_t i = 2; i + 1 < segment.step_count; i++){
             if (script.step(segment, i - 1).type != StepType::SAVE){
                 continue;
@@ -2975,11 +2984,13 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 41 &&
+        once == 46 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
-            "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY, C20_35_LEVEL_01, C20_36_LEVEL_02, "
+            "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY, C20_EXP_01_ELITE_FOUR, "
+            "C20_EXP_02_ELITE_FOUR, C20_EXP_03_ELITE_FOUR, C20_EXP_04_ELITE_FOUR, C20_EXP_05_ELITE_FOUR, "
+            "C20_35_LEVEL_01, C20_36_LEVEL_02, "
             "C20_37_LEVEL_03, C20_38_LEVEL_04, C20_39_LEVEL_05, C20_40_LEVEL_06, C20_41_LEVEL_07, "
             "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
             "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17, "
@@ -2987,7 +2998,8 @@ int check_leave_out(Logger& logger){
             "C20_57_FRIEND_04, C20_58_FRIEND_05, C20_59_FRIEND_06, C20_60_FRIEND_07, C20_61_FRIEND_08",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
-        "the story itself), the nineteen that evolve by level, the eight that evolve by friendship"
+        "the story itself), the five rounds of the Elite Four for experience, the nineteen that evolve by level, "
+        "the eight that evolve by friendship"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3030,7 +3042,8 @@ int check_leave_out(Logger& logger){
         std::vector<size_t> left_open;
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
-            lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_35_LEVEL_01") &&
+            lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_EXP_01_ELITE_FOUR") &&
+            index_of("C20_EXP_05_ELITE_FOUR") + 1 == index_of("C20_35_LEVEL_01") &&
             index_of("C20_53_LEVEL_19") + 1 == index_of("C20_54_FRIEND_01") &&
             index_of("C20_61_FRIEND_08") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
@@ -4150,6 +4163,113 @@ int check_boxes(Logger& logger){
         );
     }
 
+    //  The Elite Four for experience (build 46): which of the boxes, the
+    //  places, and the five rounds.
+    {
+        check(
+            Boxes::EXP_ROUND_MIN == 20000 && Boxes::exp_to_go(43, 55) == 86868 && Boxes::exp_to_go(55, 55) == 0 &&
+            Boxes::exp_to_go(56, 55) == 0 && Boxes::exp_to_go(0, 50) == 0 && Boxes::exp_to_go(-1, 50) == 0 &&
+            Boxes::exp_to_go(50, 101) == 0 && Boxes::exp_to_go(99, 100) == 1000000 - 970299,
+            "the experience points to go from a level to another, on the curve of the medium fast group"
+        );
+        Boxes::BoxCensus more = census;
+        auto add = [&](int box, int cell, const char* slug, int level){
+            Boxes::BoxPokemon one;
+            one.box = box;
+            one.cell = cell;
+            one.slug = slug;
+            one.level = level;
+            more.pokemon.push_back(one);
+        };
+        //  Nothing of the census so far has 20000 points to go (PIDGEOTTO Lv 40
+        //  to 41 is 4921, METAPOD Lv 8 to 10 is 488).
+        const bool none_yet = Boxes::exp_targets(Boxes::evolve_plan(table, more)).empty();
+        add(3, 0, "pupitar", 43);
+        const std::vector<Boxes::LevelTarget> one = Boxes::exp_targets(Boxes::evolve_plan(table, more));
+        const std::vector<Boxes::LevelTarget> left_out = Boxes::exp_targets(Boxes::evolve_plan(table, more), {"tyranitar"});
+        more.pokemon.back().level = 52;
+        const std::vector<Boxes::LevelTarget> edge = Boxes::exp_targets(Boxes::evolve_plan(table, more));
+        more.pokemon.back().level = 53;
+        const std::vector<Boxes::LevelTarget> below = Boxes::exp_targets(Boxes::evolve_plan(table, more));
+        more.pokemon.back().level = -1;
+        const std::vector<Boxes::LevelTarget> unknown = Boxes::exp_targets(Boxes::evolve_plan(table, more));
+        check(
+            none_yet && one.size() == 1 && one[0].slug == "tyranitar" && one[0].from_slug == "pupitar" &&
+            one[0].level == 43 && one[0].goal == 55 && one[0].exp == 86868 && one[0].box == 3 && one[0].cell == 0 &&
+            left_out.empty() && edge.size() == 1 && edge[0].exp == 25767 && below.empty() && unknown.empty(),
+            "the Pokemon of the boxes for a round of the Elite Four: 20000 points to go or more, a known level, the "
+            "most first"
+        );
+        more.pokemon.back().level = 43;
+        check(
+            Boxes::exp_targets_text(Boxes::exp_targets(Boxes::evolve_plan(table, more))) ==
+                "Tyranitar (PUPITAR Lv 43, box 4 cell 1, to level 55, about 86868 points to go)" &&
+            story_exp_rounds_place() == "the Elite Four for experience" &&
+            story_exp_place("tyranitar") == "the Elite Four for TYRANITAR" &&
+            story_exp_place("tyranitar") != story_level_place("tyranitar"),
+            "the targets as one line for the log, and the places of the rounds for the failures of a run"
+        );
+
+        int rounds = 0;
+        bool shape = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (segment.step_count < 3 || script.step(segment, 0).type != StepType::SKIP_IF_NO_LEVELS ||
+                script.step(segment, 0).p1 != 2){
+                continue;
+            }
+            rounds++;
+            size_t out_at = 0;
+            size_t in_at = 0;
+            size_t nurse_at = 0;
+            size_t champion_at = 0;
+            int outs = 0;
+            int ins = 0;
+            int raises = 0;
+            int nurses = 0;
+            int resets = 0;
+            int flies = 0;
+            for (size_t k = 0; k < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type == StepType::LEVEL_OUT){
+                    out_at = k;
+                    outs++;
+                    shape &= step.p1 == 2;
+                }else if (step.type == StepType::LEVEL_IN){
+                    in_at = k;
+                    ins++;
+                }else if (step.type == StepType::RAISE || step.type == StepType::PACE){
+                    raises++;
+                }else if (step.type == StepType::HEAL){
+                    if (nurses == 0){
+                        nurse_at = k;
+                    }
+                    nurses++;
+                }else if (step.type == StepType::RESET){
+                    resets++;
+                    champion_at = k;
+                }else if (step.type == StepType::FLY){
+                    flies++;
+                }
+            }
+            //  The League (the nurse first, for the loss handler), the Hall of
+            //  Fame once, and FLY at the start and again after Oak's rating.
+            shape &= story_once_segment(script, segment) && outs == 1 && ins == 1 && raises == 0 && resets == 1 &&
+                flies == 2 && nurses >= 1 && out_at < nurse_at && nurse_at < champion_at && champion_at < in_at &&
+                (size_t)script.step(segment, out_at).p0 == in_at - out_at &&
+                script.step(segment, 1).type == StepType::FLY &&
+                script.step(segment, segment.step_count - 1).type == StepType::SAVE &&
+                script.step(segment, in_at + 1).type == StepType::WALK &&
+                std::string(segment.id).find("_ELITE_FOUR") != std::string::npos &&
+                std::string(segment.id).rfind("C20_EXP_", 0) == 0;
+        }
+        check(
+            rounds == 5 && shape,
+            "the five rounds of the Elite Four for experience: FLY, the PC, the nurse, the League, the Hall of Fame, "
+            "FLY back, the PC, a save at the end"
+        );
+    }
+
     logger.log(
         "AutoStory test: the PC's boxes are read, and what is in them gets its stone or is traded (the PC's "
         "texts, the cells, the list as a file, the six stones, the trades for " + trade_gets + "; of the " +
@@ -4158,7 +4278,8 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone, nineteen of levels and eight of friendship): " +
+        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, nineteen of levels and eight of "
+        "friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

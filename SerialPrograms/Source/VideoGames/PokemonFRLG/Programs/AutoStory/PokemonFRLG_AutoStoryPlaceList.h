@@ -201,6 +201,20 @@ inline std::string story_friend_place(const std::string& slug){
     return name;
 }
 
+//  The same for the rounds of the Elite Four for experience (build 46,
+//  experimental): the Pokemon that rides along is a place of its own
+//  ("the Elite Four for PUPITAR").
+inline std::string story_exp_rounds_place(){
+    return "the Elite Four for experience";
+}
+inline std::string story_exp_place(const std::string& slug){
+    std::string name = "the Elite Four for ";
+    for (char ch : slug){
+        name += ch >= 'a' && ch <= 'z' ? (char)(ch - 'a' + 'A') : ch;
+    }
+    return name;
+}
+
 //  The segment that fetches one evolution stone where the game has it
 //  (build 41, experimental): the text of its first step is "Moon Stone in
 //  Mt. Moon". The stone is the part before " in " (empty when the text has

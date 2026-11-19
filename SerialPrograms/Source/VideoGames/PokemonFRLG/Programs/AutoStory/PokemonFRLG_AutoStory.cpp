@@ -550,18 +550,29 @@ void set_wanted(StoryRuntime& rt, const StoryScript& script, const StorySegment&
     }
 }
 
+//  A round of the Elite Four for experience (C20_EXP_nn_ELITE_FOUR, build 46):
+//  the Pokemon of the box that has the most levels to go rides through the
+//  League in the party's sixth place with the EXP. SHARE on it, and the
+//  segment is the whole League again, the Champion and Oak's rating included.
+bool exp_segment(const std::string& id){
+    return id.rfind("C20_EXP_", 0) == 0;
+}
+
 //  A segment of the League again (C13, C15: for prize money, and for the
 //  Hall of Fame the National POKeDEX wants): the Elite Four or the Champion.
+//  The rounds for experience (C20_EXP) are one segment with both.
 bool league_again_segment(const std::string& id){
-    return (id.rfind("C13_", 0) == 0 || id.rfind("C15_", 0) == 0) &&
-        (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos);
+    return exp_segment(id) ||
+        ((id.rfind("C13_", 0) == 0 || id.rfind("C15_", 0) == 0) &&
+        (id.find("_ELITE_FOUR") != std::string::npos || id.find("_CHAMPION") != std::string::npos));
 }
 
 //  A segment for something that is done once (story_once_segment()), as a
 //  place for the failures of a run: by its first step.
 std::string once_place_of(const StoryStep& check){
     return check.type == StepType::SKIP_IF_BOXES ? story_boxes_place() :
-        check.type == StepType::SKIP_IF_NO_LEVELS ? (check.p1 == 1 ? story_friends_place() : story_levels_place()) :
+        check.type == StepType::SKIP_IF_NO_LEVELS
+            ? (check.p1 == 2 ? story_exp_rounds_place() : check.p1 == 1 ? story_friends_place() : story_levels_place()) :
         check.type == StepType::SKIP_IF_NO_STONES
             ? (check.text != nullptr && check.text[0] != '\0' ? story_stone_fetch_place(check.text) : story_stones_place())
             : story_once_place(check.text);
@@ -788,6 +799,12 @@ void AutoStory::run_segment(
     //  No trip to a place of the collection is under way yet: a trip starts
     //  at its check (a retry after a reset comes by that check again).
     rt.trip_place.clear();
+
+    //  A round of the Elite Four for experience: the Pokemon that rides along
+    //  (the EXP. SHARE on it) is not valued, and the League's battles must
+    //  not stop for a move it could learn (also after a reset to a save in
+    //  the middle of the round).
+    rt.battle.never_learn = exp_segment(segment.id);
 
     //  The segment of a Pokemon that is there once, continued from a save
     //  in it (a retry after a reset does not come by its check again): a
@@ -1669,7 +1686,8 @@ void AutoStory::run_segment(
             //  in a box. One of them in each segment.
             const size_t skip = (size_t)std::max(0, (int)step.p0);
             const bool friendship = step.p1 == 1;
-            const std::string by = friendship ? "friendship" : "a level";
+            const bool by_exp = step.p1 == 2;
+            const std::string by = friendship ? "friendship" : by_exp ? "a level (the Elite Four for experience)" : "a level";
             if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
                 env.log(
                     label + ": the PC's boxes were not read yet (no list of them from this run or an earlier "
@@ -1683,11 +1701,14 @@ void AutoStory::run_segment(
                 load_friend_file(env, rt, label);
             }
             const std::vector<AutoStoryBoxes::LevelTarget> targets =
-                friendship ? story_friend_targets(rt) : story_level_targets(rt);
+                by_exp ? story_exp_targets(rt) : friendship ? story_friend_targets(rt) : story_level_targets(rt);
             if (targets.empty()){
                 env.log(
                     label + ": nothing in the boxes is left to evolve by " + by + " into a species the POKeDEX table "
-                    "still wants: the next " + std::to_string(skip) + " steps are skipped.",
+                    "still wants" +
+                    (by_exp ? " with " + std::to_string(AutoStoryBoxes::EXP_ROUND_MIN) + " experience points to go or more" :
+                        std::string()) +
+                    ": the next " + std::to_string(skip) + " steps are skipped.",
                     COLOR_BLUE
                 );
                 i += skip;
@@ -1696,13 +1717,15 @@ void AutoStory::run_segment(
             env.log(
                 label + ": " + std::to_string(targets.size()) + " of the boxes can evolve by " + by +
                 " (experimental): " +
-                (friendship ? AutoStoryBoxes::friend_targets_text(targets) : AutoStoryBoxes::level_targets_text(targets)) +
+                (by_exp ? AutoStoryBoxes::exp_targets_text(targets) :
+                    friendship ? AutoStoryBoxes::friend_targets_text(targets) : AutoStoryBoxes::level_targets_text(targets)) +
                 ". The first one now.",
                 COLOR_BLUE
             );
             if (i == 0 && story_once_segment(script, segment)){
                 //  A failure from here to the segment's end counts for that one.
-                rt.trip_place = friendship ? story_friend_place(targets.front().slug) : story_level_place(targets.front().slug);
+                rt.trip_place = by_exp ? story_exp_place(targets.front().slug) :
+                    friendship ? story_friend_place(targets.front().slug) : story_level_place(targets.front().slug);
                 rt.trip_last = i + skip;
                 rt.trip_fishing = false;
             }
@@ -1719,16 +1742,22 @@ void AutoStory::run_segment(
                 );
                 i += skip;
             }else{
-                const bool friendship = step.p1 == 1;
-                if (friendship){
+                const LevelMode mode = step.p1 == 2 ? LevelMode::EXP :
+                    step.p1 == 1 ? LevelMode::FRIENDSHIP : LevelMode::LEVEL;
+                if (mode == LevelMode::FRIENDSHIP){
                     load_friend_file(env, rt, label);
                 }
-                if (!story_level_out(rt, label, friendship, [&]{
+                if (!story_level_out(rt, label, mode, [&]{
                     write_boxes_file(env, rt, label, false);
                     write_raise_file(env, rt);
                 })){
                     env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
                     i += skip;
+                }else if (mode == LevelMode::EXP){
+                    //  The EXP. SHARE on the one that rides along: a holder
+                    //  that is not sent out gets half of what each battle
+                    //  of the League gives.
+                    story_exp_share(rt, 1, 6, label);
                 }
             }
             break;
@@ -1762,6 +1791,11 @@ void AutoStory::run_segment(
             }
             if (rt.collection != nullptr){
                 boxes_list_known(env, rt, label);
+            }
+            if (exp_segment(segment.id) && rt.out_box >= 0){
+                //  The EXP. SHARE back to the lead: it would go into the box
+                //  with the Pokemon.
+                story_exp_share(rt, 6, 1, label);
             }
             story_level_in(rt, label, [&]{
                 //  Not without the list: a file with one Pokemon in it would

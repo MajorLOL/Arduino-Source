@@ -3407,6 +3407,64 @@ def level_segment(seg_id):
             "steps": [{"unless_no_levels": {"steps": steps}, "label": "Anything to evolve by a level?"}]}
 
 
+# ------------------------------------------------ chapter 20, the Elite Four for experience
+#  EXPERIMENTAL (PocketPilot build 46, not run on a console when written).
+#  A Pokemon of the PC that evolves by a level and has a lot of experience to
+#  go (PUPITAR from level 43 to 55 is 108585 points: at Victory Road, some 20000
+#  an hour, five hours) rides through the League again in the party's sixth
+#  place with the EXP. SHARE on it. It is never sent out (the League's
+#  battles take the party's slots 1 to 5), and a holder that is not sent out
+#  gets half of what each battle gives, with the factor of 1.5 for trainers:
+#  the 26 Pokemon of level 63 to 75 of the five trainers give it some 36000
+#  points in a round, in 30 to 35 minutes (about 65000 an hour: three times
+#  Victory Road).
+#
+#  One segment for each round, the whole League in it, so that the Pokemon
+#  that is out of its box is not left behind by a save in the middle: FLY to
+#  the Indigo Plateau, the PC (StepType::LEVEL_OUT with p1 = 2: the one with
+#  the most points to go, from 20000 on, changes places with the party's sixth
+#  and gets the EXP. SHARE), the nurse, the healing items, the Elite Four, the
+#  Champion, the Hall of Fame, Oak's rating, FLY back, the PC (LEVEL_IN: the
+#  EXP. SHARE back on the lead, the Pokemon into its cell), the save. A round
+#  that is lost starts over after the nurse like the League again of chapter
+#  13 (league_again_segment() in the program). Skipped when no Pokemon of the
+#  boxes has that many points to go; the training at Victory Road (the
+#  segments after these) finishes what is left.
+EXP_ROUNDS = 5
+
+
+def exp_segment(seg_id):
+    steps = [
+        fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_Fly", force=True),
+        talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"level_trip": {"exp": True, "steps": [
+            #  The nurse first: a loss of a room starts over after her.
+            heal(PC["INDIGO"], seg_id + "_ToNurse"),
+        ] + league_kit() + [save(), team()] + league_room_steps(again=True) + [
+            goto("MAP_POKEMON_LEAGUE_CHAMPIONS_ROOM", [[6, 19]], "ToChampion"),
+            cutscene(6000, 60000, "Champion intro"),
+            battle("Champion (rival)", 60000),
+            {"hall_of_fame": 600000, "label": "Oak, Hall of Fame, credits"},
+            setst(vars={"VAR_MAP_SCENE_PALLET_TOWN_OAK": 2}),
+        ] + oak_rating("Oak: the Elite Four for experience") + [
+            save(),
+            fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_FlyBack", force=True),
+            talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label=seg_id + "_BackToThePC"),
+        ], "in_label": "Into the box"}, "label": "Out of the box"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    state = {"clear_flags": ["FLAG_HIDE_POSTGAME_GOSSIPERS"] + LEAGUE_FLAGS,
+             "vars": {"VAR_MAP_SCENE_POKEMON_LEAGUE": 0}}
+    return {"id": seg_id, "chapter": 20, "no_repel": True, "state": state,
+            "title": "POKeDEX collection: the Elite Four again for experience (a Pokemon of the PC rides along "
+                     "with the EXP. SHARE)",
+            "steps": [{"unless_no_levels": {"steps": steps, "exp": True},
+                       "label": "Anything to evolve by a level with a lot of experience to go?"}]}
+
+
+CHAPTER20 += [exp_segment("C20_EXP_%02d_ELITE_FOUR" % (k + 1)) for k in range(EXP_ROUNDS)]
+
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (35 + k, k + 1)) for k in range(LEVEL_SEGMENTS)]
 
 
