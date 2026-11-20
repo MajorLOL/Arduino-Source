@@ -772,9 +772,12 @@ bool cell_empty(StoryRuntime& rt){
 //  with nothing in the hand, picks up the party's last Pokemon (MOVE) and
 //  puts it down in that cell. "in_party": the species of the party's last
 //  one, read before. Returns the level it has in the cell, and the cell.
+//  "party_last": the presses of DOWN from the party's first place to its last
+//  (5 for a party of six).
 int store_last(
     StoryRuntime& rt, const std::string& label, View& view,
-    const std::vector<std::pair<int, int>>& candidates, const std::string& in_party, int& box_found, int& cell_found
+    const std::vector<std::pair<int, int>>& candidates, const std::string& in_party, int& box_found, int& cell_found,
+    int party_last = BOX_PARTY_LAST
 ){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -832,7 +835,7 @@ int store_last(
         }
     }
     pbf_press_button(context, BUTTON_A, 160ms, 1840ms);     //  The party slides in: the hand on its first place.
-    for (int k = 0; k < BOX_PARTY_LAST; k++){
+    for (int k = 0; k < party_last; k++){
         dpad(context, DPAD_DOWN);
         pbf_wait(context, 150ms);
     }
@@ -1487,6 +1490,239 @@ void story_egg_back(StoryRuntime& rt, const std::string& label){
     rt.egg_extra.clear();
     rt.egg_party = 0;
     rt.egg_hatched.clear();
+}
+
+
+//  ---- The Day Care (build 48, experimental) ---------------------------------
+
+namespace{
+
+//  The Pokemon of the baby's evolution line that can have it with a DITTO
+//  (the egg's species is the one at the root of the mother's line, whatever
+//  the gender: daycare.c, GetEggSpecies; all of them are in the egg groups
+//  that breed).
+std::vector<std::string> daycare_family(const std::string& baby){
+    if (baby == "pichu"){
+        return {"pikachu", "raichu"};
+    }
+    if (baby == "cleffa"){
+        return {"clefairy", "clefable"};
+    }
+    if (baby == "igglybuff"){
+        return {"jigglypuff", "wigglytuff"};
+    }
+    if (baby == "togepi"){
+        return {"togetic"};
+    }
+    if (baby == "smoochum"){
+        return {"jynx"};
+    }
+    if (baby == "elekid"){
+        return {"electabuzz"};
+    }
+    if (baby == "tyrogue"){
+        return {"hitmonlee", "hitmonchan", "hitmontop"};
+    }
+    return {};
+}
+
+}
+
+bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::string& baby){
+    ConsoleHandle& console = rt.console;
+    rt.dc_baby = baby;
+    rt.dc_parents[0].clear();
+    rt.dc_parents[1].clear();
+    rt.dc_party = 0;
+    rt.dc_given = false;
+    rt.dc_egg = false;
+    const std::vector<std::string> family = daycare_family(baby);
+    if (family.empty()){
+        fail(rt, label + ": " + upper(baby) + " has no parents in the program's list of the Day Care.");
+    }
+    auto is_family = [&](const std::string& slug){
+        return std::find(family.begin(), family.end(), slug) != family.end();
+    };
+    auto skip = [&](const std::string& why){
+        console.log(
+            label + ": " + why + ": no " + upper(baby) + " is bred in this round (nothing was changed in the party "
+            "or the boxes).",
+            COLOR_ORANGE
+        );
+        return false;
+    };
+    const int count = story_party_count(rt);
+    if (count != 6){
+        return skip(
+            "the party has " + std::to_string(count) + " Pokemon, not six (the two parents take the party's fifth "
+            "and sixth place, the ones that are there go into the boxes)"
+        );
+    }
+    std::string slot[7];
+    int level[7] = {-1, -1, -1, -1, -1, -1, -1};
+    for (int k = 5; k <= 6; k++){
+        level[k] = story_read_slot(rt, k, &slot[k]);
+        if (level[k] < 0 || slot[k].empty()){
+            return skip("party slot " + std::to_string(k) + " was not read");
+        }
+        for (const StoryTeamMember& member : rt.team){
+            if (member.line.count(slot[k]) != 0){
+                return skip("party slot " + std::to_string(k) + " is " + upper(slot[k]) + ", one of the team");
+            }
+        }
+    }
+    //  What the party's fifth and sixth place hold of the parents already
+    //  (the parents of the segment before are still there).
+    bool keep[7] = {false, false, false, false, false, false, false};
+    bool have_ditto = false;
+    bool have_parent = false;
+    for (int k = 5; k <= 6; k++){
+        if (!have_ditto && slot[k] == "ditto"){
+            keep[k] = true;
+            have_ditto = true;
+        }else if (!have_parent && slot[k] != "ditto" && is_family(slot[k])){
+            keep[k] = true;
+            have_parent = true;
+        }
+    }
+    //  What the boxes have for the rest: not the one that is set aside to
+    //  evolve into a species the table still wants, and the lowest level.
+    const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
+    auto pick_of = [&](const std::vector<std::string>& species, BoxPokemon& pick){
+        bool found = false;
+        for (const std::string& name : species){
+            for (const BoxPokemon& one : rt.boxes.of(name)){
+                bool aside = false;
+                for (const EvolveLine& line : plan){
+                    aside |= line.box == one.box && line.cell == one.cell;
+                }
+                if (aside){
+                    continue;
+                }
+                if (!found || (one.level >= 0 && (pick.level < 0 || one.level < pick.level))){
+                    pick = one;
+                    found = true;
+                }
+            }
+        }
+        return found;
+    };
+    BoxPokemon ditto_pick;
+    BoxPokemon parent_pick;
+    if (!have_ditto && !pick_of({"ditto"}, ditto_pick)){
+        return skip("no DITTO in the boxes (as they were read)");
+    }
+    if (!have_parent && !pick_of(family, parent_pick)){
+        std::string names;
+        for (const std::string& name : family){
+            names += (names.empty() ? "" : " or ") + upper(name);
+        }
+        return skip("no " + names + " in the boxes (as they were read)");
+    }
+    if (have_ditto && have_parent){
+        console.log(
+            label + ": the party's fifth and sixth place hold " + upper(slot[5]) + " and " + upper(slot[6]) +
+            " already: the parents.",
+            COLOR_BLUE
+        );
+    }
+    std::vector<BoxPokemon> picks;
+    if (!have_ditto){
+        picks.push_back(ditto_pick);
+    }
+    if (!have_parent){
+        picks.push_back(parent_pick);
+    }
+    for (const BoxPokemon& pick : picks){
+        //  The place that is not kept; the sixth, as a box takes the one
+        //  that is there (the fifth changes places with it first).
+        if (keep[6]){
+            story_swap_party(rt, 5, 6);
+            std::swap(slot[5], slot[6]);
+            std::swap(level[5], level[6]);
+            std::swap(keep[5], keep[6]);
+        }
+        console.log(
+            label + ": " + upper(pick.slug) + " (" + cell_text(pick.box, pick.cell) + ") comes into the party; " +
+            upper(slot[6]) + " waits in its cell (experimental).",
+            COLOR_BLUE
+        );
+        box_swap(rt, label, pick.box, pick.cell, pick.slug, slot[6]);
+        //  The list follows the game.
+        rt.boxes.put(pick.box, pick.cell, slot[6], level[6]);
+        slot[6] = pick.slug;
+        level[6] = pick.level;
+        keep[6] = true;
+    }
+    rt.dc_parents[0] = slot[5];
+    rt.dc_parents[1] = slot[6];
+    console.log(
+        label + ": " + upper(slot[5]) + " and " + upper(slot[6]) + " are the party's fifth and sixth Pokemon: the "
+        "parents of " + upper(baby) + ".",
+        COLOR_BLUE
+    );
+    return true;
+}
+
+void story_daycare_store(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    if (rt.dc_party <= 0){
+        fail(rt, label + ": the Day Care step before this one did not run: the size of the party is not known.");
+    }
+    const int count = story_party_count(rt);
+    if (count != rt.dc_party + 1){
+        fail(
+            rt,
+            label + ": the party has " + std::to_string(count) + " Pokemon, but " + std::to_string(rt.dc_party + 1) +
+            " were expected (the team and what hatched). The game is reset."
+        );
+    }
+    std::string baby;
+    const int baby_level = story_read_slot(rt, count, &baby);
+    if (baby_level < 0 || baby.empty()){
+        fail(rt, label + ": party slot " + std::to_string(count) + " was not read: it is not known what hatched.");
+    }
+    if (baby != rt.dc_baby){
+        console.log(
+            label + ": party slot " + std::to_string(count) + " is " + upper(baby) + ", not " + upper(rt.dc_baby) +
+            " as expected.",
+            COLOR_ORANGE
+        );
+    }
+    //  Empty cells by the list, from the last box back (as story_egg_room()).
+    std::vector<std::pair<int, int>> candidates;
+    for (int box = BOX_COUNT - 1; box >= 0 && candidates.size() < 4; box--){
+        for (int cell = BOX_ROWS * BOX_COLUMNS - 1; cell >= 0 && candidates.size() < 4; cell--){
+            if (rt.boxes.at(box, cell) == nullptr){
+                candidates.emplace_back(box, cell);
+            }
+        }
+    }
+    if (candidates.empty()){
+        fail(rt, label + ": the boxes have no empty cell (as the list has them): the baby has no room.");
+    }
+    console.log(
+        label + ": " + upper(baby) + " (level " + std::to_string(baby_level) + ") goes into an empty cell of the "
+        "boxes (experimental).",
+        COLOR_BLUE
+    );
+    int box = -1;
+    int cell = -1;
+    int level = -1;
+    {
+        StoryMemoryScope memory_scope("PC boxes");
+        enter_box_view(rt, label);
+        View view;
+        to_box_name(rt, label);
+        view.home = still_look(rt);
+        level = store_last(rt, label, view, candidates, baby, box, cell, count - 1);
+        back_home(rt, label, view);
+    }
+    rt.boxes.put(box, cell, baby, level > 0 ? level : baby_level);
+    console.log(
+        label + ": " + upper(baby) + " lies in " + cell_text(box, cell) + "; the party has the team now.",
+        COLOR_BLUE
+    );
 }
 
 

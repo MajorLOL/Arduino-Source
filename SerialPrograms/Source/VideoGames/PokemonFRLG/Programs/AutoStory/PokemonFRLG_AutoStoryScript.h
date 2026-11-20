@@ -251,6 +251,25 @@ enum class StepType : uint8_t{
                         //  scene is read through with B, the nickname is declined). At most p0
                         //  steps; "text": the species that comes of it. The party must have one
                         //  more Pokemon than EGG_ROOM left (the egg was handed over)
+    DAYCARE_OUT,        //  (build 48, experimental) in front of a PC, facing it: a DITTO and a
+                        //  Pokemon of the family of the species "text" (the one that is bred) come
+                        //  out of the boxes into the party's fifth and sixth place. No parents
+                        //  there (or the party has no six Pokemon): skip the next p0 steps, the
+                        //  whole trip to the Day Care and back to this PC
+    DAYCARE_GIVE,       //  in front of the woman of the Four Island Day Care (across the counter):
+                        //  the party's fifth and sixth Pokemon are left with her
+    DAYCARE_WALK,       //  back and forth (dir) along a line of p1 tiles with a wall at both ends,
+                        //  run along (B held), p0 steps (the parents make an egg at every 256)
+    DAYCARE_MAN,        //  in front of the tile the Day Care man stands on when he has an egg (dir =
+                        //  the step to where he stands otherwise, p2 = 1, p3 = the facing there):
+                        //  p0 = 0: take the egg when there is one, and then skip the next p1
+                        //  steps (the rounds that are left); p0 = 1: an egg that is waiting is
+                        //  not wanted (NO, NO)
+    DAYCARE_STORE,      //  in front of a PC, facing it: the baby that hatched (the party's last)
+                        //  goes into an empty cell of the boxes
+    DAYCARE_TAKE,       //  in front of the woman again: she gives the two parents back (they
+                        //  cost 100 and 100 for each level they gained, each)
+    DAYCARE_END,        //  the trip is over: the party has the team and the two parents
 };
 
 struct StoryStep{
@@ -501,7 +520,7 @@ inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment&
     //  A Pokemon is out of its box (LEVEL_OUT came before this step): the
     //  segment cannot be given up from here, the Pokemon would stay in the party.
     for (size_t k = 2; k < index; k++){
-        if (script.step(segment, k).type == StepType::LEVEL_OUT){
+        if (script.step(segment, k).type == StepType::LEVEL_OUT || script.step(segment, k).type == StepType::DAYCARE_OUT){
             return OnceLeave::NO;
         }
     }

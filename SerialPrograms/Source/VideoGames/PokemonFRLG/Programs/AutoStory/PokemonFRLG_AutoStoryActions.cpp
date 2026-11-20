@@ -80,6 +80,14 @@ std::string lower(const std::string& text){
     return ret;
 }
 
+std::string upper_name(const std::string& text){
+    std::string ret;
+    for (char c : text){
+        ret += (char)std::toupper((unsigned char)c);
+    }
+    return ret;
+}
+
 void press(ProControllerContext& context, Button button, Milliseconds after = 840ms){
     pbf_press_button(context, button, 160ms, after);
 }
@@ -4534,6 +4542,385 @@ int story_rematch(StoryRuntime& rt, const StoryScript& script, const StoryStep& 
     return wins;
 }
 
+
+//  ---- The Day Care (build 48, experimental) ---------------------------------
+
+namespace{
+
+//  A press of A every 2.7 seconds (the text of the box is read in between)
+//  until a YES/NO box is on the screen: true. (PA's own egg pickup of the Egg
+//  RNG does the same: egg_pickup().)
+bool daycare_prompt(StoryRuntime& rt, int presses){
+    SelectionDialogWatcher prompt(COLOR_RED);
+    rt.context.wait_for_all_requests();
+    const int ret = run_until<ProControllerContext>(
+        rt.console, rt.context,
+        [&](ProControllerContext& context){
+            for (int i = 0; i < presses; i++){
+                pbf_wait(context, 2700ms);
+                pbf_press_button(context, BUTTON_A, 160ms, 140ms);
+            }
+            pbf_wait(context, 2700ms);
+        },
+        { prompt }
+    );
+    return ret >= 0;
+}
+
+//  The box is answered: B (NO, and what closes a text) until the text box
+//  is gone.
+void daycare_close(StoryRuntime& rt, const std::string& what, Milliseconds longest = 10000ms){
+    WhiteDialogOverWatcher over(COLOR_RED);
+    rt.context.wait_for_all_requests();
+    const int ret = run_until<ProControllerContext>(
+        rt.console, rt.context,
+        [&](ProControllerContext& context){
+            pbf_mash_button(context, BUTTON_B, longest);
+        },
+        { over }
+    );
+    rt.context.wait_for_all_requests();
+    if (ret < 0){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "The Day Care: the text box did not go away after B for " + std::to_string(longest.count() / 1000) +
+            " seconds: " + what,
+            rt.console
+        );
+    }
+    rt.facing = DPAD_NONE;
+}
+
+//  The party's slot in the Day Care's menu ("Which POKeMON should we
+//  raise?"): the cursor starts on the first place; DOWN to "slot", A, STORE.
+void daycare_pick(StoryRuntime& rt, const std::string& what, int slot, int party_size){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    PartyMenuWatcher party(COLOR_RED);
+    context.wait_for_all_requests();
+    const int ret = run_until<ProControllerContext>(
+        console, context,
+        [&](ProControllerContext& ctx){
+            //  A closes "Which POKeMON should we raise?"; the menu follows
+            //  after a fade. (A on the menu itself would open a place: the
+            //  watcher stops this at the first look at it.)
+            for (int i = 0; i < 4; i++){
+                pbf_wait(ctx, 2200ms);
+                pbf_press_button(ctx, BUTTON_A, 160ms, 140ms);
+            }
+            pbf_wait(ctx, 2200ms);
+        },
+        { party }
+    );
+    if (ret < 0){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_give(): The party menu did not come up after the woman's question: " + what,
+            console
+        );
+    }
+    pbf_wait(context, 800ms);
+    context.wait_for_all_requests();
+    const int count = (int)detect_last_occupied_party_slot(console) + 1;
+    if (count != party_size){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_give(): The party menu shows " + std::to_string(count) + " Pokemon, not " +
+            std::to_string(party_size) + ": " + what,
+            console
+        );
+    }
+    for (int i = 1; i < slot; i++){
+        dpad(context, DPAD_DOWN, 300ms);
+    }
+    press(context, BUTTON_A, 900ms);        //  The places: STORE, SUMMARY, CANCEL.
+    press(context, BUTTON_A, 1500ms);       //  STORE.
+    context.wait_for_all_requests();
+}
+
+}
+
+
+void story_daycare_walk(
+    StoryRuntime& rt, DpadPosition direction, int length, int steps, const std::string& what
+){
+    ConsoleHandle& console = rt.console;
+    if (length < 3 || direction == DPAD_NONE){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_walk(): The step has no line to walk along: " + what,
+            console
+        );
+    }
+    //  As story_pace(): along the line between two walls, B held, each way a
+    //  little longer than the line, so it ends bumping into the wall. A bump
+    //  is no step: a leg is length - 1 steps. An even number of legs: the
+    //  walk ends where it started.
+    const DpadPosition back = opposite(direction);
+    const int64_t per_leg = length - 1;
+    const Milliseconds leg = Milliseconds((int64_t)((8 + 8 * (length - 1) + 12) * 1000 / 60));
+    int64_t legs = ((int64_t)steps + per_leg - 1) / per_leg;
+    legs += legs % 2;
+    console.log(
+        what + ": " + std::to_string(legs * per_leg) + " steps along " + std::to_string(length) +
+        " tiles (the parents at the Day Care make an egg at every 256 of them; experimental).",
+        COLOR_BLUE
+    );
+    AutoStoryScroll::Screen reference;
+    const bool check = story_take_picture(rt, reference);
+    int hits = 0;
+    for (;;){
+        WhiteDialogWatcher dialog(COLOR_RED);
+        BlackScreenWatcher black(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            console, rt.context,
+            [&](ProControllerContext& context){
+                for (int64_t i = 0; i < legs; i++){
+                    pbf_controller_state(context, BUTTON_B, i % 2 == 0 ? direction : back, {0, 0}, {0, 0}, leg);
+                    pbf_wait(context, 50ms);
+                }
+                context.wait_for_all_requests();
+            },
+            { dialog, black }
+        );
+        rt.facing = DPAD_NONE;
+        if (ret < 0){
+            break;
+        }
+        //  Nothing on the line starts a text box or a black screen: once or
+        //  twice back to the start of the line (the wall behind it closes
+        //  nothing, B does) and again; three in a row: an error.
+        hits++;
+        if (hits >= 3){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_daycare_walk(): A text box or a black screen came up " + std::to_string(hits) +
+                " times in a row on the line: " + what,
+                console
+            );
+        }
+        console.log(
+            what + ": a text box or a black screen came up (" + std::to_string(hits) + " in a row): back to the "
+            "start of the line, and again.",
+            COLOR_ORANGE
+        );
+        pbf_mash_button(rt.context, BUTTON_B, 1500ms);
+        pbf_controller_state(rt.context, BUTTON_B, back, {0, 0}, {0, 0}, leg);
+        pbf_wait(rt.context, 500ms);
+        rt.context.wait_for_all_requests();
+    }
+    if (check){
+        AutoStoryScroll::Screen now;
+        if (story_take_picture(rt, now)){
+            const AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(reference, now, 2);
+            if (offset.clear && (offset.x != 0 || offset.y != 0)){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_daycare_walk(): The player is " + offset.summary() + " from where the walk started: " + what,
+                    console
+                );
+            }
+        }
+    }
+}
+
+void story_daycare_give(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    if (rt.dc_parents[0].empty() || rt.dc_parents[1].empty()){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_give(): The parents were not brought into the party (the step before this trip did not "
+            "run): " + label,
+            console
+        );
+    }
+    const int before = story_party_count(rt);
+    if (before != 6){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_give(): The party has " + std::to_string(before) + " Pokemon, not six (the team and the "
+            "two parents): " + label,
+            console
+        );
+    }
+    //  The parents are the party's fifth and sixth place; after the first
+    //  one is left, the other one is the fifth.
+    for (int k = 0; k < 2; k++){
+        if (k == 0){
+            //  "Would you like us to raise a POKeMON?" YES.
+            story_talk_answer(rt, true, label + ": the woman of the Day Care");
+        }else{
+            //  "We can raise one more POKeMON. Would you like us to?" comes
+            //  by itself after the first one is taken in.
+            if (!daycare_prompt(rt, 5)){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_daycare_give(): The woman did not ask for a second Pokemon: " + label,
+                    console
+                );
+            }
+            pbf_wait(rt.context, 300ms);
+            pbf_press_button(rt.context, BUTTON_A, 160ms, 840ms);
+            rt.context.wait_for_all_requests();
+        }
+        console.log(
+            label + ": " + upper_name(rt.dc_parents[k]) + " is chosen (party slot 5, " + std::to_string(6 - k) +
+            " Pokemon in the party).",
+            COLOR_BLUE
+        );
+        daycare_pick(rt, label, 5, 6 - k);
+    }
+    //  "We'll raise your X." and the end of the talk.
+    daycare_close(rt, label + ": the end of the woman's talk");
+    const int after = story_party_count(rt);
+    if (after != before - 2){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_give(): The party has " + std::to_string(after) + " Pokemon after the two were given, "
+            "not " + std::to_string(before - 2) + ": " + label,
+            console
+        );
+    }
+    //  The team is still the team (the places that were chosen were the fifth
+    //  and the sixth): each place that is left holds a member of it.
+    for (int slot = 1; slot <= after; slot++){
+        std::string name;
+        const int level = story_read_slot(rt, slot, &name);
+        if (level < 0 || name.empty()){
+            continue;
+        }
+        bool of_team = false;
+        for (const StoryTeamMember& member : rt.team){
+            of_team |= member.line.count(name) != 0;
+        }
+        if (!of_team){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_daycare_give(): Party slot " + std::to_string(slot) + " is " + upper_name(name) +
+                ", not one of the team: the wrong Pokemon was given to the Day Care: " + label,
+                console
+            );
+        }
+    }
+    rt.dc_party = after;
+    rt.dc_given = true;
+    rt.egg_party = after;       //  (StepType::HATCH looks for one more than this.)
+    console.log(
+        label + ": " + upper_name(rt.dc_parents[0]) + " and " + upper_name(rt.dc_parents[1]) + " are at the Day Care; "
+        "the party has the team (" + std::to_string(after) + ").",
+        COLOR_BLUE
+    );
+}
+
+bool story_daycare_man(StoryRuntime& rt, const std::string& label, bool reject, const StoryTalkAlt& alt){
+    ConsoleHandle& console = rt.console;
+    if (!rt.dc_given){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_man(): The parents were not given to the Day Care: " + label,
+            console
+        );
+    }
+    //  A press of A in front of the tile he stands on when an egg waits; one
+    //  step up, and again, when he is not there (he stands where he always
+    //  does: no egg was made since the map was loaded).
+    story_talk_start(rt, label, alt);
+    if (!daycare_prompt(rt, 2)){
+        //  "Your POKeMON are doing fine." and the compatibility text: no egg.
+        daycare_close(rt, label + ": the man's talk (no egg)");
+        console.log(label + ": no egg is waiting.");
+        return false;
+    }
+    if (reject){
+        //  "Do you want the egg?" NO, "I will keep it, do you want it?" NO.
+        console.log(label + ": an egg is waiting: not wanted (NO, NO).", COLOR_BLUE);
+        pbf_wait(rt.context, 300ms);
+        pbf_press_button(rt.context, BUTTON_B, 160ms, 840ms);
+        rt.context.wait_for_all_requests();
+        if (daycare_prompt(rt, 2)){
+            pbf_wait(rt.context, 300ms);
+            pbf_press_button(rt.context, BUTTON_B, 160ms, 840ms);
+            rt.context.wait_for_all_requests();
+        }
+        daycare_close(rt, label + ": the man's talk (an egg is waiting, not wanted)");
+        return true;
+    }
+    console.log(label + ": an egg is waiting: YES.", COLOR_BLUE);
+    pbf_wait(rt.context, 300ms);
+    pbf_mash_button(rt.context, BUTTON_A, 1000ms);
+    rt.context.wait_for_all_requests();
+    daycare_close(rt, label + ": the man's talk (the egg)");
+    const int count = story_party_count(rt);
+    if (count != rt.dc_party + 1){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_man(): The party has " + std::to_string(count) + " Pokemon after the egg, not " +
+            std::to_string(rt.dc_party + 1) + ": " + label,
+            console
+        );
+    }
+    rt.dc_egg = true;
+    console.log(label + ": the egg is in the party (slot " + std::to_string(count) + ").", COLOR_BLUE);
+    story_note(rt, label + ": the egg", COLOR_GREEN);
+    return true;
+}
+
+void story_daycare_take(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    if (!rt.dc_given){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_take(): The parents were not given to the Day Care: " + label,
+            console
+        );
+    }
+    //  "Good to see you!", what they have grown, "Take your POKeMON back?"
+    //  YES, the list of the two (the first), what it costs, YES; "Take the
+    //  other one back too?" YES, what it costs, YES.
+    story_talk_start(rt, label + ": the woman of the Day Care");
+    int prompts = 0;
+    for (int round = 0; round < 6; round++){
+        if (!daycare_prompt(rt, round == 0 ? 8 : 5)){
+            break;
+        }
+        prompts++;
+        console.log(label + ": question " + std::to_string(prompts) + ": YES.", COLOR_BLUE);
+        pbf_wait(rt.context, 300ms);
+        pbf_press_button(rt.context, BUTTON_A, 160ms, 1200ms);
+        rt.context.wait_for_all_requests();
+        if (prompts == 1){
+            //  The list of the two (both have grown): A on the first.
+            pbf_wait(rt.context, 800ms);
+            pbf_press_button(rt.context, BUTTON_A, 160ms, 1200ms);
+            rt.context.wait_for_all_requests();
+        }
+    }
+    const std::string last = story_read_dialog(rt);
+    daycare_close(rt, label + ": the end of the woman's talk");
+    const int count = story_party_count(rt);
+    if (count != rt.dc_party + 2){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_take(): The party has " + std::to_string(count) + " Pokemon, not " +
+            std::to_string(rt.dc_party + 2) + " (the team and the two parents) after " + std::to_string(prompts) +
+            " questions. The last text read: \"" + last + "\". Not enough money (it costs 100 and 100 for each level "
+            "they gained, each), or an egg is waiting for the man?: " + label,
+            console
+        );
+    }
+    std::string a;
+    std::string b;
+    story_read_slot(rt, count - 1, &a);
+    story_read_slot(rt, count, &b);
+    console.log(
+        label + ": " + upper_name(a) + " and " + upper_name(b) + " are the party's fifth and sixth Pokemon again.",
+        COLOR_BLUE
+    );
+    rt.dc_parents[0] = a;
+    rt.dc_parents[1] = b;
+    rt.dc_given = false;
+}
 
 
 }

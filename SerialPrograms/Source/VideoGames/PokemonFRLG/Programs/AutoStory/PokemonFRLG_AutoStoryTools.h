@@ -299,6 +299,16 @@ struct StoryRuntime{
     int egg_party = 0;
     //  What hatched (StepType::HATCH), for EGG_BACK.
     std::string egg_hatched;
+    //  The Day Care (build 48, experimental; StepType::DAYCARE_OUT to
+    //  DAYCARE_END, never across a save): the species that is bred, the two
+    //  parents (the party's fifth and sixth place), the size of the party with
+    //  the parents at the Day Care (the team), whether they were given to the
+    //  woman, and whether the egg was taken.
+    std::string dc_baby;
+    std::string dc_parents[2];
+    int dc_party = 0;
+    bool dc_given = false;
+    bool dc_egg = false;
     //  Evolution stones (build 35), by their names in the POKeDEX table
     //  ("Moon Stone"): seen in the bag in this run (at least one), and not
     //  to be had (not in the bag and not sold, or not there after buying).

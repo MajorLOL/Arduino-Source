@@ -211,6 +211,27 @@ std::string story_hatch(
     const std::string& what
 );
 
+//  The Four Island Day Care (build 48, experimental; StepType::DAYCARE_OUT to
+//  DAYCARE_END, a trip that has no save in it).
+//  story_daycare_walk(): "steps" steps along a line of "length" tiles between
+//  two walls (as story_pace()), an even number of legs: it ends where it
+//  started. story_daycare_give(): in front of the woman across the counter,
+//  with the parents in the party's fifth and sixth place: both are given to
+//  her (A, YES, the party menu, STORE; "one more?" YES, again). The party has
+//  the team then (an error when it does not, or when a member of the team
+//  went in the Day Care). story_daycare_man(): in front of the man outside
+//  (in "alt" the other tile he may stand on): the egg when he has one (YES;
+//  true, the party has it in its last place); with "reject": an egg that is
+//  waiting is not wanted (NO, NO; true when there was one). false: no egg.
+//  story_daycare_take(): the woman gives both back (what it costs is paid,
+//  the party has the team and the two parents again).
+void story_daycare_walk(
+    StoryRuntime& rt, DpadPosition direction, int length, int steps, const std::string& what
+);
+void story_daycare_give(StoryRuntime& rt, const std::string& label);
+bool story_daycare_man(StoryRuntime& rt, const std::string& label, bool reject, const StoryTalkAlt& alt);
+void story_daycare_take(StoryRuntime& rt, const std::string& label);
+
 //  The Vermilion Gym trash cans. Starts and ends at the hub tile.
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
 
@@ -354,6 +375,17 @@ void story_box_in(StoryRuntime& rt, const std::string& label);
 //  may have a save between them.
 void story_egg_room(StoryRuntime& rt, const std::string& label);
 void story_egg_back(StoryRuntime& rt, const std::string& label);
+
+//  The Day Care (build 48, experimental). In front of a PC, facing it.
+//  story_daycare_out(): a DITTO and a Pokemon of the family of "baby" (the
+//  ones that give its egg with a DITTO) come into the party's fifth and sixth
+//  place, from the boxes (the ones that were there go into their cells;
+//  a parent that is there already stays). False (nothing changed): the party
+//  does not have six Pokemon, or the boxes lack a parent. story_daycare_store():
+//  what hatched (the party's last place, the team and the baby) goes into an
+//  empty cell of the boxes.
+bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::string& baby);
+void story_daycare_store(StoryRuntime& rt, const std::string& label);
 //  Facing someone who trades in the game ("Do you have a SPEAROW? Want to
 //  trade it for my FARFETCH'D?"): YES, the party's sixth one, the trade's
 //  scene, and a look at what the sixth is now: it must be "get" (one more

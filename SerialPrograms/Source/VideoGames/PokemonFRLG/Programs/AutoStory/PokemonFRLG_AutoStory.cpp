@@ -1697,6 +1697,16 @@ void AutoStory::run_segment(
         case StepType::HATCH:{
             //  Walk until the egg hatches (build 47, experimental), and
             //  the POKeDEX table has what came out of it.
+            if (rt.dc_given && !rt.dc_egg){
+                //  (The Day Care, build 48: the rounds of the wait are over.)
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    label + ": the man of the Day Care gave no egg in all the rounds of the wait (the two do not "
+                    "make one: they must not be of the same kind, and not of the Undiscovered egg group; or the "
+                    "man was not talked to where he stands).",
+                    rt.console
+                );
+            }
             const std::string hatched = story_hatch(rt, step.dir, step.p1, step.p0, step.text, label);
             rt.egg_hatched = hatched;
             rt.caught.insert(hatched);
@@ -1716,6 +1726,69 @@ void AutoStory::run_segment(
         }
         case StepType::EGG_BACK:
             story_egg_back(rt, label);
+            break;
+        case StepType::DAYCARE_OUT:{
+            //  The Four Island Day Care (build 48, experimental): a DITTO and
+            //  a parent out of the boxes; without them, the whole trip is
+            //  left out (the player stays at this PC).
+            const size_t skip = (size_t)std::max(0, (int)step.p0);
+            const std::string baby = step.text != nullptr ? std::string(step.text) : std::string();
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                env.log(
+                    label + ": the PC's boxes were not read yet (no list of them from this run or an earlier one): "
+                    "no parents for " + baby + ". The next " + std::to_string(skip) + " steps are skipped.",
+                    COLOR_ORANGE
+                );
+                i += skip;
+            }else if (!story_daycare_out(rt, label, baby)){
+                env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
+                i += skip;
+            }else{
+                write_boxes_file(env, rt, label, false);
+            }
+            break;
+        }
+        case StepType::DAYCARE_GIVE:
+            story_daycare_give(rt, label);
+            break;
+        case StepType::DAYCARE_WALK:
+            story_daycare_walk(rt, step.dir, step.p1, step.p0, label);
+            break;
+        case StepType::DAYCARE_MAN:{
+            const bool took = story_daycare_man(rt, label, step.p0 == 1, talk_alt(step));
+            if (took && step.p0 == 0){
+                //  The egg is in the party: the rounds that are left are skipped.
+                env.log(
+                    label + ": the next " + std::to_string(step.p1) + " steps (the rounds that are left) are skipped.",
+                    COLOR_BLUE
+                );
+                i += (size_t)std::max(0, (int)step.p1);
+            }
+            break;
+        }
+        case StepType::DAYCARE_STORE:
+            story_daycare_store(rt, label);
+            if (rt.boxes_known){
+                write_boxes_file(env, rt, label, false);
+            }
+            break;
+        case StepType::DAYCARE_TAKE:
+            story_daycare_take(rt, label);
+            break;
+        case StepType::DAYCARE_END:
+            env.log(
+                label + ": " + rt.dc_baby + " hatched and lies in a box; the party has the team and " +
+                rt.dc_parents[0] + " and " + rt.dc_parents[1] + " (the parents).",
+                COLOR_BLUE
+            );
+            //  The parents are the party's fifth and sixth Pokemon now, not
+            //  of the team.
+            rt.party_extras = 2;
+            rt.dc_given = false;
+            rt.dc_egg = false;
+            if (rt.boxes_known){
+                write_boxes_file(env, rt, label, false);
+            }
             break;
         case StepType::SKIP_IF_NO_LEVELS:{
             //  Evolving by level (experimental): the species the POKeDEX
@@ -3517,6 +3590,12 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.egg_extra.clear();
             rt.egg_party = 0;
             rt.egg_hatched.clear();
+            rt.dc_baby.clear();
+            rt.dc_parents[0].clear();
+            rt.dc_parents[1].clear();
+            rt.dc_party = 0;
+            rt.dc_given = false;
+            rt.dc_egg = false;
             if (rt.friend_known){
                 //  What was walked since the save is lost with it.
                 rt.friend_records = rt.friend_at_save;

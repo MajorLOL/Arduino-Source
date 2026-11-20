@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 58 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 67 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2984,7 +2984,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 50 && exp_leave_no &&
+        once == 59 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -2996,11 +2996,15 @@ int check_leave_out(Logger& logger){
             "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17, "
             "C20_52_LEVEL_18, C20_53_LEVEL_19, C20_54_FRIEND_01, C20_55_FRIEND_02, C20_56_FRIEND_03, "
             "C20_57_FRIEND_04, C20_58_FRIEND_05, C20_59_FRIEND_06, C20_60_FRIEND_07, C20_61_FRIEND_08, "
-            "C20_62_TOGEPI_EGG, C20_63_FRIEND_09, C20_64_FRIEND_10, C20_65_FRIEND_11",
+            "C20_62_TOGEPI_EGG, C20_63_FRIEND_09, C20_64_FRIEND_10, C20_65_FRIEND_11, "
+            "C20_66_DAYCARE_01_PICHU, C20_67_DAYCARE_02_CLEFFA, C20_68_DAYCARE_03_IGGLYBUFF, "
+            "C20_69_DAYCARE_04_TOGEPI, C20_70_DAYCARE_05_SMOOCHUM, C20_71_DAYCARE_06_ELEKID, "
+            "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
         "the story itself), the five rounds of the Elite Four for experience, the nineteen that evolve by level, "
-        "the eight that evolve by friendship, the Togepi egg (build 47) and three more that evolve by friendship"
+        "the eight that evolve by friendship, the Togepi egg (build 47), three more that evolve by friendship and "
+        "the nine eggs of the Day Care (build 48, experimental)"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3037,8 +3041,10 @@ int check_leave_out(Logger& logger){
         const size_t mansion = index_of("C20_30_MOON_STONE_MANSION");
         const size_t sun_stone = index_of("C20_34_SUN_STONE_RUIN_VALLEY");
         std::set<std::string> missing = {"farfetch-d", "jynx", "mr-mime", "lickitung"};
+        //  (The Day Care wants up to three Tyrogue: a Pokemon that is not
+        //  missing is there three times.)
         auto have = [&](const std::string& slug){
-            return missing.count(slug) != 0 ? 0 : 1;
+            return missing.count(slug) != 0 ? 0 : 3;
         };
         std::vector<size_t> left_open;
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
@@ -3048,7 +3054,8 @@ int check_leave_out(Logger& logger){
             index_of("C20_53_LEVEL_19") + 1 == index_of("C20_54_FRIEND_01") &&
             index_of("C20_61_FRIEND_08") + 1 == index_of("C20_62_TOGEPI_EGG") &&
             index_of("C20_62_TOGEPI_EGG") + 1 == index_of("C20_63_FRIEND_09") &&
-            index_of("C20_65_FRIEND_11") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_65_FRIEND_11") + 1 == index_of("C20_66_DAYCARE_01_PICHU") &&
+            index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3076,6 +3083,93 @@ int check_leave_out(Logger& logger){
                     hatch.p0 > 2805 && hatch.p1 >= 3 && std::string(hatch.text) == "togepi" && hatch.dir != DPAD_NONE;
             }
             check(egg_ok, "the Togepi egg: room in the party, the walk to the hatching, the hatched one into the box, no save between");
+        }
+        //  The Day Care (build 48, experimental): the parents out of the
+        //  boxes, to the woman, up to 24 rounds of walking and asking the man
+        //  for the egg, the walk until it hatches, the baby into a box, the
+        //  parents back, and no save in between (a reset undoes all of it).
+        {
+            struct DayCare{
+                const char* id;
+                const char* slug;
+                int copies;
+            };
+            static const DayCare day_cares[] = {
+                {"C20_66_DAYCARE_01_PICHU", "pichu", 1},
+                {"C20_67_DAYCARE_02_CLEFFA", "cleffa", 1},
+                {"C20_68_DAYCARE_03_IGGLYBUFF", "igglybuff", 1},
+                {"C20_69_DAYCARE_04_TOGEPI", "togepi", 2},
+                {"C20_70_DAYCARE_05_SMOOCHUM", "smoochum", 1},
+                {"C20_71_DAYCARE_06_ELEKID", "elekid", 1},
+                {"C20_72_DAYCARE_07_TYROGUE", "tyrogue", 1},
+                {"C20_73_DAYCARE_08_TYROGUE", "tyrogue", 2},
+                {"C20_74_DAYCARE_09_TYROGUE", "tyrogue", 3},
+            };
+            size_t day_cares_ok = 0;
+            for (const DayCare& day_care : day_cares){
+                const size_t at = index_of(day_care.id);
+                if (at >= story_end || !story_once_segment(script, script.segments[at])){
+                    continue;
+                }
+                const StorySegment& segment = script.segments[at];
+                const StoryStep& first = script.step(segment, 0);
+                size_t out_at = 0, give_at = 0, first_walk = 0, hatch_at = 0, store_at = 0, take_at = 0, end_at = 0;
+                size_t outs = 0, gives = 0, walks = 0, men = 0, hatches = 0, stores = 0, takes = 0, ends = 0;
+                size_t saves_between = 0;
+                bool walks_fit = true;
+                bool texts_fit = true;
+                for (size_t i = 0; i < segment.step_count; i++){
+                    const StoryStep& step = script.step(segment, i);
+                    switch (step.type){
+                    case StepType::DAYCARE_OUT:
+                        outs++, out_at = i;
+                        texts_fit &= std::string(step.text) == day_care.slug;
+                        break;
+                    case StepType::DAYCARE_GIVE:
+                        gives++, give_at = i;
+                        break;
+                    case StepType::DAYCARE_WALK:
+                        first_walk = walks == 0 ? i : first_walk;
+                        walks++;
+                        walks_fit &= step.p0 == 270 && step.p1 == 9;
+                        break;
+                    case StepType::DAYCARE_MAN:
+                        men++;
+                        break;
+                    case StepType::HATCH:
+                        hatches++, hatch_at = i;
+                        texts_fit &= std::string(step.text) == day_care.slug;
+                        break;
+                    case StepType::DAYCARE_STORE:
+                        stores++, store_at = i;
+                        break;
+                    case StepType::DAYCARE_TAKE:
+                        takes++, take_at = i;
+                        break;
+                    case StepType::DAYCARE_END:
+                        ends++, end_at = i;
+                        break;
+                    case StepType::SAVE:
+                        saves_between += i + 1 < segment.step_count ? 1 : 0;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                const bool fine =
+                    first.type == StepType::SKIP_IF_OWNED && std::string(first.text) == day_care.slug &&
+                    first.p1 == day_care.copies &&
+                    outs == 1 && gives == 1 && walks == 24 && men == 25 && hatches == 1 && stores == 1 &&
+                    takes == 1 && ends == 1 && walks_fit && texts_fit && saves_between == 0 &&
+                    out_at > 1 && give_at > out_at && first_walk > give_at && hatch_at > first_walk &&
+                    store_at > hatch_at && take_at > store_at && end_at > take_at &&
+                    script.step(segment, segment.step_count - 1).type == StepType::SAVE;
+                day_cares_ok += fine ? 1 : 0;
+            }
+            check(
+                day_cares_ok == std::size(day_cares),
+                "the nine eggs of the Day Care: the parents out, to the woman, 24 rounds at most, the hatching, the baby into a box, the parents back, no save between"
+            );
         }
         left_open.clear();
         const size_t from_mime = story_once_open_before(script, mime, have, &left_open);

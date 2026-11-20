@@ -1627,6 +1627,96 @@ class Builder:
                 raise StoryError("stones: not after the walk to the PC (%s)" % step.get("label", "?"))
             out.append({"type": "STONES", "label": step.get("label", "Stones")})
             return
+        if "daycare_trip" in step:
+            #  (Build 48, experimental.) The Four Island Day Care, one egg per
+            #  trip. In front of the PC of a Pokemon Center, facing it:
+            #  DAYCARE_OUT brings a DITTO and a Pokemon of the baby's family
+            #  out of the boxes into the party's fifth and sixth place (the
+            #  ones that were there lie in their cells); the steps are the
+            #  trip to Four Island and the Day Care, the walk and the egg,
+            #  and they end in front of the same PC again (the program skips
+            #  all of them when it has no parents for the baby).
+            b = step["daycare_trip"]
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("daycare_trip: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("daycare_trip: not after the walk to the PC (%s)" % step.get("label", "?"))
+            start = (self.pos[0], self.pos[1], self.pos[2], self.pos[3])
+            sub = []
+            for s in b["steps"]:
+                self.run_step(s, sub)
+            if (self.pos[0], self.pos[1], self.pos[2], self.pos[3]) != start:
+                raise StoryError("daycare_trip: the steps do not end in front of the PC they start at (%s: %s, not %s)"
+                                 % (step.get("label", "?"), self.pos, start))
+            if not sub or sub[-1]["type"] != "WALK" or any(s["type"] in ("SAVE", "HEAL", "FLY") for s in sub):
+                raise StoryError("daycare_trip: walks and the Day Care's steps only, the last one a walk to the PC; "
+                                 "no save, nurse or FLY (%s)" % step.get("label", "?"))
+            for kind, count in (("DAYCARE_GIVE", 1), ("DAYCARE_STORE", 1), ("DAYCARE_TAKE", 1), ("HATCH", 1)):
+                if sum(1 for s in sub if s["type"] == kind) != count:
+                    raise StoryError("daycare_trip: %d %s step(s) (%s)" % (count, kind, step.get("label", "?")))
+            out.append({"type": "DAYCARE_OUT", "label": step.get("label", "Parents out of the boxes"),
+                        "text": b["baby"], "p0": len(sub) + 1})
+            out.extend(sub)
+            out.append({"type": "DAYCARE_END", "label": b.get("end_label", "The parents are back")})
+            return
+        if "daycare_wait" in step:
+            #  The rounds that wait for the egg (each one: to the line, along
+            #  it for a few hundred steps, to the man, DAYCARE_MAN). The man
+            #  gives the egg in one of them: the rest are skipped (p1 of
+            #  DAYCARE_MAN = the steps that are left in this block).
+            sub = []
+            for s in step["daycare_wait"]["steps"]:
+                self.run_step(s, sub)
+            men = [i for i, s in enumerate(sub) if s["type"] == "DAYCARE_MAN"]
+            if not men or sub[-1]["type"] != "DAYCARE_MAN" or \
+                    any(s["type"] == "DAYCARE_MAN" and s.get("p0") != 0 for s in sub):
+                raise StoryError("daycare_wait: rounds that end with the man who gives the egg (%s)"
+                                 % step.get("label", "?"))
+            for i in men:
+                sub[i]["p1"] = len(sub) - i - 1
+            out.extend(sub)
+            return
+        if "daycare_man" in step:
+            #  In front of the Day Care man outside, who gives the egg: the
+            #  player stands below the tile he has the egg at (16, 14) and
+            #  faces it. His usual tile is one more up: without a text box
+            #  the program takes one step up (and back before the next walk).
+            #  mode "reject": an egg that is waiting is not wanted.
+            b = step["daycare_man"]
+            label = step.get("label", "The Day Care man")
+            self.run_step({"talk": {"map": b["map"], "xy": b["xy"], "mode": "plain", "counter": False,
+                                    "dirs": ["up"]}, "label": label}, out)
+            if self.pos[3] != "up":
+                raise StoryError("daycare_man: the player does not face up at %s (%s)" % (self.pos, label))
+            ts = {"type": "DAYCARE_MAN", "label": label, "p0": 1 if b.get("mode") == "reject" else 0,
+                  "p2": 1, "p3": 1, "dir": "up"}
+            out.append(ts)
+            return
+        if "daycare_give" in step or "daycare_take" in step:
+            #  In front of the Day Care's woman (across the counter): the two
+            #  parents are given, or taken back.
+            kind = "DAYCARE_GIVE" if "daycare_give" in step else "DAYCARE_TAKE"
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("%s: not after the walk to the woman (%s)" % (kind.lower(), step.get("label", "?")))
+            out.append({"type": kind, "label": step.get("label", kind)})
+            return
+        if "daycare_store" in step:
+            #  In front of the PC of a Pokemon Center, facing it: the Pokemon
+            #  that hatched (the party's last) goes into an empty cell.
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("daycare_store: the player does not face a PC (%s, at %s)"
+                                 % (step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("daycare_store: not after the walk to the PC (%s)" % step.get("label", "?"))
+            out.append({"type": "DAYCARE_STORE", "label": step.get("label", "The baby into a box")})
+            return
         if "egg_room" in step or "egg_back" in step:
             #  (Build 47, experimental.) In front of the PC of a Pokemon
             #  Center, facing it. EGG_ROOM: the party has six Pokemon, an egg
@@ -2146,6 +2236,16 @@ class Builder:
                                 "at": [self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]]]})
                     self.pos = (self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]])
                     return
+                if o.get("daycare"):
+                    #  DAYCARE_WALK (build 48): the same run along the line,
+                    #  for a number of steps (the Day Care's egg is made
+                    #  every 256 steps of the parents there). The player
+                    #  ends on the tile it started from.
+                    out.append({"type": "DAYCARE_WALK", "label": step.get("label", "Walk"), "dir": ends[here],
+                                "p0": o["daycare"]["steps"], "p1": n,
+                                "at": [self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]]]})
+                    self.pos = (self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]])
+                    return
                 if o.get("pace"):
                     #  PACE (build 45): the same run along the line, for a
                     #  number of steps the program counts (friendship), not
@@ -2158,7 +2258,7 @@ class Builder:
                 out.append({"type": "OSCILLATE", "label": step.get("label", "Oscillate"), "dir": ends[here],
                             "p0": o.get("max_ms", 600000), "p1": n})
                 return
-            if o.get("pace") or o.get("hatch"):
+            if o.get("pace") or o.get("hatch") or o.get("daycare"):
                 raise StoryError("pace: no straight line with a wall at both ends on %s (%s)"
                                  % (m.id, step.get("label", "Pace")))
             spots = {}

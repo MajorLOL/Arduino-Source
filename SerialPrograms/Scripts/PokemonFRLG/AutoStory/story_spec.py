@@ -3579,6 +3579,123 @@ CHAPTER20 += [togepi_egg_segment("C20_62_TOGEPI_EGG")]
 CHAPTER20 += [friend_segment("C20_%d_FRIEND_%02d" % (63 + k, FRIEND_SEGMENTS + k + 1)) for k in range(FRIEND_AFTER_EGGS)]
 
 
+# ------------------------------------------------ chapter 20, the Day Care
+#  EXPERIMENTAL (PocketPilot build 48, not run on a console when written).
+#  The POKeDEX table's other species that only come of an egg: PICHU, CLEFFA,
+#  IGGLYBUFF, SMOOCHUM, ELEKID, the second TOGEPI and TYROGUE (three copies
+#  of it are wanted). They are bred at the Day Care of Four Island with a
+#  DITTO of the boxes (caught at the Pokemon Mansion and elsewhere) and one
+#  Pokemon of the baby's family: with a DITTO, the egg comes of the other one
+#  whatever its gender (daycare.c: GetDaycareCompatibilityScore, and
+#  GetEggSpecies for the species at the root of its evolution line), once
+#  in five at each 256 steps the two spend there (their trainer is the same:
+#  20 of 100). WYNAUT (the LAX INCENSE of the Lost Cave) and MAGBY and AZURILL
+#  (LeafGreen only) are not part of this.
+#
+#  One segment, one egg. The segment's steps (StepType::DAYCARE_OUT to
+#  DAYCARE_END, in front of the Vermilion PC, so that the program can skip
+#  them all when the boxes lack a parent):
+#    DAYCARE_OUT    the DITTO and a parent come out of the boxes into the
+#                   party's fifth and sixth place
+#    the Seagallop to One Island, the Rainbow Pass ferry to Four Island
+#    DAYCARE_GIVE   the woman of the Day Care takes the two (the party is
+#                   the four of the team then, so the egg has room)
+#    rounds         along the long line outside (row 15 of Four Island, 20
+#                   tiles between two walls) for 270 steps, then the man at
+#                   the fence: StepType::DAYCARE_MAN gives the egg when
+#                   there is one (YES), and the rest of the rounds are
+#                   skipped. At most DAYCARE_ROUNDS rounds, 20 in 100 each
+#    HATCH          the same line, until the egg hatches
+#    the PC of the Pokemon Center: DAYCARE_STORE puts the baby into a box
+#                   (the party needs room for the two parents)
+#    the man again  (DAYCARE_MAN, reject): a second egg made while the first
+#                   hatched is not wanted, the woman gives no one back
+#                   while an egg is waiting
+#    DAYCARE_TAKE   the woman gives the two parents back (what the game
+#                   costs: 100 + 100 for each level they gained, each)
+#    the ferry back to Vermilion, the PC, the save.
+#  The parents are the party's fifth and sixth Pokemon from then on: the
+#  next segment finds them there.
+DAYCARE_ROUNDS = 24
+DAYCARE_ROUND_STEPS = 270
+DAYCARE_WOMAN = "MAP_FOUR_ISLAND_POKEMON_DAY_CARE"
+DAYCARE_LINE = [[x, 15] for x in range(9, 29)]
+#  The tile the man stands on when an egg is waiting (FourIsland_EventScript_
+#  TrySetDayCareManPos); the rest of the time he stands at (16, 13).
+DAYCARE_MAN_TILE = ["MAP_FOUR_ISLAND", [16, 14]]
+#  eggCycles of the babies (species_info.h): the egg hatches after
+#  (cycles + 1) * 255 steps.
+DAYCARE_BABIES = [
+    ("PICHU", "pichu", 10, 1),
+    ("CLEFFA", "cleffa", 10, 1),
+    ("IGGLYBUFF", "igglybuff", 10, 1),
+    ("TOGEPI", "togepi", 10, 2),
+    ("SMOOCHUM", "smoochum", 25, 1),
+    ("ELEKID", "elekid", 25, 1),
+    ("TYROGUE", "tyrogue", 25, 1),
+    ("TYROGUE", "tyrogue", 25, 2),
+    ("TYROGUE", "tyrogue", 25, 3),
+]
+
+
+def daycare_round(seg_id, k):
+    return [
+        {"oscillate": {"map": "MAP_FOUR_ISLAND", "tiles": DAYCARE_LINE, "max_len": 24,
+                       "daycare": {"steps": DAYCARE_ROUND_STEPS}},
+         "label": "%s_Round%d" % (seg_id, k + 1)},
+        {"daycare_man": {"map": DAYCARE_MAN_TILE[0], "xy": DAYCARE_MAN_TILE[1], "mode": "take"},
+         "label": "%s_Man%d" % (seg_id, k + 1)},
+    ]
+
+
+def daycare_segment(seg_id, name, baby, cycles, count):
+    rounds = []
+    for k in range(DAYCARE_ROUNDS):
+        rounds += daycare_round(seg_id, k)
+    trip = [
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    trip += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 3, None, "MAP_FOUR_ISLAND_HARBOR", "FerryToFourIsland")
+    trip += [
+        talk(DAYCARE_WOMAN, xy=[2, 2], mode="plain", counter=True, dirs=["up"], label="ToTheWoman"),
+        {"daycare_give": True, "label": "The parents to the Day Care"},
+        {"daycare_wait": {"steps": rounds}, "label": "Waiting for the egg"},
+        {"oscillate": {"map": "MAP_FOUR_ISLAND", "tiles": DAYCARE_LINE, "max_len": 24,
+                       "hatch": {"species": baby, "cycles": cycles}},
+         "label": seg_id + "_Hatch"},
+        talk(FOUR_PC, xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePCOfFourIsland"),
+        {"daycare_store": True, "label": "The baby into a box"},
+        {"daycare_man": {"map": DAYCARE_MAN_TILE[0], "xy": DAYCARE_MAN_TILE[1], "mode": "reject"},
+         "label": seg_id + "_NoSecondEgg"},
+        talk(DAYCARE_WOMAN, xy=[2, 2], mode="plain", counter=True, dirs=["up"], label="BackToTheWoman"),
+        {"daycare_take": True, "label": "The parents back from the Day Care"},
+        goto("MAP_FOUR_ISLAND_HARBOR", [[8, 5]], "ToTheHarbor"),
+    ]
+    trip += rainbow_ferry("MAP_FOUR_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    trip += [
+        pos("MAP_VERMILION_CITY", 23, 32),
+        talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="BackToThePC"),
+    ]
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+        talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"daycare_trip": {"baby": baby, "steps": trip}, "label": "Parents out of the boxes"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: %s bred at the Four Island Day Care (a DITTO and a parent, the egg hatched on the line outside)" % name,
+            "steps": [{"unless_owned": {"species": baby, "count": count, "steps": steps, "segment": True},
+                       "label": "%s in the table?" % name}]}
+
+
+CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), name, baby, cycles, count)
+              for k, (name, baby, cycles, count) in enumerate(DAYCARE_BABIES)]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with
