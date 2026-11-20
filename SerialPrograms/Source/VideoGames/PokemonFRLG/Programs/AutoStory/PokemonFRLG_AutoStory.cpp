@@ -1680,6 +1680,43 @@ void AutoStory::run_segment(
         case StepType::BOX_IN:
             story_box_in(rt, label);
             break;
+        case StepType::EGG_ROOM:
+            //  Room in the party for an egg (build 47, experimental). The
+            //  list of the boxes tells which cells are empty (each one is
+            //  looked at on the screen first).
+            if (rt.collection == nullptr || !boxes_list_known(env, rt, label)){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    label + ": the PC's boxes were not read yet (no list of them from this run or an earlier one): "
+                    "it is not known which cell of the boxes is empty for a Pokemon that makes room for the egg.",
+                    rt.console
+                );
+            }
+            story_egg_room(rt, label);
+            break;
+        case StepType::HATCH:{
+            //  Walk until the egg hatches (build 47, experimental), and
+            //  the POKeDEX table has what came out of it.
+            const std::string hatched = story_hatch(rt, step.dir, step.p1, step.p0, step.text, label);
+            rt.egg_hatched = hatched;
+            rt.caught.insert(hatched);
+            std::string table;
+            if (rt.collection != nullptr){
+                rt.collection->add_caught(hatched, false, false);
+                const int needed = rt.collection->needed(hatched);
+                if (needed > 0){
+                    table = " The POKeDEX table: " + std::to_string(rt.collection->have(hatched)) + " of " +
+                        std::to_string(needed) + ".";
+                }
+            }
+            rt.dex_new_since_load.insert(hatched);
+            env.log("Got for the POKeDEX: " + hatched + " (hatched)." + table, COLOR_BLUE);
+            story_note(rt, "Got " + hatched, COLOR_GREEN);
+            break;
+        }
+        case StepType::EGG_BACK:
+            story_egg_back(rt, label);
+            break;
         case StepType::SKIP_IF_NO_LEVELS:{
             //  Evolving by level (experimental): the species the POKeDEX
             //  table does not have and that come by a level of one that lies
@@ -3475,6 +3512,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.out_becomes.clear();
             rt.out_goal = 0;
             rt.out_friend = false;
+            rt.egg_box = -1;
+            rt.egg_cell = -1;
+            rt.egg_extra.clear();
+            rt.egg_party = 0;
+            rt.egg_hatched.clear();
             if (rt.friend_known){
                 //  What was walked since the save is lost with it.
                 rt.friend_records = rt.friend_at_save;
@@ -3539,6 +3581,38 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             std::string("The ") + AutoStoryFishing::rod_name(rod) + " was not in the bag when a place wanted to fish "
             "with it (" + AutoStoryFishing::rod_giver(rod) + " gives it): the places fished with it were left out.",
             COLOR_RED
+        );
+    }
+    //  Why the program ends here. A run from a save at the end of the route
+    //  goes through every segment without a step (the ones it has done are
+    //  skipped) and ends: the run of 20 November 2026 stopped on the plaza
+    //  of the Indigo Plateau after the load and said only "finished
+    //  normally". Say what that means, and what is still missing.
+    if (current_segment > last){
+        const bool route_end = last + 1 >= script.segment_count;
+        std::string missing;
+        size_t missing_count = 0;
+        if (rt.collection != nullptr){
+            for (const AutoStoryDex::SpeciesInfo& info : AutoStoryDex::species()){
+                if (COLLECTION.needed(info.slug) > 0 && COLLECTION.wants(info.slug)){
+                    missing += (missing.empty() ? "" : ", ") + std::string(info.name);
+                    missing_count++;
+                }
+            }
+        }
+        env.log(
+            std::string(route_end
+                ? "The program is at the end of the route: the last segment (" +
+                    std::string(script.segments[script.segment_count - 1].id) + ") is through, and there is nothing after it to run."
+                : "The program is at the segment it was told to end after (" +
+                    std::string(script.segments[last].id) + "): it is through.") +
+            " Segments that were done in an earlier run are skipped by the save they were done from, so a start from"
+            " this save ends here again" + (route_end ? "." : " (choose a later end segment to go on).") +
+            (missing_count == 0
+                ? std::string(" The POKeDEX table has everything it wants.")
+                : " The POKeDEX table still wants " + std::to_string(missing_count) +
+                    " species: " + missing + "."),
+            COLOR_BLUE
         );
     }
     //  What is left of the POKeDEX table, and how much of that the route

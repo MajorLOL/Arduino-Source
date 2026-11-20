@@ -707,18 +707,9 @@ int swap_with_party(
     return placed.level;
 }
 
-//  Into the box view, the change, the view back on the box the PC was on
-//  (where the game looks for room for a caught Pokemon), and out.
-int box_swap(
-    StoryRuntime& rt, const std::string& label,
-    int box, int cell, const std::string& in_cell, const std::string& in_party
-){
-    StoryMemoryScope memory_scope("PC boxes");
-    enter_box_view(rt, label);
-    View view;
-    to_box_name(rt, label);
-    view.home = still_look(rt);
-    const int level = swap_with_party(rt, label, view, box, cell, in_cell, in_party);
+//  The view back on the box the PC was on (where the game looks for room
+//  for a caught Pokemon), and the box view left.
+void back_home(StoryRuntime& rt, const std::string& label, View& view){
     show_box(rt, label, view, 0);
     to_box_name(rt, label);
     std::vector<uint8_t> look = still_look(rt);
@@ -739,7 +730,167 @@ int box_swap(
         rt.console.log(label + ": the hand was not seen " + std::to_string(view.unseen) + " times.", COLOR_ORANGE);
     }
     leave_box_view(rt);
+}
+
+//  Into the box view, the change, the view back on the box the PC was on
+//  and out.
+int box_swap(
+    StoryRuntime& rt, const std::string& label,
+    int box, int cell, const std::string& in_cell, const std::string& in_party
+){
+    StoryMemoryScope memory_scope("PC boxes");
+    enter_box_view(rt, label);
+    View view;
+    to_box_name(rt, label);
+    view.home = still_look(rt);
+    const int level = swap_with_party(rt, label, view, box, cell, in_cell, in_party);
+    back_home(rt, label, view);
     return level;
+}
+
+
+//  ---- The party's last Pokemon into an empty cell (build 47) -----------------
+
+//  From the party's first place down to its sixth: five presses.
+constexpr int BOX_PARTY_LAST = 5;
+
+//  Nothing on the panel, twice, with a little time between: the cell is
+//  empty (the panel changes with a short effect).
+bool cell_empty(StoryRuntime& rt){
+    pbf_wait(rt.context, 500ms);
+    for (int look = 0; look < 2; look++){
+        if (read_panel(rt).pokemon){
+            return false;
+        }
+        pbf_wait(rt.context, 400ms);
+    }
+    return true;
+}
+
+//  The hand goes to the first of the cells that is empty on the screen (the
+//  list of the boxes may be older than the catches since), opens the party
+//  with nothing in the hand, picks up the party's last Pokemon (MOVE) and
+//  puts it down in that cell. "in_party": the species of the party's last
+//  one, read before. Returns the level it has in the cell, and the cell.
+int store_last(
+    StoryRuntime& rt, const std::string& label, View& view,
+    const std::vector<std::pair<int, int>>& candidates, const std::string& in_party, int& box_found, int& cell_found
+){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    int box = -1;
+    int cell = -1;
+    Cell target{0, 0};
+    for (const std::pair<int, int>& candidate : candidates){
+        show_box(rt, label, view, candidate.first);
+        const Cell at = hand_in_cells(rt, label);
+        target = Cell{candidate.second / BOX_COLUMNS, candidate.second % BOX_COLUMNS};
+        move_to(rt, label, at, target, true, view.unseen);
+        if (cell_empty(rt)){
+            box = candidate.first;
+            cell = candidate.second;
+            break;
+        }
+        //  Something lies there (the list is older): the list takes it.
+        const Panel there = read_panel(rt);
+        console.log(
+            label + ": " + cell_text(candidate.first, candidate.second) + " has " + panel_text(there) +
+            ", the list of the boxes had nothing there: the next cell.",
+            COLOR_ORANGE
+        );
+        rt.boxes.put(candidate.first, candidate.second, there.slug, there.level);
+    }
+    if (box < 0){
+        fail(rt, label + ": none of the cells that were tried in the boxes is empty. Nothing is saved: the game is reset.");
+    }
+    const std::string where = cell_text(box, cell);
+    console.log(label + ": " + where + " is empty. " + upper(in_party) + " (the party's last) goes there.");
+
+    //  To the party: the left half of the bottom row, DOWN (the hand on PARTY
+    //  POKeMON), A. With nothing in the hand the party opens on its first
+    //  place.
+    move_to(rt, label, target, Cell{BOX_ROWS - 1, std::min(target.column, 2)}, true, view.unseen);
+    dpad(context, DPAD_DOWN);
+    pbf_wait(context, 300ms);
+    {
+        std::optional<BoxSelection> hand = find_hand(rt, 4);
+        if (hand && hand->location == BoxSelectionLocation::Grid){
+            dpad(context, DPAD_DOWN);
+            pbf_wait(context, 300ms);
+            hand = find_hand(rt, 4);
+        }
+        if (hand && hand->location == BoxSelectionLocation::CloseBoxButton){
+            dpad(context, DPAD_LEFT);
+            pbf_wait(context, 300ms);
+            hand = find_hand(rt, 4);
+        }
+        if (!hand){
+            view.unseen++;
+            console.log(label + ": the hand is not seen below the cells: taken to be on PARTY POKeMON.", COLOR_ORANGE);
+        }else if (hand->location != BoxSelectionLocation::OpenPartyButton){
+            fail(rt, label + ": the hand did not get onto PARTY POKeMON. Nothing is saved: the game is reset.");
+        }
+    }
+    pbf_press_button(context, BUTTON_A, 160ms, 1840ms);     //  The party slides in: the hand on its first place.
+    for (int k = 0; k < BOX_PARTY_LAST; k++){
+        dpad(context, DPAD_DOWN);
+        pbf_wait(context, 150ms);
+    }
+    context.wait_for_all_requests();
+    const Panel under = read_panel(rt, in_party);
+    if (!under.pokemon || under.slug != in_party){
+        fail(
+            rt,
+            label + ": the hand in the party is on " + panel_text(under) + ", not on " + upper(in_party) +
+            " (the party's last). Nothing is saved: the game is reset."
+        );
+    }
+    pbf_press_button(context, BUTTON_A, 160ms, 840ms);      //  The menu: MOVE first.
+    pbf_press_button(context, BUTTON_A, 160ms, 1240ms);     //  MOVE: the hand holds it.
+    pbf_press_button(context, BUTTON_B, 160ms, 1840ms);     //  The party slides away: the hand on the first cell.
+    context.wait_for_all_requests();
+
+    //  A MAIL on it keeps the party in view (see swap_with_party()).
+    {
+        const std::string text = story_read_dialog(rt);
+        if (text.find("mail") != std::string::npos && (text.find("remove") != std::string::npos || text.find("please") != std::string::npos)){
+            fail(
+                rt,
+                label + ": " + upper(in_party) + " holds a MAIL (\"" + text + "\"): the PC does not close the party with it in "
+                "the hand. Nothing is saved: the game is reset."
+            );
+        }
+    }
+    Cell from{0, 0};
+    bool from_seen = false;
+    {
+        const std::optional<BoxSelection> hand = find_hand(rt, 4);
+        if (!hand || hand->location != BoxSelectionLocation::Grid || !hand->closed){
+            fail(
+                rt,
+                label + ": the hand does not hold " + upper(in_party) + " in the cells after MOVE. Nothing is "
+                "saved: the game is reset."
+            );
+        }
+        from = Cell{(int)hand->row, (int)hand->column};
+        from_seen = true;
+    }
+    move_to(rt, label, from, target, from_seen, view.unseen, true);
+    if (!press_first_entry(rt, label, view, still_look(rt), false, "putting down " + upper(in_party))){
+        fail(rt, label + ": the hand did not put down " + upper(in_party) + " (" + where + "). Nothing is saved: the game is reset.");
+    }
+    const Panel placed = read_panel(rt, in_party);
+    if (!placed.pokemon || placed.slug != in_party){
+        fail(
+            rt,
+            label + ": " + where + " has " + panel_text(placed) + " after putting down, not " + upper(in_party) +
+            ". Nothing is saved: the game is reset."
+        );
+    }
+    console.log(label + ": " + upper(in_party) + " lies in " + where + " now.", COLOR_BLUE);
+    box_found = box;
+    cell_found = cell;
+    return placed.level;
 }
 
 }
@@ -1231,6 +1382,111 @@ void story_box_in(StoryRuntime& rt, const std::string& label){
     rt.out_extra.clear();
     rt.out_give.clear();
     rt.out_now.clear();
+}
+
+
+//  ---- Room for an egg (build 47, experimental) ------------------------------
+
+void story_egg_room(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    rt.egg_box = -1;
+    rt.egg_cell = -1;
+    rt.egg_extra.clear();
+    rt.egg_party = 0;
+    rt.egg_hatched.clear();
+    const int count = story_party_count(rt);
+    if (count < 6){
+        rt.egg_party = count;
+        console.log(
+            label + ": the party has " + std::to_string(count) + " Pokemon: there is room for the egg. Nothing is "
+            "put into a box.",
+            COLOR_BLUE
+        );
+        return;
+    }
+    std::string extra;
+    const int extra_level = story_read_slot(rt, 6, &extra);
+    if (extra_level < 0 || extra.empty()){
+        fail(rt, label + ": party slot 6 was not read: it is not known what to put into a box for the egg.");
+    }
+    for (const StoryTeamMember& member : rt.team){
+        if (member.line.count(extra) != 0){
+            fail(
+                rt,
+                label + ": party slot 6 is " + upper(extra) + ", one of the team: it is not put into a box, and the "
+                "egg has no room. Take one Pokemon that is not of the team into the party and start again."
+            );
+        }
+    }
+    //  Empty cells by the list, from the last box back: what is caught fills
+    //  the first boxes.
+    std::vector<std::pair<int, int>> candidates;
+    for (int box = BOX_COUNT - 1; box >= 0 && candidates.size() < 4; box--){
+        for (int cell = BOX_ROWS * BOX_COLUMNS - 1; cell >= 0 && candidates.size() < 4; cell--){
+            if (rt.boxes.at(box, cell) == nullptr){
+                candidates.emplace_back(box, cell);
+            }
+        }
+    }
+    if (candidates.empty()){
+        fail(rt, label + ": the boxes have no empty cell (as the list has them): the egg has no room.");
+    }
+    console.log(
+        label + ": the party has six Pokemon; " + upper(extra) + " (level " + std::to_string(extra_level) +
+        ") goes into an empty cell of the boxes for the egg (experimental).",
+        COLOR_BLUE
+    );
+    int box = -1;
+    int cell = -1;
+    int level = -1;
+    {
+        StoryMemoryScope memory_scope("PC boxes");
+        enter_box_view(rt, label);
+        View view;
+        to_box_name(rt, label);
+        view.home = still_look(rt);
+        level = store_last(rt, label, view, candidates, extra, box, cell);
+        back_home(rt, label, view);
+    }
+    rt.boxes.put(box, cell, extra, level > 0 ? level : extra_level);
+    rt.egg_box = box;
+    rt.egg_cell = cell;
+    rt.egg_extra = extra;
+    rt.egg_party = 5;
+}
+
+void story_egg_back(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    if (rt.egg_box < 0 || rt.egg_extra.empty()){
+        console.log(
+            label + ": nothing was put into a box for the egg: what hatched stays in the party.",
+            COLOR_BLUE
+        );
+        return;
+    }
+    std::string now;
+    const int now_level = story_read_slot(rt, 6, &now);
+    if (now_level < 0 || now.empty()){
+        fail(rt, label + ": party slot 6 was not read: it is not known what goes into the box.");
+    }
+    if (!rt.egg_hatched.empty() && now != rt.egg_hatched){
+        console.log(
+            label + ": party slot 6 is " + upper(now) + ", not " + upper(rt.egg_hatched) + " as the hatching showed.",
+            COLOR_ORANGE
+        );
+    }
+    const int level = box_swap(rt, label, rt.egg_box, rt.egg_cell, rt.egg_extra, now);
+    rt.boxes.put(rt.egg_box, rt.egg_cell, now, level);
+    console.log(
+        label + ": " + upper(now) + " lies in " + cell_text(rt.egg_box, rt.egg_cell) + "; " + upper(rt.egg_extra) +
+        " is back in the party.",
+        COLOR_BLUE
+    );
+    rt.egg_box = -1;
+    rt.egg_cell = -1;
+    rt.egg_extra.clear();
+    rt.egg_party = 0;
+    rt.egg_hatched.clear();
 }
 
 

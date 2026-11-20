@@ -288,6 +288,17 @@ struct StoryRuntime{
     std::string out_watch;
     bool out_made_before = false;
     int out_made_level = -1;
+    //  An egg (build 47, experimental; StepType::EGG_ROOM to EGG_BACK, never
+    //  across a save): the Pokemon of the party's sixth place that was put
+    //  into an empty cell of the boxes to make room, the cell, and how many
+    //  Pokemon the party had then (0: nothing was put away, the party's size
+    //  is not known).
+    int egg_box = -1;
+    int egg_cell = -1;
+    std::string egg_extra;
+    int egg_party = 0;
+    //  What hatched (StepType::HATCH), for EGG_BACK.
+    std::string egg_hatched;
     //  Evolution stones (build 35), by their names in the POKeDEX table
     //  ("Moon Stone"): seen in the bag in this run (at least one), and not
     //  to be had (not in the bag and not sold, or not there after buying).

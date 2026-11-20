@@ -1627,6 +1627,25 @@ class Builder:
                 raise StoryError("stones: not after the walk to the PC (%s)" % step.get("label", "?"))
             out.append({"type": "STONES", "label": step.get("label", "Stones")})
             return
+        if "egg_room" in step or "egg_back" in step:
+            #  (Build 47, experimental.) In front of the PC of a Pokemon
+            #  Center, facing it. EGG_ROOM: the party has six Pokemon, an egg
+            #  needs room: the sixth (not one of the team) goes into an empty
+            #  cell of the boxes. EGG_BACK: what the sixth place holds then
+            #  (the Pokemon that hatched) goes into that cell and the one
+            #  that was put away comes back.
+            kind = "EGG_ROOM" if "egg_room" in step else "EGG_BACK"
+            m = self.d.maps[self.pos[0]]
+            x, y, facing = self.pos[1], self.pos[2], self.pos[3]
+            if facing != "up" or not m.in_bounds(x, y - 1) or \
+                    self.d.behaviors.name(m.tile(x, y - 1)[3]) != "MB_PC":
+                raise StoryError("%s: the player does not face a PC (%s, at %s)"
+                                 % (kind.lower(), step.get("label", "?"), self.pos))
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("%s: not after the walk to the PC (%s)" % (kind.lower(), step.get("label", "?")))
+            out.append({"type": kind, "label": step.get("label", "Room for the egg" if kind == "EGG_ROOM"
+                                                          else "The hatched one into the box")})
+            return
         if "box_trip" in step:
             #  In front of the PC of a Pokemon Center, facing it: a Pokemon
             #  of a box comes into the party's sixth place, the steps do
@@ -2114,6 +2133,19 @@ class Builder:
                 n, ends = best
                 self.walk_to(set(ends.keys()), step.get("label", "Oscillate") + "_ToLine", out)
                 here = (self.pos[0], self.pos[1], self.pos[2])
+                if o.get("hatch"):
+                    #  HATCH (build 47): the same run along the line with an
+                    #  egg in the party, until it hatches: the steps it
+                    #  wants ((cycles + 1) * 255, UpdateEggSteps / ShouldEggHatch
+                    #  of the game's daycare.c) and a margin are the most
+                    #  the walk goes on. text: the species that comes of it.
+                    h = o["hatch"]
+                    out.append({"type": "HATCH", "label": step.get("label", "Hatch"), "dir": ends[here],
+                                "p0": (h["cycles"] + 1) * 255 + h.get("margin", 800), "p1": n,
+                                "text": h["species"],
+                                "at": [self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]]]})
+                    self.pos = (self.pos[0], self.pos[1], self.pos[2], OPPOSITE[ends[here]])
+                    return
                 if o.get("pace"):
                     #  PACE (build 45): the same run along the line, for a
                     #  number of steps the program counts (friendship), not
@@ -2126,7 +2158,7 @@ class Builder:
                 out.append({"type": "OSCILLATE", "label": step.get("label", "Oscillate"), "dir": ends[here],
                             "p0": o.get("max_ms", 600000), "p1": n})
                 return
-            if o.get("pace"):
+            if o.get("pace") or o.get("hatch"):
                 raise StoryError("pace: no straight line with a wall at both ends on %s (%s)"
                                  % (m.id, step.get("label", "Pace")))
             spots = {}

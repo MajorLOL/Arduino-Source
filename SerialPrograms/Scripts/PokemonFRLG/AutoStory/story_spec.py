@@ -3517,6 +3517,68 @@ def friend_segment(seg_id):
 CHAPTER20 += [friend_segment("C20_%d_FRIEND_%02d" % (35 + LEVEL_SEGMENTS + k, k + 1)) for k in range(FRIEND_SEGMENTS)]
 
 
+# ------------------------------------------------ chapter 20, eggs
+#  EXPERIMENTAL (PocketPilot build 47, not run on a console when written).
+#  The POKeDEX table has species that only come of an egg. The first one is
+#  the gift of Five Island: the Gentleman in the Water Labyrinth (the channel
+#  between Five Island and Resort Gorgeous, on a patch of land at (14, 11))
+#  gives a TOGEPI egg to a player whose lead Pokemon has the highest
+#  friendship (FiveIsland_WaterLabyrinth_EventScript_EggGentleman:
+#  GetLeadMonFriendship == 6, which is 255: the starter has walked a lot by
+#  now, every Pokemon of the party gets a point per 128 steps of the
+#  friendship stage's walks with a chance of one in two) and a party with
+#  room (GetPartySize < 6: giveegg). The party has six Pokemon, the sixth not
+#  of the team, so that one goes into an empty cell of the boxes first
+#  (StepType::EGG_ROOM) at the Vermilion Pokemon Center, a ferry to Five
+#  Island (as the fishing trip does), a swim to the Gentleman, the ferry
+#  back, FLY to the Indigo Plateau and the walk along the plaza's line until
+#  the egg hatches ((10 + 1) * 255 steps, 2805: the TOGEPI of level 5), and
+#  at the PC there the hatched one goes into the cell and the Pokemon that
+#  was put away comes back (StepType::EGG_BACK). The game is saved only at
+#  the end: a failure is a reset to the save before the segment. The TOGEPI
+#  lies in a box then: the friendship segments after this one evolve it
+#  (TOGETIC), a hatched one starts with a friendship of 120.
+TOGEPI_CYCLES = 10
+EGG_GENTLEMAN = ["MAP_FIVE_ISLAND_WATER_LABYRINTH", [14, 11]]
+FRIEND_AFTER_EGGS = 3
+
+
+def togepi_egg_segment(seg_id):
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+        talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
+        {"egg_room": True, "label": "Room for the egg"},
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": "SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland")
+    steps += [
+        talk(EGG_GENTLEMAN[0], xy=EGG_GENTLEMAN[1], mode="talk", label="EggGentleman"),
+    ]
+    steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
+    steps += [
+        pos("MAP_VERMILION_CITY", 23, 32),
+        fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_FlyToTheHatch", force=True),
+        {"oscillate": {"map": "MAP_INDIGO_PLATEAU_EXTERIOR", "tiles": PACE_TILES,
+                       "hatch": {"species": "togepi", "cycles": TOGEPI_CYCLES}},
+         "label": seg_id + "_Hatch"},
+        talk(PC["INDIGO"], xy=INDIGO_PC_TILE, mode="plain", dirs=["up"], label="BackToThePC"),
+        {"egg_back": True, "label": "The hatched TOGEPI into the box"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": False, "state": LEVEL_STATE,
+            "title": "POKeDEX collection: the TOGEPI egg of Five Island (hatched on the Indigo Plateau's plaza)",
+            "steps": [{"unless_owned": {"species": "togepi", "count": 1, "steps": steps, "segment": True},
+                       "label": "TOGEPI in the table?"}]}
+
+
+CHAPTER20 += [togepi_egg_segment("C20_62_TOGEPI_EGG")]
+CHAPTER20 += [friend_segment("C20_%d_FRIEND_%02d" % (63 + k, FRIEND_SEGMENTS + k + 1)) for k in range(FRIEND_AFTER_EGGS)]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

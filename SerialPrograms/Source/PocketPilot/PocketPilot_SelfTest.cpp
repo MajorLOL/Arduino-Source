@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 54 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 58 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2984,7 +2984,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 46 && exp_leave_no &&
+        once == 50 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -2995,11 +2995,12 @@ int check_leave_out(Logger& logger){
             "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
             "C20_47_LEVEL_13, C20_48_LEVEL_14, C20_49_LEVEL_15, C20_50_LEVEL_16, C20_51_LEVEL_17, "
             "C20_52_LEVEL_18, C20_53_LEVEL_19, C20_54_FRIEND_01, C20_55_FRIEND_02, C20_56_FRIEND_03, "
-            "C20_57_FRIEND_04, C20_58_FRIEND_05, C20_59_FRIEND_06, C20_60_FRIEND_07, C20_61_FRIEND_08",
+            "C20_57_FRIEND_04, C20_58_FRIEND_05, C20_59_FRIEND_06, C20_60_FRIEND_07, C20_61_FRIEND_08, "
+            "C20_62_TOGEPI_EGG, C20_63_FRIEND_09, C20_64_FRIEND_10, C20_65_FRIEND_11",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
         "the story itself), the five rounds of the Elite Four for experience, the nineteen that evolve by level, "
-        "the eight that evolve by friendship"
+        "the eight that evolve by friendship, the Togepi egg (build 47) and three more that evolve by friendship"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3045,10 +3046,37 @@ int check_leave_out(Logger& logger){
             lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_EXP_01_ELITE_FOUR") &&
             index_of("C20_EXP_05_ELITE_FOUR") + 1 == index_of("C20_35_LEVEL_01") &&
             index_of("C20_53_LEVEL_19") + 1 == index_of("C20_54_FRIEND_01") &&
-            index_of("C20_61_FRIEND_08") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_61_FRIEND_08") + 1 == index_of("C20_62_TOGEPI_EGG") &&
+            index_of("C20_62_TOGEPI_EGG") + 1 == index_of("C20_63_FRIEND_09") &&
+            index_of("C20_65_FRIEND_11") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
+        //  The egg (build 47): room in the party, the walk until it hatches,
+        //  what hatched into the box; no save in between (a reset undoes
+        //  all of it, and the party and the boxes agree with the save).
+        {
+            const size_t egg_index = index_of("C20_62_TOGEPI_EGG");
+            size_t room_at = 0;
+            size_t hatch_at = 0;
+            size_t back_at = 0;
+            size_t saves_between = 0;
+            bool egg_ok = egg_index < story_end && story_once_segment(script, script.segments[egg_index]);
+            if (egg_ok){
+                const StorySegment& egg = script.segments[egg_index];
+                for (size_t i = 0; i < egg.step_count; i++){
+                    const StoryStep& step = script.step(egg, i);
+                    room_at = step.type == StepType::EGG_ROOM ? i : room_at;
+                    hatch_at = step.type == StepType::HATCH ? i : hatch_at;
+                    back_at = step.type == StepType::EGG_BACK ? i : back_at;
+                    saves_between += step.type == StepType::SAVE && i + 1 < egg.step_count ? 1 : 0;
+                }
+                const StoryStep& hatch = script.step(egg, hatch_at);
+                egg_ok = room_at > 1 && hatch_at > room_at && back_at > hatch_at && saves_between == 0 &&
+                    hatch.p0 > 2805 && hatch.p1 >= 3 && std::string(hatch.text) == "togepi" && hatch.dir != DPAD_NONE;
+            }
+            check(egg_ok, "the Togepi egg: room in the party, the walk to the hatching, the hatched one into the box, no save between");
+        }
         left_open.clear();
         const size_t from_mime = story_once_open_before(script, mime, have, &left_open);
         check(
@@ -4158,8 +4186,8 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            friends == 8 && shape,
-            "the eight segments that evolve by friendship: FLY, the PC, the walk, the training, the PC, a save at the end only"
+            friends == 11 && shape,
+            "the eleven segments that evolve by friendship (eight before the egg, three after it): FLY, the PC, the walk, the training, the PC, a save at the end only"
         );
     }
 
@@ -4278,7 +4306,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, nineteen of levels and eight of "
+        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, nineteen of levels and eleven of "
         "friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED

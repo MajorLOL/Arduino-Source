@@ -191,6 +191,26 @@ void story_pace(
     const std::function<void()>& on_saved
 );
 
+//  How many Pokemon (eggs too) the party has: the party menu, its last
+//  occupied slot (build 47).
+int story_party_count(StoryRuntime& rt);
+
+//  StepType::HATCH (build 47, experimental): with an egg in the party's last
+//  place, back and forth along a line of "length" tiles between two walls
+//  (run along, B held, as story_pace() does) until a text box or a black
+//  screen comes up: the hatching. The scene is read through with B (the
+//  nickname is declined), what the last place holds is looked at (the
+//  summary), and the player goes back to where the line starts. Returns the
+//  species that hatched (what it reads as). An error (the game is then
+//  reset) when the party does not have the Pokemon that EGG_ROOM and the
+//  egg's handing over make it, when the walk reaches "max_steps" steps, or
+//  when the scene does not come. "species": what is expected (a different
+//  one is logged, not an error).
+std::string story_hatch(
+    StoryRuntime& rt, DpadPosition direction, int length, int max_steps, const std::string& species,
+    const std::string& what
+);
+
 //  The Vermilion Gym trash cans. Starts and ends at the hub tile.
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
 
@@ -322,6 +342,18 @@ bool story_box_out(
     StoryRuntime& rt, const std::string& label, const std::string& give, const std::string& trade_get
 );
 void story_box_in(StoryRuntime& rt, const std::string& label);
+
+//  Room for an egg (build 47, experimental). In front of a PC, facing it.
+//  story_egg_room(): with fewer than six Pokemon in the party there is room
+//  (nothing is pressed); else the sixth one, which must not be of the team,
+//  goes into an empty cell of the boxes (from the last box back: new catches
+//  fill the first ones; each cell is looked at on the screen first). An error
+//  (the game is then reset) when it cannot. story_egg_back(): what the
+//  party's sixth place holds now (the Pokemon that hatched, StepType::HATCH)
+//  goes into that cell and the one that was put away comes back. Neither
+//  may have a save between them.
+void story_egg_room(StoryRuntime& rt, const std::string& label);
+void story_egg_back(StoryRuntime& rt, const std::string& label);
 //  Facing someone who trades in the game ("Do you have a SPEAROW? Want to
 //  trade it for my FARFETCH'D?"): YES, the party's sixth one, the trade's
 //  scene, and a look at what the sixth is now: it must be "get" (one more

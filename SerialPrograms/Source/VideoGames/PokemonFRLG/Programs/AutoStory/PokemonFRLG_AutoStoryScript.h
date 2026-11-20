@@ -238,6 +238,19 @@ enum class StepType : uint8_t{
                         //  a wall at both ends, run along (B held) as OSCILLATE does, until
                         //  the steps its evolution wants are counted. A save every 40 blocks
                         //  of 128 steps, one at the end
+    EGG_ROOM,           //  (build 47, experimental) in front of a PC, facing it: the party has
+                        //  six Pokemon and an egg needs room. The sixth (it must not be one of
+                        //  the team) goes into an empty cell of the boxes (the list of them
+                        //  says which). Fewer than six: nothing. No save until EGG_BACK
+    EGG_BACK,           //  in front of a PC, facing it: what the party's sixth place holds now
+                        //  (the Pokemon that hatched) goes into the cell EGG_ROOM used, the
+                        //  Pokemon that was put away there comes back
+    HATCH,              //  (build 47) back and forth (dir) along a line of p1 tiles with a
+                        //  wall at both ends, run along (B held) as PACE does, with an egg in
+                        //  the party, until it hatches (a text box or a black screen: the
+                        //  scene is read through with B, the nickname is declined). At most p0
+                        //  steps; "text": the species that comes of it. The party must have one
+                        //  more Pokemon than EGG_ROOM left (the egg was handed over)
 };
 
 struct StoryStep{

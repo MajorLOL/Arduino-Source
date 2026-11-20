@@ -2059,6 +2059,170 @@ void story_pace(
 
 
 
+int story_party_count(StoryRuntime& rt){
+    StoryMemoryScope memory_scope("party menu");
+    open_party_menu_from_overworld(rt.console, rt.context);
+    pbf_wait(rt.context, 800ms);
+    rt.context.wait_for_all_requests();
+    const int count = (int)detect_last_occupied_party_slot(rt.console) + 1;
+    story_back_to_overworld(rt, "party menu");
+    return count;
+}
+
+
+std::string story_hatch(
+    StoryRuntime& rt, DpadPosition direction, int length, int max_steps, const std::string& species,
+    const std::string& what
+){
+    ConsoleHandle& console = rt.console;
+    if (length < 3 || direction == DPAD_NONE){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_hatch(): The step has no line to walk along: " + what,
+            console
+        );
+    }
+    //  The egg: the party has one Pokemon more than when the room was made.
+    const int count = story_party_count(rt);
+    if (rt.egg_party > 0 && count != rt.egg_party + 1){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_hatch(): The party has " + std::to_string(count) + " Pokemon, but " +
+            std::to_string(rt.egg_party + 1) + " were expected with the egg: it was not handed over (the man gives "
+            "it to a lead Pokemon with the highest friendship, once, and the party needs room): " + what,
+            console
+        );
+    }
+    if (count < 2){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_hatch(): The party has no egg (" + std::to_string(count) + " Pokemon): " + what,
+            console
+        );
+    }
+    const DpadPosition back = opposite(direction);
+    const int64_t per_leg = length - 1;
+    const Milliseconds leg = Milliseconds((int64_t)((8 + 8 * (length - 1) + 12) * 1000 / 60));
+    constexpr int64_t LEGS_PER_ROUND = 60;
+    const int64_t legs_total = ((int64_t)max_steps + per_leg - 1) / per_leg;
+    const int64_t minutes = legs_total * (leg.count() + 50) / 60000;
+    console.log(
+        what + ": the egg lies in party slot " + std::to_string(count) + ". Walking back and forth along " +
+        std::to_string(length) + " tiles until it hatches: at most " + std::to_string(max_steps) + " steps, about " +
+        std::to_string(minutes) + " minutes (experimental).",
+        COLOR_BLUE
+    );
+    story_note(rt, what + ": walking for the egg");
+
+    int64_t steps = 0;
+    int rounds = 0;
+    int false_alarms = 0;
+    AutoStoryScroll::Screen reference;
+    const bool check = story_take_picture(rt, reference);
+    while (steps < max_steps){
+        const int64_t remaining = (int64_t)max_steps - steps;
+        int64_t legs = std::min<int64_t>(LEGS_PER_ROUND, (remaining + per_leg - 1) / per_leg);
+        legs += legs % 2;
+        WhiteDialogWatcher dialog(COLOR_RED);
+        BlackScreenWatcher black(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                for (int64_t i = 0; i < legs; i++){
+                    pbf_controller_state(context, BUTTON_B, i % 2 == 0 ? direction : back, {0, 0}, {0, 0}, leg);
+                    pbf_wait(context, 50ms);
+                }
+                context.wait_for_all_requests();
+            },
+            { dialog, black }
+        );
+        rt.facing = DPAD_NONE;
+        if (ret >= 0){
+            console.log(
+                what + ": a text box or a black screen came up after about " + std::to_string(steps) +
+                " steps: the egg hatches? B reads through it.",
+                COLOR_BLUE
+            );
+            //  The scene: "Oh?", the animation, "... hatched from the EGG!"
+            //  and the nickname question (B: NO).
+            pbf_mash_button(rt.context, BUTTON_B, 14000ms);
+            rt.context.wait_for_all_requests();
+            story_back_to_overworld(rt, what + ": the scene of the hatching");
+            std::string name;
+            const int level = story_read_slot(rt, count, &name);
+            if (level > 0 && !name.empty()){
+                console.log(
+                    what + ": " + name + " hatched (level " + std::to_string(level) + ")" +
+                    (name == species ? "." : ", not " + species + " as expected."),
+                    name == species ? COLOR_BLUE : COLOR_ORANGE
+                );
+                //  Back to where the line starts: a leg towards its wall.
+                for (int k = 0; k < 2; k++){
+                    pbf_controller_state(rt.context, BUTTON_B, back, {0, 0}, {0, 0}, leg);
+                    pbf_wait(rt.context, 300ms);
+                }
+                rt.context.wait_for_all_requests();
+                rt.facing = DPAD_NONE;
+                return name;
+            }
+            false_alarms++;
+            if (false_alarms >= 3){
+                OperationFailedExceptionWithScreenshot::fire(
+                    ErrorReportMode::SEND_ERROR_REPORT,
+                    "story_hatch(): A text box or a black screen came up " + std::to_string(false_alarms) +
+                    " times, and party slot " + std::to_string(count) + " did not read as a hatched Pokemon: " + what,
+                    console
+                );
+            }
+            console.log(
+                what + ": party slot " + std::to_string(count) + " does not read as a hatched Pokemon (" +
+                std::to_string(false_alarms) + " in all): back to the start of the line, the walk goes on.",
+                COLOR_ORANGE
+            );
+            for (int k = 0; k < 2; k++){
+                pbf_controller_state(rt.context, BUTTON_B, back, {0, 0}, {0, 0}, leg);
+                pbf_wait(rt.context, 300ms);
+            }
+            rt.context.wait_for_all_requests();
+            //  (The steps up to here are not counted exactly: the round is
+            //  taken as half done.)
+            steps += legs * per_leg / 2;
+            continue;
+        }
+        steps += legs * per_leg;
+        rounds++;
+        if (check){
+            AutoStoryScroll::Screen now;
+            if (story_take_picture(rt, now)){
+                const AutoStoryScroll::TileOffset offset = AutoStoryScroll::tile_offset(reference, now, 2);
+                if (offset.clear && (offset.x != 0 || offset.y != 0)){
+                    OperationFailedExceptionWithScreenshot::fire(
+                        ErrorReportMode::SEND_ERROR_REPORT,
+                        "story_hatch(): The player is " + offset.summary() + " from where the walk started after " +
+                        std::to_string(steps) + " steps: " + what,
+                        console
+                    );
+                }
+            }
+        }
+        story_note(rt, what + ": " + std::to_string(steps) + " of at most " + std::to_string(max_steps) + " steps");
+        if (rounds % 2 == 0){
+            console.log(
+                what + ": " + std::to_string(steps) + " steps walked, the egg has not hatched yet (at most " +
+                std::to_string(max_steps) + ").",
+                COLOR_BLUE
+            );
+        }
+    }
+    OperationFailedExceptionWithScreenshot::fire(
+        ErrorReportMode::SEND_ERROR_REPORT,
+        "story_hatch(): The egg did not hatch in " + std::to_string(steps) + " steps (a Togepi egg wants 2805): " + what,
+        console
+    );
+}
+
+
 void story_trash_can_puzzle(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
     std::vector<int32_t> to_can = script.leg_list(step.legs_a);
     std::vector<int32_t> back = script.leg_list(step.legs_b);
