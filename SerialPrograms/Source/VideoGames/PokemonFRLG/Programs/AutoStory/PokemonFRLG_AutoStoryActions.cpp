@@ -4550,7 +4550,7 @@ namespace{
 //  A press of A every 2.7 seconds (the text of the box is read in between)
 //  until a YES/NO box is on the screen: true. (PA's own egg pickup of the Egg
 //  RNG does the same: egg_pickup().)
-bool daycare_prompt(StoryRuntime& rt, int presses){
+bool daycare_prompt(StoryRuntime& rt, int presses, Milliseconds last = 2700ms){
     SelectionDialogWatcher prompt(COLOR_RED);
     rt.context.wait_for_all_requests();
     const int ret = run_until<ProControllerContext>(
@@ -4560,11 +4560,63 @@ bool daycare_prompt(StoryRuntime& rt, int presses){
                 pbf_wait(context, 2700ms);
                 pbf_press_button(context, BUTTON_A, 160ms, 140ms);
             }
-            pbf_wait(context, 2700ms);
+            pbf_wait(context, last);
         },
         { prompt }
     );
     return ret >= 0;
+}
+
+//  What the text of one of the Day Care's people came to.
+enum class DaycareText{
+    PROMPT,     //  A YES/NO box is on the screen.
+    OVER,       //  The text box is gone, and did not come back: the talk is over.
+    NONE,       //  Neither, in all the presses.
+};
+
+//  Like daycare_prompt(), for a text that may also end without a question
+//  (the man: "Your POKeMON are doing fine." and the compatibility text when
+//  no egg waits, but five pages and a question when one does). The press of A
+//  stops with the box: never a B here, for B on the question of the egg is NO.
+//  A box that is gone is looked at again for "confirm" (the woman walks away
+//  and back, in the middle of her talk, with no box on the screen).
+DaycareText daycare_text(StoryRuntime& rt, int presses, Milliseconds confirm = 2000ms){
+    for (int again = 0; again < 6; again++){
+        SelectionDialogWatcher prompt(COLOR_RED);
+        WhiteDialogOverWatcher over(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                for (int i = 0; i < presses; i++){
+                    pbf_wait(context, 2700ms);
+                    pbf_press_button(context, BUTTON_A, 160ms, 140ms);
+                }
+                pbf_wait(context, 2700ms);
+            },
+            { prompt, over }
+        );
+        if (ret == 0){
+            return DaycareText::PROMPT;
+        }
+        if (ret < 0){
+            return DaycareText::NONE;
+        }
+        WhiteDialogWatcher back(COLOR_RED);
+        rt.context.wait_for_all_requests();
+        const int shown = run_until<ProControllerContext>(
+            rt.console, rt.context,
+            [&](ProControllerContext& context){
+                pbf_wait(context, confirm);
+            },
+            { back }
+        );
+        if (shown < 0){
+            return DaycareText::OVER;
+        }
+        rt.console.log("The Day Care: a text box is on the screen again; the talk goes on.", COLOR_ORANGE);
+    }
+    return DaycareText::NONE;
 }
 
 //  The box is answered: B (NO, and what closes a text) until the text box
@@ -4826,19 +4878,34 @@ bool story_daycare_man(StoryRuntime& rt, const std::string& label, bool reject, 
     //  step up, and again, when he is not there (he stands where he always
     //  does: no egg was made since the map was loaded).
     story_talk_start(rt, label, alt);
-    if (!daycare_prompt(rt, 2)){
-        //  "Your POKeMON are doing fine." and the compatibility text: no egg.
-        daycare_close(rt, label + ": the man's talk (no egg)");
+    //  With an egg: five pages ("Ah, it's you! We were raising your POKeMON,
+    //  and ... Your POKeMON had an EGG! ... You do want it?") and YES/NO. A
+    //  press of A for each page, and the same again for the pages that were
+    //  still being written (build 48 pressed twice, and the B that closed
+    //  the box then answered NO to the egg).
+    //  Without: "Your POKeMON are doing fine." and the compatibility text,
+    //  and the box is gone: no B is needed.
+    const DaycareText text = daycare_text(rt, 12);
+    if (text == DaycareText::NONE){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_daycare_man(): The man's text went on, with no question and no end, in 12 presses of A: " + label,
+            console
+        );
+    }
+    if (text == DaycareText::OVER){
         console.log(label + ": no egg is waiting.");
+        rt.facing = DPAD_NONE;
         return false;
     }
     if (reject){
         //  "Do you want the egg?" NO, "I will keep it, do you want it?" NO.
+        //  No A at all while the second question is waited for: A is YES.
         console.log(label + ": an egg is waiting: not wanted (NO, NO).", COLOR_BLUE);
         pbf_wait(rt.context, 300ms);
         pbf_press_button(rt.context, BUTTON_B, 160ms, 840ms);
         rt.context.wait_for_all_requests();
-        if (daycare_prompt(rt, 2)){
+        if (daycare_prompt(rt, 0, 7000ms)){
             pbf_wait(rt.context, 300ms);
             pbf_press_button(rt.context, BUTTON_B, 160ms, 840ms);
             rt.context.wait_for_all_requests();
@@ -4881,7 +4948,12 @@ void story_daycare_take(StoryRuntime& rt, const std::string& label){
     story_talk_start(rt, label + ": the woman of the Day Care");
     int prompts = 0;
     for (int round = 0; round < 6; round++){
-        if (!daycare_prompt(rt, round == 0 ? 8 : 5)){
+        //  The end of the talk is a box that is gone, and stays gone: she
+        //  walks away and back before she hands over each one (about five
+        //  seconds without a box), so seven are waited for. (A press of A
+        //  after the last text would start the talk again, and answer
+        //  "Would you like us to raise a POKeMON?" with YES.)
+        if (daycare_text(rt, round == 0 ? 8 : 5, 7000ms) != DaycareText::PROMPT){
             break;
         }
         prompts++;
@@ -4890,8 +4962,10 @@ void story_daycare_take(StoryRuntime& rt, const std::string& label){
         pbf_press_button(rt.context, BUTTON_A, 160ms, 1200ms);
         rt.context.wait_for_all_requests();
         if (prompts == 1){
-            //  The list of the two (both have grown): A on the first.
-            pbf_wait(rt.context, 800ms);
+            //  The list of the two (both have grown): A on the first. Once
+            //  it is drawn; one more A that comes too late is the YES of
+            //  the next question, which is wanted too.
+            pbf_wait(rt.context, 1500ms);
             pbf_press_button(rt.context, BUTTON_A, 160ms, 1200ms);
             rt.context.wait_for_all_requests();
         }
