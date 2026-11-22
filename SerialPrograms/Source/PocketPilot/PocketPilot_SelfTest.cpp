@@ -2629,7 +2629,8 @@ int check_next_steps(Logger& logger){
                 //  Fishing: for the table, a rod the story fetches, the
                 //  walk before it ending with the player facing the water.
                 fishing_places++;
-                fishing_fine &= step.p2 == 6 && (step.p4 == 1 || step.p4 == 2) && step.dir != DPAD_NONE &&
+                //  (7: in a Safari Game too, build 52.)
+                fishing_fine &= (step.p2 == 6 || step.p2 == 7) && (step.p4 == 1 || step.p4 == 2) && step.dir != DPAD_NONE &&
                     !story_place_species(step.text, 0).empty() && step.p0 > 0 && step.p1 > 0 &&
                     k > 0 && leg_faces(script.step(segment, k - 1), step.dir);
             }
@@ -2702,7 +2703,7 @@ int check_next_steps(Logger& logger){
             }
         }
     }
-    check(fishing_places == 12 && fishing_fine, "the places fished at, in the story's data");
+    check(fishing_places == 15 && fishing_fine, "the places fished at, in the story's data");
     check(lap_places == 4 && laps_fine, "the laps and their steps, in the story's data");
     check(rod_ways == 2 && rod_ways_fine, "the ways to the fishing rods");
     check(gifts == 3 && gifts_fine, "the Pokemon that are given, and their scenes");
@@ -2739,7 +2740,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 72 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 81 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2906,13 +2907,13 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        trips == 105 && trips_not_named == 0 && others_named == 0,
-        "every visit of a place of the collection is one trip (105), and nothing else is"
+        trips == 108 && trips_not_named == 0 && others_named == 0,
+        "every visit of a place of the collection is one trip (108), and nothing else is"
     );
     check(at_a_nurse == trips, "every trip starts at the nurse it ends at");
-    check(fishing_trips == 12 && lap_trips == 4, "the trips to fish (12) and to walk laps (4)");
-    check(others == 26, "the checks of a segment (16) and of an island or a group (10) are not trips");
-    check(places.size() == 56, "the places of the trips (48 with two visits or three, 8 Safari Games)");
+    check(fishing_trips == 15 && lap_trips == 4, "the trips to fish (15, three of them in a Safari Game) and to walk laps (4)");
+    check(others == 27, "the checks of a segment (17) and of an island or a group (10) are not trips");
+    check(places.size() == 57, "the places of the trips (49 with two visits or three, 8 Safari Games)");
     check(rod_ways == 2 && rod_ways_in_place == 2, "the two ways to a rod, each a segment of its own that ends with its save");
 
     //  The segments of the Pokemon that are there once: given up from any
@@ -2984,12 +2985,14 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 64 && exp_leave_no &&
+        once == 72 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
             "C20_33_MOON_STONE_MT_MOON_B2F, C20_34_SUN_STONE_RUIN_VALLEY, C20_EXP_01_ELITE_FOUR, "
             "C20_EXP_02_ELITE_FOUR, C20_EXP_03_ELITE_FOUR, C20_EXP_04_ELITE_FOUR, C20_EXP_05_ELITE_FOUR, "
+            "C20_EXP_06_ELITE_FOUR, C20_EXP_07_ELITE_FOUR, C20_EXP_08_ELITE_FOUR, C20_EXP_09_ELITE_FOUR, "
+            "C20_EXP_10_ELITE_FOUR, "
             "C20_35_LEVEL_01, C20_36_LEVEL_02, "
             "C20_37_LEVEL_03, C20_38_LEVEL_04, C20_39_LEVEL_05, C20_40_LEVEL_06, C20_41_LEVEL_07, "
             "C20_42_LEVEL_08, C20_43_LEVEL_09, C20_44_LEVEL_10, C20_45_LEVEL_11, C20_46_LEVEL_12, "
@@ -3000,13 +3003,14 @@ int check_leave_out(Logger& logger){
             "C20_66_DAYCARE_01_PICHU, C20_67_DAYCARE_02_CLEFFA, C20_68_DAYCARE_03_IGGLYBUFF, "
             "C20_69_DAYCARE_04_TOGEPI, C20_70_DAYCARE_05_SMOOCHUM, C20_71_DAYCARE_06_ELEKID, "
             "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE, "
-            "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24",
+            "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24, "
+            "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
-        "the story itself), the five rounds of the Elite Four for experience, the nineteen that evolve by level, "
-        "the eight that evolve by friendship, the Togepi egg (build 47), three more that evolve by friendship and "
-        "the nine eggs of the Day Care (build 48, experimental) and five more that evolve by level after them "
-        "(build 51, experimental)"
+        "the story itself), the ten rounds of the Elite Four for experience (five more in build 52), the nineteen "
+        "that evolve by level, the eight that evolve by friendship, the Togepi egg (build 47), three more that "
+        "evolve by friendship and the nine eggs of the Day Care (build 48, experimental) and eight more that evolve "
+        "by level after them (build 51, experimental, and three for the DRATINI of build 52)"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3052,13 +3056,13 @@ int check_leave_out(Logger& logger){
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
         check(
             lickitung + 1 == mansion && sun_stone + 1 == index_of("C20_EXP_01_ELITE_FOUR") &&
-            index_of("C20_EXP_05_ELITE_FOUR") + 1 == index_of("C20_35_LEVEL_01") &&
+            index_of("C20_EXP_10_ELITE_FOUR") + 1 == index_of("C20_35_LEVEL_01") &&
             index_of("C20_53_LEVEL_19") + 1 == index_of("C20_54_FRIEND_01") &&
             index_of("C20_61_FRIEND_08") + 1 == index_of("C20_62_TOGEPI_EGG") &&
             index_of("C20_62_TOGEPI_EGG") + 1 == index_of("C20_63_FRIEND_09") &&
             index_of("C20_65_FRIEND_11") + 1 == index_of("C20_66_DAYCARE_01_PICHU") &&
             index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_LEVEL_20") &&
-            index_of("C20_79_LEVEL_24") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_82_LEVEL_27") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3540,13 +3544,14 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            table.size() == 175 && plan.size() == 41 && none_there && all_named &&
-            by_level == 23 && by_stone == 14 && by_friendship == 3 && by_other == 1,
-            "FireRed with Charmander: the 41 species of the table that only come by evolving, and how"
+            table.size() == 175 && plan.size() == 42 && none_there && all_named &&
+            by_level == 24 && by_stone == 14 && by_friendship == 3 && by_other == 1,
+            "FireRed with Charmander: the 42 species of the table that only come by evolving, and how (build 52: "
+            "DRAGONAIR is one of them, 1 bite in 100 of the SUPER ROD)"
         );
         const std::vector<std::string> lines = Boxes::evolve_summary(plan);
         check(
-            lines.size() == 1 && lines[0].find("is not in a box (41;") != std::string::npos &&
+            lines.size() == 1 && lines[0].find("is not in a box (42;") != std::string::npos &&
             lines[0].find("Butterfree (Metapod)") != std::string::npos,
             "with empty boxes every one of them is still to come"
         );
@@ -4095,10 +4100,103 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            segments == 24 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
+            segments == 27 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
             story_levels_place() == "the evolving by level",
-            "the 24 segments that evolve by level (19 before the Day Care, five after it): FLY, the PC, the training, "
+            "the 27 segments that evolve by level (19 before the Day Care, eight after it): FLY, the PC, the training, "
             "the PC, a save at the end only"
+        );
+    }
+
+    //  DRATINI (build 52, experimental): DRAGONAIR is 1 bite in 100 of the SUPER ROD
+    //  in the Safari Zone, DRATINI 15, so the table wants DRATINI twice and has
+    //  DRAGONAIR and DRAGONITE come by evolving, as LARVITAR's line does. The
+    //  fishing is a segment of its own among the fishing ones: three Safari
+    //  Games, each the rod cast at the water of the center area, and the way
+    //  out by the gate for when the game is not over by itself.
+    {
+        auto entry_of = [&](const char* slug){
+            for (size_t k = 0; k < count; k++){
+                if (std::string(entries[k].slug) == slug){
+                    return entries[k];
+                }
+            }
+            return entries[0];
+        };
+        const AutoStoryDex::CollectionEntry dratini = entry_of("dratini");
+        const AutoStoryDex::CollectionEntry dragonair = entry_of("dragonair");
+        const AutoStoryDex::CollectionEntry dragonite = entry_of("dragonite");
+        Boxes::BoxCensus more = census;
+        Boxes::BoxPokemon first;
+        first.box = 6;
+        first.cell = 1;
+        first.slug = "dratini";
+        first.level = 18;
+        more.pokemon.push_back(first);
+        const std::vector<Boxes::LevelTarget> to_dragonair = Boxes::level_targets(Boxes::evolve_plan(table, more));
+        Boxes::BoxPokemon second;
+        second.box = 6;
+        second.cell = 2;
+        second.slug = "dragonair";
+        second.level = 31;
+        more.pokemon.push_back(second);
+        const std::vector<Boxes::LevelTarget> to_dragonite = Boxes::exp_targets(Boxes::evolve_plan(table, more));
+        bool dragonair_line = false;
+        for (const Boxes::LevelTarget& target : to_dragonair){
+            dragonair_line |= target.slug == "dragonair" && target.from_slug == "dratini" && target.level == 18 &&
+                target.evolves_at == 30 && target.goal == 30;
+        }
+        bool dragonite_line = false;
+        for (const Boxes::LevelTarget& target : to_dragonite){
+            dragonite_line |= target.slug == "dragonite" && target.from_slug == "dragonair" && target.level == 31 &&
+                target.evolves_at == 55 && target.goal == 55;
+        }
+        check(
+            dratini.copies[0] == 2 && dratini.copies[1] == 2 && dragonair.copies[0] == 0 && dragonair.copies[1] == 0 &&
+            dragonite.copies[0] == 0 && std::string(dragonair.how[0]) == "evolve from Dratini: level 30" &&
+            std::string(dratini.evolve[0]) == "Dragonair (level 30) -> Dragonite (level 55)" &&
+            dragonair_line && dragonite_line,
+            "DRATINI twice in the table, DRAGONAIR (level 30) and DRAGONITE (level 55) from the extra one: a "
+            "DRATINI of the boxes is trained to level 30, the DRAGONAIR it becomes to 55"
+        );
+
+        auto index_of = [&](const char* id){
+            for (size_t s = 0; s < script.segment_count; s++){
+                if (std::string(script.segments[s].id) == id){
+                    return s;
+                }
+            }
+            return script.segment_count;
+        };
+        const size_t fuchsia = index_of("C20_16_FISH_FUCHSIA");
+        const size_t safari = index_of("C20_16B_SAFARI_FISH");
+        const size_t five = index_of("C20_17_FIVE_ISLAND_WATER");
+        int games = 0;
+        bool shape = safari < script.segment_count;
+        if (shape){
+            const StorySegment& segment = script.segments[safari];
+            shape &= !story_once_segment(script, segment) && script.step(segment, 0).type == StepType::SKIP_IF_COLLECTED;
+            for (size_t k = 0; k + 1 < segment.step_count; k++){
+                const StoryStep& step = script.step(segment, k);
+                if (step.type != StepType::DEX){
+                    continue;
+                }
+                games++;
+                //  Safari (1), the table (2), fishing (4): the SUPER ROD (2), an hour, no limit of battles
+                //  in a row without a catch, DRATINI 15 in 100 of the casts in both games, and the way out:
+                //  legs that end on a warp. The game's own end ("The Safari Game is over") follows.
+                const std::vector<int32_t> out = script.leg_list(step.legs_b);
+                shape &= step.p2 == 7 && step.p4 == 2 && step.p1 == 60 && step.p0 >= 1000 &&
+                    std::string(step.text).find("dratini:15:15") != std::string::npos &&
+                    std::string(step.text).find("dragonair:1:1") != std::string::npos &&
+                    !out.empty() && (script.leg(out.back()).end == LegEnd::WARP_PUSH ||
+                        script.leg(out.back()).end == LegEnd::WARP_STEP) &&
+                    script.step(segment, k + 1).type == StepType::CUTSCENE;
+            }
+        }
+        check(
+            fuchsia + 1 == safari && safari + 1 == five && games == 3 && shape,
+            "the Super Rod in the Safari Zone (build 52): three games between the fishing at Fuchsia City and "
+            "Five Island, each with the rod cast, DRATINI 15 and DRAGONAIR 1 in 100, and the way out by the gate"
         );
     }
 
@@ -4482,8 +4580,8 @@ int check_boxes(Logger& logger){
                 std::string(segment.id).rfind("C20_EXP_", 0) == 0;
         }
         check(
-            rounds == 5 && shape,
-            "the five rounds of the Elite Four for experience: FLY, the PC, the nurse, the League, the Hall of Fame, "
+            rounds == 10 && shape,
+            "the ten rounds of the Elite Four for experience: FLY, the PC, the nurse, the League, the Hall of Fame, "
             "FLY back, the PC, a save at the end"
         );
     }
@@ -4496,7 +4594,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, 24 of levels and eleven of "
+        ", C20_25_STONES, four of trades, four that fetch a stone, ten rounds of the Elite Four, 27 of levels and eleven of "
         "friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED

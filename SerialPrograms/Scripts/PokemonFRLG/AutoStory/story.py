@@ -24,7 +24,9 @@ A spec step is a dict with one of these keys:
   catch      {species, map, tiles}
   dex        for the POKeDEX: {map, tiles, species, idle, minutes, collect};
              fish: a rod (0 OLD, 1 GOOD, 2 SUPER ROD) cast from the shore of
-             the map; laps + ground (water | rocks): steps that end where
+             the map (with safari: in a Safari Game, and exit: the map of
+             the gate, where the program leaves it when the visit is over);
+             laps + ground (water | rocks): steps that end where
              they start, played again and again, catching on the way
   smash      {map, xy}: ROCK SMASH on that rock (for what is under it)
   rod_wanted {rod, steps}: the way to a fishing rod, skipped when nothing
@@ -2932,10 +2934,26 @@ class Builder:
         if here not in spots or self.pos[3] != spots[here] or self.surfing or self.node()[3] != 3:
             raise StoryError("%s: the walk to the water ends at %s (%s)" % (label, self.pos, spots.get(here)))
         text = ",".join("%s:%d:%d" % (slug, share[slug][0], share[slug][1]) for slug in species)
-        out.append({"type": "DEX", "label": label, "text": text,
+        step_out = {"type": "DEX", "label": label, "text": text,
                     "p0": c.get("idle", 25), "p1": c.get("minutes", 30),
-                    "p2": 4 | (2 if c.get("collect") else 0),
-                    "p3": c.get("enough", 0), "dir": spots[here], "p4": rod})
+                    "p2": 4 | (2 if c.get("collect") else 0) | (1 if c.get("safari") else 0),
+                    "p3": c.get("enough", 0), "dir": spots[here], "p4": rod}
+        if c.get("safari"):
+            #  In a Safari Game (build 52): a cast costs no step and no ball
+            #  unless something is caught, so the game does not end by
+            #  itself. The program leaves it when the visit is over: the
+            #  way out to the gate (legs_to_nurse, as ROAM's way into a
+            #  building), where the attendant asks whether to leave early
+            #  (FuchsiaCity_SafariZone_Entrance_EventScript_ExitEarly).
+            gate = self.d.map(c["exit"])
+            start = (self.pos, self.surfing)
+            sub = []
+            self.walk_to(MapGoals([gate.id]), label + "_Leave", sub)
+            if any(s["type"] != "WALK" for s in sub) or not sub:
+                raise StoryError("%s: the way out of the Safari Zone must be plain walking" % label)
+            step_out["legs_to_nurse"] = [s["leg"] for s in sub]
+            self.pos, self.surfing = start
+        out.append(step_out)
 
     def dex_laps(self, step, out):
         """For the POKeDEX, on the way: a DEX step (p2 & 8) and after it

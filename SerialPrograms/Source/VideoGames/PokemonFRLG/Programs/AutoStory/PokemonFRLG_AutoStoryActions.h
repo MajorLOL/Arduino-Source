@@ -287,8 +287,11 @@ void story_roam(StoryRuntime& rt, const StoryScript& script, const StoryStep& st
 //  water) of a place, catching the species of the step not caught yet with
 //  the cheapest balls; the others are run from. With p2 & 4: fishing, the
 //  rod p4 cast from where the player stands until the same ends
-//  (PokemonFRLG_AutoStoryFishing.h).
-void story_dex(StoryRuntime& rt, const StoryStep& step);
+//  (PokemonFRLG_AutoStoryFishing.h). With p2 & 1 and & 4 (build 52): in a
+//  Safari Game; the visit ends as any other, and the game is left early by
+//  the walk of legs_b to the gate (a game that ends by itself is read through
+//  by the segment's next step).
+void story_dex(StoryRuntime& rt, const StoryScript& script, const StoryStep& step);
 
 //  For the POKeDEX, laps (StepType::DEX with p2 & 8): the steps after the
 //  step are a lap that ends where it starts (walks over water, rocks

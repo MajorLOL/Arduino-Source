@@ -152,7 +152,9 @@ enum class StepType : uint8_t{
                         //  or p1 minutes are over; p2 & 1: the Safari Zone (until the game ends);
                         //  p2 & 2: what the POKeDEX table still wants of text (extra ones to evolve);
                         //  p2 & 4: fishing: on land facing the water (dir), the rod p4 (0 OLD
-                        //  ROD, 1 GOOD ROD, 2 SUPER ROD) cast again and again;
+                        //  ROD, 1 GOOD ROD, 2 SUPER ROD) cast again and again; with p2 & 1 too
+                        //  (build 52): in a Safari Game, left early when the visit is over, by
+                        //  the walk of legs_b to the gate;
                         //  p2 & 8: laps: the next p4 steps (walks over water, rocks smashed)
                         //  end where they start, and are played again and again, catching
                         //  what comes on the way

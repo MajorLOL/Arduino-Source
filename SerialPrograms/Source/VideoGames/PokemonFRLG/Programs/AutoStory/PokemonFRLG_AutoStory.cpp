@@ -1261,7 +1261,7 @@ void AutoStory::run_segment(
                 }
                 break;
             }
-            story_dex(rt, step);
+            story_dex(rt, script, step);
             if (rt.no_balls && step.p2 > 0 && (step.p2 & 2) != 0 && (step.p2 & 1) == 0){
                 //  The collection: no ball for a wanted species.
                 rt.short_of_balls = true;

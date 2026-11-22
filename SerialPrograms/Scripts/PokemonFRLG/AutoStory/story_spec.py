@@ -2976,6 +2976,49 @@ def revive(fossil, species, label):
     ]
 
 
+#  DRATINI by fishing in the Safari Zone (PocketPilot build 52, experimental,
+#  not run on a console when written).
+#  The four areas of the Safari Zone have water, and the SUPER ROD brings
+#  (wild_encounters.json, the same in all four, both games) GOLDEEN 40,
+#  SEAKING 40, DRATINI 15, PSYDUCK (SLOWPOKE in LeafGreen) 4 and DRAGONAIR 1
+#  in 100 bites. DRAGONAIR is too rare to wait for: the table has DRATINI
+#  twice (dex_report.py: RARE_FORMS), one stays and the other is trained to
+#  DRAGONAIR (level 30) and on to DRAGONITE (level 55), as LARVITAR's line is.
+#
+#  A game of the Safari Zone (the desk, 500, as in C14_05 and the collection)
+#  in which the player does not walk the grass but stands at the water of the
+#  center area, 17 steps from the gate, and casts the rod: a cast costs no
+#  step and a ball is thrown only at something wanted, so the game would not
+#  end for hours. The program leaves it itself once the table has what it is
+#  fished for, or after an hour: back to the gate, where the attendant asks
+#  whether to leave early (YES). A game that ends by itself (the last of its
+#  30 balls) is the same one as before: "The Safari Game is over".
+#  Up to three games, each skipped when the table wants no DRATINI (any more).
+#  The levels of what it caught are the segments of build 43 and 46 (the rounds
+#  of the Elite Four for experience, the training at Victory Road).
+SAFARI_FISH_GAMES = 3
+SAFARI_FISH_MINUTES = 60
+SAFARI_GATE = "MAP_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE"
+
+
+def safari_fish(area_map, label):
+    """The game itself: the SUPER ROD cast at the water until the visit is
+    over (no limit of battles in a row without a catch: DRATINI is 15 in
+    100 bites, and a catch comes in one of five tries or so)."""
+    return {"dex": {"map": area_map, "tiles": WHOLE, "species": None, "idle": 1000000,
+                    "minutes": SAFARI_FISH_MINUTES, "safari": True, "enough": 0, "collect": True,
+                    "fish": ROD_SUPER, "exit": SAFARI_GATE}, "label": label}
+
+
+def safari_fish_game(game):
+    #  (One place, as the other fishing places' visits are: the failures of its games
+    #  count together.)
+    name = "FishSafariCenter" + ("" if game == 0 else "_Visit%d" % (game + 1))
+    steps = safari_game("MAP_SAFARI_ZONE_CENTER", WHOLE, None, name,
+                        catching=safari_fish("MAP_SAFARI_ZONE_CENTER", name))
+    return collect_trip(PC["FUCHSIA"], steps, name)
+
+
 CHAPTER20 += [
     rod_segment("C20_12_GOOD_ROD", ROD_GOOD, "Fuchsia City", "HEAL_LOCATION_FUCHSIA_CITY",
                 "MAP_FUCHSIA_CITY_HOUSE2", [6, 5], "FLAG_GOT_GOOD_ROD"),
@@ -2991,6 +3034,9 @@ CHAPTER20 += [
     collect_town("C20_16_FISH_FUCHSIA", "fishing in Fuchsia City", PC["FUCHSIA"], [
         collect_fish(PC["FUCHSIA"], "MAP_FUCHSIA_CITY", WHOLE, ROD_SUPER, "FishFuchsia"),
     ], fly_to="HEAL_LOCATION_FUCHSIA_CITY"),
+    collect_town("C20_16B_SAFARI_FISH", "Super Rod fishing in the Safari Zone (DRATINI)", PC["FUCHSIA"],
+                 [safari_fish_game(game) for game in range(SAFARI_FISH_GAMES)],
+                 fly_to="HEAL_LOCATION_FUCHSIA_CITY"),
     collect_town("C20_17_FIVE_ISLAND_WATER", "fishing and surfing on Five Island", PC["VERMILION"], [
         {"unless_collected": {"steps": five_island_water()}, "label": "Five Island's water?"},
     ], fly_to="HEAL_LOCATION_VERMILION_CITY"),
@@ -3430,7 +3476,10 @@ def level_segment(seg_id):
 #  13 (league_again_segment() in the program). Skipped when no Pokemon of the
 #  boxes has that many points to go; the training at Victory Road (the
 #  segments after these) finishes what is left.
-EXP_ROUNDS = 5
+#  Build 52: ten rounds, not five: the DRAGONAIR of the Safari Zone's water has
+#  some 170000 experience points to go from level 30 to 55 (C20_16B_SAFARI_FISH),
+#  and PUPITAR's 108000 are three rounds.
+EXP_ROUNDS = 10
 
 
 def exp_segment(seg_id):
@@ -3714,7 +3763,10 @@ CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), 
 #  and HITMONTOP only comes this way. The three TYROGUE are the three tries
 #  (a Pokemon of the PC that became another one of the two is registered
 #  and the plan goes on with the next one).
-AFTER_DAYCARE_LEVELS = 5
+#  Build 52 (experimental): three more, for the DRATINI of the Safari Zone's
+#  water (C20_16B_SAFARI_FISH): DRATINI to level 30 (DRAGONAIR) and on to
+#  level 55 (DRAGONITE) are two more Pokemon of the boxes' lines to train.
+AFTER_DAYCARE_LEVELS = 8
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (75 + k, LEVEL_SEGMENTS + k + 1))
               for k in range(AFTER_DAYCARE_LEVELS)]
 

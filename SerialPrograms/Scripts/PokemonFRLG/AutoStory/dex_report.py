@@ -15,6 +15,20 @@ NAME = d["names"]
 DEX = d["dex"]
 PRE = d["pre"]
 EVOS = d["evolutions"]
+
+#  Forms that one cast of the rod brings so rarely that the table does not
+#  catch them (PocketPilot build 52): DRAGONAIR is 1 cast in 100 of the SUPER
+#  ROD in the Safari Zone, DRATINI 15 in 100. The table has them come by
+#  evolving, as LARVITAR's line does: a DRATINI more, trained to level 30
+#  (DRAGONAIR) and on to 55 (DRAGONITE), registers both. A DRAGONAIR that
+#  does come on the line is caught all the same when it is new to the POKeDEX.
+RARE_FORMS = ("DRAGONAIR",)
+for _combo in d["combos"].values():
+    for _form in RARE_FORMS:
+        _entry = _combo["species"].get(_form)
+        if _entry is not None:
+            _entry["direct"] = None
+            _entry["direct_how"] = []
 SHORT = {"FireRed": "FR", "LeafGreen": "LG", "BULBASAUR": "Bulb.", "CHARMANDER": "Char.", "SQUIRTLE": "Squi."}
 
 

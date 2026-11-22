@@ -3701,12 +3701,52 @@ bool story_bag_has(StoryRuntime& rt, int pocket, int rod, const std::string& wor
 
 
 
-void story_dex(StoryRuntime& rt, const StoryStep& step){
+namespace{
+
+//  A Safari Game that the visit of its water leaves before it is over (build
+//  52, experimental): the walk out to the gate (the step's legs_b), where the
+//  attendant asks whether the player is going to leave early (FuchsiaCity_
+//  SafariZone_Entrance_EventScript_ExitEarly): YES, the balls are given back,
+//  two steps down. The scene is read through as the one at the end of a game
+//  is (the segment's next step does that one again, and finds the player free).
+void story_safari_leave(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
+    ConsoleHandle& console = rt.console;
+    const std::string label = step.label;
+    const std::vector<int32_t> out = script.leg_list(step.legs_b);
+    if (out.empty()){
+        OperationFailedExceptionWithScreenshot::fire(
+            ErrorReportMode::SEND_ERROR_REPORT,
+            "story_safari_leave(): No way out of the Safari Game in the data: " + label,
+            console
+        );
+    }
+    console.log(label + ": the visit of the water is over: the Safari Game is left early, out by the gate.", COLOR_BLUE);
+    for (int32_t leg : out){
+        walk_leg(rt, script, leg);
+        if (rt.safari_over){
+            //  The last ball went on the way (a Pokemon of the grass that
+            //  the table had not): the game ends by itself.
+            break;
+        }
+    }
+    story_cutscene(rt, 3000ms, 60s, true, label + " (leaving the Safari Game)");
+}
+
+}
+
+
+void story_dex(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
     ConsoleHandle& console = rt.console;
     const bool safari = step.p2 > 0 && (step.p2 & 1) != 0;
     //  Fishing (p2 & 4): the rod p4, cast from where the player stands.
     const bool fishing = step.p2 > 0 && (step.p2 & 4) != 0;
     const int rod = fishing ? (int)step.p4 : -1;
+    //  Both (build 52): the rod cast at the water of a Safari area, in a Safari
+    //  Game. A cast costs no step, and a ball only goes at what is wanted, so
+    //  the game does not end by itself: the visit ends as that of any other
+    //  place (what is wanted is caught, the minutes are through), and the
+    //  player leaves the game early (story_safari_leave()).
+    const bool safari_fishing = safari && fishing;
     //  For the POKeDEX table: what it still wants of the list, in its game.
     const bool collect = step.p2 > 0 && (step.p2 & 2) != 0 && rt.collection != nullptr;
     const std::string label = step.label;
@@ -3789,7 +3829,9 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         (fishing ? std::string("fishing with the ") + AutoStoryFishing::rod_name(rod) + " for " : std::string("catching ")) +
         (shiny_only ? "shiny " : "") + species_names(looked_for) +
         (collect ? " (" + rt.collection->game_name() + ", the table: " + counts + ")" : std::string()) +
-        (safari ? " (the Safari Game, until it is over)." :
+        (safari_fishing ? " (in the Safari Game: until the table has what is fished for, or " +
+            std::to_string(minutes_limit) + " minutes are through, or the game is over; then out by the gate)." :
+            safari ? " (the Safari Game, until it is over)." :
             shiny_only ? " (all others are run from; at most " + std::to_string(minutes_limit) + " minutes)." :
             " (until " + std::to_string(idle_limit) + " battles in a row bring none, at most " +
             std::to_string(minutes_limit) + " minutes).") +
@@ -3807,13 +3849,19 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         );
         return;
     }
+    bool no_rod_here = false;
     if (fishing && (!AutoStoryFishing::is_rod(rod) || rt.rods_missing.count(rod) != 0)){
         console.log(
             label + ": the " + AutoStoryFishing::rod_name(rod) + " was not in the bag when it was last looked for: "
             "not fished here.",
             COLOR_ORANGE
         );
-        return;
+        if (!safari){
+            return;
+        }
+        //  (The segment looks for the rod before the game is joined: this is
+        //  for a rod that went missing in between.)
+        no_rod_here = true;
     }
     //  Enough for what the POKeDEX is caught for (the National POKeDEX),
     //  as the game counts them: nothing to catch here.
@@ -3867,7 +3915,7 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     //  in a row, and with the fourth the program. The limit is for a game
     //  that does not end at all.
     const std::chrono::minutes safari_limit(75);
-    const WallClock deadline = start + (safari ? safari_limit : std::chrono::minutes(minutes_limit));
+    const WallClock deadline = start + (safari && !fishing ? safari_limit : std::chrono::minutes(minutes_limit));
     //  No wild Pokemon at all: the player is not on the grass. (Canyon
     //  Entrance, 16 November 2026: the walk there ended a row above the
     //  grass, and the row was walked back and forth for the 30 minutes of
@@ -3881,8 +3929,11 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     const std::chrono::minutes nothing_limit(6);
     const uint64_t nothing_steps = 400;
     try{
-        while (current_time() < deadline && !rt.safari_over){
-            if (!safari && (!any_looked_for() || idle >= idle_limit || rt.no_balls)){
+        while (current_time() < deadline && !rt.safari_over && !no_rod_here){
+            if (safari_fishing
+                ? (!any_looked_for() || idle >= idle_limit)
+                : (!safari && (!any_looked_for() || idle >= idle_limit || rt.no_balls))
+            ){
                 break;
             }
             if (!safari && step.p3 > 0 && rt.dex_count_at_load >= 0 &&
@@ -3978,7 +4029,11 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
     for (const std::string& slug : rt.battle.dex_species){
         (in_passing.count(slug) != 0 ? left_in_passing : left).insert(slug);
     }
-    rt.in_safari = false;
+    //  (A game that is left early is still on while the way out is walked.)
+    const bool leave_now = safari_fishing && !rt.safari_over;
+    if (!leave_now){
+        rt.in_safari = false;
+    }
     rt.collecting = false;
     rt.battle = saved;
     const int minutes = (int)std::chrono::duration_cast<std::chrono::minutes>(current_time() - start).count();
@@ -3992,12 +4047,17 @@ void story_dex(StoryRuntime& rt, const StoryStep& step){
         (left_in_passing.empty() ? std::string() :
             " Not waited for here: " + species_names(left_in_passing) + ".") +
         (rt.no_balls ? " No balls left." : "") +
-        (safari ? " " + std::to_string(spot.steps()) + " steps on the grass (the game ends after 600, with those "
+        (safari && !fishing ? " " + std::to_string(spot.steps()) + " steps on the grass (the game ends after 600, with those "
             "of the way there)." : std::string()) +
         (fish != nullptr ? " " + std::to_string(spot.steps()) + " casts, " + std::to_string(fish->bites()) + " bites."
             : std::string()),
         COLOR_BLUE
     );
+    if (leave_now){
+        story_safari_leave(rt, script, step);
+        rt.in_safari = false;
+        return;
+    }
     if (safari){
         if (!rt.safari_over){
             OperationFailedExceptionWithScreenshot::fire(
