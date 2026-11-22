@@ -3437,7 +3437,13 @@ CastEnd cast_rod(
     battle = StoryBattleResult::NO_BATTLE;
     said.clear();
     const AutoStoryFishing::RodWords words = AutoStoryFishing::rod_words(rod);
-    open_bag_from_overworld(console, context);
+    //  In a Safari Game the start menu is another one: RETIRE on top, so that the BAG lies
+    //  a place lower (SetUpStartMenu_SafariZone() of the decompilation). With the ordinary
+    //  order the cursor went to the POKeMON and the bag never opened (build 52, 22 November:
+    //  "Failed to open bag" six times in each of two tries).
+    open_bag_from_overworld(
+        console, context, rt.in_safari ? StartMenuContext::SAFARI_ZONE : StartMenuContext::STANDARD
+    );
     if (!select_bag_item(
         rt, BagPocket::KEY_ITEMS, words.words, words.avoid, AutoStoryFishing::rod_name(rod), true, true
     )){
