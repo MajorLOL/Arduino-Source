@@ -1695,6 +1695,19 @@ class Builder:
             ts = {"type": "DAYCARE_MAN", "label": label, "p0": 1 if b.get("mode") == "reject" else 0,
                   "p2": 1, "p3": 1, "dir": "up"}
             out.append(ts)
+            if b.get("mode") == "reject":
+                #  The man stays where he is until the map is loaded again:
+                #  on the tile of the egg (16, 14) when an egg was waiting
+                #  (it was in all 13 trips of build 49, the Ditto made the
+                #  next egg while the first one was walked), on his usual
+                #  tile above it when none was. The way on (to the woman)
+                #  goes around both: a step up from the line was "The player
+                #  does not move" in front of him.
+                bx, by = b["xy"]
+                blocked = self.state.extra_blocked.setdefault(b["map"], set())
+                blocked.add((bx, by))
+                blocked.add((bx, by - 1))
+                self.engine.invalidate()
             return
         if "daycare_give" in step or "daycare_take" in step:
             #  In front of the Day Care's woman (across the counter): the two
