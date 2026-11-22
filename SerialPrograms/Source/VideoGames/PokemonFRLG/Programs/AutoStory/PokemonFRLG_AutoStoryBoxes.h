@@ -500,6 +500,32 @@ struct EvolveLine{
     int level = -1;
 };
 
+//  TYROGUE (build 51, experimental): it evolves at level 20 into HITMONLEE
+//  (Attack above Defense), HITMONCHAN (Attack below Defense) or HITMONTOP (the
+//  same), whatever the nature, the DVs and the experience of its training make
+//  of them: not known beforehand, and no memory is read. The table has
+//  HITMONLEE and HITMONCHAN as species to get (one copy each; the Dojo gives one
+//  of them) and HITMONTOP as one that only comes by evolving.
+constexpr int TYROGUE_EVOLVES_AT = 20;
+
+inline bool tyrogue_line(const std::string& slug){
+    return slug == "tyrogue" || slug == "hitmonlee" || slug == "hitmonchan" || slug == "hitmontop";
+}
+
+//  What a Pokemon in training can be called while it is trained: what it was,
+//  what the plan said it becomes, and for TYROGUE all three of its evolutions
+//  (which one comes is its Attack against its Defense at level 20).
+inline std::set<std::string> training_line(const std::string& from, const std::string& becomes){
+    std::set<std::string> line{from, becomes};
+    if (tyrogue_line(from)){
+        line.insert("tyrogue");
+        line.insert("hitmonlee");
+        line.insert("hitmonchan");
+        line.insert("hitmontop");
+    }
+    return line;
+}
+
 inline std::vector<EvolveLine> evolve_plan(const std::vector<TableRow>& table, const BoxCensus& census){
     std::map<std::string, std::string> slug_of;
     for (const TableRow& row : table){
@@ -509,7 +535,18 @@ inline std::vector<EvolveLine> evolve_plan(const std::vector<TableRow>& table, c
     std::vector<EvolveLine> plan;
     for (const TableRow& row : table){
         EvolveLine line;
-        if (row.needed != 0 || row.have > 0 || !read_evolve_how(row.how, line.how)){
+        bool tyrogue_wanted = false;
+        if ((row.slug == "hitmonlee" || row.slug == "hitmonchan") && row.needed > row.have){
+            //  A species to get that a TYROGUE of the boxes can be (after the
+            //  Day Care): the one of the two that the Dojo did not give.
+            if (slug_of.find("Tyrogue") == slug_of.end()){
+                continue;
+            }
+            line.how.from = "Tyrogue";
+            line.how.by = EvolveBy::OTHER;
+            line.how.level = TYROGUE_EVOLVES_AT;
+            tyrogue_wanted = true;
+        }else if (row.needed != 0 || row.have > 0 || !read_evolve_how(row.how, line.how)){
             continue;
         }
         line.slug = row.slug;
@@ -525,6 +562,10 @@ inline std::vector<EvolveLine> evolve_plan(const std::vector<TableRow>& table, c
                 line.cell = ones[next].cell;
                 line.level = ones[next].level;
                 next++;
+            }else if (tyrogue_wanted){
+                //  No TYROGUE left in the boxes: not a species that only
+                //  comes by evolving, so nothing to say of it.
+                continue;
             }
         }
         plan.push_back(line);
@@ -818,7 +859,11 @@ inline std::vector<LevelTarget> level_targets(
 ){
     std::vector<LevelTarget> targets;
     for (const EvolveLine& line : plan){
-        if (line.how.by != EvolveBy::LEVEL || line.box < 0 || line.cell < 0 || line.from_slug.empty()){
+        //  (OTHER: a level and its stats, TYROGUE's; the level is trained to,
+        //  what it becomes is the game's.)
+        const bool by_level = line.how.by == EvolveBy::LEVEL ||
+            (line.how.by == EvolveBy::OTHER && line.how.level > 0);
+        if (!by_level || line.box < 0 || line.cell < 0 || line.from_slug.empty()){
             continue;
         }
         if (without.count(line.slug) != 0){

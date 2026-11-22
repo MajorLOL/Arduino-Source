@@ -2739,7 +2739,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 67 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 72 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2984,7 +2984,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 59 && exp_leave_no &&
+        once == 64 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -2999,12 +2999,14 @@ int check_leave_out(Logger& logger){
             "C20_62_TOGEPI_EGG, C20_63_FRIEND_09, C20_64_FRIEND_10, C20_65_FRIEND_11, "
             "C20_66_DAYCARE_01_PICHU, C20_67_DAYCARE_02_CLEFFA, C20_68_DAYCARE_03_IGGLYBUFF, "
             "C20_69_DAYCARE_04_TOGEPI, C20_70_DAYCARE_05_SMOOCHUM, C20_71_DAYCARE_06_ELEKID, "
-            "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE",
+            "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE, "
+            "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
         "the story itself), the five rounds of the Elite Four for experience, the nineteen that evolve by level, "
         "the eight that evolve by friendship, the Togepi egg (build 47), three more that evolve by friendship and "
-        "the nine eggs of the Day Care (build 48, experimental)"
+        "the nine eggs of the Day Care (build 48, experimental) and five more that evolve by level after them "
+        "(build 51, experimental)"
     );
     check(
         saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3055,7 +3057,8 @@ int check_leave_out(Logger& logger){
             index_of("C20_61_FRIEND_08") + 1 == index_of("C20_62_TOGEPI_EGG") &&
             index_of("C20_62_TOGEPI_EGG") + 1 == index_of("C20_63_FRIEND_09") &&
             index_of("C20_65_FRIEND_11") + 1 == index_of("C20_66_DAYCARE_01_PICHU") &&
-            index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_LEVEL_20") &&
+            index_of("C20_79_LEVEL_24") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -4092,9 +4095,102 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            segments == 19 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
+            segments == 24 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
             story_levels_place() == "the evolving by level",
-            "the nineteen segments that evolve by level: FLY, the PC, the training, the PC, a save at the end only"
+            "the 24 segments that evolve by level (19 before the Day Care, five after it): FLY, the PC, the training, "
+            "the PC, a save at the end only"
+        );
+    }
+
+    //  TYROGUE (build 51, experimental): it evolves at level 20 into HITMONLEE,
+    //  HITMONCHAN or HITMONTOP, which of them the game decides by its Attack
+    //  and Defense. The table wants HITMONCHAN (HITMONLEE comes from the Dojo)
+    //  and has HITMONTOP as one that only comes by evolving: a TYROGUE of the
+    //  boxes is trained to level 20 for each, whatever comes of it.
+    {
+        auto table_with = [&](const std::set<std::string>& had){
+            std::vector<Boxes::TableRow> rows = table;
+            for (Boxes::TableRow& row : rows){
+                row.have = had.count(row.slug) != 0 ? 1 : 0;
+            }
+            return rows;
+        };
+        auto census_of = [&](const std::vector<std::pair<std::string, int>>& list){
+            Boxes::BoxCensus made;
+            made.boxes = Boxes::BOX_COUNT;
+            made.closed = true;
+            int cell = 0;
+            for (const auto& item : list){
+                Boxes::BoxPokemon one;
+                one.box = 13;
+                one.cell = cell++;
+                one.slug = item.first;
+                one.level = item.second;
+                made.pokemon.push_back(one);
+            }
+            return made;
+        };
+        auto find_line = [](const std::vector<Boxes::EvolveLine>& plan, const std::string& slug){
+            for (const Boxes::EvolveLine& line : plan){
+                if (line.slug == slug){
+                    return line;
+                }
+            }
+            return Boxes::EvolveLine();
+        };
+        //  After the Day Care: three TYROGUE of level 5, the Dojo's HITMONLEE had.
+        const std::set<std::string> had{"hitmonlee", "tyrogue"};
+        const std::vector<Boxes::EvolveLine> plan = Boxes::evolve_plan(
+            table_with(had), census_of({{"tyrogue", 5}, {"tyrogue", 5}, {"tyrogue", 5}, {"hitmonlee", 25}})
+        );
+        const Boxes::EvolveLine chan = find_line(plan, "hitmonchan");
+        const Boxes::EvolveLine top = find_line(plan, "hitmontop");
+        const std::vector<Boxes::LevelTarget> targets = Boxes::level_targets(plan);
+        check(
+            find_line(plan, "hitmonlee").slug.empty() &&
+            chan.from_slug == "tyrogue" && chan.how.by == Boxes::EvolveBy::OTHER && chan.how.level == 20 &&
+            chan.box == 13 && chan.cell == 0 && chan.level == 5 &&
+            top.from_slug == "tyrogue" && top.how.level == 20 && top.box == 13 && top.cell == 1,
+            "TYROGUE: a line for the HITMONCHAN that is wanted and one for HITMONTOP, two TYROGUE of the boxes"
+        );
+        check(
+            targets.size() == 2 && targets[0].slug == "hitmonchan" && targets[0].goal == 20 &&
+            targets[0].evolves_at == 20 && Boxes::levels_to_go(targets[0]) == 15 &&
+            targets[1].slug == "hitmontop" && targets[1].goal == 20 &&
+            Boxes::level_targets(plan, {"hitmonchan"}).size() == 1 &&
+            Boxes::exp_targets(plan).empty() && Boxes::stone_targets(plan).empty() &&
+            Boxes::friend_targets(plan, std::map<std::string, Boxes::FriendRecord>()).empty(),
+            "TYROGUE: trained to level 20 by level, not by the Elite Four's rounds, a stone or friendship"
+        );
+        //  The first of them became HITMONLEE: the next two are the ones left.
+        const std::vector<Boxes::EvolveLine> after_lee = Boxes::evolve_plan(
+            table_with(had), census_of({{"hitmonlee", 20}, {"tyrogue", 5}, {"tyrogue", 5}, {"hitmonlee", 25}})
+        );
+        //  HITMONCHAN came: HITMONTOP is the only one left to try for; and both: nothing.
+        const std::vector<Boxes::LevelTarget> one_left = Boxes::level_targets(Boxes::evolve_plan(
+            table_with({"hitmonlee", "hitmonchan", "tyrogue"}), census_of({{"hitmonchan", 20}, {"tyrogue", 5}, {"tyrogue", 5}})
+        ));
+        const std::vector<Boxes::EvolveLine> none_left = Boxes::evolve_plan(
+            table_with({"hitmonlee", "hitmonchan", "hitmontop", "tyrogue"}), census_of({{"tyrogue", 5}})
+        );
+        //  No TYROGUE in the boxes (before the Day Care): no line for it.
+        const std::vector<Boxes::EvolveLine> before = Boxes::evolve_plan(
+            table_with({"hitmonlee"}), census_of({{"hitmonlee", 25}})
+        );
+        check(
+            find_line(after_lee, "hitmonchan").cell == 1 && find_line(after_lee, "hitmontop").cell == 2 &&
+            one_left.size() == 1 && one_left[0].slug == "hitmontop" && one_left[0].cell == 1 &&
+            Boxes::level_targets(none_left).empty() && find_line(none_left, "hitmonchan").slug.empty() &&
+            find_line(before, "hitmonchan").slug.empty(),
+            "TYROGUE: the next ones after a HITMONLEE, only HITMONTOP once HITMONCHAN is there, none when both are, "
+            "and no line without a TYROGUE in a box"
+        );
+        const std::set<std::string> tyrogue_line = Boxes::training_line("tyrogue", "hitmonchan");
+        check(
+            tyrogue_line == std::set<std::string>({"tyrogue", "hitmonlee", "hitmonchan", "hitmontop"}) &&
+            Boxes::training_line("hitmonlee", "hitmonchan") == tyrogue_line &&
+            Boxes::training_line("metapod", "butterfree") == std::set<std::string>({"metapod", "butterfree"}),
+            "TYROGUE in training can be any of its three evolutions afterwards, the others the two"
         );
     }
 
@@ -4400,7 +4496,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, nineteen of levels and eleven of "
+        ", C20_25_STONES, four of trades, four that fetch a stone, five rounds of the Elite Four, 24 of levels and eleven of "
         "friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED

@@ -1839,7 +1839,11 @@ bool story_level_out(
          friendship ? "to walk " + std::to_string(std::max(0, target.blocks - target.walked)) + " more blocks of " +
             std::to_string(FRIEND_BLOCK_STEPS) + " steps for its friendship and then be trained to level " :
             std::string("to be trained to level ")) +
-        std::to_string(target.goal) + " for " + target.name + "; " + upper(extra) + " waits in its cell (experimental).",
+        std::to_string(target.goal) + " for " + target.name + (from == "TYROGUE"
+            ? " (or HITMONLEE or HITMONTOP: its Attack against its Defense at level " +
+                std::to_string(TYROGUE_EVOLVES_AT) + " decides)"
+            : std::string()) +
+        "; " + upper(extra) + " waits in its cell (experimental).",
         COLOR_BLUE
     );
     box_swap(rt, label, target.box, target.cell, target.from_slug, extra);
@@ -1906,7 +1910,9 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
     }
     std::string now;
     const int level = story_read_slot(rt, 6, &now);
-    if (now.empty() || (now != rt.out_give && now != rt.out_becomes)){
+    //  (TYROGUE: any of its three evolutions.)
+    const std::set<std::string> line = training_line(rt.out_give, rt.out_becomes);
+    if (now.empty() || line.count(now) == 0){
         fail(
             rt,
             label + ": party slot 6 is " + (now.empty() ? std::string("not read") : upper(now)) + ", not " +
@@ -1948,7 +1954,7 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
             rt.friend_records[was].tests = tests + 1;
         }
     }
-    if (now == becomes && now != was){
+    if (line.count(now) != 0 && now != was){
         //  One more in the POKeDEX table, the game saved.
         rt.caught.insert(now);
         if (rt.collection != nullptr){
@@ -1963,6 +1969,14 @@ void story_level_in(StoryRuntime& rt, const std::string& label, const std::funct
             rt.collection->counts_summary(registered, total, to_catch);
             table = " The POKeDEX table: " + std::to_string(registered) + " of " + std::to_string(total) +
                 " species with at least one.";
+        }
+        if (now != becomes){
+            //  TYROGUE: the game chose, by its Attack and Defense at level 20.
+            console.log(
+                "Evolved into " + upper(now) + ", not into the " + upper(becomes) + " that the plan had for it: the "
+                "game decides between HITMONLEE (Attack above Defense), HITMONCHAN (below) and HITMONTOP (equal).",
+                COLOR_ORANGE
+            );
         }
         console.log(
             "Evolved for the POKeDEX: " + now + " (" + upper(was) +

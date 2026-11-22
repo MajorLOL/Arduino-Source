@@ -415,6 +415,7 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
     for (int attempt = 0; attempt < 2; attempt++){
+        std::string nature;
         open_party_menu_from_overworld(console, context);
         //  LEFT from any slot on the right goes to slot 1.
         dpad(context, DPAD_LEFT, 500ms);
@@ -441,12 +442,14 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
             if (species != nullptr){
                 *species = stats.name;
             }
+            nature = stats.nature;
         }
         story_back_to_overworld(rt, "summary");
         if (level > 0){
             console.log(
                 "Party slot " + std::to_string(slot) + ": " +
-                (species != nullptr ? *species + " " : std::string()) + "level " + std::to_string(level)
+                (species != nullptr ? *species + " " : std::string()) + "level " + std::to_string(level) +
+                (nature.empty() ? std::string() : ", nature " + nature)
             );
             return level;
         }
@@ -2997,7 +3000,8 @@ void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& s
     const std::string from = rt.out_give;
     const std::string becomes = rt.out_becomes;
     const int goal = rt.out_goal;
-    const std::set<std::string> line{from, becomes};
+    //  (TYROGUE: all three of its evolutions.)
+    const std::set<std::string> line = AutoStoryBoxes::training_line(from, becomes);
     console.log(
         where + ": training " + from + " (" + becomes + " at level " + std::to_string(goal) + ", experimental).",
         COLOR_BLUE

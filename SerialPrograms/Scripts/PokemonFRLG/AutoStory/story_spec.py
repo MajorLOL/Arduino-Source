@@ -3696,6 +3696,29 @@ CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), 
               for k, (name, baby, cycles, count) in enumerate(DAYCARE_BABIES)]
 
 
+# ------------------------------------------------ chapter 20, what the Day Care hatched, by level
+#  EXPERIMENTAL (PocketPilot build 51, not run on a console when written).
+#  The level segments of build 43 (C20_35 and on) come before the Day Care in
+#  the route: what it hatched (TYROGUE and its HITMONCHAN / HITMONTOP, the
+#  SMOOCHUM that becomes JYNX and the ELEKID that becomes ELECTABUZZ at level
+#  30) lies in the boxes after them. These are the same segments again, after
+#  it: one Pokemon of the boxes each, the one with the fewest levels to go
+#  first (TYROGUE has 15), skipped when the boxes have none left that evolves
+#  by a level into a species the table does not have.
+#
+#  TYROGUE evolves at level 20 into HITMONLEE (Attack above Defense),
+#  HITMONCHAN (below) or HITMONTOP (the same). Which one it is comes of its
+#  nature, its DVs and the experience points it got on the way (no memory is
+#  read, the stats are not either), so the program trains one and looks at
+#  what it became: the table has HITMONLEE (the Dojo) and wants HITMONCHAN,
+#  and HITMONTOP only comes this way. The three TYROGUE are the three tries
+#  (a Pokemon of the PC that became another one of the two is registered
+#  and the plan goes on with the next one).
+AFTER_DAYCARE_LEVELS = 5
+CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (75 + k, LEVEL_SEGMENTS + k + 1))
+              for k in range(AFTER_DAYCARE_LEVELS)]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with
