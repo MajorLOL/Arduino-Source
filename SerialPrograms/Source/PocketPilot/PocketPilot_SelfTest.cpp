@@ -2757,7 +2757,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 92 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 93 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2964,9 +2964,11 @@ int check_leave_out(Logger& logger){
         once_ids += (once_ids.empty() ? "" : ", ") + std::string(segment.id);
         //  The legendary Pokemon (build 54): a save in front of it is in a
         //  cave, and the one after Lady Gillian's battles in a Pokemon Center
-        //  of Five Island: not a place such a segment is given up from.
+        //  of Five Island: not a place such a segment is given up from. The
+        //  same for UNOWN (build 55): its saves are in the Pokemon Center of
+        //  Seven Island (a Sevii island: FLY does not go from there to Kanto).
         if (std::string(segment.id) == "C20_86_HO_OH" || std::string(segment.id) == "C20_87_LUGIA" ||
-            std::string(segment.id) == "C20_88_DEOXYS"){
+            std::string(segment.id) == "C20_88_DEOXYS" || std::string(segment.id) == "C20_89_UNOWN"){
             continue;
         }
         //  A round of the Elite Four for experience (build 46) has the Pokemon
@@ -3009,7 +3011,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 83 && exp_leave_no &&
+        once == 84 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -3031,7 +3033,7 @@ int check_leave_out(Logger& logger){
             "C20_78_DAYCARE_13_EEVEE, C20_79_DAYCARE_14_WYNAUT, "
             "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24, "
             "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27, C20_83_LEVEL_28, C20_84_LEVEL_29, "
-            "C20_85_STONES_2, C20_86_HO_OH, C20_87_LUGIA, C20_88_DEOXYS",
+            "C20_85_STONES_2, C20_86_HO_OH, C20_87_LUGIA, C20_88_DEOXYS, C20_89_UNOWN",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
         "the story itself), the ten rounds of the Elite Four for experience (five more in build 52), the nineteen "
@@ -3039,7 +3041,8 @@ int check_leave_out(Logger& logger){
         "evolve by friendship and the nine eggs of the Day Care (build 48, experimental) and eight more that evolve "
         "by level after them (build 51, experimental, and three for the DRATINI of build 52); build 54 "
         "(experimental) adds five eggs (the second KABUTO, three EEVEE, WYNAUT), two more that evolve by level "
-        "(KABUTO's line, MAGCARGO), the stones again, and HO-OH, LUGIA and DEOXYS"
+        "(KABUTO's line, MAGCARGO), the stones again, and HO-OH, LUGIA and DEOXYS; build 55 (experimental) "
+        "adds UNOWN (the Tanoby Key's seven boulders, the Monean Chamber)"
     );
     check(
         saves_at_a_nurse == 4 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
@@ -3094,7 +3097,8 @@ int check_leave_out(Logger& logger){
             index_of("C20_78_DAYCARE_13_EEVEE") + 1 == index_of("C20_79_DAYCARE_14_WYNAUT") &&
             index_of("C20_79_DAYCARE_14_WYNAUT") + 1 == index_of("C20_75_LEVEL_20") &&
             index_of("C20_84_LEVEL_29") + 1 == index_of("C20_85_STONES_2") &&
-            index_of("C20_88_DEOXYS") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_88_DEOXYS") + 1 == index_of("C20_89_UNOWN") &&
+            index_of("C20_89_UNOWN") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );

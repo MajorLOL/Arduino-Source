@@ -2832,6 +2832,14 @@ class Builder:
                 strength_on = True
                 self.strength_used = (mid, len(self.legs))
             out.append({"type": "PUSH", "label": "Push boulder %s" % d, "text": d})
+            if bp.get("wait_on_button") and self.d.behaviors.name(v0.tile(nb[0], nb[1])[3]) == "MB_STRENGTH_BUTTON":
+                #  A boulder that lands on a floor switch runs the switch's
+                #  script (the Tanoby Key's: lockall, the screen shakes, a
+                #  delay of 60 frames, and after the seventh one a message):
+                #  the player cannot walk for a while. B closes a message
+                #  and does nothing else.
+                out.append({"type": "PRESS", "label": "%s_Switch%d" % (label, i + 1), "text": "B",
+                            "p0": 1, "p1": int(bp["wait_on_button"])})
             fell = self.d.behaviors.name(v0.tile(nb[0], nb[1])[3]) == "MB_FALL_WARP"
             if fell:
                 self.set_state({"objects": {mid: {key: {"hidden": True}}}})

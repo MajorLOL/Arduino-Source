@@ -3961,6 +3961,79 @@ CHAPTER20 += [
 ]
 
 
+# ------------------------------------------------ chapter 20, UNOWN (Tanoby Ruins)
+#  EXPERIMENTAL (PocketPilot build 55, not run on a console when written).
+#  UNOWN lives in the seven Tanoby Chambers (level 25, the only Pokemon there,
+#  every step of the floor), but the game keeps them out of reach until the
+#  Tanoby Key's puzzle is solved: wild_encounter.c (UnlockedTanobyOrAreNotInTanoby)
+#  gives none before FLAG_SYS_UNLOCKED_TANOBY_RUINS. The Tanoby Key is a cave
+#  off Sevault Canyon (the warp at (7, 17)): a room of seven boulders and
+#  seven floor switches (MB_STRENGTH_BUTTON). A boulder that lands on a switch
+#  runs its script (HandleBoulderActivateVictoryRoadSwitch -> ..._SwitchN:
+#  lockall, the screen shakes, a delay of a second; VAR_TEMP_N remembers it
+#  until the map loads again), and when the seventh has been pressed the
+#  room shakes twice more and the flag is set ("A mysterious rumble echoed
+#  somewhere far away."). So every switch has to be pressed once during one
+#  visit of the room; a boulder may be pushed on after it has pressed one.
+#  The router solves it one switch at a time (boulder_puzzle), in the order
+#  of TANOBY_SWITCHES (the upper rows first: the way up from the middle of
+#  the room runs over the two switches at (5, 6) and (9, 6), and a boulder
+#  on either shuts it; found by the router in build 55, 32 pushes in all).
+#  After the push that presses a switch the program waits (wait_on_button):
+#  the player cannot walk while the script runs.
+#  From the Seven Island nurse: the room, the puzzle, Monean Chamber (the
+#  nearest chamber: Sevault Canyon's rocks and the water of the Tanoby
+#  Ruins' coast, the route is the router's), UNOWN, back to the nurse and
+#  home by ferry. A save at the nurse before the room: a try that goes wrong
+#  starts from there (the room's boulders are back where they were whenever
+#  the room is loaded, with the puzzle not solved).
+TANOBY_KEY = "MAP_SEVEN_ISLAND_SEVAULT_CANYON_TANOBY_KEY"
+MONEAN_CHAMBER = "MAP_SEVEN_ISLAND_TANOBY_RUINS_MONEAN_CHAMBER"
+TANOBY_SWITCHES = [[7, 2], [10, 4], [4, 4], [5, 6], [9, 6], [5, 8], [9, 8]]
+SWITCH_WAIT_MS = 3500
+
+
+def tanoby_key_puzzle():
+    steps = []
+    for k, (x, y) in enumerate(TANOBY_SWITCHES):
+        steps.append({"boulder": {"target": [x, y], "wait_on_button": SWITCH_WAIT_MS},
+                      "label": "TanobyKey%d" % (k + 1)})
+    #  The seventh switch: two more shakes, the sound, the message. B closes
+    #  it (and does nothing else if it is closed already).
+    steps += [press("B", 1, 6000, "TanobyKeyRumble"),
+              press("B", 1, 1500, "TanobyKeyRumbleClose"),
+              press("B", 1, 1500, "TanobyKeyRumbleClose2"),
+              setst(flags=["FLAG_SYS_UNLOCKED_TANOBY_RUINS"])]
+    return steps
+
+
+def unown_segment(seg_id):
+    steps = [fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+             heal(PC["VERMILION"], seg_id + "_ToVermilionPC"),
+             goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+             {"seagallop": 0, "label": "SeagallopToOneIsland"},
+             cutscene(8000, 90000, "Ferry"),
+             pos("MAP_ONE_ISLAND_HARBOR", 8, 5)]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 2, "MAP_SEVEN_ISLAND_HARBOR", "FerryToSevenIsland")
+    steps += [heal(SEVEN_PC, "HarborToSevenIslandNurse"), save(),
+              goto(TANOBY_KEY, [[7, 12]], "ToTanobyKey")]
+    steps += tanoby_key_puzzle()
+    steps += [collect(MONEAN_CHAMBER, WHOLE, "CollectMoneanChamber"),
+              heal(SEVEN_PC, "MoneanChamberToNurse"), save(),
+              goto("MAP_SEVEN_ISLAND_HARBOR", [[8, 5]], "ToHarbor")]
+    steps += sevii_ferry_home("MAP_SEVEN_ISLAND_HARBOR", seg_id + "_FerryHome")
+    steps += [heal(PC["VERMILION"], seg_id + "_BackToVermilionPC"),
+              {"outside": True, "label": seg_id + "_Out"},
+              save()]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: Unown in the Monean Chamber (the Tanoby Key's seven boulders)",
+            "steps": [{"unless_owned": {"species": "unown", "count": 1, "steps": steps, "segment": True},
+                       "label": "Unown in the table?"}]}
+
+
+CHAPTER20 += [unown_segment("C20_89_UNOWN")]
+
+
 def fly_only(segments):
     """From here on the story flies (the Indigo Plateau is out of reach on
     foot once Victory Road is reset, the places are far apart): with

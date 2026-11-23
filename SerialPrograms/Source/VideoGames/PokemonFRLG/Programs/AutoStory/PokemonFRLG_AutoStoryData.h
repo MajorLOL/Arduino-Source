@@ -7113,6 +7113,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -7318,6 +7319,7 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_86_HO_OH", "POKeDEX collection: Ho-Oh on the summit of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 1739, 1},
     {"C20_87_LUGIA", "POKeDEX collection: Lugia at the base of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 1740, 1},
     {"C20_88_DEOXYS", "POKeDEX collection: Deoxys on Birth Island (the Aurora Ticket; the triangle; Gillian's prize money, Ultra Balls)", 20, true, 1741, 1},
+    {"C20_89_UNOWN", "POKeDEX collection: Unown in the Monean Chamber (the Tanoby Key's seven boulders)", 20, true, 1742, 1},
 };
 
 }
@@ -14448,6 +14450,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
     {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
+    {StepType::STOP, "Not with this starter", -1, 0, 0, -1, 0, 0, DPAD_NONE, "The story after the Sevii Islands (the National POKeDEX) is only played with Charmander so far (it needs FLY).", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -14653,6 +14656,7 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_86_HO_OH", "POKeDEX collection: Ho-Oh on the summit of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 1740, 1},
     {"C20_87_LUGIA", "POKeDEX collection: Lugia at the base of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 1741, 1},
     {"C20_88_DEOXYS", "POKeDEX collection: Deoxys on Birth Island (the Aurora Ticket; the triangle; Gillian's prize money, Ultra Balls)", 20, true, 1742, 1},
+    {"C20_89_UNOWN", "POKeDEX collection: Unown in the Monean Chamber (the Tanoby Key's seven boulders)", 20, true, 1743, 1},
 };
 
 }
@@ -28326,6 +28330,304 @@ inline constexpr StoryRun RUNS[] = {
     {DPAD_UP, 1, RunKind::WALK},
     {DPAD_UP, 4, RunKind::WALK},
     {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_RIGHT, 12, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 11, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 1, RunKind::DISMOUNT},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK, 0x2ull},
+    {DPAD_LEFT, 8, RunKind::WALK},
+    {DPAD_UP, 6, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 19, RunKind::WALK, 0x80ull},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::CHECKED},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 3, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_DOWN, 3, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 5, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 6, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::CHECKED},
+    {DPAD_DOWN, 4, RunKind::CHECKED},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK, 0x7ull},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK, 0x1ull},
+    {DPAD_DOWN, 1, RunKind::CHECKED},
+    {DPAD_LEFT, 6, RunKind::CHECKED},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::JUMP},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::JUMP},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::CHECKED},
+    {DPAD_RIGHT, 6, RunKind::CHECKED},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 7, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::CHECKED},
+    {DPAD_DOWN, 4, RunKind::CHECKED},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_LEFT, 5, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK, 0x6ull},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::CHECKED_TRAINER},
+    {DPAD_DOWN, 6, RunKind::WALK},
+    {DPAD_RIGHT, 6, RunKind::WALK},
+    {DPAD_DOWN, 10, RunKind::WALK, 0x60ull},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_DOWN, 6, RunKind::CHECKED},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::CHECKED_TRAINER},
+    {DPAD_RIGHT, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 7, RunKind::WALK, 0x20ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 4, RunKind::WALK, 0x4ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::CHECKED},
+    {DPAD_DOWN, 6, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::SURF_CHECKED},
+    {DPAD_DOWN, 4, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 13, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 7, RunKind::WALK},
+    {DPAD_RIGHT, 7, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 7, RunKind::WALK},
+    {DPAD_RIGHT, 5, RunKind::SURF_CHECKED},
+    {DPAD_RIGHT, 1, RunKind::DISMOUNT},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_DOWN, 1, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK, 0x2ull},
+    {DPAD_UP, 1, RunKind::CHECKED_TRAINER, 0x1ull},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 2, RunKind::CHECKED},
+    {DPAD_DOWN, 3, RunKind::WALK, 0x3ull},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 5, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 7, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_LEFT, 7, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 7, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 13, RunKind::SURF_CHECKED},
+    {DPAD_UP, 4, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 3, RunKind::SURF_CHECKED},
+    {DPAD_LEFT, 1, RunKind::DISMOUNT},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::CHECKED},
+    {DPAD_UP, 4, RunKind::WALK, 0x4ull},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 1, RunKind::WALK},
+    {DPAD_UP, 7, RunKind::WALK, 0x2ull},
+    {DPAD_LEFT, 2, RunKind::CHECKED_TRAINER},
+    {DPAD_UP, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_UP, 6, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 11, RunKind::WALK, 0x18ull},
+    {DPAD_LEFT, 6, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::CHECKED_TRAINER},
+    {DPAD_UP, 7, RunKind::WALK},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_DOWN, 3, RunKind::WALK, 0x3ull},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_RIGHT, 5, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 13, RunKind::WALK, 0xe00ull},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::WALK},
+    {DPAD_UP, 5, RunKind::CHECKED},
+    {DPAD_LEFT, 2, RunKind::CHECKED},
+    {DPAD_LEFT, 5, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 6, RunKind::CHECKED},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::CHECKED},
+    {DPAD_LEFT, 1, RunKind::CHECKED},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 3, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::CHECKED_TRAINER},
+    {DPAD_UP, 2, RunKind::CHECKED},
+    {DPAD_RIGHT, 2, RunKind::CHECKED},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 6, RunKind::WALK, 0x20ull},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::CHECKED},
+    {DPAD_UP, 3, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_LEFT, 2, RunKind::WALK},
+    {DPAD_UP, 6, RunKind::CHECKED},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_LEFT, 3, RunKind::WALK},
+    {DPAD_UP, 2, RunKind::WALK},
+    {DPAD_RIGHT, 2, RunKind::WALK},
+    {DPAD_UP, 21, RunKind::WALK, 0x800ull},
+    {DPAD_RIGHT, 4, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_LEFT, 4, RunKind::WALK},
+    {DPAD_DOWN, 5, RunKind::WALK},
+    {DPAD_RIGHT, 8, RunKind::WALK},
+    {DPAD_DOWN, 2, RunKind::WALK, 0x1ull},
+    {DPAD_DOWN, 2, RunKind::WALK},
+    {DPAD_RIGHT, 1, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::SURF_CHECKED},
+    {DPAD_UP, 1, RunKind::DISMOUNT},
+    {DPAD_UP, 13, RunKind::WALK},
+    {DPAD_RIGHT, 3, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_LEFT, 12, RunKind::WALK},
+    {DPAD_UP, 1, RunKind::WALK},
+    {DPAD_UP, 4, RunKind::WALK},
+    {DPAD_DOWN, 4, RunKind::WALK},
 };
 
 inline constexpr const char* MAP_NAMES[] = {
@@ -28530,6 +28832,9 @@ inline constexpr const char* MAP_NAMES[] = {
     "Seven Island Pokemon Center 1F",
     "Seven Island Sevault Canyon",
     "Seven Island Sevault Canyon Entrance",
+    "Seven Island Sevault Canyon Tanoby Key",
+    "Seven Island Tanoby Ruins",
+    "Seven Island Tanoby Ruins Monean Chamber",
     "Silph Co 11F",
     "Silph Co 1F",
     "Silph Co 2F",
@@ -28597,27 +28902,27 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToRivalTrigger", 8, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 112, 10, 5},  //  4
     {"LabToViridianMart", 11, 2, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 112, 7, 8},  //  5
     {"LabToViridianMart_1", 13, 26, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 16, 14},  //  6
-    {"ToOak", 39, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 255, 4, 3},  //  7
-    {"ToOak_1", 40, 23, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 253, 36, 20},  //  8
+    {"ToOak", 39, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 258, 4, 3},  //  7
+    {"ToOak_1", 40, 23, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 36, 20},  //  8
     {"ToOak_2", 63, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 112, 6, 12},  //  9
     {"LabToViridianPC", 64, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 112, 6, 4},  //  10
     {"LabToViridianPC_1", 65, 26, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 109, 16, 14},  //  11
-    {"LabToViridianPC_2", 91, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  12
-    {"ToOldManTutorial", 92, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  13
-    {"ToOldManTutorial_1", 93, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 253, 26, 27},  //  14
-    {"GrindRoute2South_FirstToNurse", 95, 2, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 253, 22, 8},  //  15
-    {"GrindRoute2South_FirstToNurse_1", 97, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  16
-    {"GrindRoute2South_ToGrass", 98, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  17
-    {"GrindRoute2South_ToGrass_1", 99, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 253, 26, 27},  //  18
+    {"LabToViridianPC_2", 91, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  12
+    {"ToOldManTutorial", 92, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  13
+    {"ToOldManTutorial_1", 93, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 256, 26, 27},  //  14
+    {"GrindRoute2South_FirstToNurse", 95, 2, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 22, 8},  //  15
+    {"GrindRoute2South_FirstToNurse_1", 97, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  16
+    {"GrindRoute2South_ToGrass", 98, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  17
+    {"GrindRoute2South_ToGrass_1", 99, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 26, 27},  //  18
     {"GrindRoute2South_ToNurse", 104, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 6, 60},  //  19
-    {"GrindRoute2South_ToNurse_1", 109, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  20
-    {"GrindRoute2South_BackToGrass", 110, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  21
-    {"GrindRoute2South_BackToGrass_1", 111, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 253, 26, 27},  //  22
-    {"ViridianToPewterPC_ToTrainer", 116, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  23
-    {"ViridianToPewterPC_ToTrainer_1", 117, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 253, 26, 27},  //  24
+    {"GrindRoute2South_ToNurse_1", 109, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  20
+    {"GrindRoute2South_BackToGrass", 110, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  21
+    {"GrindRoute2South_BackToGrass_1", 111, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 26, 27},  //  22
+    {"ViridianToPewterPC_ToTrainer", 116, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  23
+    {"ViridianToPewterPC_ToTrainer_1", 117, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 256, 26, 27},  //  24
     {"ViridianToPewterPC_ToTrainer_2", 125, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, false, 170, 7, 10},  //  25
-    {"ViridianToPewterPC_ToTrainer_3", 126, 24, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 257, 29, 62},  //  26
-    {"ViridianToPewterPC", 150, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 257, 5, 22},  //  27
+    {"ViridianToPewterPC_ToTrainer_3", 126, 24, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 260, 29, 62},  //  26
+    {"ViridianToPewterPC", 150, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 260, 5, 22},  //  27
     {"ViridianToPewterPC_1", 152, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 169, 7, 10},  //  28
     {"ViridianToPewterPC_2", 153, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 158, 5, 13},  //  29
     {"ViridianToPewterPC_3", 158, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 117, 7, 8},  //  30
@@ -28708,80 +29013,80 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToCeruleanRocket_3", 478, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 21, 3, 7},  //  115
     {"ToCeruleanRocket_4", 483, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 18, 31, 8},  //  116
     {"RareCandyRoute6", 485, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 18, 33, 7},  //  117
-    {"RareCandyRoute6_1", 492, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 241, 6, 8},  //  118
-    {"RareCandyRoute6_2", 495, 2, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 242, 4, 3},  //  119
-    {"RareCandyRoute6_3", 497, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 243, 7, 4},  //  120
+    {"RareCandyRoute6_1", 492, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 244, 6, 8},  //  118
+    {"RareCandyRoute6_2", 495, 2, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 4, 3},  //  119
+    {"RareCandyRoute6_3", 497, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 246, 7, 4},  //  120
     {"RareCandyRoute6_4", 499, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 175, 19, 14},  //  121
     {"CeruleanToVermilionPC_ToTrainer", 503, 12, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 175, 19, 6},  //  122
     {"CeruleanToVermilionPC", 515, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 175, 10, 33},  //  123
-    {"CeruleanToVermilionPC_1", 517, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  124
-    {"ToTicketCheck", 518, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  125
-    {"ToTicketCheck_1", 519, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 15, 7},  //  126
-    {"ToSSAnneRival", 528, 1, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 23, 33},  //  127
-    {"ToSSAnneRival_1", 529, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 32, 5},  //  128
-    {"ToSSAnneRival_2", 530, 4, DPAD_DOWN, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 222, 19, 2},  //  129
-    {"ToSSAnneRival_3", 534, 5, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 223, 2, 2},  //  130
-    {"Captain", 539, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 223, 31, 6},  //  131
-    {"Captain_1", 542, 2, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 3, 7},  //  132
-    {"LeaveSSAnne", 544, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 224, 5, 5},  //  133
-    {"LeaveSSAnne_1", 546, 5, DPAD_LEFT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 223, 30, 2},  //  134
-    {"LeaveSSAnne_2", 551, 4, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 222, 3, 8},  //  135
-    {"DockToVermilionPC", 555, 8, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 23, 32},  //  136
-    {"DockToVermilionPC_1", 563, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  137
-    {"GrindRoute11_ToGrass", 564, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  138
-    {"GrindRoute11_ToGrass_1", 565, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  139
+    {"CeruleanToVermilionPC_1", 517, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  124
+    {"ToTicketCheck", 518, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  125
+    {"ToTicketCheck_1", 519, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 15, 7},  //  126
+    {"ToSSAnneRival", 528, 1, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 23, 33},  //  127
+    {"ToSSAnneRival_1", 529, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 228, 32, 5},  //  128
+    {"ToSSAnneRival_2", 530, 4, DPAD_DOWN, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 19, 2},  //  129
+    {"ToSSAnneRival_3", 534, 5, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 226, 2, 2},  //  130
+    {"Captain", 539, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 31, 6},  //  131
+    {"Captain_1", 542, 2, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 227, 3, 7},  //  132
+    {"LeaveSSAnne", 544, 2, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 227, 5, 5},  //  133
+    {"LeaveSSAnne_1", 546, 5, DPAD_LEFT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 30, 2},  //  134
+    {"LeaveSSAnne_2", 551, 4, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 225, 3, 8},  //  135
+    {"DockToVermilionPC", 555, 8, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 23, 32},  //  136
+    {"DockToVermilionPC_1", 563, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  137
+    {"GrindRoute11_ToGrass", 564, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  138
+    {"GrindRoute11_ToGrass_1", 565, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  139
     {"GrindRoute11_ToNurse", 574, 7, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 18, 7},  //  140
-    {"GrindRoute11_ToNurse_1", 581, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  141
-    {"GrindRoute11_BackToGrass", 582, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  142
-    {"GrindRoute11_BackToGrass_1", 583, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  143
-    {"Sailor Dwayne", 592, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  144
-    {"Sailor Dwayne_1", 593, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  145
-    {"Sailor Dwayne_2", 600, 2, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 19, 23},  //  146
-    {"Sailor Dwayne_3", 602, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 19},  //  147
-    {"Sailor Dwayne_Back", 606, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 8, 14},  //  148
-    {"Super Nerd Baily", 607, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 8, 15},  //  149
-    {"Super Nerd Baily_Back", 611, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 3, 11},  //  150
-    {"Gentleman Tucker", 612, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 4, 11},  //  151
-    {"VERMILION_TRASH_CANS_ToHub", 615, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 7, 9},  //  152
-    {"VERMILION_TRASH_CANS_To1", 618, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  153
-    {"VERMILION_TRASH_CANS_Back1", 620, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 0, 10},  //  154
-    {"VERMILION_TRASH_CANS_To2", 622, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  155
-    {"VERMILION_TRASH_CANS_Back2", 624, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 4, 10},  //  156
-    {"VERMILION_TRASH_CANS_To3", 626, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  157
-    {"VERMILION_TRASH_CANS_Back3", 628, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 4, 10},  //  158
-    {"VERMILION_TRASH_CANS_To4", 630, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  159
-    {"VERMILION_TRASH_CANS_Back4", 632, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 6, 10},  //  160
-    {"VERMILION_TRASH_CANS_To5", 634, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  161
-    {"VERMILION_TRASH_CANS_Back5", 637, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 9, 11},  //  162
-    {"VERMILION_TRASH_CANS_To6", 640, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  163
-    {"VERMILION_TRASH_CANS_Back6", 642, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 2, 12},  //  164
-    {"VERMILION_TRASH_CANS_To7", 644, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  165
-    {"VERMILION_TRASH_CANS_Back7", 646, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 4, 12},  //  166
-    {"VERMILION_TRASH_CANS_To8", 648, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  167
-    {"VERMILION_TRASH_CANS_Back8", 650, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 4, 12},  //  168
-    {"VERMILION_TRASH_CANS_To9", 652, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  169
-    {"VERMILION_TRASH_CANS_Back9", 654, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 6, 12},  //  170
-    {"VERMILION_TRASH_CANS_To10", 656, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  171
-    {"VERMILION_TRASH_CANS_Back10", 658, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 10, 12},  //  172
-    {"VERMILION_TRASH_CANS_To11", 660, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  173
-    {"VERMILION_TRASH_CANS_Back11", 661, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 1, 15},  //  174
-    {"VERMILION_TRASH_CANS_To12", 662, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  175
-    {"VERMILION_TRASH_CANS_Back12", 663, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 3, 15},  //  176
-    {"VERMILION_TRASH_CANS_To13", 664, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  177
-    {"VERMILION_TRASH_CANS_To14", 664, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  178
-    {"VERMILION_TRASH_CANS_Back14", 665, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 7, 15},  //  179
-    {"VERMILION_TRASH_CANS_To15", 666, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  180
-    {"VERMILION_TRASH_CANS_Back15", 667, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 246, 9, 15},  //  181
-    {"Lt. Surge", 668, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 246, 5, 15},  //  182
-    {"SurgeToVermilionPC", 670, 3, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 246, 4, 2},  //  183
-    {"SurgeToVermilionPC_1", 673, 2, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 14, 26},  //  184
-    {"SurgeToVermilionPC_2", 675, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 19, 25},  //  185
-    {"SurgeToVermilionPC_3", 682, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  186
-    {"RareCandyRoute9_ToTrainer", 683, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  187
-    {"RareCandyRoute9_ToTrainer_1", 684, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  188
-    {"RareCandyRoute9_ToTrainer_2", 694, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 243, 6, 8},  //  189
-    {"RareCandyRoute9_ToTrainer_3", 697, 2, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 242, 3, 60},  //  190
-    {"RareCandyRoute9_ToTrainer_4", 699, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 241, 7, 4},  //  191
+    {"GrindRoute11_ToNurse_1", 581, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  141
+    {"GrindRoute11_BackToGrass", 582, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  142
+    {"GrindRoute11_BackToGrass_1", 583, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  143
+    {"Sailor Dwayne", 592, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  144
+    {"Sailor Dwayne_1", 593, 7, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  145
+    {"Sailor Dwayne_2", 600, 2, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 19, 23},  //  146
+    {"Sailor Dwayne_3", 602, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 19},  //  147
+    {"Sailor Dwayne_Back", 606, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 8, 14},  //  148
+    {"Super Nerd Baily", 607, 4, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 8, 15},  //  149
+    {"Super Nerd Baily_Back", 611, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 3, 11},  //  150
+    {"Gentleman Tucker", 612, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 4, 11},  //  151
+    {"VERMILION_TRASH_CANS_ToHub", 615, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 9},  //  152
+    {"VERMILION_TRASH_CANS_To1", 618, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  153
+    {"VERMILION_TRASH_CANS_Back1", 620, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 0, 10},  //  154
+    {"VERMILION_TRASH_CANS_To2", 622, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  155
+    {"VERMILION_TRASH_CANS_Back2", 624, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 4, 10},  //  156
+    {"VERMILION_TRASH_CANS_To3", 626, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  157
+    {"VERMILION_TRASH_CANS_Back3", 628, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 4, 10},  //  158
+    {"VERMILION_TRASH_CANS_To4", 630, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  159
+    {"VERMILION_TRASH_CANS_Back4", 632, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 6, 10},  //  160
+    {"VERMILION_TRASH_CANS_To5", 634, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  161
+    {"VERMILION_TRASH_CANS_Back5", 637, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 9, 11},  //  162
+    {"VERMILION_TRASH_CANS_To6", 640, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  163
+    {"VERMILION_TRASH_CANS_Back6", 642, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 2, 12},  //  164
+    {"VERMILION_TRASH_CANS_To7", 644, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  165
+    {"VERMILION_TRASH_CANS_Back7", 646, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 4, 12},  //  166
+    {"VERMILION_TRASH_CANS_To8", 648, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  167
+    {"VERMILION_TRASH_CANS_Back8", 650, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 4, 12},  //  168
+    {"VERMILION_TRASH_CANS_To9", 652, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  169
+    {"VERMILION_TRASH_CANS_Back9", 654, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 6, 12},  //  170
+    {"VERMILION_TRASH_CANS_To10", 656, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  171
+    {"VERMILION_TRASH_CANS_Back10", 658, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 10, 12},  //  172
+    {"VERMILION_TRASH_CANS_To11", 660, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  173
+    {"VERMILION_TRASH_CANS_Back11", 661, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 1, 15},  //  174
+    {"VERMILION_TRASH_CANS_To12", 662, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  175
+    {"VERMILION_TRASH_CANS_Back12", 663, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 3, 15},  //  176
+    {"VERMILION_TRASH_CANS_To13", 664, 0, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  177
+    {"VERMILION_TRASH_CANS_To14", 664, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  178
+    {"VERMILION_TRASH_CANS_Back14", 665, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 15},  //  179
+    {"VERMILION_TRASH_CANS_To15", 666, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  180
+    {"VERMILION_TRASH_CANS_Back15", 667, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 9, 15},  //  181
+    {"Lt. Surge", 668, 2, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 5, 15},  //  182
+    {"SurgeToVermilionPC", 670, 3, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 4, 2},  //  183
+    {"SurgeToVermilionPC_1", 673, 2, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 14, 26},  //  184
+    {"SurgeToVermilionPC_2", 675, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 19, 25},  //  185
+    {"SurgeToVermilionPC_3", 682, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  186
+    {"RareCandyRoute9_ToTrainer", 683, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  187
+    {"RareCandyRoute9_ToTrainer_1", 684, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  188
+    {"RareCandyRoute9_ToTrainer_2", 694, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 246, 6, 8},  //  189
+    {"RareCandyRoute9_ToTrainer_3", 697, 2, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 3, 60},  //  190
+    {"RareCandyRoute9_ToTrainer_4", 699, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 244, 7, 4},  //  191
     {"RareCandyRoute9_ToTrainer_5", 701, 5, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 174, 31, 32},  //  192
     {"RareCandyRoute9_ToTrainer_6", 706, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 1, 8},  //  193
     {"RareCandyRoute9_ToTrainer", 709, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 180, 13, 10},  //  194
@@ -28814,9 +29119,9 @@ inline constexpr StoryLeg LEGS[] = {
     {"LavenderToCeladonPC_ToTrainer", 812, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 63, 7, 4},  //  221
     {"LavenderToCeladonPC_ToTrainer_1", 813, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 61, 6, 6},  //  222
     {"LavenderToCeladonPC", 818, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 178, 56, 14},  //  223
-    {"LavenderToCeladonPC_1", 825, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 239, 6, 8},  //  224
-    {"LavenderToCeladonPC_2", 828, 2, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 240, 76, 3},  //  225
-    {"LavenderToCeladonPC_3", 830, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 244, 7, 4},  //  226
+    {"LavenderToCeladonPC_1", 825, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 242, 6, 8},  //  224
+    {"LavenderToCeladonPC_2", 828, 2, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 243, 76, 3},  //  225
+    {"LavenderToCeladonPC_3", 830, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 247, 7, 4},  //  226
     {"LavenderToCeladonPC_4", 832, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 176, 7, 15},  //  227
     {"LavenderToCeladonPC_5", 837, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 14, 7, 8},  //  228
     {"TeaWoman", 838, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 14, 7, 4},  //  229
@@ -29037,38 +29342,38 @@ inline constexpr StoryLeg LEGS[] = {
     {"GateToSaffronPC_2", 1563, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 190, 7, 8},  //  444
     {"CardKey", 1564, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 7, 4},  //  445
     {"CardKey_1", 1565, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, true, 186, 24, 39},  //  446
-    {"CardKey_2", 1569, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 8, 20},  //  447
-    {"CardKey_3", 1572, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 203, 30, 2},  //  448
-    {"CardKey_4", 1575, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 207, 2, 17},  //  449
-    {"CardKey_5", 1578, 10, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 208, 16, 2},  //  450
-    {"CardKey_6", 1588, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 205, 10, 20},  //  451
-    {"CardKeyToSaffronPC_WalkOut", 1591, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 205, 21, 21},  //  452
-    {"CardKeyToSaffronPC_WalkOut_1", 1595, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 208, 22, 18},  //  453
-    {"CardKeyToSaffronPC_WalkOut_2", 1598, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 208, 21, 14},  //  454
-    {"CardKeyToSaffronPC_WalkOut_3", 1599, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 208, 21, 8},  //  455
-    {"CardKeyToSaffronPC_WalkOut_4", 1602, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 207, 16, 2},  //  456
-    {"CardKeyToSaffronPC_WalkOut_5", 1605, 2, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 15, 6},  //  457
-    {"CardKeyToSaffronPC_WalkOut_6", 1607, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 31, 2},  //  458
+    {"CardKey_2", 1569, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 8, 20},  //  447
+    {"CardKey_3", 1572, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 206, 30, 2},  //  448
+    {"CardKey_4", 1575, 3, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 210, 2, 17},  //  449
+    {"CardKey_5", 1578, 10, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 211, 16, 2},  //  450
+    {"CardKey_6", 1588, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 208, 10, 20},  //  451
+    {"CardKeyToSaffronPC_WalkOut", 1591, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 208, 21, 21},  //  452
+    {"CardKeyToSaffronPC_WalkOut_1", 1595, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 211, 22, 18},  //  453
+    {"CardKeyToSaffronPC_WalkOut_2", 1598, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 211, 21, 14},  //  454
+    {"CardKeyToSaffronPC_WalkOut_3", 1599, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 211, 21, 8},  //  455
+    {"CardKeyToSaffronPC_WalkOut_4", 1602, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 210, 16, 2},  //  456
+    {"CardKeyToSaffronPC_WalkOut_5", 1605, 2, DPAD_DOWN, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 15, 6},  //  457
+    {"CardKeyToSaffronPC_WalkOut_6", 1607, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 31, 2},  //  458
     {"CardKeyToSaffronPC", 1611, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 186, 33, 31},  //  459
     {"CardKeyToSaffronPC_1", 1615, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 190, 7, 8},  //  460
     {"ToSilphRival_ToTrainer", 1616, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 7, 4},  //  461
     {"ToSilphRival_ToTrainer_1", 1617, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, true, 186, 24, 39},  //  462
-    {"ToSilphRival_ToTrainer_2", 1621, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 8, 20},  //  463
-    {"ToSilphRival_ToTrainer_3", 1624, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 30, 2},  //  464
-    {"ToSilphRival_ToTrainer_4", 1625, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 204, 28, 2},  //  465
-    {"ToSilphRival", 1629, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 204, 22, 9},  //  466
-    {"ToSilphRival_1", 1630, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 204, 22, 13},  //  467
-    {"ToSilphRival_2", 1633, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 206, 5, 4},  //  468
-    {"LaprasGuy", 1634, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 206, 2, 4},  //  469
-    {"ToSilphGiovanni_ToTrainer", 1636, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 206, 0, 6},  //  470
-    {"ToSilphGiovanni_ToTrainer_1", 1639, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 201, 2, 5},  //  471
-    {"ToSilphGiovanni", 1642, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 2, 18},  //  472
-    {"ToSilphGiovanni_1", 1643, 1, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 201, 5, 18},  //  473
-    {"SilphToSaffronPC_WalkOut", 1644, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 201, 5, 15},  //  474
-    {"SilphToSaffronPC_WalkOut_1", 1647, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 206, 5, 8},  //  475
-    {"SilphToSaffronPC_WalkOut_2", 1651, 6, DPAD_RIGHT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 204, 13, 14},  //  476
-    {"SilphToSaffronPC_WalkOut_3", 1657, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 28, 2},  //  477
-    {"SilphToSaffronPC_WalkOut_4", 1658, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 31, 2},  //  478
+    {"ToSilphRival_ToTrainer_2", 1621, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 8, 20},  //  463
+    {"ToSilphRival_ToTrainer_3", 1624, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 30, 2},  //  464
+    {"ToSilphRival_ToTrainer_4", 1625, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 207, 28, 2},  //  465
+    {"ToSilphRival", 1629, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 207, 22, 9},  //  466
+    {"ToSilphRival_1", 1630, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 207, 22, 13},  //  467
+    {"ToSilphRival_2", 1633, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 209, 5, 4},  //  468
+    {"LaprasGuy", 1634, 2, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 209, 2, 4},  //  469
+    {"ToSilphGiovanni_ToTrainer", 1636, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 209, 0, 6},  //  470
+    {"ToSilphGiovanni_ToTrainer_1", 1639, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 204, 2, 5},  //  471
+    {"ToSilphGiovanni", 1642, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 204, 2, 18},  //  472
+    {"ToSilphGiovanni_1", 1643, 1, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 204, 5, 18},  //  473
+    {"SilphToSaffronPC_WalkOut", 1644, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 204, 5, 15},  //  474
+    {"SilphToSaffronPC_WalkOut_1", 1647, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 209, 5, 8},  //  475
+    {"SilphToSaffronPC_WalkOut_2", 1651, 6, DPAD_RIGHT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 207, 13, 14},  //  476
+    {"SilphToSaffronPC_WalkOut_3", 1657, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 28, 2},  //  477
+    {"SilphToSaffronPC_WalkOut_4", 1658, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 31, 2},  //  478
     {"SilphToSaffronPC", 1662, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 186, 33, 31},  //  479
     {"SilphToSaffronPC_1", 1666, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 190, 7, 8},  //  480
     {"GrindRoute7Sabrina_Lapras_FirstToNurse", 1667, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 190, 7, 4},  //  481
@@ -29215,22 +29520,22 @@ inline constexpr StoryLeg LEGS[] = {
     {"GrindMansion2_BackToGrass_1", 2030, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 25, 14, 12},  //  622
     {"GrindMansion2_BackToGrass_2", 2034, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 122, 8, 33},  //  623
     {"CinnabarToViridianPC_Out", 2035, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 7, 4},  //  624
-    {"CinnabarToViridianPC", 2036, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  625
-    {"CinnabarToViridianPC_1", 2036, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  626
-    {"Black Belt Takashi", 2037, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  627
-    {"Black Belt Takashi_1", 2038, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  628
-    {"Black Belt Takashi_2", 2043, 6, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 254, 17, 22},  //  629
-    {"Giovanni (Gym)_ToTrainer", 2049, 12, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 254, 11, 2},  //  630
-    {"Giovanni (Gym)", 2061, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 254, 15, 7},  //  631
-    {"GiovanniToViridianPC", 2070, 9, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 254, 2, 3},  //  632
-    {"GiovanniToViridianPC_1", 2079, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 36, 11},  //  633
-    {"GiovanniToViridianPC_2", 2084, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  634
-    {"ToRoute22Rival", 2085, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  635
-    {"ToRoute22Rival_1", 2086, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 253, 26, 27},  //  636
-    {"Route22RivalToViridianPC", 2094, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  637
-    {"Route22RivalToViridianPC_1", 2094, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  638
-    {"BoulderBadgeGuard", 2095, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  639
-    {"BoulderBadgeGuard_1", 2096, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 26, 27},  //  640
+    {"CinnabarToViridianPC", 2036, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  625
+    {"CinnabarToViridianPC_1", 2036, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  626
+    {"Black Belt Takashi", 2037, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  627
+    {"Black Belt Takashi_1", 2038, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  628
+    {"Black Belt Takashi_2", 2043, 6, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 257, 17, 22},  //  629
+    {"Giovanni (Gym)_ToTrainer", 2049, 12, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 257, 11, 2},  //  630
+    {"Giovanni (Gym)", 2061, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 257, 15, 7},  //  631
+    {"GiovanniToViridianPC", 2070, 9, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 257, 2, 3},  //  632
+    {"GiovanniToViridianPC_1", 2079, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 36, 11},  //  633
+    {"GiovanniToViridianPC_2", 2084, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  634
+    {"ToRoute22Rival", 2085, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  635
+    {"ToRoute22Rival_1", 2086, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 256, 26, 27},  //  636
+    {"Route22RivalToViridianPC", 2094, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  637
+    {"Route22RivalToViridianPC_1", 2094, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  638
+    {"BoulderBadgeGuard", 2095, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  639
+    {"BoulderBadgeGuard_1", 2096, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 256, 26, 27},  //  640
     {"BoulderBadgeGuard_2", 2105, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 162, 22, 8},  //  641
     {"BoulderBadgeGuard_3", 2113, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 163, 7, 10},  //  642
     {"BadgeGuard1", 2114, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 163, 7, 2},  //  643
@@ -29244,132 +29549,132 @@ inline constexpr StoryLeg LEGS[] = {
     {"BadgeGuard6", 2135, 7, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 164, 9, 94},  //  651
     {"BadgeGuard7", 2142, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 164, 13, 61},  //  652
     {"ToVictoryRoad", 2147, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 164, 5, 35},  //  653
-    {"ToVictoryRoad_1", 2148, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 250, 11, 20},  //  654
-    {"VR1F_Boulder_Push1", 2149, 3, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 11, 19},  //  655
-    {"VR1F_Boulder_Push2", 2152, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 7, 17},  //  656
-    {"VR1F_Boulder_Push3", 2155, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 6, 19},  //  657
-    {"VR1F_Boulder_Push4", 2156, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 7, 19},  //  658
-    {"VR1F_Boulder_Push5", 2157, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 8, 19},  //  659
-    {"VR1F_Boulder_Push6", 2158, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 9, 19},  //  660
-    {"VR1F_Boulder_Push7", 2161, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 11, 20},  //  661
-    {"VR1F_Boulder_Push8", 2164, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 10, 18},  //  662
-    {"VR1F_Boulder_Push9", 2167, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 12, 19},  //  663
-    {"VR1F_Boulder_Push10", 2170, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 11, 17},  //  664
-    {"VR1F_Boulder_Push11", 2171, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 12, 17},  //  665
-    {"VR1F_Boulder_Push12", 2172, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 13, 17},  //  666
-    {"VR1F_Boulder_Push13", 2173, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 14, 17},  //  667
-    {"VR1F_Boulder_Push14", 2174, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 15, 17},  //  668
-    {"VR1F_Boulder_Push15", 2175, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 16, 17},  //  669
-    {"VR1F_Boulder_Push16", 2176, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 17, 17},  //  670
-    {"VR1F_Boulder_Push17", 2179, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 19, 18},  //  671
-    {"VR1F_Boulder_Push18", 2180, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 19, 17},  //  672
-    {"VR1F_Boulder_Push19", 2183, 3, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 250, 18, 15},  //  673
-    {"VR1FTo2F", 2186, 16, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 250, 20, 14},  //  674
-    {"VR1FTo2F_1", 2202, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 1, 9},  //  675
-    {"VR2F_Boulder1_Push1", 2203, 2, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 1, 8},  //  676
-    {"VR2F_Boulder1_Push2", 2205, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 6, 16},  //  677
-    {"VR2F_Boulder1_Push3", 2208, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 7, 18},  //  678
-    {"VR2F_Boulder1_Push4", 2209, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 6, 18},  //  679
-    {"VR2F_Boulder1_Push5", 2212, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 4, 17},  //  680
-    {"VR2F_Boulder1_Push6", 2215, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 5, 19},  //  681
-    {"VR2FTo3F", 2216, 12, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 251, 4, 19},  //  682
-    {"VR2FTo3F_1", 2228, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 252, 34, 9},  //  683
-    {"VR3F_Boulder_Push1", 2233, 5, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 5, 3},  //  684
-    {"VR3F_Boulder_Push2", 2238, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 33, 5},  //  685
-    {"VR3F_Boulder_Push3", 2239, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 32, 5},  //  686
-    {"VR3F_Boulder_Push4", 2240, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 31, 5},  //  687
-    {"VR3F_Boulder_Push5", 2243, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 29, 6},  //  688
-    {"VR3F_Boulder_Push6", 2244, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 29, 5},  //  689
-    {"VR3F_Boulder_Push7", 2247, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 30, 3},  //  690
-    {"VR3F_Boulder_Push8", 2248, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 29, 3},  //  691
-    {"VR3F_Boulder_Push9", 2249, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 28, 3},  //  692
-    {"VR3F_Boulder_Push10", 2250, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 27, 3},  //  693
-    {"VR3F_Boulder_Push11", 2251, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 26, 3},  //  694
-    {"VR3F_Boulder_Push12", 2252, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 25, 3},  //  695
-    {"VR3F_Boulder_Push13", 2253, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 24, 3},  //  696
-    {"VR3F_Boulder_Push14", 2254, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 23, 3},  //  697
-    {"VR3F_Boulder_Push15", 2255, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 22, 3},  //  698
-    {"VR3F_Boulder_Push16", 2256, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 21, 3},  //  699
-    {"VR3F_Boulder_Push17", 2257, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 20, 3},  //  700
-    {"VR3F_Boulder_Push18", 2258, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 19, 3},  //  701
-    {"VR3F_Boulder_Push19", 2259, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 18, 3},  //  702
-    {"VR3F_Boulder_Push20", 2260, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 17, 3},  //  703
-    {"VR3F_Boulder_Push21", 2261, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 16, 3},  //  704
-    {"VR3F_Boulder_Push22", 2262, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 15, 3},  //  705
-    {"VR3F_Boulder_Push23", 2263, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 14, 3},  //  706
-    {"VR3F_Boulder_Push24", 2264, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 13, 3},  //  707
-    {"VR3F_Boulder_Push25", 2267, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 11, 2},  //  708
-    {"VR3F_Boulder_Push26", 2270, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 12, 4},  //  709
-    {"VR3F_Boulder_Push27", 2271, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 11, 4},  //  710
-    {"VR3F_Boulder_Push28", 2272, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 10, 4},  //  711
-    {"VR3F_Boulder_Push29", 2273, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 9, 4},  //  712
-    {"VR3F_Boulder_Push30", 2274, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 8, 4},  //  713
-    {"VR3F_Boulder_Push31", 2277, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 6, 3},  //  714
-    {"VR3F_Boulder_Push32", 2278, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 6, 4},  //  715
-    {"VR3F_Boulder_Push33", 2279, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 252, 6, 5},  //  716
-    {"VR3F_Hole_Push1", 2282, 18, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 5, 7},  //  717
-    {"VR3FTo2FBoulder", 2300, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 252, 32, 18},  //  718
-    {"VR3FTo2FBoulder_1", 2302, 1, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 34, 19},  //  719
-    {"VR2F_Boulder2_Push1", 2303, 1, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 35, 19},  //  720
-    {"VR2F_Boulder2_Push2", 2304, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 34, 19},  //  721
-    {"VR2F_Boulder2_Push3", 2305, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 33, 19},  //  722
-    {"VR2F_Boulder2_Push4", 2306, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 32, 19},  //  723
-    {"VR2F_Boulder2_Push5", 2307, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 31, 19},  //  724
-    {"VR2F_Boulder2_Push6", 2308, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 30, 19},  //  725
-    {"VR2F_Boulder2_Push7", 2309, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 29, 19},  //  726
-    {"VR2F_Boulder2_Push8", 2310, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 28, 19},  //  727
-    {"VR2F_Boulder2_Push9", 2311, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 27, 19},  //  728
-    {"VR2F_Boulder2_Push10", 2312, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 26, 19},  //  729
-    {"VR2F_Boulder2_Push11", 2313, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 25, 19},  //  730
-    {"VR2F_Boulder2_Push12", 2314, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 24, 19},  //  731
-    {"VR2F_Boulder2_Push13", 2315, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 23, 19},  //  732
-    {"VR2F_Boulder2_Push14", 2316, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 22, 19},  //  733
-    {"VR2F_Boulder2_Push15", 2317, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 21, 19},  //  734
-    {"VR2F_Boulder2_Push16", 2318, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 20, 19},  //  735
-    {"VR2F_Boulder2_Push17", 2319, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 19, 19},  //  736
-    {"VR2F_Boulder2_Push18", 2320, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 18, 19},  //  737
-    {"VR2F_Boulder2_Push19", 2321, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 251, 17, 19},  //  738
-    {"VictoryRoadToIndigoPC", 2322, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 251, 16, 19},  //  739
-    {"VictoryRoadToIndigoPC_1", 2326, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 252, 39, 17},  //  740
-    {"VictoryRoadToIndigoPC_2", 2330, 3, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 38, 9},  //  741
+    {"ToVictoryRoad_1", 2148, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 253, 11, 20},  //  654
+    {"VR1F_Boulder_Push1", 2149, 3, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 11, 19},  //  655
+    {"VR1F_Boulder_Push2", 2152, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 7, 17},  //  656
+    {"VR1F_Boulder_Push3", 2155, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 6, 19},  //  657
+    {"VR1F_Boulder_Push4", 2156, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 7, 19},  //  658
+    {"VR1F_Boulder_Push5", 2157, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 8, 19},  //  659
+    {"VR1F_Boulder_Push6", 2158, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 9, 19},  //  660
+    {"VR1F_Boulder_Push7", 2161, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 11, 20},  //  661
+    {"VR1F_Boulder_Push8", 2164, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 10, 18},  //  662
+    {"VR1F_Boulder_Push9", 2167, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 12, 19},  //  663
+    {"VR1F_Boulder_Push10", 2170, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 11, 17},  //  664
+    {"VR1F_Boulder_Push11", 2171, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 12, 17},  //  665
+    {"VR1F_Boulder_Push12", 2172, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 13, 17},  //  666
+    {"VR1F_Boulder_Push13", 2173, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 14, 17},  //  667
+    {"VR1F_Boulder_Push14", 2174, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 15, 17},  //  668
+    {"VR1F_Boulder_Push15", 2175, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 16, 17},  //  669
+    {"VR1F_Boulder_Push16", 2176, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 17, 17},  //  670
+    {"VR1F_Boulder_Push17", 2179, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 19, 18},  //  671
+    {"VR1F_Boulder_Push18", 2180, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 19, 17},  //  672
+    {"VR1F_Boulder_Push19", 2183, 3, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 18, 15},  //  673
+    {"VR1FTo2F", 2186, 16, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 253, 20, 14},  //  674
+    {"VR1FTo2F_1", 2202, 1, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 1, 9},  //  675
+    {"VR2F_Boulder1_Push1", 2203, 2, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 1, 8},  //  676
+    {"VR2F_Boulder1_Push2", 2205, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 6, 16},  //  677
+    {"VR2F_Boulder1_Push3", 2208, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 7, 18},  //  678
+    {"VR2F_Boulder1_Push4", 2209, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 6, 18},  //  679
+    {"VR2F_Boulder1_Push5", 2212, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 4, 17},  //  680
+    {"VR2F_Boulder1_Push6", 2215, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 5, 19},  //  681
+    {"VR2FTo3F", 2216, 12, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 254, 4, 19},  //  682
+    {"VR2FTo3F_1", 2228, 5, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 255, 34, 9},  //  683
+    {"VR3F_Boulder_Push1", 2233, 5, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 5, 3},  //  684
+    {"VR3F_Boulder_Push2", 2238, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 33, 5},  //  685
+    {"VR3F_Boulder_Push3", 2239, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 32, 5},  //  686
+    {"VR3F_Boulder_Push4", 2240, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 31, 5},  //  687
+    {"VR3F_Boulder_Push5", 2243, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 29, 6},  //  688
+    {"VR3F_Boulder_Push6", 2244, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 29, 5},  //  689
+    {"VR3F_Boulder_Push7", 2247, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 30, 3},  //  690
+    {"VR3F_Boulder_Push8", 2248, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 29, 3},  //  691
+    {"VR3F_Boulder_Push9", 2249, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 28, 3},  //  692
+    {"VR3F_Boulder_Push10", 2250, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 27, 3},  //  693
+    {"VR3F_Boulder_Push11", 2251, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 26, 3},  //  694
+    {"VR3F_Boulder_Push12", 2252, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 25, 3},  //  695
+    {"VR3F_Boulder_Push13", 2253, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 24, 3},  //  696
+    {"VR3F_Boulder_Push14", 2254, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 23, 3},  //  697
+    {"VR3F_Boulder_Push15", 2255, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 22, 3},  //  698
+    {"VR3F_Boulder_Push16", 2256, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 21, 3},  //  699
+    {"VR3F_Boulder_Push17", 2257, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 20, 3},  //  700
+    {"VR3F_Boulder_Push18", 2258, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 19, 3},  //  701
+    {"VR3F_Boulder_Push19", 2259, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 18, 3},  //  702
+    {"VR3F_Boulder_Push20", 2260, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 17, 3},  //  703
+    {"VR3F_Boulder_Push21", 2261, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 16, 3},  //  704
+    {"VR3F_Boulder_Push22", 2262, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 15, 3},  //  705
+    {"VR3F_Boulder_Push23", 2263, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 14, 3},  //  706
+    {"VR3F_Boulder_Push24", 2264, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 13, 3},  //  707
+    {"VR3F_Boulder_Push25", 2267, 3, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 11, 2},  //  708
+    {"VR3F_Boulder_Push26", 2270, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 12, 4},  //  709
+    {"VR3F_Boulder_Push27", 2271, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 11, 4},  //  710
+    {"VR3F_Boulder_Push28", 2272, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 10, 4},  //  711
+    {"VR3F_Boulder_Push29", 2273, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 9, 4},  //  712
+    {"VR3F_Boulder_Push30", 2274, 3, DPAD_LEFT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 8, 4},  //  713
+    {"VR3F_Boulder_Push31", 2277, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 6, 3},  //  714
+    {"VR3F_Boulder_Push32", 2278, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 6, 4},  //  715
+    {"VR3F_Boulder_Push33", 2279, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 255, 6, 5},  //  716
+    {"VR3F_Hole_Push1", 2282, 18, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 255, 5, 7},  //  717
+    {"VR3FTo2FBoulder", 2300, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 255, 32, 18},  //  718
+    {"VR3FTo2FBoulder_1", 2302, 1, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 34, 19},  //  719
+    {"VR2F_Boulder2_Push1", 2303, 1, DPAD_RIGHT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 35, 19},  //  720
+    {"VR2F_Boulder2_Push2", 2304, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 34, 19},  //  721
+    {"VR2F_Boulder2_Push3", 2305, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 33, 19},  //  722
+    {"VR2F_Boulder2_Push4", 2306, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 32, 19},  //  723
+    {"VR2F_Boulder2_Push5", 2307, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 31, 19},  //  724
+    {"VR2F_Boulder2_Push6", 2308, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 30, 19},  //  725
+    {"VR2F_Boulder2_Push7", 2309, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 29, 19},  //  726
+    {"VR2F_Boulder2_Push8", 2310, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 28, 19},  //  727
+    {"VR2F_Boulder2_Push9", 2311, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 27, 19},  //  728
+    {"VR2F_Boulder2_Push10", 2312, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 26, 19},  //  729
+    {"VR2F_Boulder2_Push11", 2313, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 25, 19},  //  730
+    {"VR2F_Boulder2_Push12", 2314, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 24, 19},  //  731
+    {"VR2F_Boulder2_Push13", 2315, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 23, 19},  //  732
+    {"VR2F_Boulder2_Push14", 2316, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 22, 19},  //  733
+    {"VR2F_Boulder2_Push15", 2317, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 21, 19},  //  734
+    {"VR2F_Boulder2_Push16", 2318, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 20, 19},  //  735
+    {"VR2F_Boulder2_Push17", 2319, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 19, 19},  //  736
+    {"VR2F_Boulder2_Push18", 2320, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 18, 19},  //  737
+    {"VR2F_Boulder2_Push19", 2321, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 254, 17, 19},  //  738
+    {"VictoryRoadToIndigoPC", 2322, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 254, 16, 19},  //  739
+    {"VictoryRoadToIndigoPC_1", 2326, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 255, 39, 17},  //  740
+    {"VictoryRoadToIndigoPC_2", 2330, 3, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 38, 9},  //  741
     {"VictoryRoadToIndigoPC_3", 2333, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  742
     {"VictoryRoadToIndigoPC_4", 2341, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  743
     {"GrindVictoryRoad_Voltorb_ToGrass", 2343, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  744
     {"GrindVictoryRoad_Voltorb_ToGrass_1", 2345, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  745
-    {"GrindVictoryRoad_Voltorb_ToGrass_2", 2354, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  746
-    {"GrindVictoryRoad_Voltorb_ToNurse", 2356, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  747
+    {"GrindVictoryRoad_Voltorb_ToGrass_2", 2354, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  746
+    {"GrindVictoryRoad_Voltorb_ToNurse", 2356, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  747
     {"GrindVictoryRoad_Voltorb_ToNurse_1", 2358, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  748
     {"GrindVictoryRoad_Voltorb_ToNurse_2", 2366, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  749
     {"GrindVictoryRoad_Voltorb_BackToGrass", 2368, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  750
     {"GrindVictoryRoad_Voltorb_BackToGrass_1", 2370, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  751
-    {"GrindVictoryRoad_Voltorb_BackToGrass_2", 2379, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  752
+    {"GrindVictoryRoad_Voltorb_BackToGrass_2", 2379, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  752
     {"GrindVictoryRoad_Eevee_ToGrass", 2381, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  753
     {"GrindVictoryRoad_Eevee_ToGrass_1", 2383, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  754
-    {"GrindVictoryRoad_Eevee_ToGrass_2", 2392, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  755
-    {"GrindVictoryRoad_Eevee_ToNurse", 2394, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  756
+    {"GrindVictoryRoad_Eevee_ToGrass_2", 2392, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  755
+    {"GrindVictoryRoad_Eevee_ToNurse", 2394, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  756
     {"GrindVictoryRoad_Eevee_ToNurse_1", 2396, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  757
     {"GrindVictoryRoad_Eevee_ToNurse_2", 2404, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  758
     {"GrindVictoryRoad_Eevee_BackToGrass", 2406, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  759
     {"GrindVictoryRoad_Eevee_BackToGrass_1", 2408, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  760
-    {"GrindVictoryRoad_Eevee_BackToGrass_2", 2417, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  761
+    {"GrindVictoryRoad_Eevee_BackToGrass_2", 2417, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  761
     {"GrindVictoryRoad_Lapras_ToGrass", 2419, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  762
     {"GrindVictoryRoad_Lapras_ToGrass_1", 2421, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  763
-    {"GrindVictoryRoad_Lapras_ToGrass_2", 2430, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  764
-    {"GrindVictoryRoad_Lapras_ToNurse", 2432, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  765
+    {"GrindVictoryRoad_Lapras_ToGrass_2", 2430, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  764
+    {"GrindVictoryRoad_Lapras_ToNurse", 2432, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  765
     {"GrindVictoryRoad_Lapras_ToNurse_1", 2434, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  766
     {"GrindVictoryRoad_Lapras_ToNurse_2", 2442, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  767
     {"GrindVictoryRoad_Lapras_BackToGrass", 2444, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  768
     {"GrindVictoryRoad_Lapras_BackToGrass_1", 2446, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  769
-    {"GrindVictoryRoad_Lapras_BackToGrass_2", 2455, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  770
+    {"GrindVictoryRoad_Lapras_BackToGrass_2", 2455, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  770
     {"GrindVictoryRoad_ToGrass", 2457, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  771
     {"GrindVictoryRoad_ToGrass_1", 2459, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  772
-    {"GrindVictoryRoad_ToGrass_2", 2468, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  773
-    {"GrindVictoryRoad_ToNurse", 2470, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  774
+    {"GrindVictoryRoad_ToGrass_2", 2468, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  773
+    {"GrindVictoryRoad_ToNurse", 2470, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  774
     {"GrindVictoryRoad_ToNurse_1", 2472, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  775
     {"GrindVictoryRoad_ToNurse_2", 2480, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  776
     {"GrindVictoryRoad_BackToGrass", 2482, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  777
     {"GrindVictoryRoad_BackToGrass_1", 2484, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  778
-    {"GrindVictoryRoad_BackToGrass_2", 2493, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  779
+    {"GrindVictoryRoad_BackToGrass_2", 2493, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  779
     {"BuyFullRestore", 2495, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  780
     {"BuyRevive", 2497, 0, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 0, 9},  //  781
     {"BuyUltraBalls", 2497, 0, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 0, 9},  //  782
@@ -29390,16 +29695,16 @@ inline constexpr StoryLeg LEGS[] = {
     {"PostgameRoute16HouseHM02_4", 2530, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 152, 4, 7},  //  797
     {"BackToPallet_Out", 2531, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 152, 4, 3},  //  798
     {"SilphPresident", 2532, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::CAVE, true, 186, 24, 39},  //  799
-    {"SilphPresident_1", 2536, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 8, 20},  //  800
-    {"SilphPresident_2", 2539, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 30, 2},  //  801
-    {"SilphPresident_3", 2540, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 204, 28, 2},  //  802
-    {"SilphPresident_4", 2546, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 206, 5, 4},  //  803
-    {"SilphPresident_5", 2549, 4, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 2, 5},  //  804
-    {"BuyEscapeRopes", 2553, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 201, 8, 9},  //  805
-    {"BuyEscapeRopes_1", 2557, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 206, 5, 8},  //  806
-    {"BuyEscapeRopes_2", 2561, 6, DPAD_RIGHT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 204, 13, 14},  //  807
-    {"BuyEscapeRopes_3", 2567, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 28, 2},  //  808
-    {"BuyEscapeRopes_4", 2568, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 202, 31, 2},  //  809
+    {"SilphPresident_1", 2536, 3, DPAD_UP, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 8, 20},  //  800
+    {"SilphPresident_2", 2539, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 30, 2},  //  801
+    {"SilphPresident_3", 2540, 6, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 207, 28, 2},  //  802
+    {"SilphPresident_4", 2546, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 209, 5, 4},  //  803
+    {"SilphPresident_5", 2549, 4, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 204, 2, 5},  //  804
+    {"BuyEscapeRopes", 2553, 4, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 204, 8, 9},  //  805
+    {"BuyEscapeRopes_1", 2557, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 209, 5, 8},  //  806
+    {"BuyEscapeRopes_2", 2561, 6, DPAD_RIGHT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 207, 13, 14},  //  807
+    {"BuyEscapeRopes_3", 2567, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 206, 28, 2},  //  808
+    {"BuyEscapeRopes_4", 2568, 4, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 205, 31, 2},  //  809
     {"BuyEscapeRopes_5", 2572, 5, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 186, 33, 31},  //  810
     {"BuyEscapeRopes_6", 2577, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 189, 4, 7},  //  811
     {"SilphToSaffronPC", 2578, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 189, 4, 3},  //  812
@@ -29478,44 +29783,44 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToTwoIsland", 2846, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 107, 5, 4},  //  885
     {"FerryToTwoIsland_1", 2849, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 14, 6},  //  886
     {"FerryToTwoIsland_2", 2852, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 3},  //  887
-    {"ToJoyfulGameCorner", 2853, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 236, 8, 5},  //  888
-    {"ToJoyfulGameCorner_1", 2854, 8, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 10, 8},  //  889
-    {"GameCornerToTwoIslandPC", 2862, 1, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 4, 8},  //  890
-    {"GameCornerToTwoIslandPC_1", 2863, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 234, 39, 10},  //  891
-    {"GameCornerToTwoIslandPC_2", 2867, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 238, 7, 8},  //  892
-    {"FerryToThreeIsland", 2868, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 7, 4},  //  893
-    {"FerryToThreeIsland_1", 2869, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 21, 8},  //  894
-    {"FerryToThreeIsland_2", 2874, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 236, 8, 3},  //  895
-    {"BikerBossIntro", 2875, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 230, 8, 5},  //  896
-    {"BikerBossIntro_1", 2876, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 233, 12, 13},  //  897
-    {"ToThreeIslandPC", 2879, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 9, 27},  //  898
-    {"ToThreeIslandPC_1", 2881, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  899
-    {"BattleBikers", 2882, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  900
-    {"BattleBikers_1", 2883, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 226, 14, 28},  //  901
-    {"BikersToThreeIslandPC", 2885, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 9, 26},  //  902
-    {"BikersToThreeIslandPC_1", 2887, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  903
-    {"BuyMaxRepels", 2888, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  904
-    {"BuyMaxRepels_1", 2889, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 14, 28},  //  905
-    {"BuyMaxRepels_2", 2892, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 4, 7},  //  906
-    {"MartToThreeIslandPC", 2893, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 4, 3},  //  907
-    {"MartToThreeIslandPC_1", 2894, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 18, 13},  //  908
-    {"MartToThreeIslandPC_2", 2898, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  909
-    {"Lostelle_ToRepel", 2899, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  910
-    {"Lostelle_ToRepel_1", 2900, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  911
-    {"Lostelle_ToTrainer", 2906, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 83, 10},  //  912
-    {"Lostelle_ToTrainer_1", 2910, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 228, 72, 9},  //  913
-    {"Lostelle", 2914, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 66, 10},  //  914
-    {"Lostelle_1", 2919, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 228, 34, 11},  //  915
-    {"Lostelle_2", 2927, 8, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 227, 43, 41},  //  916
-    {"Lostelle_3", 2935, 8, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 227, 43, 23},  //  917
-    {"Lostelle_4", 2943, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 227, 9, 26},  //  918
-    {"LostellesDaddy", 2947, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 237, 6, 6},  //  919
-    {"GameCornerToTwoIslandPC2", 2948, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 5, 6},  //  920
-    {"GameCornerToTwoIslandPC2_1", 2949, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 234, 39, 10},  //  921
-    {"GameCornerToTwoIslandPC2_2", 2953, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 238, 7, 8},  //  922
-    {"FerryToOneIsland", 2954, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 7, 4},  //  923
-    {"FerryToOneIsland_1", 2955, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 21, 8},  //  924
-    {"FerryToOneIsland_2", 2960, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 236, 8, 3},  //  925
+    {"ToJoyfulGameCorner", 2853, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 239, 8, 5},  //  888
+    {"ToJoyfulGameCorner_1", 2854, 8, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 10, 8},  //  889
+    {"GameCornerToTwoIslandPC", 2862, 1, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 240, 4, 8},  //  890
+    {"GameCornerToTwoIslandPC_1", 2863, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 237, 39, 10},  //  891
+    {"GameCornerToTwoIslandPC_2", 2867, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 241, 7, 8},  //  892
+    {"FerryToThreeIsland", 2868, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 241, 7, 4},  //  893
+    {"FerryToThreeIsland_1", 2869, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 21, 8},  //  894
+    {"FerryToThreeIsland_2", 2874, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 239, 8, 3},  //  895
+    {"BikerBossIntro", 2875, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 233, 8, 5},  //  896
+    {"BikerBossIntro_1", 2876, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, false, 236, 12, 13},  //  897
+    {"ToThreeIslandPC", 2879, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 229, 9, 27},  //  898
+    {"ToThreeIslandPC_1", 2881, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  899
+    {"BattleBikers", 2882, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  900
+    {"BattleBikers_1", 2883, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 229, 14, 28},  //  901
+    {"BikersToThreeIslandPC", 2885, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 229, 9, 26},  //  902
+    {"BikersToThreeIslandPC_1", 2887, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  903
+    {"BuyMaxRepels", 2888, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  904
+    {"BuyMaxRepels_1", 2889, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 229, 14, 28},  //  905
+    {"BuyMaxRepels_2", 2892, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 234, 4, 7},  //  906
+    {"MartToThreeIslandPC", 2893, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 4, 3},  //  907
+    {"MartToThreeIslandPC_1", 2894, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 229, 18, 13},  //  908
+    {"MartToThreeIslandPC_2", 2898, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  909
+    {"Lostelle_ToRepel", 2899, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  910
+    {"Lostelle_ToRepel_1", 2900, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  911
+    {"Lostelle_ToTrainer", 2906, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 83, 10},  //  912
+    {"Lostelle_ToTrainer_1", 2910, 4, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 231, 72, 9},  //  913
+    {"Lostelle", 2914, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 66, 10},  //  914
+    {"Lostelle_1", 2919, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 231, 34, 11},  //  915
+    {"Lostelle_2", 2927, 8, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 230, 43, 41},  //  916
+    {"Lostelle_3", 2935, 8, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 230, 43, 23},  //  917
+    {"Lostelle_4", 2943, 4, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 230, 9, 26},  //  918
+    {"LostellesDaddy", 2947, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 240, 6, 6},  //  919
+    {"GameCornerToTwoIslandPC2", 2948, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 240, 5, 6},  //  920
+    {"GameCornerToTwoIslandPC2_1", 2949, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 237, 39, 10},  //  921
+    {"GameCornerToTwoIslandPC2_2", 2953, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 241, 7, 8},  //  922
+    {"FerryToOneIsland", 2954, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 241, 7, 4},  //  923
+    {"FerryToOneIsland_1", 2955, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 21, 8},  //  924
+    {"FerryToOneIsland_2", 2960, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 239, 8, 3},  //  925
     {"ToMtEmber", 2961, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 104, 8, 5},  //  926
     {"ToMtEmber_1", 2962, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 103, 12, 18},  //  927
     {"ToMtEmber_2", 2967, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 105, 3, 130},  //  928
@@ -29581,11 +29886,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"BuyMaxRepels_3", 3185, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 55, 4, 7},  //  988
     {"BuyGreatBalls", 3186, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 55, 4, 3},  //  989
     {"FuchsiaToVermilionPC_Out", 3186, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 55, 4, 3},  //  990
-    {"FuchsiaToVermilionPC", 3187, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  991
-    {"FuchsiaToVermilionPC_1", 3187, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  992
-    {"FerryToOneIsland", 3188, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  993
-    {"FerryToOneIsland_1", 3189, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  994
-    {"FerryToOneIsland_2", 3194, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  995
+    {"FuchsiaToVermilionPC", 3187, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  991
+    {"FuchsiaToVermilionPC_1", 3187, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  992
+    {"FerryToOneIsland", 3188, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  993
+    {"FerryToOneIsland_1", 3189, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  994
+    {"FerryToOneIsland_2", 3194, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  995
     {"HarborToOneIslandPC", 3199, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 104, 8, 5},  //  996
     {"HarborToOneIslandPC_1", 3200, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 12, 18},  //  997
     {"HarborToOneIslandPC_2", 3203, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 107, 9, 9},  //  998
@@ -29656,15 +29961,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToLance", 3433, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 118, 6, 6},  //  1063
     {"Lance", 3437, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 120, 6, 10},  //  1064
     {"ToChampion", 3438, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 120, 6, 9},  //  1065
-    {"ToViridianPC", 3442, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1066
-    {"ToViridianPC_1", 3442, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1067
-    {"BuyPokeBalls", 3443, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1068
-    {"BuyPokeBalls_1", 3444, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1069
-    {"BuyPokeBalls_2", 3447, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 255, 4, 7},  //  1070
-    {"DexViridianForest_ToGrass", 3448, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 255, 4, 3},  //  1071
-    {"DexViridianForest_ToGrass_1", 3449, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 253, 36, 20},  //  1072
+    {"ToViridianPC", 3442, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1066
+    {"ToViridianPC_1", 3442, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1067
+    {"BuyPokeBalls", 3443, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1068
+    {"BuyPokeBalls_1", 3444, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1069
+    {"BuyPokeBalls_2", 3447, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 258, 4, 7},  //  1070
+    {"DexViridianForest_ToGrass", 3448, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 258, 4, 3},  //  1071
+    {"DexViridianForest_ToGrass_1", 3449, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 256, 36, 20},  //  1072
     {"DexViridianForest_ToGrass_2", 3457, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 170, 7, 10},  //  1073
-    {"DexViridianForest_ToGrass_3", 3458, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 257, 29, 62},  //  1074
+    {"DexViridianForest_ToGrass_3", 3458, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 260, 29, 62},  //  1074
     {"ForestToPewterPC", 3461, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 113, 17, 26},  //  1075
     {"ForestToPewterPC_1", 3461, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 117, 7, 8},  //  1076
     {"BuyEscapeRopes", 3462, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 117, 7, 4},  //  1077
@@ -29762,37 +30067,37 @@ inline constexpr StoryLeg LEGS[] = {
     {"MansionToCinnabarPC_1", 3722, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 25, 8, 4},  //  1169
     {"MansionToCinnabarPC_2", 3726, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 7, 8},  //  1170
     {"ToVermilionPC_Out", 3727, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 7, 4},  //  1171
-    {"ToVermilionPC", 3728, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1172
-    {"ToVermilionPC_1", 3728, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1173
-    {"BuyPokeBalls", 3729, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1174
-    {"BuyPokeBalls_1", 3730, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1175
-    {"BuyPokeBalls_2", 3736, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 7},  //  1176
-    {"DexRoute11_ToGrass", 3737, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1177
-    {"DexRoute11_ToGrass_1", 3738, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 29, 18},  //  1178
+    {"ToVermilionPC", 3728, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1172
+    {"ToVermilionPC_1", 3728, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1173
+    {"BuyPokeBalls", 3729, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1174
+    {"BuyPokeBalls_1", 3730, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1175
+    {"BuyPokeBalls_2", 3736, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 7},  //  1176
+    {"DexRoute11_ToGrass", 3737, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1177
+    {"DexRoute11_ToGrass_1", 3738, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 29, 18},  //  1178
     {"DexDiglettsCave_ToGrass", 3742, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 143, 15, 13},  //  1179
     {"DexDiglettsCave_ToGrass_1", 3745, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 31, 4, 6},  //  1180
     {"DexDiglettsCave_ToGrass_2", 3748, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 82, 71},  //  1181
     {"DiglettToVermilionPC", 3749, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 80, 71},  //  1182
     {"DiglettToVermilionPC_1", 3751, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 31, 6, 4},  //  1183
     {"DiglettToVermilionPC_2", 3753, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 6, 8},  //  1184
-    {"DiglettToVermilionPC_3", 3760, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1185
-    {"ToIndigoPC_Out", 3761, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1186
+    {"DiglettToVermilionPC_3", 3760, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1185
+    {"ToIndigoPC_Out", 3761, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1186
     {"ToIndigoPC", 3762, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  1187
     {"ToIndigoPC_1", 3762, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1188
     {"DexVictoryRoad_ToGrass", 3764, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1189
     {"DexVictoryRoad_ToGrass_1", 3766, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  1190
-    {"DexVictoryRoad_ToGrass_2", 3775, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  1191
-    {"VictoryRoadToIndigoPC", 3777, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  1192
+    {"DexVictoryRoad_ToGrass_2", 3775, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  1191
+    {"VictoryRoadToIndigoPC", 3777, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  1192
     {"VictoryRoadToIndigoPC_1", 3779, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  1193
     {"VictoryRoadToIndigoPC_2", 3787, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1194
     {"ToVermilionPC_Out", 3789, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1195
-    {"ToVermilionPC", 3791, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1196
-    {"ToVermilionPC_1", 3791, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1197
-    {"BuyPokeBalls", 3792, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1198
-    {"BuyPokeBalls_1", 3793, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1199
-    {"BuyPokeBalls_2", 3799, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 7},  //  1200
-    {"FerryToOneIsland", 3800, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1201
-    {"FerryToOneIsland_1", 3801, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 29, 18},  //  1202
+    {"ToVermilionPC", 3791, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1196
+    {"ToVermilionPC_1", 3791, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1197
+    {"BuyPokeBalls", 3792, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1198
+    {"BuyPokeBalls_1", 3793, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1199
+    {"BuyPokeBalls_2", 3799, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 7},  //  1200
+    {"FerryToOneIsland", 3800, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1201
+    {"FerryToOneIsland_1", 3801, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 29, 18},  //  1202
     {"DexKindleRoad_ToGrass", 3806, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 104, 8, 5},  //  1203
     {"DexKindleRoad_ToGrass_1", 3807, 5, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 103, 12, 18},  //  1204
     {"DexKindleRoad_ToGrass_2", 3812, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 105, 3, 130},  //  1205
@@ -29802,30 +30107,30 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToThreeIsland", 3832, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 107, 5, 4},  //  1209
     {"FerryToThreeIsland_1", 3835, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 14, 6},  //  1210
     {"FerryToThreeIsland_2", 3838, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 3},  //  1211
-    {"HarborToThreeIslandPC", 3839, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 230, 8, 5},  //  1212
-    {"HarborToThreeIslandPC_1", 3840, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 233, 12, 13},  //  1213
-    {"HarborToThreeIslandPC_2", 3843, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  1214
-    {"DexBondBridge_ToGrass", 3844, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  1215
-    {"DexBondBridge_ToGrass_1", 3845, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  1216
-    {"BondBridgeToThreeIslandPC", 3852, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 83, 11},  //  1217
-    {"BondBridgeToThreeIslandPC_1", 3858, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  1218
-    {"DexBerryForest_ToGrass", 3859, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  1219
-    {"DexBerryForest_ToGrass_1", 3860, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 226, 14, 28},  //  1220
-    {"DexBerryForest_ToGrass_2", 3872, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 72, 9},  //  1221
-    {"DexBerryForest_ToGrass_3", 3883, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 228, 34, 11},  //  1222
-    {"DexBerryForest_ToGrass_4", 3891, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 227, 43, 41},  //  1223
-    {"BerryForestToThreeIslandPC_WalkOut", 3894, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 227, 31, 37},  //  1224
-    {"BerryForestToThreeIslandPC_WalkOut_1", 3896, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 12, 6},  //  1225
-    {"BerryForestToThreeIslandPC_WalkOut_2", 3902, 22, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 228, 34, 12},  //  1226
-    {"BerryForestToThreeIslandPC", 3924, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 226, 14, 28},  //  1227
-    {"BerryForestToThreeIslandPC_1", 3924, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  1228
-    {"FerryToVermilion", 3925, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  1229
-    {"FerryToVermilion_1", 3926, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 226, 14, 28},  //  1230
-    {"FerryToVermilion_2", 3929, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 230, 8, 3},  //  1231
-    {"PierToVermilionPC", 3930, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  1232
-    {"PierToVermilionPC_1", 3932, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  1233
-    {"PierToVermilionPC_2", 3939, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1234
-    {"ToIndigoPC_Out", 3940, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1235
+    {"HarborToThreeIslandPC", 3839, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 233, 8, 5},  //  1212
+    {"HarborToThreeIslandPC_1", 3840, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 236, 12, 13},  //  1213
+    {"HarborToThreeIslandPC_2", 3843, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  1214
+    {"DexBondBridge_ToGrass", 3844, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  1215
+    {"DexBondBridge_ToGrass_1", 3845, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  1216
+    {"BondBridgeToThreeIslandPC", 3852, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 83, 11},  //  1217
+    {"BondBridgeToThreeIslandPC_1", 3858, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  1218
+    {"DexBerryForest_ToGrass", 3859, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  1219
+    {"DexBerryForest_ToGrass_1", 3860, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 229, 14, 28},  //  1220
+    {"DexBerryForest_ToGrass_2", 3872, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 72, 9},  //  1221
+    {"DexBerryForest_ToGrass_3", 3883, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 231, 34, 11},  //  1222
+    {"DexBerryForest_ToGrass_4", 3891, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 230, 43, 41},  //  1223
+    {"BerryForestToThreeIslandPC_WalkOut", 3894, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 230, 31, 37},  //  1224
+    {"BerryForestToThreeIslandPC_WalkOut_1", 3896, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 12, 6},  //  1225
+    {"BerryForestToThreeIslandPC_WalkOut_2", 3902, 22, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 231, 34, 12},  //  1226
+    {"BerryForestToThreeIslandPC", 3924, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 229, 14, 28},  //  1227
+    {"BerryForestToThreeIslandPC_1", 3924, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  1228
+    {"FerryToVermilion", 3925, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  1229
+    {"FerryToVermilion_1", 3926, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 14, 28},  //  1230
+    {"FerryToVermilion_2", 3929, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 233, 8, 3},  //  1231
+    {"PierToVermilionPC", 3930, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  1232
+    {"PierToVermilionPC_1", 3932, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  1233
+    {"PierToVermilionPC_2", 3939, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1234
+    {"ToIndigoPC_Out", 3940, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1235
     {"ToIndigoPC", 3941, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  1236
     {"ToIndigoPC_1", 3941, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1237
     {"BuyRevives", 3943, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1238
@@ -29856,11 +30161,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"Route15ToFuchsiaPC", 3996, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 25, 32},  //  1263
     {"Route15ToFuchsiaPC_1", 3996, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 56, 7, 8},  //  1264
     {"LabToVermilionPC_Out", 3997, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 56, 7, 4},  //  1265
-    {"LabToVermilionPC", 3998, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1266
-    {"LabToVermilionPC_1", 3998, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1267
-    {"FerryToOneIsland", 3999, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1268
-    {"FerryToOneIsland_1", 4000, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1269
-    {"FerryToOneIsland_2", 4005, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  1270
+    {"LabToVermilionPC", 3998, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1266
+    {"LabToVermilionPC_1", 3998, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1267
+    {"FerryToOneIsland", 3999, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1268
+    {"FerryToOneIsland_1", 4000, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1269
+    {"FerryToOneIsland_2", 4005, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  1270
     {"HarborToOneIslandPC", 4010, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 104, 8, 5},  //  1271
     {"HarborToOneIslandPC_1", 4011, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 12, 18},  //  1272
     {"HarborToOneIslandPC_2", 4014, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 107, 9, 9},  //  1273
@@ -29959,29 +30264,29 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToSixIsland", 4322, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 50, 7, 4},  //  1366
     {"FerryToSixIsland_1", 4323, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 18, 21},  //  1367
     {"FerryToSixIsland_2", 4326, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 3},  //  1368
-    {"HarborToSixIslandPC", 4327, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 217, 8, 5},  //  1369
-    {"HarborToSixIslandPC_1", 4328, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 23},  //  1370
-    {"ToSixIslandNurse", 4329, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 6, 8},  //  1371
-    {"ToDottedHoleDoor", 4331, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  1372
-    {"ToDottedHoleDoor_1", 4332, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  1373
-    {"ToDottedHoleDoor_2", 4335, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 13, 56},  //  1374
-    {"ToDottedHoleDoor_3", 4338, 102, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 221, 17, 61},  //  1375
-    {"Sapphire", 4440, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 220, 24, 25},  //  1376
-    {"Sapphire_1", 4441, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 210, 6, 9},  //  1377
-    {"Sapphire_2", 4442, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 211, 6, 7},  //  1378
-    {"Sapphire_3", 4446, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 212, 6, 7},  //  1379
-    {"Sapphire_4", 4449, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 6, 7},  //  1380
-    {"Sapphire_5", 4451, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 214, 6, 7},  //  1381
-    {"Sapphire_6", 4452, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 215, 5, 9},  //  1382
-    {"DottedHoleToSixIslandPC", 4454, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 215, 6, 7},  //  1383
-    {"DottedHoleToSixIslandPC_1", 4457, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 210, 13, 5},  //  1384
-    {"DottedHoleToSixIslandPC_2", 4461, 29, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 24, 25},  //  1385
-    {"DottedHoleToSixIslandPC_3", 4490, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 18, 73},  //  1386
-    {"DottedHoleToSixIslandPC_4", 4495, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 13, 60},  //  1387
-    {"DottedHoleToSixIslandPC_5", 4502, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  1388
-    {"FerryToFiveIsland", 4503, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  1389
-    {"FerryToFiveIsland_1", 4504, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 12},  //  1390
-    {"FerryToFiveIsland_2", 4505, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 217, 8, 3},  //  1391
+    {"HarborToSixIslandPC", 4327, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 220, 8, 5},  //  1369
+    {"HarborToSixIslandPC_1", 4328, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 23},  //  1370
+    {"ToSixIslandNurse", 4329, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 6, 8},  //  1371
+    {"ToDottedHoleDoor", 4331, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  1372
+    {"ToDottedHoleDoor_1", 4332, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  1373
+    {"ToDottedHoleDoor_2", 4335, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 13, 56},  //  1374
+    {"ToDottedHoleDoor_3", 4338, 102, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 224, 17, 61},  //  1375
+    {"Sapphire", 4440, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 223, 24, 25},  //  1376
+    {"Sapphire_1", 4441, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 213, 6, 9},  //  1377
+    {"Sapphire_2", 4442, 4, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 214, 6, 7},  //  1378
+    {"Sapphire_3", 4446, 3, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 215, 6, 7},  //  1379
+    {"Sapphire_4", 4449, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 216, 6, 7},  //  1380
+    {"Sapphire_5", 4451, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 217, 6, 7},  //  1381
+    {"Sapphire_6", 4452, 2, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 218, 5, 9},  //  1382
+    {"DottedHoleToSixIslandPC", 4454, 3, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 218, 6, 7},  //  1383
+    {"DottedHoleToSixIslandPC_1", 4457, 4, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 213, 13, 5},  //  1384
+    {"DottedHoleToSixIslandPC_2", 4461, 29, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 223, 24, 25},  //  1385
+    {"DottedHoleToSixIslandPC_3", 4490, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 18, 73},  //  1386
+    {"DottedHoleToSixIslandPC_4", 4495, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 13, 60},  //  1387
+    {"DottedHoleToSixIslandPC_5", 4502, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  1388
+    {"FerryToFiveIsland", 4503, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  1389
+    {"FerryToFiveIsland_1", 4504, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 12},  //  1390
+    {"FerryToFiveIsland_2", 4505, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 8, 3},  //  1391
     {"HarborToFiveIslandPC", 4506, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  1392
     {"HarborToFiveIslandPC_1", 4507, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  1393
     {"HarborToFiveIslandPC_2", 4509, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 39, 7, 8},  //  1394
@@ -30055,12 +30360,12 @@ inline constexpr StoryLeg LEGS[] = {
     {"CaveToCeruleanPC", 4843, 11, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 18, 1, 13},  //  1462
     {"CaveToCeruleanPC_1", 4854, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1463
     {"C20_01_Out", 4855, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1464
-    {"C20_01B_MONEY_ToNurse", 4856, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1465
-    {"C20_01B_MONEY_ToNurse_1", 4856, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1466
-    {"VsSeekerWoman", 4857, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1467
-    {"ToTheSeagallop", 4857, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1468
-    {"ToTheSeagallop_1", 4858, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  1469
-    {"ToTheSeagallop_2", 4863, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  1470
+    {"C20_01B_MONEY_ToNurse", 4856, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1465
+    {"C20_01B_MONEY_ToNurse_1", 4856, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1466
+    {"VsSeekerWoman", 4857, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1467
+    {"ToTheSeagallop", 4857, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1468
+    {"ToTheSeagallop_1", 4858, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  1469
+    {"ToTheSeagallop_2", 4863, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  1470
     {"FerryToFiveIsland", 4868, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  1471
     {"HarborToFiveIslandNurse", 4868, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  1472
     {"HarborToFiveIslandNurse_1", 4869, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  1473
@@ -30118,15 +30423,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToVermilion", 4968, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 39, 7, 4},  //  1525
     {"FerryToVermilion_1", 4969, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  1526
     {"FerryToVermilion_2", 4972, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 3},  //  1527
-    {"BuyPokeBalls3", 4973, 5, DPAD_NONE, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 23, 32},  //  1528
-    {"BuyPokeBalls3_1", 4978, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 7},  //  1529
-    {"BuyPokeBalls5", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1530
-    {"BuyPokeBalls7", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1531
-    {"BuyPokeBalls9", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1532
-    {"MartToVermilionNurse", 4979, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 248, 4, 3},  //  1533
-    {"MartToVermilionNurse_1", 4980, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 29, 18},  //  1534
-    {"MartToVermilionNurse_2", 4986, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  1535
-    {"C20_01B_MONEY_Out", 4987, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  1536
+    {"BuyPokeBalls3", 4973, 5, DPAD_NONE, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 23, 32},  //  1528
+    {"BuyPokeBalls3_1", 4978, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 7},  //  1529
+    {"BuyPokeBalls5", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1530
+    {"BuyPokeBalls7", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1531
+    {"BuyPokeBalls9", 4979, 0, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1532
+    {"MartToVermilionNurse", 4979, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 251, 4, 3},  //  1533
+    {"MartToVermilionNurse_1", 4980, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 29, 18},  //  1534
+    {"MartToVermilionNurse_2", 4986, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  1535
+    {"C20_01B_MONEY_Out", 4987, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  1536
     {"C20_02_CERULEAN_ToNurse", 4988, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 18, 22, 20},  //  1537
     {"C20_02_CERULEAN_ToNurse_1", 4988, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  1538
     {"CollectRoute24_ToGrass", 4989, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  1539
@@ -30238,59 +30543,59 @@ inline constexpr StoryLeg LEGS[] = {
     {"CollectRoute3_Visit2_BackToNurse", 5550, 2, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 171, 73, 10},  //  1645
     {"CollectRoute3_Visit2_BackToNurse_1", 5552, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 173, 7, 8},  //  1646
     {"C20_03_MT_MOON_Out", 5553, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 173, 7, 4},  //  1647
-    {"C20_04_VIRIDIAN_ToNurse", 5554, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1648
-    {"C20_04_VIRIDIAN_ToNurse_1", 5554, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1649
-    {"CollectViridianForest_ToGrass", 5555, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1650
-    {"CollectViridianForest_ToGrass_1", 5556, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1651
+    {"C20_04_VIRIDIAN_ToNurse", 5554, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1648
+    {"C20_04_VIRIDIAN_ToNurse_1", 5554, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1649
+    {"CollectViridianForest_ToGrass", 5555, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1650
+    {"CollectViridianForest_ToGrass_1", 5556, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1651
     {"CollectViridianForest_ToGrass_2", 5564, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 170, 7, 10},  //  1652
-    {"CollectViridianForest_ToGrass_3", 5565, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 257, 29, 62},  //  1653
-    {"CollectViridianForest_BackToNurse", 5568, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1654
-    {"CollectViridianForest_BackToNurse_1", 5568, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1655
-    {"CollectViridianForest_Visit2_ToGrass", 5569, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1656
-    {"CollectViridianForest_Visit2_ToGrass_1", 5570, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1657
+    {"CollectViridianForest_ToGrass_3", 5565, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 260, 29, 62},  //  1653
+    {"CollectViridianForest_BackToNurse", 5568, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1654
+    {"CollectViridianForest_BackToNurse_1", 5568, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1655
+    {"CollectViridianForest_Visit2_ToGrass", 5569, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1656
+    {"CollectViridianForest_Visit2_ToGrass_1", 5570, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1657
     {"CollectViridianForest_Visit2_ToGrass_2", 5578, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 170, 7, 10},  //  1658
-    {"CollectViridianForest_Visit2_ToGrass_3", 5579, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 257, 29, 62},  //  1659
-    {"CollectViridianForest_Visit2_BackToNurse", 5582, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1660
-    {"CollectViridianForest_Visit2_BackToNurse_1", 5582, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1661
-    {"CollectRoute22_ToGrass", 5583, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1662
-    {"CollectRoute22_ToGrass_1", 5584, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1663
+    {"CollectViridianForest_Visit2_ToGrass_3", 5579, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 260, 29, 62},  //  1659
+    {"CollectViridianForest_Visit2_BackToNurse", 5582, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1660
+    {"CollectViridianForest_Visit2_BackToNurse_1", 5582, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1661
+    {"CollectRoute22_ToGrass", 5583, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1662
+    {"CollectRoute22_ToGrass_1", 5584, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1663
     {"CollectRoute22_BackToNurse", 5590, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 162, 39, 13},  //  1664
-    {"CollectRoute22_BackToNurse_1", 5596, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1665
-    {"CollectRoute22_Visit2_ToGrass", 5597, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1666
-    {"CollectRoute22_Visit2_ToGrass_1", 5598, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1667
+    {"CollectRoute22_BackToNurse_1", 5596, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1665
+    {"CollectRoute22_Visit2_ToGrass", 5597, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1666
+    {"CollectRoute22_Visit2_ToGrass_1", 5598, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1667
     {"CollectRoute22_Visit2_BackToNurse", 5604, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 162, 39, 13},  //  1668
-    {"CollectRoute22_Visit2_BackToNurse_1", 5610, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1669
-    {"CollectRoute23_ToGrass", 5611, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1670
-    {"CollectRoute23_ToGrass_1", 5612, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1671
+    {"CollectRoute22_Visit2_BackToNurse_1", 5610, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1669
+    {"CollectRoute23_ToGrass", 5611, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1670
+    {"CollectRoute23_ToGrass_1", 5612, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1671
     {"CollectRoute23_ToGrass_2", 5621, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 162, 22, 8},  //  1672
     {"CollectRoute23_ToGrass_3", 5629, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 163, 7, 10},  //  1673
     {"CollectRoute23_ToGrass_4", 5630, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 164, 8, 153},  //  1674
     {"CollectRoute23_ToGrass_5", 5639, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 164, 13, 117},  //  1675
     {"CollectRoute23_ToGrass_6", 5643, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 164, 8, 98},  //  1676
-    {"CollectRoute23_BackToNurse", 5649, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1677
-    {"CollectRoute23_BackToNurse_1", 5649, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1678
-    {"CollectRoute23_Visit2_ToGrass", 5650, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1679
-    {"CollectRoute23_Visit2_ToGrass_1", 5651, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1680
+    {"CollectRoute23_BackToNurse", 5649, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1677
+    {"CollectRoute23_BackToNurse_1", 5649, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1678
+    {"CollectRoute23_Visit2_ToGrass", 5650, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1679
+    {"CollectRoute23_Visit2_ToGrass_1", 5651, 9, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1680
     {"CollectRoute23_Visit2_ToGrass_2", 5660, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 162, 22, 8},  //  1681
     {"CollectRoute23_Visit2_ToGrass_3", 5668, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 163, 7, 10},  //  1682
     {"CollectRoute23_Visit2_ToGrass_4", 5669, 9, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 164, 8, 153},  //  1683
     {"CollectRoute23_Visit2_ToGrass_5", 5678, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 164, 13, 117},  //  1684
     {"CollectRoute23_Visit2_ToGrass_6", 5682, 6, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 164, 8, 98},  //  1685
-    {"CollectRoute23_Visit2_BackToNurse", 5688, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  1686
-    {"CollectRoute23_Visit2_BackToNurse_1", 5688, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  1687
-    {"C20_04_VIRIDIAN_Out", 5689, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  1688
+    {"CollectRoute23_Visit2_BackToNurse", 5688, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  1686
+    {"CollectRoute23_Visit2_BackToNurse_1", 5688, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  1687
+    {"C20_04_VIRIDIAN_Out", 5689, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  1688
     {"C20_05_VICTORY_ROAD_ToNurse", 5690, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  1689
     {"C20_05_VICTORY_ROAD_ToNurse_1", 5690, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1690
     {"CollectVictoryRoad_ToGrass", 5692, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1691
     {"CollectVictoryRoad_ToGrass_1", 5694, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  1692
-    {"CollectVictoryRoad_ToGrass_2", 5703, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  1693
-    {"CollectVictoryRoad_BackToNurse", 5705, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  1694
+    {"CollectVictoryRoad_ToGrass_2", 5703, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  1693
+    {"CollectVictoryRoad_BackToNurse", 5705, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  1694
     {"CollectVictoryRoad_BackToNurse_1", 5707, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  1695
     {"CollectVictoryRoad_BackToNurse_2", 5715, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1696
     {"CollectVictoryRoad_Visit2_ToGrass", 5717, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1697
     {"CollectVictoryRoad_Visit2_ToGrass_1", 5719, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  1698
-    {"CollectVictoryRoad_Visit2_ToGrass_2", 5728, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  1699
-    {"CollectVictoryRoad_Visit2_BackToNurse", 5730, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  1700
+    {"CollectVictoryRoad_Visit2_ToGrass_2", 5728, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  1699
+    {"CollectVictoryRoad_Visit2_BackToNurse", 5730, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  1700
     {"CollectVictoryRoad_Visit2_BackToNurse_1", 5732, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  1701
     {"CollectVictoryRoad_Visit2_BackToNurse_2", 5740, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  1702
     {"C20_05_VICTORY_ROAD_Out", 5742, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  1703
@@ -30595,43 +30900,43 @@ inline constexpr StoryLeg LEGS[] = {
     {"CollectRoute21_Visit2_BackToNurse", 6622, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 25, 14, 12},  //  2002
     {"CollectRoute21_Visit2_BackToNurse_1", 6622, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 27, 7, 8},  //  2003
     {"C20_10_CINNABAR_Out", 6623, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 27, 7, 4},  //  2004
-    {"C20_11_VERMILION_SEVII_ToNurse", 6624, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2005
-    {"C20_11_VERMILION_SEVII_ToNurse_1", 6624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2006
-    {"CollectRoute11_ToGrass", 6625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2007
-    {"CollectRoute11_ToGrass_1", 6626, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2008
+    {"C20_11_VERMILION_SEVII_ToNurse", 6624, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2005
+    {"C20_11_VERMILION_SEVII_ToNurse_1", 6624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2006
+    {"CollectRoute11_ToGrass", 6625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2007
+    {"CollectRoute11_ToGrass_1", 6626, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2008
     {"CollectRoute11_BackToNurse", 6634, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 15, 13},  //  2009
-    {"CollectRoute11_BackToNurse_1", 6641, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2010
-    {"CollectRoute11_Visit2_ToGrass", 6642, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2011
-    {"CollectRoute11_Visit2_ToGrass_1", 6643, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2012
+    {"CollectRoute11_BackToNurse_1", 6641, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2010
+    {"CollectRoute11_Visit2_ToGrass", 6642, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2011
+    {"CollectRoute11_Visit2_ToGrass_1", 6643, 8, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2012
     {"CollectRoute11_Visit2_BackToNurse", 6651, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 15, 13},  //  2013
-    {"CollectRoute11_Visit2_BackToNurse_1", 6658, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2014
-    {"CollectDiglettsCave_ToGrass", 6659, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2015
-    {"CollectDiglettsCave_ToGrass_1", 6660, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 245, 15, 7},  //  2016
+    {"CollectRoute11_Visit2_BackToNurse_1", 6658, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2014
+    {"CollectDiglettsCave_ToGrass", 6659, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2015
+    {"CollectDiglettsCave_ToGrass_1", 6660, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 248, 15, 7},  //  2016
     {"CollectDiglettsCave_ToGrass_2", 6667, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 31, 4, 6},  //  2017
     {"CollectDiglettsCave_ToGrass_3", 6670, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 82, 71},  //  2018
     {"CollectDiglettsCave_BackToNurse", 6671, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 80, 71},  //  2019
     {"CollectDiglettsCave_BackToNurse_1", 6673, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 31, 6, 4},  //  2020
     {"CollectDiglettsCave_BackToNurse_2", 6675, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 6, 8},  //  2021
-    {"CollectDiglettsCave_BackToNurse_3", 6682, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2022
-    {"CollectDiglettsCave_Visit2_ToGrass", 6683, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2023
-    {"CollectDiglettsCave_Visit2_ToGrass_1", 6684, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 245, 15, 7},  //  2024
+    {"CollectDiglettsCave_BackToNurse_3", 6682, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2022
+    {"CollectDiglettsCave_Visit2_ToGrass", 6683, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2023
+    {"CollectDiglettsCave_Visit2_ToGrass_1", 6684, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 248, 15, 7},  //  2024
     {"CollectDiglettsCave_Visit2_ToGrass_2", 6691, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 31, 4, 6},  //  2025
     {"CollectDiglettsCave_Visit2_ToGrass_3", 6694, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 30, 82, 71},  //  2026
     {"CollectDiglettsCave_Visit2_BackToNurse", 6695, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 30, 80, 71},  //  2027
     {"CollectDiglettsCave_Visit2_BackToNurse_1", 6697, 2, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 31, 6, 4},  //  2028
     {"CollectDiglettsCave_Visit2_BackToNurse_2", 6699, 7, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 143, 6, 8},  //  2029
-    {"CollectDiglettsCave_Visit2_BackToNurse_3", 6706, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2030
-    {"CollectRoute6_ToGrass", 6707, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2031
-    {"CollectRoute6_ToGrass_1", 6708, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2032
+    {"CollectDiglettsCave_Visit2_BackToNurse_3", 6706, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2030
+    {"CollectRoute6_ToGrass", 6707, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2031
+    {"CollectRoute6_ToGrass_1", 6708, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2032
     {"CollectRoute6_BackToNurse", 6714, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 175, 13, 31},  //  2033
-    {"CollectRoute6_BackToNurse_1", 6719, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2034
-    {"CollectRoute6_Visit2_ToGrass", 6720, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2035
-    {"CollectRoute6_Visit2_ToGrass_1", 6721, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2036
+    {"CollectRoute6_BackToNurse_1", 6719, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2034
+    {"CollectRoute6_Visit2_ToGrass", 6720, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2035
+    {"CollectRoute6_Visit2_ToGrass_1", 6721, 6, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2036
     {"CollectRoute6_Visit2_BackToNurse", 6727, 5, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 175, 13, 31},  //  2037
-    {"CollectRoute6_Visit2_BackToNurse_1", 6732, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2038
-    {"ToTheSeagallop", 6733, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2039
-    {"ToTheSeagallop_1", 6734, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2040
-    {"ToTheSeagallop_2", 6739, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  2041
+    {"CollectRoute6_Visit2_BackToNurse_1", 6732, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2038
+    {"ToTheSeagallop", 6733, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2039
+    {"ToTheSeagallop_1", 6734, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2040
+    {"ToTheSeagallop_2", 6739, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  2041
     {"OneIsland_ToNurse", 6744, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2042
     {"OneIsland_ToNurse_1", 6745, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 12, 18},  //  2043
     {"OneIsland_ToNurse_2", 6748, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 107, 9, 9},  //  2044
@@ -30697,54 +31002,54 @@ inline constexpr StoryLeg LEGS[] = {
     {"OneIsland_ToHarbor_1", 7128, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 103, 14, 6},  //  2104
     {"OneIsland_ToHarbor_2", 7131, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 104, 8, 3},  //  2105
     {"FerryToTwoIsland", 7132, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2106
-    {"TwoIsland_ToNurse", 7132, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 236, 8, 5},  //  2107
-    {"TwoIsland_ToNurse_1", 7133, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 10, 8},  //  2108
-    {"TwoIsland_ToNurse_2", 7138, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 238, 7, 8},  //  2109
-    {"CollectCapeBrink_ToGrass", 7139, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 7, 4},  //  2110
-    {"CollectCapeBrink_ToGrass_1", 7140, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 234, 21, 8},  //  2111
-    {"CollectCapeBrink_BackToNurse", 7147, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 8, 31},  //  2112
-    {"CollectCapeBrink_BackToNurse_1", 7153, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 238, 7, 8},  //  2113
-    {"CollectCapeBrink_Visit2_ToGrass", 7154, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 7, 4},  //  2114
-    {"CollectCapeBrink_Visit2_ToGrass_1", 7155, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 234, 21, 8},  //  2115
-    {"CollectCapeBrink_Visit2_BackToNurse", 7162, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 8, 31},  //  2116
-    {"CollectCapeBrink_Visit2_BackToNurse_1", 7168, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 238, 7, 8},  //  2117
-    {"TwoIsland_ToHarbor", 7169, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 7, 4},  //  2118
-    {"TwoIsland_ToHarbor_1", 7170, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 234, 21, 8},  //  2119
-    {"TwoIsland_ToHarbor_2", 7175, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 236, 8, 3},  //  2120
-    {"FerryToThreeIsland", 7176, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 236, 8, 5},  //  2121
-    {"ThreeIsland_ToNurse", 7176, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 230, 8, 5},  //  2122
-    {"ThreeIsland_ToNurse_1", 7177, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 233, 12, 13},  //  2123
-    {"ThreeIsland_ToNurse_2", 7180, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2124
-    {"CollectBondBridge_ToGrass", 7181, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2125
-    {"CollectBondBridge_ToGrass_1", 7182, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2126
-    {"CollectBondBridge_BackToNurse", 7189, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 83, 11},  //  2127
-    {"CollectBondBridge_BackToNurse_1", 7195, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2128
-    {"CollectBondBridge_Visit2_ToGrass", 7196, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2129
-    {"CollectBondBridge_Visit2_ToGrass_1", 7197, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2130
-    {"CollectBondBridge_Visit2_BackToNurse", 7204, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 83, 11},  //  2131
-    {"CollectBondBridge_Visit2_BackToNurse_1", 7210, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2132
-    {"CollectBerryForest_ToGrass", 7211, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2133
-    {"CollectBerryForest_ToGrass_1", 7212, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2134
-    {"CollectBerryForest_ToGrass_2", 7224, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 72, 9},  //  2135
-    {"CollectBerryForest_ToGrass_3", 7235, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 228, 34, 11},  //  2136
-    {"CollectBerryForest_ToGrass_4", 7243, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 227, 43, 41},  //  2137
-    {"CollectBerryForest_BackToNurse", 7246, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 227, 31, 37},  //  2138
-    {"CollectBerryForest_BackToNurse_1", 7248, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 12, 6},  //  2139
-    {"CollectBerryForest_BackToNurse_2", 7254, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 34, 12},  //  2140
-    {"CollectBerryForest_BackToNurse_3", 7276, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2141
-    {"CollectBerryForest_Visit2_ToGrass", 7277, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2142
-    {"CollectBerryForest_Visit2_ToGrass_1", 7278, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2143
-    {"CollectBerryForest_Visit2_ToGrass_2", 7290, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 72, 9},  //  2144
-    {"CollectBerryForest_Visit2_ToGrass_3", 7301, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 228, 34, 11},  //  2145
-    {"CollectBerryForest_Visit2_ToGrass_4", 7309, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 227, 43, 41},  //  2146
-    {"CollectBerryForest_Visit2_BackToNurse", 7312, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 227, 31, 37},  //  2147
-    {"CollectBerryForest_Visit2_BackToNurse_1", 7314, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 228, 12, 6},  //  2148
-    {"CollectBerryForest_Visit2_BackToNurse_2", 7320, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 228, 34, 12},  //  2149
-    {"CollectBerryForest_Visit2_BackToNurse_3", 7342, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2150
-    {"ThreeIsland_ToHarbor", 7343, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2151
-    {"ThreeIsland_ToHarbor_1", 7344, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2152
-    {"ThreeIsland_ToHarbor_2", 7347, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 230, 8, 3},  //  2153
-    {"FerryToFourIsland", 7348, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 230, 8, 5},  //  2154
+    {"TwoIsland_ToNurse", 7132, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 239, 8, 5},  //  2107
+    {"TwoIsland_ToNurse_1", 7133, 5, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 10, 8},  //  2108
+    {"TwoIsland_ToNurse_2", 7138, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 241, 7, 8},  //  2109
+    {"CollectCapeBrink_ToGrass", 7139, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 241, 7, 4},  //  2110
+    {"CollectCapeBrink_ToGrass_1", 7140, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 237, 21, 8},  //  2111
+    {"CollectCapeBrink_BackToNurse", 7147, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 8, 31},  //  2112
+    {"CollectCapeBrink_BackToNurse_1", 7153, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 241, 7, 8},  //  2113
+    {"CollectCapeBrink_Visit2_ToGrass", 7154, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 241, 7, 4},  //  2114
+    {"CollectCapeBrink_Visit2_ToGrass_1", 7155, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 237, 21, 8},  //  2115
+    {"CollectCapeBrink_Visit2_BackToNurse", 7162, 6, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 238, 8, 31},  //  2116
+    {"CollectCapeBrink_Visit2_BackToNurse_1", 7168, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 241, 7, 8},  //  2117
+    {"TwoIsland_ToHarbor", 7169, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 241, 7, 4},  //  2118
+    {"TwoIsland_ToHarbor_1", 7170, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 237, 21, 8},  //  2119
+    {"TwoIsland_ToHarbor_2", 7175, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 239, 8, 3},  //  2120
+    {"FerryToThreeIsland", 7176, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 239, 8, 5},  //  2121
+    {"ThreeIsland_ToNurse", 7176, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 233, 8, 5},  //  2122
+    {"ThreeIsland_ToNurse_1", 7177, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 236, 12, 13},  //  2123
+    {"ThreeIsland_ToNurse_2", 7180, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2124
+    {"CollectBondBridge_ToGrass", 7181, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2125
+    {"CollectBondBridge_ToGrass_1", 7182, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2126
+    {"CollectBondBridge_BackToNurse", 7189, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 83, 11},  //  2127
+    {"CollectBondBridge_BackToNurse_1", 7195, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2128
+    {"CollectBondBridge_Visit2_ToGrass", 7196, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2129
+    {"CollectBondBridge_Visit2_ToGrass_1", 7197, 7, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2130
+    {"CollectBondBridge_Visit2_BackToNurse", 7204, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 83, 11},  //  2131
+    {"CollectBondBridge_Visit2_BackToNurse_1", 7210, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2132
+    {"CollectBerryForest_ToGrass", 7211, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2133
+    {"CollectBerryForest_ToGrass_1", 7212, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2134
+    {"CollectBerryForest_ToGrass_2", 7224, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 72, 9},  //  2135
+    {"CollectBerryForest_ToGrass_3", 7235, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 231, 34, 11},  //  2136
+    {"CollectBerryForest_ToGrass_4", 7243, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 230, 43, 41},  //  2137
+    {"CollectBerryForest_BackToNurse", 7246, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 230, 31, 37},  //  2138
+    {"CollectBerryForest_BackToNurse_1", 7248, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 12, 6},  //  2139
+    {"CollectBerryForest_BackToNurse_2", 7254, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 34, 12},  //  2140
+    {"CollectBerryForest_BackToNurse_3", 7276, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2141
+    {"CollectBerryForest_Visit2_ToGrass", 7277, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2142
+    {"CollectBerryForest_Visit2_ToGrass_1", 7278, 12, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2143
+    {"CollectBerryForest_Visit2_ToGrass_2", 7290, 11, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 72, 9},  //  2144
+    {"CollectBerryForest_Visit2_ToGrass_3", 7301, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 231, 34, 11},  //  2145
+    {"CollectBerryForest_Visit2_ToGrass_4", 7309, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 230, 43, 41},  //  2146
+    {"CollectBerryForest_Visit2_BackToNurse", 7312, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 230, 31, 37},  //  2147
+    {"CollectBerryForest_Visit2_BackToNurse_1", 7314, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 231, 12, 6},  //  2148
+    {"CollectBerryForest_Visit2_BackToNurse_2", 7320, 22, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 231, 34, 12},  //  2149
+    {"CollectBerryForest_Visit2_BackToNurse_3", 7342, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2150
+    {"ThreeIsland_ToHarbor", 7343, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2151
+    {"ThreeIsland_ToHarbor_1", 7344, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2152
+    {"ThreeIsland_ToHarbor_2", 7347, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 233, 8, 3},  //  2153
+    {"FerryToFourIsland", 7348, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 233, 8, 5},  //  2154
     {"FourIsland_ToNurse", 7348, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  2155
     {"FourIsland_ToNurse_1", 7349, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  2156
     {"FourIsland_ToNurse_2", 7351, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 50, 7, 8},  //  2157
@@ -30835,53 +31140,53 @@ inline constexpr StoryLeg LEGS[] = {
     {"FiveIsland_ToHarbor_1", 7568, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  2242
     {"FiveIsland_ToHarbor_2", 7571, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 33, 8, 3},  //  2243
     {"FerryToSixIsland", 7572, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 5},  //  2244
-    {"SixIsland_ToNurse", 7572, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 217, 8, 5},  //  2245
-    {"SixIsland_ToNurse_1", 7573, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 23},  //  2246
-    {"SixIsland_ToNurse_2", 7574, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2247
-    {"CollectRuinValley_ToGrass", 7575, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2248
-    {"CollectRuinValley_ToGrass_1", 7576, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2249
-    {"CollectRuinValley_ToGrass_2", 7579, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 13, 56},  //  2250
-    {"CollectRuinValley_ToGrass_3", 7582, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 221, 17, 61},  //  2251
-    {"CollectRuinValley_BackToNurse", 7599, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 44, 9},  //  2252
-    {"CollectRuinValley_BackToNurse_1", 7612, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 18, 73},  //  2253
-    {"CollectRuinValley_BackToNurse_2", 7617, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 13, 60},  //  2254
-    {"CollectRuinValley_BackToNurse_3", 7624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2255
-    {"CollectRuinValley_Visit2_ToGrass", 7625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2256
-    {"CollectRuinValley_Visit2_ToGrass_1", 7626, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2257
-    {"CollectRuinValley_Visit2_ToGrass_2", 7629, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 13, 56},  //  2258
-    {"CollectRuinValley_Visit2_ToGrass_3", 7632, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 221, 17, 61},  //  2259
-    {"CollectRuinValley_Visit2_BackToNurse", 7649, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 44, 9},  //  2260
-    {"CollectRuinValley_Visit2_BackToNurse_1", 7662, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 18, 73},  //  2261
-    {"CollectRuinValley_Visit2_BackToNurse_2", 7667, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 13, 60},  //  2262
-    {"CollectRuinValley_Visit2_BackToNurse_3", 7674, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2263
-    {"CollectPatternBush_ToGrass", 7675, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2264
-    {"CollectPatternBush_ToGrass_1", 7676, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2265
-    {"CollectPatternBush_ToGrass_2", 7682, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 221, 13, 51},  //  2266
-    {"CollectPatternBush_ToGrass_3", 7693, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 218, 55, 26},  //  2267
-    {"CollectPatternBush_BackToNurse", 7696, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 218, 53, 24},  //  2268
-    {"CollectPatternBush_BackToNurse_1", 7698, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 216, 63, 10},  //  2269
-    {"CollectPatternBush_BackToNurse_2", 7704, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 11, 27},  //  2270
-    {"CollectPatternBush_BackToNurse_3", 7714, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2271
-    {"CollectPatternBush_Visit2_ToGrass", 7715, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2272
-    {"CollectPatternBush_Visit2_ToGrass_1", 7716, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2273
-    {"CollectPatternBush_Visit2_ToGrass_2", 7722, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 221, 13, 51},  //  2274
-    {"CollectPatternBush_Visit2_ToGrass_3", 7733, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 218, 55, 26},  //  2275
-    {"CollectPatternBush_Visit2_BackToNurse", 7736, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 218, 53, 24},  //  2276
-    {"CollectPatternBush_Visit2_BackToNurse_1", 7738, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 216, 63, 10},  //  2277
-    {"CollectPatternBush_Visit2_BackToNurse_2", 7744, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 11, 27},  //  2278
-    {"CollectPatternBush_Visit2_BackToNurse_3", 7754, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2279
-    {"CollectWaterPath_ToGrass", 7755, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2280
-    {"CollectWaterPath_ToGrass_1", 7756, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2281
-    {"CollectWaterPath_BackToNurse", 7759, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 10, 57},  //  2282
-    {"CollectWaterPath_BackToNurse_1", 7762, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2283
-    {"CollectWaterPath_Visit2_ToGrass", 7763, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2284
-    {"CollectWaterPath_Visit2_ToGrass_1", 7764, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2285
-    {"CollectWaterPath_Visit2_BackToNurse", 7767, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 10, 57},  //  2286
-    {"CollectWaterPath_Visit2_BackToNurse_1", 7770, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2287
-    {"SixIsland_ToHarbor", 7771, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2288
-    {"SixIsland_ToHarbor_1", 7772, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2289
-    {"SixIsland_ToHarbor_2", 7773, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 217, 8, 3},  //  2290
-    {"FerryToSevenIsland", 7774, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 217, 8, 5},  //  2291
+    {"SixIsland_ToNurse", 7572, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 220, 8, 5},  //  2245
+    {"SixIsland_ToNurse_1", 7573, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 23},  //  2246
+    {"SixIsland_ToNurse_2", 7574, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2247
+    {"CollectRuinValley_ToGrass", 7575, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2248
+    {"CollectRuinValley_ToGrass_1", 7576, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2249
+    {"CollectRuinValley_ToGrass_2", 7579, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 13, 56},  //  2250
+    {"CollectRuinValley_ToGrass_3", 7582, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 224, 17, 61},  //  2251
+    {"CollectRuinValley_BackToNurse", 7599, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 223, 44, 9},  //  2252
+    {"CollectRuinValley_BackToNurse_1", 7612, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 18, 73},  //  2253
+    {"CollectRuinValley_BackToNurse_2", 7617, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 13, 60},  //  2254
+    {"CollectRuinValley_BackToNurse_3", 7624, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2255
+    {"CollectRuinValley_Visit2_ToGrass", 7625, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2256
+    {"CollectRuinValley_Visit2_ToGrass_1", 7626, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2257
+    {"CollectRuinValley_Visit2_ToGrass_2", 7629, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 13, 56},  //  2258
+    {"CollectRuinValley_Visit2_ToGrass_3", 7632, 17, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 224, 17, 61},  //  2259
+    {"CollectRuinValley_Visit2_BackToNurse", 7649, 13, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 223, 44, 9},  //  2260
+    {"CollectRuinValley_Visit2_BackToNurse_1", 7662, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 18, 73},  //  2261
+    {"CollectRuinValley_Visit2_BackToNurse_2", 7667, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 13, 60},  //  2262
+    {"CollectRuinValley_Visit2_BackToNurse_3", 7674, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2263
+    {"CollectPatternBush_ToGrass", 7675, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2264
+    {"CollectPatternBush_ToGrass_1", 7676, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2265
+    {"CollectPatternBush_ToGrass_2", 7682, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 224, 13, 51},  //  2266
+    {"CollectPatternBush_ToGrass_3", 7693, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 221, 55, 26},  //  2267
+    {"CollectPatternBush_BackToNurse", 7696, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 221, 53, 24},  //  2268
+    {"CollectPatternBush_BackToNurse_1", 7698, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 219, 63, 10},  //  2269
+    {"CollectPatternBush_BackToNurse_2", 7704, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 11, 27},  //  2270
+    {"CollectPatternBush_BackToNurse_3", 7714, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2271
+    {"CollectPatternBush_Visit2_ToGrass", 7715, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2272
+    {"CollectPatternBush_Visit2_ToGrass_1", 7716, 6, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2273
+    {"CollectPatternBush_Visit2_ToGrass_2", 7722, 11, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::FOREST, false, 224, 13, 51},  //  2274
+    {"CollectPatternBush_Visit2_ToGrass_3", 7733, 3, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 221, 55, 26},  //  2275
+    {"CollectPatternBush_Visit2_BackToNurse", 7736, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 221, 53, 24},  //  2276
+    {"CollectPatternBush_Visit2_BackToNurse_1", 7738, 6, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 219, 63, 10},  //  2277
+    {"CollectPatternBush_Visit2_BackToNurse_2", 7744, 10, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 11, 27},  //  2278
+    {"CollectPatternBush_Visit2_BackToNurse_3", 7754, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2279
+    {"CollectWaterPath_ToGrass", 7755, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2280
+    {"CollectWaterPath_ToGrass_1", 7756, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2281
+    {"CollectWaterPath_BackToNurse", 7759, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 10, 57},  //  2282
+    {"CollectWaterPath_BackToNurse_1", 7762, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2283
+    {"CollectWaterPath_Visit2_ToGrass", 7763, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2284
+    {"CollectWaterPath_Visit2_ToGrass_1", 7764, 3, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2285
+    {"CollectWaterPath_Visit2_BackToNurse", 7767, 3, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 10, 57},  //  2286
+    {"CollectWaterPath_Visit2_BackToNurse_1", 7770, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2287
+    {"SixIsland_ToHarbor", 7771, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2288
+    {"SixIsland_ToHarbor_1", 7772, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2289
+    {"SixIsland_ToHarbor_2", 7773, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 220, 8, 3},  //  2290
+    {"FerryToSevenIsland", 7774, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 8, 5},  //  2291
     {"SevenIsland_ToNurse", 7774, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2292
     {"SevenIsland_ToNurse_1", 7775, 4, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 16, 13},  //  2293
     {"SevenIsland_ToNurse_2", 7779, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 198, 7, 8},  //  2294
@@ -30905,10 +31210,10 @@ inline constexpr StoryLeg LEGS[] = {
     {"SevenIsland_ToHarbor_1", 7943, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 12, 4},  //  2312
     {"SevenIsland_ToHarbor_2", 7948, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 197, 8, 3},  //  2313
     {"FerryToVermilion", 7949, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 197, 8, 5},  //  2314
-    {"PierToVermilionNurse", 7949, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  2315
-    {"PierToVermilionNurse_1", 7951, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  2316
-    {"PierToVermilionNurse_2", 7958, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2317
-    {"C20_11_VERMILION_SEVII_Out", 7959, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2318
+    {"PierToVermilionNurse", 7949, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  2315
+    {"PierToVermilionNurse_1", 7951, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  2316
+    {"PierToVermilionNurse_2", 7958, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2317
+    {"C20_11_VERMILION_SEVII_Out", 7959, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2318
     {"GoodRodGuru", 7960, 3, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 25, 32},  //  2319
     {"GoodRodGuru_1", 7963, 2, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 54, 3, 8},  //  2320
     {"C20_12_GOOD_ROD_Out", 7965, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 54, 5, 5},  //  2321
@@ -30921,36 +31226,36 @@ inline constexpr StoryLeg LEGS[] = {
     {"SuperRodGuru_6", 7988, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 144, 17, 60},  //  2328
     {"SuperRodGuru_7", 7996, 1, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 145, 3, 7},  //  2329
     {"C20_13_SUPER_ROD_Out", 7997, 1, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 145, 3, 4},  //  2330
-    {"C20_14_FISH_VIRIDIAN_ToNurse", 7998, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2331
-    {"C20_14_FISH_VIRIDIAN_ToNurse_1", 7998, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2332
-    {"FishViridian_ToWater", 7999, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  2333
-    {"FishViridian_ToWater_1", 8000, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2334
-    {"FishViridian_BackToNurse", 8001, 1, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 17, 27},  //  2335
-    {"FishViridian_BackToNurse_1", 8002, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2336
-    {"FishViridian_Visit2_ToWater", 8003, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  2337
-    {"FishViridian_Visit2_ToWater_1", 8004, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2338
-    {"FishViridian_Visit2_BackToNurse", 8005, 1, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 17, 27},  //  2339
-    {"FishViridian_Visit2_BackToNurse_1", 8006, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2340
-    {"C20_14_FISH_VIRIDIAN_Out", 8007, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 7, 4},  //  2341
-    {"C20_15_FISH_VERMILION_ToNurse", 8008, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2342
-    {"C20_15_FISH_VERMILION_ToNurse_1", 8008, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2343
-    {"FishVermilionGoodRod_ToWater", 8009, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2344
-    {"FishVermilionGoodRod_ToWater_1", 8010, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2345
-    {"FishVermilionGoodRod_BackToNurse", 8011, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 11},  //  2346
-    {"FishVermilionGoodRod_BackToNurse_1", 8012, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2347
-    {"FishVermilionGoodRod_Visit2_ToWater", 8013, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2348
-    {"FishVermilionGoodRod_Visit2_ToWater_1", 8014, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2349
-    {"FishVermilionGoodRod_Visit2_BackToNurse", 8015, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 11},  //  2350
-    {"FishVermilionGoodRod_Visit2_BackToNurse_1", 8016, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2351
-    {"FishVermilion_ToWater", 8017, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2352
-    {"FishVermilion_ToWater_1", 8018, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2353
-    {"FishVermilion_BackToNurse", 8019, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 11},  //  2354
-    {"FishVermilion_BackToNurse_1", 8020, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2355
-    {"FishVermilion_Visit2_ToWater", 8021, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2356
-    {"FishVermilion_Visit2_ToWater_1", 8022, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2357
-    {"FishVermilion_Visit2_BackToNurse", 8023, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 11},  //  2358
-    {"FishVermilion_Visit2_BackToNurse_1", 8024, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2359
-    {"C20_15_FISH_VERMILION_Out", 8025, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2360
+    {"C20_14_FISH_VIRIDIAN_ToNurse", 7998, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2331
+    {"C20_14_FISH_VIRIDIAN_ToNurse_1", 7998, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2332
+    {"FishViridian_ToWater", 7999, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  2333
+    {"FishViridian_ToWater_1", 8000, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2334
+    {"FishViridian_BackToNurse", 8001, 1, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 17, 27},  //  2335
+    {"FishViridian_BackToNurse_1", 8002, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2336
+    {"FishViridian_Visit2_ToWater", 8003, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  2337
+    {"FishViridian_Visit2_ToWater_1", 8004, 1, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2338
+    {"FishViridian_Visit2_BackToNurse", 8005, 1, DPAD_LEFT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 17, 27},  //  2339
+    {"FishViridian_Visit2_BackToNurse_1", 8006, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2340
+    {"C20_14_FISH_VIRIDIAN_Out", 8007, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 7, 4},  //  2341
+    {"C20_15_FISH_VERMILION_ToNurse", 8008, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2342
+    {"C20_15_FISH_VERMILION_ToNurse_1", 8008, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2343
+    {"FishVermilionGoodRod_ToWater", 8009, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2344
+    {"FishVermilionGoodRod_ToWater_1", 8010, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2345
+    {"FishVermilionGoodRod_BackToNurse", 8011, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 11},  //  2346
+    {"FishVermilionGoodRod_BackToNurse_1", 8012, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2347
+    {"FishVermilionGoodRod_Visit2_ToWater", 8013, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2348
+    {"FishVermilionGoodRod_Visit2_ToWater_1", 8014, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2349
+    {"FishVermilionGoodRod_Visit2_BackToNurse", 8015, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 11},  //  2350
+    {"FishVermilionGoodRod_Visit2_BackToNurse_1", 8016, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2351
+    {"FishVermilion_ToWater", 8017, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2352
+    {"FishVermilion_ToWater_1", 8018, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2353
+    {"FishVermilion_BackToNurse", 8019, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 11},  //  2354
+    {"FishVermilion_BackToNurse_1", 8020, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2355
+    {"FishVermilion_Visit2_ToWater", 8021, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2356
+    {"FishVermilion_Visit2_ToWater_1", 8022, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2357
+    {"FishVermilion_Visit2_BackToNurse", 8023, 1, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 11},  //  2358
+    {"FishVermilion_Visit2_BackToNurse_1", 8024, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2359
+    {"C20_15_FISH_VERMILION_Out", 8025, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2360
     {"C20_16_FISH_FUCHSIA_ToNurse", 8026, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 25, 32},  //  2361
     {"C20_16_FISH_FUCHSIA_ToNurse_1", 8026, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 56, 7, 8},  //  2362
     {"FishFuchsia_ToWater", 8027, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 56, 7, 4},  //  2363
@@ -31003,11 +31308,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"FishSafariCenter_Visit3_BackToNurse", 8120, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 25, 32},  //  2410
     {"FishSafariCenter_Visit3_BackToNurse_1", 8120, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 56, 7, 8},  //  2411
     {"C20_16B_SAFARI_FISH_Out", 8121, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 56, 7, 4},  //  2412
-    {"C20_17_FIVE_ISLAND_WATER_ToNurse", 8122, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2413
-    {"C20_17_FIVE_ISLAND_WATER_ToNurse_1", 8122, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2414
-    {"ToTheSeagallop", 8123, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2415
-    {"ToTheSeagallop_1", 8124, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2416
-    {"ToTheSeagallop_2", 8129, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  2417
+    {"C20_17_FIVE_ISLAND_WATER_ToNurse", 8122, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2413
+    {"C20_17_FIVE_ISLAND_WATER_ToNurse_1", 8122, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2414
+    {"ToTheSeagallop", 8123, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2415
+    {"ToTheSeagallop_1", 8124, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2416
+    {"ToTheSeagallop_2", 8129, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  2417
     {"FerryToFiveIsland", 8134, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2418
     {"HarborToFiveIslandNurse", 8134, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  2419
     {"HarborToFiveIslandNurse_1", 8135, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  2420
@@ -31049,10 +31354,10 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToVermilion", 8208, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 39, 7, 4},  //  2456
     {"FerryToVermilion_1", 8209, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  2457
     {"FerryToVermilion_2", 8212, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 3},  //  2458
-    {"PierToVermilionNurse", 8213, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  2459
-    {"PierToVermilionNurse_1", 8215, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  2460
-    {"PierToVermilionNurse_2", 8222, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2461
-    {"C20_17_FIVE_ISLAND_WATER_Out", 8223, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2462
+    {"PierToVermilionNurse", 8213, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  2459
+    {"PierToVermilionNurse_1", 8215, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  2460
+    {"PierToVermilionNurse_2", 8222, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2461
+    {"C20_17_FIVE_ISLAND_WATER_Out", 8223, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2462
     {"C20_18_CAVE_ROCKS_ToNurse", 8224, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 18, 22, 20},  //  2463
     {"C20_18_CAVE_ROCKS_ToNurse_1", 8224, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 24, 7, 8},  //  2464
     {"SmashCeruleanCave_ToRocks_Up", 8225, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 7, 4},  //  2465
@@ -31131,46 +31436,46 @@ inline constexpr StoryLeg LEGS[] = {
     {"Aerodactyl_DoctorAgain_1", 8460, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 29, 7, 9},  //  2538
     {"C20_22_AERODACTYL_Out", 8463, 3, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 29, 10, 3},  //  2539
     {"C20_22_AERODACTYL_Out_1", 8466, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 28, 25, 6},  //  2540
-    {"C20_23_THREE_ISLE_PORT_ToNurse", 8469, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2541
-    {"C20_23_THREE_ISLE_PORT_ToNurse_1", 8469, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2542
-    {"ToTheSeagallop", 8470, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2543
-    {"ToTheSeagallop_1", 8471, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2544
-    {"ToTheSeagallop_2", 8476, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  2545
+    {"C20_23_THREE_ISLE_PORT_ToNurse", 8469, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2541
+    {"C20_23_THREE_ISLE_PORT_ToNurse_1", 8469, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2542
+    {"ToTheSeagallop", 8470, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2543
+    {"ToTheSeagallop_1", 8471, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2544
+    {"ToTheSeagallop_2", 8476, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  2545
     {"FerryToThreeIsland", 8481, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2546
-    {"HarborToThreeIslandNurse", 8481, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 230, 8, 5},  //  2547
-    {"HarborToThreeIslandNurse_1", 8482, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 233, 12, 13},  //  2548
-    {"HarborToThreeIslandNurse_2", 8485, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2549
-    {"CollectThreeIslePort_ToGrass", 8486, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2550
-    {"CollectThreeIslePort_ToGrass_1", 8487, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2551
-    {"CollectThreeIslePort_ToGrass_2", 8492, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 3, 4},  //  2552
-    {"CollectThreeIslePort_ToGrass_3", 8497, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 233, 38, 6},  //  2553
-    {"CollectThreeIslePort_BackToNurse", 8499, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 233, 36, 6},  //  2554
-    {"CollectThreeIslePort_BackToNurse_1", 8501, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 25, 5},  //  2555
-    {"CollectThreeIslePort_BackToNurse_2", 8506, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 233, 16, 5},  //  2556
-    {"CollectThreeIslePort_BackToNurse_3", 8510, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2557
-    {"CollectThreeIslePort_Visit2_ToGrass", 8511, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2558
-    {"CollectThreeIslePort_Visit2_ToGrass_1", 8512, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2559
-    {"CollectThreeIslePort_Visit2_ToGrass_2", 8517, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 3, 4},  //  2560
-    {"CollectThreeIslePort_Visit2_ToGrass_3", 8522, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 233, 38, 6},  //  2561
-    {"CollectThreeIslePort_Visit2_BackToNurse", 8524, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 233, 36, 6},  //  2562
-    {"CollectThreeIslePort_Visit2_BackToNurse_1", 8526, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 25, 5},  //  2563
-    {"CollectThreeIslePort_Visit2_BackToNurse_2", 8531, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 233, 16, 5},  //  2564
-    {"CollectThreeIslePort_Visit2_BackToNurse_3", 8535, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 232, 7, 8},  //  2565
-    {"FerryToVermilion", 8536, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 7, 4},  //  2566
-    {"FerryToVermilion_1", 8537, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 226, 14, 28},  //  2567
-    {"FerryToVermilion_2", 8540, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 230, 8, 3},  //  2568
-    {"PierToVermilionNurse", 8541, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  2569
-    {"PierToVermilionNurse_1", 8543, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  2570
-    {"PierToVermilionNurse_2", 8550, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2571
-    {"C20_23_THREE_ISLE_PORT_Out", 8551, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2572
-    {"ToThePC", 8552, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2573
-    {"ToThePC_1", 8552, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2574
-    {"C20_24_PC_BOXES_Out", 8555, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2575
-    {"C20_25_STONES_ToNurse", 8558, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2576
-    {"C20_25_STONES_ToNurse_1", 8558, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2577
-    {"ToTheSeagallop", 8559, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2578
-    {"ToTheSeagallop_1", 8560, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2579
-    {"ToTheSeagallop_2", 8565, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  2580
+    {"HarborToThreeIslandNurse", 8481, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 233, 8, 5},  //  2547
+    {"HarborToThreeIslandNurse_1", 8482, 3, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 236, 12, 13},  //  2548
+    {"HarborToThreeIslandNurse_2", 8485, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2549
+    {"CollectThreeIslePort_ToGrass", 8486, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2550
+    {"CollectThreeIslePort_ToGrass_1", 8487, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2551
+    {"CollectThreeIslePort_ToGrass_2", 8492, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 3, 4},  //  2552
+    {"CollectThreeIslePort_ToGrass_3", 8497, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 236, 38, 6},  //  2553
+    {"CollectThreeIslePort_BackToNurse", 8499, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 236, 36, 6},  //  2554
+    {"CollectThreeIslePort_BackToNurse_1", 8501, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 25, 5},  //  2555
+    {"CollectThreeIslePort_BackToNurse_2", 8506, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 236, 16, 5},  //  2556
+    {"CollectThreeIslePort_BackToNurse_3", 8510, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2557
+    {"CollectThreeIslePort_Visit2_ToGrass", 8511, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2558
+    {"CollectThreeIslePort_Visit2_ToGrass_1", 8512, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2559
+    {"CollectThreeIslePort_Visit2_ToGrass_2", 8517, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 3, 4},  //  2560
+    {"CollectThreeIslePort_Visit2_ToGrass_3", 8522, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 236, 38, 6},  //  2561
+    {"CollectThreeIslePort_Visit2_BackToNurse", 8524, 2, DPAD_LEFT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 236, 36, 6},  //  2562
+    {"CollectThreeIslePort_Visit2_BackToNurse_1", 8526, 5, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 232, 25, 5},  //  2563
+    {"CollectThreeIslePort_Visit2_BackToNurse_2", 8531, 4, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 236, 16, 5},  //  2564
+    {"CollectThreeIslePort_Visit2_BackToNurse_3", 8535, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 235, 7, 8},  //  2565
+    {"FerryToVermilion", 8536, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 235, 7, 4},  //  2566
+    {"FerryToVermilion_1", 8537, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 229, 14, 28},  //  2567
+    {"FerryToVermilion_2", 8540, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 233, 8, 3},  //  2568
+    {"PierToVermilionNurse", 8541, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  2569
+    {"PierToVermilionNurse_1", 8543, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  2570
+    {"PierToVermilionNurse_2", 8550, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2571
+    {"C20_23_THREE_ISLE_PORT_Out", 8551, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2572
+    {"ToThePC", 8552, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2573
+    {"ToThePC_1", 8552, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2574
+    {"C20_24_PC_BOXES_Out", 8555, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2575
+    {"C20_25_STONES_ToNurse", 8558, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2576
+    {"C20_25_STONES_ToNurse_1", 8558, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2577
+    {"ToTheSeagallop", 8559, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2578
+    {"ToTheSeagallop_1", 8560, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2579
+    {"ToTheSeagallop_2", 8565, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  2580
     {"FerryToFiveIsland", 8570, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2581
     {"HarborToFiveIslandNurse", 8570, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  2582
     {"HarborToFiveIslandNurse_1", 8571, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  2583
@@ -31203,10 +31508,10 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToVermilion", 8622, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 39, 7, 4},  //  2610
     {"FerryToVermilion_1", 8623, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  2611
     {"FerryToVermilion_2", 8626, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 3},  //  2612
-    {"PierToVermilionNurse", 8627, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  2613
-    {"PierToVermilionNurse_1", 8629, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  2614
-    {"PierToVermilionNurse_2", 8636, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2615
-    {"C20_25_STONES_OutVermilion", 8637, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2616
+    {"PierToVermilionNurse", 8627, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  2613
+    {"PierToVermilionNurse_1", 8629, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  2614
+    {"PierToVermilionNurse_2", 8636, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2615
+    {"C20_25_STONES_OutVermilion", 8637, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2616
     {"ToTheStoneClerk", 8638, 2, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 2, 48, 12},  //  2617
     {"ToTheStoneClerk_1", 8640, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 8, 2, 14},  //  2618
     {"ToTheStoneClerk_2", 8643, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 9, 3, 2},  //  2619
@@ -31216,18 +31521,18 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_25_STONES_OutStore_1", 8647, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 10, 3, 2},  //  2623
     {"C20_25_STONES_OutStore_2", 8648, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 9, 9, 2},  //  2624
     {"C20_25_STONES_OutStore_3", 8649, 3, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 8, 4, 2},  //  2625
-    {"ToThePC", 8652, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2626
-    {"ToThePC_1", 8652, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2627
-    {"C20_25_STONES_Out", 8655, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2628
-    {"ToThePC", 8658, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2629
-    {"ToThePC_1", 8658, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2630
-    {"C20_26_TRADE_FARFETCHD_ToTheTrader", 8661, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  2631
-    {"C20_26_TRADE_FARFETCHD_ToTheTrader_1", 8664, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2632
-    {"C20_26_TRADE_FARFETCHD_ToTheTrader_2", 8670, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 247, 4, 7},  //  2633
-    {"C20_26_TRADE_FARFETCHD_BackToThePC", 8671, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 247, 4, 5},  //  2634
-    {"C20_26_TRADE_FARFETCHD_BackToThePC_1", 8672, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 19, 18},  //  2635
-    {"C20_26_TRADE_FARFETCHD_BackToThePC_2", 8678, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2636
-    {"C20_26_TRADE_FARFETCHD_Out", 8681, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  2637
+    {"ToThePC", 8652, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2626
+    {"ToThePC_1", 8652, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2627
+    {"C20_25_STONES_Out", 8655, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2628
+    {"ToThePC", 8658, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2629
+    {"ToThePC_1", 8658, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2630
+    {"C20_26_TRADE_FARFETCHD_ToTheTrader", 8661, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  2631
+    {"C20_26_TRADE_FARFETCHD_ToTheTrader_1", 8664, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2632
+    {"C20_26_TRADE_FARFETCHD_ToTheTrader_2", 8670, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 250, 4, 7},  //  2633
+    {"C20_26_TRADE_FARFETCHD_BackToThePC", 8671, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 250, 4, 5},  //  2634
+    {"C20_26_TRADE_FARFETCHD_BackToThePC_1", 8672, 6, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 19, 18},  //  2635
+    {"C20_26_TRADE_FARFETCHD_BackToThePC_2", 8678, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2636
+    {"C20_26_TRADE_FARFETCHD_Out", 8681, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  2637
     {"ToThePC", 8684, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 18, 22, 20},  //  2638
     {"ToThePC_1", 8684, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 24, 7, 8},  //  2639
     {"C20_27_TRADE_JYNX_ToTheTrader", 8687, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 24, 11, 2},  //  2640
@@ -31262,52 +31567,52 @@ inline constexpr StoryLeg LEGS[] = {
     {"Pick up stone: Moon Stone (Pokemon Mansion 1F)", 8766, 4, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::FOREST, true, 25, 14, 12},  //  2669
     {"Pick up stone: Moon Stone (Pokemon Mansion 1F)_1", 8770, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 122, 8, 33},  //  2670
     {"C20_30_MOON_STONE_MANSION_OutCave", 8773, 3, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 122, 3, 21},  //  2671
-    {"ToThePC", 8776, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2672
-    {"ToThePC_1", 8776, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2673
-    {"C20_30_MOON_STONE_MANSION_Out", 8779, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2674
+    {"ToThePC", 8776, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2672
+    {"ToThePC_1", 8776, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2673
+    {"C20_30_MOON_STONE_MANSION_Out", 8779, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2674
     {"Pick up stone: Moon Stone (Mt. Moon 1F)", 8782, 2, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 172, 12, 6},  //  2675
     {"Pick up stone: Moon Stone (Mt. Moon 1F)_1", 8784, 11, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 78, 18, 37},  //  2676
     {"C20_32_MOON_STONE_MT_MOON_1F_OutCave", 8795, 11, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 78, 3, 3},  //  2677
-    {"ToThePC", 8806, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2678
-    {"ToThePC_1", 8806, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2679
-    {"C20_32_MOON_STONE_MT_MOON_1F_Out", 8809, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2680
+    {"ToThePC", 8806, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2678
+    {"ToThePC_1", 8806, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2679
+    {"C20_32_MOON_STONE_MT_MOON_1F_Out", 8809, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2680
     {"Pick up stone: Moon Stone (Mt. Moon B2F)", 8812, 10, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 18, 22, 20},  //  2681
     {"Pick up stone: Moon Stone (Mt. Moon B2F)_1", 8822, 17, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, true, 165, 6, 16},  //  2682
     {"Pick up stone: Moon Stone (Mt. Moon B2F)_2", 8839, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 79, 45, 4},  //  2683
     {"Pick up stone: Moon Stone (Mt. Moon B2F)_3", 8841, 5, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 80, 5, 10},  //  2684
     {"C20_33_MOON_STONE_MT_MOON_B2F_OutCave", 8846, 5, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 80, 19, 16},  //  2685
     {"C20_33_MOON_STONE_MT_MOON_B2F_OutCave_1", 8851, 2, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 79, 39, 4},  //  2686
-    {"ToThePC", 8853, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2687
-    {"ToThePC_1", 8853, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2688
-    {"C20_33_MOON_STONE_MT_MOON_B2F_Out", 8856, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2689
-    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse", 8859, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2690
-    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse_1", 8859, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  2691
-    {"ToTheSeagallop", 8860, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  2692
-    {"ToTheSeagallop_1", 8861, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  2693
-    {"ToTheSeagallop_2", 8866, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  2694
+    {"ToThePC", 8853, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2687
+    {"ToThePC_1", 8853, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2688
+    {"C20_33_MOON_STONE_MT_MOON_B2F_Out", 8856, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2689
+    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse", 8859, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2690
+    {"C20_34_SUN_STONE_RUIN_VALLEY_ToNurse_1", 8859, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  2691
+    {"ToTheSeagallop", 8860, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  2692
+    {"ToTheSeagallop_1", 8861, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  2693
+    {"ToTheSeagallop_2", 8866, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  2694
     {"FerryToSixIsland", 8871, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  2695
-    {"HarborToSixIslandNurse", 8871, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 217, 8, 5},  //  2696
-    {"HarborToSixIslandNurse_1", 8872, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 23},  //  2697
-    {"HarborToSixIslandNurse_2", 8873, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2698
-    {"ToSunStoneBoulders", 8874, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2699
-    {"ToSunStoneBoulders_1", 8875, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2700
-    {"ToSunStoneBoulders_2", 8878, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 13, 56},  //  2701
-    {"ToSunStoneBoulders_3", 8881, 27, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 221, 17, 61},  //  2702
-    {"SunStoneBoulders_Push1", 8908, 0, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 220, 40, 32},  //  2703
-    {"SunStoneBoulders_Push2", 8908, 1, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 220, 40, 32},  //  2704
-    {"SunStoneBoulders_Push3", 8909, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 220, 41, 32},  //  2705
-    {"SunStoneBoulders_Push4", 8910, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 220, 41, 33},  //  2706
-    {"Pick up stone: Sun Stone (Ruin Valley)", 8911, 1, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 220, 42, 33},  //  2707
-    {"RuinValleyToNurse", 8912, 23, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 42, 32},  //  2708
-    {"RuinValleyToNurse_1", 8935, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 221, 18, 73},  //  2709
-    {"RuinValleyToNurse_2", 8940, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 221, 13, 60},  //  2710
-    {"RuinValleyToNurse_3", 8947, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 219, 7, 8},  //  2711
-    {"FerryToVermilion", 8948, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 219, 7, 4},  //  2712
-    {"FerryToVermilion_1", 8949, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 209, 11, 12},  //  2713
-    {"FerryToVermilion_2", 8950, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 217, 8, 3},  //  2714
-    {"ToThePC", 8951, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  2715
-    {"ToThePC_1", 8951, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  2716
-    {"C20_34_SUN_STONE_RUIN_VALLEY_Out", 8954, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  2717
+    {"HarborToSixIslandNurse", 8871, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 220, 8, 5},  //  2696
+    {"HarborToSixIslandNurse_1", 8872, 1, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 23},  //  2697
+    {"HarborToSixIslandNurse_2", 8873, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2698
+    {"ToSunStoneBoulders", 8874, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2699
+    {"ToSunStoneBoulders_1", 8875, 3, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2700
+    {"ToSunStoneBoulders_2", 8878, 3, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 13, 56},  //  2701
+    {"ToSunStoneBoulders_3", 8881, 27, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 224, 17, 61},  //  2702
+    {"SunStoneBoulders_Push1", 8908, 0, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 223, 40, 32},  //  2703
+    {"SunStoneBoulders_Push2", 8908, 1, DPAD_RIGHT, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 223, 40, 32},  //  2704
+    {"SunStoneBoulders_Push3", 8909, 1, DPAD_DOWN, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 223, 41, 32},  //  2705
+    {"SunStoneBoulders_Push4", 8910, 1, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 223, 41, 33},  //  2706
+    {"Pick up stone: Sun Stone (Ruin Valley)", 8911, 1, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 223, 42, 33},  //  2707
+    {"RuinValleyToNurse", 8912, 23, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 223, 42, 32},  //  2708
+    {"RuinValleyToNurse_1", 8935, 5, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 224, 18, 73},  //  2709
+    {"RuinValleyToNurse_2", 8940, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 224, 13, 60},  //  2710
+    {"RuinValleyToNurse_3", 8947, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 222, 7, 8},  //  2711
+    {"FerryToVermilion", 8948, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 222, 7, 4},  //  2712
+    {"FerryToVermilion_1", 8949, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 212, 11, 12},  //  2713
+    {"FerryToVermilion_2", 8950, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 220, 8, 3},  //  2714
+    {"ToThePC", 8951, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  2715
+    {"ToThePC_1", 8951, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  2716
+    {"C20_34_SUN_STONE_RUIN_VALLEY_Out", 8954, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  2717
     {"ToThePC", 8957, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2718
     {"ToThePC_1", 8957, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2719
     {"C20_EXP_01_ELITE_FOUR_ToNurse", 8960, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2720
@@ -31483,13 +31788,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_35_LEVEL_01_Raise_FirstToNurse", 9310, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2890
     {"C20_35_LEVEL_01_Raise_ToGrass", 9312, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2891
     {"C20_35_LEVEL_01_Raise_ToGrass_1", 9314, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2892
-    {"C20_35_LEVEL_01_Raise_ToGrass_2", 9323, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2893
-    {"C20_35_LEVEL_01_Raise_ToNurse", 9325, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2894
+    {"C20_35_LEVEL_01_Raise_ToGrass_2", 9323, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2893
+    {"C20_35_LEVEL_01_Raise_ToNurse", 9325, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2894
     {"C20_35_LEVEL_01_Raise_ToNurse_1", 9327, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2895
     {"C20_35_LEVEL_01_Raise_ToNurse_2", 9335, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2896
     {"C20_35_LEVEL_01_Raise_BackToGrass", 9337, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2897
     {"C20_35_LEVEL_01_Raise_BackToGrass_1", 9339, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2898
-    {"C20_35_LEVEL_01_Raise_BackToGrass_2", 9348, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2899
+    {"C20_35_LEVEL_01_Raise_BackToGrass_2", 9348, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2899
     {"C20_35_LEVEL_01_BackToThePC", 9350, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2900
     {"C20_35_LEVEL_01_Out", 9352, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2901
     {"ToThePC", 9355, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2902
@@ -31497,13 +31802,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_36_LEVEL_02_Raise_FirstToNurse", 9358, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2904
     {"C20_36_LEVEL_02_Raise_ToGrass", 9360, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2905
     {"C20_36_LEVEL_02_Raise_ToGrass_1", 9362, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2906
-    {"C20_36_LEVEL_02_Raise_ToGrass_2", 9371, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2907
-    {"C20_36_LEVEL_02_Raise_ToNurse", 9373, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2908
+    {"C20_36_LEVEL_02_Raise_ToGrass_2", 9371, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2907
+    {"C20_36_LEVEL_02_Raise_ToNurse", 9373, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2908
     {"C20_36_LEVEL_02_Raise_ToNurse_1", 9375, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2909
     {"C20_36_LEVEL_02_Raise_ToNurse_2", 9383, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2910
     {"C20_36_LEVEL_02_Raise_BackToGrass", 9385, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2911
     {"C20_36_LEVEL_02_Raise_BackToGrass_1", 9387, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2912
-    {"C20_36_LEVEL_02_Raise_BackToGrass_2", 9396, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2913
+    {"C20_36_LEVEL_02_Raise_BackToGrass_2", 9396, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2913
     {"C20_36_LEVEL_02_BackToThePC", 9398, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2914
     {"C20_36_LEVEL_02_Out", 9400, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2915
     {"ToThePC", 9403, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2916
@@ -31511,13 +31816,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_37_LEVEL_03_Raise_FirstToNurse", 9406, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2918
     {"C20_37_LEVEL_03_Raise_ToGrass", 9408, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2919
     {"C20_37_LEVEL_03_Raise_ToGrass_1", 9410, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2920
-    {"C20_37_LEVEL_03_Raise_ToGrass_2", 9419, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2921
-    {"C20_37_LEVEL_03_Raise_ToNurse", 9421, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2922
+    {"C20_37_LEVEL_03_Raise_ToGrass_2", 9419, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2921
+    {"C20_37_LEVEL_03_Raise_ToNurse", 9421, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2922
     {"C20_37_LEVEL_03_Raise_ToNurse_1", 9423, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2923
     {"C20_37_LEVEL_03_Raise_ToNurse_2", 9431, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2924
     {"C20_37_LEVEL_03_Raise_BackToGrass", 9433, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2925
     {"C20_37_LEVEL_03_Raise_BackToGrass_1", 9435, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2926
-    {"C20_37_LEVEL_03_Raise_BackToGrass_2", 9444, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2927
+    {"C20_37_LEVEL_03_Raise_BackToGrass_2", 9444, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2927
     {"C20_37_LEVEL_03_BackToThePC", 9446, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2928
     {"C20_37_LEVEL_03_Out", 9448, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2929
     {"ToThePC", 9451, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2930
@@ -31525,13 +31830,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_38_LEVEL_04_Raise_FirstToNurse", 9454, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2932
     {"C20_38_LEVEL_04_Raise_ToGrass", 9456, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2933
     {"C20_38_LEVEL_04_Raise_ToGrass_1", 9458, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2934
-    {"C20_38_LEVEL_04_Raise_ToGrass_2", 9467, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2935
-    {"C20_38_LEVEL_04_Raise_ToNurse", 9469, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2936
+    {"C20_38_LEVEL_04_Raise_ToGrass_2", 9467, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2935
+    {"C20_38_LEVEL_04_Raise_ToNurse", 9469, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2936
     {"C20_38_LEVEL_04_Raise_ToNurse_1", 9471, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2937
     {"C20_38_LEVEL_04_Raise_ToNurse_2", 9479, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2938
     {"C20_38_LEVEL_04_Raise_BackToGrass", 9481, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2939
     {"C20_38_LEVEL_04_Raise_BackToGrass_1", 9483, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2940
-    {"C20_38_LEVEL_04_Raise_BackToGrass_2", 9492, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2941
+    {"C20_38_LEVEL_04_Raise_BackToGrass_2", 9492, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2941
     {"C20_38_LEVEL_04_BackToThePC", 9494, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2942
     {"C20_38_LEVEL_04_Out", 9496, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2943
     {"ToThePC", 9499, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2944
@@ -31539,13 +31844,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_39_LEVEL_05_Raise_FirstToNurse", 9502, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2946
     {"C20_39_LEVEL_05_Raise_ToGrass", 9504, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2947
     {"C20_39_LEVEL_05_Raise_ToGrass_1", 9506, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2948
-    {"C20_39_LEVEL_05_Raise_ToGrass_2", 9515, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2949
-    {"C20_39_LEVEL_05_Raise_ToNurse", 9517, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2950
+    {"C20_39_LEVEL_05_Raise_ToGrass_2", 9515, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2949
+    {"C20_39_LEVEL_05_Raise_ToNurse", 9517, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2950
     {"C20_39_LEVEL_05_Raise_ToNurse_1", 9519, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2951
     {"C20_39_LEVEL_05_Raise_ToNurse_2", 9527, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2952
     {"C20_39_LEVEL_05_Raise_BackToGrass", 9529, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2953
     {"C20_39_LEVEL_05_Raise_BackToGrass_1", 9531, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2954
-    {"C20_39_LEVEL_05_Raise_BackToGrass_2", 9540, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2955
+    {"C20_39_LEVEL_05_Raise_BackToGrass_2", 9540, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2955
     {"C20_39_LEVEL_05_BackToThePC", 9542, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2956
     {"C20_39_LEVEL_05_Out", 9544, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2957
     {"ToThePC", 9547, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2958
@@ -31553,13 +31858,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_40_LEVEL_06_Raise_FirstToNurse", 9550, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2960
     {"C20_40_LEVEL_06_Raise_ToGrass", 9552, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2961
     {"C20_40_LEVEL_06_Raise_ToGrass_1", 9554, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2962
-    {"C20_40_LEVEL_06_Raise_ToGrass_2", 9563, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2963
-    {"C20_40_LEVEL_06_Raise_ToNurse", 9565, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2964
+    {"C20_40_LEVEL_06_Raise_ToGrass_2", 9563, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2963
+    {"C20_40_LEVEL_06_Raise_ToNurse", 9565, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2964
     {"C20_40_LEVEL_06_Raise_ToNurse_1", 9567, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2965
     {"C20_40_LEVEL_06_Raise_ToNurse_2", 9575, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2966
     {"C20_40_LEVEL_06_Raise_BackToGrass", 9577, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2967
     {"C20_40_LEVEL_06_Raise_BackToGrass_1", 9579, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2968
-    {"C20_40_LEVEL_06_Raise_BackToGrass_2", 9588, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2969
+    {"C20_40_LEVEL_06_Raise_BackToGrass_2", 9588, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2969
     {"C20_40_LEVEL_06_BackToThePC", 9590, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2970
     {"C20_40_LEVEL_06_Out", 9592, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2971
     {"ToThePC", 9595, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2972
@@ -31567,13 +31872,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_41_LEVEL_07_Raise_FirstToNurse", 9598, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2974
     {"C20_41_LEVEL_07_Raise_ToGrass", 9600, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2975
     {"C20_41_LEVEL_07_Raise_ToGrass_1", 9602, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2976
-    {"C20_41_LEVEL_07_Raise_ToGrass_2", 9611, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2977
-    {"C20_41_LEVEL_07_Raise_ToNurse", 9613, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2978
+    {"C20_41_LEVEL_07_Raise_ToGrass_2", 9611, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2977
+    {"C20_41_LEVEL_07_Raise_ToNurse", 9613, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2978
     {"C20_41_LEVEL_07_Raise_ToNurse_1", 9615, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2979
     {"C20_41_LEVEL_07_Raise_ToNurse_2", 9623, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2980
     {"C20_41_LEVEL_07_Raise_BackToGrass", 9625, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2981
     {"C20_41_LEVEL_07_Raise_BackToGrass_1", 9627, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2982
-    {"C20_41_LEVEL_07_Raise_BackToGrass_2", 9636, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2983
+    {"C20_41_LEVEL_07_Raise_BackToGrass_2", 9636, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2983
     {"C20_41_LEVEL_07_BackToThePC", 9638, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2984
     {"C20_41_LEVEL_07_Out", 9640, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2985
     {"ToThePC", 9643, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  2986
@@ -31581,13 +31886,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_42_LEVEL_08_Raise_FirstToNurse", 9646, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2988
     {"C20_42_LEVEL_08_Raise_ToGrass", 9648, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2989
     {"C20_42_LEVEL_08_Raise_ToGrass_1", 9650, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2990
-    {"C20_42_LEVEL_08_Raise_ToGrass_2", 9659, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2991
-    {"C20_42_LEVEL_08_Raise_ToNurse", 9661, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  2992
+    {"C20_42_LEVEL_08_Raise_ToGrass_2", 9659, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2991
+    {"C20_42_LEVEL_08_Raise_ToNurse", 9661, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  2992
     {"C20_42_LEVEL_08_Raise_ToNurse_1", 9663, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  2993
     {"C20_42_LEVEL_08_Raise_ToNurse_2", 9671, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  2994
     {"C20_42_LEVEL_08_Raise_BackToGrass", 9673, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2995
     {"C20_42_LEVEL_08_Raise_BackToGrass_1", 9675, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  2996
-    {"C20_42_LEVEL_08_Raise_BackToGrass_2", 9684, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  2997
+    {"C20_42_LEVEL_08_Raise_BackToGrass_2", 9684, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  2997
     {"C20_42_LEVEL_08_BackToThePC", 9686, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  2998
     {"C20_42_LEVEL_08_Out", 9688, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  2999
     {"ToThePC", 9691, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3000
@@ -31595,13 +31900,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_43_LEVEL_09_Raise_FirstToNurse", 9694, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3002
     {"C20_43_LEVEL_09_Raise_ToGrass", 9696, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3003
     {"C20_43_LEVEL_09_Raise_ToGrass_1", 9698, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3004
-    {"C20_43_LEVEL_09_Raise_ToGrass_2", 9707, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3005
-    {"C20_43_LEVEL_09_Raise_ToNurse", 9709, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3006
+    {"C20_43_LEVEL_09_Raise_ToGrass_2", 9707, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3005
+    {"C20_43_LEVEL_09_Raise_ToNurse", 9709, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3006
     {"C20_43_LEVEL_09_Raise_ToNurse_1", 9711, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3007
     {"C20_43_LEVEL_09_Raise_ToNurse_2", 9719, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3008
     {"C20_43_LEVEL_09_Raise_BackToGrass", 9721, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3009
     {"C20_43_LEVEL_09_Raise_BackToGrass_1", 9723, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3010
-    {"C20_43_LEVEL_09_Raise_BackToGrass_2", 9732, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3011
+    {"C20_43_LEVEL_09_Raise_BackToGrass_2", 9732, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3011
     {"C20_43_LEVEL_09_BackToThePC", 9734, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3012
     {"C20_43_LEVEL_09_Out", 9736, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3013
     {"ToThePC", 9739, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3014
@@ -31609,13 +31914,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_44_LEVEL_10_Raise_FirstToNurse", 9742, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3016
     {"C20_44_LEVEL_10_Raise_ToGrass", 9744, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3017
     {"C20_44_LEVEL_10_Raise_ToGrass_1", 9746, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3018
-    {"C20_44_LEVEL_10_Raise_ToGrass_2", 9755, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3019
-    {"C20_44_LEVEL_10_Raise_ToNurse", 9757, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3020
+    {"C20_44_LEVEL_10_Raise_ToGrass_2", 9755, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3019
+    {"C20_44_LEVEL_10_Raise_ToNurse", 9757, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3020
     {"C20_44_LEVEL_10_Raise_ToNurse_1", 9759, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3021
     {"C20_44_LEVEL_10_Raise_ToNurse_2", 9767, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3022
     {"C20_44_LEVEL_10_Raise_BackToGrass", 9769, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3023
     {"C20_44_LEVEL_10_Raise_BackToGrass_1", 9771, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3024
-    {"C20_44_LEVEL_10_Raise_BackToGrass_2", 9780, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3025
+    {"C20_44_LEVEL_10_Raise_BackToGrass_2", 9780, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3025
     {"C20_44_LEVEL_10_BackToThePC", 9782, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3026
     {"C20_44_LEVEL_10_Out", 9784, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3027
     {"ToThePC", 9787, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3028
@@ -31623,13 +31928,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_45_LEVEL_11_Raise_FirstToNurse", 9790, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3030
     {"C20_45_LEVEL_11_Raise_ToGrass", 9792, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3031
     {"C20_45_LEVEL_11_Raise_ToGrass_1", 9794, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3032
-    {"C20_45_LEVEL_11_Raise_ToGrass_2", 9803, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3033
-    {"C20_45_LEVEL_11_Raise_ToNurse", 9805, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3034
+    {"C20_45_LEVEL_11_Raise_ToGrass_2", 9803, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3033
+    {"C20_45_LEVEL_11_Raise_ToNurse", 9805, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3034
     {"C20_45_LEVEL_11_Raise_ToNurse_1", 9807, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3035
     {"C20_45_LEVEL_11_Raise_ToNurse_2", 9815, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3036
     {"C20_45_LEVEL_11_Raise_BackToGrass", 9817, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3037
     {"C20_45_LEVEL_11_Raise_BackToGrass_1", 9819, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3038
-    {"C20_45_LEVEL_11_Raise_BackToGrass_2", 9828, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3039
+    {"C20_45_LEVEL_11_Raise_BackToGrass_2", 9828, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3039
     {"C20_45_LEVEL_11_BackToThePC", 9830, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3040
     {"C20_45_LEVEL_11_Out", 9832, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3041
     {"ToThePC", 9835, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3042
@@ -31637,13 +31942,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_46_LEVEL_12_Raise_FirstToNurse", 9838, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3044
     {"C20_46_LEVEL_12_Raise_ToGrass", 9840, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3045
     {"C20_46_LEVEL_12_Raise_ToGrass_1", 9842, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3046
-    {"C20_46_LEVEL_12_Raise_ToGrass_2", 9851, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3047
-    {"C20_46_LEVEL_12_Raise_ToNurse", 9853, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3048
+    {"C20_46_LEVEL_12_Raise_ToGrass_2", 9851, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3047
+    {"C20_46_LEVEL_12_Raise_ToNurse", 9853, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3048
     {"C20_46_LEVEL_12_Raise_ToNurse_1", 9855, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3049
     {"C20_46_LEVEL_12_Raise_ToNurse_2", 9863, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3050
     {"C20_46_LEVEL_12_Raise_BackToGrass", 9865, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3051
     {"C20_46_LEVEL_12_Raise_BackToGrass_1", 9867, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3052
-    {"C20_46_LEVEL_12_Raise_BackToGrass_2", 9876, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3053
+    {"C20_46_LEVEL_12_Raise_BackToGrass_2", 9876, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3053
     {"C20_46_LEVEL_12_BackToThePC", 9878, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3054
     {"C20_46_LEVEL_12_Out", 9880, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3055
     {"ToThePC", 9883, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3056
@@ -31651,13 +31956,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_47_LEVEL_13_Raise_FirstToNurse", 9886, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3058
     {"C20_47_LEVEL_13_Raise_ToGrass", 9888, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3059
     {"C20_47_LEVEL_13_Raise_ToGrass_1", 9890, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3060
-    {"C20_47_LEVEL_13_Raise_ToGrass_2", 9899, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3061
-    {"C20_47_LEVEL_13_Raise_ToNurse", 9901, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3062
+    {"C20_47_LEVEL_13_Raise_ToGrass_2", 9899, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3061
+    {"C20_47_LEVEL_13_Raise_ToNurse", 9901, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3062
     {"C20_47_LEVEL_13_Raise_ToNurse_1", 9903, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3063
     {"C20_47_LEVEL_13_Raise_ToNurse_2", 9911, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3064
     {"C20_47_LEVEL_13_Raise_BackToGrass", 9913, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3065
     {"C20_47_LEVEL_13_Raise_BackToGrass_1", 9915, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3066
-    {"C20_47_LEVEL_13_Raise_BackToGrass_2", 9924, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3067
+    {"C20_47_LEVEL_13_Raise_BackToGrass_2", 9924, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3067
     {"C20_47_LEVEL_13_BackToThePC", 9926, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3068
     {"C20_47_LEVEL_13_Out", 9928, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3069
     {"ToThePC", 9931, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3070
@@ -31665,13 +31970,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_48_LEVEL_14_Raise_FirstToNurse", 9934, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3072
     {"C20_48_LEVEL_14_Raise_ToGrass", 9936, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3073
     {"C20_48_LEVEL_14_Raise_ToGrass_1", 9938, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3074
-    {"C20_48_LEVEL_14_Raise_ToGrass_2", 9947, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3075
-    {"C20_48_LEVEL_14_Raise_ToNurse", 9949, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3076
+    {"C20_48_LEVEL_14_Raise_ToGrass_2", 9947, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3075
+    {"C20_48_LEVEL_14_Raise_ToNurse", 9949, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3076
     {"C20_48_LEVEL_14_Raise_ToNurse_1", 9951, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3077
     {"C20_48_LEVEL_14_Raise_ToNurse_2", 9959, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3078
     {"C20_48_LEVEL_14_Raise_BackToGrass", 9961, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3079
     {"C20_48_LEVEL_14_Raise_BackToGrass_1", 9963, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3080
-    {"C20_48_LEVEL_14_Raise_BackToGrass_2", 9972, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3081
+    {"C20_48_LEVEL_14_Raise_BackToGrass_2", 9972, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3081
     {"C20_48_LEVEL_14_BackToThePC", 9974, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3082
     {"C20_48_LEVEL_14_Out", 9976, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3083
     {"ToThePC", 9979, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3084
@@ -31679,13 +31984,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_49_LEVEL_15_Raise_FirstToNurse", 9982, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3086
     {"C20_49_LEVEL_15_Raise_ToGrass", 9984, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3087
     {"C20_49_LEVEL_15_Raise_ToGrass_1", 9986, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3088
-    {"C20_49_LEVEL_15_Raise_ToGrass_2", 9995, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3089
-    {"C20_49_LEVEL_15_Raise_ToNurse", 9997, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3090
+    {"C20_49_LEVEL_15_Raise_ToGrass_2", 9995, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3089
+    {"C20_49_LEVEL_15_Raise_ToNurse", 9997, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3090
     {"C20_49_LEVEL_15_Raise_ToNurse_1", 9999, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3091
     {"C20_49_LEVEL_15_Raise_ToNurse_2", 10007, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3092
     {"C20_49_LEVEL_15_Raise_BackToGrass", 10009, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3093
     {"C20_49_LEVEL_15_Raise_BackToGrass_1", 10011, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3094
-    {"C20_49_LEVEL_15_Raise_BackToGrass_2", 10020, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3095
+    {"C20_49_LEVEL_15_Raise_BackToGrass_2", 10020, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3095
     {"C20_49_LEVEL_15_BackToThePC", 10022, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3096
     {"C20_49_LEVEL_15_Out", 10024, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3097
     {"ToThePC", 10027, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3098
@@ -31693,13 +31998,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_50_LEVEL_16_Raise_FirstToNurse", 10030, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3100
     {"C20_50_LEVEL_16_Raise_ToGrass", 10032, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3101
     {"C20_50_LEVEL_16_Raise_ToGrass_1", 10034, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3102
-    {"C20_50_LEVEL_16_Raise_ToGrass_2", 10043, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3103
-    {"C20_50_LEVEL_16_Raise_ToNurse", 10045, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3104
+    {"C20_50_LEVEL_16_Raise_ToGrass_2", 10043, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3103
+    {"C20_50_LEVEL_16_Raise_ToNurse", 10045, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3104
     {"C20_50_LEVEL_16_Raise_ToNurse_1", 10047, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3105
     {"C20_50_LEVEL_16_Raise_ToNurse_2", 10055, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3106
     {"C20_50_LEVEL_16_Raise_BackToGrass", 10057, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3107
     {"C20_50_LEVEL_16_Raise_BackToGrass_1", 10059, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3108
-    {"C20_50_LEVEL_16_Raise_BackToGrass_2", 10068, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3109
+    {"C20_50_LEVEL_16_Raise_BackToGrass_2", 10068, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3109
     {"C20_50_LEVEL_16_BackToThePC", 10070, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3110
     {"C20_50_LEVEL_16_Out", 10072, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3111
     {"ToThePC", 10075, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3112
@@ -31707,13 +32012,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_51_LEVEL_17_Raise_FirstToNurse", 10078, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3114
     {"C20_51_LEVEL_17_Raise_ToGrass", 10080, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3115
     {"C20_51_LEVEL_17_Raise_ToGrass_1", 10082, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3116
-    {"C20_51_LEVEL_17_Raise_ToGrass_2", 10091, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3117
-    {"C20_51_LEVEL_17_Raise_ToNurse", 10093, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3118
+    {"C20_51_LEVEL_17_Raise_ToGrass_2", 10091, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3117
+    {"C20_51_LEVEL_17_Raise_ToNurse", 10093, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3118
     {"C20_51_LEVEL_17_Raise_ToNurse_1", 10095, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3119
     {"C20_51_LEVEL_17_Raise_ToNurse_2", 10103, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3120
     {"C20_51_LEVEL_17_Raise_BackToGrass", 10105, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3121
     {"C20_51_LEVEL_17_Raise_BackToGrass_1", 10107, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3122
-    {"C20_51_LEVEL_17_Raise_BackToGrass_2", 10116, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3123
+    {"C20_51_LEVEL_17_Raise_BackToGrass_2", 10116, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3123
     {"C20_51_LEVEL_17_BackToThePC", 10118, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3124
     {"C20_51_LEVEL_17_Out", 10120, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3125
     {"ToThePC", 10123, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3126
@@ -31721,13 +32026,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_52_LEVEL_18_Raise_FirstToNurse", 10126, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3128
     {"C20_52_LEVEL_18_Raise_ToGrass", 10128, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3129
     {"C20_52_LEVEL_18_Raise_ToGrass_1", 10130, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3130
-    {"C20_52_LEVEL_18_Raise_ToGrass_2", 10139, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3131
-    {"C20_52_LEVEL_18_Raise_ToNurse", 10141, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3132
+    {"C20_52_LEVEL_18_Raise_ToGrass_2", 10139, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3131
+    {"C20_52_LEVEL_18_Raise_ToNurse", 10141, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3132
     {"C20_52_LEVEL_18_Raise_ToNurse_1", 10143, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3133
     {"C20_52_LEVEL_18_Raise_ToNurse_2", 10151, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3134
     {"C20_52_LEVEL_18_Raise_BackToGrass", 10153, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3135
     {"C20_52_LEVEL_18_Raise_BackToGrass_1", 10155, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3136
-    {"C20_52_LEVEL_18_Raise_BackToGrass_2", 10164, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3137
+    {"C20_52_LEVEL_18_Raise_BackToGrass_2", 10164, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3137
     {"C20_52_LEVEL_18_BackToThePC", 10166, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3138
     {"C20_52_LEVEL_18_Out", 10168, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3139
     {"ToThePC", 10171, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3140
@@ -31735,13 +32040,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_53_LEVEL_19_Raise_FirstToNurse", 10174, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3142
     {"C20_53_LEVEL_19_Raise_ToGrass", 10176, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3143
     {"C20_53_LEVEL_19_Raise_ToGrass_1", 10178, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3144
-    {"C20_53_LEVEL_19_Raise_ToGrass_2", 10187, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3145
-    {"C20_53_LEVEL_19_Raise_ToNurse", 10189, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3146
+    {"C20_53_LEVEL_19_Raise_ToGrass_2", 10187, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3145
+    {"C20_53_LEVEL_19_Raise_ToNurse", 10189, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3146
     {"C20_53_LEVEL_19_Raise_ToNurse_1", 10191, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3147
     {"C20_53_LEVEL_19_Raise_ToNurse_2", 10199, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3148
     {"C20_53_LEVEL_19_Raise_BackToGrass", 10201, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3149
     {"C20_53_LEVEL_19_Raise_BackToGrass_1", 10203, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3150
-    {"C20_53_LEVEL_19_Raise_BackToGrass_2", 10212, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3151
+    {"C20_53_LEVEL_19_Raise_BackToGrass_2", 10212, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3151
     {"C20_53_LEVEL_19_BackToThePC", 10214, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3152
     {"C20_53_LEVEL_19_Out", 10216, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3153
     {"ToThePC", 10219, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3154
@@ -31752,13 +32057,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_54_FRIEND_01_Raise_FirstToNurse_1", 10229, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3159
     {"C20_54_FRIEND_01_Raise_ToGrass", 10231, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3160
     {"C20_54_FRIEND_01_Raise_ToGrass_1", 10233, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3161
-    {"C20_54_FRIEND_01_Raise_ToGrass_2", 10242, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3162
-    {"C20_54_FRIEND_01_Raise_ToNurse", 10244, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3163
+    {"C20_54_FRIEND_01_Raise_ToGrass_2", 10242, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3162
+    {"C20_54_FRIEND_01_Raise_ToNurse", 10244, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3163
     {"C20_54_FRIEND_01_Raise_ToNurse_1", 10246, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3164
     {"C20_54_FRIEND_01_Raise_ToNurse_2", 10254, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3165
     {"C20_54_FRIEND_01_Raise_BackToGrass", 10256, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3166
     {"C20_54_FRIEND_01_Raise_BackToGrass_1", 10258, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3167
-    {"C20_54_FRIEND_01_Raise_BackToGrass_2", 10267, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3168
+    {"C20_54_FRIEND_01_Raise_BackToGrass_2", 10267, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3168
     {"C20_54_FRIEND_01_BackToThePC", 10269, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3169
     {"C20_54_FRIEND_01_Out", 10271, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3170
     {"ToThePC", 10274, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3171
@@ -31769,13 +32074,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_55_FRIEND_02_Raise_FirstToNurse_1", 10284, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3176
     {"C20_55_FRIEND_02_Raise_ToGrass", 10286, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3177
     {"C20_55_FRIEND_02_Raise_ToGrass_1", 10288, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3178
-    {"C20_55_FRIEND_02_Raise_ToGrass_2", 10297, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3179
-    {"C20_55_FRIEND_02_Raise_ToNurse", 10299, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3180
+    {"C20_55_FRIEND_02_Raise_ToGrass_2", 10297, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3179
+    {"C20_55_FRIEND_02_Raise_ToNurse", 10299, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3180
     {"C20_55_FRIEND_02_Raise_ToNurse_1", 10301, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3181
     {"C20_55_FRIEND_02_Raise_ToNurse_2", 10309, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3182
     {"C20_55_FRIEND_02_Raise_BackToGrass", 10311, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3183
     {"C20_55_FRIEND_02_Raise_BackToGrass_1", 10313, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3184
-    {"C20_55_FRIEND_02_Raise_BackToGrass_2", 10322, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3185
+    {"C20_55_FRIEND_02_Raise_BackToGrass_2", 10322, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3185
     {"C20_55_FRIEND_02_BackToThePC", 10324, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3186
     {"C20_55_FRIEND_02_Out", 10326, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3187
     {"ToThePC", 10329, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3188
@@ -31786,13 +32091,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_56_FRIEND_03_Raise_FirstToNurse_1", 10339, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3193
     {"C20_56_FRIEND_03_Raise_ToGrass", 10341, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3194
     {"C20_56_FRIEND_03_Raise_ToGrass_1", 10343, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3195
-    {"C20_56_FRIEND_03_Raise_ToGrass_2", 10352, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3196
-    {"C20_56_FRIEND_03_Raise_ToNurse", 10354, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3197
+    {"C20_56_FRIEND_03_Raise_ToGrass_2", 10352, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3196
+    {"C20_56_FRIEND_03_Raise_ToNurse", 10354, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3197
     {"C20_56_FRIEND_03_Raise_ToNurse_1", 10356, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3198
     {"C20_56_FRIEND_03_Raise_ToNurse_2", 10364, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3199
     {"C20_56_FRIEND_03_Raise_BackToGrass", 10366, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3200
     {"C20_56_FRIEND_03_Raise_BackToGrass_1", 10368, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3201
-    {"C20_56_FRIEND_03_Raise_BackToGrass_2", 10377, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3202
+    {"C20_56_FRIEND_03_Raise_BackToGrass_2", 10377, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3202
     {"C20_56_FRIEND_03_BackToThePC", 10379, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3203
     {"C20_56_FRIEND_03_Out", 10381, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3204
     {"ToThePC", 10384, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3205
@@ -31803,13 +32108,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_57_FRIEND_04_Raise_FirstToNurse_1", 10394, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3210
     {"C20_57_FRIEND_04_Raise_ToGrass", 10396, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3211
     {"C20_57_FRIEND_04_Raise_ToGrass_1", 10398, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3212
-    {"C20_57_FRIEND_04_Raise_ToGrass_2", 10407, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3213
-    {"C20_57_FRIEND_04_Raise_ToNurse", 10409, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3214
+    {"C20_57_FRIEND_04_Raise_ToGrass_2", 10407, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3213
+    {"C20_57_FRIEND_04_Raise_ToNurse", 10409, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3214
     {"C20_57_FRIEND_04_Raise_ToNurse_1", 10411, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3215
     {"C20_57_FRIEND_04_Raise_ToNurse_2", 10419, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3216
     {"C20_57_FRIEND_04_Raise_BackToGrass", 10421, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3217
     {"C20_57_FRIEND_04_Raise_BackToGrass_1", 10423, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3218
-    {"C20_57_FRIEND_04_Raise_BackToGrass_2", 10432, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3219
+    {"C20_57_FRIEND_04_Raise_BackToGrass_2", 10432, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3219
     {"C20_57_FRIEND_04_BackToThePC", 10434, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3220
     {"C20_57_FRIEND_04_Out", 10436, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3221
     {"ToThePC", 10439, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3222
@@ -31820,13 +32125,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_58_FRIEND_05_Raise_FirstToNurse_1", 10449, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3227
     {"C20_58_FRIEND_05_Raise_ToGrass", 10451, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3228
     {"C20_58_FRIEND_05_Raise_ToGrass_1", 10453, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3229
-    {"C20_58_FRIEND_05_Raise_ToGrass_2", 10462, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3230
-    {"C20_58_FRIEND_05_Raise_ToNurse", 10464, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3231
+    {"C20_58_FRIEND_05_Raise_ToGrass_2", 10462, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3230
+    {"C20_58_FRIEND_05_Raise_ToNurse", 10464, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3231
     {"C20_58_FRIEND_05_Raise_ToNurse_1", 10466, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3232
     {"C20_58_FRIEND_05_Raise_ToNurse_2", 10474, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3233
     {"C20_58_FRIEND_05_Raise_BackToGrass", 10476, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3234
     {"C20_58_FRIEND_05_Raise_BackToGrass_1", 10478, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3235
-    {"C20_58_FRIEND_05_Raise_BackToGrass_2", 10487, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3236
+    {"C20_58_FRIEND_05_Raise_BackToGrass_2", 10487, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3236
     {"C20_58_FRIEND_05_BackToThePC", 10489, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3237
     {"C20_58_FRIEND_05_Out", 10491, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3238
     {"ToThePC", 10494, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3239
@@ -31837,13 +32142,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_59_FRIEND_06_Raise_FirstToNurse_1", 10504, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3244
     {"C20_59_FRIEND_06_Raise_ToGrass", 10506, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3245
     {"C20_59_FRIEND_06_Raise_ToGrass_1", 10508, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3246
-    {"C20_59_FRIEND_06_Raise_ToGrass_2", 10517, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3247
-    {"C20_59_FRIEND_06_Raise_ToNurse", 10519, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3248
+    {"C20_59_FRIEND_06_Raise_ToGrass_2", 10517, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3247
+    {"C20_59_FRIEND_06_Raise_ToNurse", 10519, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3248
     {"C20_59_FRIEND_06_Raise_ToNurse_1", 10521, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3249
     {"C20_59_FRIEND_06_Raise_ToNurse_2", 10529, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3250
     {"C20_59_FRIEND_06_Raise_BackToGrass", 10531, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3251
     {"C20_59_FRIEND_06_Raise_BackToGrass_1", 10533, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3252
-    {"C20_59_FRIEND_06_Raise_BackToGrass_2", 10542, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3253
+    {"C20_59_FRIEND_06_Raise_BackToGrass_2", 10542, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3253
     {"C20_59_FRIEND_06_BackToThePC", 10544, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3254
     {"C20_59_FRIEND_06_Out", 10546, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3255
     {"ToThePC", 10549, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3256
@@ -31854,13 +32159,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_60_FRIEND_07_Raise_FirstToNurse_1", 10559, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3261
     {"C20_60_FRIEND_07_Raise_ToGrass", 10561, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3262
     {"C20_60_FRIEND_07_Raise_ToGrass_1", 10563, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3263
-    {"C20_60_FRIEND_07_Raise_ToGrass_2", 10572, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3264
-    {"C20_60_FRIEND_07_Raise_ToNurse", 10574, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3265
+    {"C20_60_FRIEND_07_Raise_ToGrass_2", 10572, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3264
+    {"C20_60_FRIEND_07_Raise_ToNurse", 10574, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3265
     {"C20_60_FRIEND_07_Raise_ToNurse_1", 10576, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3266
     {"C20_60_FRIEND_07_Raise_ToNurse_2", 10584, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3267
     {"C20_60_FRIEND_07_Raise_BackToGrass", 10586, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3268
     {"C20_60_FRIEND_07_Raise_BackToGrass_1", 10588, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3269
-    {"C20_60_FRIEND_07_Raise_BackToGrass_2", 10597, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3270
+    {"C20_60_FRIEND_07_Raise_BackToGrass_2", 10597, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3270
     {"C20_60_FRIEND_07_BackToThePC", 10599, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3271
     {"C20_60_FRIEND_07_Out", 10601, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3272
     {"ToThePC", 10604, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3273
@@ -31871,20 +32176,20 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_61_FRIEND_08_Raise_FirstToNurse_1", 10614, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3278
     {"C20_61_FRIEND_08_Raise_ToGrass", 10616, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3279
     {"C20_61_FRIEND_08_Raise_ToGrass_1", 10618, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3280
-    {"C20_61_FRIEND_08_Raise_ToGrass_2", 10627, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3281
-    {"C20_61_FRIEND_08_Raise_ToNurse", 10629, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3282
+    {"C20_61_FRIEND_08_Raise_ToGrass_2", 10627, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3281
+    {"C20_61_FRIEND_08_Raise_ToNurse", 10629, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3282
     {"C20_61_FRIEND_08_Raise_ToNurse_1", 10631, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3283
     {"C20_61_FRIEND_08_Raise_ToNurse_2", 10639, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3284
     {"C20_61_FRIEND_08_Raise_BackToGrass", 10641, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3285
     {"C20_61_FRIEND_08_Raise_BackToGrass_1", 10643, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3286
-    {"C20_61_FRIEND_08_Raise_BackToGrass_2", 10652, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3287
+    {"C20_61_FRIEND_08_Raise_BackToGrass_2", 10652, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3287
     {"C20_61_FRIEND_08_BackToThePC", 10654, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3288
     {"C20_61_FRIEND_08_Out", 10656, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3289
-    {"ToThePC", 10659, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3290
-    {"ToThePC_1", 10659, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3291
-    {"ToTheSeagallop", 10662, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3292
-    {"ToTheSeagallop_1", 10665, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3293
-    {"ToTheSeagallop_2", 10670, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3294
+    {"ToThePC", 10659, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3290
+    {"ToThePC_1", 10659, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3291
+    {"ToTheSeagallop", 10662, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3292
+    {"ToTheSeagallop_1", 10665, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3293
+    {"ToTheSeagallop_2", 10670, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3294
     {"FerryToFiveIsland", 10675, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3295
     {"EggGentleman", 10675, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  3296
     {"EggGentleman_1", 10676, 4, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 32, 12, 14},  //  3297
@@ -31904,13 +32209,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_63_FRIEND_09_Raise_FirstToNurse_1", 10738, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3311
     {"C20_63_FRIEND_09_Raise_ToGrass", 10740, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3312
     {"C20_63_FRIEND_09_Raise_ToGrass_1", 10742, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3313
-    {"C20_63_FRIEND_09_Raise_ToGrass_2", 10751, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3314
-    {"C20_63_FRIEND_09_Raise_ToNurse", 10753, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3315
+    {"C20_63_FRIEND_09_Raise_ToGrass_2", 10751, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3314
+    {"C20_63_FRIEND_09_Raise_ToNurse", 10753, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3315
     {"C20_63_FRIEND_09_Raise_ToNurse_1", 10755, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3316
     {"C20_63_FRIEND_09_Raise_ToNurse_2", 10763, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3317
     {"C20_63_FRIEND_09_Raise_BackToGrass", 10765, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3318
     {"C20_63_FRIEND_09_Raise_BackToGrass_1", 10767, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3319
-    {"C20_63_FRIEND_09_Raise_BackToGrass_2", 10776, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3320
+    {"C20_63_FRIEND_09_Raise_BackToGrass_2", 10776, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3320
     {"C20_63_FRIEND_09_BackToThePC", 10778, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3321
     {"C20_63_FRIEND_09_Out", 10780, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3322
     {"ToThePC", 10783, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3323
@@ -31921,13 +32226,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_64_FRIEND_10_Raise_FirstToNurse_1", 10793, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3328
     {"C20_64_FRIEND_10_Raise_ToGrass", 10795, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3329
     {"C20_64_FRIEND_10_Raise_ToGrass_1", 10797, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3330
-    {"C20_64_FRIEND_10_Raise_ToGrass_2", 10806, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3331
-    {"C20_64_FRIEND_10_Raise_ToNurse", 10808, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3332
+    {"C20_64_FRIEND_10_Raise_ToGrass_2", 10806, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3331
+    {"C20_64_FRIEND_10_Raise_ToNurse", 10808, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3332
     {"C20_64_FRIEND_10_Raise_ToNurse_1", 10810, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3333
     {"C20_64_FRIEND_10_Raise_ToNurse_2", 10818, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3334
     {"C20_64_FRIEND_10_Raise_BackToGrass", 10820, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3335
     {"C20_64_FRIEND_10_Raise_BackToGrass_1", 10822, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3336
-    {"C20_64_FRIEND_10_Raise_BackToGrass_2", 10831, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3337
+    {"C20_64_FRIEND_10_Raise_BackToGrass_2", 10831, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3337
     {"C20_64_FRIEND_10_BackToThePC", 10833, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3338
     {"C20_64_FRIEND_10_Out", 10835, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3339
     {"ToThePC", 10838, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  3340
@@ -31938,20 +32243,20 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_65_FRIEND_11_Raise_FirstToNurse_1", 10848, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3345
     {"C20_65_FRIEND_11_Raise_ToGrass", 10850, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3346
     {"C20_65_FRIEND_11_Raise_ToGrass_1", 10852, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3347
-    {"C20_65_FRIEND_11_Raise_ToGrass_2", 10861, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3348
-    {"C20_65_FRIEND_11_Raise_ToNurse", 10863, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  3349
+    {"C20_65_FRIEND_11_Raise_ToGrass_2", 10861, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3348
+    {"C20_65_FRIEND_11_Raise_ToNurse", 10863, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  3349
     {"C20_65_FRIEND_11_Raise_ToNurse_1", 10865, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  3350
     {"C20_65_FRIEND_11_Raise_ToNurse_2", 10873, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  3351
     {"C20_65_FRIEND_11_Raise_BackToGrass", 10875, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3352
     {"C20_65_FRIEND_11_Raise_BackToGrass_1", 10877, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  3353
-    {"C20_65_FRIEND_11_Raise_BackToGrass_2", 10886, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  3354
+    {"C20_65_FRIEND_11_Raise_BackToGrass_2", 10886, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  3354
     {"C20_65_FRIEND_11_BackToThePC", 10888, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  3355
     {"C20_65_FRIEND_11_Out", 10890, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  3356
-    {"ToThePC", 10893, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3357
-    {"ToThePC_1", 10893, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3358
-    {"ToTheSeagallop", 10896, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3359
-    {"ToTheSeagallop_1", 10899, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3360
-    {"ToTheSeagallop_2", 10904, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3361
+    {"ToThePC", 10893, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3357
+    {"ToThePC_1", 10893, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3358
+    {"ToTheSeagallop", 10896, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3359
+    {"ToTheSeagallop_1", 10899, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3360
+    {"ToTheSeagallop_2", 10904, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3361
     {"FerryToFourIsland", 10909, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3362
     {"ToTheWoman", 10909, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3363
     {"ToTheWoman_1", 10910, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3364
@@ -32016,15 +32321,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 10983, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3423
     {"ToTheHarbor_2", 10986, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3424
     {"FerryToVermilion", 10987, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3425
-    {"BackToThePC", 10987, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3426
-    {"BackToThePC_1", 10989, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3427
-    {"BackToThePC_2", 10996, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3428
-    {"C20_66_DAYCARE_01_PICHU_Out", 10999, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3429
-    {"ToThePC", 11002, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3430
-    {"ToThePC_1", 11002, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3431
-    {"ToTheSeagallop", 11005, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3432
-    {"ToTheSeagallop_1", 11008, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3433
-    {"ToTheSeagallop_2", 11013, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3434
+    {"BackToThePC", 10987, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3426
+    {"BackToThePC_1", 10989, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3427
+    {"BackToThePC_2", 10996, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3428
+    {"C20_66_DAYCARE_01_PICHU_Out", 10999, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3429
+    {"ToThePC", 11002, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3430
+    {"ToThePC_1", 11002, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3431
+    {"ToTheSeagallop", 11005, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3432
+    {"ToTheSeagallop_1", 11008, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3433
+    {"ToTheSeagallop_2", 11013, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3434
     {"FerryToFourIsland", 11018, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3435
     {"ToTheWoman", 11018, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3436
     {"ToTheWoman_1", 11019, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3437
@@ -32089,15 +32394,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11092, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3496
     {"ToTheHarbor_2", 11095, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3497
     {"FerryToVermilion", 11096, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3498
-    {"BackToThePC", 11096, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3499
-    {"BackToThePC_1", 11098, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3500
-    {"BackToThePC_2", 11105, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3501
-    {"C20_67_DAYCARE_02_CLEFFA_Out", 11108, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3502
-    {"ToThePC", 11111, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3503
-    {"ToThePC_1", 11111, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3504
-    {"ToTheSeagallop", 11114, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3505
-    {"ToTheSeagallop_1", 11117, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3506
-    {"ToTheSeagallop_2", 11122, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3507
+    {"BackToThePC", 11096, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3499
+    {"BackToThePC_1", 11098, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3500
+    {"BackToThePC_2", 11105, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3501
+    {"C20_67_DAYCARE_02_CLEFFA_Out", 11108, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3502
+    {"ToThePC", 11111, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3503
+    {"ToThePC_1", 11111, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3504
+    {"ToTheSeagallop", 11114, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3505
+    {"ToTheSeagallop_1", 11117, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3506
+    {"ToTheSeagallop_2", 11122, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3507
     {"FerryToFourIsland", 11127, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3508
     {"ToTheWoman", 11127, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3509
     {"ToTheWoman_1", 11128, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3510
@@ -32162,15 +32467,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11201, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3569
     {"ToTheHarbor_2", 11204, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3570
     {"FerryToVermilion", 11205, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3571
-    {"BackToThePC", 11205, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3572
-    {"BackToThePC_1", 11207, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3573
-    {"BackToThePC_2", 11214, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3574
-    {"C20_68_DAYCARE_03_IGGLYBUFF_Out", 11217, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3575
-    {"ToThePC", 11220, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3576
-    {"ToThePC_1", 11220, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3577
-    {"ToTheSeagallop", 11223, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3578
-    {"ToTheSeagallop_1", 11226, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3579
-    {"ToTheSeagallop_2", 11231, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3580
+    {"BackToThePC", 11205, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3572
+    {"BackToThePC_1", 11207, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3573
+    {"BackToThePC_2", 11214, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3574
+    {"C20_68_DAYCARE_03_IGGLYBUFF_Out", 11217, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3575
+    {"ToThePC", 11220, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3576
+    {"ToThePC_1", 11220, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3577
+    {"ToTheSeagallop", 11223, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3578
+    {"ToTheSeagallop_1", 11226, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3579
+    {"ToTheSeagallop_2", 11231, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3580
     {"FerryToFourIsland", 11236, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3581
     {"ToTheWoman", 11236, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3582
     {"ToTheWoman_1", 11237, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3583
@@ -32235,15 +32540,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11310, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3642
     {"ToTheHarbor_2", 11313, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3643
     {"FerryToVermilion", 11314, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3644
-    {"BackToThePC", 11314, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3645
-    {"BackToThePC_1", 11316, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3646
-    {"BackToThePC_2", 11323, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3647
-    {"C20_69_DAYCARE_04_TOGEPI_Out", 11326, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3648
-    {"ToThePC", 11329, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3649
-    {"ToThePC_1", 11329, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3650
-    {"ToTheSeagallop", 11332, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3651
-    {"ToTheSeagallop_1", 11335, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3652
-    {"ToTheSeagallop_2", 11340, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3653
+    {"BackToThePC", 11314, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3645
+    {"BackToThePC_1", 11316, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3646
+    {"BackToThePC_2", 11323, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3647
+    {"C20_69_DAYCARE_04_TOGEPI_Out", 11326, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3648
+    {"ToThePC", 11329, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3649
+    {"ToThePC_1", 11329, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3650
+    {"ToTheSeagallop", 11332, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3651
+    {"ToTheSeagallop_1", 11335, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3652
+    {"ToTheSeagallop_2", 11340, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3653
     {"FerryToFourIsland", 11345, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3654
     {"ToTheWoman", 11345, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3655
     {"ToTheWoman_1", 11346, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3656
@@ -32308,15 +32613,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11419, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3715
     {"ToTheHarbor_2", 11422, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3716
     {"FerryToVermilion", 11423, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3717
-    {"BackToThePC", 11423, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3718
-    {"BackToThePC_1", 11425, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3719
-    {"BackToThePC_2", 11432, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3720
-    {"C20_70_DAYCARE_05_SMOOCHUM_Out", 11435, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3721
-    {"ToThePC", 11438, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3722
-    {"ToThePC_1", 11438, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3723
-    {"ToTheSeagallop", 11441, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3724
-    {"ToTheSeagallop_1", 11444, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3725
-    {"ToTheSeagallop_2", 11449, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3726
+    {"BackToThePC", 11423, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3718
+    {"BackToThePC_1", 11425, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3719
+    {"BackToThePC_2", 11432, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3720
+    {"C20_70_DAYCARE_05_SMOOCHUM_Out", 11435, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3721
+    {"ToThePC", 11438, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3722
+    {"ToThePC_1", 11438, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3723
+    {"ToTheSeagallop", 11441, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3724
+    {"ToTheSeagallop_1", 11444, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3725
+    {"ToTheSeagallop_2", 11449, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3726
     {"FerryToFourIsland", 11454, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3727
     {"ToTheWoman", 11454, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3728
     {"ToTheWoman_1", 11455, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3729
@@ -32381,15 +32686,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11528, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3788
     {"ToTheHarbor_2", 11531, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3789
     {"FerryToVermilion", 11532, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3790
-    {"BackToThePC", 11532, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3791
-    {"BackToThePC_1", 11534, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3792
-    {"BackToThePC_2", 11541, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3793
-    {"C20_71_DAYCARE_06_ELEKID_Out", 11544, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3794
-    {"ToThePC", 11547, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3795
-    {"ToThePC_1", 11547, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3796
-    {"ToTheSeagallop", 11550, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3797
-    {"ToTheSeagallop_1", 11553, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3798
-    {"ToTheSeagallop_2", 11558, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3799
+    {"BackToThePC", 11532, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3791
+    {"BackToThePC_1", 11534, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3792
+    {"BackToThePC_2", 11541, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3793
+    {"C20_71_DAYCARE_06_ELEKID_Out", 11544, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3794
+    {"ToThePC", 11547, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3795
+    {"ToThePC_1", 11547, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3796
+    {"ToTheSeagallop", 11550, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3797
+    {"ToTheSeagallop_1", 11553, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3798
+    {"ToTheSeagallop_2", 11558, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3799
     {"FerryToFourIsland", 11563, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3800
     {"ToTheWoman", 11563, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3801
     {"ToTheWoman_1", 11564, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3802
@@ -32454,15 +32759,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11637, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3861
     {"ToTheHarbor_2", 11640, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3862
     {"FerryToVermilion", 11641, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3863
-    {"BackToThePC", 11641, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3864
-    {"BackToThePC_1", 11643, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3865
-    {"BackToThePC_2", 11650, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3866
-    {"C20_72_DAYCARE_07_TYROGUE_Out", 11653, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3867
-    {"ToThePC", 11656, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3868
-    {"ToThePC_1", 11656, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3869
-    {"ToTheSeagallop", 11659, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3870
-    {"ToTheSeagallop_1", 11662, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3871
-    {"ToTheSeagallop_2", 11667, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3872
+    {"BackToThePC", 11641, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3864
+    {"BackToThePC_1", 11643, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3865
+    {"BackToThePC_2", 11650, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3866
+    {"C20_72_DAYCARE_07_TYROGUE_Out", 11653, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3867
+    {"ToThePC", 11656, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3868
+    {"ToThePC_1", 11656, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3869
+    {"ToTheSeagallop", 11659, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3870
+    {"ToTheSeagallop_1", 11662, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3871
+    {"ToTheSeagallop_2", 11667, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3872
     {"FerryToFourIsland", 11672, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3873
     {"ToTheWoman", 11672, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3874
     {"ToTheWoman_1", 11673, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3875
@@ -32527,15 +32832,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11746, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  3934
     {"ToTheHarbor_2", 11749, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  3935
     {"FerryToVermilion", 11750, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3936
-    {"BackToThePC", 11750, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  3937
-    {"BackToThePC_1", 11752, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  3938
-    {"BackToThePC_2", 11759, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3939
-    {"C20_73_DAYCARE_08_TYROGUE_Out", 11762, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3940
-    {"ToThePC", 11765, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3941
-    {"ToThePC_1", 11765, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  3942
-    {"ToTheSeagallop", 11768, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  3943
-    {"ToTheSeagallop_1", 11771, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  3944
-    {"ToTheSeagallop_2", 11776, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  3945
+    {"BackToThePC", 11750, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  3937
+    {"BackToThePC_1", 11752, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  3938
+    {"BackToThePC_2", 11759, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3939
+    {"C20_73_DAYCARE_08_TYROGUE_Out", 11762, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3940
+    {"ToThePC", 11765, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3941
+    {"ToThePC_1", 11765, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  3942
+    {"ToTheSeagallop", 11768, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  3943
+    {"ToTheSeagallop_1", 11771, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  3944
+    {"ToTheSeagallop_2", 11776, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  3945
     {"FerryToFourIsland", 11781, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  3946
     {"ToTheWoman", 11781, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  3947
     {"ToTheWoman_1", 11782, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  3948
@@ -32600,15 +32905,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11855, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4007
     {"ToTheHarbor_2", 11858, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4008
     {"FerryToVermilion", 11859, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4009
-    {"BackToThePC", 11859, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4010
-    {"BackToThePC_1", 11861, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4011
-    {"BackToThePC_2", 11868, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4012
-    {"C20_74_DAYCARE_09_TYROGUE_Out", 11871, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4013
-    {"ToThePC", 11874, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4014
-    {"ToThePC_1", 11874, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4015
-    {"ToTheSeagallop", 11877, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4016
-    {"ToTheSeagallop_1", 11880, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4017
-    {"ToTheSeagallop_2", 11885, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4018
+    {"BackToThePC", 11859, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4010
+    {"BackToThePC_1", 11861, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4011
+    {"BackToThePC_2", 11868, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4012
+    {"C20_74_DAYCARE_09_TYROGUE_Out", 11871, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4013
+    {"ToThePC", 11874, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4014
+    {"ToThePC_1", 11874, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4015
+    {"ToTheSeagallop", 11877, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4016
+    {"ToTheSeagallop_1", 11880, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4017
+    {"ToTheSeagallop_2", 11885, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4018
     {"FerryToFourIsland", 11890, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4019
     {"ToTheWoman", 11890, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4020
     {"ToTheWoman_1", 11891, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  4021
@@ -32673,15 +32978,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 11964, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4080
     {"ToTheHarbor_2", 11967, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4081
     {"FerryToVermilion", 11968, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4082
-    {"BackToThePC", 11968, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4083
-    {"BackToThePC_1", 11970, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4084
-    {"BackToThePC_2", 11977, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4085
-    {"C20_75_DAYCARE_10_KABUTO_Out", 11980, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4086
-    {"ToThePC", 11983, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4087
-    {"ToThePC_1", 11983, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4088
-    {"ToTheSeagallop", 11986, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4089
-    {"ToTheSeagallop_1", 11989, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4090
-    {"ToTheSeagallop_2", 11994, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4091
+    {"BackToThePC", 11968, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4083
+    {"BackToThePC_1", 11970, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4084
+    {"BackToThePC_2", 11977, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4085
+    {"C20_75_DAYCARE_10_KABUTO_Out", 11980, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4086
+    {"ToThePC", 11983, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4087
+    {"ToThePC_1", 11983, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4088
+    {"ToTheSeagallop", 11986, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4089
+    {"ToTheSeagallop_1", 11989, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4090
+    {"ToTheSeagallop_2", 11994, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4091
     {"FerryToFourIsland", 11999, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4092
     {"ToTheWoman", 11999, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4093
     {"ToTheWoman_1", 12000, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  4094
@@ -32746,15 +33051,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 12073, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4153
     {"ToTheHarbor_2", 12076, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4154
     {"FerryToVermilion", 12077, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4155
-    {"BackToThePC", 12077, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4156
-    {"BackToThePC_1", 12079, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4157
-    {"BackToThePC_2", 12086, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4158
-    {"C20_76_DAYCARE_11_EEVEE_Out", 12089, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4159
-    {"ToThePC", 12092, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4160
-    {"ToThePC_1", 12092, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4161
-    {"ToTheSeagallop", 12095, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4162
-    {"ToTheSeagallop_1", 12098, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4163
-    {"ToTheSeagallop_2", 12103, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4164
+    {"BackToThePC", 12077, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4156
+    {"BackToThePC_1", 12079, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4157
+    {"BackToThePC_2", 12086, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4158
+    {"C20_76_DAYCARE_11_EEVEE_Out", 12089, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4159
+    {"ToThePC", 12092, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4160
+    {"ToThePC_1", 12092, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4161
+    {"ToTheSeagallop", 12095, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4162
+    {"ToTheSeagallop_1", 12098, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4163
+    {"ToTheSeagallop_2", 12103, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4164
     {"FerryToFourIsland", 12108, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4165
     {"ToTheWoman", 12108, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4166
     {"ToTheWoman_1", 12109, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  4167
@@ -32819,15 +33124,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 12182, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4226
     {"ToTheHarbor_2", 12185, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4227
     {"FerryToVermilion", 12186, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4228
-    {"BackToThePC", 12186, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4229
-    {"BackToThePC_1", 12188, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4230
-    {"BackToThePC_2", 12195, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4231
-    {"C20_77_DAYCARE_12_EEVEE_Out", 12198, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4232
-    {"ToThePC", 12201, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4233
-    {"ToThePC_1", 12201, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4234
-    {"ToTheSeagallop", 12204, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4235
-    {"ToTheSeagallop_1", 12207, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4236
-    {"ToTheSeagallop_2", 12212, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4237
+    {"BackToThePC", 12186, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4229
+    {"BackToThePC_1", 12188, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4230
+    {"BackToThePC_2", 12195, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4231
+    {"C20_77_DAYCARE_12_EEVEE_Out", 12198, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4232
+    {"ToThePC", 12201, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4233
+    {"ToThePC_1", 12201, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4234
+    {"ToTheSeagallop", 12204, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4235
+    {"ToTheSeagallop_1", 12207, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4236
+    {"ToTheSeagallop_2", 12212, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4237
     {"FerryToFourIsland", 12217, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4238
     {"ToTheWoman", 12217, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4239
     {"ToTheWoman_1", 12218, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  4240
@@ -32892,15 +33197,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 12291, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4299
     {"ToTheHarbor_2", 12294, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4300
     {"FerryToVermilion", 12295, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4301
-    {"BackToThePC", 12295, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4302
-    {"BackToThePC_1", 12297, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4303
-    {"BackToThePC_2", 12304, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4304
-    {"C20_78_DAYCARE_13_EEVEE_Out", 12307, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4305
-    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToNurse", 12310, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4306
-    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToNurse_1", 12310, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4307
-    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop", 12311, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4308
-    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop_1", 12312, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4309
-    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop_2", 12317, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4310
+    {"BackToThePC", 12295, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4302
+    {"BackToThePC_1", 12297, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4303
+    {"BackToThePC_2", 12304, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4304
+    {"C20_78_DAYCARE_13_EEVEE_Out", 12307, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4305
+    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToNurse", 12310, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4306
+    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToNurse_1", 12310, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4307
+    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop", 12311, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4308
+    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop_1", 12312, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4309
+    {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_ToTheSeagallop_2", 12317, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4310
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_FerryToFiveIsland", 12322, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4311
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_HarborToNurse", 12322, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  4312
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_HarborToNurse_1", 12323, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  4313
@@ -32933,11 +33238,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_FerryToVermilion", 12383, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 39, 7, 4},  //  4340
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_FerryToVermilion_1", 12384, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  4341
     {"C20_79_DAYCARE_14_WYNAUT_LaxIncense_FerryToVermilion_2", 12387, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 3},  //  4342
-    {"ToThePC", 12388, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4343
-    {"ToThePC_1", 12388, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4344
-    {"ToTheSeagallop", 12391, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4345
-    {"ToTheSeagallop_1", 12394, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4346
-    {"ToTheSeagallop_2", 12399, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4347
+    {"ToThePC", 12388, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4343
+    {"ToThePC_1", 12388, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4344
+    {"ToTheSeagallop", 12391, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4345
+    {"ToTheSeagallop_1", 12394, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4346
+    {"ToTheSeagallop_2", 12399, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4347
     {"FerryToFourIsland", 12404, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4348
     {"ToTheWoman", 12404, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4349
     {"ToTheWoman_1", 12405, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 10, 28},  //  4350
@@ -33002,22 +33307,22 @@ inline constexpr StoryLeg LEGS[] = {
     {"ToTheHarbor_1", 12478, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 43, 12, 14},  //  4409
     {"ToTheHarbor_2", 12481, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 44, 8, 3},  //  4410
     {"FerryToVermilion", 12482, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 44, 8, 5},  //  4411
-    {"BackToThePC", 12482, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4412
-    {"BackToThePC_1", 12484, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4413
-    {"BackToThePC_2", 12491, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4414
-    {"C20_79_DAYCARE_14_WYNAUT_Out", 12494, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 11, 2},  //  4415
+    {"BackToThePC", 12482, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4412
+    {"BackToThePC_1", 12484, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4413
+    {"BackToThePC_2", 12491, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4414
+    {"C20_79_DAYCARE_14_WYNAUT_Out", 12494, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 11, 2},  //  4415
     {"ToThePC", 12497, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4416
     {"ToThePC_1", 12497, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4417
     {"C20_75_LEVEL_20_Raise_FirstToNurse", 12500, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4418
     {"C20_75_LEVEL_20_Raise_ToGrass", 12502, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4419
     {"C20_75_LEVEL_20_Raise_ToGrass_1", 12504, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4420
-    {"C20_75_LEVEL_20_Raise_ToGrass_2", 12513, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4421
-    {"C20_75_LEVEL_20_Raise_ToNurse", 12515, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4422
+    {"C20_75_LEVEL_20_Raise_ToGrass_2", 12513, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4421
+    {"C20_75_LEVEL_20_Raise_ToNurse", 12515, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4422
     {"C20_75_LEVEL_20_Raise_ToNurse_1", 12517, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4423
     {"C20_75_LEVEL_20_Raise_ToNurse_2", 12525, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4424
     {"C20_75_LEVEL_20_Raise_BackToGrass", 12527, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4425
     {"C20_75_LEVEL_20_Raise_BackToGrass_1", 12529, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4426
-    {"C20_75_LEVEL_20_Raise_BackToGrass_2", 12538, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4427
+    {"C20_75_LEVEL_20_Raise_BackToGrass_2", 12538, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4427
     {"C20_75_LEVEL_20_BackToThePC", 12540, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4428
     {"C20_75_LEVEL_20_Out", 12542, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4429
     {"ToThePC", 12545, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4430
@@ -33025,13 +33330,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_76_LEVEL_21_Raise_FirstToNurse", 12548, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4432
     {"C20_76_LEVEL_21_Raise_ToGrass", 12550, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4433
     {"C20_76_LEVEL_21_Raise_ToGrass_1", 12552, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4434
-    {"C20_76_LEVEL_21_Raise_ToGrass_2", 12561, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4435
-    {"C20_76_LEVEL_21_Raise_ToNurse", 12563, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4436
+    {"C20_76_LEVEL_21_Raise_ToGrass_2", 12561, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4435
+    {"C20_76_LEVEL_21_Raise_ToNurse", 12563, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4436
     {"C20_76_LEVEL_21_Raise_ToNurse_1", 12565, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4437
     {"C20_76_LEVEL_21_Raise_ToNurse_2", 12573, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4438
     {"C20_76_LEVEL_21_Raise_BackToGrass", 12575, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4439
     {"C20_76_LEVEL_21_Raise_BackToGrass_1", 12577, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4440
-    {"C20_76_LEVEL_21_Raise_BackToGrass_2", 12586, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4441
+    {"C20_76_LEVEL_21_Raise_BackToGrass_2", 12586, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4441
     {"C20_76_LEVEL_21_BackToThePC", 12588, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4442
     {"C20_76_LEVEL_21_Out", 12590, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4443
     {"ToThePC", 12593, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4444
@@ -33039,13 +33344,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_77_LEVEL_22_Raise_FirstToNurse", 12596, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4446
     {"C20_77_LEVEL_22_Raise_ToGrass", 12598, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4447
     {"C20_77_LEVEL_22_Raise_ToGrass_1", 12600, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4448
-    {"C20_77_LEVEL_22_Raise_ToGrass_2", 12609, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4449
-    {"C20_77_LEVEL_22_Raise_ToNurse", 12611, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4450
+    {"C20_77_LEVEL_22_Raise_ToGrass_2", 12609, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4449
+    {"C20_77_LEVEL_22_Raise_ToNurse", 12611, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4450
     {"C20_77_LEVEL_22_Raise_ToNurse_1", 12613, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4451
     {"C20_77_LEVEL_22_Raise_ToNurse_2", 12621, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4452
     {"C20_77_LEVEL_22_Raise_BackToGrass", 12623, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4453
     {"C20_77_LEVEL_22_Raise_BackToGrass_1", 12625, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4454
-    {"C20_77_LEVEL_22_Raise_BackToGrass_2", 12634, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4455
+    {"C20_77_LEVEL_22_Raise_BackToGrass_2", 12634, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4455
     {"C20_77_LEVEL_22_BackToThePC", 12636, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4456
     {"C20_77_LEVEL_22_Out", 12638, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4457
     {"ToThePC", 12641, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4458
@@ -33053,13 +33358,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_78_LEVEL_23_Raise_FirstToNurse", 12644, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4460
     {"C20_78_LEVEL_23_Raise_ToGrass", 12646, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4461
     {"C20_78_LEVEL_23_Raise_ToGrass_1", 12648, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4462
-    {"C20_78_LEVEL_23_Raise_ToGrass_2", 12657, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4463
-    {"C20_78_LEVEL_23_Raise_ToNurse", 12659, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4464
+    {"C20_78_LEVEL_23_Raise_ToGrass_2", 12657, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4463
+    {"C20_78_LEVEL_23_Raise_ToNurse", 12659, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4464
     {"C20_78_LEVEL_23_Raise_ToNurse_1", 12661, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4465
     {"C20_78_LEVEL_23_Raise_ToNurse_2", 12669, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4466
     {"C20_78_LEVEL_23_Raise_BackToGrass", 12671, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4467
     {"C20_78_LEVEL_23_Raise_BackToGrass_1", 12673, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4468
-    {"C20_78_LEVEL_23_Raise_BackToGrass_2", 12682, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4469
+    {"C20_78_LEVEL_23_Raise_BackToGrass_2", 12682, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4469
     {"C20_78_LEVEL_23_BackToThePC", 12684, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4470
     {"C20_78_LEVEL_23_Out", 12686, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4471
     {"ToThePC", 12689, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4472
@@ -33067,13 +33372,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_79_LEVEL_24_Raise_FirstToNurse", 12692, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4474
     {"C20_79_LEVEL_24_Raise_ToGrass", 12694, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4475
     {"C20_79_LEVEL_24_Raise_ToGrass_1", 12696, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4476
-    {"C20_79_LEVEL_24_Raise_ToGrass_2", 12705, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4477
-    {"C20_79_LEVEL_24_Raise_ToNurse", 12707, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4478
+    {"C20_79_LEVEL_24_Raise_ToGrass_2", 12705, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4477
+    {"C20_79_LEVEL_24_Raise_ToNurse", 12707, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4478
     {"C20_79_LEVEL_24_Raise_ToNurse_1", 12709, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4479
     {"C20_79_LEVEL_24_Raise_ToNurse_2", 12717, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4480
     {"C20_79_LEVEL_24_Raise_BackToGrass", 12719, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4481
     {"C20_79_LEVEL_24_Raise_BackToGrass_1", 12721, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4482
-    {"C20_79_LEVEL_24_Raise_BackToGrass_2", 12730, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4483
+    {"C20_79_LEVEL_24_Raise_BackToGrass_2", 12730, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4483
     {"C20_79_LEVEL_24_BackToThePC", 12732, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4484
     {"C20_79_LEVEL_24_Out", 12734, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4485
     {"ToThePC", 12737, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4486
@@ -33081,13 +33386,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_80_LEVEL_25_Raise_FirstToNurse", 12740, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4488
     {"C20_80_LEVEL_25_Raise_ToGrass", 12742, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4489
     {"C20_80_LEVEL_25_Raise_ToGrass_1", 12744, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4490
-    {"C20_80_LEVEL_25_Raise_ToGrass_2", 12753, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4491
-    {"C20_80_LEVEL_25_Raise_ToNurse", 12755, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4492
+    {"C20_80_LEVEL_25_Raise_ToGrass_2", 12753, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4491
+    {"C20_80_LEVEL_25_Raise_ToNurse", 12755, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4492
     {"C20_80_LEVEL_25_Raise_ToNurse_1", 12757, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4493
     {"C20_80_LEVEL_25_Raise_ToNurse_2", 12765, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4494
     {"C20_80_LEVEL_25_Raise_BackToGrass", 12767, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4495
     {"C20_80_LEVEL_25_Raise_BackToGrass_1", 12769, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4496
-    {"C20_80_LEVEL_25_Raise_BackToGrass_2", 12778, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4497
+    {"C20_80_LEVEL_25_Raise_BackToGrass_2", 12778, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4497
     {"C20_80_LEVEL_25_BackToThePC", 12780, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4498
     {"C20_80_LEVEL_25_Out", 12782, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4499
     {"ToThePC", 12785, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4500
@@ -33095,13 +33400,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_81_LEVEL_26_Raise_FirstToNurse", 12788, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4502
     {"C20_81_LEVEL_26_Raise_ToGrass", 12790, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4503
     {"C20_81_LEVEL_26_Raise_ToGrass_1", 12792, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4504
-    {"C20_81_LEVEL_26_Raise_ToGrass_2", 12801, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4505
-    {"C20_81_LEVEL_26_Raise_ToNurse", 12803, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4506
+    {"C20_81_LEVEL_26_Raise_ToGrass_2", 12801, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4505
+    {"C20_81_LEVEL_26_Raise_ToNurse", 12803, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4506
     {"C20_81_LEVEL_26_Raise_ToNurse_1", 12805, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4507
     {"C20_81_LEVEL_26_Raise_ToNurse_2", 12813, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4508
     {"C20_81_LEVEL_26_Raise_BackToGrass", 12815, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4509
     {"C20_81_LEVEL_26_Raise_BackToGrass_1", 12817, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4510
-    {"C20_81_LEVEL_26_Raise_BackToGrass_2", 12826, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4511
+    {"C20_81_LEVEL_26_Raise_BackToGrass_2", 12826, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4511
     {"C20_81_LEVEL_26_BackToThePC", 12828, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4512
     {"C20_81_LEVEL_26_Out", 12830, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4513
     {"ToThePC", 12833, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4514
@@ -33109,13 +33414,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_82_LEVEL_27_Raise_FirstToNurse", 12836, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4516
     {"C20_82_LEVEL_27_Raise_ToGrass", 12838, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4517
     {"C20_82_LEVEL_27_Raise_ToGrass_1", 12840, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4518
-    {"C20_82_LEVEL_27_Raise_ToGrass_2", 12849, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4519
-    {"C20_82_LEVEL_27_Raise_ToNurse", 12851, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4520
+    {"C20_82_LEVEL_27_Raise_ToGrass_2", 12849, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4519
+    {"C20_82_LEVEL_27_Raise_ToNurse", 12851, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4520
     {"C20_82_LEVEL_27_Raise_ToNurse_1", 12853, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4521
     {"C20_82_LEVEL_27_Raise_ToNurse_2", 12861, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4522
     {"C20_82_LEVEL_27_Raise_BackToGrass", 12863, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4523
     {"C20_82_LEVEL_27_Raise_BackToGrass_1", 12865, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4524
-    {"C20_82_LEVEL_27_Raise_BackToGrass_2", 12874, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4525
+    {"C20_82_LEVEL_27_Raise_BackToGrass_2", 12874, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4525
     {"C20_82_LEVEL_27_BackToThePC", 12876, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4526
     {"C20_82_LEVEL_27_Out", 12878, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4527
     {"ToThePC", 12881, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4528
@@ -33123,13 +33428,13 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_83_LEVEL_28_Raise_FirstToNurse", 12884, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4530
     {"C20_83_LEVEL_28_Raise_ToGrass", 12886, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4531
     {"C20_83_LEVEL_28_Raise_ToGrass_1", 12888, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4532
-    {"C20_83_LEVEL_28_Raise_ToGrass_2", 12897, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4533
-    {"C20_83_LEVEL_28_Raise_ToNurse", 12899, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4534
+    {"C20_83_LEVEL_28_Raise_ToGrass_2", 12897, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4533
+    {"C20_83_LEVEL_28_Raise_ToNurse", 12899, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4534
     {"C20_83_LEVEL_28_Raise_ToNurse_1", 12901, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4535
     {"C20_83_LEVEL_28_Raise_ToNurse_2", 12909, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4536
     {"C20_83_LEVEL_28_Raise_BackToGrass", 12911, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4537
     {"C20_83_LEVEL_28_Raise_BackToGrass_1", 12913, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4538
-    {"C20_83_LEVEL_28_Raise_BackToGrass_2", 12922, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4539
+    {"C20_83_LEVEL_28_Raise_BackToGrass_2", 12922, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4539
     {"C20_83_LEVEL_28_BackToThePC", 12924, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4540
     {"C20_83_LEVEL_28_Out", 12926, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4541
     {"ToThePC", 12929, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 59, 11, 7},  //  4542
@@ -33137,20 +33442,20 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_84_LEVEL_29_Raise_FirstToNurse", 12932, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4544
     {"C20_84_LEVEL_29_Raise_ToGrass", 12934, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4545
     {"C20_84_LEVEL_29_Raise_ToGrass_1", 12936, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4546
-    {"C20_84_LEVEL_29_Raise_ToGrass_2", 12945, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4547
-    {"C20_84_LEVEL_29_Raise_ToNurse", 12947, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 251, 46, 11},  //  4548
+    {"C20_84_LEVEL_29_Raise_ToGrass_2", 12945, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4547
+    {"C20_84_LEVEL_29_Raise_ToNurse", 12947, 2, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 254, 46, 11},  //  4548
     {"C20_84_LEVEL_29_Raise_ToNurse_1", 12949, 8, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 164, 18, 29},  //  4549
     {"C20_84_LEVEL_29_Raise_ToNurse_2", 12957, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 60, 11, 16},  //  4550
     {"C20_84_LEVEL_29_Raise_BackToGrass", 12959, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4551
     {"C20_84_LEVEL_29_Raise_BackToGrass_1", 12961, 9, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 59, 11, 7},  //  4552
-    {"C20_84_LEVEL_29_Raise_BackToGrass_2", 12970, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 251, 48, 12},  //  4553
+    {"C20_84_LEVEL_29_Raise_BackToGrass_2", 12970, 2, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 254, 48, 12},  //  4553
     {"C20_84_LEVEL_29_BackToThePC", 12972, 2, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 60, 13, 12},  //  4554
     {"C20_84_LEVEL_29_Out", 12974, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 60, 17, 10},  //  4555
-    {"C20_85_STONES_2_ToNurse", 12977, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4556
-    {"C20_85_STONES_2_ToNurse_1", 12977, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4557
-    {"ToTheSeagallop", 12978, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4558
-    {"ToTheSeagallop_1", 12979, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4559
-    {"ToTheSeagallop_2", 12984, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4560
+    {"C20_85_STONES_2_ToNurse", 12977, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4556
+    {"C20_85_STONES_2_ToNurse_1", 12977, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4557
+    {"ToTheSeagallop", 12978, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4558
+    {"ToTheSeagallop_1", 12979, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4559
+    {"ToTheSeagallop_2", 12984, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4560
     {"FerryToFiveIsland", 12989, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4561
     {"HarborToFiveIslandNurse", 12989, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  4562
     {"HarborToFiveIslandNurse_1", 12990, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  4563
@@ -33183,10 +33488,10 @@ inline constexpr StoryLeg LEGS[] = {
     {"FerryToVermilion", 13041, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 39, 7, 4},  //  4590
     {"FerryToVermilion_1", 13042, 3, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 18, 7},  //  4591
     {"FerryToVermilion_2", 13045, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 33, 8, 3},  //  4592
-    {"PierToVermilionNurse", 13046, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4593
-    {"PierToVermilionNurse_1", 13048, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4594
-    {"PierToVermilionNurse_2", 13055, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4595
-    {"C20_85_STONES_2_OutVermilion", 13056, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4596
+    {"PierToVermilionNurse", 13046, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4593
+    {"PierToVermilionNurse_1", 13048, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4594
+    {"PierToVermilionNurse_2", 13055, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4595
+    {"C20_85_STONES_2_OutVermilion", 13056, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4596
     {"ToTheStoneClerk", 13057, 2, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 2, 48, 12},  //  4597
     {"ToTheStoneClerk_1", 13059, 3, DPAD_UP, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 8, 2, 14},  //  4598
     {"ToTheStoneClerk_2", 13062, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 9, 3, 2},  //  4599
@@ -33196,15 +33501,15 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_85_STONES_2_OutStore_1", 13066, 1, DPAD_RIGHT, DPAD_RIGHT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 10, 3, 2},  //  4603
     {"C20_85_STONES_2_OutStore_2", 13067, 1, DPAD_LEFT, DPAD_LEFT, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 9, 9, 2},  //  4604
     {"C20_85_STONES_2_OutStore_3", 13068, 3, DPAD_RIGHT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 8, 4, 2},  //  4605
-    {"ToThePC", 13071, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 253, 26, 27},  //  4606
-    {"ToThePC_1", 13071, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 256, 7, 8},  //  4607
-    {"C20_85_STONES_2_Out", 13074, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 256, 11, 2},  //  4608
-    {"C20_01B_MONEY_ToNurse", 13077, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4609
-    {"C20_01B_MONEY_ToNurse_1", 13077, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4610
-    {"VsSeekerWoman", 13078, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4611
-    {"ToTheSeagallop", 13078, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4612
-    {"ToTheSeagallop_1", 13079, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4613
-    {"ToTheSeagallop_2", 13084, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4614
+    {"ToThePC", 13071, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 256, 26, 27},  //  4606
+    {"ToThePC_1", 13071, 3, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 259, 7, 8},  //  4607
+    {"C20_85_STONES_2_Out", 13074, 3, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 259, 11, 2},  //  4608
+    {"C20_01B_MONEY_ToNurse", 13077, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4609
+    {"C20_01B_MONEY_ToNurse_1", 13077, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4610
+    {"VsSeekerWoman", 13078, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4611
+    {"ToTheSeagallop", 13078, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4612
+    {"ToTheSeagallop_1", 13079, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4613
+    {"ToTheSeagallop_2", 13084, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4614
     {"FerryToFiveIsland", 13089, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4615
     {"HarborToFiveIslandNurse", 13089, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  4616
     {"HarborToFiveIslandNurse_1", 13090, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  4617
@@ -33269,11 +33574,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"BuyUltraBalls_2", 13201, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 24, 23},  //  4676
     {"BuyUltraBalls_3", 13203, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 55, 4, 7},  //  4677
     {"C20_86_HO_OH_FlyBack_Out", 13204, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 55, 4, 3},  //  4678
-    {"C20_86_HO_OH_ToVermilionPC", 13205, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4679
-    {"C20_86_HO_OH_ToVermilionPC_1", 13205, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4680
-    {"ToTheSeagallop", 13206, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4681
-    {"ToTheSeagallop_1", 13207, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4682
-    {"ToTheSeagallop_2", 13212, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4683
+    {"C20_86_HO_OH_ToVermilionPC", 13205, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4679
+    {"C20_86_HO_OH_ToVermilionPC_1", 13205, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4680
+    {"ToTheSeagallop", 13206, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4681
+    {"ToTheSeagallop_1", 13207, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4682
+    {"ToTheSeagallop_2", 13212, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4683
     {"ToHoOh", 13217, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 97, 8, 5},  //  4684
     {"ToHoOh_1", 13218, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 95, 9, 16},  //  4685
     {"ToHoOh_2", 13219, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 81, 8, 23},  //  4686
@@ -33295,16 +33600,16 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_86_HO_OH_FerryHome_7", 13253, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 81, 8, 4},  //  4702
     {"C20_86_HO_OH_FerryHome_8", 13254, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 9, 9},  //  4703
     {"C20_86_HO_OH_FerryHome_9", 13255, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 97, 8, 3},  //  4704
-    {"C20_86_HO_OH_BackToVermilionPC", 13256, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4705
-    {"C20_86_HO_OH_BackToVermilionPC_1", 13258, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4706
-    {"C20_86_HO_OH_BackToVermilionPC_2", 13265, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4707
-    {"C20_86_HO_OH_Out", 13266, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4708
-    {"C20_01B_MONEY_ToNurse", 13267, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4709
-    {"C20_01B_MONEY_ToNurse_1", 13267, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4710
-    {"VsSeekerWoman", 13268, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4711
-    {"ToTheSeagallop", 13268, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4712
-    {"ToTheSeagallop_1", 13269, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4713
-    {"ToTheSeagallop_2", 13274, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4714
+    {"C20_86_HO_OH_BackToVermilionPC", 13256, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4705
+    {"C20_86_HO_OH_BackToVermilionPC_1", 13258, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4706
+    {"C20_86_HO_OH_BackToVermilionPC_2", 13265, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4707
+    {"C20_86_HO_OH_Out", 13266, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4708
+    {"C20_01B_MONEY_ToNurse", 13267, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4709
+    {"C20_01B_MONEY_ToNurse_1", 13267, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4710
+    {"VsSeekerWoman", 13268, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4711
+    {"ToTheSeagallop", 13268, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4712
+    {"ToTheSeagallop_1", 13269, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4713
+    {"ToTheSeagallop_2", 13274, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4714
     {"FerryToFiveIsland", 13279, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4715
     {"HarborToFiveIslandNurse", 13279, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  4716
     {"HarborToFiveIslandNurse_1", 13280, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  4717
@@ -33369,11 +33674,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"BuyUltraBalls_2", 13391, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 24, 23},  //  4776
     {"BuyUltraBalls_3", 13393, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 55, 4, 7},  //  4777
     {"C20_87_LUGIA_FlyBack_Out", 13394, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 55, 4, 3},  //  4778
-    {"C20_87_LUGIA_ToVermilionPC", 13395, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4779
-    {"C20_87_LUGIA_ToVermilionPC_1", 13395, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4780
-    {"ToTheSeagallop", 13396, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4781
-    {"ToTheSeagallop_1", 13397, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4782
-    {"ToTheSeagallop_2", 13402, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4783
+    {"C20_87_LUGIA_ToVermilionPC", 13395, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4779
+    {"C20_87_LUGIA_ToVermilionPC_1", 13395, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4780
+    {"ToTheSeagallop", 13396, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4781
+    {"ToTheSeagallop_1", 13397, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4782
+    {"ToTheSeagallop_2", 13402, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4783
     {"ToLugia", 13407, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 97, 8, 5},  //  4784
     {"ToLugia_1", 13408, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 95, 9, 16},  //  4785
     {"ToLugia_2", 13409, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, true, 81, 8, 23},  //  4786
@@ -33409,16 +33714,16 @@ inline constexpr StoryLeg LEGS[] = {
     {"C20_87_LUGIA_FerryHome_14", 13470, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 81, 8, 4},  //  4816
     {"C20_87_LUGIA_FerryHome_15", 13471, 1, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 95, 9, 9},  //  4817
     {"C20_87_LUGIA_FerryHome_16", 13472, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 97, 8, 3},  //  4818
-    {"C20_87_LUGIA_BackToVermilionPC", 13473, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4819
-    {"C20_87_LUGIA_BackToVermilionPC_1", 13475, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4820
-    {"C20_87_LUGIA_BackToVermilionPC_2", 13482, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4821
-    {"C20_87_LUGIA_Out", 13483, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4822
-    {"C20_01B_MONEY_ToNurse", 13484, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4823
-    {"C20_01B_MONEY_ToNurse_1", 13484, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4824
-    {"VsSeekerWoman", 13485, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4825
-    {"ToTheSeagallop", 13485, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4826
-    {"ToTheSeagallop_1", 13486, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4827
-    {"ToTheSeagallop_2", 13491, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4828
+    {"C20_87_LUGIA_BackToVermilionPC", 13473, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4819
+    {"C20_87_LUGIA_BackToVermilionPC_1", 13475, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4820
+    {"C20_87_LUGIA_BackToVermilionPC_2", 13482, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4821
+    {"C20_87_LUGIA_Out", 13483, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4822
+    {"C20_01B_MONEY_ToNurse", 13484, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4823
+    {"C20_01B_MONEY_ToNurse_1", 13484, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4824
+    {"VsSeekerWoman", 13485, 0, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4825
+    {"ToTheSeagallop", 13485, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4826
+    {"ToTheSeagallop_1", 13486, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4827
+    {"ToTheSeagallop_2", 13491, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4828
     {"FerryToFiveIsland", 13496, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4829
     {"HarborToFiveIslandNurse", 13496, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 33, 8, 5},  //  4830
     {"HarborToFiveIslandNurse_1", 13497, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 32, 12, 14},  //  4831
@@ -33483,11 +33788,11 @@ inline constexpr StoryLeg LEGS[] = {
     {"BuyUltraBalls_2", 13608, 2, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 52, 24, 23},  //  4890
     {"BuyUltraBalls_3", 13610, 1, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 55, 4, 7},  //  4891
     {"C20_88_DEOXYS_FlyBack_Out", 13611, 1, DPAD_LEFT, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 55, 4, 3},  //  4892
-    {"C20_88_DEOXYS_ToVermilionPC", 13612, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4893
-    {"C20_88_DEOXYS_ToVermilionPC_1", 13612, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4894
-    {"ToTheSeagallop", 13613, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4895
-    {"ToTheSeagallop_1", 13614, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 15, 7},  //  4896
-    {"ToTheSeagallop_2", 13619, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 245, 24, 26},  //  4897
+    {"C20_88_DEOXYS_ToVermilionPC", 13612, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4893
+    {"C20_88_DEOXYS_ToVermilionPC_1", 13612, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4894
+    {"ToTheSeagallop", 13613, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4895
+    {"ToTheSeagallop_1", 13614, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4896
+    {"ToTheSeagallop_2", 13619, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4897
     {"ToTheStone", 13624, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 1, 8, 5},  //  4898
     {"ToTheStone_1", 13625, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 0, 15, 24},  //  4899
     {"StoneWalk2", 13626, 1, DPAD_UP, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 15, 13},  //  4900
@@ -33502,10 +33807,76 @@ inline constexpr StoryLeg LEGS[] = {
     {"StoneWalk11", 13640, 1, DPAD_DOWN, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 0, 15, 14},  //  4909
     {"C20_88_DEOXYS_FerryHome", 13641, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 0, 15, 11},  //  4910
     {"C20_88_DEOXYS_FerryHome_1", 13642, 1, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 1, 8, 3},  //  4911
-    {"C20_88_DEOXYS_BackToVermilionPC", 13643, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 245, 23, 32},  //  4912
-    {"C20_88_DEOXYS_BackToVermilionPC_1", 13645, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 245, 24, 27},  //  4913
-    {"C20_88_DEOXYS_BackToVermilionPC_2", 13652, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 249, 7, 8},  //  4914
-    {"C20_88_DEOXYS_Out", 13653, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 249, 7, 4},  //  4915
+    {"C20_88_DEOXYS_BackToVermilionPC", 13643, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4912
+    {"C20_88_DEOXYS_BackToVermilionPC_1", 13645, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4913
+    {"C20_88_DEOXYS_BackToVermilionPC_2", 13652, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4914
+    {"C20_88_DEOXYS_Out", 13653, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4915
+    {"C20_89_UNOWN_ToVermilionPC", 13654, 0, DPAD_DOWN, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4916
+    {"C20_89_UNOWN_ToVermilionPC_1", 13654, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4917
+    {"ToTheSeagallop", 13655, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4918
+    {"ToTheSeagallop_1", 13656, 5, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 15, 7},  //  4919
+    {"ToTheSeagallop_2", 13661, 5, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::TRIGGER, false, false, MapPreview::NONE, true, 248, 24, 26},  //  4920
+    {"FerryToSevenIsland", 13666, 0, DPAD_NONE, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 104, 8, 5},  //  4921
+    {"HarborToSevenIslandNurse", 13666, 1, DPAD_NONE, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 197, 8, 5},  //  4922
+    {"HarborToSevenIslandNurse_1", 13667, 4, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 16, 13},  //  4923
+    {"HarborToSevenIslandNurse_2", 13671, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 198, 7, 8},  //  4924
+    {"ToTanobyKey", 13672, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 198, 7, 4},  //  4925
+    {"ToTanobyKey_1", 13673, 50, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::NONE, false, 196, 12, 4},  //  4926
+    {"ToTanobyKey_2", 13723, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 201, 7, 13},  //  4927
+    {"TanobyKey1_Push1", 13724, 4, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 12},  //  4928
+    {"TanobyKey1_Push2", 13728, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 7},  //  4929
+    {"TanobyKey1_Push3", 13729, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 6},  //  4930
+    {"TanobyKey1_Push4", 13730, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 5},  //  4931
+    {"TanobyKey2_Push1", 13731, 2, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 4},  //  4932
+    {"TanobyKey2_Push2", 13733, 3, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 9, 6},  //  4933
+    {"TanobyKey2_Push3", 13736, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 7},  //  4934
+    {"TanobyKey2_Push4", 13737, 6, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 6},  //  4935
+    {"TanobyKey2_Push5", 13743, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 4},  //  4936
+    {"TanobyKey2_Push6", 13744, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 4},  //  4937
+    {"TanobyKey3_Push1", 13745, 2, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 8, 4},  //  4938
+    {"TanobyKey3_Push2", 13747, 3, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 5, 6},  //  4939
+    {"TanobyKey3_Push3", 13750, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 7},  //  4940
+    {"TanobyKey3_Push4", 13751, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 6},  //  4941
+    {"TanobyKey3_Push5", 13754, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 8, 4},  //  4942
+    {"TanobyKey3_Push6", 13755, 1, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 4},  //  4943
+    {"TanobyKey4_Push1", 13756, 2, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 4},  //  4944
+    {"TanobyKey4_Push2", 13758, 1, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 10},  //  4945
+    {"TanobyKey4_Push3", 13759, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 10},  //  4946
+    {"TanobyKey4_Push4", 13760, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 9},  //  4947
+    {"TanobyKey4_Push5", 13761, 3, DPAD_UP, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 8},  //  4948
+    {"TanobyKey5_Push1", 13764, 3, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 6},  //  4949
+    {"TanobyKey5_Push2", 13767, 5, DPAD_LEFT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 9, 9},  //  4950
+    {"TanobyKey5_Push3", 13772, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 10},  //  4951
+    {"TanobyKey5_Push4", 13773, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 9},  //  4952
+    {"TanobyKey5_Push5", 13774, 3, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 8},  //  4953
+    {"TanobyKey5_Push6", 13777, 1, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 6, 6},  //  4954
+    {"TanobyKey6_Push1", 13778, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 6},  //  4955
+    {"TanobyKey6_Push2", 13782, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 5, 11},  //  4956
+    {"TanobyKey7_Push1", 13783, 1, DPAD_UP, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 5, 10},  //  4957
+    {"TanobyKey7_Push2", 13784, 4, DPAD_RIGHT, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 7, 10},  //  4958
+    {"TanobyKey7_Push3", 13788, 1, DPAD_UP, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 201, 9, 11},  //  4959
+    {"CollectMoneanChamber_ToGrass", 13789, 2, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 201, 9, 10},  //  4960
+    {"CollectMoneanChamber_ToGrass_1", 13791, 9, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 199, 7, 18},  //  4961
+    {"CollectMoneanChamber_ToGrass_2", 13800, 22, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 199, 12, 31},  //  4962
+    {"CollectMoneanChamber_ToGrass_3", 13822, 6, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 202, 67, 4},  //  4963
+    {"CollectMoneanChamber_ToGrass_4", 13828, 4, DPAD_RIGHT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 202, 92, 9},  //  4964
+    {"CollectMoneanChamber_ToGrass_5", 13832, 11, DPAD_RIGHT, DPAD_NONE, DPAD_NONE, LegEnd::WARP_STEP, false, false, MapPreview::CAVE, false, 202, 108, 11},  //  4965
+    {"CollectMoneanChamber_ToGrass_6", 13843, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, true, 203, 11, 15},  //  4966
+    {"MoneanChamberToNurse", 13844, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 203, 11, 13},  //  4967
+    {"MoneanChamberToNurse_1", 13845, 7, DPAD_DOWN, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 202, 120, 11},  //  4968
+    {"MoneanChamberToNurse_2", 13852, 4, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 202, 113, 11},  //  4969
+    {"MoneanChamberToNurse_3", 13856, 4, DPAD_LEFT, DPAD_NONE, DPAD_LEFT, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 202, 99, 9},  //  4970
+    {"MoneanChamberToNurse_4", 13860, 27, DPAD_LEFT, DPAD_NONE, DPAD_RIGHT, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 202, 83, 8},  //  4971
+    {"MoneanChamberToNurse_5", 13887, 46, DPAD_RIGHT, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 199, 10, 31},  //  4972
+    {"MoneanChamberToNurse_6", 13933, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 198, 7, 8},  //  4973
+    {"ToHarbor", 13934, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 198, 7, 4},  //  4974
+    {"ToHarbor_1", 13935, 5, DPAD_DOWN, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 196, 12, 4},  //  4975
+    {"ToHarbor_2", 13940, 1, DPAD_DOWN, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 197, 8, 3},  //  4976
+    {"C20_89_UNOWN_FerryHome", 13941, 0, DPAD_DOWN, DPAD_NONE, DPAD_DOWN, LegEnd::INTERACT, false, false, MapPreview::NONE, false, 197, 8, 5},  //  4977
+    {"C20_89_UNOWN_BackToVermilionPC", 13941, 2, DPAD_NONE, DPAD_NONE, DPAD_UP, LegEnd::INTERACT, false, false, MapPreview::NONE, true, 248, 23, 32},  //  4978
+    {"C20_89_UNOWN_BackToVermilionPC_1", 13943, 7, DPAD_UP, DPAD_UP, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, true, 248, 24, 27},  //  4979
+    {"C20_89_UNOWN_BackToVermilionPC_2", 13950, 1, DPAD_UP, DPAD_NONE, DPAD_NONE, LegEnd::STOP, false, false, MapPreview::NONE, false, 252, 7, 8},  //  4980
+    {"C20_89_UNOWN_Out", 13951, 1, DPAD_UP, DPAD_DOWN, DPAD_NONE, LegEnd::WARP_PUSH, false, false, MapPreview::NONE, false, 252, 7, 4},  //  4981
 };
 
 inline constexpr int32_t LEG_LISTS[] = {
@@ -42124,6 +42495,157 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_88_DEOXYS_Out", 4915, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SKIP_IF_OWNED, "Unown in the table?", -1, 150, 1, -1, 0, 0, DPAD_NONE, "unown", 0, 0, 0},
+    {StepType::FLY, "C20_89_UNOWN_Fly_Fly", -1, 5, 1, -1, 0, 0, DPAD_NONE, "MAP_VERMILION_CITY", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_ToVermilionPC", 4916, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_ToVermilionPC_1", 4917, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop", 4918, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_1", 4919, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTheSeagallop_2", 4920, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SEAGALLOP, "SeagallopToOneIsland", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "FerryToSevenIsland", 4921, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "FerryToSevenIsland_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "FerryToSevenIsland_Menu", -1, 4, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
+    {StepType::PRESS, "FerryToSevenIsland_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "FerryToSevenIsland_Menu2", -1, 2, 500, -1, 0, 0, DPAD_NONE, "DOWN", 0, 0, 0},
+    {StepType::PRESS, "FerryToSevenIsland_Pick2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSevenIslandNurse", 4922, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSevenIslandNurse_1", 4923, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "HarborToSevenIslandNurse_2", 4924, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTanobyKey", 4925, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTanobyKey_1", 4926, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToTanobyKey_2", 4927, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "TanobyKey1_Push1", 4928, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Use Strength", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::CUTSCENE, "Strength", -1, 1500, 20000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey1_Push2", 4929, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey1_Push3", 4930, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey1_Push4", 4931, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey1_Switch4", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push1", 4932, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push2", 4933, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push3", 4934, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push4", 4935, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push5", 4936, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "TanobyKey2_Push6", 4937, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey2_Switch6", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push1", 4938, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push2", 4939, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push3", 4940, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push4", 4941, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push5", 4942, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::WALK, "TanobyKey3_Push6", 4943, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey3_Switch6", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey4_Push1", 4944, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::WALK, "TanobyKey4_Push2", 4945, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey4_Push3", 4946, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey4_Push4", 4947, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey4_Push5", 4948, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey4_Switch5", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push1", 4949, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder left", -1, 0, 0, -1, 0, 0, DPAD_LEFT, "left", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push2", 4950, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push3", 4951, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push4", 4952, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push5", 4953, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "TanobyKey5_Push6", 4954, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey5_Switch6", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey6_Push1", 4955, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey6_Push2", 4956, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey6_Switch2", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "TanobyKey7_Push1", 4957, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder right", -1, 0, 0, -1, 0, 0, DPAD_RIGHT, "right", 0, 0, 0},
+    {StepType::WALK, "TanobyKey7_Push2", 4958, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::WALK, "TanobyKey7_Push3", 4959, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PUSH, "Push boulder up", -1, 0, 0, -1, 0, 0, DPAD_UP, "up", 0, 0, 0},
+    {StepType::PRESS, "TanobyKey7_Switch3", -1, 1, 3500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::PRESS, "TanobyKeyRumble", -1, 1, 6000, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::PRESS, "TanobyKeyRumbleClose", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::PRESS, "TanobyKeyRumbleClose2", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "B", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass", 4960, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_1", 4961, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_2", 4962, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_3", 4963, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_4", 4964, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_5", 4965, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "CollectMoneanChamber_ToGrass_6", 4966, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::DEX, "CollectMoneanChamber", -1, 30, 30, 2, 0, 4, DPAD_UP, "unown:100:100", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse", 4967, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_1", 4968, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_2", 4969, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_3", 4970, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_4", 4971, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Rock Smash", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Rock Smash animation", -1, 2500, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_5", 4972, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "MoneanChamberToNurse_6", 4973, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at SevenIsland_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToHarbor", 4974, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToHarbor_1", 4975, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "ToHarbor_2", 4976, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_FerryHome", 4977, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "C20_89_UNOWN_FerryHome_Talk", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::PRESS, "C20_89_UNOWN_FerryHome_Pick", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
+    {StepType::CUTSCENE, "Ferry", -1, 8000, 90000, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_BackToVermilionPC", 4978, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::TALK_YES, "Surf", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WAIT, "Surf start", -1, 2000, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_BackToVermilionPC_1", 4979, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_BackToVermilionPC_2", 4980, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::HEAL, "Heal at VermilionCity_PokemonCenter_1F", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::WALK, "C20_89_UNOWN_Out", 4981, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
 };
 
 inline constexpr StorySegment SEGMENTS[] = {
@@ -42329,6 +42851,7 @@ inline constexpr StorySegment SEGMENTS[] = {
     {"C20_86_HO_OH", "POKeDEX collection: Ho-Oh on the summit of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 8153, 131},
     {"C20_87_LUGIA", "POKeDEX collection: Lugia at the base of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)", 20, true, 8284, 146},
     {"C20_88_DEOXYS", "POKeDEX collection: Deoxys on Birth Island (the Aurora Ticket; the triangle; Gillian's prize money, Ultra Balls)", 20, true, 8430, 135},
+    {"C20_89_UNOWN", "POKeDEX collection: Unown in the Monean Chamber (the Tanoby Key's seven boulders)", 20, true, 8565, 151},
 };
 
 }
@@ -42346,7 +42869,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "2fa92d1566";
+inline constexpr const char* DATA_ID = "3a7e49035d";
 
 }
 }
