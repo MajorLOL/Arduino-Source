@@ -819,6 +819,28 @@ void AutoStory::run_segment(
     if (first_step > 0 && story_once_segment(script, segment)){
         const std::string once = once_place_of(script.step(segment, 0));
         const OnceLeave leave = story_once_leave(script, segment, first_step);
+        //  (Build 56) The Game Corner of Celadon City (PORYGON): its saves are
+        //  indoors, where no way out is known, and the slot machine's routine
+        //  has not run on a console yet: where it fails twice in a row the
+        //  program stops instead of trying it again and again.
+        const bool game_corner = leave == OnceLeave::NO && std::string(segment.id) == "C20_90_PORYGON";
+        if (rt.places.place_out(once) && (leave == OnceLeave::SEVII || game_corner)){
+            //  (Build 56) Not left out: the player is on a Sevii island, and
+            //  the story's next FLY cannot start there (it jumped to the last
+            //  step before: a save on the island, and a program that could
+            //  not go on from it). Stop, with the way to try again.
+            throw UserSetupError(
+                env.console,
+                once + " failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row (see the errors above), " +
+                (game_corner
+                    ? "in the Game Corner of Celadon City (the coins, the slot machine or the prize counter), where "
+                        "the segment cannot be left out: the game is saved there, with the coins it has. "
+                    : "and the game was saved at a Pokemon Center of the Sevii Islands: this segment cannot be left out "
+                        "from there (no FLY from the islands to Kanto: the way home is part of the segment). ") +
+                "The program stops here; started again it goes on from that save (" + segment.id + ", step " +
+                std::to_string(first_step) + ")."
+            );
+        }
         if (rt.places.place_out(once) && leave != OnceLeave::NO){
             env.log(
                 once + " failed " + std::to_string(STORY_PLACE_FAILURES) + " times in a row (see the errors "
@@ -1775,6 +1797,9 @@ void AutoStory::run_segment(
         case StepType::DAYCARE_TAKE:
             story_daycare_take(rt, label);
             break;
+        case StepType::COINS:
+            story_coins(rt, step, label);
+            break;
         case StepType::DAYCARE_END:
             env.log(
                 label + ": " + rt.dc_baby + " hatched and lies in a box; the party has the team and " +
@@ -1813,11 +1838,17 @@ void AutoStory::run_segment(
             const std::vector<AutoStoryBoxes::LevelTarget> targets =
                 by_exp ? story_exp_targets(rt) : friendship ? story_friend_targets(rt) : story_level_targets(rt);
             if (targets.empty()){
+                //  (Build 56: the segments by level leave the ones with a lot
+                //  of experience to go to the rounds of the Elite Four.)
+                const std::vector<AutoStoryBoxes::LevelTarget> heavy =
+                    by_exp || friendship ? std::vector<AutoStoryBoxes::LevelTarget>() : story_exp_targets(rt);
                 env.log(
                     label + ": nothing in the boxes is left to evolve by " + by + " into a species the POKeDEX table "
                     "still wants" +
                     (by_exp ? " with " + std::to_string(AutoStoryBoxes::EXP_ROUND_MIN) + " experience points to go or more" :
                         std::string()) +
+                    (heavy.empty() ? std::string() :
+                        " (left to the rounds of the Elite Four: " + AutoStoryBoxes::exp_targets_text(heavy) + ")") +
                     ": the next " + std::to_string(skip) + " steps are skipped.",
                     COLOR_BLUE
                 );

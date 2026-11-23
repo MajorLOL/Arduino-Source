@@ -209,6 +209,16 @@ def puzzle(name):
     return {"puzzle": name}
 
 
+def coins(mode, label, p1=0, p2=0, species=None):
+    """The Celadon Game Corner (build 56): StepType::COINS, after the walk that
+    ends in front of the coins' clerk (mode "buy": p1 packs of 500, p2 of 50),
+    a slot machine ("play": p1 games) or the prizes' clerk ("prize": species)."""
+    c = {"mode": mode, "p1": p1, "p2": p2}
+    if species:
+        c["species"] = species
+    return {"coins": c, "label": label}
+
+
 def press(button, times=1, wait_ms=800, label=None):
     return {"press": {"button": button, "times": times, "wait": wait_ms}, "label": label or ("Press " + button)}
 
@@ -3496,6 +3506,21 @@ def level_segment(seg_id):
 #  some 170000 experience points to go from level 30 to 55 (C20_16B_SAFARI_FISH),
 #  and PUPITAR's 108000 are three rounds.
 EXP_ROUNDS = 10
+#  Build 56: rounds again after the segments that train by level. A Pokemon
+#  that is light when the first rounds come (DRATINI from level 22 is 16000 points
+#  to level 30) is trained at Victory Road, evolves, and what it has to go as
+#  the new species is heavy (DRAGONAIR from level 30 to 55 is some 170000, eight
+#  hours at Victory Road). The segments by level now leave the Pokemon that
+#  have EXP_ROUND_MIN points to go (Boxes::EXP_ROUND_MIN, 20000) alone (a heavy
+#  one that failed in the rounds twice in a row still goes to Victory Road), and
+#  these rounds come after them: twelve after the nineteen segments of levels
+#  (DRAGONAIR and PUPITAR, the two that come out of them heavy, are five or six
+#  rounds each), six after the ten that follow the Day Care (the babies that
+#  have 25 levels to go: ELEKID, MAGBY, SMOOCHUM, and what is left of the
+#  fossil's and SLUGMA's lines). Skipped when no Pokemon of the boxes has that
+#  many points to go, like the first ten.
+EXP_ROUNDS_LATE = 12
+EXP_ROUNDS_DAYCARE = 6
 
 
 def exp_segment(seg_id):
@@ -3531,6 +3556,7 @@ def exp_segment(seg_id):
 CHAPTER20 += [exp_segment("C20_EXP_%02d_ELITE_FOUR" % (k + 1)) for k in range(EXP_ROUNDS)]
 
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (35 + k, k + 1)) for k in range(LEVEL_SEGMENTS)]
+CHAPTER20 += [exp_segment("C20_EXP_%02d_ELITE_FOUR" % (EXP_ROUNDS + k + 1)) for k in range(EXP_ROUNDS_LATE)]
 
 
 # ------------------------------------------------ chapter 20, evolving by friendship
@@ -3850,6 +3876,8 @@ CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_WYNAUT" % (66 + len(DAYCARE_B
 AFTER_DAYCARE_LEVELS = 10
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (75 + k, LEVEL_SEGMENTS + k + 1))
               for k in range(AFTER_DAYCARE_LEVELS)]
+CHAPTER20 += [exp_segment("C20_EXP_%02d_ELITE_FOUR" % (EXP_ROUNDS + EXP_ROUNDS_LATE + k + 1))
+              for k in range(EXP_ROUNDS_DAYCARE)]
 CHAPTER20 += [stones_segment("C20_85_STONES_2")]
 
 
@@ -4032,6 +4060,76 @@ def unown_segment(seg_id):
 
 
 CHAPTER20 += [unown_segment("C20_89_UNOWN")]
+
+
+# ------------------------------------------------ chapter 20, PORYGON (the Celadon Game Corner)
+#  EXPERIMENTAL (PocketPilot build 56, not run on a console when written).
+#  PORYGON is a prize of the Celadon Game Corner for 9999 COINS (FireRed;
+#  CeladonCity_GameCorner_PrizeRoom_EventScript_Porygon). The COIN CASE is the
+#  gift of the man in the Celadon restaurant (FLAG_GOT_COIN_CASE), the case
+#  holds 9999 COINS at most (MAX_COINS), the clerk sells 50 for 1000 and 500
+#  for 10000 and refuses a pack that does not fit, which is 19 packs of 500
+#  and 9 of 50: 9950 COINS for 199000. The 49 that are left (the three
+#  gamblers' 10, 20 and 20 and the hidden COINS are all multiples of ten: they
+#  cannot make 9999) come from the slot machine. Its odds are the player's: the
+#  game draws a "bias" for each game (sReelBiasChances) and the reels stop
+#  where it can be met, whatever the player's timing: the Python port of the
+#  game's code (a million games with the bet of 3) pays 7.6 COINS on average
+#  for 3, wins one game in three, and pays 300 for a row of sevens a few times
+#  in a hundred games. So the games only have to add 49 to what the packs
+#  gave, and what goes over 9999 is cut off by the game itself (AddCoins).
+#  The program does not read the case: after each series of games it asks the
+#  prizes' clerk for the PORYGON (the second YES/NO of a nickname question
+#  comes only when the COINS are enough).
+#  Nine battles with Lady Gillian pay 88200; the packs cost 199000: three
+#  trips (264600) with what is left in the bag, so that no pack is refused for
+#  lack of money.
+PORYGON_TRIPS = 3
+COINS_500 = 19
+COINS_50 = 9
+PORYGON_ROUNDS = 14
+PORYGON_GAMES = 30
+CELADON_RESTAURANT = "MAP_CELADON_CITY_RESTAURANT"
+CELADON_GAME_CORNER = "MAP_CELADON_CITY_GAME_CORNER"
+CELADON_PRIZE_ROOM = "MAP_CELADON_CITY_GAME_CORNER_PRIZE_ROOM"
+#  Where they stand (map.json): the man of the COIN CASE, the coins' clerk and
+#  the prizes' clerk of the POKeMON (both behind a counter), a slot machine
+#  (its tile: the player faces it from the east).
+COIN_CASE_MAN = [1, 2]
+COINS_CLERK = [6, 2]
+SLOT_MACHINE = [6, 6]
+PRIZE_CLERK = [4, 2]
+
+
+def porygon_segment(seg_id):
+    steps = []
+    for k in range(PORYGON_TRIPS):
+        steps += gillian_trip(seg_id + "_Fly" + ("" if k == 0 else str(k + 1)))
+    steps += [fly("HEAL_LOCATION_CELADON_CITY", seg_id + "_FlyToCeladon", force=True),
+              talk(CELADON_RESTAURANT, xy=COIN_CASE_MAN, mode="talk", label="CoinCaseMan"),
+              setst(flags=["FLAG_GOT_COIN_CASE"]),
+              talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="ToTheCoinsClerk"),
+              coins("buy", "BuyCoins", p1=COINS_500, p2=COINS_50),
+              heal(PC["CELADON"], "CoinsToCeladonNurse"), save(),
+              talk(CELADON_PRIZE_ROOM, xy=PRIZE_CLERK, mode="plain", counter=True, label="ToThePrizeClerk")]
+    games = [talk(CELADON_GAME_CORNER, xy=SLOT_MACHINE, mode="plain", label="ToTheSlotMachine"),
+             coins("play", "SlotMachine", p1=PORYGON_GAMES),
+             save(),
+             talk(CELADON_PRIZE_ROOM, xy=PRIZE_CLERK, mode="plain", counter=True, label="BackToThePrizeClerk"),
+             coins("prize", "PorygonPrize", species="porygon")]
+    for k in range(PORYGON_ROUNDS):
+        steps.append({"unless_owned": {"species": "porygon", "count": 1, "steps": games},
+                      "label": "Porygon in the table (round %d)?" % (k + 1)})
+    steps += [heal(PC["CELADON"], seg_id + "_ToCeladonNurse"),
+              {"outside": True, "label": seg_id + "_Out"},
+              save()]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: PORYGON for 9999 COINS (the Game Corner's slot machines)",
+            "steps": [{"unless_owned": {"species": "porygon", "count": 1, "steps": steps, "segment": True},
+                       "label": "Porygon in the table?"}]}
+
+
+CHAPTER20 += [porygon_segment("C20_90_PORYGON")]
 
 
 def fly_only(segments):

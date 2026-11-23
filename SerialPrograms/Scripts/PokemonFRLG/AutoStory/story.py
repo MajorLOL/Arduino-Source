@@ -1839,6 +1839,24 @@ class Builder:
             out.extend(sub)
             out.append({"type": "BOX_IN", "label": b.get("in_label", "Into the box")})
             return
+        if "coins" in step:
+            #  The Celadon Game Corner (build 56, experimental): the walk before
+            #  this step ended facing the coins' clerk (across the counter), a
+            #  slot machine, or the clerk of the prizes. "buy": p1 packs of 500
+            #  COINS, then p2 packs of 50; "play": p1 games with the bet of 3;
+            #  "prize": the Pokemon (text) for 9999 COINS, when the case has so
+            #  many.
+            c = step["coins"]
+            if not out or out[-1]["type"] != "WALK":
+                raise StoryError("coins: not after the walk to the clerk or the machine (%s)" % step.get("label", "?"))
+            modes = {"buy": 0, "play": 1, "prize": 2}
+            if c["mode"] not in modes:
+                raise StoryError("coins: mode is buy, play or prize (%s)" % step.get("label", "?"))
+            if c["mode"] == "prize" and not c.get("species"):
+                raise StoryError("coins: the prize needs a species (%s)" % step.get("label", "?"))
+            out.append({"type": "COINS", "label": step.get("label", "Coins: " + c["mode"]), "p0": modes[c["mode"]],
+                        "p1": int(c.get("p1", 0)), "p2": int(c.get("p2", 0)), "text": c.get("species", "")})
+            return
         if "trade" in step:
             #  Facing someone who trades in the game (the walk before this
             #  step ended there): the species the trade gives.

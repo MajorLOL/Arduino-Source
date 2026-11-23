@@ -1145,6 +1145,23 @@ inline std::vector<LevelTarget> exp_targets(
     return targets;
 }
 
+//  Build 56: the targets of a segment that trains at Victory Road: those of
+//  level_targets() without the ones that have EXP_ROUND_MIN points to go or
+//  more, which are left to the rounds of the Elite Four (those come after these
+//  segments too). "exp_without" are the species that failed in the rounds twice
+//  in a row in this run: they are not left to them, so that they are still
+//  trained, slowly, at Victory Road.
+inline std::vector<LevelTarget> level_targets_light(
+    const std::vector<EvolveLine>& plan, const std::set<std::string>& without = std::set<std::string>(),
+    const std::set<std::string>& exp_without = std::set<std::string>()
+){
+    std::set<std::string> left = without;
+    for (const LevelTarget& heavy : exp_targets(plan, exp_without)){
+        left.insert(heavy.slug);
+    }
+    return level_targets(plan, left);
+}
+
 //  They as one line for the log.
 inline std::string exp_targets_text(const std::vector<LevelTarget>& targets){
     std::string text;

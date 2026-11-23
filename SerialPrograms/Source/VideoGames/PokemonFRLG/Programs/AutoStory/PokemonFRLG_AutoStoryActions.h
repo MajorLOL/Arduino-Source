@@ -211,6 +211,18 @@ std::string story_hatch(
     const std::string& what
 );
 
+//  The Celadon Game Corner (build 56, experimental; StepType::COINS, see its
+//  steps in PokemonFRLG_AutoStoryScript.h): the packs of COINS at the clerk
+//  (A, A, the list: DOWN for the 500, A, A: the same keys whether the pack is
+//  bought or the clerk says why not), the games of a slot machine (R for the bet
+//  of 3, the reels stopped with A, START for the payout; the machine's own
+//  bias decides what comes, whatever the timing is), and the prizes' clerk,
+//  who is asked for the species of "text": a YES/NO box of a nickname that
+//  comes by itself says that the COINS were enough (the fanfare, "obtained
+//  the PORYGON!", the nickname question; NO), else the clerk says that more
+//  are needed. When the prize was given: one more in the POKeDEX table.
+void story_coins(StoryRuntime& rt, const StoryStep& step, const std::string& label);
+
 //  The Four Island Day Care (build 48, experimental; StepType::DAYCARE_OUT to
 //  DAYCARE_END, a trip that has no save in it).
 //  story_daycare_walk(): "steps" steps along a line of "length" tiles between

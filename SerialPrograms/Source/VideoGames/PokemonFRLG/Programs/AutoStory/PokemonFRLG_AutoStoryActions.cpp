@@ -5119,6 +5119,213 @@ void story_daycare_take(StoryRuntime& rt, const std::string& label){
 }
 
 
+
+//  ---- The Celadon Game Corner (build 56, experimental) -----------------------
+//
+//  PORYGON is a prize for 9999 COINS. The packs of COINS are bought at the clerk
+//  (the same keys for a pack, or for the clerk's "you can't afford that"), the
+//  slot machine is played with the bet of 3 (R), the reels are stopped with A
+//  (the machine's bias decides what comes up, whatever the timing is: a Python
+//  port of slot_machine.c pays 7.6 COINS for 3 on average), and the prizes'
+//  clerk is asked for the PORYGON after each series of games. The program does
+//  not read the case: the nickname question (a YES/NO box that comes by itself)
+//  says that the COINS were enough.
+
+namespace{
+
+//  One pack at the coins' clerk (across the counter, the player faces it). A
+//  until the box is up ("Welcome to ROCKET GAME CORNER!" and, after a page
+//  break, "Do you need some game COINS? Would you like to buy some?"), A for
+//  the page, the list (50 COINS, 500 COINS, NO THANKS; the cursor on the
+//  first) comes up when the page is printed, DOWN for the 500, A, A for the text
+//  that says "Here are your COINS!" (or why not).
+void coins_pack(StoryRuntime& rt, bool big, const std::string& what){
+    ProControllerContext& context = rt.context;
+    story_talk_start(rt, what);
+    pbf_wait(context, 2500ms);
+    press(context, BUTTON_A, 3000ms);
+    if (big){
+        dpad(context, DPAD_DOWN, 600ms);
+    }
+    press(context, BUTTON_A, 2500ms);
+    press(context, BUTTON_A, 1500ms);
+    context.wait_for_all_requests();
+}
+
+void coins_buy(StoryRuntime& rt, int big, int small, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    console.log(
+        label + ": " + std::to_string(big) + " packs of 500 COINS and " + std::to_string(small) +
+        " of 50 at the clerk (experimental): " + std::to_string(big * 500 + small * 50) + " COINS for " +
+        std::to_string(big * 10000 + small * 1000) + " (a pack that the money or the case does not allow is "
+        "refused with the same keys)."
+    );
+    for (int i = 0; i < big; i++){
+        coins_pack(rt, true, label + " (500 COINS, " + std::to_string(i + 1) + " of " + std::to_string(big) + ")");
+    }
+    for (int i = 0; i < small; i++){
+        coins_pack(rt, false, label + " (50 COINS, " + std::to_string(i + 1) + " of " + std::to_string(small) + ")");
+    }
+    story_back_to_overworld(rt, label);
+}
+
+//  Up to "games" games of a slot machine, then out of it. "Do you want to
+//  play the slot machine?" YES; the machine's picture comes up after a little
+//  face over the player's head and a fade. A game: R (the bet: three COINS,
+//  the reels start by themselves), A for each of the three reels, START now
+//  and then (when the fanfare of a win is over, START adds the whole payout at
+//  once; before that it does nothing). A key that comes too early or too late
+//  does nothing harmful: R is only taken when a game can start, A only stops a
+//  reel or starts one. Out: B (the question to quit, in the betting phase
+//  only), YES.
+void coins_play(StoryRuntime& rt, int games, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log(label + ": up to " + std::to_string(games) + " games of the slot machine with the bet of 3 (experimental).");
+    story_talk_answer(rt, true, label);
+    pbf_wait(context, 5000ms);
+    for (int game = 0; game < games; game++){
+        press(context, BUTTON_R, 900ms);
+        press(context, BUTTON_A, 700ms);
+        press(context, BUTTON_A, 700ms);
+        press(context, BUTTON_A, 900ms);
+        for (int i = 0; i < 6; i++){
+            press(context, BUTTON_PLUS, 450ms);
+        }
+        if ((game + 1) % 10 == 0){
+            console.log(label + ": " + std::to_string(game + 1) + " games played.");
+        }
+    }
+    //  Out of the machine. B asks "quit?" only in the betting phase: B (and
+    //  START for what is still being paid out) until the question is up.
+    bool asked = false;
+    for (int attempt = 0; attempt < 12 && !asked; attempt++){
+        SelectionDialogWatcher question(COLOR_RED);
+        context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            console, context,
+            [](ProControllerContext& ctx){
+                pbf_press_button(ctx, BUTTON_B, 160ms, 140ms);
+                pbf_press_button(ctx, BUTTON_PLUS, 160ms, 1700ms);
+            },
+            { question }
+        );
+        asked = ret == 0;
+    }
+    if (asked){
+        pbf_wait(context, 300ms);
+        press(context, BUTTON_A, 4000ms);
+    }else{
+        console.log(label + ": no question to quit came up: B until the player is out of it.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+    }
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, label);
+}
+
+//  The prizes' clerk of the POKeMON (across the counter): the text, A, the list
+//  (ABRA, CLEFAIRY, DRATINI, SCYTHER, PORYGON, NO THANKS: the cursor on the
+//  first), DOWN four times, A, "So, you want the PORYGON?" YES. With 9999 COINS:
+//  the fanfare, "obtained the PORYGON!" and the nickname question, a YES/NO box
+//  that comes by itself (NO; the party is full: it goes to the PC). Without:
+//  "Sorry, you'll need more COINS than that." and no box.
+void coins_prize(StoryRuntime& rt, const std::string& species, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    console.log(label + ": the prizes' clerk is asked for " + species + " (9999 COINS; experimental).");
+    story_talk_start(rt, label);
+    pbf_wait(context, 2000ms);
+    press(context, BUTTON_A, 3000ms);
+    for (int i = 0; i < 4; i++){
+        dpad(context, DPAD_DOWN, 450ms);
+    }
+    bool sure = false;
+    {
+        SelectionDialogWatcher question(COLOR_RED);
+        context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            console, context,
+            [](ProControllerContext& ctx){
+                pbf_press_button(ctx, BUTTON_A, 160ms, 9000ms);
+            },
+            { question }
+        );
+        sure = ret == 0;
+    }
+    if (!sure){
+        console.log(label + ": no \"So, you want the prize?\" question: the list was not as expected.", COLOR_ORANGE);
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, label);
+        return;
+    }
+    pbf_wait(context, 300ms);
+    press(context, BUTTON_A, 1500ms);   //  YES
+    bool given = false;
+    {
+        SelectionDialogWatcher nickname(COLOR_RED);
+        context.wait_for_all_requests();
+        const int ret = run_until<ProControllerContext>(
+            console, context,
+            [](ProControllerContext& ctx){
+                pbf_wait(ctx, 14000ms);
+            },
+            { nickname }
+        );
+        given = ret == 0;
+    }
+    if (!given){
+        console.log(label + ": no nickname question: \"you'll need more COINS than that\". The case is not full yet.", COLOR_BLUE);
+        pbf_mash_button(context, BUTTON_B, 3000ms);
+        context.wait_for_all_requests();
+        story_back_to_overworld(rt, label);
+        return;
+    }
+    //  NO to the nickname; the text that says where it went, and the clerk's
+    //  end of the talk.
+    pbf_wait(context, 300ms);
+    press(context, BUTTON_B, 1500ms);
+    context.wait_for_all_requests();
+    story_cutscene(rt, 0ms, 30000ms, false, label);
+    story_back_to_overworld(rt, label);
+    rt.caught.insert(species);
+    if (rt.collection != nullptr){
+        rt.collection->add_caught(species, false, false);
+    }
+    rt.dex_new_since_load.insert(species);
+    console.log(
+        "Got for the POKeDEX: " + species + " (the prize of the Game Corner for 9999 COINS)." +
+        (rt.collection != nullptr
+            ? " The POKeDEX table: " + std::to_string(rt.collection->caught(species)) + " of " +
+                std::to_string(std::max(0, rt.collection->needed(species))) + "."
+            : std::string()),
+        COLOR_BLUE
+    );
+    story_note(rt, "Got " + species, COLOR_GREEN);
+}
+
+}
+
+
+void story_coins(StoryRuntime& rt, const StoryStep& step, const std::string& label){
+    switch (step.p0){
+    case 0:
+        coins_buy(rt, std::max(0, (int)step.p1), std::max(0, (int)step.p2), label);
+        break;
+    case 1:
+        coins_play(rt, std::max(0, (int)step.p1), label);
+        break;
+    case 2:
+        coins_prize(rt, step.text == nullptr ? std::string() : std::string(step.text), label);
+        break;
+    default:
+        rt.console.log(label + ": a step of the Game Corner that this program does not know (" +
+            std::to_string(step.p0) + ").", COLOR_RED);
+        break;
+    }
+}
+
+
 }
 }
 }

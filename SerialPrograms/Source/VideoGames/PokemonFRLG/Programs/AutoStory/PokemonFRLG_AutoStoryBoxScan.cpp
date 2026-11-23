@@ -1797,12 +1797,22 @@ std::vector<AutoStoryBoxes::LevelTarget> story_level_targets(StoryRuntime& rt){
     const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
     //  One that failed twice in a row in this run is left for the next run.
     std::set<std::string> without;
+    std::set<std::string> exp_without;
     for (const EvolveLine& line : plan){
         if (rt.places.place_out(story_level_place(line.slug))){
             without.insert(line.slug);
         }
+        if (rt.places.place_out(story_exp_place(line.slug))){
+            exp_without.insert(line.slug);
+        }
     }
-    return level_targets(plan, without);
+    //  Build 56: the ones with EXP_ROUND_MIN points to go or more are left to
+    //  the rounds of the Elite Four (there are rounds after these segments
+    //  too: a DRATINI that evolves here is a DRAGONAIR with 170000 points to
+    //  go, eight hours at Victory Road, six rounds of the League). One that
+    //  failed in the rounds twice in a row is not left to them: it is trained
+    //  here, slowly, as it was before.
+    return level_targets_light(plan, without, exp_without);
 }
 
 std::vector<AutoStoryBoxes::LevelTarget> story_friend_targets(StoryRuntime& rt){

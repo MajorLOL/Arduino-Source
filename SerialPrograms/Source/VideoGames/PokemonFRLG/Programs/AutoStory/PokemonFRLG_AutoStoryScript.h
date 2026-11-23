@@ -272,6 +272,13 @@ enum class StepType : uint8_t{
     DAYCARE_TAKE,       //  in front of the woman again: she gives the two parents back (they
                         //  cost 100 and 100 for each level they gained, each)
     DAYCARE_END,        //  the trip is over: the party has the team and the two parents
+    COINS,              //  (build 56, experimental) the Celadon Game Corner, after the walk to
+                        //  its clerk or machine. p0 = 0: facing the coins' clerk (across the
+                        //  counter): p1 packs of 500 COINS, then p2 packs of 50; p0 = 1: facing
+                        //  a slot machine: up to p1 games with the bet of 3, then out of it;
+                        //  p0 = 2: facing the prizes' clerk of the POKeMON (across the counter):
+                        //  the species "text" for 9999 COINS, when the case has so many (a
+                        //  nickname question comes only then; one more in the table)
 };
 
 struct StoryStep{
@@ -508,12 +515,21 @@ inline bool story_outdoors(const std::string& map_name){
 //      PAST_STEP       The step is the one of the evolution stones, which
 //                      saves by itself in front of the PC: the steps after
 //                      it (out of the Pokemon Center, the save).
+//      SEVII           (build 56) The save is at a nurse, but the walk out leads to
+//                      somewhere other than a town or a route of Kanto (the Pokemon
+//                      Centers of the Sevii Islands): the next segment's FLY cannot
+//                      start from there, and the way home is part of this segment.
+//                      The segment is not given up: the program stops there with a
+//                      message after it failed twice in a row (it jumped to the
+//                      segment's last step on the island before: a save on the
+//                      island, and a FLY that could not follow).
 //      NO              Not known: the segment is not given up.
 enum class OnceLeave : uint8_t{
     NO,
     WALK_OUT_FIRST,
     FROM_HERE,
     PAST_STEP,
+    SEVII,
 };
 inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment& segment, size_t index){
     if (!story_once_segment(script, segment) || index < 2 || index + 1 >= segment.step_count){
@@ -541,8 +557,25 @@ inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment&
     }
     const StoryLeg& leg = script.leg(step.leg);
     if (script.step(segment, index - 2).type == StepType::HEAL){
-        return leg.end == LegEnd::WARP_PUSH || leg.end == LegEnd::WARP_STEP
-            ? OnceLeave::WALK_OUT_FIRST : OnceLeave::NO;
+        if (leg.end != LegEnd::WARP_PUSH && leg.end != LegEnd::WARP_STEP){
+            return OnceLeave::NO;
+        }
+        //  After the walk out: a FLY, or a walk that starts in a town or on a
+        //  route of Kanto. Anything else is a Pokemon Center of the Sevii
+        //  Islands (build 56).
+        if (index + 1 >= segment.step_count){
+            return OnceLeave::NO;
+        }
+        const StoryStep& after = script.step(segment, index + 1);
+        if (after.type == StepType::FLY){
+            return OnceLeave::WALK_OUT_FIRST;
+        }
+        if (after.type == StepType::WALK && after.leg >= 0 && (size_t)after.leg < script.leg_count){
+            const StoryLeg& next = script.leg(after.leg);
+            return next.start_map < script.map_name_count && story_outdoors(script.map_names[next.start_map])
+                ? OnceLeave::WALK_OUT_FIRST : OnceLeave::SEVII;
+        }
+        return OnceLeave::NO;
     }
     return leg.start_map < script.map_name_count && story_outdoors(script.map_names[leg.start_map])
         ? OnceLeave::FROM_HERE : OnceLeave::NO;
