@@ -1342,7 +1342,8 @@ CHAPTER10 = [
 ]
 
 
-def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False, trigger=None, start=None):
+def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False, trigger=None, start=None,
+              no_text=False):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
     (not the Master Ball: that is kept for the roaming legendary) until it
@@ -1362,9 +1363,17 @@ def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False, tr
     BALL and two POKe BALLs: 19 tries in an hour).
     trigger: a tile of the map that starts it when it is stepped on (HO-OH
     on Navel Rock's summit: a scene of its own, no A) in place of the A in
-    front of it. start: the steps that come instead (DEOXYS: the puzzle)."""
+    front of it. start: the steps that come instead (DEOXYS: the puzzle).
+    no_text: its script has no text box before the battle (LUGIA: the screen
+    shakes, it cries, then the battle, about nine seconds in all; the other
+    four have "Gyaoo!" in a box, which a talk waits for). The player walks
+    to the tile in front of it and faces it, then A once, and the battle
+    step waits for the battle (Navel Rock, a run of build 54: five failures in a
+    row, "No text box after pressing A at: Lugia", with the battle menu on
+    the screen when the error came)."""
     start = start if start is not None else \
         [goto(map_id, [trigger], label + "_Trigger", trigger=True)] if trigger else \
+        [talk(map_id, xy=xy, mode="plain", label=label), press("A", 1, 2500, label + "_A")] if no_text else \
         [talk(map_id, xy=xy, mode="talk", label=label)]
     return start + [
             {"battle": 60000, "label": label, "legendary": True, "weaken": weaken, "later": later},
@@ -4030,7 +4039,7 @@ CHAPTER20 += [
         "C20_87_LUGIA", "Lugia", "lugia", 1, "MAP_NAVEL_ROCK_HARBOR",
         [goto("MAP_NAVEL_ROCK_BASE", [[10, 16]], "ToLugia"), save()] +
         legendary("MAP_NAVEL_ROCK_BASE", [10, 15], ["FLAG_FOUGHT_LUGIA", "FLAG_HIDE_LUGIA"], "Lugia",
-                  weaken=True),
+                  weaken=True, no_text=True),
         "Lugia at the base of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)"),
     legend_segment(
         "C20_88_DEOXYS", "Deoxys", "deoxys", 2, "MAP_BIRTH_ISLAND_HARBOR",

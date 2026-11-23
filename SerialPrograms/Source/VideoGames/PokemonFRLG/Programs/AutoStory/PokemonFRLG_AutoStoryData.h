@@ -45719,7 +45719,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::WALK, "ToLugia_16", 5231, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "Lugia", 5232, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
-    {StepType::TALK, "Lugia", -1, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::PRESS, "Lugia_A", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::BATTLE, "Lugia", -1, 60000, 2, 1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL_ITEMS, "Heal with items after Lugia", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -46680,7 +46680,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "8898c2a388";
+inline constexpr const char* DATA_ID = "b150a510c5";
 
 }
 }

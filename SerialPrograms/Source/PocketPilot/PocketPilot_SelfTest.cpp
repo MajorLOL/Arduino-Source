@@ -3436,6 +3436,37 @@ int check_leave_out(Logger& logger){
         "is given up from (build 56: the program stops there); the one of Celadon City (PORYGON) walks out "
         "into the city"
     );
+    //  (Build 59) LUGIA's script has no text box before its battle (the screen shakes, it cries, then the
+    //  battle): a talk waits for a box that never comes (a run of build 54: five failures in a row at the
+    //  last step before the battle). The player faces it, A once, and the battle step waits for the battle.
+    {
+        size_t lugia_talks = 0;
+        size_t lugia_battles = 0;
+        bool lugia_press_before = false;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (std::string(segment.id) != "C20_87_LUGIA"){
+                continue;
+            }
+            for (size_t i = 1; i < segment.step_count; i++){
+                const StoryStep& step = script.step(segment, i);
+                if (std::string(step.label) != "Lugia"){
+                    continue;
+                }
+                lugia_talks += step.type == StepType::TALK ? 1 : 0;
+                if (step.type == StepType::BATTLE && step.p1 == 2){
+                    lugia_battles++;
+                    const StoryStep& before = script.step(segment, i - 1);
+                    lugia_press_before = before.type == StepType::PRESS && std::string(before.text) == "A";
+                }
+            }
+        }
+        check(
+            lugia_talks == 0 && lugia_battles == 1 && lugia_press_before,
+            "LUGIA has no text before its battle (build 59): no talk waits for a text box, the step before the "
+            "battle is one press of A"
+        );
+    }
     check(
         saves_at_a_nurse == 4 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
         "from every save in such a segment the player gets outdoors: at a nurse by the walk out of the Pokemon "
