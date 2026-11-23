@@ -1391,10 +1391,14 @@ int check_money_trip(Logger& logger){
             }
         }
     }
-    //  (Two REMATCH steps on the money trip; a third one since build 35,
-    //  two battles for the evolution stones.)
+    //  (Two REMATCH steps on the money trip, 4 + 5 battles; a third one since
+    //  build 35, two battles for the evolution stones; build 54: the same
+    //  once more for the stones of the Eevee (STONES_2, 2 battles), and the
+    //  same two as on the money trip on the way to each of the three
+    //  legendary Pokemon, for their ULTRA BALLs: 2 + 1 + 1 + 3 * 2 = 10
+    //  steps, 9 + 2 + 2 + 3 * 9 = 40 battles.)
     check(
-        money_segment && rematches == 3 && rematch_wins == 11 && walks_fine && purchases == 4,
+        money_segment && rematches == 10 && rematch_wins == 40 && walks_fine && purchases == 4,
         "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
     );
     check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
@@ -1697,10 +1701,18 @@ int check_bump(Logger& logger){
     int longest_other = 0;
     for (size_t s = 0; s < script.segment_count; s++){
         const StorySegment& segment = script.segments[s];
-        const bool money = std::string(segment.id).find("_MONEY") != std::string::npos;
+        //  The prize money for the Ultra Balls of the three legendaries of
+        //  the Sevii Islands (build 54): the same way to Lady Gillian twice
+        //  each, so they count as money trips too.
+        const std::string segment_id = segment.id;
+        const bool money =
+            segment_id.find("_MONEY") != std::string::npos ||
+            segment_id.find("_HO_OH") != std::string::npos ||
+            segment_id.find("_LUGIA") != std::string::npos ||
+            segment_id.find("_DEOXYS") != std::string::npos;
         //  The prize money for the evolution stones (build 35): the same
-        //  way to Lady Gillian, once.
-        const bool stones = std::string(segment.id).find("_STONES") != std::string::npos;
+        //  way to Lady Gillian, once (and once more in build 54).
+        const bool stones = segment_id.find("_STONES") != std::string::npos;
         for (size_t k = 0; k < segment.step_count; k++){
             const StoryStep& step = script.step(segment, k);
             if (step.type != StepType::WALK || step.leg < 0){
@@ -1708,7 +1720,11 @@ int check_bump(Logger& logger){
             }
             const StoryLeg& leg = script.leg(step.leg);
             const StoryRun* runs = script.leg_runs(leg);
-            const bool cave = std::string(leg.name).find("LostCave") != std::string::npos;
+            //  ... and the way to the Lax Incense in the Lost Cave for the
+            //  Wynaut egg (build 54): the same water once more.
+            const bool cave =
+                std::string(leg.name).find("LostCave") != std::string::npos ||
+                std::string(leg.name).find("LaxIncense") != std::string::npos;
             const bool lap = std::string(leg.name).rfind("SurfFiveIsland", 0) == 0;
             for (uint16_t r = 0; r < leg.run_count; r++){
                 if (runs[r].kind == RunKind::SURF_BUMP){
@@ -1724,10 +1740,10 @@ int check_bump(Logger& logger){
         }
     }
     check(
-        money_bumps == 8 && stones_bumps == 4 && bumps_last && longest_other <= 4,
-        "the money trip in the story's data: the water to Resort Gorgeous and back"
+        money_bumps == 32 && stones_bumps == 8 && bumps_last && longest_other <= 4,
+        "the money trips in the story's data: the water to Resort Gorgeous and back"
     );
-    check(cave_bumps == 8 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
+    check(cave_bumps == 12 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
 
     logger.log(
         "AutoStory test: runs that end where the way is shut (over open water the video cannot count tiles: "
@@ -2651,8 +2667,9 @@ int check_next_steps(Logger& logger){
                 laps_fine &= fine && walks;
                 lap_steps += (int)count;
             }
-            if (step.type == StepType::SKIP_IF_ITEM){
-                //  The way to a rod: skipped when nothing is fished for with
+            if (step.type == StepType::SKIP_IF_ITEM && step.p2 > 0){
+                //  The way to a rod (p2 > 0; build 54: the way to the LAX
+                //  INCENSE has p2 0 and is none): skipped when nothing is fished for with
                 //  it (the step before), and when the bag has it. Both skip
                 //  to the segment's end; the one who gives it may have given
                 //  it before.
@@ -2740,7 +2757,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 81 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 92 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2945,6 +2962,13 @@ int check_leave_out(Logger& logger){
         }
         once++;
         once_ids += (once_ids.empty() ? "" : ", ") + std::string(segment.id);
+        //  The legendary Pokemon (build 54): a save in front of it is in a
+        //  cave, and the one after Lady Gillian's battles in a Pokemon Center
+        //  of Five Island: not a place such a segment is given up from.
+        if (std::string(segment.id) == "C20_86_HO_OH" || std::string(segment.id) == "C20_87_LUGIA" ||
+            std::string(segment.id) == "C20_88_DEOXYS"){
+            continue;
+        }
         //  A round of the Elite Four for experience (build 46) has the Pokemon
         //  out of its box from its PC to its save: given up from none of them.
         if (script.step(segment, 0).type == StepType::SKIP_IF_NO_LEVELS && script.step(segment, 0).p1 == 2){
@@ -2985,7 +3009,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 72 && exp_leave_no &&
+        once == 83 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -3003,19 +3027,24 @@ int check_leave_out(Logger& logger){
             "C20_66_DAYCARE_01_PICHU, C20_67_DAYCARE_02_CLEFFA, C20_68_DAYCARE_03_IGGLYBUFF, "
             "C20_69_DAYCARE_04_TOGEPI, C20_70_DAYCARE_05_SMOOCHUM, C20_71_DAYCARE_06_ELEKID, "
             "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE, "
+            "C20_75_DAYCARE_10_KABUTO, C20_76_DAYCARE_11_EEVEE, C20_77_DAYCARE_12_EEVEE, "
+            "C20_78_DAYCARE_13_EEVEE, C20_79_DAYCARE_14_WYNAUT, "
             "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24, "
-            "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27",
+            "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27, C20_83_LEVEL_28, C20_84_LEVEL_29, "
+            "C20_85_STONES_2, C20_86_HO_OH, C20_87_LUGIA, C20_88_DEOXYS",
         "the four segments of Pokemon that are there once, the one that reads the PC's boxes, the one of the "
         "stones, the four trades, the four that fetch a stone (the Moon Stone of the Rocket Hideout is taken by "
         "the story itself), the ten rounds of the Elite Four for experience (five more in build 52), the nineteen "
         "that evolve by level, the eight that evolve by friendship, the Togepi egg (build 47), three more that "
         "evolve by friendship and the nine eggs of the Day Care (build 48, experimental) and eight more that evolve "
-        "by level after them (build 51, experimental, and three for the DRATINI of build 52)"
+        "by level after them (build 51, experimental, and three for the DRATINI of build 52); build 54 "
+        "(experimental) adds five eggs (the second KABUTO, three EEVEE, WYNAUT), two more that evolve by level "
+        "(KABUTO's line, MAGCARGO), the stones again, and HO-OH, LUGIA and DEOXYS"
     );
     check(
-        saves_at_a_nurse == 3 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
+        saves_at_a_nurse == 4 && saves_outdoors == 2 && saves_unknown == 0 && walks_out_wrong == 0,
         "from every save in such a segment the player gets outdoors: at a nurse by the walk out of the Pokemon "
-        "Center (3), or the save is outdoors (2)"
+        "Center (4: the dojo, the Snorlax, and the stones twice), or the save is outdoors (2)"
     );
     check(
         story_once_leave(script, script.segments[0], 2) == OnceLeave::NO &&
@@ -3047,10 +3076,10 @@ int check_leave_out(Logger& logger){
         const size_t mansion = index_of("C20_30_MOON_STONE_MANSION");
         const size_t sun_stone = index_of("C20_34_SUN_STONE_RUIN_VALLEY");
         std::set<std::string> missing = {"farfetch-d", "jynx", "mr-mime", "lickitung"};
-        //  (The Day Care wants up to three Tyrogue: a Pokemon that is not
-        //  missing is there three times.)
+        //  (The Day Care wants up to three Tyrogue and, since build 54, four
+        //  Eevee: a Pokemon that is not missing is there four times.)
         auto have = [&](const std::string& slug){
-            return missing.count(slug) != 0 ? 0 : 3;
+            return missing.count(slug) != 0 ? 0 : 4;
         };
         std::vector<size_t> left_open;
         const size_t from_end = story_once_open_before(script, story_end, have, &left_open);
@@ -3061,8 +3090,11 @@ int check_leave_out(Logger& logger){
             index_of("C20_61_FRIEND_08") + 1 == index_of("C20_62_TOGEPI_EGG") &&
             index_of("C20_62_TOGEPI_EGG") + 1 == index_of("C20_63_FRIEND_09") &&
             index_of("C20_65_FRIEND_11") + 1 == index_of("C20_66_DAYCARE_01_PICHU") &&
-            index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_LEVEL_20") &&
-            index_of("C20_82_LEVEL_27") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
+            index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_DAYCARE_10_KABUTO") &&
+            index_of("C20_78_DAYCARE_13_EEVEE") + 1 == index_of("C20_79_DAYCARE_14_WYNAUT") &&
+            index_of("C20_79_DAYCARE_14_WYNAUT") + 1 == index_of("C20_75_LEVEL_20") &&
+            index_of("C20_84_LEVEL_29") + 1 == index_of("C20_85_STONES_2") &&
+            index_of("C20_88_DEOXYS") + 1 == story_end && from_end == farfetchd && left_open.size() == 4 &&
             left_open[0] == farfetchd && left_open[1] == jynx && left_open[2] == mime && left_open[3] == lickitung,
             "a save at the story's end with the four trades left out: the start goes back to the first of them"
         );
@@ -3111,6 +3143,11 @@ int check_leave_out(Logger& logger){
                 {"C20_72_DAYCARE_07_TYROGUE", "tyrogue", 1},
                 {"C20_73_DAYCARE_08_TYROGUE", "tyrogue", 2},
                 {"C20_74_DAYCARE_09_TYROGUE", "tyrogue", 3},
+                {"C20_75_DAYCARE_10_KABUTO", "kabuto", 2},
+                {"C20_76_DAYCARE_11_EEVEE", "eevee", 2},
+                {"C20_77_DAYCARE_12_EEVEE", "eevee", 3},
+                {"C20_78_DAYCARE_13_EEVEE", "eevee", 4},
+                {"C20_79_DAYCARE_14_WYNAUT", "wynaut", 1},
             };
             size_t day_cares_ok = 0;
             for (const DayCare& day_care : day_cares){
@@ -3175,7 +3212,7 @@ int check_leave_out(Logger& logger){
             }
             check(
                 day_cares_ok == std::size(day_cares),
-                "the nine eggs of the Day Care: the parents out, to the woman, 24 rounds at most, the hatching, the baby into a box, the parents back, no save between"
+                "the fourteen eggs of the Day Care (build 54: five more): the parents out, to the woman, 24 rounds at most, the hatching, the baby into a box, the parents back, no save between"
             );
         }
         left_open.clear();
@@ -4100,9 +4137,9 @@ int check_boxes(Logger& logger){
             }
         }
         check(
-            segments == 27 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
+            segments == 29 && shape && legs_there && story_level_place("pidgeot") == "raising PIDGEOT" &&
             story_levels_place() == "the evolving by level",
-            "the 27 segments that evolve by level (19 before the Day Care, eight after it): FLY, the PC, the training, "
+            "the 29 segments that evolve by level (19 before the Day Care, ten after it): FLY, the PC, the training, "
             "the PC, a save at the end only"
         );
     }
@@ -4594,7 +4631,7 @@ int check_boxes(Logger& logger){
         std::to_string(by_level) + " by level, " + std::to_string(by_stone) + " by a stone, " +
         std::to_string(by_friendship) + " by friendship, " + std::to_string(by_other) + " by level and stats; " +
         std::to_string(hows) + " ways of evolving in the table; in the story's data the segments " + where +
-        ", C20_25_STONES, four of trades, four that fetch a stone, ten rounds of the Elite Four, 27 of levels and eleven of "
+        ", C20_25_STONES, four of trades, four that fetch a stone, ten rounds of the Elite Four, 29 of levels and eleven of "
         "friendship): " +
         std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED

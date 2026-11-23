@@ -1523,6 +1523,22 @@ std::vector<std::string> daycare_family(const std::string& baby){
     if (baby == "tyrogue"){
         return {"hitmonlee", "hitmonchan", "hitmontop"};
     }
+    //  Build 54 (experimental): WYNAUT comes of a WOBBUFFET (and a DITTO) that
+    //  holds the LAX INCENSE (daycare.c, AlterEggSpeciesWithIncenseItem: the
+    //  egg is a WOBBUFFET without it).
+    if (baby == "wynaut"){
+        return {"wobbuffet"};
+    }
+    //  Build 54 (experimental): the second KABUTO (its parent: the one that is
+    //  there, or the KABUTOPS it became), and EEVEE (the line of the story's
+    //  team member: VAPOREON, JOLTEON or FLAREON; EEVEE itself too, once the
+    //  Day Care made one).
+    if (baby == "kabuto"){
+        return {"kabuto", "kabutops"};
+    }
+    if (baby == "eevee"){
+        return {"eevee", "vaporeon", "jolteon", "flareon"};
+    }
     return {};
 }
 
@@ -1536,6 +1552,7 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
     rt.dc_party = 0;
     rt.dc_given = false;
     rt.dc_egg = false;
+    rt.dc_team_slot = 0;
     const std::vector<std::string> family = daycare_family(baby);
     if (family.empty()){
         fail(rt, label + ": " + upper(baby) + " has no parents in the program's list of the Day Care.");
@@ -1551,6 +1568,22 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
         );
         return false;
     };
+    //  EEVEE (build 54, experimental): the only one of its line is the team's
+    //  (the gift became VAPOREON, JOLTEON or FLAREON): it is the parent, from
+    //  its place in the party, with a DITTO of the boxes.
+    int team_slot = 0;
+    if (baby == "eevee"){
+        for (size_t k = 0; k < rt.team.size() && k < 4 && team_slot == 0; k++){
+            for (const std::string& name : family){
+                if (rt.team[k].line.count(name) != 0){
+                    team_slot = (int)k + 1;
+                }
+            }
+        }
+        if (team_slot == 0){
+            return skip("no member of the team is of the line of EEVEE (the gift became one of them)");
+        }
+    }
     const int count = story_party_count(rt);
     if (count != 6){
         return skip(
@@ -1575,7 +1608,7 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
     //  (the parents of the segment before are still there).
     bool keep[7] = {false, false, false, false, false, false, false};
     bool have_ditto = false;
-    bool have_parent = false;
+    bool have_parent = team_slot > 0;       //  (the team's: changed with the other place below)
     for (int k = 5; k <= 6; k++){
         if (!have_ditto && slot[k] == "ditto"){
             keep[k] = true;
@@ -1588,20 +1621,28 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
     //  What the boxes have for the rest: not the one that is set aside to
     //  evolve into a species the table still wants, and the lowest level.
     const std::vector<EvolveLine> plan = evolve_plan(story_evolve_table(rt), rt.boxes);
-    auto pick_of = [&](const std::vector<std::string>& species, BoxPokemon& pick){
+    //  allow_aside (build 54, KABUTO): the one KABUTO of the boxes is the one that
+    //  is set aside for KABUTOPS, and the only parent there is: the egg is
+    //  made first, and the plan sees the two KABUTO after it.
+    auto pick_of = [&](const std::vector<std::string>& species, BoxPokemon& pick, bool allow_aside){
         bool found = false;
-        for (const std::string& name : species){
-            for (const BoxPokemon& one : rt.boxes.of(name)){
-                bool aside = false;
-                for (const EvolveLine& line : plan){
-                    aside |= line.box == one.box && line.cell == one.cell;
-                }
-                if (aside){
-                    continue;
-                }
-                if (!found || (one.level >= 0 && (pick.level < 0 || one.level < pick.level))){
-                    pick = one;
-                    found = true;
+        for (int pass = 0; pass < 2 && !found; pass++){
+            if (pass == 1 && !allow_aside){
+                break;
+            }
+            for (const std::string& name : species){
+                for (const BoxPokemon& one : rt.boxes.of(name)){
+                    bool aside = false;
+                    for (const EvolveLine& line : plan){
+                        aside |= line.box == one.box && line.cell == one.cell;
+                    }
+                    if (aside && pass == 0){
+                        continue;
+                    }
+                    if (!found || (one.level >= 0 && (pick.level < 0 || one.level < pick.level))){
+                        pick = one;
+                        found = true;
+                    }
                 }
             }
         }
@@ -1609,17 +1650,17 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
     };
     BoxPokemon ditto_pick;
     BoxPokemon parent_pick;
-    if (!have_ditto && !pick_of({"ditto"}, ditto_pick)){
+    if (!have_ditto && !pick_of({"ditto"}, ditto_pick, false)){
         return skip("no DITTO in the boxes (as they were read)");
     }
-    if (!have_parent && !pick_of(family, parent_pick)){
+    if (!have_parent && !pick_of(family, parent_pick, baby == "kabuto")){
         std::string names;
         for (const std::string& name : family){
             names += (names.empty() ? "" : " or ") + upper(name);
         }
         return skip("no " + names + " in the boxes (as they were read)");
     }
-    if (have_ditto && have_parent){
+    if (team_slot == 0 && have_ditto && have_parent){
         console.log(
             label + ": the party's fifth and sixth place hold " + upper(slot[5]) + " and " + upper(slot[6]) +
             " already: the parents.",
@@ -1653,6 +1694,30 @@ bool story_daycare_out(StoryRuntime& rt, const std::string& label, const std::st
         slot[6] = pick.slug;
         level[6] = pick.level;
         keep[6] = true;
+    }
+    if (team_slot > 0){
+        //  The place of the one that is not the DITTO changes with the team's
+        //  member: both parents are the party's fifth and sixth then (the
+        //  woman is given those two).
+        const int other = slot[5] == "ditto" ? 6 : 5;
+        std::string name;
+        const int team_level = story_read_slot(rt, team_slot, &name);
+        if (team_level < 0 || name.empty() || !is_family(name)){
+            return skip(
+                "party slot " + std::to_string(team_slot) + " is " + (name.empty() ? std::string("not read") : upper(name)) +
+                ", not a Pokemon of the line of " + upper(baby)
+            );
+        }
+        console.log(
+            label + ": " + upper(name) + " (party slot " + std::to_string(team_slot) + ", the team's) is the "
+            "parent of " + upper(baby) + ": it changes places with " + upper(slot[other]) + " (party slot " +
+            std::to_string(other) + "; experimental).",
+            COLOR_BLUE
+        );
+        story_swap_party(rt, team_slot, other);
+        slot[other] = name;
+        level[other] = team_level;
+        rt.dc_team_slot = team_slot;
     }
     rt.dc_parents[0] = slot[5];
     rt.dc_parents[1] = slot[6];

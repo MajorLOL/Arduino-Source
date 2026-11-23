@@ -420,6 +420,8 @@ bool story_bag_has(StoryRuntime& rt, int pocket, int rod, const std::string& wor
 //  of the Sevii Islands list (0: One Island), until his text box is gone.
 //  His text is blue and not read: for row 0 every page and menu gets A
 //  (AutoStoryFerryTalk). The ferry scene is the next step.
+//  Build 54 (experimental): "row" 101 and 102 are rows of the tickets' menu
+//  itself (NAVEL ROCK, BIRTH ISLAND): the ferry goes there at once.
 void story_seagallop(StoryRuntime& rt, int row, const std::string& what);
 
 //  Prize money from a trainer who battles again (StepType::REMATCH), the

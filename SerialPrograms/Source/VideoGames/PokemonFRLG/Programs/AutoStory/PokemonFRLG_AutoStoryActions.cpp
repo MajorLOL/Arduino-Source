@@ -4286,7 +4286,18 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
     auto has = [](const std::string& text, const char* part){
         return text.find(part) != std::string::npos;
     };
-    console.log("The Seagallop from Vermilion City: row " + std::to_string(row) + " of the Sevii Islands list (" + what + ").");
+    //  Build 54 (experimental): 100 and more is a row of the tickets' menu
+    //  itself (101: NAVEL ROCK, 102: BIRTH ISLAND): that goes to the island
+    //  at once, there is no Sevii Islands list after it.
+    const bool ticket_mode = row >= 100;
+    const int ticket_row = ticket_mode ? row - 100 : 0;
+    const int list_row = ticket_mode ? 0 : row;
+    const bool read_menus = ticket_mode || list_row != 0;
+    console.log(
+        ticket_mode
+            ? "The Seagallop from Vermilion City: row " + std::to_string(ticket_row) + " of the tickets' menu (" + what + ")."
+            : "The Seagallop from Vermilion City: row " + std::to_string(row) + " of the Sevii Islands list (" + what + ")."
+    );
     //  The sailor's text is blue, and the text reading takes dark text
     //  only: on 15 November 2026 his first page ("Oh! That's a
     //  MYSTICTICKET! Now that is rare.") stood there until "The sailor's
@@ -4303,9 +4314,22 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
     const WallClock deadline = current_time() + 90s;
     while (current_time() < deadline){
         context.wait_for_all_requests();
-        if (row != 0 && !picked){
+        if (read_menus && !picked){
             const std::string tickets = read_story_text(console, TICKET_MENU, false);
             if (has(tickets, "sevii") || has(tickets, "navel") || has(tickets, "birth")){
+                if (ticket_mode){
+                    console.log(
+                        std::string("The tickets' menu: ") + (ticket_row == 1 ? "NAVEL ROCK" : "BIRTH ISLAND") + ".",
+                        COLOR_BLUE
+                    );
+                    for (int i = 0; i < ticket_row; i++){
+                        pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
+                    }
+                    pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
+                    talk.pressed++;
+                    picked = true;
+                    continue;
+                }
                 console.log("The tickets' menu: SEVII ISLANDS.", COLOR_BLUE);
                 pbf_press_button(context, BUTTON_A, 160ms, 1340ms);
                 talk.pressed++;
@@ -4314,7 +4338,7 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
             //  (The list's box also takes in the right half of the tickets'
             //  menu: "ISLANDS", "ROCK", "ISLAND".)
             const std::string islands = read_story_text(console, ISLAND_MENU, false);
-            if (has(islands, "island") && (has(islands, "other") || has(islands, "exit")) && !has(islands, "rock")){
+            if (!ticket_mode && has(islands, "island") && (has(islands, "other") || has(islands, "exit")) && !has(islands, "rock")){
                 console.log("The Sevii Islands list: row " + std::to_string(row) + ".", COLOR_BLUE);
                 for (int i = 0; i < row; i++){
                     pbf_press_dpad(context, DPAD_DOWN, 160ms, 340ms);
@@ -4336,7 +4360,7 @@ void story_seagallop(StoryRuntime& rt, int row, const std::string& what){
                 look = Look::BOX;
             }
         }
-        switch (AutoStoryFerryTalk::next(talk, look, row == 0 || picked)){
+        switch (AutoStoryFerryTalk::next(talk, look, !read_menus || picked)){
         case Act::PRESS_A:
             //  What he says, for the log only.
             console.log(
@@ -4916,7 +4940,9 @@ void story_daycare_give(StoryRuntime& rt, const std::string& label){
         for (const StoryTeamMember& member : rt.team){
             of_team |= member.line.count(name) != 0;
         }
-        if (!of_team){
+        //  (EEVEE, build 54: the team's place that the parent came from holds the
+        //  one that was changed with it, until the parents are back.)
+        if (!of_team && !(rt.dc_team_slot > 0 && slot == rt.dc_team_slot)){
             OperationFailedExceptionWithScreenshot::fire(
                 ErrorReportMode::SEND_ERROR_REPORT,
                 "story_daycare_give(): Party slot " + std::to_string(slot) + " is " + upper_name(name) +
@@ -5061,6 +5087,32 @@ void story_daycare_take(StoryRuntime& rt, const std::string& label){
         label + ": " + upper_name(a) + " and " + upper_name(b) + " are the party's fifth and sixth Pokemon again.",
         COLOR_BLUE
     );
+    if (rt.dc_team_slot > 0){
+        //  EEVEE (build 54, experimental): the team's member goes back to the
+        //  place it came from, and the one that was there to where it was.
+        const int team_slot = rt.dc_team_slot;
+        const std::set<std::string>& line = rt.team[(size_t)team_slot - 1].line;
+        const int from = line.count(a) != 0 ? count - 1 : line.count(b) != 0 ? count : 0;
+        if (from == 0){
+            OperationFailedExceptionWithScreenshot::fire(
+                ErrorReportMode::SEND_ERROR_REPORT,
+                "story_daycare_take(): Neither " + upper_name(a) + " nor " + upper_name(b) + " is the team's member "
+                "that went to the Day Care (party slot " + std::to_string(team_slot) + "): " + label,
+                console
+            );
+        }
+        console.log(
+            label + ": " + upper_name(from == count - 1 ? a : b) + " (party slot " + std::to_string(from) +
+            ") goes back to party slot " + std::to_string(team_slot) + " (experimental).",
+            COLOR_BLUE
+        );
+        pbf_wait(rt.context, 800ms);
+        rt.context.wait_for_all_requests();
+        story_swap_party(rt, team_slot, from);
+        story_read_slot(rt, count - 1, &a);
+        story_read_slot(rt, count, &b);
+        rt.dc_team_slot = 0;
+    }
     rt.dc_parents[0] = a;
     rt.dc_parents[1] = b;
     rt.dc_given = false;

@@ -1329,7 +1329,7 @@ CHAPTER10 = [
 ]
 
 
-def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False):
+def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False, trigger=None, start=None):
     """A legendary Pokemon after the Hall of Fame: A in front of it
     ("Gyaoo!"), a wild battle in which it gets the best ball in the bag
     (not the Master Ball: that is kept for the roaming legendary) until it
@@ -1346,8 +1346,14 @@ def legendary(map_id, xy, flags, label, weaken=False, heal=True, later=False):
     (moltres_again): with too few balls in the bag (they ran out before a
     try had a fair chance) it is left where it is, the save in front of it
     loaded once more, and the steps after it go on (Moltres with one ULTRA
-    BALL and two POKe BALLs: 19 tries in an hour)."""
-    return [talk(map_id, xy=xy, mode="talk", label=label),
+    BALL and two POKe BALLs: 19 tries in an hour).
+    trigger: a tile of the map that starts it when it is stepped on (HO-OH
+    on Navel Rock's summit: a scene of its own, no A) in place of the A in
+    front of it. start: the steps that come instead (DEOXYS: the puzzle)."""
+    start = start if start is not None else \
+        [goto(map_id, [trigger], label + "_Trigger", trigger=True)] if trigger else \
+        [talk(map_id, xy=xy, mode="talk", label=label)]
+    return start + [
             {"battle": 60000, "label": label, "legendary": True, "weaken": weaken, "later": later},
             setst(flags=flags),
             save()] + ([heal_after_legendary(label)] if heal else [])
@@ -2679,15 +2685,14 @@ def gillian(wins, label):
     ] + from_resort(label + "_Back")
 
 
-def money_trip():
-    """The VS SEEKER, Five Island, nine battles with Lady Gillian (88200),
-    back to Vermilion City, POKe BALLs. Each purchase (99 for 19800) only
-    when the battles won leave 9000 or more after it: the fee of the Safari
-    Games (500 each, eight in a round of the towns)."""
+def gillian_trip(fly_label):
+    """From the FLY to Vermilion City: the VS SEEKER, Five Island, nine
+    battles with Lady Gillian (88200), back to Vermilion City (outdoors, at
+    the pier). Build 54: a function of its own, for the ULTRA BALLs of the
+    legendary Pokemon as well (ultra_balls_trip())."""
     vermilion = PC["VERMILION"]
-    mart = "MAP_VERMILION_CITY_MART"
     steps = [
-        fly("HEAL_LOCATION_VERMILION_CITY", "C20_01B_MONEY_Fly", force=True),
+        fly("HEAL_LOCATION_VERMILION_CITY", fly_label, force=True),
         heal(vermilion, "C20_01B_MONEY_ToNurse"),
         #  VermilionCity_PokemonCenter_1F_EventScript_VSSeekerWoman: the VS
         #  SEEKER the first time, what it does after that.
@@ -2708,6 +2713,17 @@ def money_trip():
     steps += [heal(FIVE_PC, "GillianAgainToNurse"), save()]
     steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
     steps += [pos("MAP_VERMILION_CITY", 23, 32)]
+    return steps
+
+
+def money_trip():
+    """The VS SEEKER, Five Island, nine battles with Lady Gillian (88200),
+    back to Vermilion City, POKe BALLs. Each purchase (99 for 19800) only
+    when the battles won leave 9000 or more after it: the fee of the Safari
+    Games (500 each, eight in a round of the towns)."""
+    vermilion = PC["VERMILION"]
+    mart = "MAP_VERMILION_CITY_MART"
+    steps = gillian_trip("C20_01B_MONEY_Fly")
     #  Each "as many as the money allows", which is 99 at most in one
     #  purchase (Task_BuyHowManyDialogueInit).
     for wins in (3, 5, 7, 9):
@@ -3684,6 +3700,19 @@ DAYCARE_BABIES = [
     ("TYROGUE", "tyrogue", 25, 1),
     ("TYROGUE", "tyrogue", 25, 2),
     ("TYROGUE", "tyrogue", 25, 3),
+    #  Build 54 (experimental): the second KABUTO (the one fossil gives one, and
+    #  the table wants two: one to keep, one to become KABUTOPS). The parent is
+    #  the KABUTO that lies in the boxes, or the KABUTOPS it became (the egg
+    #  is a KABUTO whichever of them is the parent), with a DITTO.
+    ("KABUTO", "kabuto", 30, 2),
+    #  Three EEVEE for the table's four (VAPOREON, JOLTEON, FLAREON and EEVEE
+    #  itself: the gift became the team's VAPOREON, or JOLTEON / FLAREON with
+    #  another starter). The parent is that team member: it goes to the Day
+    #  Care from its place in the party and comes back to it
+    #  (story_daycare_out(), story_daycare_take()).
+    ("EEVEE", "eevee", 35, 2),
+    ("EEVEE", "eevee", 35, 3),
+    ("EEVEE", "eevee", 35, 4),
 ]
 
 
@@ -3697,11 +3726,51 @@ def daycare_round(seg_id, k):
     ]
 
 
-def daycare_segment(seg_id, name, baby, cycles, count):
+#  Build 54 (experimental): WYNAUT. The egg of a WOBBUFFET and a DITTO is a
+#  WOBBUFFET unless one of the parents holds the LAX INCENSE (daycare.c,
+#  AlterEggSpeciesWithIncenseItem). It lies in the Lost Cave of Five Island
+#  (FiveIsland_LostCave_Room11, an item ball at (5, 5)): from the entrance
+#  east out of the first room (8, 5) into Room 2, and out of that south (5, 8)
+#  into Room 11 (the doors of the rooms are fixed warps, see the map files).
+#  The way is skipped when the bag has it (a segment that failed after the
+#  pick-up does not go again), and ends with FLY, as the segment starts, so
+#  that what comes after it is the same whether it ran or not.
+LAX_INCENSE_WORDS = "aroma|reduces"
+LAX_INCENSE_FLAG = "FLAG_HIDE_FIVE_ISLAND_LOST_CAVE_ROOM11_LAX_INCENSE"
+LOST_CAVE_ROOM11 = "MAP_FIVE_ISLAND_LOST_CAVE_ROOM11"
+
+
+def lax_incense_way(label):
+    steps = [
+        heal(PC["VERMILION"], label + "_ToNurse"),
+        goto("MAP_VERMILION_CITY", [[23, 33]], label + "_ToTheSeagallop", trigger=True),
+        {"seagallop": 0, "label": label + "_SeagallopToOneIsland"},
+        cutscene(8000, 90000, "Ferry"),
+        pos("MAP_ONE_ISLAND_HARBOR", 8, 5),
+    ]
+    steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", label + "_FerryToFiveIsland")
+    steps += [heal(FIVE_PC, label + "_HarborToNurse")]
+    steps += to_resort(label)
+    steps += [goto(LOST_CAVE_ROOM11, [[5, 4]], label + "_ToRoom11")]
+    steps += candy(LOST_CAVE_ROOM11, [5, 5], LAX_INCENSE_FLAG, label + "_PickUp")
+    steps += from_resort(label + "_Back")
+    steps += [heal(FIVE_PC, label + "_BackToNurse")]
+    steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", label + "_FerryToVermilion")[:-1]
+    steps += [pos("MAP_VERMILION_CITY", 23, 32),
+              fly("HEAL_LOCATION_VERMILION_CITY", label + "_Fly", force=True)]
+    return steps
+
+
+def daycare_segment(seg_id, name, baby, cycles, count, held=None):
+    """held: the words of an item of the bag that the parent which is not the
+    DITTO holds in the Day Care (WYNAUT: the LAX INCENSE, fetched first)."""
     rounds = []
     for k in range(DAYCARE_ROUNDS):
         rounds += daycare_round(seg_id, k)
-    trip = [
+    trip = []
+    if held:
+        trip += [give_item(held, 0, "GiveTheIncense")]
+    trip += [
         goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
         {"seagallop": 0, "label": "SeagallopToOneIsland"},
         cutscene(8000, 90000, "Ferry"),
@@ -3728,8 +3797,11 @@ def daycare_segment(seg_id, name, baby, cycles, count):
         pos("MAP_VERMILION_CITY", 23, 32),
         talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="BackToThePC"),
     ]
-    steps = [
-        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+    steps = [fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True)]
+    if held:
+        steps += [{"unless_item": {"words": held, "pocket": 0, "steps": lax_incense_way(seg_id + "_LaxIncense")},
+                   "label": "LAX INCENSE in the bag?"}]
+    steps += [
         talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
         {"daycare_trip": {"baby": baby, "steps": trip}, "label": "Parents out of the boxes"},
         {"outside": True, "label": seg_id + "_Out"},
@@ -3743,6 +3815,10 @@ def daycare_segment(seg_id, name, baby, cycles, count):
 
 CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), name, baby, cycles, count)
               for k, (name, baby, cycles, count) in enumerate(DAYCARE_BABIES)]
+#  Build 54 (experimental): WYNAUT (20 cycles), the egg of a WOBBUFFET and a
+#  DITTO with the LAX INCENSE of the Lost Cave.
+CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_WYNAUT" % (66 + len(DAYCARE_BABIES), len(DAYCARE_BABIES) + 1),
+                              "WYNAUT", "wynaut", 20, 1, held=LAX_INCENSE_WORDS)]
 
 
 # ------------------------------------------------ chapter 20, what the Day Care hatched, by level
@@ -3766,9 +3842,123 @@ CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), 
 #  Build 52 (experimental): three more, for the DRATINI of the Safari Zone's
 #  water (C20_16B_SAFARI_FISH): DRATINI to level 30 (DRAGONAIR) and on to
 #  level 55 (DRAGONITE) are two more Pokemon of the boxes' lines to train.
-AFTER_DAYCARE_LEVELS = 8
+#  Build 54 (experimental): two more, for the second KABUTO's line (the one to
+#  keep and the one that goes to level 40) and MAGCARGO (SLUGMA to level 38),
+#  and after them the stones again (C20_85_STONES_2): the THUNDER STONE and
+#  the FIRE STONE for the EEVEE that the Day Care made become JOLTEON and
+#  FLAREON.
+AFTER_DAYCARE_LEVELS = 10
 CHAPTER20 += [level_segment("C20_%d_LEVEL_%02d" % (75 + k, LEVEL_SEGMENTS + k + 1))
               for k in range(AFTER_DAYCARE_LEVELS)]
+CHAPTER20 += [stones_segment("C20_85_STONES_2")]
+
+
+# ------------------------------------------------ chapter 20, the legendary Pokemon of the tickets
+#  EXPERIMENTAL (PocketPilot build 54, not run on a console when written).
+#  The Switch version gives the MYSTIC TICKET and the AURORA TICKET after the
+#  Hall of Fame; the Vermilion sailor's tickets menu takes the Seagallop to
+#  NAVEL ROCK (HO-OH on the summit, LUGIA at the base) and BIRTH ISLAND
+#  (DEOXYS). Level 70, catch rate 3 (30 for DEOXYS: its own segment, later):
+#  weakened, then ULTRA BALLs, a lot of them (about 2 in 100 catch it, so
+#  some 70 are a fair try). Each of them is a segment of its own that first
+#  makes the money (nine battles with Lady Gillian, 88200: 73 ULTRA BALLs),
+#  buys the ULTRA BALLs in Fuchsia City, and goes there (no MAX REPELs: the
+#  maps of Navel Rock and Birth Island have no wild Pokemon in the game's
+#  data, the router found no step to be checked on the whole way);
+#  a try that does not catch it loads the save in front of it, balls and all.
+#  The segment starts like the ones of a Pokemon that is there once (the
+#  check, FLY, ..., save), so a failure that comes twice leaves it out.
+def ultra_balls_trip(seg_id):
+    """FLY to Vermilion City; the money (gillian_trip); FLY to Fuchsia City;
+    the ULTRA BALLs the money allows; FLY back to Vermilion City, the nurse,
+    a save."""
+    steps = gillian_trip(seg_id + "_Fly")
+    steps += [fly("HEAL_LOCATION_FUCHSIA_CITY", seg_id + "_FlyToFuchsia", force=True),
+              heal(PC["FUCHSIA"], seg_id + "_ToFuchsiaPC")]
+    steps += buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls")
+    steps += [fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_FlyBack", force=True),
+              heal(PC["VERMILION"], seg_id + "_ToVermilionPC"),
+              save()]
+    return steps
+
+
+def legend_segment(seg_id, name, slug, ticket_row, harbor, there, title):
+    """there: the steps from the island's harbor (where the ferry lands) to
+    the legendary Pokemon and its catch (legendary())."""
+    steps = ultra_balls_trip(seg_id) + [
+        goto("MAP_VERMILION_CITY", [[23, 33]], "ToTheSeagallop", trigger=True),
+        {"seagallop": 100 + ticket_row, "label": "SeagallopTo" + name},
+        cutscene(8000, 90000, "Ferry"),
+        pos(harbor, 8, 5),
+    ] + there + sevii_ferry_home(harbor, seg_id + "_FerryHome") + [
+        heal(PC["VERMILION"], seg_id + "_BackToVermilionPC"),
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": False,
+            "title": "POKeDEX collection: " + title,
+            "steps": [{"unless_owned": {"species": slug, "count": 1, "steps": steps, "segment": True},
+                       "label": "%s in the table?" % name}]}
+
+
+#  DEOXYS (Birth Island): the stone (the triangle) in front of the player
+#  moves every time A is pressed in front of it (DoDeoxysTriangleInteraction,
+#  src/field_specials.c): to sDeoxysCoords[n], and the next press must come
+#  within sDeoxysStepCaps[n - 1] steps of the last one (4, 8, 8, 8, 4, 4, 4, 6,
+#  3, 3), else it goes back to the start; the eleventh press breaks it and
+#  DEOXYS comes. The stone stands at (15, 12) and goes to (11, 14), (15, 8),
+#  (19, 14), (12, 11), (18, 11), (15, 14), (11, 14), (19, 14), (15, 15),
+#  (15, 10). The tiles below were found with a search over the island's
+#  floor (next to the stone's place each time, the way of the last press to
+#  the next at the shortest, with the stone in its new place in the way):
+#  every one of them is as many steps as the cap, or fewer, so one step more
+#  (a stray bump into the stone is none) is the failure; the segment's save
+#  is in front of the first press (the count of presses is not in the save).
+DEOXYS_STONE = "MAP_BIRTH_ISLAND_EXTERIOR"
+DEOXYS_WALKS = [
+    ([(14, 13), (13, 13), (12, 13), (11, 13)], "down"),
+    ([(12, 13), (13, 13), (14, 13), (15, 13), (15, 12), (15, 11), (15, 10), (15, 9)], "up"),
+    ([(16, 9), (17, 9), (18, 9), (19, 9), (19, 10), (19, 11), (19, 12), (19, 13)], "down"),
+    ([(18, 13), (17, 13), (16, 13), (15, 13), (14, 13), (13, 13), (13, 12), (13, 11)], "left"),
+    ([(14, 11), (15, 11), (16, 11), (17, 11)], "right"),
+    ([(16, 11), (15, 11), (15, 12), (15, 13)], "down"),
+    ([(14, 13), (13, 13), (12, 13), (12, 14)], "left"),
+    ([(13, 14), (14, 14), (15, 14), (16, 14), (17, 14), (18, 14)], "right"),
+    ([(17, 14), (16, 14), (15, 14)], "down"),
+    ([(15, 13), (15, 12), (15, 11)], "up"),
+]
+
+
+def deoxys_puzzle():
+    steps = [talk(DEOXYS_STONE, xy=[15, 12], mode="plain", dirs=["up"], label="ToTheStone"),
+             save(),
+             press("A", 1, 2500, "StonePress1")]
+    for k, (tiles, face) in enumerate(DEOXYS_WALKS):
+        steps += [{"walk_exact": {"map": DEOXYS_STONE, "tiles": [list(t) for t in tiles], "face": face},
+                   "label": "StoneWalk%d" % (k + 2)},
+                  press("A", 1, 2500 if k < len(DEOXYS_WALKS) - 1 else 1500, "StonePress%d" % (k + 2))]
+    return steps
+
+
+CHAPTER20 += [
+    legend_segment(
+        "C20_86_HO_OH", "Ho-Oh", "ho-oh", 1, "MAP_NAVEL_ROCK_HARBOR",
+        [goto("MAP_NAVEL_ROCK_SUMMIT", [[9, 13]], "ToHoOh"), save()] +
+        legendary("MAP_NAVEL_ROCK_SUMMIT", None, ["FLAG_FOUGHT_HO_OH", "FLAG_HIDE_HO_OH"], "Ho-Oh",
+                  weaken=True, trigger=[9, 12]),
+        "Ho-Oh on the summit of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)"),
+    legend_segment(
+        "C20_87_LUGIA", "Lugia", "lugia", 1, "MAP_NAVEL_ROCK_HARBOR",
+        [goto("MAP_NAVEL_ROCK_BASE", [[10, 16]], "ToLugia"), save()] +
+        legendary("MAP_NAVEL_ROCK_BASE", [10, 15], ["FLAG_FOUGHT_LUGIA", "FLAG_HIDE_LUGIA"], "Lugia",
+                  weaken=True),
+        "Lugia at the base of Navel Rock (the Mystic Ticket; Gillian's prize money, Ultra Balls)"),
+    legend_segment(
+        "C20_88_DEOXYS", "Deoxys", "deoxys", 2, "MAP_BIRTH_ISLAND_HARBOR",
+        legendary(DEOXYS_STONE, None, ["FLAG_FOUGHT_DEOXYS", "FLAG_HIDE_DEOXYS", "FLAG_HIDE_BIRTH_ISLAND_METEORITE"],
+                  "Deoxys", weaken=True, start=deoxys_puzzle()),
+        "Deoxys on Birth Island (the Aurora Ticket; the triangle; Gillian's prize money, Ultra Balls)"),
+]
 
 
 def fly_only(segments):

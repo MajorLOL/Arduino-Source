@@ -22,13 +22,23 @@ EVOS = d["evolutions"]
 #  evolving, as LARVITAR's line does: a DRATINI more, trained to level 30
 #  (DRAGONAIR) and on to 55 (DRAGONITE), registers both. A DRAGONAIR that
 #  does come on the line is caught all the same when it is new to the POKeDEX.
-RARE_FORMS = ("DRAGONAIR",)
+#  Build 54: MAGCARGO the same way. It lives only in the rocks that Rock Smash
+#  breaks on the bottom floor of Mt. Ember's Ruby Path (a fraction of the
+#  encounters of a few tiles), while SLUGMA is everywhere on the floors above:
+#  a SLUGMA more, trained to level 38.
+RARE_FORMS = ("DRAGONAIR", "MAGCARGO")
 for _combo in d["combos"].values():
     for _form in RARE_FORMS:
         _entry = _combo["species"].get(_form)
         if _entry is not None:
             _entry["direct"] = None
             _entry["direct_how"] = []
+#  The program takes the Dome Fossil at Mt. Moon (KABUTO): the Helix Fossil is
+#  taken by someone else and never comes back, and no other way gives OMANYTE
+#  (its egg needs an OMANYTE to breed; the other game of a trade is not part
+#  of this). The rows stay in the table, but there is nothing to get.
+_FOSSIL_TEXT = "Not in this save: the Helix Fossil is gone once the Dome Fossil is taken (one fossil per save)"
+NOT_IN_THIS_SAVE = {"OMANYTE": _FOSSIL_TEXT, "OMASTAR": _FOSSIL_TEXT}
 SHORT = {"FireRed": "FR", "LeafGreen": "LG", "BULBASAUR": "Bulb.", "CHARMANDER": "Char.", "SQUIRTLE": "Squi."}
 
 
@@ -294,6 +304,8 @@ for v in V:
         where = summarize(e["direct_how"], 2)
         if src == "EEVEE":
             where += " — one gift: the extra copies by breeding it (after the Hall of Fame)"
+        if src == "KABUTO":
+            where += " — one fossil: the extra copy by breeding it with a Ditto (after the Hall of Fame)"
         if src == "TYROGUE":
             where += " (with Ditto)"
         L.append("| %s | %d | %s | %s |" % (name(src), copies, "<br>".join(steps), where.replace("|", "/")))
@@ -363,6 +375,13 @@ if len(sys.argv) > 3:
             e = None
             for s in ST:
                 e = e or C[key(v, s)]["species"].get(sp)
+            if sp in NOT_IN_THIS_SAVE and e is not None:
+                #  Not a row to get (build 54): copies 0 and a text that is no way of evolving.
+                post = post and e["phase"] == "post-game"
+                copies.append(0)
+                how.append(NOT_IN_THIS_SAVE[sp])
+                evolve.append("")
+                continue
             if e is None:
                 copies.append(0)
                 how.append("")

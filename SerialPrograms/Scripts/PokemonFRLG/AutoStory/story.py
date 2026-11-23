@@ -33,6 +33,13 @@ A spec step is a dict with one of these keys:
              is fished for with it or the bag has it
   unless_owned {species, count, steps}: steps for a Pokemon that is there
              once, skipped when the POKeDEX table has it
+  walk_exact {map, tiles, face}: a walk over exactly these tiles, one step
+             each (the first next to the player), then turned to "face" (build
+             54: the stone of Birth Island, where the steps between two
+             presses of A are counted)
+  unless_item {words, pocket, steps}: the way to an item (build 54, the LAX
+             INCENSE), skipped when the bag has it already; the steps end
+             where they start
   got        species: the player was just given it (after cutscene gift)
   wait       ms
   puzzle     name
@@ -1436,6 +1443,53 @@ class Builder:
                         "text": Builder.RODS[rod]})
             out.append({"type": "SKIP_IF_ITEM", "label": "%s in the bag?" % Builder.RODS[rod], "p0": len(sub),
                         "p1": 1, "p2": rod + 1, "text": Builder.RODS[rod]})
+            out.extend(sub)
+            return
+        if "walk_exact" in step:
+            #  A walk over the tiles given, no route of the router's: DEOXYS'
+            #  stone on Birth Island moves when A is pressed in front of it,
+            #  and the next press must come within so many steps of the last
+            #  (src/field_specials.c, sDeoxysStepCaps), so the way is the
+            #  shortest one, and the tiles are those the solver found. The
+            #  stone is an object the router does not know to be moving.
+            u = step["walk_exact"]
+            label = step.get("label", "Walk")
+            if self.pos[0] != u["map"]:
+                raise StoryError("walk_exact: the player is on %s, not on %s (%s)" % (self.pos[0], u["map"], label))
+            m = self.d.maps[u["map"]]
+            leg = self.new_leg(label)
+            x, y = self.pos[1], self.pos[2]
+            names = {(0, -1): "up", (0, 1): "down", (-1, 0): "left", (1, 0): "right"}
+            for nx, ny in u["tiles"]:
+                d = names.get((nx - x, ny - y))
+                if d is None or not m.in_bounds(nx, ny) or m.tile(nx, ny)[1] != 0:
+                    raise StoryError("walk_exact: (%d,%d) is not a free tile next to (%d,%d) (%s)" % (nx, ny, x, y, label))
+                self.add_run(leg, d, RUN_WALK)
+                leg["points"].append((u["map"], nx, ny))
+                x, y = nx, ny
+                self.pos = (u["map"], x, y, d)
+            if u.get("face"):
+                leg["face"] = u["face"]
+                leg["end"] = "INTERACT"
+                self.pos = (u["map"], x, y, u["face"])
+            self.close_leg(leg, out)
+            return
+        if "unless_item" in step:
+            #  The way to an item that is not a fishing rod (build 54: the
+            #  LAX INCENSE of the Lost Cave, for the egg of WYNAUT): skipped
+            #  when the bag has it (SKIP_IF_ITEM with no rod: text = words
+            #  of its description, "a|b" one of them enough; p1 = the pocket).
+            #  The steps end where they start (FLY again at the end), so the
+            #  steps after it are the same whether they ran or not.
+            u = step["unless_item"]
+            sub = []
+            start = self.pos
+            for s in u["steps"]:
+                self.run_step(s, sub)
+            if self.pos[:3] != start[:3]:
+                raise StoryError("unless_item: the steps end at %s, not %s" % (self.pos, start))
+            out.append({"type": "SKIP_IF_ITEM", "label": step.get("label", "In the bag already?"),
+                        "p0": len(sub), "p1": u.get("pocket", 0), "text": u["words"]})
             out.extend(sub)
             return
         if "unless_owned" in step:

@@ -309,6 +309,12 @@ struct StoryRuntime{
     int dc_party = 0;
     bool dc_given = false;
     bool dc_egg = false;
+    //  Build 54 (experimental): the baby of a team member's line (EEVEE: the
+    //  gift became the team's VAPOREON / JOLTEON / FLAREON, the only one of
+    //  its line there is): the party slot (1-4) it came from, 0 when the
+    //  parents came out of the boxes. The place was changed with the party's
+    //  fifth or sixth one before the trip, and is changed back after it.
+    int dc_team_slot = 0;
     //  Evolution stones (build 35), by their names in the POKeDEX table
     //  ("Moon Stone"): seen in the bag in this run (at least one), and not
     //  to be had (not in the bag and not sold, or not there after buying).

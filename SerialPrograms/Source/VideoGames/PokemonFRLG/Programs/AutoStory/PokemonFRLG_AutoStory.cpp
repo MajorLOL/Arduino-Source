@@ -2122,9 +2122,26 @@ void AutoStory::run_segment(
                 story_heal_with_items(rt, step.p0);
             }
             break;
-        case StepType::USE_ITEM:
-            story_use_item(rt, step.p0, step.text, label, step.p1 == 1);
+        case StepType::USE_ITEM:{
+            int party_slot = step.p0;
+            if (party_slot == 0){
+                //  Build 54 (experimental): party slot 0 is the Day Care
+                //  parent that is not the DITTO (the LAX INCENSE for the egg
+                //  of WYNAUT goes to the WOBBUFFET): the parents are party
+                //  slots 5 and 6, DAYCARE_OUT put them there.
+                if (rt.dc_parents[0].empty() || rt.dc_parents[1].empty()){
+                    OperationFailedExceptionWithScreenshot::fire(
+                        ErrorReportMode::SEND_ERROR_REPORT,
+                        label + ": the Day Care parents are not in the party (the step before this one did not run).",
+                        rt.console
+                    );
+                }
+                party_slot = rt.dc_parents[0] == "ditto" ? 6 : 5;
+                env.log(label + ": the parent that is not the DITTO is in party slot " + std::to_string(party_slot) + ".", COLOR_BLUE);
+            }
+            story_use_item(rt, party_slot, step.text, label, step.p1 == 1);
             break;
+        }
         case StepType::FLY:
             story_fly(rt, step.p1, step.p0, label);
             break;
