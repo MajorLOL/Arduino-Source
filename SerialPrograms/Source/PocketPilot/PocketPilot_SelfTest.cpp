@@ -1398,9 +1398,10 @@ int check_money_trip(Logger& logger){
     //  same two as on the money trip on the way to each of the three
     //  legendary Pokemon, for their ULTRA BALLs: 2 + 1 + 1 + 3 * 2 = 10
     //  steps, 9 + 2 + 2 + 3 * 9 = 40 battles; build 56: three trips to Lady
-    //  Gillian more for the coins of PORYGON: 6 steps, 27 battles.)
+    //  Gillian more for the coins of PORYGON: 6 steps, 27 battles; build 57:
+    //  two visits more for the vitamins of HITMONTOP: 4 steps, 18 battles.)
     check(
-        money_segment && rematches == 16 && rematch_wins == 67 && walks_fine && purchases == 4,
+        money_segment && rematches == 20 && rematch_wins == 85 && walks_fine && purchases == 4,
         "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
     );
     check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
