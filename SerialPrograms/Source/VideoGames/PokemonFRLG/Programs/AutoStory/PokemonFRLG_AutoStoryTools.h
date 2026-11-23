@@ -271,6 +271,23 @@ struct StoryRuntime{
     //  save. out_box < 0: no training under way.
     std::string out_becomes;
     int out_goal = 0;
+    //  HITMONTOP by vitamins (build 57): which Pokemon of the boxes the
+    //  vitamins were used on ("box:cell"), how many of each, and whether the
+    //  aim is done for it (kept for the run only: a program started again
+    //  from a save in the middle of it aims again, from what it reads).
+    std::string aim_key;
+    int aim_protein = 0;
+    int aim_iron = 0;
+    bool aim_done = false;
+    //  The Celadon Game Corner (build 57, experimental): what the coins
+    //  window showed last (-1: not read), whether the reading was confirmed
+    //  (by a pack's size, or by the same number twice in a row) or found
+    //  wrong, and how many games with the bet of one COIN the last look at the
+    //  clerk asks for (to bring the COINS to 49 modulo 50).
+    int coins_seen = -1;
+    bool coins_reader_sure = false;
+    bool coins_reader_bad = false;
+    int coins_games = 0;
     //  Evolving by friendship (build 45): the training under way is the one
     //  of a Pokemon that is walked with first (StepType::PACE), then trained
     //  a level. What was walked with each species (the steps are counted in

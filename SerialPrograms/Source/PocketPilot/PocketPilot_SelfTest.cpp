@@ -55,6 +55,7 @@
 #include "Pokemon/Resources/Pokemon_PokemonSlugs.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBoxes.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryBump.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCoins.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryCollectionText.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryData.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryDex.h"
@@ -1711,7 +1712,8 @@ int check_bump(Logger& logger){
             segment_id.find("_HO_OH") != std::string::npos ||
             segment_id.find("_LUGIA") != std::string::npos ||
             segment_id.find("_DEOXYS") != std::string::npos ||
-            segment_id.find("_PORYGON") != std::string::npos;
+            segment_id.find("_PORYGON") != std::string::npos ||
+            segment_id.find("_VITAMINS") != std::string::npos;
         //  The prize money for the evolution stones (build 35): the same
         //  way to Lady Gillian, once (and once more in build 54).
         const bool stones = segment_id.find("_STONES") != std::string::npos;
@@ -1742,7 +1744,7 @@ int check_bump(Logger& logger){
         }
     }
     check(
-        money_bumps == 56 && stones_bumps == 8 && bumps_last && longest_other <= 4,
+        money_bumps == 72 && stones_bumps == 8 && bumps_last && longest_other <= 4,
         "the money trips in the story's data: the water to Resort Gorgeous and back"
     );
     check(cave_bumps == 12 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
@@ -2759,7 +2761,7 @@ int check_next_steps(Logger& logger){
             next_steps += std::string(script.segments[s].id).rfind("C20_", 0) == 0 ? 1 : 0;
         }
         check(found == std::size(towns) && same, "the towns of the collection have the steps they had in build 31");
-        check(next_steps == 112 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
+        check(next_steps == 113 && last_town + 1 + next_steps == script.segment_count, "the next steps come after the towns");
     }
 
     logger.log(
@@ -2777,6 +2779,338 @@ int check_next_steps(Logger& logger){
 //  for the run, and so is the way to a fishing rod (build 33): the place of
 //  a check, the count of the failures, and in the story's data which checks
 //  are one trip from a nurse and back.
+//  HITMONTOP by vitamins and the number in the Game Corner's coins window (build 57,
+//  experimental): the pure parts of both (PokemonFRLG_AutoStoryBoxes.h,
+//  PokemonFRLG_AutoStoryCoins.h), and the steps the story's data has for them.
+int check_vitamins_and_coins(Logger& logger){
+    using namespace NintendoSwitch;
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Boxes = AutoStoryBoxes;
+    namespace Coins = AutoStoryCoins;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const std::string& what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log("AutoStory test: failed: " + what, COLOR_RED);
+        }
+    };
+
+    //  The 25 natures: what they do to the Attack and the Defense.
+    {
+        struct Nature{
+            const char* name;
+            int attack;
+            int defense;
+        };
+        static const Nature natures[] = {
+            {"Hardy", 100, 100}, {"Lonely", 110, 90}, {"Brave", 110, 100}, {"Adamant", 110, 100}, {"Naughty", 110, 100},
+            {"Bold", 90, 110}, {"Docile", 100, 100}, {"Relaxed", 100, 110}, {"Impish", 100, 110}, {"Lax", 100, 110},
+            {"Timid", 90, 100}, {"Hasty", 100, 90}, {"Serious", 100, 100}, {"Jolly", 100, 100}, {"Naive", 100, 100},
+            {"Modest", 90, 100}, {"Mild", 100, 90}, {"Quiet", 100, 100}, {"Bashful", 100, 100}, {"Rash", 100, 100},
+            {"Calm", 90, 100}, {"Gentle", 100, 90}, {"Sassy", 100, 100}, {"Careful", 100, 100}, {"Quirky", 100, 100},
+        };
+        size_t fine = 0;
+        for (const Nature& nature : natures){
+            int attack = 0;
+            int defense = 0;
+            fine += Boxes::nature_percent(nature.name, attack, defense) && attack == nature.attack && defense == nature.defense;
+        }
+        int attack = 0;
+        int defense = 0;
+        check(
+            fine == std::size(natures) && std::size(natures) == 25 &&
+            Boxes::nature_percent("ADAMANT", attack, defense) && attack == 110 && defense == 100 &&
+            !Boxes::nature_percent("Dreamy", attack, defense) && !Boxes::nature_percent("", attack, defense),
+            "the natures of the game and what they do to the Attack and the Defense (five raise and five lower "
+            "each stat, the rest of the 25 leave the pair as it is)"
+        );
+    }
+
+    //  The stat formula, and what a vitamin adds to it.
+    check(
+        Boxes::tyrogue_stat(20, 19, 100) == 22 && Boxes::tyrogue_stat(20, 20, 100) == 23 &&
+        Boxes::tyrogue_stat(20, 19, 110) == 24 && Boxes::tyrogue_stat(20, 19, 90) == 19 &&
+        Boxes::vitamin_x(10, 5, 3) == 18 && Boxes::vitamin_x(10, 24, 8) == 35 && Boxes::vitamin_x(10, 0, 0) == 10 &&
+        Boxes::vitamin_x(31, 0, 20) == 56,
+        "a TYROGUE's Attack and Defense by the game's formula; 10 EVs a vitamin, no more than 100"
+    );
+
+    //  What the aim says about readings that cannot be (no vitamins), and about one that is.
+    {
+        const Boxes::VitaminAim nothing = Boxes::vitamin_aim(
+            Boxes::VitaminGoal::ATTACK_EQUALS_DEFENSE, 19, 20, 3, 4, 100, 100, 0, 0
+        );
+        const Boxes::VitaminAim same = Boxes::vitamin_aim(
+            Boxes::VitaminGoal::ATTACK_EQUALS_DEFENSE, 19, 20, 22, 22, 100, 100, 0, 0
+        );
+        const Boxes::VitaminAim iron = Boxes::vitamin_aim(
+            Boxes::VitaminGoal::DEFENSE_ABOVE_ATTACK, 19, 20, 22, 20, 100, 100, 0, 0
+        );
+        check(
+            nothing.chance < 0 && nothing.protein == 0 && nothing.iron == 0 &&
+            same.chance > 0 && same.chance <= 1 && same.attack_fits > 0 && same.defense_fits > 0 &&
+            iron.protein == 0 && iron.iron > 0 && iron.chance > 0.5,
+            "no vitamins for stats that no IV and EVs make; IRONs only for a HITMONCHAN when the Attack leads (22 against 20: 5 to 7 of them)"
+        );
+    }
+
+    //  2000 TYROGUE (a fixed sequence of numbers, IVs 0 to 31, EVs of the fights 0 to 24, a nature, then the EVs
+    //  of the last fights to level 20): left alone, with the vitamins of two readings for a HITMONTOP, and with
+    //  IRONs for a HITMONCHAN.
+    {
+        uint64_t state = 0x2545F4914F6CDD1DULL;
+        auto next = [&](int below){
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            return (int)((state >> 33) % (uint64_t)below);
+        };
+        static const char* const natures[] = {
+            "Hardy", "Lonely", "Brave", "Adamant", "Naughty", "Bold", "Docile", "Relaxed", "Impish", "Lax", "Timid",
+            "Hasty", "Serious", "Jolly", "Naive", "Modest", "Mild", "Quiet", "Bashful", "Rash", "Calm", "Gentle",
+            "Sassy", "Careful", "Quirky"
+        };
+        const int trials = 2000;
+        int unaided_top = 0;
+        int aimed_top = 0;
+        int unaided_chan = 0;
+        int aimed_chan = 0;
+        long vitamins = 0;
+        bool within = true;
+        for (int t = 0; t < trials; t++){
+            int ap = 100;
+            int dp = 100;
+            Boxes::nature_percent(natures[next(25)], ap, dp);
+            const int iva = next(32);
+            const int ivd = next(32);
+            const int eba = next(Boxes::BATTLE_EV_MAX + 1);
+            const int ebd = next(Boxes::BATTLE_EV_MAX + 1);
+            const int noise_a = next(3);
+            const int noise_d = next(2);
+            const int a20 = Boxes::tyrogue_stat(Boxes::vitamin_x(iva, eba + noise_a, 0), 20, ap);
+            const int d20 = Boxes::tyrogue_stat(Boxes::vitamin_x(ivd, ebd + noise_d, 0), 20, dp);
+            unaided_top += a20 == d20;
+            unaided_chan += d20 > a20;
+            for (int goal = 0; goal < 2; goal++){
+                const Boxes::VitaminGoal kind = goal == 0
+                    ? Boxes::VitaminGoal::ATTACK_EQUALS_DEFENSE : Boxes::VitaminGoal::DEFENSE_ABOVE_ATTACK;
+                int protein = 0;
+                int iron = 0;
+                for (int round = 0; round < 2; round++){
+                    const int a19 = Boxes::tyrogue_stat(Boxes::vitamin_x(iva, eba, protein), 19, ap);
+                    const int d19 = Boxes::tyrogue_stat(Boxes::vitamin_x(ivd, ebd, iron), 19, dp);
+                    const Boxes::VitaminAim aim = Boxes::vitamin_aim(kind, 19, 20, a19, d19, ap, dp, protein, iron);
+                    within &= aim.chance >= 0 && aim.chance <= 1 && aim.protein >= 0 && aim.iron >= 0 &&
+                        protein + aim.protein <= Boxes::VITAMIN_MAX_EACH && iron + aim.iron <= Boxes::VITAMIN_MAX_EACH &&
+                        (goal == 1 ? aim.protein == 0 : true);
+                    if (aim.chance < 0 || (aim.protein == 0 && aim.iron == 0)){
+                        break;
+                    }
+                    protein += aim.protein;
+                    iron += aim.iron;
+                }
+                const int a = Boxes::tyrogue_stat(Boxes::vitamin_x(iva, eba + noise_a, protein), 20, ap);
+                const int d = Boxes::tyrogue_stat(Boxes::vitamin_x(ivd, ebd + noise_d, iron), 20, dp);
+                if (goal == 0){
+                    aimed_top += a == d;
+                    vitamins += protein + iron;
+                }else{
+                    aimed_chan += d > a;
+                }
+            }
+        }
+        const double top_unaided = unaided_top / (double)trials;
+        const double top_aimed = aimed_top / (double)trials;
+        const double chan_unaided = unaided_chan / (double)trials;
+        const double chan_aimed = aimed_chan / (double)trials;
+        check(
+            within && top_unaided > 0.05 && top_unaided < 0.20 && top_aimed > 0.55 && top_aimed < 0.85 &&
+            chan_unaided > 0.30 && chan_unaided < 0.60 && chan_aimed > 0.70 && vitamins / (double)trials < 6.0,
+            "the vitamins' aim on " + std::to_string(trials) + " TYROGUE: a HITMONTOP in " +
+            std::to_string((int)(top_unaided * 100 + 0.5)) + "% left alone, " + std::to_string((int)(top_aimed * 100 + 0.5)) +
+            "% aimed (" + std::to_string(vitamins / (double)trials) + " vitamins each); a HITMONCHAN in " +
+            std::to_string((int)(chan_unaided * 100 + 0.5)) + "% and " + std::to_string((int)(chan_aimed * 100 + 0.5)) + "%"
+        );
+    }
+
+    //  The coins window: numbers drawn as the game does (the glyphs of the small font on white, dark grey with a
+    //  light grey shadow), at the scales of a capture, a pixel off, with noise.
+    {
+        uint64_t state = 12345;
+        auto noise = [&](int amount){
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            return (int)((state >> 33) % (uint64_t)(2 * amount + 1)) - amount;
+        };
+        auto draw = [&](int value, int width, int height, int off_x, int off_y){
+            std::vector<uint8_t> image((size_t)width * (size_t)height, 255);
+            const double sx = (double)width / Coins::CROP_W;
+            const double sy = (double)height / Coins::CROP_H;
+            std::string number = std::to_string(value);
+            while ((int)number.size() < Coins::SLOTS){
+                number = " " + number;
+            }
+            for (int y = 0; y < height; y++){
+                for (int x = 0; x < width; x++){
+                    const int gx = (int)std::floor((x + 0.5) / sx + Coins::CROP_X - off_x) - Coins::DIGIT_X;
+                    const int gy = (int)std::floor((y + 0.5) / sy + Coins::CROP_Y - off_y) - Coins::DIGIT_Y;
+                    int v = 255;
+                    if (gx >= 0 && gx < Coins::SLOTS * Coins::GLYPH_W && gy >= 0 && gy < Coins::GLYPH_H){
+                        const char digit = number[(size_t)(gx / Coins::GLYPH_W)];
+                        if (digit != ' '){
+                            const char ch = Coins::glyph(digit - '0')[gy][gx % Coins::GLYPH_W];
+                            v = ch == '#' ? 56 : ch == 'o' ? 216 : 255;
+                        }
+                    }
+                    image[(size_t)y * (size_t)width + (size_t)x] = (uint8_t)std::max(0, std::min(255, v + noise(10)));
+                }
+            }
+            return image;
+        };
+        static const int values[] = {0, 5, 49, 50, 99, 499, 549, 1049, 1234, 4999, 9549, 9949, 9999, 1000, 8888};
+        static const int sizes[][2] = {{192, 66}, {160, 74}, {96, 33}, {256, 88}};
+        int tried = 0;
+        int read = 0;
+        for (int value : values){
+            for (const auto& size : sizes){
+                for (int off_x = -1; off_x <= 1; off_x++){
+                    for (int off_y = -1; off_y <= 0; off_y++){
+                        const std::vector<uint8_t> image = draw(value, size[0], size[1], off_x, off_y);
+                        const Coins::Reading reading = Coins::read_digits(image, size[0], size[1]);
+                        tried++;
+                        read += reading.ok && reading.value == value;
+                    }
+                }
+            }
+        }
+        const std::vector<uint8_t> white((size_t)192 * 66, 255);
+        std::vector<uint8_t> junk((size_t)192 * 66);
+        for (uint8_t& v : junk){
+            v = (uint8_t)(noise(127) + 127);
+        }
+        check(
+            read == tried && !Coins::read_digits(white, 192, 66).ok && !Coins::read_digits(junk, 192, 66).ok &&
+            !Coins::read_digits(white, 10, 10).ok,
+            "the number in the coins window: " + std::to_string(read) + " of " + std::to_string(tried) +
+            " drawings read right, a white window and noise read as nothing"
+        );
+        check(
+            Coins::games_to_residue(50, 12) == 1 && Coins::games_to_residue(49, 12) == 0 &&
+            Coins::games_to_residue(51, 12) == 2 && Coins::games_to_residue(99, 12) == 0 &&
+            Coins::games_to_residue(148, 12) == 12 && Coins::games_to_residue(20, 12) == 0 &&
+            Coins::games_to_residue(9549, 12) == 0 && Coins::games_to_residue(9999, 12) == 0,
+            "the games of one COIN that bring the COINS to 49 modulo 50"
+        );
+        //  From 49 modulo 50 the clerk's packs end at 9999: 500 only below 9500, 50 only below 9950.
+        int coins = 49;
+        int big = 0;
+        int small = 0;
+        while (coins < 9500 && big < 19){
+            coins += 500;
+            big++;
+        }
+        while (coins < 9950 && small < 9){
+            coins += 50;
+            small++;
+        }
+        check(coins == 9999 && big == 19 && small == 9, "49 + 19 packs of 500 + 9 of 50 is 9999 with the clerk's limits");
+    }
+
+    //  The story's data.
+    {
+        const StoryScript& script = AutoStoryData::story_CHARMANDER();
+        const StorySegment* vitamins = nullptr;
+        const StorySegment* porygon = nullptr;
+        size_t vitamins_at = 0;
+        size_t level_20_at = 0;
+        size_t wynaut_at = 0;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const std::string id = script.segments[s].id;
+            if (id == "C20_79B_VITAMINS"){
+                vitamins = &script.segments[s];
+                vitamins_at = s;
+            }
+            if (id == "C20_90_PORYGON"){
+                porygon = &script.segments[s];
+            }
+            if (id == "C20_75_LEVEL_20"){
+                level_20_at = s;
+            }
+            if (id == "C20_79_DAYCARE_14_WYNAUT"){
+                wynaut_at = s;
+            }
+        }
+        check(
+            vitamins != nullptr && story_once_segment(script, *vitamins) &&
+            script.step(*vitamins, 0).type == StepType::SKIP_IF_OWNED &&
+            std::string(script.step(*vitamins, 0).text) == "hitmontop" &&
+            wynaut_at + 1 == vitamins_at && vitamins_at + 1 == level_20_at,
+            "the vitamins' segment: a once segment for HITMONTOP, between WYNAUT's egg and the levels"
+        );
+        if (vitamins != nullptr){
+            int protein = 0;
+            int iron = 0;
+            int rematches = 0;
+            int wins = 0;
+            int item_skips = 0;
+            bool buys_after = true;
+            bool seen_buy = false;
+            for (size_t k = 0; k < vitamins->step_count; k++){
+                const StoryStep& step = script.step(*vitamins, k);
+                if (step.type == StepType::BUY){
+                    seen_buy = true;
+                    protein += step.p0 == 1 && step.p1 == 9 ? 1 : 0;
+                    iron += step.p0 == 2 && step.p1 == 9 ? 1 : 0;
+                }
+                if (step.type == StepType::REMATCH){
+                    rematches++;
+                    wins += step.p0;
+                    buys_after &= !seen_buy;
+                }
+                if (step.type == StepType::SKIP_IF_ITEM){
+                    item_skips++;
+                    buys_after &= std::string(step.text) == "base attack|base atta";
+                }
+            }
+            check(
+                protein == 1 && iron == 1 && rematches == 4 && wins == 18 && item_skips == 1 && buys_after,
+                "the vitamins' segment: 18 battles with Lady Gillian (176400) before nine PROTEINs and nine IRONs "
+                "from the fifth floor's clerk, all skipped with a PROTEIN in the bag"
+            );
+        }
+        if (porygon != nullptr){
+            std::string modes;
+            int packs_big = 0;
+            int packs_small = 0;
+            for (size_t k = 0; k < porygon->step_count; k++){
+                const StoryStep& step = script.step(*porygon, k);
+                if (step.type != StepType::COINS){
+                    continue;
+                }
+                modes += (char)('0' + step.p0);
+                if (step.p0 == 0){
+                    packs_big += (int)step.p1;
+                    packs_small += (int)step.p2;
+                }
+            }
+            check(
+                modes == "0" "343434343434" "0" "2" "1212121212121212121212121212" &&
+                packs_big == 19 && packs_small == 10,
+                "the Game Corner's steps: a pack of 50, six rounds of a look at the coins' clerk and the machine's "
+                "games of one COIN, the packs (19 of 500, 9 of 50), the prizes' clerk first, and the 14 rounds of "
+                "build 56 as they were"
+            );
+        }
+    }
+
+    logger.log(
+        "AutoStory test: the vitamins' aim and the coins window: " + std::to_string(checks - wrong) + " of " +
+        std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
 int check_leave_out(Logger& logger){
     using namespace NintendoSwitch;
     using namespace NintendoSwitch::PokemonFRLG;
@@ -2976,7 +3310,8 @@ int check_leave_out(Logger& logger){
         //  same for UNOWN (build 55): its saves are in the Pokemon Center of
         //  Seven Island (a Sevii island: FLY does not go from there to Kanto).
         if (std::string(segment.id) == "C20_86_HO_OH" || std::string(segment.id) == "C20_87_LUGIA" ||
-            std::string(segment.id) == "C20_88_DEOXYS" || std::string(segment.id) == "C20_89_UNOWN"){
+            std::string(segment.id) == "C20_88_DEOXYS" || std::string(segment.id) == "C20_89_UNOWN" ||
+            std::string(segment.id) == "C20_79B_VITAMINS"){
             //  (Build 56) Its saves at a Pokemon Center of Five or Seven
             //  Island are the ones the segment is not left from: SEVII.
             for (size_t i = 2; i + 1 < segment.step_count; i++){
@@ -3048,7 +3383,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 103 && exp_leave_no &&
+        once == 104 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -3072,7 +3407,7 @@ int check_leave_out(Logger& logger){
             "C20_69_DAYCARE_04_TOGEPI, C20_70_DAYCARE_05_SMOOCHUM, C20_71_DAYCARE_06_ELEKID, "
             "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE, "
             "C20_75_DAYCARE_10_KABUTO, C20_76_DAYCARE_11_EEVEE, C20_77_DAYCARE_12_EEVEE, "
-            "C20_78_DAYCARE_13_EEVEE, C20_79_DAYCARE_14_WYNAUT, "
+            "C20_78_DAYCARE_13_EEVEE, C20_79_DAYCARE_14_WYNAUT, C20_79B_VITAMINS, "
             "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24, "
             "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27, C20_83_LEVEL_28, C20_84_LEVEL_29, "
             "C20_EXP_23_ELITE_FOUR, C20_EXP_24_ELITE_FOUR, C20_EXP_25_ELITE_FOUR, "
@@ -3089,12 +3424,14 @@ int check_leave_out(Logger& logger){
         "adds UNOWN (the Tanoby Key's seven boulders, the Monean Chamber); build 56 (experimental) adds "
         "eighteen more rounds of the Elite Four for experience (twelve after the segments by level, six after the "
         "Day Care's) for what comes out of them with a lot of experience to go, and PORYGON (the Game Corner's "
-        "slot machines for 9999 coins) at the end"
+        "slot machines for 9999 coins) at the end; build 57 (experimental) adds the segment of the vitamins for "
+        "a HITMONTOP between the Day Care's eggs and the levels"
     );
     check(
-        sevii_saves == 11 && sevii_saves_wrong == 0 && porygon_nurse_saves == 1 && porygon_sevii == 9,
+        sevii_saves == 16 && sevii_saves_wrong == 0 && porygon_nurse_saves == 1 && porygon_sevii == 9,
         "a save at a Pokemon Center of the Sevii Islands (Five Island: the three legendary Pokemon of Lady "
-        "Gillian's battles, 3 each, and the three trips of PORYGON, 9; Seven Island: UNOWN, 2) is none a segment "
+        "Gillian's battles, 3 each, the three trips of PORYGON, 9, and the vitamins' two visits, 5; Seven Island: "
+        "UNOWN, 2) is none a segment "
         "is given up from (build 56: the program stops there); the one of Celadon City (PORYGON) walks out "
         "into the city"
     );
@@ -3150,7 +3487,8 @@ int check_leave_out(Logger& logger){
             index_of("C20_65_FRIEND_11") + 1 == index_of("C20_66_DAYCARE_01_PICHU") &&
             index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_DAYCARE_10_KABUTO") &&
             index_of("C20_78_DAYCARE_13_EEVEE") + 1 == index_of("C20_79_DAYCARE_14_WYNAUT") &&
-            index_of("C20_79_DAYCARE_14_WYNAUT") + 1 == index_of("C20_75_LEVEL_20") &&
+            index_of("C20_79_DAYCARE_14_WYNAUT") + 1 == index_of("C20_79B_VITAMINS") &&
+            index_of("C20_79B_VITAMINS") + 1 == index_of("C20_75_LEVEL_20") &&
             index_of("C20_84_LEVEL_29") + 1 == index_of("C20_EXP_23_ELITE_FOUR") &&
             index_of("C20_EXP_28_ELITE_FOUR") + 1 == index_of("C20_85_STONES_2") &&
             index_of("C20_88_DEOXYS") + 1 == index_of("C20_89_UNOWN") &&
@@ -4840,6 +5178,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_poison_flash(logger);
         failed += check_safari_table(logger);
         failed += check_next_steps(logger);
+        failed += check_vitamins_and_coins(logger);
         failed += check_leave_out(logger);
         failed += check_boxes(logger);
         failed += check_species_names(logger);

@@ -14,6 +14,7 @@
 #include "Common/Cpp/Exceptions.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Language.h"
+#include "CommonFramework/ImageTools/ImageBoxes.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "CommonTools/Async/InferenceRoutines.h"
@@ -28,7 +29,9 @@
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_SummaryDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_StatsReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
+#include "VideoGames/PokemonFRLG/PokemonFRLG_Settings.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
+#include "PokemonFRLG_AutoStoryCoins.h"
 #include "PokemonFRLG_AutoStoryCollection.h"
 #include "PokemonFRLG_AutoStoryFerryTalk.h"
 #include "PokemonFRLG_AutoStoryFishing.h"
@@ -456,6 +459,80 @@ int story_read_slot(StoryRuntime& rt, int slot, std::string* species){
         console.log("Could not read party slot " + std::to_string(slot) + ".", COLOR_ORANGE);
     }
     return -1;
+}
+
+
+bool story_read_stats(StoryRuntime& rt, int slot, StoryStats& out){
+    StoryMemoryScope memory_scope("party menu");
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    for (int attempt = 0; attempt < 3; attempt++){
+        out = StoryStats();
+        open_party_menu_from_overworld(console, context);
+        //  LEFT from any slot on the right goes to slot 1.
+        dpad(context, DPAD_LEFT, 500ms);
+        for (int i = 1; i < slot; i++){
+            dpad(context, DPAD_DOWN);
+        }
+        //  A: SUMMARY is the first action. A: the summary (fades).
+        press(context, BUTTON_A, 800ms);
+        press(context, BUTTON_A, 500ms);
+        context.wait_for_all_requests();
+        SummaryWatcher summary(COLOR_RED);
+        bool agree = false;
+        if (wait_until(console, context, 6000ms, { summary }) == 0){
+            pbf_wait(context, 800ms);
+            context.wait_for_all_requests();
+            StatsReader reader(COLOR_RED);
+            PokemonFRLG_Stats first;
+            reader.read_page1(console.logger(), Language::English, console.video().snapshot(), first);
+            //  Page 2 (the stats): RIGHT until its detector sees it.
+            SummaryPage2Watcher page_two(COLOR_RED);
+            const int ret = run_until<ProControllerContext>(
+                console, context,
+                [](ProControllerContext& context){
+                    for (int i = 0; i < 5; i++){
+                        pbf_press_dpad(context, DPAD_RIGHT, 200ms, 1800ms);
+                    }
+                },
+                { page_two }
+            );
+            if (ret == 0){
+                //  Twice, 500 ms apart: the same numbers, or not trusted.
+                PokemonFRLG_Stats one;
+                PokemonFRLG_Stats two;
+                pbf_wait(context, 700ms);
+                context.wait_for_all_requests();
+                reader.read_page2(console.logger(), Language::English, console.video().snapshot(), one);
+                pbf_wait(context, 500ms);
+                context.wait_for_all_requests();
+                reader.read_page2(console.logger(), Language::English, console.video().snapshot(), two);
+                agree = one.attack.has_value() && one.defense.has_value() &&
+                    two.attack.has_value() && two.defense.has_value() &&
+                    *one.attack == *two.attack && *one.defense == *two.defense;
+                if (agree){
+                    out.attack = (int)*one.attack;
+                    out.defense = (int)*one.defense;
+                }
+                if (first.level.has_value()){
+                    out.level = (int)first.level.value();
+                }
+                out.species = first.name;
+                out.nature = first.nature;
+            }
+        }
+        story_back_to_overworld(rt, "summary");
+        if (agree && out.level > 0 && !out.species.empty() && !out.nature.empty()){
+            console.log(
+                "Party slot " + std::to_string(slot) + ": " + out.species + " level " + std::to_string(out.level) +
+                ", nature " + out.nature + ", Attack " + std::to_string(out.attack) +
+                ", Defense " + std::to_string(out.defense)
+            );
+            return true;
+        }
+        console.log("Could not read the stats of party slot " + std::to_string(slot) + ".", COLOR_ORANGE);
+    }
+    return false;
 }
 
 
@@ -1203,7 +1280,8 @@ bool story_trade(StoryRuntime& rt, const std::string& label, const std::string& 
 }
 
 bool story_use_item(
-    StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give, bool tolerant
+    StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what, bool give, bool tolerant,
+    bool keep_order
 ){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -1211,8 +1289,10 @@ bool story_use_item(
         std::string(give ? "Giving an item to hold to party slot " : "Using an item on party slot ") +
         std::to_string(party_slot) + ": " + what
     );
-    story_fix_party_order(rt, false);
-    if (give && party_slot == 1){
+    if (!keep_order){
+        story_fix_party_order(rt, false);
+    }
+    if (give && party_slot == 1 && !keep_order){
         //  The starter (Charizard and the EXP. SHARE): in slot 1.
         story_check_lead(rt);
     }
@@ -2987,6 +3067,97 @@ void story_exp_share(StoryRuntime& rt, int from_slot, int to_slot, const std::st
 }
 
 
+//  HITMONTOP (or HITMONCHAN) by vitamins (build 57, experimental, not run on
+//  a console when written; PokemonFRLG_AutoStoryBoxes.h says how it works).
+//  The TYROGUE in party slot 1 is at level 19, healed, in front of the nurse:
+//  the Attack and the Defense are read (summary, page 2), the PROTEINs and
+//  IRONs that make them what the goal says at level 20 are used, and that
+//  is done once more (what the first ones did is what the reading did not
+//  know). The vitamins come from the bag (the segment that buys them comes
+//  before the training); with none in the bag the training goes on as it
+//  is. True: something was used.
+static bool aim_vitamins(StoryRuntime& rt, AutoStoryBoxes::VitaminGoal kind, const std::string& where){
+    ConsoleHandle& console = rt.console;
+    constexpr int LEVEL_READ = AutoStoryBoxes::TYROGUE_EVOLVES_AT - 1;
+    const std::string key = std::to_string(rt.out_box) + ":" + std::to_string(rt.out_cell);
+    if (rt.aim_key != key){
+        rt.aim_key = key;
+        rt.aim_protein = 0;
+        rt.aim_iron = 0;
+        rt.aim_done = false;
+    }
+    if (rt.aim_done){
+        console.log(where + ": the vitamins were used on this one already.", COLOR_BLUE);
+        return false;
+    }
+    bool used_any = false;
+    for (int round = 1; round <= 2; round++){
+        StoryStats stats;
+        if (!story_read_stats(rt, 1, stats)){
+            console.log(where + ": the stats could not be read: no vitamins.", COLOR_ORANGE);
+            break;
+        }
+        if (stats.species != "tyrogue" || stats.level != LEVEL_READ){
+            console.log(
+                where + ": party slot 1 is " + stats.species + " of level " + std::to_string(stats.level) +
+                ", not a TYROGUE of level " + std::to_string(LEVEL_READ) + ": no vitamins.",
+                COLOR_ORANGE
+            );
+            break;
+        }
+        int attack_percent = 100;
+        int defense_percent = 100;
+        if (!AutoStoryBoxes::nature_percent(stats.nature, attack_percent, defense_percent)){
+            console.log(where + ": \"" + stats.nature + "\" is not a nature it knows: no vitamins.", COLOR_ORANGE);
+            break;
+        }
+        const AutoStoryBoxes::VitaminAim aim = AutoStoryBoxes::vitamin_aim(
+            kind, LEVEL_READ, AutoStoryBoxes::TYROGUE_EVOLVES_AT,
+            stats.attack, stats.defense, attack_percent, defense_percent, rt.aim_protein, rt.aim_iron
+        );
+        console.log(
+            where + ": reading " + std::to_string(round) + ": " + std::to_string(aim.attack_fits) + " IV/EV pairs fit the Attack, " +
+            std::to_string(aim.defense_fits) + " the Defense; " +
+            (aim.chance < 0
+                ? std::string("the stats fit none: no vitamins.")
+                : std::to_string(aim.protein) + " PROTEIN and " + std::to_string(aim.iron) + " IRON more (" +
+                    std::to_string((int)(aim.chance * 100 + 0.5)) + "% to " +
+                    (kind == AutoStoryBoxes::VitaminGoal::ATTACK_EQUALS_DEFENSE ? "HITMONTOP" : "HITMONCHAN") + ")."),
+            COLOR_BLUE
+        );
+        if (aim.chance < 0 || (aim.protein == 0 && aim.iron == 0)){
+            break;
+        }
+        auto use = [&](int count, const char* words, const char* name){
+            int used = 0;
+            for (int i = 0; i < count; i++){
+                if (!story_use_item(rt, 1, words, name, false, true, true)){
+                    break;
+                }
+                used++;
+            }
+            return used;
+        };
+        const int protein = use(aim.protein, "base attack|base atta", "PROTEIN");
+        const int iron = use(aim.iron, "base defense|base defen", "IRON");
+        rt.aim_protein += protein;
+        rt.aim_iron += iron;
+        used_any |= protein + iron > 0;
+        console.log(
+            where + ": used " + std::to_string(protein) + " PROTEIN and " + std::to_string(iron) + " IRON (" +
+            std::to_string(rt.aim_protein) + " and " + std::to_string(rt.aim_iron) + " on this one).",
+            COLOR_BLUE
+        );
+        if (protein < aim.protein || iron < aim.iron){
+            console.log(where + ": the bag ran out of vitamins.", COLOR_ORANGE);
+            break;
+        }
+    }
+    rt.aim_done = true;
+    return used_any;
+}
+
+
 void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& step){
     ConsoleHandle& console = rt.console;
     const std::string where = step.label;
@@ -3068,6 +3239,36 @@ void story_raise(StoryRuntime& rt, const StoryScript& script, const StoryStep& s
     trained.text = "";
     //  800 battles: a Tyranitar from a Pupitar of level 30 is some 400 of
     //  them (about 450 experience points a battle at 75%, 90 seconds each).
+    //  A TYROGUE: to level 19 first, and there the vitamins (HITMONTOP while
+    //  the table has none, then HITMONCHAN while it wants one).
+    if (from == "tyrogue" && goal == AutoStoryBoxes::TYROGUE_EVOLVES_AT && rt.collection != nullptr){
+        bool aim = false;
+        AutoStoryBoxes::VitaminGoal kind = AutoStoryBoxes::VitaminGoal::ATTACK_EQUALS_DEFENSE;
+        if (rt.collection->caught("hitmontop") == 0){
+            aim = true;
+        }else if (rt.collection->needed("hitmonchan") > rt.collection->caught("hitmonchan")){
+            aim = true;
+            kind = AutoStoryBoxes::VitaminGoal::DEFENSE_ABOVE_ATTACK;
+        }
+        if (aim){
+            StoryStep to_19 = trained;
+            to_19.p0 = goal - 1;
+            grind_front(rt, script, to_19, 0, true, 5, 800);
+            try{
+                if (aim_vitamins(rt, kind, where) && rt.save_after_heal){
+                    //  Saved with the vitamins in it: a reset does not lose them.
+                    story_save(rt, rt.has_dex);
+                    story_saved(rt, rt.step_index);
+                }
+            }catch (OperationFailedException&){
+                console.log(where + ": the vitamins failed (see the error above): the training goes on as it is.", COLOR_ORANGE);
+                try{
+                    story_back_to_overworld(rt, "bag");
+                }catch (OperationFailedException&){
+                }
+            }
+        }
+    }
     grind_front(rt, script, trained, 0, true, 5, 800);
 
     rt.battle.never_learn = false;
@@ -5139,7 +5340,84 @@ namespace{
 //  the page, the list (50 COINS, 500 COINS, NO THANKS; the cursor on the
 //  first) comes up when the page is printed, DOWN for the 500, A, A for the text
 //  that says "Here are your COINS!" (or why not).
-void coins_pack(StoryRuntime& rt, bool big, const std::string& what){
+//  The number in the coins window of the clerk (PokemonFRLG_AutoStoryCoins.h):
+//  read until two readings in a row are the same. -1: not read (the window
+//  is not up, or what is in its place is no number).
+int coins_read_window(StoryRuntime& rt, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    int last = -1;
+    for (int attempt = 0; attempt < 6; attempt++){
+        context.wait_for_all_requests();
+        VideoSnapshot screen = console.video().snapshot();
+        ImageViewRGB32 game = extract_box_reference(screen, GameSettings::instance().GAME_BOX);
+        ImageViewRGB32 piece = extract_box_reference(
+            game,
+            ImageFloatBox(
+                AutoStoryCoins::CROP_X / 240.0, AutoStoryCoins::CROP_Y / 160.0,
+                AutoStoryCoins::CROP_W / 240.0, AutoStoryCoins::CROP_H / 160.0
+            )
+        );
+        const int width = (int)piece.width();
+        const int height = (int)piece.height();
+        std::vector<uint8_t> lum;
+        lum.reserve((size_t)width * (size_t)height);
+        for (int y = 0; y < height; y++){
+            for (int x = 0; x < width; x++){
+                const uint32_t pixel = piece.pixel((size_t)x, (size_t)y);
+                const uint32_t r = (pixel >> 16) & 0xff;
+                const uint32_t g = (pixel >> 8) & 0xff;
+                const uint32_t b = pixel & 0xff;
+                lum.push_back((uint8_t)((r + g + b) / 3));
+            }
+        }
+        const AutoStoryCoins::Reading reading = AutoStoryCoins::read_digits(lum, width, height);
+        if (reading.ok){
+            console.log(
+                what + ": the coins window says " + std::to_string(reading.value) + " (cost " +
+                std::to_string(reading.cost) + ", margin " + std::to_string(reading.margin) + ", place " +
+                std::to_string(reading.dx) + "," + std::to_string(reading.dy) + ")."
+            );
+            if (reading.value == last){
+                return reading.value;
+            }
+            last = reading.value;
+        }else{
+            console.log(what + ": the coins window is not read: " + reading.why + ".", COLOR_ORANGE);
+            last = -1;
+        }
+        pbf_wait(context, 400ms);
+    }
+    return -1;
+}
+
+//  What a reading after a purchase says about the reader: the same as
+//  before and "size" more is right, anything else (not a refusal) is wrong.
+void coins_check(StoryRuntime& rt, int before, int after, int size, const std::string& what){
+    ConsoleHandle& console = rt.console;
+    if (after < 0){
+        rt.coins_seen = -1;
+        return;
+    }
+    if (before >= 0){
+        if (after - before == size){
+            rt.coins_reader_sure = true;
+        }else if (after == before){
+            console.log(what + ": no COINS more (the clerk refused: the case is too full, or the money is short).", COLOR_ORANGE);
+        }else{
+            rt.coins_reader_bad = true;
+            console.log(
+                what + ": the window went from " + std::to_string(before) + " to " + std::to_string(after) +
+                " with a pack of " + std::to_string(size) + ": the reading is not trusted from here.",
+                COLOR_RED
+            );
+        }
+    }
+    rt.coins_seen = after;
+}
+
+//  Returns the reading of the window after the purchase (-1 when not read).
+int coins_pack(StoryRuntime& rt, bool big, const std::string& what){
     ProControllerContext& context = rt.context;
     story_talk_start(rt, what);
     pbf_wait(context, 2500ms);
@@ -5147,9 +5425,13 @@ void coins_pack(StoryRuntime& rt, bool big, const std::string& what){
     if (big){
         dpad(context, DPAD_DOWN, 600ms);
     }
+    //  The pack: the script adds the COINS, updates the window and says "Here are
+    //  your COINS!" (or why not): the window shows what the case has now.
     press(context, BUTTON_A, 2500ms);
+    const int after = coins_read_window(rt, what);
     press(context, BUTTON_A, 1500ms);
     context.wait_for_all_requests();
+    return after;
 }
 
 void coins_buy(StoryRuntime& rt, int big, int small, const std::string& label){
@@ -5161,12 +5443,59 @@ void coins_buy(StoryRuntime& rt, int big, int small, const std::string& label){
         "refused with the same keys)."
     );
     for (int i = 0; i < big; i++){
-        coins_pack(rt, true, label + " (500 COINS, " + std::to_string(i + 1) + " of " + std::to_string(big) + ")");
+        const std::string what = label + " (500 COINS, " + std::to_string(i + 1) + " of " + std::to_string(big) + ")";
+        const int before = rt.coins_seen;
+        coins_check(rt, before, coins_pack(rt, true, what), 500, what);
     }
     for (int i = 0; i < small; i++){
-        coins_pack(rt, false, label + " (50 COINS, " + std::to_string(i + 1) + " of " + std::to_string(small) + ")");
+        const std::string what = label + " (50 COINS, " + std::to_string(i + 1) + " of " + std::to_string(small) + ")";
+        const int before = rt.coins_seen;
+        coins_check(rt, before, coins_pack(rt, false, what), 50, what);
     }
     story_back_to_overworld(rt, label);
+    if (rt.coins_seen >= 0){
+        console.log(
+            label + ": the case holds " + std::to_string(rt.coins_seen) + " COINS (by the window" +
+            std::string(rt.coins_reader_bad ? ", not trusted" : rt.coins_reader_sure ? ", confirmed" : "") + ").",
+            COLOR_BLUE
+        );
+    }
+}
+
+//  Facing the coins' clerk: how many COINS the case holds, and from that how
+//  many games of the slot machine with the bet of one COIN the next visit to it
+//  plays (StoryRuntime::coins_games), to leave 49 modulo 50. The clerk is asked
+//  as for a pack and says no (the window is up while the list is). Without a
+//  reading, or with one that was found wrong, no games: the packs and the
+//  slot machine's games of the route before this one do the rest.
+void coins_look(StoryRuntime& rt, const std::string& label){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    rt.coins_games = 0;
+    story_talk_start(rt, label);
+    pbf_wait(context, 2500ms);
+    press(context, BUTTON_A, 3000ms);
+    const int seen = coins_read_window(rt, label);
+    //  NO THANKS: B ("Please come play sometime").
+    press(context, BUTTON_B, 2000ms);
+    press(context, BUTTON_A, 1500ms);
+    context.wait_for_all_requests();
+    story_back_to_overworld(rt, label);
+    if (seen >= 0 && rt.coins_seen == seen){
+        //  The same number twice (after a pack and now): the reader is right.
+        rt.coins_reader_sure = true;
+    }
+    rt.coins_seen = seen;
+    if (seen < 0 || rt.coins_reader_bad){
+        console.log(label + ": the COINS are not known: no games to bring them to 49 modulo 50.", COLOR_ORANGE);
+        return;
+    }
+    rt.coins_games = AutoStoryCoins::games_to_residue(seen, 12);
+    console.log(
+        label + ": " + std::to_string(seen) + " COINS: " + std::to_string(rt.coins_games) +
+        (seen % 50 == 49 ? " games more (49 modulo 50: the packs now end at 9999)." : " games of one COIN to play."),
+        COLOR_BLUE
+    );
 }
 
 //  Up to "games" games of a slot machine, then out of it. "Do you want to
@@ -5178,14 +5507,32 @@ void coins_buy(StoryRuntime& rt, int big, int small, const std::string& label){
 //  does nothing harmful: R is only taken when a game can start, A only stops a
 //  reel or starts one. Out: B (the question to quit, in the betting phase
 //  only), YES.
-void coins_play(StoryRuntime& rt, int games, const std::string& label){
+//  "bet" 1 (build 57): DOWN puts one COIN on the middle line (the machine goes
+//  back to the betting phase for more), A starts the reels; each game costs one
+//  COIN and a win pays some. No games (nothing to play): the question is
+//  answered NO.
+void coins_play(StoryRuntime& rt, int games, const std::string& label, int bet = 3){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
-    console.log(label + ": up to " + std::to_string(games) + " games of the slot machine with the bet of 3 (experimental).");
+    if (games <= 0){
+        console.log(label + ": no games to play: NO to the machine.", COLOR_BLUE);
+        story_talk_answer(rt, false, label);
+        story_back_to_overworld(rt, label);
+        return;
+    }
+    console.log(
+        label + ": up to " + std::to_string(games) + " games of the slot machine with the bet of " +
+        std::to_string(bet) + " (experimental)."
+    );
     story_talk_answer(rt, true, label);
     pbf_wait(context, 5000ms);
     for (int game = 0; game < games; game++){
-        press(context, BUTTON_R, 900ms);
+        if (bet == 1){
+            dpad(context, DPAD_DOWN, 600ms);
+            press(context, BUTTON_A, 900ms);
+        }else{
+            press(context, BUTTON_R, 900ms);
+        }
         press(context, BUTTON_A, 700ms);
         press(context, BUTTON_A, 700ms);
         press(context, BUTTON_A, 900ms);
@@ -5317,6 +5664,14 @@ void story_coins(StoryRuntime& rt, const StoryStep& step, const std::string& lab
         break;
     case 2:
         coins_prize(rt, step.text == nullptr ? std::string() : std::string(step.text), label);
+        break;
+    case 3:
+        coins_look(rt, label);
+        break;
+    case 4:
+        //  The games of one COIN the last look asked for.
+        coins_play(rt, rt.coins_games, label, 1);
+        rt.coins_games = 0;
         break;
     default:
         rt.console.log(label + ": a step of the Game Corner that this program does not know (" +

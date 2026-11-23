@@ -278,7 +278,11 @@ enum class StepType : uint8_t{
                         //  a slot machine: up to p1 games with the bet of 3, then out of it;
                         //  p0 = 2: facing the prizes' clerk of the POKeMON (across the counter):
                         //  the species "text" for 9999 COINS, when the case has so many (a
-                        //  nickname question comes only then; one more in the table)
+                        //  nickname question comes only then; one more in the table).
+                        //  Build 57: p0 = 3: facing the coins' clerk: look at the number in its
+                        //  window and work out how many games of one COIN (p0 = 4, facing a
+                        //  slot machine) bring the case to 49 modulo 50; each pack of p0 = 0 is
+                        //  checked by that number too
 };
 
 struct StoryStep{

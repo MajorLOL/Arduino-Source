@@ -526,6 +526,172 @@ inline std::set<std::string> training_line(const std::string& from, const std::s
     return line;
 }
 
+//  HITMONTOP by vitamins (build 57, experimental, not run on a console when
+//  written).
+//  TYROGUE becomes HITMONTOP at level 20 when its Attack and its Defense are
+//  the same then (EVO_LEVEL_ATK_EQ_DEF; the evolution looks at the stats of
+//  the moment of the level, with the EVs it has by then). Left to itself
+//  that is one try in nine. A PROTEIN adds 10 EVs to the Attack, an IRON 10
+//  to the Defense (no more than 100 of them in all), and the stats are made
+//  again at once, so the program reads both at level 19, works out which
+//  vitamins make the two the same at level 20, uses them, reads again (what
+//  the first ones did tells the EVs it did not know of) and goes on to level
+//  20. The stats of a Pokemon of level L are
+//      floor((floor((2 * 35 + IV + floor(EV / 4)) * L / 100) + 5) * nature / 100)
+//  with the IV (0 to 31) and the EVs unknown: the reading of the Attack and
+//  the Defense gives the pairs (IV, EV) that fit each, the EVs of the fights
+//  before it taken as 0 to 24 (some fifteen battles at Victory Road).
+//  A simulation (the same model, 600 TYROGUE, EVs gained in the last fights
+//  to level 20 put in): one reading round 62%, two rounds 67%, with 3.5
+//  vitamins each; left alone 11%. The same for a HITMONCHAN (the Defense
+//  above the Attack): IRONs only.
+constexpr int VITAMIN_EV = 10;
+constexpr int VITAMIN_EV_CAP = 100;
+constexpr int VITAMIN_MAX_EACH = 8;     //  A PROTEIN or IRON on one Pokemon, in all.
+constexpr int BATTLE_EV_MAX = 24;       //  The EVs of a stat it may have from fights, at level 19.
+constexpr int TYROGUE_BASE_STAT = 35;   //  Its base Attack and Defense.
+
+//  The percentages the nature gives the Attack and the Defense (110, 100,
+//  90). False: not a nature of the game (the reading was not one).
+inline bool nature_percent(const std::string& nature, int& attack, int& defense){
+    std::string name;
+    for (char ch : nature){
+        if (ch >= 'A' && ch <= 'Z'){
+            name += (char)(ch - 'A' + 'a');
+        }else if (ch >= 'a' && ch <= 'z'){
+            name += ch;
+        }
+    }
+    //  Attack up: Lonely, Adamant, Naughty, Brave. Attack down: Bold, Modest,
+    //  Calm, Timid. Defense up: Bold, Impish, Lax, Relaxed. Defense down:
+    //  Lonely, Mild, Gentle, Hasty. The other five (Hardy, Docile, Serious,
+    //  Bashful, Quirky) change nothing; the rest of the 25 change other stats.
+    static const char* const NEUTRAL[] = {
+        "hardy", "docile", "serious", "bashful", "quirky",
+        "rash", "quiet", "sassy", "careful", "jolly", "naive"
+    };
+    attack = 100;
+    defense = 100;
+    for (const char* known : NEUTRAL){
+        if (name == known){
+            return true;
+        }
+    }
+    if (name == "lonely"){ attack = 110; defense = 90; return true; }
+    if (name == "adamant" || name == "naughty" || name == "brave"){ attack = 110; return true; }
+    if (name == "bold"){ attack = 90; defense = 110; return true; }
+    if (name == "modest" || name == "calm" || name == "timid"){ attack = 90; return true; }
+    if (name == "impish" || name == "lax" || name == "relaxed"){ defense = 110; return true; }
+    if (name == "mild" || name == "gentle" || name == "hasty"){ defense = 90; return true; }
+    return false;
+}
+
+//  The Attack or the Defense of a TYROGUE: "x" is IV + floor(EV / 4).
+inline int tyrogue_stat(int x, int level, int percent){
+    return ((2 * TYROGUE_BASE_STAT + x) * level / 100 + 5) * percent / 100;
+}
+
+//  x of a stat of IV "iv" and "ev" EVs from fights, "vitamins" vitamins on top.
+inline int vitamin_x(int iv, int ev, int vitamins){
+    return iv + std::min(ev + VITAMIN_EV * vitamins, VITAMIN_EV_CAP) / 4;
+}
+
+enum class VitaminGoal{
+    ATTACK_EQUALS_DEFENSE,      //  HITMONTOP
+    DEFENSE_ABOVE_ATTACK,       //  HITMONCHAN (IRONs only)
+};
+
+struct VitaminAim{
+    int protein = 0;            //  More of them to use now.
+    int iron = 0;
+    double chance = -1;         //  That it ends as the goal says (-1: the reading fits no IV and EVs).
+    size_t attack_fits = 0;     //  How many (IV, EV) pairs fit each reading.
+    size_t defense_fits = 0;
+};
+
+//  What to use now, given the stats read at "level_read" with "protein_used"
+//  and "iron_used" vitamins used already: the most likely to end as the goal
+//  at "level_evolve", the fewest vitamins of those. (0, 0) when the reading
+//  fits nothing the model knows (the program does nothing then).
+inline VitaminAim vitamin_aim(
+    VitaminGoal goal, int level_read, int level_evolve,
+    int attack, int defense, int attack_percent, int defense_percent,
+    int protein_used, int iron_used
+){
+    VitaminAim aim;
+    struct Pair{
+        int iv;
+        int ev;
+    };
+    std::vector<Pair> attacks;
+    std::vector<Pair> defenses;
+    for (int iv = 0; iv <= 31; iv++){
+        for (int ev = 0; ev <= BATTLE_EV_MAX; ev++){
+            if (tyrogue_stat(vitamin_x(iv, ev, protein_used), level_read, attack_percent) == attack){
+                attacks.push_back({iv, ev});
+            }
+            if (tyrogue_stat(vitamin_x(iv, ev, iron_used), level_read, defense_percent) == defense){
+                defenses.push_back({iv, ev});
+            }
+        }
+    }
+    aim.attack_fits = attacks.size();
+    aim.defense_fits = defenses.size();
+    if (attacks.empty() || defenses.empty()){
+        return aim;
+    }
+    const int more_protein = goal == VitaminGoal::ATTACK_EQUALS_DEFENSE
+        ? std::max(0, VITAMIN_MAX_EACH - protein_used) : 0;
+    const int more_iron = std::max(0, VITAMIN_MAX_EACH - iron_used);
+    constexpr int STATS = 700;
+    //  The stat each pair has at level_evolve with 0 to "more" vitamins more.
+    auto histograms = [&](const std::vector<Pair>& pairs, int used, int more, int percent){
+        std::vector<std::vector<size_t>> hist((size_t)more + 1, std::vector<size_t>(STATS, 0));
+        for (int extra = 0; extra <= more; extra++){
+            for (const Pair& pair : pairs){
+                const int stat = tyrogue_stat(vitamin_x(pair.iv, pair.ev, used + extra), level_evolve, percent);
+                if (stat >= 0 && stat < STATS){
+                    hist[(size_t)extra][(size_t)stat]++;
+                }
+            }
+        }
+        return hist;
+    };
+    const std::vector<std::vector<size_t>> by_attack = histograms(attacks, protein_used, more_protein, attack_percent);
+    const std::vector<std::vector<size_t>> by_defense = histograms(defenses, iron_used, more_iron, defense_percent);
+    const double pairs = (double)attacks.size() * (double)defenses.size();
+    double best = -1;
+    int best_vitamins = 1 << 20;
+    for (int p = 0; p <= more_protein; p++){
+        for (int i = 0; i <= more_iron; i++){
+            double hits = 0;
+            for (int a = 0; a < STATS; a++){
+                const size_t na = by_attack[(size_t)p][(size_t)a];
+                if (na == 0){
+                    continue;
+                }
+                if (goal == VitaminGoal::ATTACK_EQUALS_DEFENSE){
+                    hits += (double)na * (double)by_defense[(size_t)i][(size_t)a];
+                }else{
+                    for (int d = a + 1; d < STATS; d++){
+                        hits += (double)na * (double)by_defense[(size_t)i][(size_t)d];
+                    }
+                }
+            }
+            const double chance = hits / pairs;
+            const int vitamins = p + i;
+            if (chance > best + 1e-9 || (chance > best - 1e-9 && vitamins < best_vitamins)){
+                best = chance;
+                best_vitamins = vitamins;
+                aim.protein = p;
+                aim.iron = i;
+                aim.chance = chance;
+            }
+        }
+    }
+    return aim;
+}
+
 inline std::vector<EvolveLine> evolve_plan(const std::vector<TableRow>& table, const BoxCensus& census){
     std::map<std::string, std::string> slug_of;
     for (const TableRow& row : table){

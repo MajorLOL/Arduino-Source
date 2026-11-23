@@ -1845,13 +1845,15 @@ class Builder:
             #  slot machine, or the clerk of the prizes. "buy": p1 packs of 500
             #  COINS, then p2 packs of 50; "play": p1 games with the bet of 3;
             #  "prize": the Pokemon (text) for 9999 COINS, when the case has so
-            #  many.
+            #  many. Build 57: "look" (facing the coins' clerk: the number in
+            #  its window, and how many games of one COIN that asks for) and
+            #  "settle" (facing a slot machine: those games).
             c = step["coins"]
             if not out or out[-1]["type"] != "WALK":
                 raise StoryError("coins: not after the walk to the clerk or the machine (%s)" % step.get("label", "?"))
-            modes = {"buy": 0, "play": 1, "prize": 2}
+            modes = {"buy": 0, "play": 1, "prize": 2, "look": 3, "settle": 4}
             if c["mode"] not in modes:
-                raise StoryError("coins: mode is buy, play or prize (%s)" % step.get("label", "?"))
+                raise StoryError("coins: mode is buy, play, prize, look or settle (%s)" % step.get("label", "?"))
             if c["mode"] == "prize" and not c.get("species"):
                 raise StoryError("coins: the prize needs a species (%s)" % step.get("label", "?"))
             out.append({"type": "COINS", "label": step.get("label", "Coins: " + c["mode"]), "p0": modes[c["mode"]],

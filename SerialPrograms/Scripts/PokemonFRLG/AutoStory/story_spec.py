@@ -212,7 +212,10 @@ def puzzle(name):
 def coins(mode, label, p1=0, p2=0, species=None):
     """The Celadon Game Corner (build 56): StepType::COINS, after the walk that
     ends in front of the coins' clerk (mode "buy": p1 packs of 500, p2 of 50),
-    a slot machine ("play": p1 games) or the prizes' clerk ("prize": species)."""
+    a slot machine ("play": p1 games) or the prizes' clerk ("prize": species).
+    Build 57: "look" in front of the coins' clerk (reads the number in its
+    window), "settle" in front of a slot machine (the games of one COIN that
+    the look asked for)."""
     c = {"mode": mode, "p1": p1, "p2": p2}
     if species:
         c["species"] = species
@@ -2695,11 +2698,12 @@ def gillian(wins, label):
     ] + from_resort(label + "_Back")
 
 
-def gillian_trip(fly_label):
+def gillian_trip(fly_label, repeats=1):
     """From the FLY to Vermilion City: the VS SEEKER, Five Island, nine
     battles with Lady Gillian (88200), back to Vermilion City (outdoors, at
     the pier). Build 54: a function of its own, for the ULTRA BALLs of the
-    legendary Pokemon as well (ultra_balls_trip())."""
+    legendary Pokemon as well (ultra_balls_trip()). Build 57: "repeats" sets
+    of nine battles on the one visit (the vitamins)."""
     vermilion = PC["VERMILION"]
     steps = [
         fly("HEAL_LOCATION_VERMILION_CITY", fly_label, force=True),
@@ -2717,10 +2721,12 @@ def gillian_trip(fly_label):
     #  Seven (DrawSeagallopDestinationMenu).
     steps += rainbow_ferry("MAP_ONE_ISLAND_HARBOR", 4, 0, "MAP_FIVE_ISLAND_HARBOR", "FerryToFiveIsland")
     steps += [heal(FIVE_PC, "HarborToFiveIslandNurse"), save()]
-    steps += gillian(4, "Gillian")
-    steps += [heal(FIVE_PC, "GillianToNurse"), save()]
-    steps += gillian(5, "GillianAgain")
-    steps += [heal(FIVE_PC, "GillianAgainToNurse"), save()]
+    for k in range(repeats):
+        more = "" if k == 0 else str(k + 1)
+        steps += gillian(4, "Gillian" + more)
+        steps += [heal(FIVE_PC, "GillianToNurse" + more), save()]
+        steps += gillian(5, "GillianAgain" + more)
+        steps += [heal(FIVE_PC, "GillianAgainToNurse" + more), save()]
     steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
     steps += [pos("MAP_VERMILION_CITY", 23, 32)]
     return steps
@@ -3847,6 +3853,51 @@ CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_WYNAUT" % (66 + len(DAYCARE_B
                               "WYNAUT", "wynaut", 20, 1, held=LAX_INCENSE_WORDS)]
 
 
+# ------------------------------------------------ chapter 20, vitamins for HITMONTOP
+#  EXPERIMENTAL (PocketPilot build 57, not run on a console when written).
+#  TYROGUE becomes HITMONTOP at level 20 when its Attack and its Defense are
+#  the same (one try in nine left to itself). A PROTEIN adds 10 EVs to the Attack,
+#  an IRON 10 to the Defense, and the stats are made again at once: the program
+#  reads both at level 19, uses the vitamins that make them equal at level 20
+#  (about two in three: PokemonFRLG_AutoStoryBoxes.h, vitamin_aim()), and the
+#  same with IRONs alone for a HITMONCHAN (the Defense above the Attack: four in
+#  five). Each vitamin is 9800 at the Celadon Department Store (the clerk of the
+#  fifth floor: HP UP, PROTEIN, IRON, CALCIUM, ZINC, CARBOS) and a battle with Lady
+#  Gillian pays 9800: two visits of nine battles (176400) for nine PROTEINs and
+#  nine IRONs, which is what three TYROGUE need at most and a good deal more
+#  than they use on average (about 4). The segment is skipped when the table
+#  has a HITMONTOP, or when the bag has a PROTEIN (it was bought before); the
+#  training (C20_75 and on) uses what is in the bag, and goes on without it.
+VITAMIN_CLERK = ["MAP_CELADON_CITY_DEPARTMENT_STORE_5F", [1, 6]]
+PROTEIN_INDEX = 1
+IRON_INDEX = 2
+VITAMIN_QUANTITY = 9
+VITAMIN_VISITS = 2
+PROTEIN_WORDS = "base attack|base atta"
+
+
+def vitamins_segment(seg_id):
+    to_buy = gillian_trip(seg_id + "_FlyMoney", VITAMIN_VISITS)
+    to_buy += [fly("HEAL_LOCATION_CELADON_CITY", seg_id + "_FlyToCeladon", force=True)]
+    to_buy += buy(VITAMIN_CLERK[0], VITAMIN_CLERK[1], PROTEIN_INDEX, VITAMIN_QUANTITY, "BuyProtein")
+    to_buy += buy(VITAMIN_CLERK[0], VITAMIN_CLERK[1], IRON_INDEX, VITAMIN_QUANTITY, "BuyIron")
+    to_buy += [{"outside": True, "label": seg_id + "_OutStore"},
+               fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_FlyBack", force=True)]
+    steps = [
+        fly("HEAL_LOCATION_VERMILION_CITY", seg_id + "_Fly", force=True),
+        {"unless_item": {"words": PROTEIN_WORDS, "pocket": 0, "steps": to_buy}, "label": "PROTEIN in the bag?"},
+        {"outside": True, "label": seg_id + "_Out"},
+        save(),
+    ]
+    return {"id": seg_id, "chapter": 20, "no_repel": True,
+            "title": "POKeDEX collection: vitamins for a HITMONTOP (Lady Gillian's prize money, the Celadon Department Store)",
+            "steps": [{"unless_owned": {"species": "hitmontop", "count": 1, "steps": steps, "segment": True},
+                       "label": "Hitmontop in the table?"}]}
+
+
+CHAPTER20 += [vitamins_segment("C20_79B_VITAMINS")]
+
+
 # ------------------------------------------------ chapter 20, what the Day Care hatched, by level
 #  EXPERIMENTAL (PocketPilot build 51, not run on a console when written).
 #  The level segments of build 43 (C20_35 and on) come before the Day Care in
@@ -4084,9 +4135,24 @@ CHAPTER20 += [unown_segment("C20_89_UNOWN")]
 #  Nine battles with Lady Gillian pay 88200; the packs cost 199000: three
 #  trips (264600) with what is left in the bag, so that no pack is refused for
 #  lack of money.
+#  Build 57 (experimental): the program reads the number in the coins window
+#  of the clerk (PokemonFRLG_AutoStoryCoins.h: the window is up while she
+#  talks, in the small font of the game, of which the ten digits are in the
+#  program). With it the 49 are not left to the slot machine's luck: the
+#  clerk refuses a pack of 500 from 9500 COINS on and a pack of 50 from 9950,
+#  so from 49 modulo 50 the packs end at 9999 exactly. The route: a pack of 50
+#  first, then up to six rounds of "the clerk (look: the number, and how many
+#  games of one COIN that asks for: 50 needs one, 51 two, 99 none) and the
+#  machine (settle: those games, DOWN and A for each, at most twelve a round)",
+#  then the 19 packs of 500 and the nine of 50, and the prizes' clerk first
+#  (9999 COINS: the PORYGON). A round with nothing to play answers NO to the
+#  machine. If the number cannot be read (or a pack shows the reading to be
+#  wrong), the rounds play nothing and the slot machine's rounds of build 56
+#  (30 games with the bet of 3 and the prizes' clerk, 14 times) do what they did.
 PORYGON_TRIPS = 3
 COINS_500 = 19
 COINS_50 = 9
+COINS_SETTLE_ROUNDS = 6
 PORYGON_ROUNDS = 14
 PORYGON_GAMES = 30
 CELADON_RESTAURANT = "MAP_CELADON_CITY_RESTAURANT"
@@ -4109,9 +4175,18 @@ def porygon_segment(seg_id):
               talk(CELADON_RESTAURANT, xy=COIN_CASE_MAN, mode="talk", label="CoinCaseMan"),
               setst(flags=["FLAG_GOT_COIN_CASE"]),
               talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="ToTheCoinsClerk"),
+              coins("buy", "BuyFirstPack", p1=0, p2=1)]
+    for k in range(COINS_SETTLE_ROUNDS):
+        steps += [talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True,
+                       label="ToTheCoinsClerkLook%d" % (k + 1)),
+                  coins("look", "LookAtTheCoins%d" % (k + 1)),
+                  talk(CELADON_GAME_CORNER, xy=SLOT_MACHINE, mode="plain", label="ToTheSlotMachineSettle%d" % (k + 1)),
+                  coins("settle", "SlotMachineOneCoin%d" % (k + 1))]
+    steps += [talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="BackToTheCoinsClerk"),
               coins("buy", "BuyCoins", p1=COINS_500, p2=COINS_50),
               heal(PC["CELADON"], "CoinsToCeladonNurse"), save(),
-              talk(CELADON_PRIZE_ROOM, xy=PRIZE_CLERK, mode="plain", counter=True, label="ToThePrizeClerk")]
+              talk(CELADON_PRIZE_ROOM, xy=PRIZE_CLERK, mode="plain", counter=True, label="ToThePrizeClerk"),
+              coins("prize", "PorygonPrizeFirst", species="porygon")]
     games = [talk(CELADON_GAME_CORNER, xy=SLOT_MACHINE, mode="plain", label="ToTheSlotMachine"),
              coins("play", "SlotMachine", p1=PORYGON_GAMES),
              save(),

@@ -77,6 +77,18 @@ void story_use_repel(StoryRuntime& rt);
 //  its species (slug, "" if not read).
 int story_read_slot(StoryRuntime& rt, int slot, std::string* species);
 
+//  A party slot's summary, pages 1 and 2 (build 57, HITMONTOP by vitamins):
+//  the species (slug), level, nature, and the Attack and the Defense as
+//  they stand. Both pages are read twice and must agree. False: not read.
+struct StoryStats{
+    std::string species;
+    std::string nature;
+    int level = -1;
+    int attack = -1;
+    int defense = -1;
+};
+bool story_read_stats(StoryRuntime& rt, int party_slot, StoryStats& stats);
+
 //  Swap two party slots in the overworld party menu (a < b).
 void story_swap_party(StoryRuntime& rt, int a, int b);
 
@@ -98,9 +110,11 @@ void story_check_lead(StoryRuntime& rt);
 //  (words: "a|b" for one of several.)
 //  "tolerant": no such item in the bag is no error (false comes back, the
 //  bag is closed); true: the item was used or given.
+//  "keep_order": the party is as it is (a Pokemon of the boxes trains in
+//  front): it is not put back in the team's order first.
 bool story_use_item(
     StoryRuntime& rt, int party_slot, const std::string& words, const std::string& what,
-    bool give = false, bool tolerant = false
+    bool give = false, bool tolerant = false, bool keep_order = false
 );
 //  The party menu: the item party slot "party_slot" holds goes back to the
 //  bag. False: it holds none ("is not holding anything"). An error when the
