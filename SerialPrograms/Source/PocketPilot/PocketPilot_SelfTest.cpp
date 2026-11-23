@@ -1396,9 +1396,10 @@ int check_money_trip(Logger& logger){
     //  once more for the stones of the Eevee (STONES_2, 2 battles), and the
     //  same two as on the money trip on the way to each of the three
     //  legendary Pokemon, for their ULTRA BALLs: 2 + 1 + 1 + 3 * 2 = 10
-    //  steps, 9 + 2 + 2 + 3 * 9 = 40 battles.)
+    //  steps, 9 + 2 + 2 + 3 * 9 = 40 battles; build 56: three trips to Lady
+    //  Gillian more for the coins of PORYGON: 6 steps, 27 battles.)
     check(
-        money_segment && rematches == 10 && rematch_wins == 40 && walks_fine && purchases == 4,
+        money_segment && rematches == 16 && rematch_wins == 67 && walks_fine && purchases == 4,
         "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
     );
     check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
@@ -1709,7 +1710,8 @@ int check_bump(Logger& logger){
             segment_id.find("_MONEY") != std::string::npos ||
             segment_id.find("_HO_OH") != std::string::npos ||
             segment_id.find("_LUGIA") != std::string::npos ||
-            segment_id.find("_DEOXYS") != std::string::npos;
+            segment_id.find("_DEOXYS") != std::string::npos ||
+            segment_id.find("_PORYGON") != std::string::npos;
         //  The prize money for the evolution stones (build 35): the same
         //  way to Lady Gillian, once (and once more in build 54).
         const bool stones = segment_id.find("_STONES") != std::string::npos;
@@ -1740,7 +1742,7 @@ int check_bump(Logger& logger){
         }
     }
     check(
-        money_bumps == 32 && stones_bumps == 8 && bumps_last && longest_other <= 4,
+        money_bumps == 56 && stones_bumps == 8 && bumps_last && longest_other <= 4,
         "the money trips in the story's data: the water to Resort Gorgeous and back"
     );
     check(cave_bumps == 12 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
@@ -4624,9 +4626,18 @@ int check_boxes(Logger& logger){
             const std::vector<Boxes::LevelTarget> at_edge = light(52);
             const std::vector<Boxes::LevelTarget> just_below = light(53);
             const std::vector<Boxes::LevelTarget> not_known = light(-1);
+            //  (The census has light targets of its own: the PIDGEOTTO and the METAPOD.)
+            auto has = [](const std::vector<Boxes::LevelTarget>& targets){
+                for (const Boxes::LevelTarget& target : targets){
+                    if (target.slug == "tyranitar"){
+                        return true;
+                    }
+                }
+                return false;
+            };
             check(
-                heavy.empty() && failed.size() == 1 && failed[0].slug == "tyranitar" && at_edge.empty() &&
-                just_below.size() == 1 && just_below[0].slug == "tyranitar" && not_known.size() == 1,
+                !has(heavy) && has(failed) && !has(at_edge) && has(just_below) && has(not_known) &&
+                !heavy.empty() && heavy.size() + 1 == failed.size() && heavy.size() + 1 == just_below.size(),
                 "the segments by level leave a Pokemon with 20000 points to go or more to the Elite Four, unless it "
                 "failed there twice in a row (then it is trained at Victory Road); a level that is not known is not heavy"
             );
