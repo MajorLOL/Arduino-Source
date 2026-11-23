@@ -714,8 +714,8 @@ class Builder:
     def mark_slow_steps(self):
         """leg["slow"]: for each run of each leg, the steps of it the game
         walks slowly, as bits (bit i = step i of the run; the C++ holds
-        the input 7 frames longer for each). A run with one further on
-        than the bits reach is cut in two."""
+        the input 7 frames longer for each). A run with marks that is
+        longer than the bits reach is cut in two (or more)."""
         stairs = self.d.behaviors.by_name.get("MB_ROCK_STAIRS", -1)
 
         def is_stairs(m, x, y):
@@ -749,7 +749,11 @@ class Builder:
                 base = 0
                 while True:
                     part = count - base
-                    if any(s - base >= Builder.SLOW_BITS for s in steps):
+                    #  (A part with a mark is at most SLOW_BITS long: the
+                    #  C++ holds the marks of a run in one word. The long
+                    #  walk down Navel Rock's Fork has the stairs in its
+                    #  first steps and 94 tiles in all.)
+                    if part > Builder.SLOW_BITS and any(base <= s < base + part for s in steps):
                         part = Builder.SLOW_BITS
                     runs.append([d, part, kind])
                     slow.append(sum(1 << (s - base) for s in steps if base <= s < base + part))
