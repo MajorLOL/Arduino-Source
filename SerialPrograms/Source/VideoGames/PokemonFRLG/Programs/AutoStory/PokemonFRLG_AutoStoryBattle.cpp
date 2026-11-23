@@ -813,6 +813,16 @@ void use_best_move(
                 //  Its HP went up: it healed itself after the hit (Mewtwo:
                 //  RECOVER). Nothing to tell about the move from that.
                 console.log("The foe's HP went up (it healed): " + name + " not judged by it.");
+            }else if (weakest && foe_hp >= 0.95 && memory.foe_hp >= 0.9){
+                //  Weakening a Pokemon to catch it, and it is at full HP
+                //  again: a hit and a RECOVER (half its HP back, a wild
+                //  Pokemon picks its moves at random: one turn in four)
+                //  look like a miss. HO-OH, 23 November 2026: CUT hit for a
+                //  quarter and was healed in the same turn, "took none"
+                //  three times, the next weakest moves were tried, FLY at
+                //  full HP (a critical hit takes all of it) made it faint.
+                //  Nothing to tell about the move from this.
+                console.log("The foe is at full HP again (a hit and a heal look like a miss): " + name + " not judged by it.");
             }else if (memory.no_damage[slot] > 0 && memory.damage_turns > memory.damage_turns_at[slot]){
                 //  Again nothing, and since the first time another move did
                 //  damage: the player's Pokemon can attack, this move does
@@ -2252,6 +2262,34 @@ StoryBattleResult run_story_battle(
                     //  Its HP since the last hit: its healing, not a hit.
                     weaken_hp_before = -1;
                 }
+            }
+            //  A legendary Pokemon wears the party down (HO-OH: SWIFT, FIRE
+            //  BLAST, one try, 14 balls, the six of the party fainted, four
+            //  tries in a row on 23 November 2026). A healing item (the
+            //  League's FULL RESTOREs) gives the one that is out some eight
+            //  turns more, so more balls a try. Before the next ball.
+            if (shiny_catching && legendary && settings.heal_in_battle && !memory.no_heal_items &&
+                memory.player_hp >= 0 && memory.player_hp < 1.0 / 3 && heals_used < 15 && heal_failures < 2
+            ){
+                console.log(
+                    "HP " + std::to_string((int)(memory.player_hp * 100 + 0.5)) + "%: healing with an item before the next ball.",
+                    COLOR_BLUE
+                );
+                bool restore = false;
+                switch (heal_in_battle(console, context, restore)){
+                case BagUse::USED:
+                    heals_used++;
+                    memory.restores_used += restore ? 1 : 0;
+                    memory.player_hp = -1;      //  Seen again on the next turn.
+                    break;
+                case BagUse::NONE:
+                    memory.no_heal_items = true;
+                    break;
+                case BagUse::FAILED:
+                    heal_failures++;
+                    break;
+                }
+                break;
             }
             if (shiny_catching){
                 //  The Safari Zone: 20 of the 30 SAFARI BALLs at most (the
