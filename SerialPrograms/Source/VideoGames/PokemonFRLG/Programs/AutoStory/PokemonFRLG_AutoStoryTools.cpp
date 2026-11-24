@@ -1722,6 +1722,14 @@ bool walk_run(
                     continue;
                 }
             }
+            if (not_moving == 5){
+                //  (Build 63) Halfway to the failure: the picture, and a look
+                //  whether a text or menu the video did not see keeps the
+                //  inputs (the build 61 run: seven taps "up" on the water of
+                //  Kindle Road, nothing moved, then the failure).
+                story_save_picture(rt, "PlayerDoesNotMove-" + label);
+                story_back_to_overworld(rt, "the player does not move: " + label);
+            }
             if (not_moving >= 10){
                 OperationFailedExceptionWithScreenshot::fire(
                     ErrorReportMode::SEND_ERROR_REPORT,
@@ -2442,6 +2450,50 @@ bool story_talk_start(
 }
 
 
+namespace{
+
+//  (Build 63) Three times A and no text: before the step fails, a look at
+//  what the game is doing. A text or menu the video did not see keeps the
+//  inputs (B closes it, and the picture of it is saved), and for a Rock
+//  Smash rock a step toward it shows whether it is still there (the build
+//  61 run: "No text at Rock Smash" three times at the second rock of
+//  Kindle Road, then the failure that cost the trip its Slugma).
+//  Returns 0: look for the text once more; 1: nothing to talk to (the rock
+//  is gone), go on.
+int talk_unstick(StoryRuntime& rt, const std::string& what){
+    rt.console.log(
+        "No text at " + what + " after three tries: looking at what the game is doing.",
+        COLOR_ORANGE
+    );
+    story_save_picture(rt, "NoText-" + what);
+    story_back_to_overworld(rt, "no text at " + what);
+    if (what == "Rock Smash" && rt.facing != DPAD_NONE){
+        const DpadPosition toward = rt.facing;
+        bool moved = true;
+        story_checked_step(
+            rt, toward, false, false, StoryBattleKind::WILD,
+            what + " (is the rock there?)", false, &moved
+        );
+        if (moved){
+            rt.console.log(
+                "The player stepped " + std::string(dpad_name(toward)) + ": no rock there (smashed before). "
+                "Stepping back and going on.",
+                COLOR_ORANGE
+            );
+            story_checked_step(
+                rt, opposite(toward), false, false, StoryBattleKind::WILD,
+                what + " (back)", false, &moved
+            );
+            return 1;
+        }
+        rt.console.log("The rock is there (the step bumps into it): looking for the text once more.", COLOR_ORANGE);
+        story_face(rt, toward);
+    }
+    return 0;
+}
+
+}
+
 bool story_talk_answer(
     StoryRuntime& rt, bool yes, const std::string& what, const StoryTalkAlt& alt,
     bool may_be_given, int patience
@@ -2454,32 +2506,44 @@ bool story_talk_answer(
     //  The one talked to walks around (see story_talk_start()): A until it
     //  comes by, without turning again.
     const WallClock patient_until = current_time() + std::chrono::seconds(std::max(0, patience));
-    for (int spot = 0; spot < (alt.on ? 2 : 1) && ret < 0; spot++){
-        if (spot == 1){
-            go_to_talk_alt(rt, alt, what);
+    for (int pass = 0; pass < 2 && ret < 0; pass++){
+        if (pass == 1){
+            //  (Build 63) Another look, once, for what talks (not for the
+            //  ones that walk around or stand at another spot).
+            if (alt.on || patience > 0){
+                break;
+            }
+            if (talk_unstick(rt, what) == 1){
+                return false;
+            }
         }
-        //  With another spot, one try here (turning again is a step when
-        //  no one is there).
-        const int attempts = patience > 0 ? 1000000 : (alt.on && spot == 0 ? 1 : 3);
-        for (int attempt = 0; attempt < attempts; attempt++){
-            if (patience > 0 && attempt > 0 && current_time() >= patient_until){
-                break;
+        for (int spot = 0; spot < (alt.on ? 2 : 1) && ret < 0; spot++){
+            if (spot == 1){
+                go_to_talk_alt(rt, alt, what);
             }
-            if (attempt > 0 && patience <= 0){
-                face_again(rt, what);
-            }
-            SelectionDialogWatcher yes_no(COLOR_RED);
-            WhiteDialogWatcher text(COLOR_RED);
-            rt.context.wait_for_all_requests();
-            ret = run_until<ProControllerContext>(
-                rt.console, rt.context,
-                [](ProControllerContext& context){
-                    pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
-                },
-                { yes_no, text }
-            );
-            if (ret >= 0){
-                break;
+            //  With another spot, one try here (turning again is a step when
+            //  no one is there).
+            const int attempts = patience > 0 ? 1000000 : (alt.on && spot == 0 ? 1 : 3);
+            for (int attempt = 0; attempt < attempts; attempt++){
+                if (patience > 0 && attempt > 0 && current_time() >= patient_until){
+                    break;
+                }
+                if ((attempt > 0 || pass > 0) && patience <= 0){
+                    face_again(rt, what);
+                }
+                SelectionDialogWatcher yes_no(COLOR_RED);
+                WhiteDialogWatcher text(COLOR_RED);
+                rt.context.wait_for_all_requests();
+                ret = run_until<ProControllerContext>(
+                    rt.console, rt.context,
+                    [](ProControllerContext& context){
+                        pbf_press_button(context, BUTTON_A, 160ms, 2840ms);
+                    },
+                    { yes_no, text }
+                );
+                if (ret >= 0){
+                    break;
+                }
             }
         }
     }
