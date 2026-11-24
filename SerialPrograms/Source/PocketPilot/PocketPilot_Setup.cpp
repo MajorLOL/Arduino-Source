@@ -4186,9 +4186,9 @@ int run_setup_test(QApplication& application, const QString& folder){
     {
         QFile source(app + "/Firmware/PABotBase2-Pico1W-2026092800.uf2");
         QFile copy(QDir(drive_folder).filePath("PABotBase2-Pico1W-2026092800.uf2"));
-        source.open(QIODevice::ReadOnly);
+        const bool source_opened = source.open(QIODevice::ReadOnly);
         const bool opened = copy.open(QIODevice::ReadOnly);
-        checker.check(opened && copy.readAll() == source.readAll(), "the file is on the drive, whole");
+        checker.check(source_opened && opened && copy.readAll() == source.readAll(), "the file is on the drive, whole");
     }
     save(canvas, folder, "setup-27-pico-restarting");
     {

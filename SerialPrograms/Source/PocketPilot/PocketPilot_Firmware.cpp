@@ -409,7 +409,7 @@ void CopyJob::run(){
     //  The Pico restarts as soon as it has the last block, so what comes now
     //  (the end of the write) may be answered with an error: the file is on
     //  its way, which the drive disappearing tells.
-    out.flush();
+    (void)out.flush();
     out.close();
     m_progress = 1.0;
     m_done = true;
@@ -518,7 +518,7 @@ FlashTool find_flash_tool(const QString& app_folder){
         probe.start(python, QStringList() << "-m" << "esptool" << "version");
         if (!probe.waitForFinished(8000)){
             probe.kill();
-            probe.waitForFinished(1000);
+            (void)probe.waitForFinished(1000);
             continue;
         }
         if (probe.exitStatus() == QProcess::NormalExit && probe.exitCode() == 0){
