@@ -26,6 +26,7 @@
 #include "VideoGames/PokemonFRLG/Inference/Map/PokemonFRLG_MapDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_BagDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_PartyMenuDetector.h"
+#include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_StartMenuDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/Menus/PokemonFRLG_SummaryDetector.h"
 #include "VideoGames/PokemonFRLG/Inference/PokemonFRLG_StatsReader.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
@@ -5498,6 +5499,32 @@ void coins_look(StoryRuntime& rt, const std::string& label){
     );
 }
 
+//  Whether the player is out of the slot machine (build 61): the START menu comes
+//  up by START in the overworld, and in the machine START does nothing that
+//  matters. in_overworld() is not used here: it mashes B, and B in the machine
+//  asks "Quit playing?" (the second B is the answer NO).
+bool coins_machine_left(StoryRuntime& rt){
+    ConsoleHandle& console = rt.console;
+    ProControllerContext& context = rt.context;
+    StartMenuWatcher start_menu(COLOR_RED);
+    context.wait_for_all_requests();
+    const int ret = run_until<ProControllerContext>(
+        console, context,
+        [](ProControllerContext& ctx){
+            for (int i = 0; i < 2; i++){
+                pbf_press_button(ctx, BUTTON_PLUS, 200ms, 1500ms);
+            }
+        },
+        { start_menu }
+    );
+    if (ret != 0){
+        return false;
+    }
+    pbf_press_button(context, BUTTON_B, 160ms, 700ms);
+    context.wait_for_all_requests();
+    return true;
+}
+
 //  Up to "games" games of a slot machine, then out of it. "Do you want to
 //  play the slot machine?" YES; the machine's picture comes up after a little
 //  face over the player's head and a fade. A game: R (the bet: three COINS,
@@ -5506,11 +5533,21 @@ void coins_look(StoryRuntime& rt, const std::string& label){
 //  once; before that it does nothing). A key that comes too early or too late
 //  does nothing harmful: R is only taken when a game can start, A only stops a
 //  reel or starts one. Out: B (the question to quit, in the betting phase
-//  only), YES.
+//  only), A (YES: the cursor is on it).
 //  "bet" 1 (build 57): DOWN puts one COIN on the middle line (the machine goes
 //  back to the betting phase for more), A starts the reels; each game costs one
 //  COIN and a win pays some. No games (nothing to play): the question is
 //  answered NO.
+//  Build 61 (the first run in a machine, 24 November: "Not back in the
+//  overworld" twice): (1) the machine's own YES/NO box (slot_machine.c: tiles
+//  19 to 24 of 30, 4 to the left of the overworld's) is not the box that
+//  SelectionDialogWatcher looks for, so the question to quit was never seen,
+//  and every B on it is the answer NO: the loop of B and START went round and
+//  round. The way out is blind now: B, A (YES), a look for the START menu,
+//  and again when it does not come. (2) A press only counts when the machine
+//  is waiting for it (a reel being stopped, the little animation after the
+//  start), so one A at fixed times lost some: A now every half second for the
+//  whole game; with no bet or no reel waiting an A does nothing.
 void coins_play(StoryRuntime& rt, int games, const std::string& label, int bet = 3){
     ConsoleHandle& console = rt.console;
     ProControllerContext& context = rt.context;
@@ -5525,17 +5562,16 @@ void coins_play(StoryRuntime& rt, int games, const std::string& label, int bet =
         std::to_string(bet) + " (experimental)."
     );
     story_talk_answer(rt, true, label);
-    pbf_wait(context, 5000ms);
+    pbf_wait(context, 6000ms);
     for (int game = 0; game < games; game++){
         if (bet == 1){
             dpad(context, DPAD_DOWN, 600ms);
-            press(context, BUTTON_A, 900ms);
         }else{
             press(context, BUTTON_R, 900ms);
         }
-        press(context, BUTTON_A, 700ms);
-        press(context, BUTTON_A, 700ms);
-        press(context, BUTTON_A, 900ms);
+        for (int i = 0; i < 12; i++){
+            press(context, BUTTON_A, 500ms);
+        }
         for (int i = 0; i < 6; i++){
             press(context, BUTTON_PLUS, 450ms);
         }
@@ -5543,28 +5579,20 @@ void coins_play(StoryRuntime& rt, int games, const std::string& label, int bet =
             console.log(label + ": " + std::to_string(game + 1) + " games played.");
         }
     }
-    //  Out of the machine. B asks "quit?" only in the betting phase: B (and
-    //  START for what is still being paid out) until the question is up.
-    bool asked = false;
-    for (int attempt = 0; attempt < 12 && !asked; attempt++){
-        SelectionDialogWatcher question(COLOR_RED);
+    //  Out of the machine: B asks "Quit playing?" in the betting phase only
+    //  (the cursor is on YES), A answers. After the answer the machine fades
+    //  out. Not out yet: the same again (a B on the question is NO: the next
+    //  B asks again).
+    bool out = false;
+    for (int attempt = 0; attempt < 6 && !out; attempt++){
+        pbf_press_button(context, BUTTON_PLUS, 160ms, 450ms);
+        pbf_press_button(context, BUTTON_B, 160ms, 1200ms);
+        pbf_press_button(context, BUTTON_A, 160ms, 3500ms);
         context.wait_for_all_requests();
-        const int ret = run_until<ProControllerContext>(
-            console, context,
-            [](ProControllerContext& ctx){
-                pbf_press_button(ctx, BUTTON_B, 160ms, 140ms);
-                pbf_press_button(ctx, BUTTON_PLUS, 160ms, 1700ms);
-            },
-            { question }
-        );
-        asked = ret == 0;
-    }
-    if (asked){
-        pbf_wait(context, 300ms);
-        press(context, BUTTON_A, 4000ms);
-    }else{
-        console.log(label + ": no question to quit came up: B until the player is out of it.", COLOR_ORANGE);
-        pbf_mash_button(context, BUTTON_B, 3000ms);
+        out = coins_machine_left(rt);
+        if (!out){
+            console.log(label + ": still in the machine after try " + std::to_string(attempt + 1) + " of B and A.", COLOR_ORANGE);
+        }
     }
     context.wait_for_all_requests();
     story_back_to_overworld(rt, label);

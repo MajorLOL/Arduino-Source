@@ -2980,6 +2980,10 @@ void story_soft_reset(StoryRuntime& rt){
     );
     rt.dex_count_at_load = count;
     rt.dex_new_since_load.clear();
+    //  The COINS of the case are the save's again (build 61: after the second try of the slot machine the
+    //  reading of the first try was taken for what the case held before a pack, and the pack looked refused).
+    rt.coins_seen = -1;
+    rt.coins_games = 0;
     if (count >= 0){
         rt.console.log("The game's POKeDEX in this save: " + std::to_string(count) + " species caught.", COLOR_BLUE);
         //  The program's table far behind the game's own count: it is not
