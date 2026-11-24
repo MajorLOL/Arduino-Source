@@ -2380,12 +2380,35 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 words.push_back(word);
             }
             size_t segment = (size_t)-1;
-            for (size_t i = 0; words.size() == 3 && i < script.segment_count; i++){
+            const bool words_fine = words.size() == 3 || words.size() == 4;
+            for (size_t i = 0; words_fine && i < script.segment_count; i++){
                 if (words[1] == script.segments[i].id){
                     segment = i;
                 }
             }
-            const int step = words.size() == 3 ? std::atoi(words[2].c_str()) : 0;
+            int step = words_fine ? std::atoi(words[2].c_str()) : 0;
+            //  (Build 62) The step numbers are the story data's. A save file of
+            //  build 61 or before (three words) has the numbers of that data: the
+            //  segments that build 62 changed are carried over to the new ones. One
+            //  with another data id (build 62 and after) is only told.
+            if (words.size() == 3 && segment != (size_t)-1 && step >= 1){
+                const int moved = story_legacy_step(script.segments[segment].id, step);
+                if (moved != step){
+                    env.log(
+                        "The program's last save is from build 61 or before: " + std::string(script.segments[segment].id) +
+                        " step " + std::to_string(step) + " is step " + std::to_string(moved) +
+                        " in the story data of this build.",
+                        COLOR_ORANGE
+                    );
+                    step = moved;
+                }
+            }else if (words.size() == 4 && words[3] != AutoStoryData::DATA_ID){
+                env.log(
+                    "The program's last save was written with other story data (" + words[3] + "; this build has " +
+                    AutoStoryData::DATA_ID + "): if this build changed that segment, the step may have moved.",
+                    COLOR_ORANGE
+                );
+            }
             if (segment == (size_t)-1 || step < 1 || words[0] != starter_name(starter)){
                 env.log("The program's last save (" + save_file + ") is not for this story: \"" + text + "\". Starting at the segment and step chosen.", COLOR_ORANGE);
             }else if ((segment != START_SEGMENT.current_value() || step != (int)(uint16_t)START_STEP) && settings_older){
@@ -2709,7 +2732,8 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         try{
             string_to_file(
                 save_file,
-                std::string(starter_name(starter)) + " " + segment_id + " " + std::to_string(step) + "\n"
+                std::string(starter_name(starter)) + " " + segment_id + " " + std::to_string(step) + " " +
+                    AutoStoryData::DATA_ID + "\n"
             );
         }catch (...){
             env.log("Could not write " + save_file + ".", COLOR_ORANGE);

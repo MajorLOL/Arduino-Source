@@ -5592,6 +5592,9 @@ void coins_play(StoryRuntime& rt, int games, const std::string& label, int bet =
         out = coins_machine_left(rt);
         if (!out){
             console.log(label + ": still in the machine after try " + std::to_string(attempt + 1) + " of B and A.", COLOR_ORANGE);
+            //  (Build 62) What the screen shows: the reels, the payout, the
+            //  question to quit, or the Game Corner.
+            story_save_picture(rt, label + "-still-in-the-machine-try-" + std::to_string(attempt + 1));
         }
     }
     context.wait_for_all_requests();

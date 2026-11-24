@@ -2707,12 +2707,15 @@ def gillian(wins, label):
     ] + from_resort(label + "_Back")
 
 
-def gillian_trip(fly_label, repeats=1):
+def gillian_trip(fly_label, repeats=1, rounds=(4, 5)):
     """From the FLY to Vermilion City: the VS SEEKER, Five Island, nine
     battles with Lady Gillian (88200), back to Vermilion City (outdoors, at
     the pier). Build 54: a function of its own, for the ULTRA BALLs of the
     legendary Pokemon as well (ultra_balls_trip()). Build 57: "repeats" sets
-    of nine battles on the one visit (the vitamins)."""
+    of nine battles on the one visit (the vitamins). Build 62: "rounds" is
+    how many battles each round of a set has (4 and 5: the nurse between
+    them, as the team needs); one number is a trip of one round only (the
+    last trip of the PORYGON money needs no more than that)."""
     vermilion = PC["VERMILION"]
     steps = [
         fly("HEAL_LOCATION_VERMILION_CITY", fly_label, force=True),
@@ -2732,10 +2735,11 @@ def gillian_trip(fly_label, repeats=1):
     steps += [heal(FIVE_PC, "HarborToFiveIslandNurse"), save()]
     for k in range(repeats):
         more = "" if k == 0 else str(k + 1)
-        steps += gillian(4, "Gillian" + more)
+        steps += gillian(rounds[0], "Gillian" + more)
         steps += [heal(FIVE_PC, "GillianToNurse" + more), save()]
-        steps += gillian(5, "GillianAgain" + more)
-        steps += [heal(FIVE_PC, "GillianAgainToNurse" + more), save()]
+        if len(rounds) > 1:
+            steps += gillian(rounds[1], "GillianAgain" + more)
+            steps += [heal(FIVE_PC, "GillianAgainToNurse" + more), save()]
     steps += rainbow_ferry("MAP_FIVE_ISLAND_HARBOR", 0, None, "MAP_VERMILION_CITY", "FerryToVermilion")[:-1]
     steps += [pos("MAP_VERMILION_CITY", 23, 32)]
     return steps
@@ -3959,11 +3963,27 @@ CHAPTER20 += [stones_segment("C20_85_STONES_2")]
 #  a try that does not catch it loads the save in front of it, balls and all.
 #  The segment starts like the ones of a Pokemon that is there once (the
 #  check, FLY, ..., save), so a failure that comes twice leaves it out.
-def ultra_balls_trip(seg_id):
-    """FLY to Vermilion City; the money (gillian_trip); FLY to Fuchsia City;
-    the ULTRA BALLs the money allows; FLY back to Vermilion City, the nurse,
-    a save."""
+#  Build 62: MAX POTIONs for the legendary Pokemon's battles. HO-OH wore the
+#  party down in the tries of 23 November (one try, 14 balls, six fainted, four
+#  tries in a row), and DEOXYS took the lead from 100 to 19% in 23 balls
+#  (24 November: "No healing item in the bag"). A MAX POTION (2500, all the HP,
+#  as a FULL RESTORE, which the Poke Mart of Fuchsia City does not sell) gives
+#  the Pokemon that is out some eight turns more, and it is the bag's of the
+#  save in front of the legendary Pokemon again at each try. Three of them
+#  (7500: six ULTRA BALLs of the 73) are bought at the Indigo Plateau, up to
+#  three, as far as the money goes.
+LEGEND_MAX_POTIONS = 3
+
+
+def ultra_balls_trip(seg_id, max_potions=LEGEND_MAX_POTIONS):
+    """FLY to Vermilion City; the money (gillian_trip); the MAX POTIONs at
+    the Indigo Plateau; FLY to Fuchsia City; the ULTRA BALLs the money allows;
+    FLY back to Vermilion City, the nurse, a save."""
     steps = gillian_trip(seg_id + "_Fly")
+    if max_potions > 0:
+        steps += [fly("HEAL_LOCATION_INDIGO_PLATEAU", seg_id + "_FlyToIndigo", force=True),
+                  heal(PC["INDIGO"], seg_id + "_ToIndigoPC")]
+        steps += buy(PC["INDIGO"], [0, 7], 3, max_potions, "BuyMaxPotionsForTheLegend", kind="restore", up_to=True)
     steps += [fly("HEAL_LOCATION_FUCHSIA_CITY", seg_id + "_FlyToFuchsia", force=True),
               heal(PC["FUCHSIA"], seg_id + "_ToFuchsiaPC")]
     steps += buy("MAP_FUCHSIA_CITY_MART", [2, 3], 0, 0, "BuyUltraBalls")
@@ -4146,7 +4166,9 @@ CHAPTER20 += [unown_segment("C20_89_UNOWN")]
 #  comes only when the COINS are enough).
 #  Nine battles with Lady Gillian pay 88200; the packs cost 199000: three
 #  trips (264600) with what is left in the bag, so that no pack is refused for
-#  lack of money.
+#  lack of money. Build 62: the run of build 60 won 27 battles (264600) and
+#  needed 21 (199000 is 20.3 of 9800): the third trip is one round of four
+#  (22 battles in all: 215600, 16600 to spare), some 20 minutes less.
 #  Build 57 (experimental): the program reads the number in the coins window
 #  of the clerk (PokemonFRLG_AutoStoryCoins.h: the window is up while she
 #  talks, in the small font of the game, of which the ten digits are in the
@@ -4162,6 +4184,7 @@ CHAPTER20 += [unown_segment("C20_89_UNOWN")]
 #  wrong), the rounds play nothing and the slot machine's rounds of build 56
 #  (30 games with the bet of 3 and the prizes' clerk, 14 times) do what they did.
 PORYGON_TRIPS = 3
+PORYGON_LAST_ROUND = 4
 COINS_500 = 19
 COINS_50 = 9
 COINS_SETTLE_ROUNDS = 6
@@ -4182,19 +4205,28 @@ PRIZE_CLERK = [4, 2]
 def porygon_segment(seg_id):
     steps = []
     for k in range(PORYGON_TRIPS):
-        steps += gillian_trip(seg_id + "_Fly" + ("" if k == 0 else str(k + 1)))
+        last = k == PORYGON_TRIPS - 1
+        steps += gillian_trip(seg_id + "_Fly" + ("" if k == 0 else str(k + 1)),
+                              rounds=(PORYGON_LAST_ROUND,) if last else (4, 5))
     steps += [fly("HEAL_LOCATION_CELADON_CITY", seg_id + "_FlyToCeladon", force=True),
               talk(CELADON_RESTAURANT, xy=COIN_CASE_MAN, mode="talk", label="CoinCaseMan"),
               setst(flags=["FLAG_GOT_COIN_CASE"]),
               talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="ToTheCoinsClerk"),
-              coins("buy", "BuyFirstPack", p1=0, p2=1)]
+              coins("buy", "BuyFirstPack", p1=0, p2=1),
+              #  Build 62: a save with the first pack bought (50 COINS in the case):
+              #  a slot machine that fails costs the way back from the save here
+              #  (a minute) instead of the one from Five Island (five).
+              save()]
     for k in range(COINS_SETTLE_ROUNDS):
         steps += [talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True,
                        label="ToTheCoinsClerkLook%d" % (k + 1)),
                   coins("look", "LookAtTheCoins%d" % (k + 1)),
                   talk(CELADON_GAME_CORNER, xy=SLOT_MACHINE, mode="plain", label="ToTheSlotMachineSettle%d" % (k + 1)),
                   coins("settle", "SlotMachineOneCoin%d" % (k + 1))]
-    steps += [talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="BackToTheCoinsClerk"),
+    #  (Build 62) And one with the COINS at 49 modulo 50: the 28 packs are bought
+    #  from here, and the save after them is the next one.
+    steps += [save(),
+              talk(CELADON_GAME_CORNER, xy=COINS_CLERK, mode="plain", counter=True, label="BackToTheCoinsClerk"),
               coins("buy", "BuyCoins", p1=COINS_500, p2=COINS_50),
               heal(PC["CELADON"], "CoinsToCeladonNurse"), save(),
               talk(CELADON_PRIZE_ROOM, xy=PRIZE_CLERK, mode="plain", counter=True, label="ToThePrizeClerk"),

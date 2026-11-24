@@ -288,6 +288,14 @@ struct StoryRuntime{
     bool coins_reader_sure = false;
     bool coins_reader_bad = false;
     int coins_games = 0;
+    //  (Build 62) Pictures of the video saved by story_save_picture() in this
+    //  run: at most a few dozen, so that a loop that fails over and over does not
+    //  fill the disk.
+    int pictures_saved = 0;
+    //  (Build 62) The leg under way is on a map without wild Pokemon in the
+    //  game's data (Navel Rock, Birth Island): no battle can take the place of
+    //  a warp there.
+    bool no_wild_here = false;
     //  Evolving by friendship (build 45): the training under way is the one
     //  of a Pokemon that is walked with first (StepType::PACE), then trained
     //  a level. What was walked with each species (the steps are counted in
@@ -657,6 +665,13 @@ bool story_close_repel_text(StoryRuntime& rt);
 
 //  Close menus and text boxes until the player can move.
 void story_back_to_overworld(StoryRuntime& rt, const std::string& where);
+
+//  (Build 62) Save the picture on the video now as a PNG in the folder of the
+//  error pictures (ERROR_PATH()), named after the time and "label", and say where
+//  in the log (orange). For what the program cannot see by itself: where a
+//  failure comes from can be read on the picture, not in the log. Nothing
+//  happens beyond 40 pictures in a run, or without a picture.
+void story_save_picture(StoryRuntime& rt, const std::string& label);
 
 //  After a scene that takes the player out of a small building (the Safari
 //  Zone's desk): is the player still in it? (Black at both sides of the

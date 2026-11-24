@@ -586,6 +586,28 @@ inline OnceLeave story_once_leave(const StoryScript& script, const StorySegment&
 }
 
 
+//  (Build 62) The step to go on with (1-based) of a save of build 61 or before
+//  (the program's save file had three words then), as it is in the story data of
+//  this build. Build 62 took a round of Lady Gillian out of the last trip of
+//  the PORYGON money (20 steps: 187 to 205 are gone, the ferry home is step 186
+//  now) and put saves in the Game Corner (one after the first pack of 50, one
+//  with the COINS at 49 modulo 50), and made the three legendary Pokemon's
+//  segments buy MAX POTIONs at the Indigo Plateau (7 steps from step 72: FLY,
+//  nurse, the clerk). Every other segment is as it was.
+inline int story_legacy_step(const std::string& segment_id, int step){
+    if (segment_id == "C20_90_PORYGON"){
+        if (step < 206){
+            return step > 186 ? 186 : step;
+        }
+        return step - 20 + (step >= 220 ? 1 : 0) + (step >= 244 ? 1 : 0);
+    }
+    if (segment_id == "C20_86_HO_OH" || segment_id == "C20_87_LUGIA" || segment_id == "C20_88_DEOXYS"){
+        return step > 72 ? step + 7 : step;
+    }
+    return step;
+}
+
+
 }
 }
 }

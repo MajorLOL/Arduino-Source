@@ -1400,8 +1400,11 @@ int check_money_trip(Logger& logger){
     //  steps, 9 + 2 + 2 + 3 * 9 = 40 battles; build 56: three trips to Lady
     //  Gillian more for the coins of PORYGON: 6 steps, 27 battles; build 57:
     //  two visits more for the vitamins of HITMONTOP: 4 steps, 18 battles.)
+    //  Build 62: the last trip of the PORYGON money is one round of four battles, not two
+    //  of 4 and 5 (22 battles, 215600, for the 199000 of the packs): 5 steps, 22 battles
+    //  there, so 19 steps and 80 battles in all.
     check(
-        money_segment && rematches == 20 && rematch_wins == 85 && walks_fine && purchases == 4,
+        money_segment && rematches == 19 && rematch_wins == 80 && walks_fine && purchases == 4,
         "the money trip in the story's data: the walk for the VS SEEKER, the purchases"
     );
     check(joins >= 8 && joins_fine, "the steps skipped when a Safari Game is not joined");
@@ -1744,8 +1747,10 @@ int check_bump(Logger& logger){
             }
         }
     }
+    //  (4 such runs to a round of Lady Gillian: 17 rounds since build 62, 18 before: the last trip of
+    //  the PORYGON money is one round.)
     check(
-        money_bumps == 72 && stones_bumps == 8 && bumps_last && longest_other <= 4,
+        money_bumps == 68 && stones_bumps == 8 && bumps_last && longest_other <= 4,
         "the money trips in the story's data: the water to Resort Gorgeous and back"
     );
     check(cave_bumps == 12 && lap_bumps == 4, "the Lost Cave and the laps off Five Island in the story's data: the same water");
@@ -3429,10 +3434,10 @@ int check_leave_out(Logger& logger){
         "a HITMONTOP between the Day Care's eggs and the levels"
     );
     check(
-        sevii_saves == 16 && sevii_saves_wrong == 0 && porygon_nurse_saves == 1 && porygon_sevii == 9,
+        sevii_saves == 16 && sevii_saves_wrong == 0 && porygon_nurse_saves == 1 && porygon_sevii == 8,
         "a save at a Pokemon Center of the Sevii Islands (Five Island: the three legendary Pokemon of Lady "
-        "Gillian's battles, 3 each, the three trips of PORYGON, 9, and the vitamins' two visits, 5; Seven Island: "
-        "UNOWN, 2) is none a segment "
+        "Gillian's battles, 3 each, the three trips of PORYGON, 8 (3 + 3 + 2: the last trip is one round, build "
+        "62), and the vitamins' two visits, 5; Seven Island: UNOWN, 2) is none a segment "
         "is given up from (build 56: the program stops there); the one of Celadon City (PORYGON) walks out "
         "into the city"
     );
@@ -3482,6 +3487,93 @@ int check_leave_out(Logger& logger){
         check(
             deoxys_battles == 1 && deoxys_weakened == 0,
             "DEOXYS is caught with balls at full HP (build 60): its battle step has no weakening"
+        );
+        //  (Build 62) The legendary Pokemon's segments buy three MAX POTIONs at the Indigo Plateau
+        //  before the ULTRA BALLs; the Game Corner is saved after the first pack and before
+        //  the 28 packs; the PORYGON money is 22 battles (4 + 5, 4 + 5, 4).
+        size_t potion_buys_fine = 0;
+        size_t porygon_rematch_wins = 0;
+        size_t porygon_rematches = 0;
+        bool save_after_first_pack = false;
+        bool save_before_big_packs = false;
+        bool ferry_is_186 = false;
+        size_t game_corner_saves = 0;
+        bool game_corner_saves_no = true;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            const std::string id = segment.id;
+            if (id == "C20_86_HO_OH" || id == "C20_87_LUGIA" || id == "C20_88_DEOXYS"){
+                int potions = 0;
+                bool before_balls = true;
+                bool seen_balls = false;
+                for (size_t i = 0; i < segment.step_count; i++){
+                    const StoryStep& step = script.step(segment, i);
+                    if (step.type != StepType::BUY){
+                        continue;
+                    }
+                    const std::string label = step.label;
+                    if (label == "BuyMaxPotionsForTheLegend"){
+                        potions += step.p0 == 3 && step.p1 == 3 ? 1 : 0;
+                        before_balls &= !seen_balls;
+                    }else if (label == "BuyUltraBalls"){
+                        seen_balls = true;
+                    }
+                }
+                potion_buys_fine += potions == 1 && before_balls && seen_balls ? 1 : 0;
+            }
+            if (id == "C20_90_PORYGON"){
+                bool first_pack_seen = false;
+                for (size_t i = 0; i < segment.step_count; i++){
+                    const StoryStep& step = script.step(segment, i);
+                    if (step.type == StepType::REMATCH){
+                        porygon_rematches++;
+                        porygon_rematch_wins += (size_t)step.p0;
+                    }
+                    if (step.type == StepType::COINS && step.p0 == 0 && !first_pack_seen){
+                        first_pack_seen = true;
+                        save_after_first_pack = i + 1 < segment.step_count && script.step(segment, i + 1).type == StepType::SAVE;
+                    }
+                    if (std::string(step.label) == "BackToTheCoinsClerk" && step.type == StepType::WALK && i > 0 &&
+                        !save_before_big_packs
+                    ){
+                        save_before_big_packs = script.step(segment, i - 1).type == StepType::SAVE;
+                    }
+                }
+                //  The saves in the Game Corner (after a pack, a game): no way out is known there, so the
+                //  segment is not given up from them (build 56: the program stops after two failures).
+                for (size_t i = 2; i + 1 < segment.step_count; i++){
+                    if (script.step(segment, i - 1).type == StepType::SAVE && script.step(segment, i - 2).type == StepType::COINS){
+                        game_corner_saves++;
+                        game_corner_saves_no &= story_once_leave(script, segment, i) == OnceLeave::NO;
+                    }
+                }
+                ferry_is_186 = segment.step_count >= 186 &&
+                    std::string(script.step(segment, 185).label) == "FerryToVermilion" &&
+                    script.step(segment, 184).type == StepType::SAVE;
+            }
+        }
+        check(
+            potion_buys_fine == 3,
+            "HO-OH, LUGIA and DEOXYS buy three MAX POTIONs at the Indigo Plateau before their ULTRA BALLs (build 62)"
+        );
+        check(
+            porygon_rematches == 5 && porygon_rematch_wins == 22 && ferry_is_186,
+            "the PORYGON money is five rounds of Lady Gillian, 22 battles (build 62): the ferry home after the "
+            "last one is step 186, after a save"
+        );
+        check(
+            save_after_first_pack && save_before_big_packs && game_corner_saves >= 2 && game_corner_saves_no,
+            "the Game Corner is saved after the first pack of 50 and with the COINS at 49 modulo 50, before the "
+            "28 packs (build 62)"
+        );
+        //  The step numbers of a save of build 61, carried over to the data of build 62.
+        check(
+            story_legacy_step("C20_90_PORYGON", 206) == 186 && story_legacy_step("C20_90_PORYGON", 186) == 186 &&
+            story_legacy_step("C20_90_PORYGON", 190) == 186 && story_legacy_step("C20_90_PORYGON", 185) == 185 &&
+            story_legacy_step("C20_90_PORYGON", 220) == 201 && story_legacy_step("C20_90_PORYGON", 251) == 233 &&
+            story_legacy_step("C20_88_DEOXYS", 99) == 106 && story_legacy_step("C20_88_DEOXYS", 72) == 72 &&
+            story_legacy_step("C20_01B_MONEY", 90) == 90,
+            "a save of build 61 (three words in the save file) is carried over to the step numbers of build 62"
         );
         check(
             lugia_talks == 0 && lugia_battles == 1 && lugia_press_before,

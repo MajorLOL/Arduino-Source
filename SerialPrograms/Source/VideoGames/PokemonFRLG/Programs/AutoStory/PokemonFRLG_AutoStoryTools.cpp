@@ -12,10 +12,12 @@
 #include <utility>
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
+#include "Common/Cpp/PrettyPrint.h"
 #include "Common/Cpp/Time.h"
 #include "Common/Cpp/MemoryUtilization/MemoryUtilization.h"
 #include "CommonFramework/Exceptions/OperationFailedExceptionWithScreenshot.h"
 #include "CommonFramework/Exceptions/ProgramFinishedException.h"
+#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
@@ -161,6 +163,15 @@ void wait_after_warp(StoryRuntime& rt, MapPreview preview, const char* leg_name)
 //  warp, and the route went on as if on 2F.)
 bool battle_instead_of_warp(StoryRuntime& rt, bool dark, const char* leg_name){
     if (dark){
+        return false;
+    }
+    //  (Build 62) Navel Rock and Birth Island have no wild Pokemon in the
+    //  game's data (src/data/wild_encounters.json): no battle can take the
+    //  place of a warp there. The picture of their stairs passed for a
+    //  battle's text box after the fade seven times in the run of build 59
+    //  (24 November, LUGIA's way home), each time 3 s to see nothing and 6 s
+    //  more to wait for text that did not come.
+    if (rt.no_wild_here){
         return false;
     }
     AdvanceBattleDialogWatcher battle_text(COLOR_RED);
@@ -1919,6 +1930,12 @@ void walk_leg(StoryRuntime& rt, const StoryScript& script, int32_t leg_index){
     StoryMemoryScope memory_scope("walking");
     const StoryLeg& leg = script.leg(leg_index);
     rt.console.log(std::string("Walking: ") + leg.name);
+    //  (Build 62) Where no wild Pokemon can come (see battle_instead_of_warp()).
+    rt.no_wild_here = false;
+    if (leg.start_map < script.map_name_count){
+        const std::string here = script.map_names[leg.start_map];
+        rt.no_wild_here = here.compare(0, 10, "Navel Rock") == 0 || here.compare(0, 12, "Birth Island") == 0;
+    }
     const std::vector<StoryRun> runs = merge_runs(script.leg_runs(leg), leg.run_count, rt.verify_walking);
 
     //  Which way the player faces is what our own last move left. The
@@ -3103,10 +3120,42 @@ bool story_close_repel_text(StoryRuntime& rt){
 }
 
 
+void story_save_picture(StoryRuntime& rt, const std::string& label){
+    constexpr int MAX_PICTURES = 40;
+    if (rt.pictures_saved >= MAX_PICTURES){
+        return;
+    }
+    VideoSnapshot screen = rt.console.video().snapshot();
+    if (!screen){
+        rt.console.log("No picture on the video to save (" + label + ").", COLOR_ORANGE);
+        return;
+    }
+    std::string clean;
+    for (char c : label){
+        clean += std::isalnum((unsigned char)c) ? c : '_';
+        if (clean.size() >= 48){
+            break;
+        }
+    }
+    const std::string name = ERROR_PATH() + now_to_filestring() + "-PocketPilot-" + clean + ".png";
+    if (screen->save(name)){
+        rt.pictures_saved++;
+        rt.console.log("Picture of the video saved: " + name, COLOR_ORANGE);
+    }else{
+        rt.console.log("The picture of the video could not be saved: " + name, COLOR_RED);
+    }
+}
+
+
 void story_back_to_overworld(StoryRuntime& rt, const std::string& where){
     for (int attempt = 0; attempt < 4; attempt++){
         if (in_overworld(rt.console, rt.context)){
             return;
+        }
+        //  (Build 62) What the screen shows at the first miss: the error that
+        //  follows has the picture of the last one only.
+        if (attempt == 0){
+            story_save_picture(rt, "NotInTheOverworld-" + where);
         }
         pbf_mash_button(rt.context, BUTTON_B, 3000ms);
         rt.context.wait_for_all_requests();
