@@ -39,6 +39,7 @@
 #include <QRadialGradient>
 #include <QScreen>
 #include <QStandardPaths>
+#include <QStringList>
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QUrl>
@@ -4274,8 +4275,9 @@ int run_setup_test(QApplication& application, const QString& folder){
 
 //  The films of the tutorials, decoded without a window: each starts, has its
 //  picture size, its sound and its length, and plays to the end (a jump to
-//  the last seconds, so that the test does not take minutes).
-int run_tutorial_test(QApplication& application){
+//  the last seconds, so that the test does not take minutes). What it found is
+//  in the report, one line each; the last line says passed or FAILED.
+int run_tutorial_test(QApplication& application, QStringList& report){
     (void)application;
     static const char* const NAMES[] = {"tutorial-pico", "tutorial-esp32", "tutorial-esp32s3"};
     int failures = 0;
@@ -4283,68 +4285,80 @@ int run_tutorial_test(QApplication& application){
         const QString film = QString::fromLatin1(name);
         const QString path = extract_film(film);
         if (path.isEmpty()){
-            qWarning("Tutorial test: FAILED: %s is not in the program.", name);
+            report << QString("Tutorial test: FAILED: %1 is not in the program.").arg(film);
             failures++;
             continue;
         }
 
-        QMediaPlayer player;
-        QVideoSink sink;
-        player.setVideoSink(&sink);
         int frames = 0;
         QSize size;
-        QObject::connect(&sink, &QVideoSink::videoFrameChanged, &player, [&](const QVideoFrame& frame){
-            if (frame.isValid()){
-                frames++;
-                size = frame.size();
-            }
-        });
-        QEventLoop loop;
         bool finished = false;
         bool invalid = false;
         QString error;
-        QObject::connect(&player, &QMediaPlayer::mediaStatusChanged, &loop, [&](QMediaPlayer::MediaStatus status){
-            if (status == QMediaPlayer::EndOfMedia){
-                finished = true;
-                loop.quit();
-            }else if (status == QMediaPlayer::InvalidMedia){
+        qint64 length = 0;
+        int audio_tracks = 0;
+        int first_frames = 0;
+        {
+            QMediaPlayer player;
+            QVideoSink sink;
+            player.setVideoSink(&sink);
+            QObject::connect(&sink, &QVideoSink::videoFrameChanged, &player, [&](const QVideoFrame& frame){
+                if (frame.isValid()){
+                    frames++;
+                    size = frame.size();
+                }
+            });
+            QEventLoop loop;
+            QObject::connect(&player, &QMediaPlayer::mediaStatusChanged, &loop, [&](QMediaPlayer::MediaStatus status){
+                if (status == QMediaPlayer::EndOfMedia){
+                    finished = true;
+                    loop.quit();
+                }else if (status == QMediaPlayer::InvalidMedia){
+                    invalid = true;
+                    loop.quit();
+                }
+            });
+            QObject::connect(&player, &QMediaPlayer::errorOccurred, &loop, [&](QMediaPlayer::Error, const QString& message){
+                error = message;
                 invalid = true;
                 loop.quit();
-            }
-        });
-        QObject::connect(&player, &QMediaPlayer::errorOccurred, &loop, [&](QMediaPlayer::Error, const QString& message){
-            error = message;
-            invalid = true;
-            loop.quit();
-        });
+            });
 
-        //  The first seconds, as they are played.
-        player.setSource(QUrl::fromLocalFile(path));
-        player.play();
-        QTimer start_timer;
-        start_timer.setSingleShot(true);
-        QObject::connect(&start_timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-        start_timer.start(5000);
-        loop.exec();
-        const int first_frames = frames;
-
-        //  The end: jump to the last seconds and play on.
-        const qint64 length = player.duration();
-        const int audio_tracks = (int)player.audioTracks().size();
-        if (!invalid && length > 4000){
-            frames = 0;
-            player.setPosition(length - 3000);
-            QTimer::singleShot(25000, &loop, [&]{ loop.quit(); });
+            //  The first seconds, as they are played.
+            player.setSource(QUrl::fromLocalFile(path));
+            player.play();
+            QTimer::singleShot(5000, &loop, [&]{ loop.quit(); });
             loop.exec();
+            first_frames = frames;
+
+            //  The end: jump to the last seconds and play on.
+            length = player.duration();
+            audio_tracks = (int)player.audioTracks().size();
+            if (!invalid && length > 4000){
+                frames = 0;
+                player.setPosition(length - 3000);
+                QTimer::singleShot(25000, &loop, [&]{ loop.quit(); });
+                loop.exec();
+            }
+
+            //  Let go of the file before the player goes.
+            player.stop();
+            player.setVideoSink(nullptr);
+            player.setSource(QUrl());
+            QCoreApplication::processEvents();
         }
 
-        qInfo(
-            "Tutorial test: %s: %d pictures of %dx%d in the first 5 s, %d at the end, %d sound track(s), length %lld ms, %s%s%s.",
-            name, first_frames, size.width(), size.height(), frames, audio_tracks, (long long)length,
-            finished ? "played to the end" : "did not play to the end",
-            error.isEmpty() ? "" : ", error: ",
-            error.toUtf8().constData()
-        );
+        report << QString(
+            "Tutorial test: %1: %2 pictures of %3x%4 in the first 5 s, %5 at the end, %6 sound track(s), length %7 ms, %8%9."
+        )
+            .arg(film)
+            .arg(first_frames)
+            .arg(size.width()).arg(size.height())
+            .arg(frames)
+            .arg(audio_tracks)
+            .arg(length)
+            .arg(finished ? "played to the end" : "did not play to the end")
+            .arg(error.isEmpty() ? QString() : ", error: " + error);
         const bool ok =
             !invalid &&
             finished &&
@@ -4355,10 +4369,10 @@ int run_tutorial_test(QApplication& application){
             length >= 60000;
         if (!ok){
             failures++;
-            qWarning("Tutorial test: FAILED: %s.", name);
+            report << QString("Tutorial test: FAILED: %1.").arg(film);
         }
     }
-    qInfo("Tutorial test: %s.", failures == 0 ? "passed" : "FAILED");
+    report << QString("Tutorial test: %1.").arg(failures == 0 ? "passed" : "FAILED");
     return failures == 0 ? 0 : 1;
 }
 

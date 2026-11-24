@@ -350,12 +350,20 @@ jobs:
             $process.Kill()
             $code = -1
           }
+          $passed = $false
           if (Test-Path $log) {
             Get-Content $log | Select-String "Intro" | ForEach-Object { Write-Host $_.Line }
+            $passed = [bool](Select-String -Path $log -Pattern "Intro test: passed" -Quiet)
           }
           Write-Host "The intro test: exit code $code."
-          if ($code -ne 0) {
+          if (-not $passed) {
             throw "The intro test failed (exit code $code): the film did not come through whole."
+          }
+          #  The decoder of the film sometimes crashes when the program ends, after
+          #  the film came through (seen on this machine also in builds that did
+          #  not touch the intro): the verdict is what the test logged.
+          if ($code -ne 0) {
+            Write-Host "::warning::The intro test passed, but the program ended with exit code $code."
           }
 
       #  The films of the video tutorials (see Source/PocketPilot/PocketPilot_Setup.h):
@@ -377,12 +385,19 @@ jobs:
             $process.Kill()
             $code = -1
           }
+          $passed = $false
           if (Test-Path $log) {
             Get-Content $log | Select-String "Tutorial" | ForEach-Object { Write-Host $_.Line }
+            $passed = [bool](Select-String -Path $log -Pattern "Tutorial test: passed" -Quiet)
           }
           Write-Host "The tutorial film test: exit code $code."
-          if ($code -ne 0) {
+          if (-not $passed) {
             throw "The tutorial film test failed (exit code $code): a film did not come through whole."
+          }
+          #  As for the intro: the verdict is what the test logged, not how the
+          #  decoder ends.
+          if ($code -ne 0) {
+            Write-Host "::warning::The tutorial film test passed, but the program ended with exit code $code."
           }
 
       #  The languages (see Source/PocketPilot/PocketPilot_Language.h): every

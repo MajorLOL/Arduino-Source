@@ -245,7 +245,14 @@ int run_program(int argc, char *argv[]){
             return PocketPilot::run_intro_test(application);
         }
         if (tutorial_test){
-            return PocketPilot::run_tutorial_test(application);
+            //  What it found goes in the log, where the workflow reads it.
+            QStringList report;
+            const int code = PocketPilot::run_tutorial_test(application, report);
+            Logger& test_logger = global_logger_tagged();
+            for (const QString& line : report){
+                test_logger.log(line.toStdString(), Color());
+            }
+            return code;
         }
         if (play_intro){
             PocketPilot::play_intro();

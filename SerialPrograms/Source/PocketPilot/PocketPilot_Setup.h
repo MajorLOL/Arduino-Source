@@ -48,6 +48,7 @@
 #define PokemonAutomation_PocketPilot_Setup_H
 
 #include <QString>
+#include <QStringList>
 
 class QApplication;
 
@@ -94,8 +95,9 @@ SetupResult run_setup(const SetupRequest& request);
 int run_setup_test(QApplication& application, const QString& screenshots_folder);
 
 //  The test of the tutorial films: each is decoded without a window, has its
-//  picture size, its sound and its length, and plays to the end.
-int run_tutorial_test(QApplication& application);
+//  picture size, its sound and its length, and plays to the end. What was found
+//  is in the report, a line each; the last line says passed or FAILED.
+int run_tutorial_test(QApplication& application, QStringList& report);
 
 
 
