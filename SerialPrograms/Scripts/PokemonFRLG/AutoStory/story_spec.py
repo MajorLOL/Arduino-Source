@@ -3806,9 +3806,14 @@ def lax_incense_way(label):
     return steps
 
 
-def daycare_segment(seg_id, name, baby, cycles, count, held=None):
+def daycare_segment(seg_id, name, baby, cycles, count, held=None, owned=None, boxes_have=0):
     """held: the words of an item of the bag that the parent which is not the
-    DITTO holds in the Day Care (WYNAUT: the LAX INCENSE, fetched first)."""
+    DITTO holds in the Day Care (WYNAUT: the LAX INCENSE, fetched first).
+    owned (build 64): (species, count) the table must have for the segment to
+    be skipped, when it is not the baby's own (the 4th TYROGUE: a HITMONTOP).
+    boxes_have (build 64): skip the trip as well when the boxes already hold
+    that many of the baby (a TYROGUE that is there is trained, not bred again)."""
+    owned_species, owned_count = owned if owned else (baby, count)
     rounds = []
     for k in range(DAYCARE_ROUNDS):
         rounds += daycare_round(seg_id, k)
@@ -3848,14 +3853,15 @@ def daycare_segment(seg_id, name, baby, cycles, count, held=None):
                    "label": "LAX INCENSE in the bag?"}]
     steps += [
         talk(PC["VERMILION"], xy=PC_TILE, mode="plain", dirs=["up"], label="ToThePC"),
-        {"daycare_trip": {"baby": baby, "steps": trip}, "label": "Parents out of the boxes"},
+        {"daycare_trip": {"baby": baby, "steps": trip, "skip_if_boxes_have": boxes_have},
+         "label": "Parents out of the boxes"},
         {"outside": True, "label": seg_id + "_Out"},
         save(),
     ]
     return {"id": seg_id, "chapter": 20, "no_repel": True,
             "title": "POKeDEX collection: %s bred at the Four Island Day Care (a DITTO and a parent, the egg hatched on the line outside)" % name,
-            "steps": [{"unless_owned": {"species": baby, "count": count, "steps": steps, "segment": True},
-                       "label": "%s in the table?" % name}]}
+            "steps": [{"unless_owned": {"species": owned_species, "count": owned_count, "steps": steps, "segment": True},
+                       "label": "%s in the table?" % owned_species.upper()}]}
 
 
 CHAPTER20 += [daycare_segment("C20_%d_DAYCARE_%02d_%s" % (66 + k, k + 1, name), name, baby, cycles, count)
@@ -3909,6 +3915,22 @@ def vitamins_segment(seg_id):
 
 
 CHAPTER20 += [vitamins_segment("C20_79B_VITAMINS")]
+
+#  Build 64 (experimental): a fourth TYROGUE, for the HITMONTOP that is still
+#  missing. The three of C20_72 to C20_74 are the tries the training makes
+#  (one evolves into HITMONTOP in about two cases in three with the vitamins,
+#  see above); a save whose three TYROGUE were trained before the vitamins
+#  existed (build 57) has HITMONLEE and HITMONCHAN and no TYROGUE left, and
+#  the vitamins would be bought for nothing. This segment comes after the
+#  vitamins: it is skipped when the table has the HITMONTOP, and its trip to
+#  the Day Care is skipped when a TYROGUE lies in the boxes already (the
+#  usual run: the three of the Day Care wait there for their training). The
+#  parents are a DITTO and a HITMONLEE or HITMONCHAN of the boxes. The
+#  training segments after it (C20_75 and on) take the new TYROGUE with the
+#  vitamins that were bought, and the next round tries again when the
+#  HITMONTOP is still missing.
+CHAPTER20 += [daycare_segment("C20_79C_DAYCARE_15_TYROGUE", "TYROGUE (for the HITMONTOP)", "tyrogue", 25, 1,
+                              owned=("hitmontop", 1), boxes_have=1)]
 
 
 # ------------------------------------------------ chapter 20, what the Day Care hatched, by level

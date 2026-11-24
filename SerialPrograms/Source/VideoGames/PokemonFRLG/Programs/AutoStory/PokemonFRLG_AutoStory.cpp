@@ -1762,6 +1762,16 @@ void AutoStory::run_segment(
                     COLOR_ORANGE
                 );
                 i += skip;
+            }else if (step.p1 > 0 && rt.boxes.count(baby) >= (int)step.p1){
+                //  (Build 64) A TYROGUE that is in a box is trained first (by the
+                //  segments after this one): no second one is bred for it.
+                env.log(
+                    label + ": the PC's boxes already hold " + std::to_string(rt.boxes.count(baby)) + " " + baby +
+                    ": it is trained first, so no egg is bred now. The next " + std::to_string(skip) +
+                    " steps are skipped.",
+                    COLOR_BLUE
+                );
+                i += skip;
             }else if (!story_daycare_out(rt, label, baby)){
                 env.log(label + ": the next " + std::to_string(skip) + " steps are skipped.", COLOR_ORANGE);
                 i += skip;

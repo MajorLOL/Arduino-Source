@@ -257,7 +257,9 @@ enum class StepType : uint8_t{
                         //  Pokemon of the family of the species "text" (the one that is bred) come
                         //  out of the boxes into the party's fifth and sixth place. No parents
                         //  there (or the party has no six Pokemon): skip the next p0 steps, the
-                        //  whole trip to the Day Care and back to this PC
+                        //  whole trip to the Day Care and back to this PC. p1 > 0 (build 64):
+                        //  the same when the boxes already hold p1 or more of the baby's species
+                        //  (the 4th TYROGUE is only bred when none is left to train)
     DAYCARE_GIVE,       //  in front of the woman of the Four Island Day Care (across the counter):
                         //  the party's fifth and sixth Pokemon are left with her
     DAYCARE_WALK,       //  back and forth (dir) along a line of p1 tiles with a wall at both ends,

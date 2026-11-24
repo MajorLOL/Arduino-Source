@@ -3049,9 +3049,48 @@ int check_vitamins_and_coins(Logger& logger){
             vitamins != nullptr && story_once_segment(script, *vitamins) &&
             script.step(*vitamins, 0).type == StepType::SKIP_IF_OWNED &&
             std::string(script.step(*vitamins, 0).text) == "hitmontop" &&
-            wynaut_at + 1 == vitamins_at && vitamins_at + 1 == level_20_at,
-            "the vitamins' segment: a once segment for HITMONTOP, between WYNAUT's egg and the levels"
+            wynaut_at + 1 == vitamins_at && vitamins_at + 2 == level_20_at,
+            "the vitamins' segment: a once segment for HITMONTOP, between WYNAUT's egg and the fourth TYROGUE"
         );
+        //  (Build 64) The fourth TYROGUE: a Day Care segment that is left out when the table has
+        //  the HITMONTOP, whose trip is left out when a TYROGUE lies in the boxes already. The
+        //  other TYROGUE (and every other egg of the Day Care) have no such check.
+        {
+            const StorySegment* fourth = nullptr;
+            size_t day_care_outs = 0;
+            size_t outs_with_boxes_check = 0;
+            bool fourth_is_tyrogue_check = false;
+            for (size_t s = 0; s < script.segment_count; s++){
+                const StorySegment& segment = script.segments[s];
+                const std::string id = segment.id;
+                if (id == "C20_79C_DAYCARE_15_TYROGUE"){
+                    fourth = &segment;
+                }
+                if (id.find("_DAYCARE_") == std::string::npos){
+                    continue;
+                }
+                for (size_t k = 0; k < segment.step_count; k++){
+                    const StoryStep& step = script.step(segment, k);
+                    if (step.type != StepType::DAYCARE_OUT){
+                        continue;
+                    }
+                    day_care_outs++;
+                    if (step.p1 > 0){
+                        outs_with_boxes_check++;
+                        fourth_is_tyrogue_check = id == "C20_79C_DAYCARE_15_TYROGUE" &&
+                            std::string(step.text) == "tyrogue" && step.p1 == 1;
+                    }
+                }
+            }
+            check(
+                fourth != nullptr && story_once_segment(script, *fourth) &&
+                script.step(*fourth, 0).type == StepType::SKIP_IF_OWNED &&
+                std::string(script.step(*fourth, 0).text) == "hitmontop" && script.step(*fourth, 0).p1 == 1 &&
+                day_care_outs == 15 && outs_with_boxes_check == 1 && fourth_is_tyrogue_check,
+                "the fourth TYROGUE (build 64): a once segment for HITMONTOP; its Day Care trip is the only one "
+                "of the fifteen that is left out when the boxes hold a TYROGUE"
+            );
+        }
         if (vitamins != nullptr){
             int protein = 0;
             int iron = 0;
@@ -3389,7 +3428,7 @@ int check_leave_out(Logger& logger){
         }
     }
     check(
-        once == 104 && exp_leave_no &&
+        once == 105 && exp_leave_no &&
         once_ids == "C20_19_DOJO, C20_20_SNORLAX, C20_21_KABUTO, C20_22_AERODACTYL, C20_24_PC_BOXES, C20_25_STONES, "
             "C20_26_TRADE_FARFETCHD, C20_27_TRADE_JYNX, C20_28_TRADE_MR_MIME, C20_29_TRADE_LICKITUNG, "
             "C20_30_MOON_STONE_MANSION, C20_32_MOON_STONE_MT_MOON_1F, "
@@ -3414,6 +3453,7 @@ int check_leave_out(Logger& logger){
             "C20_72_DAYCARE_07_TYROGUE, C20_73_DAYCARE_08_TYROGUE, C20_74_DAYCARE_09_TYROGUE, "
             "C20_75_DAYCARE_10_KABUTO, C20_76_DAYCARE_11_EEVEE, C20_77_DAYCARE_12_EEVEE, "
             "C20_78_DAYCARE_13_EEVEE, C20_79_DAYCARE_14_WYNAUT, C20_79B_VITAMINS, "
+            "C20_79C_DAYCARE_15_TYROGUE, "
             "C20_75_LEVEL_20, C20_76_LEVEL_21, C20_77_LEVEL_22, C20_78_LEVEL_23, C20_79_LEVEL_24, "
             "C20_80_LEVEL_25, C20_81_LEVEL_26, C20_82_LEVEL_27, C20_83_LEVEL_28, C20_84_LEVEL_29, "
             "C20_EXP_23_ELITE_FOUR, C20_EXP_24_ELITE_FOUR, C20_EXP_25_ELITE_FOUR, "
@@ -3431,7 +3471,8 @@ int check_leave_out(Logger& logger){
         "eighteen more rounds of the Elite Four for experience (twelve after the segments by level, six after the "
         "Day Care's) for what comes out of them with a lot of experience to go, and PORYGON (the Game Corner's "
         "slot machines for 9999 coins) at the end; build 57 (experimental) adds the segment of the vitamins for "
-        "a HITMONTOP between the Day Care's eggs and the levels"
+        "a HITMONTOP between the Day Care's eggs and the levels; build 64 (experimental) adds a fourth "
+        "TYROGUE after it, for the HITMONTOP that is still missing when none is left in the boxes"
     );
     check(
         sevii_saves == 16 && sevii_saves_wrong == 0 && porygon_nurse_saves == 1 && porygon_sevii == 8,
@@ -3634,7 +3675,8 @@ int check_leave_out(Logger& logger){
             index_of("C20_74_DAYCARE_09_TYROGUE") + 1 == index_of("C20_75_DAYCARE_10_KABUTO") &&
             index_of("C20_78_DAYCARE_13_EEVEE") + 1 == index_of("C20_79_DAYCARE_14_WYNAUT") &&
             index_of("C20_79_DAYCARE_14_WYNAUT") + 1 == index_of("C20_79B_VITAMINS") &&
-            index_of("C20_79B_VITAMINS") + 1 == index_of("C20_75_LEVEL_20") &&
+            index_of("C20_79B_VITAMINS") + 1 == index_of("C20_79C_DAYCARE_15_TYROGUE") &&
+            index_of("C20_79C_DAYCARE_15_TYROGUE") + 1 == index_of("C20_75_LEVEL_20") &&
             index_of("C20_84_LEVEL_29") + 1 == index_of("C20_EXP_23_ELITE_FOUR") &&
             index_of("C20_EXP_28_ELITE_FOUR") + 1 == index_of("C20_85_STONES_2") &&
             index_of("C20_88_DEOXYS") + 1 == index_of("C20_89_UNOWN") &&

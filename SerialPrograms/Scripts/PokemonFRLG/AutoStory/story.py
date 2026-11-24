@@ -1718,8 +1718,11 @@ class Builder:
             for kind, count in (("DAYCARE_GIVE", 1), ("DAYCARE_STORE", 1), ("DAYCARE_TAKE", 1), ("HATCH", 1)):
                 if sum(1 for s in sub if s["type"] == kind) != count:
                     raise StoryError("daycare_trip: %d %s step(s) (%s)" % (count, kind, step.get("label", "?")))
+            #  "skip_if_boxes_have" (build 64): the trip is skipped too when the
+            #  boxes already hold that many of the baby's species (DAYCARE_OUT p1):
+            #  the 4th TYROGUE of C20_79C is bred only when none is left to train.
             out.append({"type": "DAYCARE_OUT", "label": step.get("label", "Parents out of the boxes"),
-                        "text": b["baby"], "p0": len(sub) + 1})
+                        "text": b["baby"], "p0": len(sub) + 1, "p1": int(b.get("skip_if_boxes_have", 0))})
             out.extend(sub)
             out.append({"type": "DAYCARE_END", "label": b.get("end_label", "The parents are back")})
             return
