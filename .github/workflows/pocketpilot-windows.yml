@@ -366,6 +366,13 @@ jobs:
           if (Test-Path "$shots/setup-test.txt") {
             Get-Content "$shots/setup-test.txt" | ForEach-Object { Write-Host $_ }
           }
+          #  Two small pictures, as text in the log (base64 of a JPEG): how the
+          #  screens look on this machine, without downloading the artifact.
+          Get-ChildItem "$shots/preview-*.jpg" -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "PP-PREVIEW-BEGIN $($_.Name)"
+            Write-Host ([Convert]::ToBase64String([IO.File]::ReadAllBytes($_.FullName)))
+            Write-Host "PP-PREVIEW-END $($_.Name)"
+          }
           Write-Host "The setup test: exit code $code."
           if ($code -ne 0) {
             throw "The setup test failed (exit code $code): see the lines above."

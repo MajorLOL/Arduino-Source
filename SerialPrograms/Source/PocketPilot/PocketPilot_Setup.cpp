@@ -114,9 +114,15 @@ QString T(const char* english){
 //  Type
 //  ---------------------------------------------------------------------
 
+//  The family names that Qt reports for the files. Windows and Linux do not
+//  name them alike (one family "Fredoka" with three weights, or three
+//  families), so each weight asks for the name its own file reported, with
+//  its own weight: that finds the file either way.
 struct Families{
     QString serif;
-    QString ui;
+    QString ui500;
+    QString ui600;
+    QString ui700;
 };
 const Families& families(){
     static const Families result = []{
@@ -127,9 +133,9 @@ const Families& families(){
             return list.isEmpty() ? QString() : list.first();
         };
         found.serif = load(":/pocketpilot/setup/Newsreader16pt-Regular.ttf");
-        found.ui = load(":/pocketpilot/setup/Fredoka-Medium.ttf");
-        load(":/pocketpilot/setup/Fredoka-SemiBold.ttf");
-        load(":/pocketpilot/setup/Fredoka-Bold.ttf");
+        found.ui500 = load(":/pocketpilot/setup/Fredoka-Medium.ttf");
+        found.ui600 = load(":/pocketpilot/setup/Fredoka-SemiBold.ttf");
+        found.ui700 = load(":/pocketpilot/setup/Fredoka-Bold.ttf");
         return found;
     }();
     return result;
@@ -146,8 +152,12 @@ QFont serif_font(double px){
 //  weight: 500, 600 or 700.
 QFont ui_font(double px, int weight = 500){
     QFont font;
-    if (!families().ui.isEmpty()){
-        font.setFamily(families().ui);
+    const Families& found = families();
+    const QString& family = weight >= 700 ? found.ui700 : weight >= 600 ? found.ui600 : found.ui500;
+    if (!family.isEmpty()){
+        font.setFamily(family);
+    }else if (!found.ui500.isEmpty()){
+        font.setFamily(found.ui500);
     }
     font.setPixelSize((int)std::lround(px));
     font.setWeight(weight >= 700 ? QFont::Bold : weight >= 600 ? QFont::DemiBold : QFont::Medium);
@@ -2347,6 +2357,18 @@ void save(Canvas& canvas, const QString& folder, const QString& name){
     canvas.picture().save(QDir(folder).filePath(name + ".png"));
 }
 
+//  A small picture (JPEG) for the log of the build: the workflow prints it as
+//  text, so that how the screens look on the build machine can be seen
+//  without downloading anything.
+void save_preview(Canvas& canvas, const QString& folder, const QString& name){
+    if (folder.isEmpty()){
+        return;
+    }
+    QDir().mkpath(folder);
+    canvas.picture().scaled(800, 450, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+        .save(QDir(folder).filePath(name + ".jpg"), "JPG", 70);
+}
+
 //  A picture is not all black: something was drawn.
 bool has_content(const QImage& image){
     qint64 sum = 0;
@@ -2409,6 +2431,7 @@ int run_setup_test(QApplication& application, const QString& folder){
     canvas.click("bar");
     canvas.wait(0.9);
     save(canvas, folder, "setup-07-board-list");
+    save_preview(canvas, folder, "preview-board-list");
     canvas.move_to("row:uno");
     canvas.wait(0.6);
     save(canvas, folder, "setup-08-board-not-supported");
@@ -2460,6 +2483,9 @@ int run_setup_test(QApplication& application, const QString& folder){
     for (int c = 0; c < 7; c++){
         canvas.wait(c == 2 ? 1.6 : 1.0);
         save(canvas, folder, QString("setup-13-steps-%1").arg(c + 1));
+        if (c == 6){
+            save_preview(canvas, folder, "preview-steps");
+        }
         if (c < 6){
             checker.check(canvas.click("next"), QString("next step %1").arg(c + 1));
         }
