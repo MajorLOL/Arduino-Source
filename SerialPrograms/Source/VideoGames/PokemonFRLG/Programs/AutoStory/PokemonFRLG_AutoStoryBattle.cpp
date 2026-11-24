@@ -1975,6 +1975,15 @@ StoryBattleResult run_story_battle(
     int fades_seen = 0;
     //  The battle is over: what it was.
     auto over = [&](){
+        if (!shiny_caught && legendary && weaken_turns > 0 && !weakened && balls_thrown == 0){
+            //  Build 60: DEOXYS (level 30, some 74 HP) fainted from the first hit of the lead
+            //  (level 100) in 26 tries in a row, and the log said only "Battle over."
+            console.log(
+                "The battle ended while it was being weakened, before a ball was thrown: a hit "
+                "of this team most likely took all its HP.",
+                COLOR_ORANGE
+            );
+        }
         if (!shiny_caught){
             return result;
         }

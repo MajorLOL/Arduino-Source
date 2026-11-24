@@ -3946,9 +3946,12 @@ CHAPTER20 += [stones_segment("C20_85_STONES_2")]
 #  The Switch version gives the MYSTIC TICKET and the AURORA TICKET after the
 #  Hall of Fame; the Vermilion sailor's tickets menu takes the Seagallop to
 #  NAVEL ROCK (HO-OH on the summit, LUGIA at the base) and BIRTH ISLAND
-#  (DEOXYS). Level 70, catch rate 3 (30 for DEOXYS: its own segment, later):
-#  weakened, then ULTRA BALLs, a lot of them (about 2 in 100 catch it, so
-#  some 70 are a fair try). Each of them is a segment of its own that first
+#  (DEOXYS). Level 70, catch rate 3 (DEOXYS: level 30, catch rate 3, about
+#  74 HP): weakened, then ULTRA BALLs, a lot of them (about 2 in 100 catch
+#  it, so some 70 are a fair try). Not DEOXYS: any hit of the lead (Level
+#  100) takes all its HP, so its tries ended with the foe fainted before
+#  the first ball (build 59: 26 tries in 50 minutes); it gets the balls at
+#  full HP (0.8 in 100 each, about 4 tries in 10 for the 73 of a trip). Each of them is a segment of its own that first
 #  makes the money (nine battles with Lady Gillian, 88200: 73 ULTRA BALLs),
 #  buys the ULTRA BALLs in Fuchsia City, and goes there (no MAX REPELs: the
 #  maps of Navel Rock and Birth Island have no wild Pokemon in the game's
@@ -4044,7 +4047,7 @@ CHAPTER20 += [
     legend_segment(
         "C20_88_DEOXYS", "Deoxys", "deoxys", 2, "MAP_BIRTH_ISLAND_HARBOR",
         legendary(DEOXYS_STONE, None, ["FLAG_FOUGHT_DEOXYS", "FLAG_HIDE_DEOXYS", "FLAG_HIDE_BIRTH_ISLAND_METEORITE"],
-                  "Deoxys", weaken=True, start=deoxys_puzzle()),
+                  "Deoxys", weaken=False, start=deoxys_puzzle()),
         "Deoxys on Birth Island (the Aurora Ticket; the triangle; Gillian's prize money, Ultra Balls)"),
 ]
 

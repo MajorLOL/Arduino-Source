@@ -45870,7 +45870,7 @@ inline constexpr StoryStep STEPS[] = {
     {StepType::PRESS, "StonePress10", -1, 1, 2500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
     {StepType::WALK, "StoneWalk11", 5340, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::PRESS, "StonePress11", -1, 1, 1500, -1, 0, 0, DPAD_NONE, "A", 0, 0, 0},
-    {StepType::BATTLE, "Deoxys", -1, 60000, 2, 1, 0, 0, DPAD_NONE, "", 0, 0, 0},
+    {StepType::BATTLE, "Deoxys", -1, 60000, 2, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::SAVE, "Save", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::HEAL_ITEMS, "Heal with items after Deoxys", -1, 1, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
     {StepType::WALK, "C20_88_DEOXYS_FerryHome", 5341, 0, 0, -1, 0, 0, DPAD_NONE, "", 0, 0, 0},
@@ -46680,7 +46680,7 @@ inline const StoryScript& story_CHARMANDER(){
 }
 
 //  A digest of all of the above.
-inline constexpr const char* DATA_ID = "b150a510c5";
+inline constexpr const char* DATA_ID = "3377761e3c";
 
 }
 }

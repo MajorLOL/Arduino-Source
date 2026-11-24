@@ -3461,6 +3461,28 @@ int check_leave_out(Logger& logger){
                 }
             }
         }
+        //  (Build 60) DEOXYS (level 30, some 74 HP) is not weakened: a hit of the lead (level 100) takes
+        //  all its HP (26 tries in a row, the foe fainted before the first ball). p2 & 1: weaken it first
+        //  (-1: no flags).
+        size_t deoxys_battles = 0;
+        size_t deoxys_weakened = 0;
+        for (size_t s = 0; s < script.segment_count; s++){
+            const StorySegment& segment = script.segments[s];
+            if (std::string(segment.id) != "C20_88_DEOXYS"){
+                continue;
+            }
+            for (size_t i = 0; i < segment.step_count; i++){
+                const StoryStep& step = script.step(segment, i);
+                if (step.type == StepType::BATTLE && step.p1 == 2 && std::string(step.label) == "Deoxys"){
+                    deoxys_battles++;
+                    deoxys_weakened += step.p2 > 0 && (step.p2 & 1) != 0 ? 1 : 0;
+                }
+            }
+        }
+        check(
+            deoxys_battles == 1 && deoxys_weakened == 0,
+            "DEOXYS is caught with balls at full HP (build 60): its battle step has no weakening"
+        );
         check(
             lugia_talks == 0 && lugia_battles == 1 && lugia_press_before,
             "LUGIA has no text before its battle (build 59): no talk waits for a text box, the step before the "
