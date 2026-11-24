@@ -44,6 +44,7 @@
 #include "Options/Environment/ThemeSelectorOption.h"
 #include "Startup/SetupSettings.h"
 #include "Windows/MainWindow.h"
+#include "PocketPilot/PocketPilot_Intro.h"
 #include "PocketPilot/PocketPilot_SelfTest.h"
 #include "GlobalSettingsPanel.h"
 #include "GlobalServices.h"
@@ -215,6 +216,32 @@ int run_program(int argc, char *argv[]){
     //  read. Not in the main window's constructor: a change of style sends
     //  an event to every widget, also to a window that is still being made.
     apply_current_theme();
+
+    //  The intro plays first, before anything else is prepared: the short
+    //  film with the two Joy-Cons. Not in the tests (nobody is there to
+    //  watch it) and not when the setting or --no-intro turns it off. The
+    //  test of the intro itself decodes the film without a window.
+    {
+        bool play_intro = GlobalSettings::instance().PLAY_INTRO;
+        bool intro_test = false;
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], PocketPilot::NO_INTRO_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0 ||
+                strcmp(argv[i], "--command-line-test-mode") == 0
+            ){
+                play_intro = false;
+            }
+            if (strcmp(argv[i], PocketPilot::INTRO_TEST_OPTION) == 0){
+                intro_test = true;
+            }
+        }
+        if (intro_test){
+            return PocketPilot::run_intro_test(application);
+        }
+        if (play_intro){
+            PocketPilot::play_intro();
+        }
+    }
 
     //  Load the Switch framework settings now, not only when their panel is opened.
     OptionsPanelWrapper<NintendoSwitch::ConsoleSettingsPanel>().make_panel()->load_json_from_global();

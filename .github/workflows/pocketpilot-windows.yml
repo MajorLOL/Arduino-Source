@@ -284,6 +284,35 @@ jobs:
           }
           exit 0
 
+      #  The intro that plays first when the program starts (see
+      #  Source/PocketPilot/PocketPilot_Intro.h): decode the film that is in
+      #  the build, without a window and without sound output, and check
+      #  that all its pictures and its sound come through. The intro never
+      #  stops the program (if it cannot play, the program goes on), so this
+      #  step reports and does not stop the build.
+      - name: Intro test
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          $log = "$dir/SerialPrograms.log"
+          if (Test-Path $log) { Remove-Item $log }
+          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--intro-test" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(120000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          if (Test-Path $log) {
+            Get-Content $log | Select-String "Intro" | ForEach-Object { Write-Host $_.Line }
+          }
+          Write-Host "The intro test: exit code $code."
+          if ($code -ne 0) {
+            throw "The intro test failed (exit code $code): the film did not come through whole."
+          }
+
       #  Also for a build that failed the interface test: to look at.
       - name: Upload artifact
         if: success() || failure()

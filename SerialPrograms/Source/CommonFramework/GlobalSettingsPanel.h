@@ -94,6 +94,8 @@ public:
     Pimpl<ResolutionOption> WINDOW_SIZE;
     Pimpl<ResolutionOption> LOG_WINDOW_SIZE;
     BooleanCheckBoxOption LOG_WINDOW_STARTUP;
+    //  PocketPilot: the short film that plays first when the program starts.
+    BooleanCheckBoxOption PLAY_INTRO;
 
     Pimpl<KeyboardLayoutOption> KEYBOARD_CONTROLS_LAYOUT;
 

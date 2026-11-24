@@ -121,6 +121,13 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         false
     )
+    , PLAY_INTRO(
+        "<b>Play the intro at startup:</b><br>"
+        "The short film that plays first when the program starts. "
+        "A click or any key skips it. Takes effect at the next start.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
+    )
     , KEYBOARD_CONTROLS_LAYOUT(
         CONSTRUCT_TOKEN,
         "<b>System Keyboard Layout:</b><br>"
@@ -209,6 +216,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(WINDOW_SIZE);
     PA_ADD_OPTION(LOG_WINDOW_SIZE);
     PA_ADD_OPTION(LOG_WINDOW_STARTUP);
+    PA_ADD_OPTION(PLAY_INTRO);
 
     PA_ADD_OPTION(KEYBOARD_CONTROLS_LAYOUT);
     PA_ADD_OPTION(DEVICE_ALIASES);
