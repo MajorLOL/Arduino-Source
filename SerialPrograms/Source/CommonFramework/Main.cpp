@@ -45,6 +45,8 @@
 #include "Startup/SetupSettings.h"
 #include "Windows/MainWindow.h"
 #include "PocketPilot/PocketPilot_Intro.h"
+#include "PocketPilot/PocketPilot_Language.h"
+#include "PocketPilot/PocketPilot_Setup.h"
 #include "PocketPilot/PocketPilot_SelfTest.h"
 #include "GlobalSettingsPanel.h"
 #include "GlobalServices.h"
@@ -240,6 +242,44 @@ int run_program(int argc, char *argv[]){
         }
         if (play_intro){
             PocketPilot::play_intro();
+        }
+    }
+
+    //  The language: put into use now, before any window is made. The setup
+    //  (the language, then the microcontroller) is asked once, after the
+    //  intro. Not in the tests (nobody is there to answer).
+    {
+        bool ask_setup = true;
+        bool language_test = false;
+        bool setup_test = false;
+        QString setup_folder;
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], PocketPilot::NO_LANGUAGE_PROMPT_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::INTRO_TEST_OPTION) == 0 ||
+                strcmp(argv[i], "--command-line-test-mode") == 0
+            ){
+                ask_setup = false;
+            }
+            if (strcmp(argv[i], PocketPilot::LANGUAGE_TEST_OPTION) == 0){
+                language_test = true;
+            }
+            if (strcmp(argv[i], PocketPilot::SETUP_TEST_OPTION) == 0){
+                setup_test = true;
+                if (i + 1 < argc){
+                    setup_folder = QString::fromLocal8Bit(argv[i + 1]);
+                }
+            }
+        }
+        if (language_test){
+            return PocketPilot::run_language_test(application);
+        }
+        PocketPilot::install_language_support(application);
+        if (setup_test){
+            return PocketPilot::run_setup_test(application, setup_folder);
+        }
+        if (ask_setup){
+            PocketPilot::ask_setup_if_needed();
         }
     }
 

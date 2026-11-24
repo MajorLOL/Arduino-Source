@@ -18,6 +18,12 @@ This folder holds:
       Jersey 20, Copyright 2023 The Soft Type Project Authors, SIL Open Font
       License 1.1.
 
+  Newsreader-OFL.txt, Fredoka-OFL.txt
+      The licenses of the typefaces of the setup that follows the intro:
+      Newsreader (the headings), Copyright 2020 The Newsreader Project
+      Authors, and Fredoka (the other texts), Copyright 2016 The Fredoka
+      Project Authors, both SIL Open Font License 1.1.
+
 Use
 ---
 

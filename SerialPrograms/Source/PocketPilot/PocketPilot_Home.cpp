@@ -21,6 +21,7 @@
 #include <QScrollBar>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include "PocketPilot_Language.h"
 #include "PocketPilot_ProgramList.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Home.h"
@@ -43,6 +44,13 @@ QString short_game_name(const QString& name){
         }
     }
     return name;
+}
+
+namespace{
+//  "1 program", "12 programs".
+QString programs_text(int count){
+    return count == 1 ? tr_ui("1 program") : tr_ui("%1 programs").arg(count);
+}
 }
 
 void game_label_colors(const QString& name, QColor& first, QColor& second){
@@ -214,11 +222,9 @@ protected:
         //  How many programs.
         QString count;
         if (!isEnabled()){
-            count = "Not available";
-        }else if (m_programs == 1){
-            count = "1 program";
+            count = tr_ui("Not available");
         }else{
-            count = QString::number(m_programs) + " programs";
+            count = programs_text(m_programs);
         }
         painter.setFont(font());
         painter.setPen(isEnabled() ? theme.muted : theme.disabled);
@@ -464,6 +470,15 @@ HomePage::HomePage(
         }
     );
 
+    //  A language picked in the settings: the texts made with tr_ui again.
+    on_language_changed(this, [this]{
+        if (!m_resume_program.isEmpty()){
+            m_resume_button->setText(tr_ui("Continue with %1").arg(m_resume_program));
+        }
+        m_grid->update();
+        refresh();
+    });
+
     m_ready = true;
     refresh();
 }
@@ -478,7 +493,7 @@ void HomePage::changeEvent(QEvent* event){
 
 void HomePage::set_resume(const QString& game, const QString& program){
     m_resume_program = program;
-    m_resume_button->setText("Continue with " + program);
+    m_resume_button->setText(tr_ui("Continue with %1").arg(program));
     m_resume_label->setText(short_game_name(game));
     refresh();
 }
@@ -578,17 +593,16 @@ void HomePage::refresh(){
         const HomeGame& game = m_games[(size_t)m_game];
         m_title->setText(short_game_name(game.name));
         m_lead->setText(
-            (game.programs == 1 ? QString("1 program") : QString::number(game.programs) + " programs") +
-            ". Pick one here or in the list on the left."
+            tr_ui("%1. Pick one here or in the list on the left.").arg(programs_text(game.programs))
         );
     }else{
-        m_title->setText("Pick a game");
-        m_lead->setText(
+        m_title->setText(tr_ui("Pick a game"));
+        m_lead->setText(tr_ui(
             "Each game has its own programs. A program watches the game through your capture card "
             "and presses the buttons for you. With Claude, at the top right, you can ask about a "
             "program or have one built or fixed. Claude Plays, in every game's list and under "
             "Other Games, plays toward a goal you write down."
-        );
+        ));
     }
 
     if (!searching && !one_game){
@@ -678,8 +692,8 @@ void HomePage::refresh(){
         m_filler->setVisible(true);
         m_no_results->setText(
             searching
-                ? "No program has \"" + wanted + "\" in its name or description. Try a shorter word."
-                : QString("This game has no programs here.")
+                ? tr_ui("No program has \"%1\" in its name or description. Try a shorter word.").arg(wanted)
+                : tr_ui("This game has no programs here.")
         );
         m_no_results->setVisible(true);
         return;

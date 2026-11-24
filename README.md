@@ -42,6 +42,19 @@ PocketPilot Studio builds like Pokémon Automation's SerialPrograms: see [Serial
 
 `SerialPrograms --ui-screenshots <folder>` starts the program, saves a picture of each page, theme and opened list in the folder and exits (nothing is pressed on a console, no setting is saved). It also holds a conversation with a made-up Claude that ends in a commit on a made-up GitHub: no key is used and nothing is sent anywhere. Its exit code is 0 when every picture was taken and every check passed.
 
+## Language and setup
+
+After the intro, the first start asks two things, full screen and in the style of the intro: the **language** and the **microcontroller**. Only the intro is a film; the rest are menus that wait for your choice (mouse or keyboard: arrows, Enter, Tab, Esc). Both can be opened again in Settings ("Open the setup").
+
+- **Language.** English is the default. Dutch, German, French and Spanish come with the program; **Other** reads a file of your own, `Languages/custom.json` next to the program. The language applies at once, also to the windows that are open, and can be changed in Settings ("Language").
+- **Microcontroller.** Raspberry Pi Pico W and Pico 2 W get their steps in the program (plug in, flash mode, firmware, Grip menu, controller, port and type, pair and test); ESP32 and ESP32-S3 link to their pages of the [Pokémon Automation Setup Guide](https://pokemonautomation.github.io/SetupGuide/index.html); the AVR8 boards (Leonardo, Uno R3, Pro Micro, Teensy) are shown as not supported, because that support was discontinued. **Other** links to the guide. The steps are those of the guide; check there for anything newer.
+
+**How the translation works.** The English text stays in the source. A language is a file, `Resources/lang/<code>.json`: the English text as the key, the translation as the value (`%1`, `%2` ... and tags are kept as they are; keys that start with `@` are comments; an empty value means "not translated yet"). Text that the program composes goes through `tr_ui("...")`; the labels, buttons, group boxes, tabs, menus, tool tips, placeholders and window titles of every window are translated by a filter on the application, so the files of Pokémon Automation's own options and panels did not have to change (merging its updates stays easy). Drop-down lists of the programs and the items of lists are left alone on purpose: the programs read their choice back from that text.
+
+**What is translated, and what is not (yet).** The setup, PocketPilot's own windows (frame, Games page, About), the Global Settings and the notices and buttons of the program panels are translated. The option texts of the programs of the games (thousands of them) and the prompts of Claude are not: they stay English until they are added to a dictionary. A text that has no translation stays English and never breaks anything. With a language other than English, the texts that were looked up and not found are written to `Languages/missing-<code>.json` when the program closes, as a list to start from. To add or fix a translation without building the program, put a file `Languages/<code>.json` (for example `nl.json`) next to the program: what is in it wins over the built-in file.
+
+`SerialPrograms --language-test` loads every language, checks that each translation keeps what must not change (`%1`, tags, line breaks) and that every language has the same texts, and translates a few windows. `SerialPrograms --setup-test <folder>` goes through the setup with clicks and keys, saves a picture of each screen in the folder and checks what was answered. The Windows workflow runs both; the pictures go with the build.
+
 ## Where the code is
 
 PocketPilot Studio's own code is in [SerialPrograms/Source/PocketPilot](SerialPrograms/Source/PocketPilot): the themes, the frame of the main window, the Games page, the look of the program list, the "About" window and the test of the interface. Claude is in its folder [Assistant](SerialPrograms/Source/PocketPilot/Assistant): the connection to the Claude API, the conversation and its tools, the work on the repository through GitHub, and the panel. The rest of the tree is Pokémon Automation's, with the changes this fork needs. The branch follows Pokémon Automation's `main` by merging it.
@@ -51,6 +64,7 @@ PocketPilot Studio's own code is in [SerialPrograms/Source/PocketPilot](SerialPr
 - The source code is under the MIT license, like Pokémon Automation's: see [LICENSE](LICENSE) (Copyright (c) 2021 Alexander J. Yee). PocketPilot Studio's own changes and additions are under the same license.
 - The builds bring along precompiled libraries and the resources of Pokémon Automation ([Packages](https://github.com/PokemonAutomation/Packages)), which that project gives for non-commercial use only. Use the builds for non-commercial purposes.
 - The typeface of the name and the headings is Jersey 20 by Sarah Cadigan-Fried, under the [SIL Open Font License 1.1](SerialPrograms/Source/PocketPilot/Resources/Jersey20-OFL.txt).
+- The setup that follows the intro uses the typefaces Newsreader (The Newsreader Project Authors) and Fredoka (The Fredoka Project Authors), both under the SIL Open Font License 1.1: [Newsreader](SerialPrograms/Source/PocketPilot/Resources/setup/Newsreader-OFL.txt), [Fredoka](SerialPrograms/Source/PocketPilot/Resources/setup/Fredoka-OFL.txt).
 - The names of the games belong to their owners and are used only to say which game a program is for.
 
 Dependencies, as in Pokémon Automation:

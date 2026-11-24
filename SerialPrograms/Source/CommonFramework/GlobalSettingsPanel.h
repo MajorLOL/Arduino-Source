@@ -47,6 +47,17 @@ enum class OcrLibrary{
     TESSERACT,
 };
 
+//  PocketPilot: the language of the menus, the settings and the explanations.
+//  See PocketPilot/PocketPilot_Language.h.
+enum class UiLanguage{
+    ENGLISH,
+    DUTCH,
+    GERMAN,
+    FRENCH,
+    SPANISH,
+    CUSTOM,     //  "Other": the file Languages/custom.json.
+};
+
 
 class FolderInputOption : public StringOption{
 public:
@@ -79,6 +90,13 @@ private:
 
 public:
     Pimpl<CheckForUpdatesOption> CHECK_FOR_UPDATES;
+
+    //  PocketPilot: the language, the setup (language and microcontroller),
+    //  and whether its questions still have to be asked at the next start.
+    EnumDropdownOption<UiLanguage> LANGUAGE;
+    ButtonOption OPEN_SETUP_BUTTON;
+    BooleanCheckBoxOption ASK_LANGUAGE;
+    BooleanCheckBoxOption ASK_SETUP;
 
     ButtonOption OPEN_BASE_FOLDER_BUTTON;
     StringOption STATS_FILE;

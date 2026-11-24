@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include "PocketPilot_Language.h"
 #include "PocketPilot_Logo.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_About.h"
@@ -48,7 +49,7 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
 
     std::unique_ptr<QDialog> owner = std::make_unique<QDialog>(parent);
     QDialog& dialog = *owner;
-    dialog.setWindowTitle("About " + info.name);
+    dialog.setWindowTitle(tr_ui("About %1").arg(info.name));
     dialog.setMinimumWidth(560);
 
     QVBoxLayout* layout = new QVBoxLayout(&dialog);
@@ -74,14 +75,14 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     name->setFont(display_font(42));
     names->addWidget(name);
     QLabel* tagline = new QLabel(
-        "Automation programs for Switch games: run them, and build or fix them with Claude.",
+        tr_ui("Automation programs for Switch games: run them, and build or fix them with Claude."),
         &dialog
     );
     tagline->setWordWrap(true);
     names->addWidget(tagline);
     names->addSpacing(4);
     QLabel* build = new QLabel(
-        "Build " + info.build + ", on " + info.upstream_name + " " + info.upstream_version,
+        tr_ui("Build %1, on %2 %3").arg(info.build, info.upstream_name, info.upstream_version),
         &dialog
     );
     build->setObjectName("ppMuted");
@@ -90,43 +91,56 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
     names->addStretch(1);
 
     layout->addWidget(paragraph(dialog,
-        "A program of " + info.name + " plays a game on a Nintendo Switch by itself: it watches the "
-        "game through a capture card and presses the buttons through a controller board."
+        tr_ui(
+            "A program of %1 plays a game on a Nintendo Switch by itself: it watches the "
+            "game through a capture card and presses the buttons through a controller board."
+        ).arg(info.name)
     ));
 
     layout->addWidget(paragraph(dialog,
-        "<b>Claude.</b> The panel \"Claude\" and the program \"Claude Plays\" talk to Claude, the AI "
-        "model of Anthropic, with an API key of your own, which Anthropic bills you for. What you "
-        "write, what Claude looks up to answer (the log, the options, parts of the source) and, when "
-        "it plays, pictures of the game and the text on its screen are sent to Anthropic, and nothing "
-        "before you add a key. Its changes to the source go to a branch of their own."
+        tr_ui(
+            "<b>Claude.</b> The panel \"Claude\" and the program \"Claude Plays\" talk to Claude, the AI "
+            "model of Anthropic, with an API key of your own, which Anthropic bills you for. What you "
+            "write, what Claude looks up to answer (the log, the options, parts of the source) and, when "
+            "it plays, pictures of the game and the text on its screen are sent to Anthropic, and nothing "
+            "before you add a key. Its changes to the source go to a branch of their own."
+        )
     ));
 
     layout->addWidget(paragraph(dialog,
-        "<b>Where it comes from.</b> " + info.name + " is a personal fork of " +
-        link(info.upstream_url, info.upstream_name, link_color) +
-        " (Copyright 2021 Alexander J. Yee and its contributors), used under the MIT license. "
-        "The programs for the games and the documentation they link to are theirs. This fork is "
-        "not theirs: please do not ask them for help with it, but use " +
-        link(info.project_url, "this fork's page", link_color) + "."
+        tr_ui(
+            "<b>Where it comes from.</b> %1 is a personal fork of %2 (Copyright 2021 Alexander J. Yee "
+            "and its contributors), used under the MIT license. The programs for the games and the "
+            "documentation they link to are theirs. This fork is not theirs: please do not ask them "
+            "for help with it, but use %3."
+        ).arg(
+            info.name,
+            link(info.upstream_url, info.upstream_name, link_color),
+            link(info.project_url, tr_ui("this fork's page"), link_color)
+        )
     ));
 
     layout->addWidget(paragraph(dialog,
-        "<b>Not an official product.</b> " + info.name + " is not made, endorsed or supported by "
-        "Nintendo, Game Freak, Creatures, The Pokémon Company or Anthropic. The names of the games "
-        "belong to their owners and are used here only to say which game a program is for."
+        tr_ui(
+            "<b>Not an official product.</b> %1 is not made, endorsed or supported by "
+            "Nintendo, Game Freak, Creatures, The Pokémon Company or Anthropic. The names of the games "
+            "belong to their owners and are used here only to say which game a program is for."
+        ).arg(info.name)
     ));
 
     layout->addWidget(paragraph(dialog,
-        "<b>Licenses.</b> The source is under the MIT license; the builds, with the libraries "
-        "they bring along, are for non-commercial use. " + info.name + " uses Qt " +
-        QString::fromLatin1(qVersion()) + " under the LGPL version 3 (unmodified, as separate "
-        "libraries) and the typeface Jersey 20 by Sarah Cadigan-Fried under the SIL Open Font "
-        "License 1.1. The licenses are in the folder \"Licenses\" next to the program."
+        tr_ui(
+            "<b>Licenses.</b> The source is under the MIT license; the builds, with the libraries "
+            "they bring along, are for non-commercial use. %1 uses Qt %2 under the LGPL version 3 "
+            "(unmodified, as separate libraries) and the typefaces Jersey 20 by Sarah Cadigan-Fried, "
+            "Newsreader by The Newsreader Project Authors and Fredoka by The Fredoka Project Authors "
+            "under the SIL Open Font License 1.1. The licenses are in the folder \"Licenses\" next "
+            "to the program."
+        ).arg(info.name, QString::fromLatin1(qVersion()))
     ));
 
     QLabel* details = new QLabel(
-        "Compiled for " + info.architecture + " with " + info.compiler + ".",
+        tr_ui("Compiled for %1 with %2.").arg(info.architecture, info.compiler),
         &dialog
     );
     details->setObjectName("ppMuted");

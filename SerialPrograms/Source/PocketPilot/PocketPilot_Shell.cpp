@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QStyle>
 #include <QVBoxLayout>
+#include "PocketPilot_Language.h"
 #include "PocketPilot_Logo.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Shell.h"
@@ -207,9 +208,9 @@ void TopBar::set_location(const QString& game, const QString& program){
 void TopBar::set_busy(bool busy){
     m_home->setEnabled(!busy);
     m_settings->setEnabled(!busy);
-    const QString why = busy ? " (not while a program runs)" : "";
-    m_home->setToolTip("All games, and a search over the programs of all of them" + why);
-    m_settings->setToolTip("The settings of the program itself" + why);
+    const QString why = busy ? tr_ui(" (not while a program runs)") : QString();
+    m_home->setToolTip(tr_ui("All games, and a search over the programs of all of them") + why);
+    m_settings->setToolTip(tr_ui("The settings of the program itself") + why);
 }
 
 void TopBar::set_assistant_open(bool open){

@@ -196,6 +196,8 @@ jobs:
           Copy-Item -Recurse "Arduino-Source/SerialPrograms/Source/PocketPilot/Licenses" "$out/Licenses"
           Copy-Item "Arduino-Source/LICENSE" "$out/Licenses/PokemonAutomation-MIT-License.txt"
           Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/Jersey20-OFL.txt" "$out/Licenses/Jersey20-OFL.txt"
+          Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/setup/Newsreader-OFL.txt" "$out/Licenses/Newsreader-OFL.txt"
+          Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/setup/Fredoka-OFL.txt" "$out/Licenses/Fredoka-OFL.txt"
           $sha = git -C Arduino-Source rev-parse HEAD
           "https://github.com/${{ github.repository }}/commit/$sha" | Out-File "$out/version.txt"
           New-Item -ItemType Directory -Path "package" | Out-Null
@@ -313,6 +315,62 @@ jobs:
             throw "The intro test failed (exit code $code): the film did not come through whole."
           }
 
+      #  The languages (see Source/PocketPilot/PocketPilot_Language.h): every
+      #  dictionary that comes with the program is read and checked (what must
+      #  not change in a translation did not change, every language has the
+      #  same texts) and a few windows are translated and brought back. Without
+      #  a window of its own on screen; reports and does not stop the build.
+      - name: Language test
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          $log = "$dir/SerialPrograms.log"
+          if (Test-Path $log) { Remove-Item $log }
+          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--language-test" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(120000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          if (Test-Path $log) {
+            Get-Content $log | Select-String "Language" | ForEach-Object { Write-Host $_.Line }
+          }
+          Write-Host "The language test: exit code $code."
+          if ($code -ne 0) {
+            throw "The language test failed (exit code $code): see the lines above."
+          }
+
+      #  The setup that comes after the intro (see
+      #  Source/PocketPilot/PocketPilot_Setup.h): goes through the language, the
+      #  microcontroller, the steps and the end like a user would (clicks and
+      #  keys), saves a picture of each screen and checks what was answered.
+      #  The pictures go with the build to look at.
+      - name: Setup test
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          New-Item -ItemType Directory -Force -Path "setup-screenshots" | Out-Null
+          $shots = (Resolve-Path "setup-screenshots").Path
+          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--setup-test", "`"$shots`"" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(240000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          if (Test-Path "$shots/setup-test.txt") {
+            Get-Content "$shots/setup-test.txt" | ForEach-Object { Write-Host $_ }
+          }
+          Write-Host "The setup test: exit code $code."
+          if ($code -ne 0) {
+            throw "The setup test failed (exit code $code): see the lines above."
+          }
+
       #  Also for a build that failed the interface test: to look at.
       - name: Upload artifact
         if: success() || failure()
@@ -322,6 +380,7 @@ jobs:
           path: |
             PocketPilot-Windows.zip
             ui-screenshots/*.png
+            setup-screenshots/*.png
 
       - name: Upload what a failed interface test left behind
         if: failure()

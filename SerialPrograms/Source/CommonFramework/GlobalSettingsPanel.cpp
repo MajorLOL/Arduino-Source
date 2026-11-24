@@ -6,7 +6,9 @@
 
 #include <iostream>
 #ifdef QT_CORE_LIB
+#include <QCoreApplication>
 #include <QDesktopServices>
+#include <QMetaObject>
 #include <QUrl>
 #endif
 #include "Common/Cpp/ColoredText.h"
@@ -31,6 +33,7 @@
 #include "CommonFramework/VideoPipeline/VideoPipelineOptions.h"
 #include "CommonFramework/ErrorReports/ErrorReports.h"
 #include "Controllers/ControllerSettings.h"
+#include "PocketPilot/PocketPilot_Language.h"
 //#include "CommonFramework/Environment/Environment.h"
 #include "Integrations/DiscordSettingsOption.h"
 #include "CommonFramework/Options/DeviceDropdownAliases.h"
@@ -51,11 +54,45 @@ GlobalSettings& GlobalSettings::instance(){
 }
 GlobalSettings::~GlobalSettings(){
     ENABLE_LIFETIME_SANITIZER0.remove_listener(*this);
+    OPEN_SETUP_BUTTON.remove_listener(static_cast<ButtonListener&>(*this));
     OPEN_BASE_FOLDER_BUTTON.remove_listener(static_cast<ButtonListener&>(*this));
 }
 GlobalSettings::GlobalSettings()
     : BatchOption(LockMode::LOCK_WHILE_RUNNING)
     , CHECK_FOR_UPDATES(CONSTRUCT_TOKEN)
+    , LANGUAGE(
+        "<b>Language:</b><br>"
+        "The language of the menus, the settings and the explanations. English is the default. "
+        "What is not translated yet stays English. With Other, the program reads the file "
+        "Languages/custom.json next to it.",
+        {
+            {UiLanguage::ENGLISH, "en", "English"},
+            {UiLanguage::DUTCH,   "nl", "Nederlands"},
+            {UiLanguage::GERMAN,  "de", "Deutsch"},
+            {UiLanguage::FRENCH,  "fr", "Français"},
+            {UiLanguage::SPANISH, "es", "Español"},
+            {UiLanguage::CUSTOM,  "custom", "Other (Languages/custom.json)"},
+        },
+        LockMode::UNLOCK_WHILE_RUNNING,
+        UiLanguage::ENGLISH
+    )
+    , OPEN_SETUP_BUTTON(
+        "<b>Setup:</b><br>"
+        "The language and the microcontroller, with the steps for it, full screen like at the first start.",
+        "Open the setup"
+    )
+    , ASK_LANGUAGE(
+        "<b>Ask for the language at the next start:</b><br>"
+        "The question comes once, after the intro. It turns itself off when you have answered.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
+    )
+    , ASK_SETUP(
+        "<b>Ask for the microcontroller at the next start:</b><br>"
+        "The question and the steps for the board come once, after the language. It turns itself off when you have answered.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
+    )
     , OPEN_BASE_FOLDER_BUTTON(
         "<b>Runtime Base Folder:</b>",
         "Open Folder"
@@ -199,6 +236,10 @@ GlobalSettings::GlobalSettings()
         "", ""
     )
 {
+    PA_ADD_OPTION(LANGUAGE);
+    PA_ADD_OPTION(OPEN_SETUP_BUTTON);
+    PA_ADD_OPTION(ASK_LANGUAGE);
+    PA_ADD_OPTION(ASK_SETUP);
     PA_ADD_OPTION(OPEN_BASE_FOLDER_BUTTON);
     PA_ADD_OPTION(CHECK_FOR_UPDATES);
     PA_ADD_OPTION(STATS_FILE);
@@ -269,6 +310,7 @@ GlobalSettings::GlobalSettings()
 
     GlobalSettings::on_config_value_changed(this);
     ENABLE_LIFETIME_SANITIZER0.add_listener(*this);
+    OPEN_SETUP_BUTTON.add_listener(static_cast<ButtonListener&>(*this));
     OPEN_BASE_FOLDER_BUTTON.add_listener(static_cast<ButtonListener&>(*this));
 }
 
@@ -336,6 +378,15 @@ void GlobalSettings::on_config_value_changed(void* object){
 
 void GlobalSettings::on_press(ButtonCell& button){
 #ifdef QT_CORE_LIB
+    if (&button == &OPEN_SETUP_BUTTON){
+        //  Later, not inside the button: the setup runs its own window.
+        if (qApp != nullptr){
+            QMetaObject::invokeMethod(qApp, []{
+                PocketPilot::open_setup();
+            }, Qt::QueuedConnection);
+        }
+        return;
+    }
     if (&button == &OPEN_BASE_FOLDER_BUTTON){
         // Open the runtime base folder in the system file manager
         QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(RUNTIME_BASE_PATH())));
