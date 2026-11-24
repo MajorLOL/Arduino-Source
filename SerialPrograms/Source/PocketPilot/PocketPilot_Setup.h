@@ -24,15 +24,23 @@
  *
  *  The boards and the steps are those of the Pokemon Automation Setup Guide
  *  (https://pokemonautomation.github.io/SetupGuide/index.html). The steps
- *  are given for the Raspberry Pi Pico W and Pico 2 W in USB mode; for the
- *  ESP32 boards the screen points to the guide, with its video.
+ *  are given in the program for the Raspberry Pi Pico W and Pico 2 W and for
+ *  the ESP32 and ESP32-S3, and the installation can be done from them (see
+ *  PocketPilot_Firmware.h): the Pico gets its firmware copied once it is in
+ *  flash mode, the ESP32 boards are flashed with esptool. The firmware card
+ *  shows the version and its download link. "Open the Setup Guide" opens the
+ *  guide inside the program, in the same style, and "Watch the video
+ *  tutorial" plays a film of the setup of the board (Resources/tutorial-*.mp4,
+ *  made by Tools/TutorialFilms.cpp from these same screens).
  *
  *  The workflow that makes the builds also runs
  *
  *      SerialPrograms --setup-test <folder>
+ *      SerialPrograms --tutorial-test
  *
- *  which goes through all the screens without a person, with the mouse and
- *  the keyboard, and saves a picture of each in the folder.
+ *  the first goes through all the screens without a person, with the mouse
+ *  and the keyboard, and saves a picture of each in the folder; the second
+ *  decodes the three tutorial films.
  *
  */
 
@@ -49,6 +57,7 @@ namespace PocketPilot{
 
 //  Option on the command line.
 extern const char* const SETUP_TEST_OPTION;     //  --setup-test <folder>
+extern const char* const TUTORIAL_TEST_OPTION;  //  --tutorial-test
 
 
 struct SetupRequest{
@@ -83,6 +92,10 @@ SetupResult run_setup(const SetupRequest& request);
 //  pictures go in the folder (when it is not empty). Returns the program's
 //  exit code: 0 when all is well.
 int run_setup_test(QApplication& application, const QString& screenshots_folder);
+
+//  The test of the tutorial films: each is decoded without a window, has its
+//  picture size, its sound and its length, and plays to the end.
+int run_tutorial_test(QApplication& application);
 
 
 

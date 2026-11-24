@@ -1489,6 +1489,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/PocketPilot_Home.h
     Source/PocketPilot/PocketPilot_Intro.cpp
     Source/PocketPilot/PocketPilot_Intro.h
+    Source/PocketPilot/PocketPilot_Firmware.cpp
+    Source/PocketPilot/PocketPilot_Firmware.h
     Source/PocketPilot/PocketPilot_Language.cpp
     Source/PocketPilot/PocketPilot_Language.h
     Source/PocketPilot/PocketPilot_Setup.cpp

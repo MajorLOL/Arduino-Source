@@ -141,6 +141,7 @@ if(WIN32 AND QT_DEPLOY_FILES)
         find_package(Qt${QT_MAJOR} ${PREFERRED_QT_VER} REQUIRED COMPONENTS
             Widgets
             SerialPort
+            Network
             Multimedia
             MultimediaWidgets
             OpenGLWidgets
@@ -153,6 +154,7 @@ if(WIN32 AND QT_DEPLOY_FILES)
         find_package(Qt${QT_MAJOR} REQUIRED COMPONENTS
             Widgets
             SerialPort
+            Network
             Multimedia
             MultimediaWidgets
             OpenGLWidgets
@@ -190,6 +192,7 @@ else()
     find_package(Qt${QT_MAJOR} REQUIRED COMPONENTS
         Widgets
         SerialPort
+        Network
         Multimedia
         MultimediaWidgets
         OpenGLWidgets
@@ -304,6 +307,7 @@ function(apply_common_target_properties target_name)
     target_link_libraries(${target_name} PRIVATE
         Qt${QT_MAJOR}::Widgets
         Qt${QT_MAJOR}::SerialPort
+        Qt${QT_MAJOR}::Network
         Qt${QT_MAJOR}::Multimedia
         Qt${QT_MAJOR}::MultimediaWidgets
         Qt${QT_MAJOR}::OpenGLWidgets

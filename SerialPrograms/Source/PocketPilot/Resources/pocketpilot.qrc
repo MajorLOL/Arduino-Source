@@ -4,6 +4,9 @@
         <file>widgets.qss</file>
         <file>Jersey20-Regular.ttf</file>
         <file>intro.mp4</file>
+        <file>tutorial-pico.mp4</file>
+        <file>tutorial-esp32.mp4</file>
+        <file>tutorial-esp32s3.mp4</file>
         <file>arrow-light.png</file>
         <file>arrow-light@2x.png</file>
         <file>arrow-dark.png</file>
@@ -17,6 +20,8 @@
         <file>setup/setup-bg.png</file>
         <file>setup/computer.png</file>
         <file>setup/pico-big.png</file>
+        <file>setup/esp32-big.png</file>
+        <file>setup/esp32s3-big.png</file>
         <file>setup/switch.png</file>
         <file>setup/switch-gg.png</file>
         <file>setup/glyph-pico.png</file>

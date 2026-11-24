@@ -173,6 +173,8 @@ jobs:
       #  the folder runs on its own.
       - name: Deploy Qt and package
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
           windeployqt --release --dir $out "$out/SerialPrograms.exe"
@@ -200,6 +202,47 @@ jobs:
           Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/setup/Fredoka-OFL.txt" "$out/Licenses/Fredoka-OFL.txt"
           $sha = git -C Arduino-Source rev-parse HEAD
           "https://github.com/${{ github.repository }}/commit/$sha" | Out-File "$out/version.txt"
+          #  Where the firmware in the package comes from: the commit of
+          #  Packages it was taken from. The setup of the program builds the
+          #  download link of the version that is picked from it.
+          $packages = git -C Arduino-Source/Packages rev-parse HEAD
+          New-Item -ItemType Directory -Force -Path "$out/Firmware" | Out-Null
+          "https://github.com/PokemonAutomation/Packages/tree/$packages/Firmware" | Out-File "$out/Firmware/SOURCE.txt" -Encoding ascii
+          Get-ChildItem "$out/Firmware" | Format-Table Name, Length
+          #  The tool that flashes the ESP32 boards from the setup: esptool of
+          #  Espressif, its stand-alone Windows build (no Python needed). It is
+          #  a separate program that PocketPilot Studio starts. If it cannot be
+          #  fetched the build goes on: the setup then looks for esptool on
+          #  the computer of the user and says what to do when it is not there.
+          try {
+            $release = gh api repos/espressif/esptool/releases/latest | ConvertFrom-Json
+            $asset = $release.assets | Where-Object { $_.name -match 'windows-amd64\.zip$' } | Select-Object -First 1
+            if ($null -eq $asset) { throw "No Windows build in release $($release.tag_name)." }
+            Write-Host "esptool $($release.tag_name): $($asset.name) ($($asset.size) bytes)"
+            $zip = Join-Path $env:RUNNER_TEMP $asset.name
+            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
+            $tools = "$out/Tools/esptool"
+            New-Item -ItemType Directory -Force -Path $tools | Out-Null
+            Expand-Archive -Path $zip -DestinationPath $tools -Force
+            $exe = Get-ChildItem $tools -Recurse -Filter "esptool.exe" | Select-Object -First 1
+            if ($null -eq $exe) { throw "No esptool.exe in $($asset.name)." }
+            Write-Host "esptool.exe: $($exe.FullName)"
+            & $exe.FullName version
+            if ($LASTEXITCODE -ne 0) { throw "esptool.exe version failed with exit code $LASTEXITCODE." }
+            #  Its license (GPL-2.0-or-later) goes with it, with where its source is.
+            Get-ChildItem $tools -Recurse -File | Where-Object { $_.Name -match '^(LICENSE|COPYING)' } | Select-Object -First 1 | ForEach-Object {
+              Copy-Item $_.FullName "$out/Licenses/esptool-LICENSE.txt"
+            }
+            @(
+              "esptool $($release.tag_name) (Espressif Systems), stand-alone Windows build.",
+              "License: GPL-2.0-or-later. Source code: https://github.com/espressif/esptool",
+              "esptool is a separate program in the folder Tools/esptool. PocketPilot Studio starts it to flash the",
+              "firmware onto an ESP32 board; it is not part of PocketPilot Studio itself."
+            ) | Out-File "$out/Licenses/esptool-NOTICE.txt" -Encoding ascii
+          } catch {
+            Write-Host "::warning::esptool is not in this package: $_"
+            if (Test-Path "$out/Tools") { Remove-Item -Recurse -Force "$out/Tools" }
+          }
           New-Item -ItemType Directory -Path "package" | Out-Null
           Copy-Item -Recurse $out "package/PocketPilot"
           Compress-Archive -Path "package/PocketPilot" -DestinationPath "PocketPilot-Windows.zip"
@@ -315,6 +358,33 @@ jobs:
             throw "The intro test failed (exit code $code): the film did not come through whole."
           }
 
+      #  The films of the video tutorials (see Source/PocketPilot/PocketPilot_Setup.h):
+      #  decode each one that is in the build, without a window and without
+      #  sound output: its picture size, its sound, its length, and that it
+      #  plays to the end. Reports and does not stop the build.
+      - name: Tutorial film test
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          $log = "$dir/SerialPrograms.log"
+          if (Test-Path $log) { Remove-Item $log }
+          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--tutorial-test" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(240000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          if (Test-Path $log) {
+            Get-Content $log | Select-String "Tutorial" | ForEach-Object { Write-Host $_.Line }
+          }
+          Write-Host "The tutorial film test: exit code $code."
+          if ($code -ne 0) {
+            throw "The tutorial film test failed (exit code $code): a film did not come through whole."
+          }
+
       #  The languages (see Source/PocketPilot/PocketPilot_Language.h): every
       #  dictionary that comes with the program is read and checked (what must
       #  not change in a translation did not change, every language has the
@@ -357,7 +427,7 @@ jobs:
           $shots = (Resolve-Path "setup-screenshots").Path
           $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--setup-test", "`"$shots`"" -PassThru
           $handle = $process.Handle
-          if ($process.WaitForExit(240000)) {
+          if ($process.WaitForExit(300000)) {
             $code = $process.ExitCode
           } else {
             $process.Kill()

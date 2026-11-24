@@ -226,6 +226,7 @@ int run_program(int argc, char *argv[]){
     {
         bool play_intro = GlobalSettings::instance().PLAY_INTRO;
         bool intro_test = false;
+        bool tutorial_test = false;
         for (int i = 1; i < argc; i++){
             if (strcmp(argv[i], PocketPilot::NO_INTRO_OPTION) == 0 ||
                 strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0 ||
@@ -236,9 +237,15 @@ int run_program(int argc, char *argv[]){
             if (strcmp(argv[i], PocketPilot::INTRO_TEST_OPTION) == 0){
                 intro_test = true;
             }
+            if (strcmp(argv[i], PocketPilot::TUTORIAL_TEST_OPTION) == 0){
+                tutorial_test = true;
+            }
         }
         if (intro_test){
             return PocketPilot::run_intro_test(application);
+        }
+        if (tutorial_test){
+            return PocketPilot::run_tutorial_test(application);
         }
         if (play_intro){
             PocketPilot::play_intro();

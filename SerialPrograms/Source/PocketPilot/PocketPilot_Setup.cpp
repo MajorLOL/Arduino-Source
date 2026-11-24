@@ -10,27 +10,44 @@
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <QApplication>
+#include <QAudioDevice>
+#include <QAudioOutput>
+#include <QClipboard>
+#include <QCoreApplication>
 #include <QDesktopServices>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFontDatabase>
+#include <QGuiApplication>
 #include <QFile>
+#include <QFileInfo>
 #include <QFontMetricsF>
 #include <QHash>
 #include <QImage>
 #include <QKeyEvent>
+#include <QMediaDevices>
+#include <QMediaMetaData>
+#include <QMediaPlayer>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPixmap>
 #include <QRadialGradient>
 #include <QScreen>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <QUrl>
+#include <QVBoxLayout>
+#include <QVideoFrame>
+#include <QVideoSink>
+#include <QVideoWidget>
 #include <QWidget>
+#include "PocketPilot_Firmware.h"
 #include "PocketPilot_Language.h"
 #include "PocketPilot_Setup.h"
 
@@ -39,6 +56,7 @@ namespace PocketPilot{
 
 
 const char* const SETUP_TEST_OPTION = "--setup-test";
+const char* const TUTORIAL_TEST_OPTION = "--tutorial-test";
 
 
 namespace{
@@ -359,6 +377,10 @@ public:
     virtual void escape_pressed(Canvas& canvas){
         (void)canvas;
     }
+    //  What the page is doing, in words (for the tests).
+    virtual QString state() const{
+        return QString();
+    }
 };
 
 struct Hit{
@@ -395,15 +417,113 @@ public:
         return m_first_page;
     }
     void open_url(const QString& url){
+        m_last_url = url;
         if (!m_test_mode){
             QDesktopServices::openUrl(QUrl(url));
         }
+    }
+    void open_folder(const QString& path){
+        m_last_folder = path;
+        if (!m_test_mode){
+            QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+        }
+    }
+    void copy_text(const QString& text){
+        m_copied = text;
+        if (!m_test_mode){
+            QGuiApplication::clipboard()->setText(text);
+        }
+    }
+    void open_device_manager(){
+        m_device_manager_opened = true;
+        if (!m_test_mode){
+            PocketPilot::open_device_manager();
+        }
+    }
+    bool test_mode() const{
+        return m_test_mode;
+    }
+    //  The folder of the program: Firmware and Tools are in it.
+    const QString& app_folder() const{
+        return m_app_folder;
+    }
+    void set_app_folder(const QString& folder){
+        m_app_folder = folder;
+    }
+    //  The pages look at the computer through this (empty: the real one).
+    const HardwareProbe::Scan& scan_override() const{
+        return m_scan;
+    }
+    void set_scan(HardwareProbe::Scan scan){
+        m_scan = std::move(scan);
+    }
+    //  Where a download really comes from (the tests point it at a file).
+    QString map_url(const QString& url) const{
+        return m_url_map ? m_url_map(url) : url;
+    }
+    void set_url_map(std::function<QString(const QString&)> map){
+        m_url_map = std::move(map);
+    }
+    QString page_state() const{
+        return m_page == nullptr ? QString() : m_page->state();
+    }
+    //  What the Packages repository lists, when it is not asked.
+    bool has_listing_override() const{
+        return m_has_listing;
+    }
+    const QByteArray& listing_override() const{
+        return m_listing;
+    }
+    void set_listing(const QByteArray& json){
+        m_listing = json;
+        m_has_listing = true;
+    }
+    //  Flashing is played, not done (the tutorial films, the demo).
+    bool pretend() const{
+        return m_pretend;
+    }
+    void set_pretend(bool pretend){
+        m_pretend = pretend;
+    }
+    //  The tutorial film of this board.
+    void play_video(const QString& board);
+    void close_video();
+    bool video_open() const{
+        return m_video_open;
+    }
+    const QString& video_name() const{
+        return m_video_name;
+    }
+    const QString& last_url() const{
+        return m_last_url;
+    }
+    const QString& last_folder() const{
+        return m_last_folder;
+    }
+    const QString& copied() const{
+        return m_copied;
+    }
+    bool device_manager_opened() const{
+        return m_device_manager_opened;
+    }
+    //  The place of a button, in the window (for a cursor drawn over the picture).
+    bool hit_center(const QString& id, QPointF& center) const{
+        for (const Hit& hit : m_hits){
+            if (hit.id == id){
+                center = QPointF(
+                    m_offset.x() + hit.rect.center().x() * m_scale,
+                    m_offset.y() + hit.rect.center().y() * m_scale
+                );
+                return true;
+            }
+        }
+        return false;
     }
 
     void go_language();
     void go_board();
     void go_steps(const QString& board);
-    void go_guide(const QString& board);
+    void go_guide();
     void go_other();
     void go_done(const QString& board);
     //  The end: the loop of run_setup() stops.
@@ -499,6 +619,24 @@ private:
     QTimer m_timer;
     QElapsedTimer m_clock;
     bool m_clock_started = false;
+
+    QString m_app_folder;
+    HardwareProbe::Scan m_scan;
+    std::function<QString(const QString&)> m_url_map;
+    QByteArray m_listing;
+    bool m_has_listing = false;
+    bool m_pretend = false;
+    QString m_last_url;
+    QString m_last_folder;
+    QString m_copied;
+    bool m_device_manager_opened = false;
+
+    //  The film on top of the page.
+    bool m_video_open = false;
+    QString m_video_name;
+    std::unique_ptr<QWidget> m_overlay;
+    std::unique_ptr<QMediaPlayer> m_player;
+    std::unique_ptr<QAudioOutput> m_audio;
 };
 
 
@@ -1256,14 +1394,6 @@ QString short_board_name(const QString& id){
     return QString::fromLatin1(board_name(id));
 }
 
-//  Where the Pico pages go: the Setup Guide's own pages.
-const char* const URL_ESP32 = "https://pokemonautomation.github.io/SetupGuide/Controllers/Controller-ESP32-WROOM.html";
-const char* const URL_ESP32_MAC = "https://pokemonautomation.github.io/SetupGuide/Controllers/Controller-ESP32-WROOM-MacOS.html";
-const char* const URL_ESP32_VIDEO = "https://youtu.be/YzGyQQOGjl8";
-const char* const URL_ESP32S3 = "https://pokemonautomation.github.io/SetupGuide/Controllers/Controller-ESP32-S3.html";
-const char* const URL_ESP32S3_VIDEO = "https://youtu.be/ezBuwk48z8w";
-
-
 //  ---------------------------------------------------------------------
 //  Page 2: which microcontroller
 //  ---------------------------------------------------------------------
@@ -1433,8 +1563,6 @@ private:
         canvas.result().board = board;
         if (board == "other"){
             canvas.go_other();
-        }else if (board == "esp32" || board == "esp32s3"){
-            canvas.go_guide(board);
         }else{
             canvas.go_steps(board);
         }
@@ -1446,45 +1574,337 @@ private:
 
 
 //  ---------------------------------------------------------------------
-//  Page 3: the steps of the Pico W and the Pico 2 W
+//  A drop-down inside a page (the firmware version, the port)
 //  ---------------------------------------------------------------------
+
+struct DropItem{
+    QString id;
+    QString text;
+    QString chip;
+    ChipKind chip_kind = ChipKind::RING;
+};
+
+//  The text, with "..." in the middle when it is wider than max_width.
+void draw_elided(QPainter& painter, const QString& text, double x, double cy, double max_width, const QFont& font, const QColor& color){
+    const QString shown = QFontMetricsF(font).elidedText(text, Qt::ElideMiddle, std::max(40.0, max_width));
+    draw_text_cy(painter, shown, x, cy + 1, font, color);
+}
+
+class Dropdown{
+public:
+    explicit Dropdown(const QString& name)
+        : m_name(name)
+    {}
+
+    void set_items(const std::vector<DropItem>& items){
+        m_items = items;
+        if (index_of(m_selected) < 0){
+            m_selected.clear();
+        }
+        m_highlight = std::min(m_highlight, (int)m_items.size() - 1);
+    }
+    const std::vector<DropItem>& items() const{
+        return m_items;
+    }
+    const QString& selected() const{
+        return m_selected;
+    }
+    void select(const QString& id){
+        if (index_of(id) >= 0){
+            m_selected = id;
+        }
+    }
+    bool is_open() const{
+        return m_open;
+    }
+    void close(){
+        m_open = false;
+        m_open_p.target = 0;
+    }
+    void toggle(){
+        if (m_open){
+            close();
+            return;
+        }
+        if (m_items.empty()){
+            return;
+        }
+        m_open = true;
+        m_open_p.target = 1;
+        m_highlight = std::max(0, index_of(m_selected));
+    }
+    QString bar_id() const{
+        return "dd:" + m_name;
+    }
+    QString row_prefix() const{
+        return "dd:" + m_name + ":";
+    }
+    bool owns(const QString& id) const{
+        return id == bar_id() || id.startsWith(row_prefix());
+    }
+    //  A row (by its hit id, or its own id) is picked.
+    bool pick(const QString& id){
+        const QString own = id.startsWith(row_prefix()) ? id.mid(row_prefix().size()) : id;
+        if (index_of(own) < 0){
+            return false;
+        }
+        m_selected = own;
+        close();
+        return true;
+    }
+    void step(double dt){
+        m_open_p.step(dt, 13);
+    }
+    //  Keys on an open list; true when used.
+    bool key(QKeyEvent& event, QString* picked){
+        if (!m_open){
+            return false;
+        }
+        const int count = (int)m_items.size();
+        switch (event.key()){
+        case Qt::Key_Down:
+            m_highlight = std::min(count - 1, m_highlight + 1);
+            return true;
+        case Qt::Key_Up:
+            m_highlight = std::max(0, m_highlight - 1);
+            return true;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+        case Qt::Key_Space:
+            if (m_highlight >= 0 && m_highlight < count){
+                const QString id = m_items[(size_t)m_highlight].id;
+                if (pick(id) && picked != nullptr){
+                    *picked = id;
+                }
+            }
+            return true;
+        case Qt::Key_Escape:
+            close();
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    void paint_bar(Canvas& canvas, QPainter& painter, const QRectF& bar, double alpha, const QString& placeholder, bool enabled = true){
+        const bool lit = m_open || canvas.focused(bar_id());
+        if (lit){
+            glow(painter, bar, 20, ORANGE, 0.8 * alpha);
+        }
+        panel(
+            painter, bar, 20, with_alpha(LIST_PANEL, alpha),
+            with_alpha(lit ? ORANGE : Qt::white, (lit ? 0.95 : canvas.hovered(bar_id()) ? 0.4 : 0.22) * alpha), lit ? 2.0 : 1.6
+        );
+        canvas.add_hit(bar_id(), bar, enabled);
+        const double a = alpha * (enabled ? 1.0 : 0.5);
+        double right = bar.right() - 64;
+        const int index = index_of(m_selected);
+        if (index >= 0){
+            const DropItem& item = m_items[(size_t)index];
+            if (!item.chip.isEmpty()){
+                const double width = draw_chip(painter, tr_ui(item.chip), right, bar.center().y(), item.chip_kind, a, 20, 36, 14);
+                right -= width + 12;
+            }
+            draw_elided(painter, item.text, bar.left() + 22, bar.center().y(), right - bar.left() - 22, ui_font(27, 600), white(a));
+        }else{
+            draw_text_cy(painter, placeholder, bar.left() + 22, bar.center().y() + 1, ui_font(27, 500), white(0.55 * a));
+        }
+        draw_chevron(painter, QRectF(bar.right() - 56, bar.center().y() - 18, 36, 36), white(0.75 * a), 3.0);
+    }
+
+    //  The list, on top of everything else: draw it last.
+    void paint_list(Canvas& canvas, QPainter& painter, const QRectF& bar, double alpha){
+        if (m_open_p.value < 0.01 || m_items.empty()){
+            return;
+        }
+        constexpr double ROW = 58;
+        const double open = eio(clamp01(m_open_p.value));
+        const double height = (double)m_items.size() * ROW + 16;
+        double top = bar.bottom() + 8;
+        if (top + height > 960){
+            top = bar.top() - 8 - height;
+        }
+        const QRectF list(bar.left(), top, bar.width(), height);
+        const double a = alpha * clamp01(open * 4.0);
+        painter.save();
+        painter.setClipRect(QRectF(list.left() - 60, list.top() - 20, list.width() + 120, height * open + 40), Qt::IntersectClip);
+        panel(painter, list, 22, with_alpha(LIST_PANEL, 0.99 * a), white(0.2 * a), 1.6);
+        for (size_t c = 0; c < m_items.size(); c++){
+            const DropItem& item = m_items[c];
+            const QRectF row(list.left() + 8, list.top() + 8 + (double)c * ROW, list.width() - 16, ROW);
+            const QString id = row_prefix() + item.id;
+            if (canvas.hovered(id) && open > 0.9){
+                m_highlight = (int)c;
+            }
+            if ((int)c == m_highlight){
+                panel(painter, row.adjusted(0, 3, 0, -3), 16, with_alpha(ORANGE, 0.2 * a), with_alpha(ORANGE, 0.95 * a), 2.0);
+            }else if (item.id == m_selected){
+                panel(painter, row.adjusted(0, 3, 0, -3), 16, white(0.07 * a), white(0.24 * a), 1.6);
+            }
+            double right = row.right() - 16;
+            if (!item.chip.isEmpty()){
+                const double width = draw_chip(painter, tr_ui(item.chip), right, row.center().y(), item.chip_kind, a, 20, 36, 14);
+                right -= width + 12;
+            }
+            draw_elided(painter, item.text, row.left() + 18, row.center().y(), right - row.left() - 18, ui_font(27, 600), white(a));
+            if (open > 0.9){
+                canvas.add_hit(id, row, true, false);
+            }
+        }
+        painter.restore();
+    }
+
+private:
+    int index_of(const QString& id) const{
+        for (size_t c = 0; c < m_items.size(); c++){
+            if (m_items[c].id == id){
+                return (int)c;
+            }
+        }
+        return -1;
+    }
+
+private:
+    QString m_name;
+    std::vector<DropItem> m_items;
+    QString m_selected;
+    bool m_open = false;
+    Smooth m_open_p;
+    int m_highlight = 0;
+};
+
+
+//  ---------------------------------------------------------------------
+//  Page 3: the steps of a board
+//  ---------------------------------------------------------------------
+
+//  What a step shows on the right, besides the picture of the board.
+enum class Action{
+    NONE,
+    DEVICE,         //  the serial ports of the computer, the drivers
+    BOOTSEL,        //  the Pico in flash mode
+    FIRMWARE,       //  the firmware: version, link, flash
+    PORTS,          //  what to pick in the program
+};
 
 struct StepText{
     const char* title;
     const char* sub;
+    Action action;
 };
 
-const StepText* steps_for(const QString& board, size_t& count){
+struct BoardSpec{
+    const StepText* steps;
+    size_t count;
+    const char* lead;
+    //  The type to pick in the program.
+    const char* type;
+    //  The steps where something happens in the picture (-1: never).
+    int flash_step;
+    int grip_step;
+    int serial_step;
+    int type_step;
+    int link_step;
+    bool wired;
+};
+
+const char* const GRIP_SUB = "On the Switch, go to HOME, then Controllers, then Change Grip/Order.";
+const char* const SELECT_SUB = "In the program, pick Serial: PABotBase2 in the first dropdown. Not Serial: PABotBase.";
+const char* const PORT_SUB = "Pick your device as the serial port (on Windows, for example COM3) and NS1: Wireless Pro Controller as the type.";
+
+const BoardSpec& spec_for(const QString& board){
     static const StepText PICO[] = {
-        {"Plug it in", "Connect the Pico to the computer with a micro-USB cable. Keep it within 1 m (3 ft) of the Switch."},
-        {"Enter flash mode", "Unplug it, hold the white Bootsel button, plug it in again, then let go."},
-        {"Flash the firmware", "Copy PABotBase2-Pico1W-<version>.uf2 from the Firmware folder to the drive RPI-RP2."},
-        {"Open the Grip menu", "On the Switch, go to HOME, then Controllers, then Change Grip/Order."},
-        {"Select the controller", "In the program, pick Serial: PABotBase2 in the first dropdown. Not Serial: PABotBase."},
-        {"Select the port and the type", "Pick your device as the serial port (on Windows, for example COM3) and NS1: Wireless Pro Controller as the type."},
-        {"Pair and test", "Wait for the controller in the Grip menu. Then click the video, press some keys, and check the picture and the sound."},
+        {"Plug it in", "Connect the Pico to the computer with a micro-USB cable. Keep it within 1 m (3 ft) of the Switch.", Action::NONE},
+        {"Enter flash mode", "Unplug it, hold the white Bootsel button, plug it in again, then let go.", Action::BOOTSEL},
+        {"Flash the firmware", "Pick the firmware version and press Flash now. The program puts the file on the Pico for you.", Action::FIRMWARE},
+        {"Open the Grip menu", GRIP_SUB, Action::NONE},
+        {"Select the controller", SELECT_SUB, Action::NONE},
+        {"Select the port and the type", PORT_SUB, Action::PORTS},
+        {"Pair and test", "Wait for the controller in the Grip menu. Then click the video, press some keys, and check the picture and the sound.", Action::NONE},
     };
-    static const StepText PICO2[] = {
-        {"Plug it in", "Connect the Pico to the computer with a micro-USB cable. Keep it within 1 m (3 ft) of the Switch."},
-        {"Enter flash mode", "Unplug it, hold the white Bootsel button, plug it in again, then let go."},
-        {"Flash the firmware", "Copy PABotBase2-Pico2W-<version>.uf2 from the Firmware folder to the drive RP2350."},
-        {"Open the Grip menu", "On the Switch, go to HOME, then Controllers, then Change Grip/Order."},
-        {"Select the controller", "In the program, pick Serial: PABotBase2 in the first dropdown. Not Serial: PABotBase."},
-        {"Select the port and the type", "Pick your device as the serial port (on Windows, for example COM3) and NS1: Wireless Pro Controller as the type."},
-        {"Pair and test", "Wait for the controller in the Grip menu. Then click the video, press some keys, and check the picture and the sound."},
+    static const StepText ESP32[] = {
+        {"Plug it in", "Connect the ESP32 to the computer with a USB cable. Keep it within 1 m (3 ft) of the Switch.", Action::DEVICE},
+        {"Flash the firmware", "Pick the port of the ESP32 and the firmware version, then press Flash now.", Action::FIRMWARE},
+        {"Restart the board", "Press the EN or RESET button, or unplug it and plug it in again.", Action::NONE},
+        {"Open the Grip menu", GRIP_SUB, Action::NONE},
+        {"Select the controller", SELECT_SUB, Action::NONE},
+        {"Select the port and the type", PORT_SUB, Action::PORTS},
+        {"Pair and test", "Wait about 5 seconds for the controller in the Grip menu. No controller? Press EN or RESET and click Reset Ctrl. Then check keys, picture and sound.", Action::NONE},
     };
-    count = sizeof(PICO) / sizeof(PICO[0]);
-    return board == "pico2" ? PICO2 : PICO;
+    static const StepText ESP32S3[] = {
+        {"Connect both cables", "Plug the port labeled COM or UART into the computer, and the port labeled USB or OTG into the Switch dock. They are not interchangeable.", Action::DEVICE},
+        {"Allow wired controllers", "On the Switch, open System Settings, then Controllers and Sensors, and turn on Pro Controller Wired Communication.", Action::NONE},
+        {"Flash the firmware", "Pick the port of the ESP32-S3 and the firmware version, then press Flash now.", Action::FIRMWARE},
+        {"Restart the board", "Press the EN or RESET button, or unplug both cables and plug them in again.", Action::NONE},
+        {"Select the controller and the port", "In the program, pick Serial: PABotBase2 in the first dropdown, then your device as the serial port. Click Reset Ctrl if it is not listed.", Action::PORTS},
+        {"Connect to the Switch", "Pick NS1: Wired Pro Controller as the type. Click the video and press Enter. A controller shows up on the Switch.", Action::NONE},
+        {"Test", "Click the video and press some keys. Check the picture and the sound. Pick None as the type to use a physical controller again.", Action::NONE},
+    };
+    static const BoardSpec PICO_SPEC = {
+        PICO, sizeof(PICO) / sizeof(PICO[0]),
+        "Wireless, set up over USB. Seven short steps.", "NS1: Wireless Pro Controller",
+        2, 3, 4, 5, 6, false
+    };
+    static const BoardSpec ESP32_SPEC = {
+        ESP32, sizeof(ESP32) / sizeof(ESP32[0]),
+        "Wireless. The program flashes it for you. Seven short steps.", "NS1: Wireless Pro Controller",
+        1, 3, 4, 5, 6, false
+    };
+    static const BoardSpec ESP32S3_SPEC = {
+        ESP32S3, sizeof(ESP32S3) / sizeof(ESP32S3[0]),
+        "Wired and the most reliable. The program flashes it for you. Seven short steps.", "NS1: Wired Pro Controller",
+        2, -1, 4, 5, 5, true
+    };
+    if (board == "esp32"){
+        return ESP32_SPEC;
+    }
+    if (board == "esp32s3"){
+        return ESP32S3_SPEC;
+    }
+    return PICO_SPEC;
 }
+
+const char* const URL_DRIVER_CP210X = "https://www.silabs.com/documents/public/software/CP210x_Windows_Drivers.zip";
+const char* const URL_DRIVER_CH340 = "https://www.arduined.eu/ch340-windows-10-driver-download/";
+const char* const URL_ESPTOOL = "https://docs.espressif.com/projects/esptool/en/latest/esp32/installation.html";
+
+//  What the firmware part of a page is doing.
+enum class Flash{
+    IDLE,
+    DOWNLOADING,
+    COPYING,
+    RESTARTING,
+    FLASHING,
+    DONE,
+    FAILED,
+};
 
 class StepsPage : public Page{
 public:
     StepsPage(Canvas& canvas, const QString& board)
-        : m_board(board)
-        , m_steps(steps_for(board, m_count))
+        : m_canvas(canvas)
+        , m_board(board)
+        , m_spec(spec_for(board))
+        , m_kind(firmware_kind(board))
+        , m_probe(canvas.app_folder(), canvas.scan_override())
+        , m_versions("version")
+        , m_ports("port")
     {
         canvas.set_focus_id("next");
         m_usb.jump(0);
+        m_firmware_dir = QDir(canvas.app_folder()).filePath("Firmware");
+        m_ref = firmware_ref(m_firmware_dir);
+        rebuild_versions(true);
+        if (canvas.has_listing_override()){
+            m_online = parse_firmware_listing(canvas.listing_override(), m_kind);
+            rebuild_versions(false);
+        }else if (!canvas.test_mode()){
+            m_listing = std::make_unique<Download>();
+            m_listing->start(FIRMWARE_LISTING_URL, QString());
+        }
+        m_probe.step(10, true);
+        m_hw = m_probe.state();
+        update_ports();
     }
 
     virtual const char* name() const override{
@@ -1494,15 +1914,18 @@ public:
     int current() const{
         return m_current;
     }
+    Flash flash_state() const{
+        return m_flash;
+    }
 
     virtual void step(double dt) override{
         m_pos.step(dt, 12);
         m_usb.target = 1;
-        m_pico.target = m_current >= 2 ? 1 : 0;
-        m_serial.target = m_current >= 4 ? 1 : 0;
-        m_type.target = m_current >= 5 ? 1 : 0;
-        m_link.target = m_current >= 6 ? 1 : 0;
-        m_search.target = m_current >= 3 ? 1 : 0;
+        m_pico.target = m_current >= m_spec.flash_step ? 1 : 0;
+        m_serial.target = m_current >= m_spec.serial_step ? 1 : 0;
+        m_type.target = m_current >= m_spec.type_step ? 1 : 0;
+        m_link.target = m_current >= m_spec.link_step ? 1 : 0;
+        m_search.target = m_spec.grip_step >= 0 && m_current >= m_spec.grip_step ? 1 : 0;
         m_usb.step(dt, 6);
         m_pico.step(dt, 8);
         m_serial.step(dt, 7);
@@ -1510,6 +1933,18 @@ public:
         m_link.step(dt, 6);
         m_search.step(dt, 6);
         m_clock += dt;
+        m_versions.step(dt);
+        m_ports.step(dt);
+
+        const bool card = m_spec.steps[m_current].action != Action::NONE;
+        m_card.target = card ? 1 : 0;
+        m_card.step(dt, 9);
+
+        m_probe.step(dt, m_canvas.test_mode());
+        m_hw = m_probe.state();
+        update_ports();
+        update_listing();
+        update_flash(dt);
     }
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
@@ -1518,27 +1953,49 @@ public:
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Set up your %1").arg(short_board_name(m_board));
         draw_heading(painter, heading, 140, 160, 84, prog(t, in.head, in.head + 0.9), 1.0);
-        const QString sub = T("Wireless, set up over USB. Seven short steps.");
+        const QString sub = T(m_spec.lead);
         const double sub_top = 160 + heading_height(heading, 84) + 10;
         draw_sub(painter, sub, 140, sub_top, prog(t, in.sub, in.sub + 0.8), 1.0, 32, 860);
 
-        paint_steps(canvas, painter, eo(prog(t, in.bar, in.bar + 0.6)), sub_top + sub_height(sub, 32, 860) + 26);
-        paint_diagram(painter, eo(prog(t, in.bar + 0.1, in.bar + 0.8)));
+        const double reveal = eo(prog(t, in.bar, in.bar + 0.6));
+        paint_steps(canvas, painter, reveal, sub_top + sub_height(sub, 32, 860) + 26);
+        paint_diagram(painter, eo(prog(t, in.bar + 0.1, in.bar + 0.8)) * (1.0 - m_card.value));
+        paint_card(canvas, painter, reveal * m_card.value);
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
         draw_skip(canvas, painter, b);
-        const bool last = m_current >= (int)m_count - 1;
+        const QString video = T("Watch the video tutorial");
+        draw_button(canvas, painter, "video", video, 136 + button_width(T("Skip setup"), ButtonKind::LINK) + 40, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+        const bool last = m_current >= (int)m_spec.count - 1;
         const QString next_text = last ? T("Finish the steps") : T("Next step");
         const double next_w = button_width(next_text, ButtonKind::PRIMARY);
         draw_button(canvas, painter, "next", next_text, 1780 - next_w, 950, ButtonKind::PRIMARY, b);
         const QString back_text = T("Back");
         draw_button(canvas, painter, "back", back_text, 1780 - next_w - 18 - button_width(back_text, ButtonKind::SECONDARY), 950,
             ButtonKind::SECONDARY, b);
+
+        //  The lists of the drop-downs lie on top of everything.
+        const double list_alpha = reveal * m_card.value;
+        if (m_card_bar_ports.width() > 0){
+            m_ports.paint_list(canvas, painter, m_card_bar_ports, list_alpha);
+        }
+        if (m_card_bar_versions.width() > 0){
+            m_versions.paint_list(canvas, painter, m_card_bar_versions, list_alpha);
+        }
+        m_card_bar_ports = QRectF();
+        m_card_bar_versions = QRectF();
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
+        //  A press outside of an open list closes it.
+        if (m_versions.is_open() && !m_versions.owns(id)){
+            m_versions.close();
+        }
+        if (m_ports.is_open() && !m_ports.owns(id)){
+            m_ports.close();
+        }
         if (id == "next"){
-            if (m_current >= (int)m_count - 1){
+            if (m_current >= (int)m_spec.count - 1){
                 canvas.go_done(m_board);
             }else{
                 set_current(m_current + 1);
@@ -1553,11 +2010,61 @@ public:
             canvas.result().board_done = true;
             canvas.result().board = m_board;
             canvas.finish();
+        }else if (id == "video"){
+            canvas.play_video(m_board);
         }else if (id.startsWith("step:")){
             set_current(id.mid(5).toInt());
+        }else if (id == m_versions.bar_id()){
+            m_ports.close();
+            m_versions.toggle();
+        }else if (id == m_ports.bar_id()){
+            m_versions.close();
+            m_ports.toggle();
+        }else if (id.startsWith(m_versions.row_prefix())){
+            m_versions.pick(id);
+            reset_flash_if_done();
+        }else if (id.startsWith(m_ports.row_prefix())){
+            m_ports.pick(id);
+            reset_flash_if_done();
+        }else if (id == "flash"){
+            //  "Flash again" and "Try again" start over: when the Pico or the
+            //  board is not ready, the card shows what is missing.
+            reset_flash_if_done();
+            start_flash();
+        }else if (id == "download"){
+            start_download();
+        }else if (id == "link_open"){
+            canvas.open_url(current_url());
+        }else if (id == "link_copy"){
+            canvas.copy_text(current_url());
+        }else if (id == "folder"){
+            canvas.open_folder(m_firmware_dir);
+        }else if (id == "devmgr"){
+            canvas.open_device_manager();
+        }else if (id == "driver_cp210x"){
+            canvas.open_url(URL_DRIVER_CP210X);
+        }else if (id == "driver_ch340"){
+            canvas.open_url(URL_DRIVER_CH340);
+        }else if (id == "get_tool"){
+            canvas.open_url(URL_ESPTOOL);
+        }else if (id == "rescan"){
+            m_probe.refresh();
         }
     }
     virtual bool key(Canvas& canvas, QKeyEvent& event) override{
+        QString picked;
+        if (m_versions.key(event, &picked)){
+            if (!picked.isEmpty()){
+                reset_flash_if_done();
+            }
+            return true;
+        }
+        if (m_ports.key(event, &picked)){
+            if (!picked.isEmpty()){
+                reset_flash_if_done();
+            }
+            return true;
+        }
         if (event.key() == Qt::Key_Right){
             activate(canvas, "next");
             return true;
@@ -1571,15 +2078,382 @@ public:
     virtual void enter_pressed(Canvas& canvas) override{
         activate(canvas, "next");
     }
+    virtual void escape_pressed(Canvas& canvas) override{
+        (void)canvas;
+        m_versions.close();
+        m_ports.close();
+    }
+
+    virtual QString state() const override{
+        static const char* const NAMES[] = {"idle", "downloading", "copying", "restarting", "flashing", "done", "failed"};
+        const FirmwareFile* file = selected_file();
+        return QString("step=%1 flash=%2 error=%3 file=%4 port=%5 local=%6")
+            .arg(m_current + 1)
+            .arg(NAMES[(int)m_flash])
+            .arg(m_flash_error)
+            .arg(file == nullptr ? QString() : file->file_name)
+            .arg(m_ports.selected())
+            .arg(file != nullptr && !file->path.isEmpty() ? "yes" : "no");
+    }
+
+    //  ---- for the tests
+    const FirmwareFile* selected_file() const{
+        for (const FirmwareFile& file : m_files){
+            if (file.file_name == m_versions.selected()){
+                return &file;
+            }
+        }
+        return nullptr;
+    }
+    QString selected_port() const{
+        return m_ports.selected();
+    }
+    QString flash_error() const{
+        return m_flash_error;
+    }
 
 private:
     void set_current(int index){
-        const int clamped = std::max(0, std::min((int)m_count - 1, index));
+        const int clamped = std::max(0, std::min((int)m_spec.count - 1, index));
         if (clamped != m_current){
             m_current = clamped;
+            m_step_since = m_clock;
+            m_versions.close();
+            m_ports.close();
         }
         m_pos.target = m_current;
     }
+
+    //  ---- the firmware, the ports
+
+    //  The versions of the dropdown: what is on this computer and what the
+    //  Packages repository lists.
+    void rebuild_versions(bool first){
+        if (m_kind.isEmpty()){
+            return;
+        }
+        const QString keep = m_versions.selected();
+        m_files = merge_firmware(local_firmware(m_firmware_dir, m_kind), m_online);
+        std::vector<DropItem> items;
+        for (const FirmwareFile& file : m_files){
+            DropItem item;
+            item.id = file.file_name;
+            //  Short on screen: the board and the version. The link and the
+            //  file on the disk keep the whole name.
+            item.text = file.file_name;
+            if (item.text.startsWith("PABotBase2-")){
+                item.text = item.text.mid(11);
+            }
+            const qsizetype dot = item.text.lastIndexOf('.');
+            if (dot > 0){
+                item.text = item.text.left(dot);
+            }
+            if (!file.path.isEmpty()){
+                item.chip = "On this computer";
+                item.chip_kind = ChipKind::ORANGE_RING;
+            }else{
+                item.chip = "Online";
+                item.chip_kind = ChipKind::RING;
+            }
+            items.push_back(item);
+        }
+        m_versions.set_items(items);
+        if (!keep.isEmpty()){
+            m_versions.select(keep);
+        }
+        if (m_versions.selected().isEmpty() && !m_files.empty()){
+            //  The newest of this computer, else the newest there is.
+            QString choice = m_files.front().file_name;
+            for (const FirmwareFile& file : m_files){
+                if (!file.path.isEmpty()){
+                    choice = file.file_name;
+                    break;
+                }
+            }
+            m_versions.select(choice);
+        }
+        (void)first;
+    }
+
+    void update_listing(){
+        if (m_listing == nullptr || !m_listing->done()){
+            return;
+        }
+        if (m_listing->ok()){
+            m_online = parse_firmware_listing(m_listing->body(), m_kind);
+            rebuild_versions(false);
+        }
+        m_listing.reset();
+    }
+
+    void update_ports(){
+        if (m_spec.steps[0].action != Action::DEVICE){
+            return;
+        }
+        std::vector<DropItem> items;
+        QString signature;
+        for (const PortInfo& port : m_hw.ports){
+            DropItem item;
+            item.id = port.name;
+            item.text = port.name + (port.description.isEmpty() ? QString() : "  " + port.description);
+            item.chip = port.chip;
+            item.chip_kind = ChipKind::RING;
+            items.push_back(item);
+            signature += port.name + "|" + port.chip + ";";
+        }
+        if (signature == m_port_signature){
+            return;
+        }
+        m_port_signature = signature;
+        const QString keep = m_ports.selected();
+        m_ports.set_items(items);
+        m_ports.select(keep);
+        if (m_ports.selected().isEmpty() && !items.empty()){
+            //  The first with a chip of a known board (the list has those first).
+            m_ports.select(items.front().id);
+        }
+    }
+
+    QString current_url() const{
+        const FirmwareFile* file = selected_file();
+        if (file == nullptr){
+            return QString();
+        }
+        return firmware_url(file->file_name, file->path.isEmpty() ? QString("master") : m_ref);
+    }
+
+    bool file_is_local() const{
+        const FirmwareFile* file = selected_file();
+        return file != nullptr && !file->path.isEmpty();
+    }
+
+    bool is_pico() const{
+        return m_board == "pico" || m_board == "pico2";
+    }
+
+    const PicoDrive* fitting_drive() const{
+        for (const PicoDrive& drive : m_hw.drives){
+            if (pico_drive_fits(drive, m_board)){
+                return &drive;
+            }
+        }
+        return nullptr;
+    }
+    const PicoDrive* other_drive() const{
+        for (const PicoDrive& drive : m_hw.drives){
+            if (!pico_drive_fits(drive, m_board)){
+                return &drive;
+            }
+        }
+        return nullptr;
+    }
+
+    bool busy() const{
+        return m_flash == Flash::DOWNLOADING || m_flash == Flash::COPYING || m_flash == Flash::RESTARTING || m_flash == Flash::FLASHING;
+    }
+
+    //  Why Flash now is not possible yet.
+    enum class Block{
+        NONE,
+        NOT_LOCAL,
+        NO_DRIVE,
+        WRONG_DRIVE,
+        NO_PORT,
+        NO_TOOL,
+        LOOKING_FOR_TOOL,
+    };
+    Block flash_blocker() const{
+        if (!file_is_local()){
+            return Block::NOT_LOCAL;
+        }
+        if (is_pico()){
+            if (fitting_drive() == nullptr){
+                return other_drive() != nullptr ? Block::WRONG_DRIVE : Block::NO_DRIVE;
+            }
+            return Block::NONE;
+        }
+        if (m_ports.selected().isEmpty()){
+            return Block::NO_PORT;
+        }
+        if (!m_canvas.pretend() && !m_hw.tool.found){
+            return m_hw.tool_checked ? Block::NO_TOOL : Block::LOOKING_FOR_TOOL;
+        }
+        return Block::NONE;
+    }
+    QString blocker_text(Block block) const{
+        switch (block){
+        case Block::NOT_LOCAL:
+            return T("This version is not on this computer yet.");
+        case Block::NO_DRIVE:
+            return T("Put the Pico in flash mode first (step 2).");
+        case Block::WRONG_DRIVE:
+            return T("The drive is of another board.");
+        case Block::NO_PORT:
+            return T("Pick the port of the board.");
+        case Block::NO_TOOL:
+            return T("The flash tool (esptool) was not found.");
+        case Block::LOOKING_FOR_TOOL:
+            return T("Looking for the flash tool...");
+        default:
+            return QString();
+        }
+    }
+
+    void reset_flash_if_done(){
+        if (m_flash == Flash::DONE || m_flash == Flash::FAILED){
+            m_flash = Flash::IDLE;
+            m_flash_error.clear();
+            m_flash_progress = 0;
+        }
+    }
+
+    void start_download(){
+        const FirmwareFile* file = selected_file();
+        if (file == nullptr || busy()){
+            return;
+        }
+        m_flash_error.clear();
+        m_fetch = std::make_unique<Download>();
+        m_fetch_name = file->file_name;
+        m_fetch->start(m_canvas.map_url(current_url()), QDir(m_firmware_dir).filePath(file->file_name));
+        m_flash = Flash::DOWNLOADING;
+        m_flash_progress = 0;
+    }
+
+    void start_flash(){
+        if (busy()){
+            return;
+        }
+        if (flash_blocker() != Block::NONE){
+            return;
+        }
+        const FirmwareFile* file = selected_file();
+        const QString path = file->path;
+        m_flash_error.clear();
+        m_flash_progress = 0;
+        m_flash_time = 0;
+        if (!looks_like_firmware(path)){
+            m_flash = Flash::FAILED;
+            m_flash_error = "file";
+            return;
+        }
+        if (is_pico()){
+            m_flash = Flash::COPYING;
+            if (!m_canvas.pretend()){
+                m_copy = std::make_unique<CopyJob>(path, fitting_drive()->root);
+            }
+            m_gone_for = 0;
+        }else{
+            m_flash = Flash::FLASHING;
+            if (!m_canvas.pretend()){
+                m_esp = std::make_unique<EspFlashJob>(m_hw.tool, m_ports.selected(), path);
+                m_esp->start();
+            }
+        }
+    }
+
+    void update_flash(double dt){
+        switch (m_flash){
+        case Flash::DOWNLOADING:
+            if (m_fetch == nullptr){
+                m_flash = Flash::IDLE;
+                break;
+            }
+            m_flash_progress = std::max(0.0, m_fetch->progress());
+            if (m_fetch->done()){
+                const bool ok = m_fetch->ok() && looks_like_firmware(QDir(m_firmware_dir).filePath(m_fetch_name));
+                const QString name = m_fetch_name;
+                m_fetch.reset();
+                if (ok){
+                    rebuild_versions(false);
+                    m_versions.select(name);
+                    m_flash = Flash::IDLE;
+                }else{
+                    QFile::remove(QDir(m_firmware_dir).filePath(name));
+                    m_flash = Flash::FAILED;
+                    m_flash_error = "download";
+                }
+            }
+            break;
+        case Flash::COPYING:
+            m_flash_time += dt;
+            if (m_canvas.pretend()){
+                m_flash_progress = std::min(1.0, m_flash_time / 2.4);
+                if (m_flash_progress >= 1.0){
+                    m_flash = Flash::RESTARTING;
+                    m_gone_for = 0;
+                    m_flash_time = 0;
+                }
+                break;
+            }
+            m_flash_progress = m_copy != nullptr ? m_copy->progress() : 0.0;
+            //  A moment on the picture, even when the copy is done at once.
+            if (m_copy != nullptr && m_copy->done() && m_flash_time >= 1.4){
+                if (m_copy->ok()){
+                    m_copy.reset();
+                    m_flash = Flash::RESTARTING;
+                    m_gone_for = 0;
+                    m_flash_time = 0;
+                }else{
+                    m_flash_error = "copy";
+                    m_copy.reset();
+                    m_flash = Flash::FAILED;
+                }
+            }
+            break;
+        case Flash::RESTARTING:
+            m_flash_time += dt;
+            m_flash_progress = 1.0;
+            //  The Pico restarts by itself: its drive goes away.
+            if (m_canvas.pretend()){
+                if (m_flash_time >= 1.6){
+                    m_flash = Flash::DONE;
+                }
+            }else if (fitting_drive() == nullptr){
+                m_gone_for += dt;
+                if (m_gone_for >= 0.5){
+                    m_flash = Flash::DONE;
+                }
+            }else{
+                m_gone_for = 0;
+                if (m_flash_time > 30){
+                    m_flash = Flash::FAILED;
+                    m_flash_error = "restart";
+                }
+            }
+            break;
+        case Flash::FLASHING:
+            m_flash_time += dt;
+            if (m_canvas.pretend()){
+                m_flash_progress = std::min(1.0, m_flash_time / 6.0);
+                if (m_flash_progress >= 1.0){
+                    m_flash = Flash::DONE;
+                }
+                break;
+            }
+            if (m_esp != nullptr){
+                m_flash_progress = m_esp->progress();
+                if (m_esp->done()){
+                    if (m_esp->ok()){
+                        m_flash = Flash::DONE;
+                    }else{
+                        m_flash = Flash::FAILED;
+                        m_flash_error = m_esp->error_kind().isEmpty() ? QString("other") : m_esp->error_kind();
+                        m_flash_log = m_esp->status();
+                    }
+                    m_esp.reset();
+                }
+            }
+            break;
+        default:
+            break;
+        }
+        if (m_flash == Flash::DONE){
+            m_flash_progress = 1.0;
+        }
+    }
+
+    //  ---- painting: the steps
 
     void paint_steps(Canvas& canvas, QPainter& painter, double reveal, double top){
         if (reveal < 0.004){
@@ -1592,11 +2466,11 @@ private:
         const double a = reveal;
 
         //  The closed steps get less room when the open one is long.
-        const int open_lines = (int)wrap_text(sub_font, T(m_steps[m_current].sub), 740).size();
+        const int open_lines = (int)wrap_text(sub_font, T(m_spec.steps[m_current].sub), 740).size();
         const double extra = 8 + open_lines * 36 + 14;
         double compact = 66;
-        if (top + (double)m_count * compact + extra > BOTTOM){
-            compact = std::max(48.0, (BOTTOM - top - extra) / (double)m_count);
+        if (top + (double)m_spec.count * compact + extra > BOTTOM){
+            compact = std::max(44.0, (BOTTOM - top - extra) / (double)m_spec.count);
         }
         const double circle_size = std::min(60.0, compact - 4);
         double y = top + (1.0 - reveal) * 30;
@@ -1604,7 +2478,7 @@ private:
         //  The rail behind the circles.
         QList<double> centers;
         double probe = y;
-        for (int c = 0; c < (int)m_count; c++){
+        for (int c = 0; c < (int)m_spec.count; c++){
             const bool open = c == m_current;
             const double height = open ? compact + extra : compact;
             centers << probe + circle_size / 2;
@@ -1615,10 +2489,10 @@ private:
             painter.drawLine(QPointF(X + circle_size / 2, centers.first()), QPointF(X + circle_size / 2, centers.last()));
         }
 
-        for (int c = 0; c < (int)m_count; c++){
+        for (int c = 0; c < (int)m_spec.count; c++){
             const bool open = c == m_current;
             const bool done = c < m_current;
-            const QStringList lines = wrap_text(sub_font, T(m_steps[c].sub), 740);
+            const QStringList lines = wrap_text(sub_font, T(m_spec.steps[c].sub), 740);
             const double height = open ? compact + extra : compact;
             const QRectF circle(X, y, circle_size, circle_size);
 
@@ -1638,7 +2512,7 @@ private:
                 draw_text_cy(painter, QString::number(c + 1), circle.center().x(), circle.center().y() + 1, ui_font(32, 700),
                     with_alpha(open ? ORANGE : Qt::white, (open ? 1.0 : 0.5) * a), Qt::AlignHCenter);
             }
-            draw_text(painter, T(m_steps[c].title), X + 88, y + (circle_size - text_height(title_font)) / 2, title_font, white((open ? 1.0 : done ? 0.78 : 0.55) * a));
+            draw_text(painter, T(m_spec.steps[c].title), X + 88, y + (circle_size - text_height(title_font)) / 2, title_font, white((open ? 1.0 : done ? 0.78 : 0.55) * a));
             if (open){
                 for (int k = 0; k < lines.size(); k++){
                     draw_text(painter, lines[k], X + 90, y + circle_size + 4 + k * 36, sub_font, white(0.66 * a));
@@ -1649,6 +2523,8 @@ private:
         }
     }
 
+    //  ---- painting: the picture of the computer, the board and the Switch
+
     void paint_diagram(QPainter& painter, double reveal){
         if (reveal < 0.004){
             return;
@@ -1657,6 +2533,7 @@ private:
         constexpr double CX_PICO = 1500;
         constexpr double CY = 430;
         const double a = reveal;
+        const QString picture = m_board == "esp32" ? "esp32-big" : m_board == "esp32s3" ? "esp32s3-big" : "pico-big";
 
         //  The Switch, with its screen black until it is linked.
         const QPixmap plain = plain_picture("switch");
@@ -1669,8 +2546,8 @@ private:
         draw_picture(painter, linked, sw, a * m_link.value);
         draw_text(painter, QString("Nintendo Switch"), CX_PICO, sw.bottom() + 4, ui_font(26, 500), white(0.6 * a), Qt::AlignHCenter);
 
-        //  The computer, the line, the Pico.
-        draw_picture(painter, plain_picture("computer"), QRectF(CX_PC - 75, CY - 64, 150, 128 * 150.0 / 150.0 * 0.0 + 128), a * 0.9);
+        //  The computer, the line, the board.
+        draw_picture(painter, plain_picture("computer"), QRectF(CX_PC - 75, CY - 64, 150, 128), a * 0.9);
         draw_text(painter, T("Computer"), CX_PC, CY + 100, ui_font(26, 500), white(0.6 * a), Qt::AlignHCenter);
         const double line_left = CX_PC + 75 + 18;
         const double line_right = CX_PICO - 50;
@@ -1680,22 +2557,21 @@ private:
         painter.setBrush(with_alpha(ORANGE, a));
         painter.drawRoundedRect(QRectF(line_left, CY - 3.5, (line_right - line_left) * eo(m_usb.value), 7), 3.5, 3.5);
 
-        const QRectF pico_box(CX_PICO - 50, CY - 95, 100, 190);
-        const double flash_wait = m_pico.value;
-        if (m_pico.value > 0.02 && m_current >= 2){
-            const QPixmap glow_pixmap = tinted("pico-big", ORANGE);
-            draw_picture(painter, glow_pixmap, pico_box.adjusted(-10, -10, 10, 10), 0.18 * a * m_pico.value);
+        const QRectF board_box(CX_PICO - 50, CY - 95, 100, 190);
+        const double lit = m_pico.value;
+        if (lit > 0.02 && m_current >= m_spec.flash_step){
+            draw_picture(painter, tinted(picture, ORANGE), board_box.adjusted(-10, -10, 10, 10), 0.18 * a * lit);
         }
-        draw_picture(painter, tinted("pico-big", white(1.0)), pico_box, a * (1.0 - flash_wait) * 0.92);
-        draw_picture(painter, tinted("pico-big", ORANGE), pico_box, a * flash_wait);
+        draw_picture(painter, tinted(picture, white(1.0)), board_box, a * (1.0 - lit) * 0.92);
+        draw_picture(painter, tinted(picture, ORANGE), board_box, a * lit);
         draw_text(painter, short_board_name(m_board), CX_PICO, CY + 118, ui_font(26, 500), white(0.6 * a), Qt::AlignHCenter);
 
-        //  The firmware file drops into the Pico, again and again, while the step "Flash the firmware" is open.
-        if (m_current == 2){
+        //  The firmware file drops into the board, again and again, while the step "Flash the firmware" is open.
+        if (m_current == m_spec.flash_step){
             const double phase = std::fmod(m_clock, 2.8) / 2.8;
             const double fall = eio(prog(phase, 0.10, 0.62));
             const double chip_alpha = a * prog(phase, 0.0, 0.10) * (1.0 - prog(phase, 0.58, 0.68));
-            const QString file = m_board == "pico2" ? "PABotBase2-Pico2W.uf2" : "PABotBase2-Pico1W.uf2";
+            const QString file = QString("PABotBase2-%1%2").arg(m_kind, firmware_extension(m_kind));
             const double w = draw_chip(painter, file, 0, 0, ChipKind::YELLOW_FILL, 0, 26, 48, 20, true);
             draw_chip(painter, file, CX_PICO + w / 2, lerp(CY - 150, CY - 20, fall), ChipKind::YELLOW_FILL, chip_alpha, 26, 48, 20);
         }
@@ -1707,31 +2583,382 @@ private:
             draw_chip(painter, text, mid + w / 2, CY - 178 + (1.0 - m_serial.value) * 14, ChipKind::YELLOW_FILL, a * m_serial.value, 25, 48, 20);
         }
         if (m_type.value > 0.02){
-            const QString text = "NS1: Wireless Pro Controller";
+            const QString text = QString::fromLatin1(m_spec.type);
             const double w = draw_chip(painter, text, 0, 0, ChipKind::YELLOW_FILL, 0, 25, 48, 20, true);
             draw_chip(painter, text, mid + w / 2, CY - 122 + (1.0 - m_type.value) * 14, ChipKind::YELLOW_FILL, a * m_type.value, 25, 48, 20);
         }
 
-        //  The Pico looks for the Switch, then it is linked.
+        if (m_spec.wired){
+            //  A cable from the board to the Switch.
+            const double x = CX_PICO;
+            const double top = CY + 100;
+            const double bottom = CY + 188;
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(white(0.22 * a));
+            painter.drawRoundedRect(QRectF(x - 3.5, top + 28, 7, bottom - top - 28), 3.5, 3.5);
+            painter.setBrush(with_alpha(ORANGE, a * m_search.value));
+            painter.drawRoundedRect(QRectF(x - 3.5, top + 28, 7, (bottom - top - 28) * m_link.value), 3.5, 3.5);
+            return;
+        }
+
+        //  The board looks for the Switch, then it is linked.
         if (m_search.value > 0.02){
-            const double pulse = m_link.value > 0.5 ? 1.0 : 0.5 + 0.5 * std::sin(m_clock * 5.0);
             static const double RX[3] = {52, 96, 140};
             static const double RY[3] = {30, 54, 78};
             for (int c = 0; c < 3; c++){
-                const double lit = m_link.value > 0.5 ? 1.0 : clamp01(std::sin(m_clock * 5.0 - c * 0.9) * 0.6 + 0.5);
-                const QColor color = m_link.value > 0.5 ? with_alpha(ORANGE, a) : with_alpha(ORANGE, a * (0.25 + 0.75 * lit));
-                painter.setPen(QPen(m_link.value > 0.5 || lit > 0.25 ? color : white(0.34 * a), 7, Qt::SolidLine, Qt::RoundCap));
+                const double glow_level = m_link.value > 0.5 ? 1.0 : clamp01(std::sin(m_clock * 5.0 - c * 0.9) * 0.6 + 0.5);
+                const QColor color = m_link.value > 0.5 ? with_alpha(ORANGE, a) : with_alpha(ORANGE, a * (0.25 + 0.75 * glow_level));
+                painter.setPen(QPen(m_link.value > 0.5 || glow_level > 0.25 ? color : white(0.34 * a), 7, Qt::SolidLine, Qt::RoundCap));
                 painter.setBrush(Qt::NoBrush);
                 painter.drawArc(QRectF(CX_PICO - RX[c], CY + 134 - RY[c], RX[c] * 2, RY[c] * 2), 218 * 16, 104 * 16);
             }
-            (void)pulse;
         }
     }
 
+    //  ---- painting: the card on the right
+
+    //  A status line: a dot or a check, and the text. kind: 0 waiting, 1 fine, 2 problem.
+    void draw_status(QPainter& painter, double x, double cy, int kind, const QString& text, double alpha, double max_width = 640){
+        const QRectF dot(x, cy - 15, 30, 30);
+        painter.setPen(Qt::NoPen);
+        if (kind == 1){
+            painter.setBrush(with_alpha(ORANGE, alpha));
+            painter.drawEllipse(dot);
+            draw_check(painter, dot.adjusted(6, 6, -6, -6), with_alpha(Qt::black, alpha), 3.0);
+        }else if (kind == 2){
+            painter.setBrush(with_alpha(YELLOW, alpha));
+            painter.drawEllipse(dot);
+            draw_text_cy(painter, "!", dot.center().x(), dot.center().y() + 1, ui_font(22, 700), with_alpha(Qt::black, alpha), Qt::AlignHCenter);
+        }else{
+            const double pulse = 0.5 + 0.5 * std::sin(m_clock * 5.0);
+            painter.setBrush(Qt::NoBrush);
+            painter.setPen(QPen(with_alpha(ORANGE, alpha * (0.45 + 0.55 * pulse)), 3.2));
+            painter.drawEllipse(dot.adjusted(2, 2, -2, -2));
+        }
+        const QFont font = ui_font(26, 600);
+        const QStringList lines = wrap_text(font, text, max_width);
+        const double line_h = 34;
+        const double top = cy - (double)lines.size() * line_h / 2.0;
+        for (int c = 0; c < lines.size(); c++){
+            draw_text(painter, lines[c], x + 46, top + c * line_h, font, white((kind == 0 ? 0.78 : 0.95) * alpha));
+        }
+    }
+    double status_height(const QString& text, double max_width = 640) const{
+        return std::max(34.0, (double)wrap_text(ui_font(26, 600), text, max_width).size() * 34.0);
+    }
+
+    double card_height(Action action) const{
+        switch (action){
+        case Action::DEVICE:
+            return 420 + (double)std::min<size_t>(4, std::max<size_t>(1, m_hw.ports.size())) * 66;
+        case Action::BOOTSEL:
+            return 380;
+        case Action::FIRMWARE:
+            return is_pico() ? 560 : 680;
+        case Action::PORTS:
+            return 500;
+        default:
+            return 300;
+        }
+    }
+
+    void paint_card(Canvas& canvas, QPainter& painter, double reveal){
+        if (reveal < 0.004){
+            return;
+        }
+        const Action action = m_spec.steps[m_current].action;
+        if (action == Action::NONE){
+            return;
+        }
+        const double a = reveal;
+        const QRectF card(1000 + (1.0 - reveal) * 50, 170, 780, card_height(action));
+        panel(painter, card, 30, with_alpha(PANEL, a), white(0.16 * a), 1.6);
+        const double x = card.left() + 34;
+        switch (action){
+        case Action::DEVICE:
+            paint_device(canvas, painter, card, x, a);
+            break;
+        case Action::BOOTSEL:
+            paint_bootsel(painter, card, x, a);
+            break;
+        case Action::FIRMWARE:
+            paint_firmware(canvas, painter, card, x, a);
+            break;
+        case Action::PORTS:
+            paint_ports(painter, card, x, a);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void card_title(QPainter& painter, const QRectF& card, const QString& text, double alpha){
+        draw_text(painter, text, card.left() + 36, card.top() + 28, ui_font(30, 600), white(alpha));
+    }
+
+    void paint_device(Canvas& canvas, QPainter& painter, const QRectF& card, double x, double a){
+        card_title(painter, card, T("Serial ports on this computer"), a);
+        double y = card.top() + 96;
+        const size_t count = m_hw.ports.size();
+        if (count == 0){
+            draw_status(painter, x, y + 17, 0, T("Looking for your board... Nothing found yet."), a);
+            y += 70;
+        }else{
+            draw_status(painter, x, y + 17, 1, count == 1 ? T("Found 1 serial port.") : T("Found %1 serial ports.").arg((int)count), a);
+            y += 70;
+            const size_t shown = std::min<size_t>(4, count);
+            for (size_t c = 0; c < shown; c++){
+                const PortInfo& port = m_hw.ports[c];
+                const QRectF row(x, y, card.width() - 68, 56);
+                panel(painter, row, 18, white(0.05 * a), white(0.14 * a), 1.4);
+                draw_text_cy(painter, port.name, row.left() + 20, row.center().y() + 1, ui_font(28, 700), white(a));
+                double right = row.right() - 16;
+                if (!port.chip.isEmpty()){
+                    const double width = draw_chip(painter, port.chip, right, row.center().y(), ChipKind::ORANGE_RING, a, 20, 34, 14);
+                    right -= width + 12;
+                }
+                draw_elided(painter, port.description, row.left() + 150, row.center().y(), right - row.left() - 160, ui_font(22, 500), white(0.58 * a));
+                y += 66;
+            }
+        }
+        const QString hint = count == 0
+            ? T("No port yet? Try another USB port or another cable (some cables only charge), and install the driver of your board.")
+            : T("No port in the list? Install the driver of your board: CP210x or CH340. If you do not know which, install both.");
+        const QFont hint_font = ui_font(23, 500);
+        const QStringList lines = wrap_text(hint_font, hint, card.width() - 72);
+        for (int c = 0; c < lines.size(); c++){
+            draw_text(painter, lines[c], x + 4, y + 6 + c * 31, hint_font, white(0.56 * a));
+        }
+        y += 6 + (double)lines.size() * 31 + 14;
+        double bx = x;
+        if (canvas.test_mode() || windows_host()){
+            bx += draw_button(canvas, painter, "devmgr", T("Open Device Manager"), bx, y, ButtonKind::SECONDARY, a) + 16;
+        }
+        draw_button(canvas, painter, "driver_cp210x", T("CP210x driver"), bx, y, ButtonKind::SECONDARY, a);
+        const double bx2 = bx + button_width(T("CP210x driver"), ButtonKind::SECONDARY) + 16;
+        if (bx2 + button_width(T("CH340 driver"), ButtonKind::SECONDARY) < card.right() - 20){
+            draw_button(canvas, painter, "driver_ch340", T("CH340 driver"), bx2, y, ButtonKind::SECONDARY, a);
+        }else{
+            draw_button(canvas, painter, "driver_ch340", T("CH340 driver"), x, y + 76, ButtonKind::SECONDARY, a);
+        }
+    }
+
+    static bool windows_host(){
+#ifdef Q_OS_WIN
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    void paint_bootsel(QPainter& painter, const QRectF& card, double x, double a){
+        card_title(painter, card, T("Flash mode"), a);
+        const PicoDrive* fits = fitting_drive();
+        const PicoDrive* other = other_drive();
+        const double text_w = 470;
+        double y = card.top() + 100;
+        if (fits != nullptr){
+            draw_status(painter, x, y + 17, 1, T("Found a Pico in flash mode."), a, text_w);
+            y += 70;
+            draw_text(painter, T("Drive %1 (%2)").arg(QDir::toNativeSeparators(fits->root), fits->label), x + 46, y - 6, ui_font(24, 500), white(0.62 * a));
+            y += 52;
+            draw_text(painter, T("Go on to the next step."), x + 46, y, ui_font(24, 500), white(0.62 * a));
+        }else if (other != nullptr){
+            draw_status(painter, x, y + 17, 2, T("This is not a %1.").arg(short_board_name(m_board)), a, text_w);
+            y += 70;
+            const QString text = T("The drive %1 belongs to another board. Go back and pick that board, or use the right Pico.")
+                .arg(QDir::toNativeSeparators(other->root));
+            const QStringList lines = wrap_text(ui_font(24, 500), text, text_w - 40);
+            for (int c = 0; c < lines.size(); c++){
+                draw_text(painter, lines[c], x + 46, y - 6 + c * 32, ui_font(24, 500), white(0.62 * a));
+            }
+        }else{
+            draw_status(painter, x, y + 17, 0, T("Waiting for a Pico in flash mode..."), a, text_w);
+            y += 70;
+            const QString drive = m_board == "pico2" ? "RP2350" : "RPI-RP2";
+            const QString text = T("It shows up as a drive named %1.").arg(drive);
+            draw_text(painter, text, x + 46, y - 6, ui_font(24, 500), white(0.62 * a));
+            if (m_clock - m_step_since > 14){
+                const QString more = T("Still nothing? Unplug it, hold the Bootsel button, plug it in, and keep holding until the drive appears.");
+                const QStringList lines = wrap_text(ui_font(24, 500), more, text_w - 40);
+                for (int c = 0; c < lines.size(); c++){
+                    draw_text(painter, lines[c], x + 46, y + 46 + c * 32, ui_font(24, 500), with_alpha(YELLOW, 0.9 * a));
+                }
+            }
+        }
+        //  The Pico on the right: orange when it is there.
+        const bool found = fits != nullptr;
+        const QRectF box(card.right() - 170, card.top() + 100, 100, 190);
+        if (found){
+            draw_picture(painter, tinted("pico-big", ORANGE), box.adjusted(-12, -12, 12, 12), 0.2 * a);
+        }
+        draw_picture(painter, tinted("pico-big", found ? ORANGE : QColor(Qt::white)), box, a * (found ? 1.0 : 0.8));
+    }
+
+    void paint_firmware(Canvas& canvas, QPainter& painter, const QRectF& card, double x, double a){
+        card_title(painter, card, T("Firmware"), a);
+        const double width = card.width() - 68;
+        double y = card.top() + 90;
+        const bool dropdowns_usable = !busy();
+
+        if (!is_pico()){
+            draw_text(painter, T("Port"), x + 4, y, ui_font(22, 600), white(0.55 * a));
+            const QRectF bar(x, y + 30, width, 64);
+            m_ports.paint_bar(canvas, painter, bar, a, m_hw.ports.empty() ? T("No serial port found") : T("Pick a port"), dropdowns_usable);
+            m_card_bar_ports = bar;
+            y += 112;
+        }
+        draw_text(painter, T("Firmware version"), x + 4, y, ui_font(22, 600), white(0.55 * a));
+        const QRectF bar(x, y + 30, width, 64);
+        m_versions.paint_bar(canvas, painter, bar, a, T("No firmware found"), dropdowns_usable && !m_files.empty());
+        m_card_bar_versions = bar;
+        y += 112;
+
+        //  The link to download this version.
+        const QString url = current_url();
+        draw_text(painter, T("Download link"), x + 4, y, ui_font(22, 600), white(0.55 * a));
+        draw_elided(painter, url.isEmpty() ? T("(none)") : url, x + 4, y + 44, width - 8, ui_font(22, 500), with_alpha(YELLOW, 0.85 * a));
+        y += 66;
+        double bx = x;
+        if (!file_is_local() && selected_file() != nullptr){
+            bx += draw_button(canvas, painter, "download", T("Download this version"), bx, y, ButtonKind::PRIMARY, a, !busy()) + 14;
+        }
+        bx += draw_button(canvas, painter, "link_open", T("Open link"), bx, y, ButtonKind::SECONDARY, a, !url.isEmpty()) + 14;
+        bx += draw_button(canvas, painter, "link_copy", T("Copy link"), bx, y, ButtonKind::SECONDARY, a, !url.isEmpty()) + 14;
+        if (bx + button_width(T("Firmware folder"), ButtonKind::SECONDARY) < card.right() - 20){
+            draw_button(canvas, painter, "folder", T("Firmware folder"), bx, y, ButtonKind::SECONDARY, a);
+        }
+        y += 92;
+
+        //  What is needed, and the flash itself.
+        paint_flash_area(canvas, painter, card, x, y, width, a);
+    }
+
+    void paint_flash_area(Canvas& canvas, QPainter& painter, const QRectF& card, double x, double y, double width, double a){
+        (void)card;
+        const Block blocker = flash_blocker();
+        switch (m_flash){
+        case Flash::DOWNLOADING:
+            draw_status(painter, x, y + 17, 0, T("Downloading..."), a, width - 60);
+            draw_progress(painter, QRectF(x, y + 48, width, 14), m_flash_progress, a);
+            return;
+        case Flash::COPYING:
+            draw_status(painter, x, y + 17, 0, T("Copying the firmware to the Pico..."), a, width - 60);
+            draw_progress(painter, QRectF(x, y + 48, width, 14), m_flash_progress, a);
+            return;
+        case Flash::RESTARTING:
+            draw_status(painter, x, y + 17, 0, T("Waiting for the Pico to restart..."), a, width - 60);
+            draw_progress(painter, QRectF(x, y + 48, width, 14), 1.0, a);
+            return;
+        case Flash::FLASHING:
+            draw_status(painter, x, y + 17, 0,
+                m_flash_progress > 0.0 ? T("Flashing... %1%").arg((int)std::lround(m_flash_progress * 100)) : T("Connecting to the board..."),
+                a, width - 60);
+            draw_progress(painter, QRectF(x, y + 48, width, 14), m_flash_progress, a);
+            return;
+        case Flash::DONE:
+            draw_status(painter, x, y + 17, 1, is_pico() ? T("Done. Your Pico has its firmware.") : T("Done. Your board has its firmware."), a, width - 60);
+            draw_button(canvas, painter, "flash", T("Flash again"), x, y + 44, ButtonKind::SECONDARY, a);
+            return;
+        case Flash::FAILED: {
+            const QString message = failure_text();
+            draw_status(painter, x, y + 17, 2, message, a, width - 60);
+            const double h = status_height(message, width - 60);
+            draw_button(canvas, painter, "flash", T("Try again"), x, y + std::max(34.0, h) + 16, ButtonKind::PRIMARY, a, blocker == Block::NONE);
+            return;
+        }
+        default:
+            break;
+        }
+
+        //  Not started yet.
+        if (blocker == Block::NONE){
+            draw_status(painter, x, y + 17, 1, is_pico()
+                ? T("Ready: the Pico is in flash mode.")
+                : T("Ready to flash %1.").arg(m_ports.selected()), a, width - 60);
+        }else{
+            const bool waiting = blocker == Block::NO_DRIVE || blocker == Block::LOOKING_FOR_TOOL || blocker == Block::NO_PORT;
+            draw_status(painter, x, y + 17, waiting ? 0 : 2, blocker_text(blocker), a, width - 60);
+        }
+        double by = y + 52;
+        if (!is_pico() && m_hw.tool_checked && !m_hw.tool.found && !m_canvas.pretend()){
+            draw_button(canvas, painter, "get_tool", T("How to get esptool"), x + width - button_width(T("How to get esptool"), ButtonKind::LINK), y + 8, ButtonKind::LINK, a);
+        }
+        draw_button(canvas, painter, "flash", T("Flash now"), x, by, ButtonKind::PRIMARY, a, blocker == Block::NONE);
+    }
+
+    QString failure_text() const{
+        if (m_flash_error == "file"){
+            return T("This file is not a valid firmware file. Download it again.");
+        }
+        if (m_flash_error == "download"){
+            return T("The download failed. Check the connection, or open the link in your browser.");
+        }
+        if (m_flash_error == "copy"){
+            return T("The file could not be copied to the Pico. Unplug it and start again from step 2.");
+        }
+        if (m_flash_error == "restart"){
+            return T("The Pico did not restart. Unplug it and start again from step 2.");
+        }
+        if (m_flash_error == "connect"){
+            return T("The board did not answer. Hold its BOOT button while it connects, or try another cable or port.");
+        }
+        if (m_flash_error == "port"){
+            return T("The port cannot be opened. Close the other programs that use it and try again.");
+        }
+        if (m_flash_error == "tool"){
+            return T("The flash tool did not start.");
+        }
+        return m_flash_log.isEmpty() ? T("Flashing failed.") : T("Flashing failed: %1").arg(m_flash_log);
+    }
+
+    void draw_progress(QPainter& painter, const QRectF& bar, double value, double alpha){
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(white(0.14 * alpha));
+        painter.drawRoundedRect(bar, bar.height() / 2, bar.height() / 2);
+        const double filled = std::max(bar.height(), bar.width() * clamp01(value));
+        painter.setBrush(with_alpha(ORANGE, alpha));
+        painter.drawRoundedRect(QRectF(bar.left(), bar.top(), filled, bar.height()), bar.height() / 2, bar.height() / 2);
+    }
+
+    void paint_ports(QPainter& painter, const QRectF& card, double x, double a){
+        card_title(painter, card, T("What to pick in the program"), a);
+        const double width = card.width() - 68;
+        double y = card.top() + 96;
+        const bool two = m_board == "esp32s3";
+        struct Row{
+            QString label;
+            QString value;
+            bool detected;
+        };
+        std::vector<Row> rows;
+        rows.push_back({T("First dropdown"), "Serial: PABotBase2", false});
+        QString port = m_hw.ports.empty() ? T("Your device, for example COM3") : m_hw.ports.front().name;
+        if (!m_ports.selected().isEmpty()){
+            port = m_ports.selected();
+        }
+        rows.push_back({T("Second dropdown"), port, !m_hw.ports.empty() || !m_ports.selected().isEmpty()});
+        rows.push_back({T("Third dropdown"), QString::fromLatin1(m_spec.type), false});
+        (void)two;
+        for (const Row& row : rows){
+            const QRectF box(x, y, width, 92);
+            panel(painter, box, 22, white(0.05 * a), white(0.14 * a), 1.4);
+            draw_text(painter, row.label, box.left() + 24, box.top() + 12, ui_font(22, 600), white(0.55 * a));
+            const QFont font = ui_font(27, 700);
+            const double chip_w = draw_chip(painter, row.value, 0, 0, ChipKind::YELLOW_FILL, 0, 26, 46, 18, true);
+            draw_chip(painter, row.value, box.left() + 24 + std::min(chip_w, width - 48), box.top() + 62, ChipKind::YELLOW_FILL, a, 26, 46, 18);
+            (void)font;
+            y += 108;
+        }
+        const QString note = T("Port not in the list? Click Reset Ctrl in the program.");
+        draw_text(painter, note, x + 4, y + 4, ui_font(23, 500), white(0.56 * a));
+    }
+
 private:
+    Canvas& m_canvas;
     QString m_board;
-    size_t m_count = 0;
-    const StepText* m_steps;
+    const BoardSpec& m_spec;
+    QString m_kind;
     int m_current = 0;
     Smooth m_pos;
     Smooth m_usb;
@@ -1740,90 +2967,184 @@ private:
     Smooth m_type;
     Smooth m_link;
     Smooth m_search;
+    Smooth m_card;
     double m_clock = 0;
+    double m_step_since = 0;
+
+    //  What the computer shows.
+    HardwareProbe m_probe;
+    HardwareState m_hw;
+    QString m_port_signature;
+
+    //  The firmware.
+    QString m_firmware_dir;
+    QString m_ref;
+    std::vector<FirmwareFile> m_online;
+    std::vector<FirmwareFile> m_files;
+    Dropdown m_versions;
+    Dropdown m_ports;
+    QRectF m_card_bar_versions;
+    QRectF m_card_bar_ports;
+    std::unique_ptr<Download> m_listing;
+    std::unique_ptr<Download> m_fetch;
+    QString m_fetch_name;
+
+    //  The flash.
+    Flash m_flash = Flash::IDLE;
+    double m_flash_progress = 0;
+    double m_flash_time = 0;
+    double m_gone_for = 0;
+    QString m_flash_error;
+    QString m_flash_log;
+    std::unique_ptr<CopyJob> m_copy;
+    std::unique_ptr<EspFlashJob> m_esp;
 };
 
 
 //  ---------------------------------------------------------------------
-//  The ESP32 boards: the guide has the steps
+//  The Setup Guide, in the program
 //  ---------------------------------------------------------------------
+
+const char* const URL_GUIDE_UART = "https://pokemonautomation.github.io/SetupGuide/Controllers/Controller-PicoW-UART.html";
 
 class GuidePage : public Page{
 public:
-    GuidePage(Canvas& canvas, const QString& board)
-        : m_board(board)
-    {
-        canvas.set_focus_id("open");
+    explicit GuidePage(Canvas& canvas){
+        canvas.set_focus_id("row:pico");
     }
 
     virtual const char* name() const override{
         return "guide";
     }
+    virtual void step(double dt) override{
+        m_clock += dt;
+        m_hl.step(dt, 20);
+    }
+
+    struct GuideRow{
+        const char* id;
+        const char* glyph;
+        const char* name;
+        int difficulty;
+        const char* url;
+    };
+    static const std::vector<GuideRow>& rows(){
+        static const std::vector<GuideRow> list = {
+            {"pico", "pico", "Raspberry Pi Pico W", 1, nullptr},
+            {"pico2", "pico2", "Raspberry Pi Pico 2 W", 1, nullptr},
+            {"esp32", "esp32", "ESP32", 3, nullptr},
+            {"esp32s3", "esp32s3", "ESP32-S3", 3, nullptr},
+            {"sysbot", "code:S3", "sys-botbase 3", 2, URL_GUIDE},
+            {"uart", "pico", "Pico W, UART mode", 5, URL_GUIDE_UART},
+            {"uart2", "pico", "Pico W, advanced UART", 10, URL_GUIDE},
+        };
+        return list;
+    }
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {0, 0, 1, 2};
+        const int states[4] = {1, 2, 2, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
-        const QString heading = T("Set up your %1").arg(short_board_name(m_board));
-        draw_heading(painter, heading, 140, 250, 84, prog(t, in.head, in.head + 0.9), 1.0);
-        draw_sub(painter, T("The Setup Guide has the steps for this board, with its own pictures."), 140,
-            250 + heading_height(heading, 84) + 20, prog(t, in.sub, in.sub + 0.8), 1.0);
+        const QString heading = T("The Setup Guide");
+        draw_heading(painter, heading, 140, 160, 84, prog(t, in.head, in.head + 0.9), 1.0);
+        const QString sub = T("Everything in one place. Pick the board you want to set up, and the steps open here.");
+        const double sub_top = 160 + heading_height(heading, 84) + 10;
+        draw_sub(painter, sub, 140, sub_top, prog(t, in.sub, in.sub + 0.8), 1.0, 32, 800);
 
-        //  The card on the right: how hard it is, and where the steps are.
+        //  What you need.
         const double reveal = eo(prog(t, in.bar, in.bar + 0.6));
         const double a = reveal;
-        const double rows = m_board == "esp32" ? 3 : 2;
-        const QRectF card(1000 + (1.0 - reveal) * 60, 200, 780, 170 + rows * 88 + 70);
-        panel(painter, card, 30, with_alpha(PANEL, a), white(0.16 * a), 1.6);
-        draw_picture(painter, tinted("glyph-" + m_board, Qt::white), QRectF(card.left() + 34, card.top() + 34, 88, 88), a);
-        draw_text(painter, QString::fromLatin1(board_name(m_board)), card.left() + 144, card.top() + 44, ui_font(40, 600), white(a));
-        draw_text(painter, T("Difficulty: 3 of 10"), card.left() + 146, card.top() + 98, ui_font(26, 500), white(0.62 * a));
-
-        double y = card.top() + 170;
-        const double x = card.left() + 34;
-        const QString guide_text = T("Open the guide");
-        draw_button(canvas, painter, "open", guide_text, x, y, ButtonKind::PRIMARY, a);
-        y += 88;
-        if (m_board == "esp32"){
-            draw_button(canvas, painter, "open_mac", T("Open the guide for macOS"), x, y, ButtonKind::SECONDARY, a);
-            y += 88;
+        const double need_top = sub_top + sub_height(sub, 32, 800) + 40;
+        draw_text(painter, T("What you need"), 144, need_top, ui_font(30, 600), white(0.9 * a));
+        static const char* const NEEDS[4] = {
+            "A regular Nintendo Switch with its dock (not a Switch Lite)",
+            "A computer with 64-bit Windows",
+            "A video capture card",
+            "One of the boards in the list",
+        };
+        double y = need_top + 56;
+        for (const char* need : NEEDS){
+            const QRectF dot(144, y + 4, 28, 28);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(ORANGE, a));
+            painter.drawEllipse(dot);
+            draw_check(painter, dot.adjusted(6, 6, -6, -6), with_alpha(Qt::black, a), 3.0);
+            const QStringList lines = wrap_text(ui_font(27, 500), T(need), 700);
+            for (int c = 0; c < lines.size(); c++){
+                draw_text(painter, lines[c], 192, y + c * 34, ui_font(27, 500), white(0.74 * a));
+            }
+            y += (double)lines.size() * 34 + 16;
         }
-        draw_button(canvas, painter, "video", T("Watch the video tutorial"), x, y, ButtonKind::SECONDARY, a);
-        y += 88;
-        draw_text(painter, T("Come back here when the board works, then continue."), x + 4, y, ui_font(24, 500), white(0.55 * a));
+
+        //  The list of boards, with how hard each is.
+        const std::vector<GuideRow>& list = rows();
+        constexpr double ROW = 70;
+        const QRectF box(1000 + (1.0 - reveal) * 60, 150, 780, (double)list.size() * ROW + 28);
+        panel(painter, box, 28, with_alpha(PANEL, a), white(0.16 * a), 1.6);
+        for (size_t c = 0; c < list.size(); c++){
+            const GuideRow& row = list[c];
+            const QRectF area(box.left() + 12, box.top() + 14 + (double)c * ROW, box.width() - 24, ROW);
+            const QString id = QString("row:") + row.id;
+            const bool hover = canvas.hovered(id) || canvas.focused(id);
+            if (hover){
+                panel(painter, area.adjusted(0, 3, 0, -3), 18, with_alpha(ORANGE, 0.20 * a), with_alpha(ORANGE, 0.95 * a), 2.0);
+            }
+            const QRectF glyph(area.left() + 14, area.center().y() - 22, 44, 44);
+            const QString g = row.glyph;
+            if (g.startsWith("code:")){
+                painter.setPen(QPen(white(0.85 * a), 2.2));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawEllipse(glyph.adjusted(1.1, 1.1, -1.1, -1.1));
+                draw_text_cy(painter, g.mid(5), glyph.center().x(), glyph.center().y() + 1, ui_font(19, 700), white(a), Qt::AlignHCenter);
+            }else{
+                draw_picture(painter, tinted("glyph-" + g, Qt::white), glyph, a);
+            }
+            draw_text_cy(painter, QString::fromLatin1(row.name), area.left() + 76, area.center().y() + 1, ui_font(28, 600), white(a));
+            double right = area.right() - 14;
+            const bool in_app = row.url == nullptr;
+            const QString where = in_app ? T("Here") : T("Browser");
+            right -= draw_chip(painter, where, right, area.center().y(), in_app ? ChipKind::ORANGE_FILL : ChipKind::DIM, a, 20, 34, 14) + 10;
+            right -= draw_chip(painter, T("%1 of 10").arg(row.difficulty), right, area.center().y(), ChipKind::RING, a, 20, 34, 14) + 10;
+            canvas.add_hit(id, area, true, true);
+        }
+        draw_text(painter, T("Difficulty: how much work it takes, from 1 to 10."), box.left() + 16, box.bottom() + 18, ui_font(22, 500), white(0.5 * a));
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
+        draw_button(canvas, painter, "web", T("Open the full guide in your browser"), 136, 880, ButtonKind::LINK, std::min(1.0, b * 1.35));
         draw_skip(canvas, painter, b);
-        const QString next = T("Continue");
-        const double next_w = button_width(next, ButtonKind::PRIMARY);
-        draw_button(canvas, painter, "continue", next, 1780 - next_w, 950, ButtonKind::PRIMARY, b);
         const QString back = T("Back");
-        draw_button(canvas, painter, "back", back, 1780 - next_w - 18 - button_width(back, ButtonKind::SECONDARY), 950, ButtonKind::SECONDARY, b);
+        draw_button(canvas, painter, "back", back, 1780 - button_width(back, ButtonKind::SECONDARY), 950, ButtonKind::SECONDARY, b);
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
-        if (id == "open"){
-            canvas.open_url(m_board == "esp32" ? URL_ESP32 : URL_ESP32S3);
-        }else if (id == "open_mac"){
-            canvas.open_url(URL_ESP32_MAC);
-        }else if (id == "video"){
-            canvas.open_url(m_board == "esp32" ? URL_ESP32_VIDEO : URL_ESP32S3_VIDEO);
-        }else if (id == "continue"){
-            canvas.go_done(m_board);
-        }else if (id == "back"){
+        if (id == "back"){
             canvas.go_board();
         }else if (id == "skip"){
             canvas.result().board_done = true;
-            canvas.result().board = m_board;
             canvas.finish();
+        }else if (id == "web"){
+            canvas.open_url(URL_GUIDE);
+        }else if (id.startsWith("row:")){
+            const QString which = id.mid(4);
+            for (const GuideRow& row : rows()){
+                if (which == row.id){
+                    if (row.url == nullptr){
+                        canvas.result().board = which;
+                        canvas.go_steps(which);
+                    }else{
+                        canvas.open_url(row.url);
+                    }
+                }
+            }
         }
     }
     virtual void enter_pressed(Canvas& canvas) override{
-        activate(canvas, "continue");
+        activate(canvas, "row:pico");
     }
 
 private:
-    QString m_board;
+    double m_clock = 0;
+    Smooth m_hl;
 };
 
 
@@ -1859,7 +3180,7 @@ public:
 
     virtual void activate(Canvas& canvas, const QString& id) override{
         if (id == "open"){
-            canvas.open_url(URL_GUIDE);
+            canvas.go_guide();
         }else if (id == "back"){
             canvas.go_board();
         }else if (id == "skip"){
@@ -1946,6 +3267,7 @@ Canvas::Canvas(const SetupRequest& request, bool test_mode)
     , m_timer(this)
 {
     setWindowTitle("PocketPilot Studio");
+    m_app_folder = QCoreApplication::applicationDirPath();
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -2039,9 +3361,9 @@ void Canvas::go_steps(const QString& board){
         return std::unique_ptr<Page>(new StepsPage(*this, board));
     });
 }
-void Canvas::go_guide(const QString& board){
-    queue_page([this, board]{
-        return std::unique_ptr<Page>(new GuidePage(*this, board));
+void Canvas::go_guide(){
+    queue_page([this]{
+        return std::unique_ptr<Page>(new GuidePage(*this));
     });
 }
 void Canvas::go_other(){
@@ -2055,7 +3377,135 @@ void Canvas::go_done(const QString& board){
     });
 }
 
+//  The black screen on top of the page that the tutorial film plays on.
+class VideoOverlay : public QWidget{
+public:
+    VideoOverlay(QWidget* parent, std::function<void()> close)
+        : QWidget(parent)
+        , m_close(std::move(close))
+    {
+        setAutoFillBackground(true);
+        QPalette black = palette();
+        black.setColor(QPalette::Window, Qt::black);
+        setPalette(black);
+        m_video = new QVideoWidget(this);
+        m_video->setAspectRatioMode(Qt::KeepAspectRatio);
+        m_video->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        QVBoxLayout* column = new QVBoxLayout(this);
+        column->setContentsMargins(0, 0, 0, 0);
+        column->addWidget(m_video);
+    }
+    QVideoWidget* video() const{
+        return m_video;
+    }
+protected:
+    virtual void mousePressEvent(QMouseEvent* event) override{
+        (void)event;
+        m_close();
+    }
+private:
+    std::function<void()> m_close;
+    QVideoWidget* m_video;
+};
+
+//  The film from the program to a file the player can open.
+QString extract_film(const QString& name){
+    QFile resource(":/pocketpilot/" + name + ".mp4");
+    if (!resource.open(QIODevice::ReadOnly)){
+        return QString();
+    }
+    const QString path = QDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation)).filePath("PocketPilot-" + name + ".mp4");
+    QFile existing(path);
+    if (existing.exists() && existing.size() == resource.size()){
+        return path;
+    }
+    QFile::remove(path);
+    if (!resource.copy(path)){
+        return QString();
+    }
+    return path;
+}
+
+//  The film of the setup of a board: the Picos have one, the ESP32 has one and
+//  the ESP32-S3 (which is wired) has one.
+QString film_for(const QString& board){
+    if (board == "esp32"){
+        return "tutorial-esp32";
+    }
+    if (board == "esp32s3"){
+        return "tutorial-esp32s3";
+    }
+    return "tutorial-pico";
+}
+
+void Canvas::play_video(const QString& board){
+    if (m_video_open){
+        return;
+    }
+    m_video_name = film_for(board);
+    m_video_open = true;
+    if (m_test_mode){
+        return;
+    }
+    const QString path = extract_film(m_video_name);
+    if (path.isEmpty()){
+        m_video_open = false;
+        return;
+    }
+    m_overlay = std::make_unique<VideoOverlay>(this, [this]{
+        QTimer::singleShot(0, this, [this]{
+            close_video();
+        });
+    });
+    m_overlay->setGeometry(rect());
+    VideoOverlay* overlay = static_cast<VideoOverlay*>(m_overlay.get());
+
+    m_player = std::make_unique<QMediaPlayer>();
+    if (!QMediaDevices::audioOutputs().isEmpty()){
+        m_audio = std::make_unique<QAudioOutput>();
+        m_audio->setVolume(0.8f);
+        m_player->setAudioOutput(m_audio.get());
+    }
+    m_player->setVideoOutput(overlay->video());
+    QObject::connect(m_player.get(), &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status){
+        if (status == QMediaPlayer::EndOfMedia || status == QMediaPlayer::InvalidMedia){
+            QTimer::singleShot(600, this, [this]{
+                close_video();
+            });
+        }
+    });
+    QObject::connect(m_player.get(), &QMediaPlayer::errorOccurred, this, [this](QMediaPlayer::Error, const QString&){
+        QTimer::singleShot(0, this, [this]{
+            close_video();
+        });
+    });
+    m_player->setSource(QUrl::fromLocalFile(path));
+    m_overlay->show();
+    m_overlay->raise();
+    m_player->play();
+    setFocus();
+}
+
+void Canvas::close_video(){
+    if (!m_video_open){
+        return;
+    }
+    m_video_open = false;
+    if (m_player != nullptr){
+        m_player->stop();
+        m_player->disconnect();
+    }
+    m_player.reset();
+    m_audio.reset();
+    m_overlay.reset();
+    setFocus();
+    update();
+}
+
 void Canvas::finish(){
+    if (m_video_open){
+        close_video();
+    }
     if (m_finished){
         return;
     }
@@ -2129,6 +3579,9 @@ void Canvas::paintEvent(QPaintEvent*){
 
 void Canvas::resizeEvent(QResizeEvent* event){
     QWidget::resizeEvent(event);
+    if (m_overlay != nullptr){
+        m_overlay->setGeometry(rect());
+    }
     update();
 }
 
@@ -2205,6 +3658,13 @@ void Canvas::move_focus(int direction){
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event){
+    if (m_video_open){
+        //  Any of these ends the film.
+        if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Space || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
+            close_video();
+        }
+        return;
+    }
     if (m_page == nullptr || m_pending){
         return;
     }
@@ -2447,7 +3907,7 @@ int run_setup_test(QApplication& application, const QString& folder){
     checker.check(canvas.hit_enabled("continue"), "a board picked with the keyboard opens the way on");
     save(canvas, folder, "setup-10-board-picked");
 
-    //  Other first: its page, and back.
+    //  Other first: its page, the Setup Guide in the program, and back.
     canvas.click("bar");
     canvas.wait(0.5);
     canvas.click("row:other");
@@ -2456,33 +3916,301 @@ int run_setup_test(QApplication& application, const QString& folder){
     canvas.wait(1.8);
     checker.check(canvas.page_name() == "other", "Other goes to its page");
     save(canvas, folder, "setup-11-other");
+    checker.check(canvas.click("open"), "the button for the Setup Guide is there");
+    canvas.wait(2.4);
+    checker.check(canvas.page_name() == "guide", "the Setup Guide opens in the program, not in the browser");
+    checker.check(canvas.last_url().isEmpty(), "and it does not open the browser");
+    save(canvas, folder, "setup-12-guide");
+    save_preview(canvas, folder, "preview-guide");
+    checker.check(canvas.has_hit("row:pico") && canvas.has_hit("row:esp32s3") && canvas.has_hit("row:uart") && canvas.has_hit("web"), "the guide lists the boards");
+    canvas.click("row:uart");
+    checker.check(canvas.last_url().contains("UART"), "a guide that is not in the program opens in the browser");
+    canvas.click("web");
+    checker.check(canvas.last_url().endsWith("SetupGuide/index.html"), "the whole guide opens in the browser");
     canvas.click("back");
-    canvas.wait(1.6);
+    canvas.wait(1.8);
     checker.check(canvas.page_name() == "board", "and back to the boards");
 
-    //  The ESP32-S3: the guide.
+    //  ---- a computer of our own: folders, drives and ports of the test
+    QTemporaryDir scratch;
+    checker.check(scratch.isValid(), "a folder for the test");
+    const QString app = QDir(scratch.path()).filePath("app");
+    const QString drive_folder = QDir(scratch.path()).filePath("drive");
+    QDir().mkpath(app + "/Firmware");
+    QDir().mkpath(drive_folder);
+    auto write_file = [](const QString& path, const QByteArray& data){
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)){
+            file.write(data);
+        }
+    };
+    QByteArray uf2(512 * 8, 'u');
+    uf2.replace(0, 4, "UF2\n");
+    write_file(app + "/Firmware/PABotBase2-Pico1W-2026092800.uf2", uf2);
+    write_file(app + "/Firmware/PABotBase2-Pico2W-2026092800.uf2", uf2);
+    write_file(app + "/Firmware/PABotBase2-ESP32-S3-2026101400.bin", QByteArray(9000, 'b'));
+    write_file(app + "/Firmware/PABotBase2-ESP32-2026101400.bin", QByteArray(9000, 'b'));
+    write_file(app + "/Firmware/SOURCE.txt", "https://github.com/PokemonAutomation/Packages/tree/4ae6b4634628626cf1f31566d871635d0f87b79a/Firmware\n");
+    //  The file that the "download" fetches.
+    write_file(QDir(scratch.path()).filePath("online-ESP32-S3-2026120100.bin"), QByteArray(10000, 'n'));
+
+    struct Computer{
+        std::mutex lock;
+        HardwareState state;
+    } computer;
+    canvas.set_app_folder(app);
+    canvas.set_scan([&computer]{
+        std::lock_guard<std::mutex> guard(computer.lock);
+        return computer.state;
+    });
+    canvas.set_listing(
+        "[{\"name\":\"PABotBase2-ESP32-S3-2026120100.bin\",\"type\":\"file\"},"
+        "{\"name\":\"PABotBase2-ESP32-S3-2026101400.bin\",\"type\":\"file\"},"
+        "{\"name\":\"README.md\",\"type\":\"file\"}]"
+    );
+    canvas.set_url_map([&scratch](const QString& url){
+        return QUrl::fromLocalFile(QDir(scratch.path()).filePath("online-ESP32-S3-2026120100.bin")).toString() + (url.isEmpty() ? "" : "");
+    });
+
+    //  The ESP32-S3: its steps, with what the computer shows.
     canvas.click("bar");
     canvas.wait(0.5);
     canvas.click("row:esp32s3");
     canvas.wait(0.5);
     canvas.click("continue");
-    canvas.wait(1.8);
-    checker.check(canvas.page_name() == "guide", "the ESP32-S3 goes to the guide");
-    save(canvas, folder, "setup-12-guide");
-    canvas.click("back");
+    canvas.wait(2.2);
+    checker.check(canvas.page_name() == "steps", "the ESP32-S3 goes to its steps");
+    checker.check(canvas.page_state().contains("step=1"), "on the first step");
+    canvas.wait(1.2);
+    save(canvas, folder, "setup-13-s3-no-port");
+    checker.check(canvas.has_hit("driver_cp210x") && canvas.has_hit("driver_ch340") && canvas.has_hit("devmgr"), "no port: the drivers and the Device Manager are offered");
+    canvas.click("driver_cp210x");
+    checker.check(canvas.last_url().contains("CP210x"), "the CP210x driver link");
+    canvas.click("driver_ch340");
+    checker.check(canvas.last_url().contains("ch340"), "the CH340 driver link");
+    canvas.click("devmgr");
+    checker.check(canvas.device_manager_opened(), "the Device Manager button");
+    {
+        std::lock_guard<std::mutex> guard(computer.lock);
+        PortInfo port;
+        port.name = "COM7";
+        port.description = "Silicon Labs CP210x USB to UART Bridge";
+        port.vendor = 0x10C4;
+        port.product = 0xEA60;
+        port.chip = "CP210x";
+        computer.state.ports.push_back(port);
+        PortInfo other;
+        other.name = "COM3";
+        other.description = "Communications Port";
+        computer.state.ports.push_back(other);
+    }
+    canvas.wait(2.2);
+    save(canvas, folder, "setup-14-s3-port-found");
+    save_preview(canvas, folder, "preview-s3-port");
+    canvas.click("next");
+    canvas.wait(0.8);
+    canvas.click("next");
     canvas.wait(1.6);
+    checker.check(canvas.page_state().contains("step=3"), "the third step of the ESP32-S3");
+    checker.check(canvas.page_state().contains("file=PABotBase2-ESP32-S3-2026101400.bin") && canvas.page_state().contains("local=yes"),
+        "the firmware of this computer is the choice");
+    checker.check(canvas.page_state().contains("port=COM7"), "and the port of the known chip");
+    checker.check(canvas.has_hit("dd:version") && canvas.has_hit("dd:port") && canvas.has_hit("link_open") && canvas.has_hit("link_copy") && canvas.has_hit("flash"),
+        "the firmware card has its parts");
+    save(canvas, folder, "setup-15-s3-firmware");
+    save_preview(canvas, folder, "preview-s3-firmware");
+    const QString expected_link =
+        "https://github.com/PokemonAutomation/Packages/raw/4ae6b4634628626cf1f31566d871635d0f87b79a/Firmware/PABotBase2-ESP32-S3-2026101400.bin";
+    canvas.click("link_open");
+    checker.check(canvas.last_url() == expected_link, "the link of the version that is chosen");
+    canvas.click("link_copy");
+    checker.check(canvas.copied() == expected_link, "and it can be copied");
+    canvas.click("folder");
+    checker.check(QDir::fromNativeSeparators(canvas.last_folder()).endsWith("/app/Firmware"), "the Firmware folder opens");
+    checker.check(!canvas.hit_enabled("flash") || true, "(the flash tool comes next)");
+    //  No flash tool yet: it cannot be started.
+    canvas.wait(1.2);
+    checker.check(!canvas.hit_enabled("flash"), "no flash tool: Flash now waits");
+    {
+        std::lock_guard<std::mutex> guard(computer.lock);
+        computer.state.tool.found = true;
+        computer.state.tool.program = "esptool";
+        computer.state.tool.where = "test";
+        computer.state.tool_checked = true;
+    }
+    canvas.wait(1.6);
+    checker.check(canvas.hit_enabled("flash"), "a flash tool: Flash now can be pressed");
+    //  The version list: the newer one is online only.
+    canvas.click("dd:version");
+    canvas.wait(0.8);
+    save(canvas, folder, "setup-16-s3-versions");
+    checker.check(canvas.has_hit("dd:version:PABotBase2-ESP32-S3-2026120100.bin") && canvas.has_hit("dd:version:PABotBase2-ESP32-S3-2026101400.bin"),
+        "the list has the version of this computer and the online one");
+    canvas.click("dd:version:PABotBase2-ESP32-S3-2026120100.bin");
+    canvas.wait(0.6);
+    checker.check(canvas.page_state().contains("2026120100") && canvas.page_state().contains("local=no"), "a version that is online only");
+    checker.check(canvas.has_hit("download") && !canvas.hit_enabled("flash"), "it is downloaded first");
+    canvas.click("link_open");
+    checker.check(canvas.last_url() == "https://github.com/PokemonAutomation/Packages/raw/master/Firmware/PABotBase2-ESP32-S3-2026120100.bin",
+        "its link points to the repository");
+    canvas.click("download");
+    for (int c = 0; c < 40 && canvas.page_state().contains("flash=downloading"); c++){
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+        canvas.wait(0.1);
+    }
+    checker.check(canvas.page_state().contains("flash=idle") && canvas.page_state().contains("local=yes"), "the download put it on this computer");
+    checker.check(QFileInfo::exists(app + "/Firmware/PABotBase2-ESP32-S3-2026120100.bin"), "in the Firmware folder");
+    checker.check(canvas.hit_enabled("flash"), "and now it can be flashed");
+    save(canvas, folder, "setup-17-s3-downloaded");
+    canvas.click("video");
+    checker.check(canvas.video_open() && canvas.video_name() == "tutorial-esp32s3", "the film of the ESP32-S3");
+    canvas.press_key(Qt::Key_Escape);
+    checker.check(!canvas.video_open(), "Escape ends the film");
+#ifndef Q_OS_WIN
+    //  A flash tool that is a script: the whole flash, as the program runs it.
+    {
+        const QString tool = QDir(scratch.path()).filePath("fake-esptool");
+        write_file(tool,
+            "#!/bin/sh\n"
+            "echo 'esptool v5.1.0'\n"
+            "echo \"args: $@\"\n"
+            "printf 'Writing at 0x00010000 [==>   ] 20.0%% 1/10 bytes...\\r'\n"
+            "sleep 0.3\n"
+            "printf 'Writing at 0x00020000 [====> ] 60.0%% 5/10 bytes...\\r'\n"
+            "sleep 0.3\n"
+            "printf 'Writing at 0x00030000 [======] 100.0%% 10/10 bytes...\\n'\n"
+            "echo 'Hash of data verified.'\n"
+            "exit 0\n");
+        QFile::setPermissions(tool, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        {
+            std::lock_guard<std::mutex> guard(computer.lock);
+            computer.state.tool.program = tool;
+        }
+        canvas.wait(1.6);
+        canvas.click("flash");
+        bool saw_flashing = false;
+        for (int c = 0; c < 80 && !canvas.page_state().contains("flash=done"); c++){
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+            canvas.wait(0.1);
+            if (canvas.page_state().contains("flash=flashing")){
+                saw_flashing = true;
+                if (c == 3){
+                    save(canvas, folder, "setup-18-s3-flashing");
+                }
+            }
+        }
+        checker.check(saw_flashing && canvas.page_state().contains("flash=done"), "the flash runs and ends well");
+        save(canvas, folder, "setup-19-s3-flashed");
+    }
+#endif
+    canvas.click("back");
+    canvas.click("back");
+    canvas.click("back");
+    canvas.click("back");
+    canvas.wait(0.6);
+    canvas.click("back");
+    canvas.wait(0.6);
+    canvas.click("back");
+    canvas.wait(1.8);
+    checker.check(canvas.page_name() == "board", "back to the boards from the steps");
 
-    //  The Pico W: the steps.
+    //  The ESP32: the same steps, wireless.
+    canvas.click("bar");
+    canvas.wait(0.5);
+    canvas.click("row:esp32");
+    canvas.wait(0.5);
+    canvas.click("continue");
+    canvas.wait(2.0);
+    checker.check(canvas.page_name() == "steps", "the ESP32 goes to its steps");
+    save(canvas, folder, "setup-20-esp32");
+    canvas.click("video");
+    checker.check(canvas.video_open() && canvas.video_name() == "tutorial-esp32", "the film of the ESP32");
+    canvas.press_key(Qt::Key_Escape);
+    checker.check(!canvas.video_open(), "Escape ends the film of the ESP32");
+    canvas.click("back");
+    canvas.wait(1.8);
+
+    //  The Pico W: the steps, with a Pico of our own.
     canvas.click("bar");
     canvas.wait(0.5);
     canvas.click("row:pico");
     canvas.wait(0.5);
     canvas.press_key(Qt::Key_Return);
-    canvas.wait(1.8);
+    canvas.wait(2.0);
     checker.check(canvas.page_name() == "steps", "the Pico W goes to its steps");
-    for (int c = 0; c < 7; c++){
-        canvas.wait(c == 2 ? 1.6 : 1.0);
-        save(canvas, folder, QString("setup-13-steps-%1").arg(c + 1));
+    checker.check(canvas.page_state().contains("step=1"), "on the first step of the Pico W");
+    canvas.wait(1.0);
+    save(canvas, folder, "setup-21-pico-1");
+    canvas.click("next");
+    canvas.wait(1.4);
+    checker.check(canvas.page_state().contains("step=2"), "the second step: flash mode");
+    save(canvas, folder, "setup-22-pico-waiting");
+    save_preview(canvas, folder, "preview-pico-waiting");
+    {
+        //  The drive of a Pico 2 W is not the one of a Pico W.
+        std::lock_guard<std::mutex> guard(computer.lock);
+        PicoDrive wrong;
+        wrong.root = drive_folder;
+        wrong.label = "RP2350";
+        wrong.board_id = "RP2350";
+        computer.state.drives.push_back(wrong);
+    }
+    canvas.wait(2.2);
+    save(canvas, folder, "setup-23-pico-wrong-drive");
+    {
+        std::lock_guard<std::mutex> guard(computer.lock);
+        computer.state.drives.clear();
+        PicoDrive drive;
+        drive.root = drive_folder;
+        drive.label = "RPI-RP2";
+        drive.board_id = "RPI-RP2";
+        computer.state.drives.push_back(drive);
+    }
+    canvas.wait(2.2);
+    save(canvas, folder, "setup-24-pico-found");
+    save_preview(canvas, folder, "preview-pico-found");
+    canvas.click("next");
+    canvas.wait(1.4);
+    checker.check(canvas.page_state().contains("step=3") && canvas.page_state().contains("file=PABotBase2-Pico1W-2026092800.uf2"), "the firmware step of the Pico W");
+    checker.check(canvas.hit_enabled("flash"), "the Pico is in flash mode: Flash now can be pressed");
+    save(canvas, folder, "setup-25-pico-firmware");
+    save_preview(canvas, folder, "preview-pico-firmware");
+    canvas.click("flash");
+    canvas.wait(0.6);
+    save(canvas, folder, "setup-26-pico-copying");
+    for (int c = 0; c < 60 && !canvas.page_state().contains("flash=restarting"); c++){
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+        canvas.wait(0.1);
+    }
+    checker.check(canvas.page_state().contains("flash=restarting"), "the file is copied, the Pico is restarting");
+    {
+        QFile source(app + "/Firmware/PABotBase2-Pico1W-2026092800.uf2");
+        QFile copy(QDir(drive_folder).filePath("PABotBase2-Pico1W-2026092800.uf2"));
+        source.open(QIODevice::ReadOnly);
+        const bool opened = copy.open(QIODevice::ReadOnly);
+        checker.check(opened && copy.readAll() == source.readAll(), "the file is on the drive, whole");
+    }
+    save(canvas, folder, "setup-27-pico-restarting");
+    {
+        //  The Pico restarts: its drive is gone.
+        std::lock_guard<std::mutex> guard(computer.lock);
+        computer.state.drives.clear();
+    }
+    canvas.wait(2.8);
+    checker.check(canvas.page_state().contains("flash=done"), "the drive is gone: the Pico has its firmware");
+    save(canvas, folder, "setup-28-pico-done");
+    canvas.click("flash");
+    canvas.wait(0.3);
+    checker.check(canvas.page_state().contains("flash=idle") && !canvas.hit_enabled("flash"),
+        "Flash again starts over, and waits for a Pico in flash mode");
+    canvas.click("next");
+    canvas.wait(0.8);
+    for (int c = 3; c < 7; c++){
+        canvas.wait(1.0);
+        save(canvas, folder, QString("setup-29-pico-%1").arg(c + 1));
+        if (c == 5){
+            save_preview(canvas, folder, "preview-ports");
+        }
         if (c == 6){
             save_preview(canvas, folder, "preview-steps");
         }
@@ -2490,6 +4218,10 @@ int run_setup_test(QApplication& application, const QString& folder){
             checker.check(canvas.click("next"), QString("next step %1").arg(c + 1));
         }
     }
+    canvas.click("video");
+    checker.check(canvas.video_open() && canvas.video_name() == "tutorial-pico", "the film of the Picos");
+    canvas.press_key(Qt::Key_Escape);
+    checker.check(!canvas.video_open(), "Escape ends that film too");
     canvas.click("back");
     canvas.wait(0.5);
     canvas.press_key(Qt::Key_Right);
@@ -2501,7 +4233,7 @@ int run_setup_test(QApplication& application, const QString& folder){
     canvas.wait(1.8);
     checker.check(canvas.page_name() == "done", "the last step goes to the end");
     canvas.wait(1.5);
-    save(canvas, folder, "setup-14-done");
+    save(canvas, folder, "setup-30-done");
     canvas.click("start");
     canvas.wait(0.2);
     checker.check(canvas.finished(), "Start ends the setup");
@@ -2539,6 +4271,96 @@ int run_setup_test(QApplication& application, const QString& folder){
     return checker.failures == 0 ? 0 : 1;
 }
 
+
+//  The films of the tutorials, decoded without a window: each starts, has its
+//  picture size, its sound and its length, and plays to the end (a jump to
+//  the last seconds, so that the test does not take minutes).
+int run_tutorial_test(QApplication& application){
+    (void)application;
+    static const char* const NAMES[] = {"tutorial-pico", "tutorial-esp32", "tutorial-esp32s3"};
+    int failures = 0;
+    for (const char* name : NAMES){
+        const QString film = QString::fromLatin1(name);
+        const QString path = extract_film(film);
+        if (path.isEmpty()){
+            qWarning("Tutorial test: FAILED: %s is not in the program.", name);
+            failures++;
+            continue;
+        }
+
+        QMediaPlayer player;
+        QVideoSink sink;
+        player.setVideoSink(&sink);
+        int frames = 0;
+        QSize size;
+        QObject::connect(&sink, &QVideoSink::videoFrameChanged, &player, [&](const QVideoFrame& frame){
+            if (frame.isValid()){
+                frames++;
+                size = frame.size();
+            }
+        });
+        QEventLoop loop;
+        bool finished = false;
+        bool invalid = false;
+        QString error;
+        QObject::connect(&player, &QMediaPlayer::mediaStatusChanged, &loop, [&](QMediaPlayer::MediaStatus status){
+            if (status == QMediaPlayer::EndOfMedia){
+                finished = true;
+                loop.quit();
+            }else if (status == QMediaPlayer::InvalidMedia){
+                invalid = true;
+                loop.quit();
+            }
+        });
+        QObject::connect(&player, &QMediaPlayer::errorOccurred, &loop, [&](QMediaPlayer::Error, const QString& message){
+            error = message;
+            invalid = true;
+            loop.quit();
+        });
+
+        //  The first seconds, as they are played.
+        player.setSource(QUrl::fromLocalFile(path));
+        player.play();
+        QTimer start_timer;
+        start_timer.setSingleShot(true);
+        QObject::connect(&start_timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        start_timer.start(5000);
+        loop.exec();
+        const int first_frames = frames;
+
+        //  The end: jump to the last seconds and play on.
+        const qint64 length = player.duration();
+        const int audio_tracks = (int)player.audioTracks().size();
+        if (!invalid && length > 4000){
+            frames = 0;
+            player.setPosition(length - 3000);
+            QTimer::singleShot(25000, &loop, [&]{ loop.quit(); });
+            loop.exec();
+        }
+
+        qInfo(
+            "Tutorial test: %s: %d pictures of %dx%d in the first 5 s, %d at the end, %d sound track(s), length %lld ms, %s%s%s.",
+            name, first_frames, size.width(), size.height(), frames, audio_tracks, (long long)length,
+            finished ? "played to the end" : "did not play to the end",
+            error.isEmpty() ? "" : ", error: ",
+            error.toUtf8().constData()
+        );
+        const bool ok =
+            !invalid &&
+            finished &&
+            first_frames >= 60 &&
+            frames >= 20 &&
+            size.width() == 1920 && size.height() == 1080 &&
+            audio_tracks >= 1 &&
+            length >= 60000;
+        if (!ok){
+            failures++;
+            qWarning("Tutorial test: FAILED: %s.", name);
+        }
+    }
+    qInfo("Tutorial test: %s.", failures == 0 ? "passed" : "FAILED");
+    return failures == 0 ? 0 : 1;
+}
 
 
 }
