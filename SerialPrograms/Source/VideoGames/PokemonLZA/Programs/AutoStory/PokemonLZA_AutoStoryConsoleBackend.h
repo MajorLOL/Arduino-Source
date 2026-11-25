@@ -44,7 +44,7 @@ struct StoryEnv{
     BattleAIOption& battle_ai;
     NewGameChoices new_game = {};
     bool walk_only = false;
-    std::optional<MapPoint> cached_map_pin;
+    std::optional<MapPoint> cached_map_pin = {};
 };
 
 //  Returns a MinimapArrowReader backed by `env`.
