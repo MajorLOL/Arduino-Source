@@ -455,6 +455,15 @@ jobs:
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
           New-Item -ItemType Directory -Force -Path "setup-screenshots" | Out-Null
           $shots = (Resolve-Path "setup-screenshots").Path
+          #  The cartridges of the game choice show the real logos of the program
+          #  (CategoryIcons of the resources that are copied next to it).
+          $logos = "$dir/Resources/CategoryIcons"
+          if (Test-Path $logos) {
+            Write-Host "The setup test shows the logos of $((Get-ChildItem $logos -Filter *.png).Count) games."
+            $env:PP_SETUP_TEST_LOGO_DIR = (Resolve-Path $logos).Path
+          } else {
+            Write-Host "::warning::No CategoryIcons next to the program: the setup test shows its own pictures."
+          }
           $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--setup-test", "`"$shots`"" -PassThru
           $handle = $process.Handle
           if ($process.WaitForExit(300000)) {
