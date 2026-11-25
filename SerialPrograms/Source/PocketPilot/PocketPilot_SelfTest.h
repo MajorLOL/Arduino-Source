@@ -38,6 +38,12 @@ extern const char* const UI_SCREENSHOTS_OPTION;
 //  were saved.
 int run_ui_screenshots(QApplication& application, MainWindow& window, const std::string& folder);
 
+//  The same for the window as the screens of the setup (see PocketPilot_Setup.h):
+//  makes that window, goes from the games to a program and the settings and
+//  back, opens Claude's panel, and saves a picture of each in the folder (and
+//  a small preview.jpg of some, that the workflow prints in its log).
+int run_app_screenshots(QApplication& application, const std::string& folder);
+
 
 
 }

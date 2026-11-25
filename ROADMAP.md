@@ -99,7 +99,34 @@ Candidates:
 | **Colored texts after a change of theme** | A program that is open while the theme changes keeps the shades of the old theme in its colored texts until it is opened again. |
 | **Pokémon Automation's tests in this fork's workflow** | Its workflow runs the command-line tests after the build; this fork's workflow only takes the pictures. |
 | **A Dutch interface** | Everything is in English. |
-| **One interface, in the style of the setup** | The goal: the old main window (side bar, pages, status strip, the "Classic" look) goes away and everything is in the style of the setup screens. Done: the intro, the language, the console, the board and its installation, the choice of the game, and the programs of the chosen game (with the live picture, the checks, the output log with "Copy for Claude", a timeline, and the options of the program that is picked in a panel that slides open next to the list, wide for a program with many options, and the picture over the whole screen) as screens of their own. Next, in this order: the open program (its page: console setup, start and stop, log, video; the lane of the program on the timeline then shows its loops, and the board lane its answers), the settings, Claude; then the old main window is removed. |
+| **One interface, in the style of the setup** | The goal: the old main window (side bar, pages, status strip, the "Classic" look) goes away and everything is in the style of the setup screens. Done: the intro, the language, the console, the board and its installation, the choice of the game, and the programs of the chosen game (with the live picture, the checks, the output log with "Copy for Claude", a timeline, and the options of the program that is picked in a panel that slides open next to the list, wide for a program with many options, and the picture over the whole screen) as screens of their own. Since the first version of the window as these screens (see the list below): the open program and the settings are held inside the screen, Claude is a panel over the right, and the buttons of the old top bar are along the top. Next: restyle the program's own page (console setup, start and stop, log, video) and the settings in the style of the screens, let the lane of the program on the timeline show its loops and the board lane its answers, then remove the old main window (`--classic-interface`, `Frame`, `HomePage`, the side bar and `shell.qss`). |
+
+### The window as the screens of the setup: what each button does now
+
+The first version of "one interface" was made without the old window's buttons being specified, so each one got an interpretation of mine. They are listed here to be reviewed; each is one place in the code. (`--classic-interface` starts the old window instead until this has been looked at.)
+
+| Where | Old | Now (interpretation) | To decide |
+|---|---|---|---|
+| Games > a game > **Start** | opened the game's page in the old window | opens the programs of that game, in the same screen | |
+| Programs > **Start** | opened the program in the old window | opens the program's own page *inside* the screen (`HostPage`), under a header: way back, game and program, state | The page itself is the old widget; restyle it |
+| Programs and Games > **Choose later** | closed the setup, the old window opened | left out: there is nothing to leave. Still there in the setup of the first start | |
+| Programs > **All games** | - | back to the games, the game stays picked | |
+| Header of an open program > the way back | "Home" in the top bar | back to the programs of that game (to the games for the settings). Off while a program runs, as the list of programs was locked | Should it ask before it closes a program with changes? (The options are kept when it closes, as before.) |
+| Top bar > **Home** | the page with the games | **Games** along the top (not on the games themselves); closes the open program, not while one runs | |
+| Top bar > **Settings** | the settings panel in the old window | the settings panel held in the screen, like a program | Not while a program runs, as before |
+| Top bar > **Claude** | a panel in the frame at the right | the same panel over the right of the screen (34 % of the window, 380 to 640 px); the open program gives it room. The setting for its width is not used | Claude's width should be dragged? |
+| Top bar > **Output** and **Buttons** | the log window and the diagram of the buttons | the same windows | A panel of the screen instead of windows? |
+| Top bar > **About** | the dialog | the same dialog | Restyle |
+| Top bar > the **side bar** switch | showed and hid the side bar | gone: there is no side bar (the list of programs is kept out of sight, to make the programs and load their panels) | |
+| Status strip > the **state** | "Ready" / "Running ..." | a chip in the header of the open program; no state on the games | Also on the programs and the games? |
+| Status strip > **sleep** | the text and the check box | the text and "Keep the screen on" / "Let the screen sleep" at the foot of the open program; not kept for the next start | |
+| Page with the games > **Resume** | opened the program of the last session | **not there**: the window starts on the games, no program is loaded at the start | A "Continue ..." button on the games, from the setting that is kept |
+| Page with the games > the **search over all programs** | found a program in any game | **not there** (the programs have a search per game) | A search over all games on the games screen |
+| Choose another console (games) | - | the screen of the consoles, then back to the games; the console is kept at once | |
+| Settings > **Open the setup** | the setup as a window of its own | the same: the full screen setup over the window | |
+| **Closing** | options of the open program kept | the same | |
+
+What the test checks: `--setup-test` (the screens with made-up actions: Start does not end the screen, the program is held and shown, the way back, no way back while a program runs, Claude over the right, a program that cannot be opened, the console that is picked is passed on) and `--ui-screenshots` (the real window: the games, a game's programs, a real program, Claude, the settings, back).
 
 ## 5. Keeping up with Pokémon Automation
 

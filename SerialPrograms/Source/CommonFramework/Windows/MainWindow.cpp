@@ -35,6 +35,7 @@
 #include "PocketPilot/PocketPilot_Home.h"
 #include "PocketPilot/PocketPilot_Language.h"
 #include "PocketPilot/PocketPilot_Logo.h"
+#include "PocketPilot/PocketPilot_Setup.h"
 #include "PocketPilot/PocketPilot_Shell.h"
 #include "PocketPilot/Assistant/Assistant_Panel.h"
 #include "PocketPilot/Assistant/Assistant_Service.h"
@@ -49,7 +50,7 @@
 namespace PokemonAutomation{
 
 
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget* parent, bool app_mode, bool app_test)
     : QMainWindow(parent)
     , m_current_panel_widget(nullptr)
 {
@@ -94,7 +95,9 @@ MainWindow::MainWindow(QWidget* parent)
 #endif
 
     //  The frame: the top bar, the side bar, the room for the page or the
-    //  program that is open, and the status strip.
+    //  program that is open, and the status strip. (Not in app mode: the
+    //  window's own screen does all that, see make_app_view().)
+    if (!app_mode){
     PocketPilot::TopBar::Actions actions;
     actions.toggle_side_bar = [this]{
         m_frame->set_side_bar_visible(!m_frame->side_bar_visible());
@@ -165,6 +168,12 @@ MainWindow::MainWindow(QWidget* parent)
         );
 #endif
     }
+    }else{
+        //  The list of programs stays, out of sight: it makes the programs
+        //  and loads their panels, as it always did.
+        m_program_list = new ProgramSelect(*centralwidget, *this);
+        m_program_list->hide();
+    }
 
     //  The windows behind the top bar's buttons.
     m_button_diagram.reset(new ButtonDiagram());
@@ -190,7 +199,7 @@ MainWindow::MainWindow(QWidget* parent)
     }
 
     //  The page with the games, shown while no program is open.
-    {
+    if (!app_mode){
         std::vector<PocketPilot::HomeGame> games;
         std::vector<PocketPilot::HomeProgram> programs;
         m_program_list->describe(games, programs);
@@ -211,17 +220,25 @@ MainWindow::MainWindow(QWidget* parent)
         m_right_panel_layout->addWidget(m_home);
     }
 
-    // Load the program panel specified in the persistent setting.
-    m_program_list->load_persistent_panel();
-    update_page();
+    if (app_mode){
+        //  The screens first (they start on the games): no program is loaded
+        //  at the start, the games are shown, as at a first start.
+        make_app_view(app_test);
+    }else{
+        // Load the program panel specified in the persistent setting.
+        m_program_list->load_persistent_panel();
+        update_page();
+    }
 
     //  Claude, in the panel at the right. Open if it was when the program
     //  closed.
     make_assistant(nullptr, SETTINGS_PATH());
-    m_frame->on_panel_width = [this](int width){
-        m_assistant->settings().panel_width = width;
-        m_assistant->save_settings();
-    };
+    if (m_frame){
+        m_frame->on_panel_width = [this](int width){
+            m_assistant->settings().panel_width = width;
+            m_assistant->save_settings();
+        };
+    }
 
     GlobalSettings::instance().WINDOW_SIZE->WIDTH.add_listener(*this);
     GlobalSettings::instance().WINDOW_SIZE->HEIGHT.add_listener(*this);
@@ -307,6 +324,10 @@ void MainWindow::show_games(){
     });
     close_panel();
     m_program_list->clear_current();
+    if (m_app != nullptr){
+        m_app->show_games();
+        return;
+    }
     m_home->show_games();
     update_page();
     m_home->focus_search();
@@ -334,6 +355,16 @@ bool MainWindow::open_game(const QString& game){
     //  games first, then the game on it.
     if (m_current_panel_widget != nullptr){
         show_games();
+    }
+    if (m_app != nullptr){
+        //  Its programs, on the screen after the games.
+        for (size_t c = 0; c < m_game_list.size(); c++){
+            if (m_game_list[c].name == game){
+                m_app->show_programs((int)c);
+                return true;
+            }
+        }
+        return false;
     }
     return m_home->pick_game(game);
 }
@@ -426,6 +457,16 @@ void MainWindow::make_assistant(
     };
 
     m_assistant = std::make_unique<Assistant::Service>(std::move(hooks), std::move(transport));
+    if (m_app != nullptr){
+        //  Over the right of the window's screen.
+        m_assistant_panel = new Assistant::Panel(*m_app->widget(), *m_assistant);
+        m_assistant_panel->on_close = [this]{
+            show_assistant(false);
+        };
+        m_app->set_claude(m_assistant_panel);
+        m_app->show_claude(m_assistant->settings().panel_open);
+        return;
+    }
     m_assistant_panel = new Assistant::Panel(*centralwidget, *m_assistant);
     m_frame->panel_layout().addWidget(m_assistant_panel);
     m_assistant_panel->on_close = [this]{
@@ -439,12 +480,20 @@ void MainWindow::remake_assistant(
     std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
     const std::string& settings_folder
 ){
-    m_frame->set_panel_visible(false);
+    if (m_app != nullptr){
+        m_app->show_claude(false);
+    }else{
+        m_frame->set_panel_visible(false);
+    }
     make_assistant(std::move(transport), settings_folder);
 }
 
 void MainWindow::show_assistant(bool show){
-    m_frame->set_panel_visible(show);
+    if (m_app != nullptr){
+        m_app->show_claude(show);
+    }else{
+        m_frame->set_panel_visible(show);
+    }
     if (m_assistant->settings().panel_open != show){
         m_assistant->settings().panel_open = show;
         m_assistant->save_settings();
@@ -458,6 +507,9 @@ void MainWindow::show_assistant(bool show){
 //  The page with the games while no program is open, and where the user
 //  is in the top bar.
 void MainWindow::update_page(){
+    if (m_app != nullptr){
+        return;
+    }
     const bool open = m_current_panel_widget != nullptr;
     m_home->setVisible(!open);
     if (!open){
@@ -531,7 +583,12 @@ void MainWindow::close_panel() noexcept{
         //  all the layouts.
         m_current_panel_widget->hide();
 
-        m_right_panel_layout->removeWidget(m_current_panel_widget);
+        if (m_app != nullptr){
+            //  The screen gives it back (it was only held there).
+            m_app->unhost(m_current_panel_widget);
+        }else{
+            m_right_panel_layout->removeWidget(m_current_panel_widget);
+        }
         QWidget* widget = m_current_panel_widget;
         m_current_panel_widget = nullptr;
         delete widget;
@@ -594,6 +651,25 @@ void MainWindow::load_panel(
 //        cout << "load_panel() = " << m_current_panel_widget << endl;
         m_current_panel_descriptor = std::move(descriptor);
         m_current_panel = std::move(panel);
+        if (m_app != nullptr){
+            //  Held by the window's screen, under its header.
+            const PanelDescriptor& current = m_current_panel->descriptor();
+            int game = -1;
+            QString game_name;
+            QString title = "Settings";
+            if (&current != &GlobalSettings_Descriptor::instance()){
+                title = QString::fromStdString(current.display_name());
+                const QString name = QString::fromStdString(m_program_list->current_game());
+                for (size_t c = 0; c < m_game_list.size(); c++){
+                    if (m_game_list[c].name == name){
+                        game = (int)c;
+                    }
+                }
+                game_name = PocketPilot::short_game_name(name);
+            }
+            m_app->host(m_current_panel_widget, game, game_name, title);
+            return;
+        }
         //  The page with the games makes room first.
         m_home->hide();
         m_right_panel_layout->addWidget(m_current_panel_widget);
@@ -607,6 +683,9 @@ void MainWindow::load_panel(
         global_logger_tagged().log("MainWindow::load_panel() - Unknown Exception", COLOR_RED);
     }
     if (m_current_panel_widget != nullptr){
+        if (m_app != nullptr){
+            m_app->unhost(m_current_panel_widget);
+        }
         delete m_current_panel_widget;
         m_current_panel_widget = nullptr;
     }
@@ -614,6 +693,14 @@ void MainWindow::load_panel(
 }
 void MainWindow::on_busy(){
     m_busy = true;
+    if (m_app != nullptr){
+        std::string text = "Running";
+        if (m_current_panel != nullptr){
+            text += " " + m_current_panel->descriptor().display_name();
+        }
+        m_app->set_state(true, QString::fromStdString(text));
+        return;
+    }
     if (m_program_list){
         m_program_list->lock();
         m_frame->top_bar().set_busy(true);
@@ -628,6 +715,10 @@ void MainWindow::on_busy(){
 }
 void MainWindow::on_idle(){
     m_busy = false;
+    if (m_app != nullptr){
+        m_app->set_state(false, "Ready");
+        return;
+    }
     if (m_program_list){
         m_program_list->unlock();
         m_frame->top_bar().set_busy(false);
@@ -731,18 +822,88 @@ void MainWindow::sleep_suppress_state_changed(SleepSuppress new_state){
     QMetaObject::invokeMethod(this, [=, this]{
         switch (new_state){
         case PokemonAutomation::SleepSuppress::NONE:
-            m_sleep_text->setText("The computer may sleep");
+            set_sleep_label("The computer may sleep");
 //            m_sleep_box->setEnabled();
 //            m_sleep_box->setCheckState(Qt::CheckState::Unchecked);
             break;
         case PokemonAutomation::SleepSuppress::NO_SLEEP:
-            m_sleep_text->setText("The computer stays awake");
+            set_sleep_label("The computer stays awake");
             break;
         case PokemonAutomation::SleepSuppress::SCREEN_ON:
-            m_sleep_text->setText("The screen stays on");
+            set_sleep_label("The screen stays on");
             break;
         }
     });
+}
+void MainWindow::set_sleep_label(const QString& text){
+    if (m_sleep_text != nullptr){
+        m_sleep_text->setText(text);
+    }else if (m_app != nullptr){
+        m_app->set_sleep_text(text);
+    }
+}
+
+//  App mode: the screens of the setup are the window. What the buttons along
+//  the top do is what the buttons of the old top bar did.
+void MainWindow::make_app_view(bool test){
+    //  The games and their programs, as the list makes them.
+    std::vector<PocketPilot::HomeProgram> programs;
+    m_game_list.clear();
+    m_program_list->describe(m_game_list, programs);
+
+    PocketPilot::AppActions actions;
+    actions.open_program = [this](int game, const QString& program){
+        if (m_busy || m_panel_transition || game < 0 || game >= (int)m_game_list.size()){
+            return false;
+        }
+        m_program_list->open_program(game, program.toStdString());
+        return m_current_panel != nullptr;
+    };
+    actions.close_program = [this]{
+        if (m_busy || m_panel_transition){
+            return false;
+        }
+        m_panel_transition = true;
+        ScopeExit cleanup([&]{
+            m_panel_transition = false;
+        });
+        close_panel();
+        m_program_list->clear_current();
+        return true;
+    };
+    actions.settings = [this]{
+        show_settings();
+    };
+    actions.about = [this]{
+        PocketPilot::show_about(this, about_info());
+    };
+    actions.output = [this]{
+        m_output_window->show();
+        m_output_window->raise(); // bring the window to front on macOS
+        m_output_window->activateWindow(); // bring the window to front on Windows
+    };
+    actions.buttons = [this]{
+        m_button_diagram->show();
+        m_button_diagram->raise(); // bring the window to front on macOS
+        m_button_diagram->activateWindow(); // bring the window to front on Windows
+    };
+    actions.claude = [this](bool show){
+        show_assistant(show);
+    };
+    actions.keep_screen_on = [this](bool on){
+        if (on){
+            m_sleep_scope.reset(new SleepSuppressScope(SleepSuppress::SCREEN_ON));
+        }else{
+            m_sleep_scope.reset();
+        }
+    };
+
+    m_app = PocketPilot::make_main_view(centralwidget, m_game_list, std::move(programs), std::move(actions), test);
+    QVBoxLayout* layout = new QVBoxLayout(centralwidget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(m_app->widget());
+    MainWindow::sleep_suppress_state_changed(SystemSleepController::instance().current_state());
 }
 
 

@@ -1,6 +1,8 @@
 
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
+#include <memory>
 //#include <QTextStream>
 #include <QApplication>
 #include "Common/Cpp/Logging/LastLogTracker.h"
@@ -417,7 +419,19 @@ int run_program(int argc, char *argv[]){
 #ifdef PA_SDL
     global_gamepad_tracker().start();
 #endif
-    MainWindow w;
+    //  The window is the screens of the setup (the games, the programs, the
+    //  program itself). The test of the interface goes through the old window
+    //  first (its pages are what that test knows), then through the new one.
+    bool classic_interface = false;
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], PocketPilot::CLASSIC_INTERFACE_OPTION) == 0){
+            classic_interface = true;
+        }
+    }
+    std::unique_ptr<MainWindow> window = std::make_unique<MainWindow>(
+        nullptr, !classic_interface && ui_screenshots_folder.empty()
+    );
+    MainWindow& w = *window;
     if (!ui_screenshots_folder.empty()){
         //  The test of the interface draws the window without putting it
         //  on the screen: the screen of a build machine is small, and a
@@ -433,7 +447,10 @@ int run_program(int argc, char *argv[]){
     //  The test of the interface: pictures of every page, then exit. The
     //  settings are not written, since the test changes the theme.
     if (!ui_screenshots_folder.empty()){
-        return PocketPilot::run_ui_screenshots(application, w, ui_screenshots_folder);
+        const int old_code = PocketPilot::run_ui_screenshots(application, w, ui_screenshots_folder);
+        window.reset();
+        const int new_code = PocketPilot::run_app_screenshots(application, ui_screenshots_folder + "/app");
+        return old_code != 0 ? old_code : new_code;
     }
 
     int ret = application.exec();

@@ -333,5 +333,9 @@
  "The same options as on the page of the program.": "Dezelfde opties als op de pagina van het programma.",
  "Choose another console": "Andere console kiezen",
  "Back to the games": "Terug naar de spellen",
- "Exit full screen": "Volledig scherm sluiten"
+ "Exit full screen": "Volledig scherm sluiten",
+ "Output": "Uitvoer",
+ "Programs": "Programma's",
+ "Running": "Bezig",
+ "Let the screen sleep": "Scherm laten slapen"
 }

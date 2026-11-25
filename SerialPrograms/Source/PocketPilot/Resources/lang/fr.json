@@ -333,5 +333,9 @@
  "The same options as on the page of the program.": "Les mêmes options que sur la page du programme.",
  "Choose another console": "Choisir une autre console",
  "Back to the games": "Retour aux jeux",
- "Exit full screen": "Quitter le plein écran"
+ "Exit full screen": "Quitter le plein écran",
+ "Output": "Sortie",
+ "Programs": "Programmes",
+ "Running": "En cours",
+ "Let the screen sleep": "Laisser l'écran se mettre en veille"
 }

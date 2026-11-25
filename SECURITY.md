@@ -23,8 +23,19 @@ The program does not listen on any port. The Discord bot and the Discord Social 
 
 - **The Claude key and the GitHub token** are in `UserSettings/PocketPilot-Assistant-Keys.json`, encrypted with your Windows account. Claude never sees them.
 - **Discord webhook addresses, the Discord token and the developer token** are in the settings file, sealed in the same way (`dpapi1:...`). A settings file from before is read as it is and sealed at the next save. A file copied to another account or computer cannot be opened: the secret has to be entered again.
-- This protects against another Windows account and against a copied folder. It does not protect against a program that runs as you: such a program can ask Windows to open them too.
+- This protects against another Windows account and against a copied folder. It does not protect against a program that runs as you (see the next part).
 - **Text that leaves the program** (what Claude reads from the log and the options, "Copy for Claude", the saved report) is cleaned: the name of the account in a path (`C:\Users\<user>\...`), Discord webhook addresses and bot tokens, Claude keys, GitHub tokens, and the value after `token`, `password`, `secret`, `api key` or `authorization`. It goes by the form of the text, so a line of the log that holds one is cleaned too.
+
+## Other programs that run as you
+
+Windows ties the encryption to your account, not to PocketPilot. A program that runs as you can ask Windows to open the secrets as well. An extra secret that is mixed in ("entropy") does not change that, because the program can read where that is kept too; it only stops programs that do not look for PocketPilot. Browsers had the same problem: Chrome now lets a service that runs as SYSTEM check who asks, and stealers have found ways around that too. A separate protection for one program needs things this project does not have: an installer with administrator rights and a certificate for the service, or, for Windows' enclaves, Windows 11 24H2 and a signing account.
+
+What does help, from the strongest:
+
+1. **Do not keep the key on the disk.** Enter it when you start, so that nothing is left to open. Not in the program yet: it is planned for the Claude key and the GitHub token, together with the Claude panel in the new interface.
+2. **Lock the keys with a passphrase** that Windows does not know. A program that runs as you then also needs the passphrase. Not in the program yet either; the second choice after not keeping the key.
+3. **Run PocketPilot under its own Windows account.** Other programs of your main account cannot open what that account sealed. This works today and costs nothing.
+4. **Make a stolen key cheap.** Give the Claude key its own workspace and a spend limit in the Claude Console, make the GitHub token a fine-grained one for this repository only, with an expiry date, and remember that a Discord webhook can be deleted in the channel settings.
 
 ## What Claude may do
 

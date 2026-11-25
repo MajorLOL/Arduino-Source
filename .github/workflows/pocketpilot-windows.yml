@@ -335,6 +335,13 @@ jobs:
           }
           Write-Host "The interface test: $result."
           Get-ChildItem $shots | Format-Table Name, Length
+          #  The window as the screens of the setup: a few small pictures, as
+          #  text in the log (base64 of a JPEG), to see them without the artifact.
+          Get-ChildItem "$shots/app/preview-*.jpg" -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "PP-PREVIEW-BEGIN $($_.Name)"
+            Write-Host ([Convert]::ToBase64String([IO.File]::ReadAllBytes($_.FullName)))
+            Write-Host "PP-PREVIEW-END $($_.Name)"
+          }
 
           #  What the program logged.
           $log = "$dir/SerialPrograms.log"

@@ -879,6 +879,42 @@ void open_setup(){
     run_and_keep(true, true);
 }
 
+AppView* make_main_view(
+    QWidget* parent,
+    std::vector<HomeGame> games, std::vector<HomeProgram> programs,
+    AppActions actions, bool test
+){
+    GlobalSettings& settings = GlobalSettings::instance();
+    SetupRequest request;
+    request.console_code = console_code_of(settings.GAME_CONSOLE.get());
+    request.language_code = setting_code();
+    request.games = std::move(games);
+    request.programs = std::move(programs);
+    setup_log_tap().listen();
+    request.log_poll = [](quint64 after, std::vector<SetupLogLine>& out){
+        setup_log_tap().poll(after, out);
+    };
+    request.build = QString::fromStdString(PROGRAM_NAME + " " + PROGRAM_VERSION + ", build " + PROGRAM_BUILD);
+    request.make_options = g_options_maker;
+
+    //  A console that is picked on the way is kept at once, as the setup does
+    //  when it is over.
+    std::function<void(const QString&)> after = std::move(actions.console_chosen);
+    actions.console_chosen = [after](const QString& code){
+        keep_console(code);
+        global_logger_tagged().log("Setup: the console is " + code.toStdString() + ".");
+        try{
+            PERSISTENT_SETTINGS().write();
+        }catch (...){
+            global_logger_tagged().log("Setup: the console could not be written to the settings file.", COLOR_RED);
+        }
+        if (after){
+            after(code);
+        }
+    };
+    return make_app_view(parent, request, std::move(actions), test);
+}
+
 void show_start_screens(bool play_intro, bool ask_setup){
     GlobalSettings& settings = GlobalSettings::instance();
     const bool ask_language = ask_setup && settings.ASK_LANGUAGE;

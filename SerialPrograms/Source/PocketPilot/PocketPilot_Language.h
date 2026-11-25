@@ -142,6 +142,16 @@ size_t count_options_for_setup();
 //  The same, whatever the settings say: "Open the setup" in the settings.
 void open_setup();
 
+//  The screens of the setup as the main window's own screen (see AppView):
+//  the games and the programs given, the output log, the options of the
+//  programs and the build as the setup has them, and the console that is
+//  picked on the way kept in the settings. "test": see make_app_view().
+AppView* make_main_view(
+    QWidget* parent,
+    std::vector<HomeGame> games, std::vector<HomeProgram> programs,
+    AppActions actions, bool test = false
+);
+
 //  The setup ends with the choice of a game to start. The games to choose
 //  from are listed by this function (the main window does not exist yet at
 //  the first start): it fills the first list with the games, their pictures

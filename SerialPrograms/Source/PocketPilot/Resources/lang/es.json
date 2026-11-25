@@ -333,5 +333,9 @@
  "The same options as on the page of the program.": "Las mismas opciones que en la página del programa.",
  "Choose another console": "Elegir otra consola",
  "Back to the games": "Volver a los juegos",
- "Exit full screen": "Salir de pantalla completa"
+ "Exit full screen": "Salir de pantalla completa",
+ "Output": "Salida",
+ "Programs": "Programas",
+ "Running": "En marcha",
+ "Let the screen sleep": "Dejar que la pantalla se apague"
 }

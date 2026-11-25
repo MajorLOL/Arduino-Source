@@ -89,6 +89,7 @@ namespace PocketPilot{
 
 const char* const SETUP_TEST_OPTION = "--setup-test";
 const char* const TUTORIAL_TEST_OPTION = "--tutorial-test";
+const char* const CLASSIC_INTERFACE_OPTION = "--classic-interface";
 
 
 namespace{
@@ -429,6 +430,11 @@ public:
     virtual QString state() const{
         return QString();
     }
+    //  As the main window's screen the buttons of the top bar are drawn over
+    //  the page; a page that fills the whole window (the video) leaves them out.
+    virtual bool shows_menu() const{
+        return true;
+    }
 };
 
 struct Hit{
@@ -438,9 +444,12 @@ struct Hit{
     bool tab_stop = true;
 };
 
-class Canvas : public QWidget{
+class Canvas : public QWidget, public AppView{
 public:
-    Canvas(const SetupRequest& request, bool test_mode);
+    //  "parent" and "app": the screens as the main window's own screen (an
+    //  embedded widget, which stays); both empty: a window of their own, that
+    //  ends with finish().
+    Canvas(const SetupRequest& request, bool test_mode, QWidget* parent = nullptr, AppActions* app = nullptr);
 
     //  ---- for the pages
     void add_hit(const QString& id, const QRectF& rect, bool enabled = true, bool tab_stop = true){
@@ -491,6 +500,87 @@ public:
     bool test_mode() const{
         return m_test_mode;
     }
+
+    //  ---- the main window's own screen (see AppView)
+    bool app_mode() const{
+        return m_app_mode;
+    }
+    const AppActions& app() const{
+        return m_app;
+    }
+    bool app_busy() const{
+        return m_app_busy;
+    }
+    const QString& app_state_text() const{
+        return m_app_state;
+    }
+    const QString& app_sleep_text() const{
+        return m_app_sleep;
+    }
+    bool app_keep_on() const{
+        return m_app_keep_on;
+    }
+    void app_set_keep_on(bool on){
+        m_app_keep_on = on;
+        if (m_app.keep_screen_on){
+            m_app.keep_screen_on(on);
+        }
+    }
+    void app_console_chosen(const QString& code){
+        if (m_app_mode && m_app.console_chosen){
+            m_app.console_chosen(code);
+        }
+    }
+    //  Where Claude's panel begins, in the places of the 1920 x 1080 screen
+    //  (the right end of the screen when it is not shown).
+    double app_right_edge() const{
+        if (!m_claude_shown || m_claude == nullptr){
+            return DW;
+        }
+        const double scale = window_scale();
+        return (m_claude->x() - (width() - DW * scale) / 2.0) / scale;
+    }
+    //  The program that was open is closed: where the way back goes.
+    void leave_host(int game);
+    //  Opens a program of a game on its own page (the main window makes it).
+    void open_program_page(int game, const QString& program);
+
+    //  AppView
+    virtual QWidget* widget() override{
+        return this;
+    }
+    virtual void show_games() override{
+        go_games();
+    }
+    virtual void show_programs(int game) override{
+        go_programs(game);
+    }
+    virtual void host(QWidget* content, int game, const QString& game_name, const QString& title) override;
+    virtual void unhost(QWidget* content) override;
+    virtual bool hosting() const override{
+        return m_hosting;
+    }
+    virtual void set_state(bool busy, const QString& text) override{
+        m_app_busy = busy;
+        m_app_state = text;
+        update();
+    }
+    virtual void set_sleep_text(const QString& text) override{
+        m_app_sleep = text;
+        update();
+    }
+    virtual void set_claude(QWidget* panel) override;
+    virtual void show_claude(bool show) override;
+    virtual bool claude_shown() const override{
+        return m_claude_shown;
+    }
+    virtual bool has_button(const QString& id) const override{
+        return has_hit(id);
+    }
+    virtual QString page() const override{
+        return page_name();
+    }
+
     //  The folder of the program: Firmware and Tools are in it.
     const QString& app_folder() const{
         return m_app_folder;
@@ -718,7 +808,7 @@ public:
         }
     }
     //  Presses it as a click on its middle would; false when it is not there.
-    bool click(const QString& id);
+    virtual bool click(const QString& id) override;
     //  Moves the mouse over it.
     bool move_to(const QString& id);
     void press_key(int key, Qt::KeyboardModifiers modifiers = Qt::NoModifier, const QString& text = QString());
@@ -729,8 +819,8 @@ public:
     //  Drags over it, from one place to another (0 to 1 of its width).
     bool drag_over(const QString& id, double from, double to);
     //  Time passes (with pictures drawn on the way).
-    void wait(double seconds);
-    QImage picture();
+    virtual void wait(double seconds) override;
+    virtual QImage picture() override;
     QString focus_id() const{
         return m_focus;
     }
@@ -766,6 +856,11 @@ private:
     void end_intro(const QString& note);
     void drop_intro_player();
     void draw_fitted(QPainter& painter, const QImage& image, QPixmap& cache, QSize& cache_for, double opacity);
+    //  A button, a row ... of the page: or one of the buttons along the top.
+    void dispatch(const QString& id);
+    void paint_app_menu(QPainter& painter);
+    bool app_activate(const QString& id);
+    void place_claude();
 
 private:
     SetupRequest m_request;
@@ -849,6 +944,21 @@ private:
     bool m_releasing = false;
     bool m_release_done = false;
     double m_release_alpha = 1;
+
+    //  The main window's own screen.
+    bool m_app_mode = false;
+    AppActions m_app;
+    bool m_hosting = false;
+    //  The page that host() made, until it is on the screen; and "the main
+    //  window is making it now" (so that host() does not queue it twice).
+    std::unique_ptr<Page> m_hosted;
+    bool m_opening = false;
+    bool m_app_busy = false;
+    QString m_app_state;
+    QString m_app_sleep;
+    bool m_app_keep_on = false;
+    QPointer<QWidget> m_claude;
+    bool m_claude_shown = false;
 };
 
 
@@ -3607,7 +3717,10 @@ public:
             draw_chevron_back(painter, QPointF(x + 8, 982), white(0.7 * b));
             x += 26 + w + 34;
         }
-        draw_button(canvas, painter, "later", T("Choose later"), x, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+        if (!canvas.app_mode()){
+            //  (As the main window's own screen there is nothing to leave.)
+            draw_button(canvas, painter, "later", T("Choose later"), x, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+        }
         const QString start_text = T("Start");
         const double start_w = button_width(start_text, ButtonKind::PRIMARY);
         draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, m_selected >= 0);
@@ -4379,6 +4492,10 @@ public:
 
     virtual const char* name() const override{
         return "programs";
+    }
+    //  The picture in full screen fills the window: no buttons over it.
+    virtual bool shows_menu() const override{
+        return !(m_video_full && m_full.value > 0.5);
     }
 
     //  ---- time
@@ -6092,7 +6209,7 @@ private:
             draw_chevron_left(painter, QPointF(x + 8, 982), white(0.7 * a));
             x += 26 + w + 34;
         }
-        {
+        if (!m_canvas->app_mode()){
             const double w = draw_button(canvas, painter, "later", T("Choose later"), x, 960, ButtonKind::LINK, std::min(1.0, a * 1.35));
             x += w + 34;
         }
@@ -6455,6 +6572,7 @@ private:
         }
         canvas.result().console_chosen = true;
         canvas.result().console_code = CONSOLES[m_selected].code;
+        canvas.app_console_chosen(QString::fromLatin1(CONSOLES[m_selected].code));
         canvas.end_console();
     }
 
@@ -6585,15 +6703,156 @@ private:
 
 
 //  ---------------------------------------------------------------------
+//  The program that is open (the main window's own screen)
+//  ---------------------------------------------------------------------
+
+//  The page of a program (or of the settings): its own Qt widget, as the
+//  program made it, is held inside the screen under a header with the way
+//  back, the name and the state. The widget is the window's: it is taken out
+//  (AppView::unhost) before it is deleted.
+class HostPage : public Page{
+public:
+    HostPage(Canvas& canvas, QWidget* holder, int game, const QString& game_name, const QString& title)
+        : m_canvas(&canvas)
+        , m_holder(holder)
+        , m_game(game)
+        , m_game_name(game_name)
+        , m_title(title)
+    {
+        canvas.set_focus_id("host-back");
+    }
+    virtual ~HostPage() override{
+        //  What is left in the holder is the window's to take: the holder is
+        //  only the frame.
+        if (m_holder != nullptr){
+            m_holder->hide();
+            delete m_holder.data();
+        }
+    }
+
+    virtual const char* name() const override{
+        return "host";
+    }
+    virtual QString state() const override{
+        return "title=" + m_title + ";game=" + QString::number(m_game);
+    }
+
+    virtual void step(double dt) override{
+        m_clock += dt;
+        place();
+    }
+
+    virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
+        const Intro in = intro_for(canvas);
+        const double a_head = eo(prog(t, in.head, in.head + 0.5));
+        const double a_body = eo(prog(t, in.sub, in.sub + 0.5));
+        place();
+
+        //  The header: the way back, then where this is.
+        const QString back_text = m_game >= 0 && canvas.has_programs(m_game) ? T("Programs") : T("All games");
+        double x = 60;
+        {
+            const double w = draw_button(canvas, painter, "host-back", back_text, x + 26, 46, ButtonKind::LINK,
+                std::min(1.0, a_head * 1.35), !canvas.app_busy());
+            draw_chevron_back(painter, QPointF(x + 8, 68), white(0.7 * a_head * (canvas.app_busy() ? 0.35 : 1.0)));
+            x += 26 + w + 30;
+        }
+        const double cy = 68;
+        if (m_game >= 0 && !m_game_name.isEmpty()){
+            const QFont game_font = ui_font(28, 500);
+            draw_text_cy(painter, m_game_name, x, cy, game_font, white(0.55 * a_head));
+            x += text_width(game_font, m_game_name) + 16;
+            draw_text_cy(painter, QString::fromUtf8("›"), x, cy, game_font, white(0.4 * a_head));
+            x += 28;
+        }
+        const double right = std::min(1860.0, canvas.app_right_edge() - 20);
+        {
+            //  The state: ready, or the program that runs.
+            const bool busy = canvas.app_busy();
+            const QString text = canvas.app_state_text().isEmpty() ? (busy ? T("Running") : T("Ready")) : canvas.app_state_text();
+            const double w = draw_chip(painter, text, right, cy + 22, busy ? ChipKind::ORANGE_FILL : ChipKind::RING, a_head);
+            m_title_room = right - w - 24 - x;
+        }
+        const QFont title_font = serif_font(46);
+        draw_text_cy(painter, QFontMetricsF(title_font).elidedText(m_title, Qt::ElideRight, std::max(200.0, m_title_room)),
+            x, cy, title_font, white(a_head));
+
+        //  The frame behind the program's widget.
+        const QRectF area = content_rect(canvas);
+        panel(painter, area.adjusted(-10, -10, 10, 10), 18, with_alpha(PANEL, 0.92 * a_body), white(0.16 * a_body), 1.5);
+
+        //  The footer: what the computer does about sleep, and its switch.
+        const double fy = 1050;
+        draw_text_cy(painter, canvas.app_sleep_text(), 70, fy, ui_font(22, 500), white(0.5 * a_body));
+        const QString toggle = canvas.app_keep_on() ? T("Let the screen sleep") : T("Keep the screen on");
+        const double toggle_w = button_width(toggle, ButtonKind::LINK);
+        draw_button(canvas, painter, "host-sleep", toggle, right - toggle_w, fy - 22, ButtonKind::LINK, std::min(1.0, a_body * 1.35));
+    }
+
+    virtual void activate(Canvas& canvas, const QString& id) override{
+        if (id == "host-back"){
+            if (canvas.app_busy()){
+                return;
+            }
+            if (canvas.app().close_program && !canvas.app().close_program()){
+                return;
+            }
+            canvas.leave_host(m_game);
+        }else if (id == "host-sleep"){
+            canvas.app_set_keep_on(!canvas.app_keep_on());
+        }
+    }
+
+private:
+    //  Under the header, over the footer; left of Claude when its panel is shown.
+    static QRectF content_rect(const Canvas& canvas){
+        const double right = std::min(1860.0, canvas.app_right_edge() - 20);
+        return QRectF(60, 112, right - 60, 920);
+    }
+    void place(){
+        if (m_holder == nullptr){
+            return;
+        }
+        //  Only when the page is there as a whole, not while it fades.
+        if (m_canvas->page_fade() < 0.98){
+            if (!m_holder->isHidden()){
+                m_holder->hide();
+            }
+            return;
+        }
+        const QRect geometry = m_canvas->window_rect(content_rect(*m_canvas));
+        if (m_holder->geometry() != geometry){
+            m_holder->setGeometry(geometry);
+        }
+        if (m_holder->isHidden()){
+            m_holder->show();
+        }
+    }
+
+    Canvas* m_canvas;
+    QPointer<QWidget> m_holder;
+    int m_game;
+    QString m_game_name;
+    QString m_title;
+    double m_clock = 0;
+    double m_title_room = 600;
+};
+
+
+//  ---------------------------------------------------------------------
 //  Canvas
 //  ---------------------------------------------------------------------
 
-Canvas::Canvas(const SetupRequest& request, bool test_mode)
-    : QWidget(nullptr, test_mode ? Qt::Window : (Qt::Window | Qt::FramelessWindowHint))
+Canvas::Canvas(const SetupRequest& request, bool test_mode, QWidget* parent, AppActions* app)
+    : QWidget(parent, parent != nullptr ? Qt::Widget : (test_mode ? Qt::Window : (Qt::Window | Qt::FramelessWindowHint)))
     , m_request(request)
     , m_test_mode(test_mode)
     , m_timer(this)
 {
+    if (app != nullptr){
+        m_app_mode = true;
+        m_app = *app;
+    }
     setWindowTitle("PocketPilot Studio");
     m_app_folder = QCoreApplication::applicationDirPath();
     setMouseTracking(true);
@@ -6612,7 +6871,10 @@ Canvas::Canvas(const SetupRequest& request, bool test_mode)
 
 void Canvas::start(QEventLoop* loop){
     m_loop = loop;
-    if (m_request.ask_language){
+    if (m_app_mode){
+        //  The window's own screen: it starts on the games and stays.
+        go_games();
+    }else if (m_request.ask_language){
         go_language();
     }else if (m_request.ask_console){
         go_console();
@@ -6686,6 +6948,10 @@ void Canvas::advance(double dt){
             m_fade = 0;
             std::function<std::unique_ptr<Page>()> make = std::move(m_pending);
             m_pending = nullptr;
+            //  The page before goes first: what it holds (the camera of the
+            //  programs, say) is free for the page that comes.
+            m_page.reset();
+            m_hits.clear();
             set_page(make());
         }
     }else if (m_fade < 1.0){
@@ -6898,6 +7164,27 @@ void Canvas::close_video(){
 }
 
 void Canvas::finish(){
+    if (m_app_mode){
+        //  The window's own screen does not end. What the page chose is a
+        //  program to open (a game without programs has nothing to open).
+        const QString game_name = m_result.game;
+        const QString program = m_result.program;
+        m_result.game.clear();
+        m_result.program.clear();
+        if (m_video_open){
+            close_video();
+        }
+        int index = -1;
+        for (size_t c = 0; c < m_request.games.size(); c++){
+            if (m_request.games[c].name == game_name){
+                index = (int)c;
+            }
+        }
+        if (index >= 0 && !program.isEmpty()){
+            open_program_page(index, program);
+        }
+        return;
+    }
     if (m_video_open){
         close_video();
     }
@@ -7177,6 +7464,10 @@ void Canvas::paintEvent(QPaintEvent*){
     if (m_page){
         painter.setOpacity(eo(clamp01(m_fade)));
         m_page->paint(*this, painter, m_page_time);
+        if (m_app_mode && m_page->shows_menu()){
+            painter.setOpacity(1.0);
+            paint_app_menu(painter);
+        }
     }
     if (m_intro == IntroState::FADE){
         //  The last picture of the film over the page, going away.
@@ -7194,6 +7485,7 @@ void Canvas::resizeEvent(QResizeEvent* event){
     if (m_intro_overlay != nullptr){
         m_intro_overlay->setGeometry(rect());
     }
+    place_claude();
     update();
 }
 
@@ -7277,7 +7569,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event){
         if (id != "bar" && !id.startsWith("row:") && !id.startsWith("step:")){
             m_focus = id;
         }
-        m_page->activate(*this, id);
+        dispatch(id);
     }
 }
 
@@ -7359,7 +7651,7 @@ void Canvas::keyPressEvent(QKeyEvent* event){
                 }
             }
             if (enabled){
-                m_page->activate(*this, m_focus);
+                dispatch(m_focus);
                 break;
             }
         }
@@ -7411,7 +7703,7 @@ bool Canvas::click(const QString& id){
             if (copy != "bar" && !copy.startsWith("row:") && !copy.startsWith("step:")){
                 m_focus = copy;
             }
-            m_page->activate(*this, copy);
+            dispatch(copy);
             return true;
         }
     }
@@ -7471,6 +7763,181 @@ QImage Canvas::picture(){
     return grab().toImage();
 }
 
+//  ---------------------------------------------------------------------
+//  The main window's own screen
+//  ---------------------------------------------------------------------
+
+void Canvas::dispatch(const QString& id){
+    if (m_page == nullptr){
+        return;
+    }
+    if (m_app_mode && id.startsWith("app:")){
+        app_activate(id);
+        return;
+    }
+    m_page->activate(*this, id);
+}
+
+//  The buttons of the old top bar, along the top of every page.
+void Canvas::paint_app_menu(QPainter& painter){
+    struct Entry{
+        const char* id;
+        const char* text;
+    };
+    static const Entry ENTRIES[] = {
+        {"app:games", "Games"},
+        {"app:settings", "Settings"},
+        {"app:claude", "Claude"},
+        {"app:log", "Output"},
+        {"app:buttons", "Buttons"},
+        {"app:about", "About"},
+    };
+    const bool on_games = m_page != nullptr && QString(m_page->name()) == "games";
+    const double edge = std::min(1880.0, app_right_edge() - 10);
+    double right = edge;
+    for (size_t c = sizeof(ENTRIES) / sizeof(ENTRIES[0]); c-- > 0;){
+        const Entry& entry = ENTRIES[c];
+        if (on_games && QString(entry.id) == "app:games"){
+            continue;
+        }
+        const QString text = T(entry.text);
+        const double width = button_width(text, ButtonKind::LINK);
+        draw_button(*this, painter, entry.id, text, right - width, 0, ButtonKind::LINK, 1.0);
+        right -= width + 14;
+    }
+}
+
+bool Canvas::app_activate(const QString& id){
+    if (id == "app:games"){
+        if (m_hosting){
+            if (m_app_busy){
+                return true;
+            }
+            if (m_app.close_program && !m_app.close_program()){
+                return true;
+            }
+        }
+        go_games();
+    }else if (id == "app:settings"){
+        if (m_app.settings){
+            m_app.settings();
+        }
+    }else if (id == "app:claude"){
+        if (m_app.claude){
+            m_app.claude(!m_claude_shown);
+        }
+    }else if (id == "app:log"){
+        if (m_app.output){
+            m_app.output();
+        }
+    }else if (id == "app:buttons"){
+        if (m_app.buttons){
+            m_app.buttons();
+        }
+    }else if (id == "app:about"){
+        if (m_app.about){
+            m_app.about();
+        }
+    }else{
+        return false;
+    }
+    return true;
+}
+
+void Canvas::leave_host(int game){
+    m_hosting = false;
+    if (game >= 0 && game < (int)m_request.games.size() && has_programs(game)){
+        go_programs(game);
+    }else{
+        go_games(game);
+    }
+}
+
+void Canvas::open_program_page(int game, const QString& program){
+    queue_page([this, game, program]() -> std::unique_ptr<Page>{
+        //  The window makes the program now, and answers with host().
+        m_opening = true;
+        m_hosted.reset();
+        bool opened = false;
+        try{
+            opened = m_app.open_program && m_app.open_program(game, program);
+        }catch (...){
+            opened = false;
+        }
+        m_opening = false;
+        if (opened && m_hosted != nullptr){
+            return std::move(m_hosted);
+        }
+        m_hosted.reset();
+        //  It did not open (a program runs, say): back where it was picked.
+        return std::unique_ptr<Page>(new ProgramsPage(*this, game));
+    });
+}
+
+void Canvas::host(QWidget* content, int game, const QString& game_name, const QString& title){
+    QWidget* holder = new QWidget(this);
+    holder->setAutoFillBackground(true);
+    holder->hide();
+    QVBoxLayout* layout = new QVBoxLayout(holder);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    content->setParent(holder);
+    layout->addWidget(content);
+    m_hosted = std::make_unique<HostPage>(*this, holder, game, game_name, title);
+    m_hosting = true;
+    if (!m_opening){
+        queue_page([this]() -> std::unique_ptr<Page>{
+            if (m_hosted != nullptr){
+                return std::move(m_hosted);
+            }
+            return std::unique_ptr<Page>(new GamesPage(*this, -1));
+        });
+    }
+}
+
+void Canvas::unhost(QWidget* content){
+    m_hosting = false;
+    if (content == nullptr){
+        return;
+    }
+    //  Back to the window, which deletes it: the holder only held it.
+    content->hide();
+    content->setParent(nullptr);
+}
+
+void Canvas::set_claude(QWidget* panel){
+    m_claude = panel;
+    if (panel != nullptr){
+        panel->setParent(this);
+        panel->hide();
+    }
+    m_claude_shown = false;
+}
+
+void Canvas::show_claude(bool show){
+    m_claude_shown = show && m_claude != nullptr;
+    place_claude();
+    update();
+}
+
+//  Claude's panel is over the right of the screen.
+void Canvas::place_claude(){
+    if (m_claude == nullptr){
+        return;
+    }
+    if (!m_claude_shown){
+        if (!m_claude->isHidden()){
+            m_claude->hide();
+        }
+        return;
+    }
+    const int panel_width = std::max(380, std::min(640, (int)std::lround(width() * 0.34)));
+    m_claude->setGeometry(width() - panel_width, 0, panel_width, height());
+    m_claude->raise();
+    m_claude->show();
+}
+
+
 
 }   //  namespace
 
@@ -7527,6 +7994,12 @@ SetupResult run_setup(const SetupRequest& request){
         canvas->hide();
     }
     return result;
+}
+
+AppView* make_app_view(QWidget* parent, const SetupRequest& request, AppActions actions, bool test){
+    Canvas* canvas = new Canvas(request, test, parent, &actions);
+    canvas->start(nullptr);
+    return canvas;
 }
 
 void release_setup_curtain(){
@@ -9312,6 +9785,200 @@ int run_setup_test(QApplication& application, const QString& folder){
         second.click("skip");
         second.wait(0.2);
         checker.check(second.finished() && second.result().board_done && second.result().board.isEmpty(), "Skip ends the setup");
+    }
+
+    //  ---- the screens as the main window's own screen (see AppView)
+    {
+        struct AppLog{
+            int opened = 0;
+            int closed = 0;
+            int settings = 0;
+            int about = 0;
+            int output = 0;
+            int buttons = 0;
+            int claude = 0;
+            int open_game = -1;
+            QString open_program;
+            QString console;
+            int keep_on = 0;
+            int keep_off = 0;
+            bool fail_next = false;
+        } record;
+        Canvas* screen = nullptr;
+        QPointer<QWidget> content;
+        AppActions actions;
+        actions.open_program = [&](int game, const QString& program) -> bool{
+            if (record.fail_next){
+                record.fail_next = false;
+                return false;
+            }
+            record.opened++;
+            record.open_game = game;
+            record.open_program = program;
+            QLabel* label = new QLabel("The page of " + program);
+            content = label;
+            screen->host(label, game, short_game_name(screen->request().games[(size_t)game].name), program);
+            return true;
+        };
+        actions.close_program = [&]() -> bool{
+            record.closed++;
+            if (content != nullptr){
+                QWidget* widget = content.data();
+                screen->unhost(widget);
+                delete widget;
+            }
+            return true;
+        };
+        actions.settings = [&]{ record.settings++; };
+        actions.about = [&]{ record.about++; };
+        actions.output = [&]{ record.output++; };
+        actions.buttons = [&]{ record.buttons++; };
+        actions.claude = [&](bool show){
+            record.claude++;
+            screen->show_claude(show);
+        };
+        actions.console_chosen = [&](const QString& code){ record.console = code; };
+        actions.keep_screen_on = [&](bool on){
+            if (on){
+                record.keep_on++;
+            }else{
+                record.keep_off++;
+            }
+        };
+
+        SetupRequest request_app;
+        request_app.games = test_games();
+        request_app.programs = test_programs();
+        request_app.build = "PocketPilot test build";
+        Canvas window_screen(request_app, true, nullptr, &actions);
+        screen = &window_screen;
+        window_screen.resize(1920, 1080);
+        window_screen.set_app_folder(app);
+        window_screen.set_scan([]{
+            HardwareState state;
+            return state;
+        });
+        window_screen.set_claude(new QLabel("Claude's panel"));
+        window_screen.start(nullptr);
+        window_screen.show();
+        window_screen.wait(2.5);
+
+        //  The games: no end, no "Choose later", the buttons of the top bar.
+        checker.check(window_screen.page_name() == "games" && !window_screen.finished(), "as the window's screen it starts on the games");
+        checker.check(window_screen.has_hit("app:settings") && window_screen.has_hit("app:claude") && window_screen.has_hit("app:log")
+            && window_screen.has_hit("app:buttons") && window_screen.has_hit("app:about"), "the buttons of the top bar are along the top");
+        checker.check(!window_screen.has_hit("app:games"), "and the way to the games is not on the games");
+        checker.check(!window_screen.has_hit("later"), "there is no 'Choose later' to leave with");
+        save(window_screen, folder, "setup-60-window-games");
+        save_preview(window_screen, folder, "preview-window-games");
+        checker.check(has_content(window_screen.picture()), "the games are drawn");
+
+        //  The programs, and Start opens one in the window.
+        window_screen.click("game:0");
+        window_screen.wait(0.2);
+        window_screen.click("start");
+        window_screen.wait(1.8);
+        checker.check(window_screen.page_name() == "programs", "a game with programs leads to its programs");
+        checker.check(!window_screen.has_hit("later") && window_screen.has_hit("all") && window_screen.has_hit("app:games"), "with the way back, and no 'Choose later'");
+        save(window_screen, folder, "setup-61-window-programs");
+        window_screen.click("prog:3");
+        window_screen.wait(0.2);
+        window_screen.click("start");
+        window_screen.wait(1.0);
+        checker.check(!window_screen.finished(), "Start does not end the screen");
+        checker.check(record.opened == 1 && record.open_game == 0 && record.open_program == "Push Joy Sticks", "it asks the window to open the program that is picked");
+        checker.check(window_screen.page_name() == "host" && window_screen.hosting(), "and the program is on the screen, under a header");
+        checker.check(window_screen.has_hit("host-back") && window_screen.has_hit("host-sleep") && window_screen.has_hit("app:games"), "with the way back, the sleep switch and the games");
+        checker.check(!content.isNull() && content->isVisible(), "its widget is visible");
+        checker.check(!content.isNull() && content->window() == &window_screen, "inside the screen");
+        save(window_screen, folder, "setup-62-window-program");
+        save_preview(window_screen, folder, "preview-window-program");
+        checker.check(has_content(window_screen.picture()), "the program is drawn");
+
+        //  The buttons of the top bar.
+        window_screen.click("app:settings");
+        window_screen.click("app:about");
+        window_screen.click("app:log");
+        window_screen.click("app:buttons");
+        checker.check(record.settings == 1 && record.about == 1 && record.output == 1 && record.buttons == 1, "each button of the top bar does its own thing");
+
+        //  Claude over the right.
+        checker.check(!window_screen.claude_shown(), "Claude is not shown at first");
+        window_screen.click("app:claude");
+        window_screen.wait(0.3);
+        checker.check(window_screen.claude_shown() && record.claude == 1, "the button shows Claude");
+        bool claude_over_right = false;
+        for (QLabel* label : window_screen.findChildren<QLabel*>()){
+            if (label->text() == "Claude's panel"){
+                claude_over_right = label->isVisible() && label->x() > window_screen.width() / 2 && label->height() == window_screen.height();
+            }
+        }
+        checker.check(claude_over_right, "its panel is over the right of the screen");
+        checker.check(!content.isNull() && content->mapTo(&window_screen, QPoint(content->width(), 0)).x() <= window_screen.width() - window_screen.width() * 30 / 100,
+            "and the program gives it room");
+        save(window_screen, folder, "setup-63-window-claude");
+        save_preview(window_screen, folder, "preview-window-claude");
+        window_screen.click("app:claude");
+        window_screen.wait(0.2);
+        checker.check(!window_screen.claude_shown(), "the same button hides it");
+
+        //  The sleep switch.
+        window_screen.click("host-sleep");
+        checker.check(record.keep_on == 1 && window_screen.app_keep_on(), "the switch keeps the screen on");
+        window_screen.click("host-sleep");
+        checker.check(record.keep_off == 1 && !window_screen.app_keep_on(), "and lets it sleep again");
+
+        //  A program that runs: the state, and no way back.
+        window_screen.set_state(true, "Running Push Joy Sticks");
+        window_screen.wait(0.3);
+        checker.check(!window_screen.hit_enabled("host-back"), "while a program runs there is no way back");
+        window_screen.click("app:games");
+        window_screen.wait(0.2);
+        checker.check(window_screen.hosting() && window_screen.page_name() == "host", "and the games button does not close it");
+        save(window_screen, folder, "setup-64-window-running");
+        window_screen.set_state(false, "Ready");
+        window_screen.wait(0.3);
+        checker.check(window_screen.hit_enabled("host-back"), "when it stops the way back is open again");
+
+        //  Back leads to the programs of the game.
+        window_screen.click("host-back");
+        window_screen.wait(1.8);
+        checker.check(record.closed == 1 && content.isNull(), "the program is closed (and its widget is the window's to delete)");
+        checker.check(window_screen.page_name() == "programs" && !window_screen.hosting(), "back leads to the programs");
+
+        //  A program that cannot be opened: the programs stay.
+        record.fail_next = true;
+        window_screen.click("start");
+        window_screen.wait(1.8);
+        checker.check(window_screen.page_name() == "programs" && record.opened == 1, "a program that cannot be opened leaves the programs on the screen");
+
+        //  The games button closes a program.
+        window_screen.click("start");
+        window_screen.wait(1.8);
+        checker.check(window_screen.hosting() && record.opened == 2, "it opens the next time");
+        window_screen.click("app:games");
+        window_screen.wait(1.8);
+        checker.check(record.closed == 2 && window_screen.page_name() == "games" && !window_screen.hosting(), "the games button closes it and shows the games");
+
+        //  The settings (no game) lead back to the games.
+        window_screen.host(new QLabel("The settings"), -1, QString(), "Settings");
+        window_screen.wait(1.8);
+        checker.check(window_screen.page_name() == "host" && window_screen.hosting(), "the settings are held in the screen as well");
+        window_screen.click("host-back");
+        window_screen.wait(1.8);
+        checker.check(window_screen.page_name() == "games", "and back from them leads to the games");
+
+        //  Another console, from the games: kept at once.
+        window_screen.click("console");
+        window_screen.wait(2.5);
+        checker.check(window_screen.page_name() == "console", "the console can be chosen again from the games");
+        window_screen.click("console:1");
+        window_screen.wait(0.3);
+        window_screen.click("continue");
+        window_screen.wait(1.0);
+        checker.check(record.console == "switch2", "the window is told which console was picked");
+        window_screen.wait(1.5);
+        checker.check(window_screen.page_name() == "games" && !window_screen.finished(), "and the games are back");
     }
 
     //  The language is English again for what comes after.

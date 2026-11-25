@@ -47,6 +47,15 @@
  *  opened in the main window (see take_chosen_game() in
  *  PocketPilot_Language.h).
  *
+ *  The same screens are also the main window (see AppView below): the games,
+ *  then the programs of one game, then the program itself, with the buttons
+ *  of the old top bar (settings, Claude, the output log, the button diagram,
+ *  about) along the top. The program's own page (its console, Start and Stop,
+ *  its options) is still the old Qt widget, held inside the screen under a
+ *  header that has the way back and the state. Nothing in it ends the screen:
+ *  "Start" opens the program, it does not leave. (This is the first version
+ *  of "one interface"; what each button does is listed in ROADMAP.md.)
+ *
  *  The workflow that makes the builds also runs
  *
  *      SerialPrograms --setup-test <folder>
@@ -64,6 +73,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <QImage>
 #include <QString>
 #include <QStringList>
 #include "PocketPilot_Home.h"
@@ -78,6 +88,9 @@ namespace PocketPilot{
 //  Option on the command line.
 extern const char* const SETUP_TEST_OPTION;     //  --setup-test <folder>
 extern const char* const TUTORIAL_TEST_OPTION;  //  --tutorial-test
+//  Starts the old window (top bar, side bar, page with the games) instead of
+//  the screens of the setup as the main window.
+extern const char* const CLASSIC_INTERFACE_OPTION;  //  --classic-interface
 
 
 //  One line of the output log of the program, for the log panel of the screen
@@ -201,6 +214,78 @@ struct SetupResult{
     QString intro_note;
 };
 
+
+//  What the main window does for the screens when they are its own screen.
+//  Every action may be empty: the button is drawn, and does nothing.
+struct AppActions{
+    //  Opens a program of a game (an index into SetupRequest::games and the
+    //  name of the program in it). The window answers with AppView::host()
+    //  before it returns. False: it could not be opened (a program runs).
+    std::function<bool(int game, const QString& program)> open_program;
+
+    //  The program that is open is closed (the way back). False: it cannot
+    //  be closed now (a program runs).
+    std::function<bool()> close_program;
+
+    //  The buttons along the top.
+    std::function<void()> settings;
+    std::function<void()> about;
+    std::function<void()> output;       //  the output log
+    std::function<void()> buttons;      //  the diagram of the buttons
+    //  Claude's panel: shown or hidden (the window calls AppView::show_claude()).
+    std::function<void(bool show)> claude;
+
+    //  Another console was picked on the screen with the consoles.
+    std::function<void(const QString& code)> console_chosen;
+
+    //  "Keep the screen on" was switched.
+    std::function<void(bool on)> keep_screen_on;
+};
+
+//  The screens as the main window's own screen: a child of "parent", it stays
+//  until the window is closed. The window owns it through its parent, as it
+//  owns any widget.
+class AppView{
+public:
+    virtual ~AppView() = default;
+
+    virtual QWidget* widget() = 0;
+
+    //  The games, or the programs of one of them (an index into the games).
+    virtual void show_games() = 0;
+    virtual void show_programs(int game) = 0;
+
+    //  A program (or the settings: game -1) is open: its widget goes under a
+    //  header with the way back. "content" is the window's own widget; it
+    //  stays the window's: unhost() gives it back before it is deleted.
+    virtual void host(QWidget* content, int game, const QString& game_name, const QString& title) = 0;
+    virtual void unhost(QWidget* content) = 0;
+    virtual bool hosting() const = 0;
+
+    //  A program runs (or not): the state in the header, and no way back.
+    virtual void set_state(bool busy, const QString& text) = 0;
+    //  What is said about the computer's sleep, beside its switch.
+    virtual void set_sleep_text(const QString& text) = 0;
+
+    //  Claude's panel, over the right of the screen when it is shown. The
+    //  panel stays the window's.
+    virtual void set_claude(QWidget* panel) = 0;
+    virtual void show_claude(bool show) = 0;
+    virtual bool claude_shown() const = 0;
+
+    //  ---- for the test, which has no event loop of its own: time passes (with
+    //  the pictures drawn), a press on a button by its name, what page it is.
+    virtual void wait(double seconds) = 0;
+    virtual bool click(const QString& id) = 0;
+    virtual bool has_button(const QString& id) const = 0;
+    virtual QString page() const = 0;
+    virtual QImage picture() = 0;
+};
+
+//  Makes the screens as the main window's own screen. Starts on the games.
+//  "test": no clock of its own (time only passes in wait()), and nothing
+//  opens outside the program.
+AppView* make_app_view(QWidget* parent, const SetupRequest& request, AppActions actions, bool test = false);
 
 //  Shows the screens full screen and returns when they are done or skipped.
 //  Needs a QApplication. The language is tried on the screens as it is

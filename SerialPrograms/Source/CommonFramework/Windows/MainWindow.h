@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include <QMainWindow>
 #include "Common/Cpp/Options/ConfigOption.h"
 #include "PanelLists.h"
@@ -26,6 +27,7 @@ class ButtonDiagram;
 class LoggerWindow;
 class WallpaperWidget;
 namespace PocketPilot{
+    class AppView;
     class Frame;
     class HomePage;
     struct AboutInfo;
@@ -44,8 +46,17 @@ class MainWindow
     , public SystemSleepController::Listener
 {
 public:
-    MainWindow(QWidget* parent = nullptr);
+    //  "app_mode": the window's screen is the one of the setup (the games,
+    //  the programs, the program itself, see PocketPilot_Setup.h) instead of
+    //  the top bar, the side bar and the page with the games. The test of the
+    //  old interface makes the old window.
+    //  "app_test": the screens have no clock of their own and nothing opens
+    //  outside the window (the test of the interface drives them).
+    MainWindow(QWidget* parent = nullptr, bool app_mode = false, bool app_test = false);
     ~MainWindow();
+
+    //  The screens when the window is made in app mode; otherwise null.
+    PocketPilot::AppView* app_view(){ return m_app; }
 
     //  What the top bar's buttons do. Also for the test of the interface
     //  (PocketPilot_SelfTest.cpp).
@@ -107,6 +118,9 @@ private:
 
     void update_wallpaper();
     void update_page();
+    //  App mode: the screens, with what the buttons along the top do.
+    void make_app_view(bool test);
+    void set_sleep_label(const QString& text);
     void make_assistant(
         std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,
         const std::string& settings_folder
@@ -121,13 +135,17 @@ private:
     std::unique_ptr<PocketPilot::Frame> m_frame;
     //  The page with the games, shown while no program is open.
     PocketPilot::HomePage* m_home = nullptr;
+    //  App mode: the window's own screen (a child of the central widget), and
+    //  the games it shows (the same order as the list of programs has).
+    PocketPilot::AppView* m_app = nullptr;
+    std::vector<PocketPilot::HomeGame> m_game_list;
     //  Claude: what it needs to work, and its panel at the right.
     std::unique_ptr<PocketPilot::Assistant::Service> m_assistant;
     PocketPilot::Assistant::Panel* m_assistant_panel = nullptr;
 
 //    ProgramTabs* m_program_list = nullptr;
     ProgramSelect* m_program_list = nullptr;
-    QVBoxLayout* m_right_panel_layout;
+    QVBoxLayout* m_right_panel_layout = nullptr;
 
     //  Keep a reference to the panel descriptor since it is referenced by the
     //  panel instance and the original descriptor may destroyed at any time.
@@ -138,8 +156,8 @@ private:
     std::unique_ptr<ButtonDiagram> m_button_diagram;
     std::unique_ptr<LoggerWindow> m_output_window;
 
-    QLabel* m_sleep_text;
-    QCheckBox* m_sleep_box;
+    QLabel* m_sleep_text = nullptr;
+    QCheckBox* m_sleep_box = nullptr;
     std::unique_ptr<SleepSuppressScope> m_sleep_scope;
 
     bool m_pending_resize = false;

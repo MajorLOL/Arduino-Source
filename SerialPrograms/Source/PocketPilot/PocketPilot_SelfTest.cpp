@@ -81,6 +81,7 @@
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Theme.h"
+#include "PocketPilot_Setup.h"
 #include "PocketPilot_SelfTest.h"
 
 namespace PokemonAutomation{
@@ -5418,6 +5419,165 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         logger.log("UI test: stopped by an exception: " + e.to_str(), COLOR_RED);
     }catch (const std::exception& e){
         logger.log(std::string("UI test: stopped by an exception: ") + e.what(), COLOR_RED);
+    }
+    return 1;
+}
+
+
+namespace{
+
+//  The window as the screens of the setup: from the games to a program and the
+//  settings and back, with Claude's panel over the right. The real programs
+//  and settings are opened, as a person opens them. Returns how many checks
+//  failed.
+int check_app_interface(const QString& out, Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool ok, const char* what){
+        checks++;
+        if (!ok){
+            wrong++;
+            logger.log(std::string("App interface test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+    //  Light on a black ground: something is drawn (not only the black).
+    auto has_content = [](const QImage& image){
+        int lit = 0;
+        for (int y = 0; y < image.height(); y += 8){
+            for (int x = 0; x < image.width(); x += 8){
+                if (image.pixelColor(x, y).lightness() > 40){
+                    lit++;
+                }
+            }
+        }
+        return lit > 60;
+    };
+
+    MainWindow window(nullptr, true, true);
+    window.setAttribute(Qt::WA_DontShowOnScreen, true);
+    window.resize(1600, 900);
+    window.show();
+    PocketPilot::AppView* view = window.app_view();
+    check(view != nullptr, "the window has the screens of the setup");
+    if (view == nullptr){
+        return wrong;
+    }
+    int number = 0;
+    auto save = [&](const char* name, bool preview){
+        number++;
+        let_run(100);
+        const QImage picture = view->picture();
+        const QString base = QString::number(number).rightJustified(2, '0') + "-" + name;
+        if (picture.save(out + "/" + base + ".png")){
+            logger.log("App interface test: saved " + base.toStdString() + ".png");
+        }else{
+            wrong++;
+            logger.log("App interface test: could not save " + base.toStdString() + ".png", COLOR_RED);
+        }
+        if (preview){
+            picture.scaledToWidth(960, Qt::SmoothTransformation).save(out + "/preview-" + base + ".jpg", "JPG", 72);
+        }
+        return picture;
+    };
+    auto menu_there = [&]{
+        return view->has_button("app:settings") && view->has_button("app:claude") &&
+            view->has_button("app:log") && view->has_button("app:buttons") && view->has_button("app:about");
+    };
+
+    //  ---- the games
+    logger.log("App interface test: the games.");
+    view->wait(2.5);
+    check(view->page() == "games", "the window starts on the games");
+    check(menu_there(), "the buttons of the top bar are along the top");
+    check(!view->has_button("app:games"), "no way to the games on the games");
+    check(!view->has_button("later"), "no 'Choose later': there is nothing to leave");
+    check(has_content(save("games", true)), "the games are drawn");
+
+    //  A game that has programs.
+    logger.log("App interface test: a game and its programs.");
+    for (int c = 0; c < 40 && view->page() != "programs"; c++){
+        const QString tile = "game:" + QString::number(c);
+        if (!view->has_button(tile)){
+            break;
+        }
+        if (view->click(tile)){
+            view->wait(0.2);
+            view->click("start");
+            view->wait(1.8);
+        }
+    }
+    check(view->page() == "programs", "a game with programs leads to its programs");
+    if (view->page() != "programs"){
+        return wrong;
+    }
+    check(menu_there() && view->has_button("app:games"), "the buttons of the top bar are on the programs too");
+    check(view->has_button("all") && !view->has_button("later"), "back to the games, and no 'Choose later'");
+    check(has_content(save("programs", true)), "the programs are drawn");
+
+    //  The program itself, in the screen.
+    logger.log("App interface test: the program.");
+    check(view->click("start"), "Start can be pressed");
+    view->wait(1.8);
+    check(view->page() == "host" && view->hosting(), "Start opens the program in the window, it does not leave");
+    check(view->has_button("host-back") && view->has_button("host-sleep"), "the way back and the sleep switch are there");
+    check(menu_there() && view->has_button("app:games"), "the buttons of the top bar are on the program too");
+    check(has_content(save("program", true)), "the program is drawn");
+    let_run(300);
+
+    //  Claude.
+    logger.log("App interface test: Claude.");
+    check(!view->claude_shown(), "Claude is not shown at first");
+    view->click("app:claude");
+    view->wait(0.3);
+    check(view->claude_shown(), "the button shows Claude");
+    check(has_content(save("program-claude", true)), "Claude's panel is drawn");
+    view->click("app:claude");
+    view->wait(0.2);
+    check(!view->claude_shown(), "and hides it again");
+
+    //  Settings over the program.
+    logger.log("App interface test: the settings.");
+    view->click("app:settings");
+    view->wait(1.8);
+    check(view->page() == "host" && view->hosting(), "the settings open in the window");
+    check(has_content(save("settings", true)), "the settings are drawn");
+
+    //  Back.
+    logger.log("App interface test: back.");
+    check(view->click("host-back"), "the way back can be pressed");
+    view->wait(1.8);
+    check(view->page() == "games" && !view->hosting(), "back from the settings leads to the games");
+
+    //  The games button closes a program that is open.
+    check(view->click("app:settings"), "the settings can be opened from the games");
+    view->wait(1.8);
+    check(view->hosting(), "they are open");
+    check(view->click("app:games"), "the games button can be pressed");
+    view->wait(1.8);
+    check(view->page() == "games" && !view->hosting(), "and it closes them");
+
+    logger.log(
+        "App interface test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+}
+
+
+int run_app_screenshots(QApplication& application, const std::string& folder){
+    (void)application;
+    Logger& logger = global_logger_tagged();
+    const QString out = QString::fromStdString(folder);
+    QDir().mkpath(out);
+    logger.log("App interface test: pictures go to " + QDir(out).absolutePath().toStdString(), COLOR_BLUE);
+    try{
+        return check_app_interface(out, logger) == 0 ? 0 : 1;
+    }catch (const Exception& e){
+        logger.log("App interface test: stopped by an exception: " + e.to_str(), COLOR_RED);
+    }catch (const std::exception& e){
+        logger.log(std::string("App interface test: stopped by an exception: ") + e.what(), COLOR_RED);
     }
     return 1;
 }
