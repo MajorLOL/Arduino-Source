@@ -94,6 +94,12 @@ QString current_language_code();
 //  QApplication.
 void apply_language();
 
+//  The texts that set a color for themselves (<font color="blue">) are shown
+//  in a shade that reads on the theme in use: the filter does it as a window
+//  is shown. This does it again for every window that is open, after the theme
+//  changed. Only on the main thread, with a QApplication.
+void refresh_text_colors();
+
 //  Calls "callback" on the main thread every time the language changed, after
 //  the windows that are open were translated. For the texts a window makes
 //  itself with tr_ui (that the filter cannot know about): it builds them

@@ -46,6 +46,7 @@
 #include <QTreeWidget>
 #include <QUrl>
 #include <QVBoxLayout>
+#include "Common/Cpp/ColoredText.h"
 #include "Common/Cpp/Logging/GlobalLogger.h"
 #include "Common/Cpp/Logging/LastLogTracker.h"
 #include "Common/Cpp/Logging/MultiOutputLogger.h"
@@ -253,6 +254,43 @@ constexpr Kind KIND_TOOL_TIP    = {"ppSrcTip", "ppShownTip"};
 constexpr Kind KIND_TITLE       = {"ppSrcTitle", "ppShownTitle"};
 constexpr Kind KIND_PLACEHOLDER = {"ppSrcHint", "ppShownHint"};
 
+//  The colors that a text sets for itself (<font color="blue">), changed just
+//  enough to read on the theme in use: the programs write them for a white
+//  background. What is readable already stays as it is, and so does
+//  everything in the classic themes.
+QString readable_colors(const QString& html){
+    if (!theme_is_pocket() || !html.contains("color", Qt::CaseInsensitive)){
+        return html;
+    }
+    static const QRegularExpression font_color(
+        "(<font\\b[^>]*?\\bcolor\\s*=\\s*)([\"'])([^\"']+)\\2",
+        QRegularExpression::CaseInsensitiveOption
+    );
+    QString out;
+    qsizetype last = 0;
+    QRegularExpressionMatchIterator matches = font_color.globalMatch(html);
+    while (matches.hasNext()){
+        const QRegularExpressionMatch match = matches.next();
+        const QColor color(match.captured(3).trimmed());
+        if (!color.isValid()){
+            continue;
+        }
+        const Color before(0xff000000u | ((uint32_t)color.rgb() & 0xffffffu));
+        const Color after = theme_readable(before);
+        if ((uint32_t)after == (uint32_t)before){
+            continue;
+        }
+        out += html.mid(last, match.capturedStart(3) - last);
+        out += QColor((uint32_t)after).name();
+        last = match.capturedEnd(3);
+    }
+    if (last == 0){
+        return html;
+    }
+    return out + html.mid(last);
+}
+
+
 //  The text to show, for the text that is on the widget now. With "restore"
 //  (English) the text before the translation comes back.
 QString next_text(
@@ -267,7 +305,7 @@ QString next_text(
     if (stored.isValid() && current == holder.property(shown_name.constData()).toString()){
         source = stored.toString();
     }
-    const QString shown = restore ? source : tr_ui(source);
+    const QString shown = readable_colors(restore ? source : tr_ui(source));
     if (stored.isValid() || shown != source){
         if (!stored.isValid() || stored.toString() != source){
             holder.setProperty(source_name.constData(), source);
@@ -443,12 +481,11 @@ public:
 
 protected:
     virtual bool eventFilter(QObject* object, QEvent* event) override{
-        if (!g_active.load(std::memory_order_acquire)){
-            return false;
-        }
         const QEvent::Type type = event->type();
         if ((type == QEvent::Polish || type == QEvent::Show) && object->isWidgetType()){
-            translate_widget(*static_cast<QWidget*>(object), false);
+            //  In English the text stays, but its colors are still made
+            //  readable (and a text that was translated comes back).
+            translate_widget(*static_cast<QWidget*>(object), !g_active.load(std::memory_order_acquire));
         }
         return false;
     }
@@ -622,6 +659,12 @@ void use_language(const QString& code){
 
 void apply_language(){
     use_language(setting_code());
+}
+
+void refresh_text_colors(){
+    if (g_filter != nullptr){
+        g_filter->sweep_all(!g_active.load(std::memory_order_acquire));
+    }
 }
 
 void preview_language(const QString& code){

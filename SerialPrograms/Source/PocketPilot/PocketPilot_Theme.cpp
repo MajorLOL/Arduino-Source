@@ -18,6 +18,7 @@
 #include <QStyleHints>
 #include <QTextStream>
 #include "CommonFramework/Windows/DpiScaler.h"
+#include "PocketPilot_Language.h"
 #include "PocketPilot_Theme.h"
 
 namespace PokemonAutomation{
@@ -421,6 +422,8 @@ void apply_theme(UiThemeMode mode, Starter starter){
     //  themselves asks for the theme.
     CURRENT_THEME = mode;
     app->setStyleSheet(scale_dpi_stylesheet(sheet));
+    //  The texts that have a color of their own in the shade of the new theme.
+    refresh_text_colors();
 }
 
 

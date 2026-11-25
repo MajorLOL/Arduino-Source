@@ -31,6 +31,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QScrollBar>
 #include <QStyle>
 #include <QStyleOptionSlider>
@@ -39,6 +40,7 @@
 #include <QToolTip>
 #include <QWheelEvent>
 #include "Common/Cpp/CancellableScope.h"
+#include "Common/Cpp/ColoredText.h"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
 #include "Common/Cpp/Json/JsonValue.h"
@@ -1074,6 +1076,116 @@ int check_assistant(const QString& out, Logger& logger){
     return result.failed + wrong;
 }
 
+
+
+//  The texts of the programs that set a color for themselves (<font color="blue">,
+//  written for a white background) in a shade that reads on the theme: on
+//  Night and on Day, again after the theme changes while they are open, and
+//  not at all in the classic themes. Returns how many checks failed.
+int check_text_colors(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool ok, const char* what){
+        checks++;
+        if (!ok){
+            wrong++;
+            logger.log(std::string("Color test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    const QString BLUE = "<font color=\"blue\" size=4><b>This is the host Switch.</b></font>";
+    const QString ORANGE = "<font color='orange'>Warning: this takes a lot of memory.</font>";
+    const QString RED = "<font color=\"red\">Careful.</font>";
+    const QString PLAIN = "<b>No color of its own.</b>";
+    const QString TWICE = "<font color=\"blue\">a</font> and <font color=\"orange\">b</font>";
+
+    QLabel blue(BLUE);
+    QLabel orange(ORANGE);
+    QLabel red(RED);
+    QLabel plain(PLAIN);
+    QLabel twice(TWICE);
+    QLabel* labels[] = {&blue, &orange, &red, &plain, &twice};
+
+    //  The colors in a text, as colors.
+    const auto colors_of = [](const QString& text){
+        std::vector<Color> colors;
+        static const QRegularExpression pattern("color\\s*=\\s*[\"']([^\"']+)[\"']");
+        QRegularExpressionMatchIterator matches = pattern.globalMatch(text);
+        while (matches.hasNext()){
+            const QColor color(matches.next().captured(1));
+            colors.emplace_back(0xff000000u | ((uint32_t)color.rgb() & 0xffffffu));
+        }
+        return colors;
+    };
+    //  The text without its colors: nothing else may change.
+    const auto without_colors = [](QString text){
+        static const QRegularExpression pattern("color\\s*=\\s*[\"'][^\"']*[\"']");
+        return text.replace(pattern, "color=");
+    };
+    const auto readable = [&](const QString& text){
+        const std::vector<Color> colors = colors_of(text);
+        for (const Color& color : colors){
+            if ((uint32_t)theme_readable(color) != (uint32_t)color){
+                return false;
+            }
+        }
+        return !colors.empty();
+    };
+
+    for (QLabel* label : labels){
+        label->setAttribute(Qt::WA_DontShowOnScreen, true);
+    }
+    const auto show_all = [&]{
+        for (QLabel* label : labels){
+            label->hide();
+            label->show();
+        }
+    };
+
+    const UiThemeMode before = CURRENT_THEME;
+
+    //  Night: blue does not read on it.
+    apply_theme(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
+    show_all();
+    check(readable(blue.text()) && readable(orange.text()) && readable(red.text()) && readable(twice.text()), "at night every color of a text reads on the background");
+    check(blue.text() != BLUE, "at night blue is lightened");
+    check(
+        without_colors(blue.text()) == without_colors(BLUE) && without_colors(orange.text()) == without_colors(ORANGE) &&
+        without_colors(twice.text()) == without_colors(TWICE),
+        "only the colors change, not the rest of a text"
+    );
+    check(plain.text() == PLAIN, "a text without a color is left alone");
+    check(colors_of(twice.text()).size() == 2, "both colors of a text are changed");
+
+    //  Day: orange does not read on it.
+    apply_theme(UiThemeMode::POCKET_DAY, Starter::WATER);
+    check(readable(blue.text()) && readable(orange.text()) && readable(red.text()) && readable(twice.text()), "by day every color reads, after the theme changed while the labels were open");
+    check(orange.text() != ORANGE, "by day orange is darkened");
+    check(blue.text() == BLUE, "by day blue is as written again: it reads already");
+    check(plain.text() == PLAIN, "a text without a color is still left alone");
+
+    //  A text that the program sets later.
+    blue.setText(ORANGE);
+    show_all();
+    check(readable(blue.text()) && without_colors(blue.text()) == without_colors(ORANGE), "a new text is changed as well");
+
+    //  The classic themes: as written.
+    apply_theme(UiThemeMode::DEFAULT_MODE, Starter::FIRE);
+    blue.setText(BLUE);
+    show_all();
+    check(
+        blue.text() == BLUE && orange.text() == ORANGE && red.text() == RED && twice.text() == TWICE && plain.text() == PLAIN,
+        "in the classic theme the texts are as the programs wrote them"
+    );
+
+    apply_theme(before, Starter::FIRE);
+
+    logger.log(
+        "Color test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
 
 
 //  The output window's filter and search: lines in red and orange stay when
@@ -5619,6 +5731,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     try{
         int failed = take_pictures(application, window, out, logger);
         failed += check_output_window(window, logger);
+        failed += check_text_colors(logger);
         failed += check_settings_file(window, logger);
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
