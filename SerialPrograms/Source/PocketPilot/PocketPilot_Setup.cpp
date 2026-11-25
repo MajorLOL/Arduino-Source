@@ -6762,7 +6762,7 @@ public:
             const QFont game_font = ui_font(28, 500);
             draw_text_cy(painter, m_game_name, x, cy, game_font, white(0.55 * a_head));
             x += text_width(game_font, m_game_name) + 16;
-            draw_text_cy(painter, QString::fromUtf8("›"), x, cy, game_font, white(0.4 * a_head));
+            draw_text_cy(painter, QString(QChar(0x203A)), x, cy, game_font, white(0.4 * a_head));
             x += 28;
         }
         const double right = std::min(1860.0, canvas.app_right_edge() - 20);
