@@ -4546,8 +4546,8 @@ public:
         return "selected=" + program + ";query=" + m_query + ";level=" + QString::number(m_level) +
             ";log=" + QString::number(m_log.size()) + ";shown=" + QString::number(visible_lines().size()) +
             ";range=" + (m_selection ? QString::number((int)std::lround(std::fabs(m_sel_a - m_sel_b))) : QString("0")) +
-            ";rows=" + QString::number(m_view.size()) + ";saved=" + m_saved_path + ";options=" + options_state_name() +
-            ";host=" + (m_host != nullptr && !m_host->isHidden() ? "shown" : "hidden");
+            ";rows=" + QString::number(m_view.size()) + ";options=" + options_state_name() +
+            ";host=" + (m_host != nullptr && !m_host->isHidden() ? "shown" : "hidden") + ";saved=" + m_saved_path;
     }
 
 private:
