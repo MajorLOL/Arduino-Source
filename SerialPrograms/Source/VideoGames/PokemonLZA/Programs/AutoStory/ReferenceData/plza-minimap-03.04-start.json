@@ -1,0 +1,24 @@
+{
+  "source": "the minimap at 03.04's start, Station Front, after loading its start save: Korean, console B, 1280x720 (03.04-start-ko-20261117.png); 16x16 cells over x 52-184, y 55-187",
+  "grid": {
+    "cols": 16,
+    "rows": [
+      "f5efb2c6ebdbd6e0d5f3e3c3f7f4e3f3f0dff2e3c9ffe6c1fbe3b1ffd036fbe69fead331dbda5efaddb5fce4b3f8f3bc",
+      "cff2e0e7f4f2fcfbf1f6f2e2f5e3c4f8e4c0f2eddaf2e5c9f5f0d6fcd75dfcdf78ffd546fbf2baf4d5bbfdcfaaf8ecc3",
+      "e1f3f4fffff7fbfaeef0e2c9fde4c0ffe6c1f1e0c0fdfdf1f0fcf4c8dad5f0e59ec8d1bcf0f7defbfaf0f9f3e7fefdf1",
+      "f1d3b8fdfcf3ebdbbeffe6c1f9e2bdf8e1bcffe6c1f0e6cfe0f7f4b0d7e5c0e0eac2d9dfdfeae6fffffcfffffbfffff8",
+      "f4dabaeadabbeadcc0f1e1beede0bbfde5c0fce4c0fae4becae5e0a1d6edb9e6f4b0d5e4e4f6f9fefffefdfdf6fbfce0",
+      "f1eddff5e1bef8f6e9fdfceff0f1c9f4ddb9f9e1bdfbe3bec1e4e0a6e3faaae3f7c4f3fcdefcfff3fbf1fffff8fffff7",
+      "eedec0f6f0dbfcfbf0f4e9d9f7d1b1fcd1abf9e1bbf4e0beb2e5e79ae9ffb2efffe2fbfdfcfef5fbfce3fffff7fffff7",
+      "faf7e7f1e8d2f1dbbafdcfacfccfa9f5dfc7f3eddcd4eee744bcf3c6ebf8fdfff9fffff4fefef3fefef1fffef3efefe7",
+      "f3e3c8fce4bffde5c0f4d7b4f7eedffefef2e7f7dd56c8f125b3fee8eedbfefeeefdfdecf7fbd0fbfce2fffff684868a",
+      "f3e2c4ffe6c1f3e1c0f6f1e1fffff5fefef1fffff4fafbe2acdce0f1f2e9fffff6f8fad6fcfde6f9f6eaf3d7bc958e87",
+      "fbfaedf6f1e0fdfcf1fffff4fffff5fcfce7fefef2f2efd9f8e3c1f2e7cdfffff4fffff6f5eadaf9d0affdcfaadac1a6",
+      "fefef5fffff4fffff4fbfce5f9fbd7f4f1d4f6f3e4fcfbf0f2dfc0f7e1bcf3eedef2dcc6fdcfacf8cdaad0bda497a69d",
+      "fffff6fbfce4f9fbd7fdfee7efe3ccfce5c1f3e3c5f3ddc6f6d0aefee5c0f4dcb8f9ceaaebc8a8b5b2a0839e9b73989e",
+      "ddf4ebf3edcdefe5ccf5e7ccf7e1bdffe6c1ffe6c1fbd2aeffd0aaf9dab5ecddbbc1bca795a59d779a9d7298a07298a1",
+      "aeddede8e3d5fde5c0fce4bffee6c0fbe3bfffe6c1fadebaf7cdaad3bfa69dafa47b9c9d72989f7298a17298a18fc1cb",
+      "bac6c5a8d6e8e6e2d3fae3beffe6c1f9e3bef5e2bddbd3b5adb1a2849e9c74989e7298a17298a17299a289bfcfbbdee7"
+    ]
+  }
+}

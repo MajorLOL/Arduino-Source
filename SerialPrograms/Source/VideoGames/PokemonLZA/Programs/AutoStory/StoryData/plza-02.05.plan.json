@@ -1,0 +1,54 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.05",
+    "title": "Main Mission 02: Hotel Z elevator to Room 202",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_lobby_elevator",
+        "why": "to the elevator's \"A Take Elevator\", past Alton's prompt. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[0, 3000]], "end": "prompt", "end_after_ms": 1500}
+      },
+      {
+        "id": "floor_question",
+        "why": "A Take Elevator, then A to \"Which floor?\", before the choice shows; B would close the talk",
+        "action": "scene",
+        "args": {"press_a_first": true, "stop_at_choice": true}
+      },
+      {
+        "id": "ride_to_2f",
+        "why": "\"2F\"",
+        "action": "choose_0"
+      },
+      {
+        "id": "arrive_2f",
+        "why": "the ride, until control on 2F (the party bar shows ~5 s after the doors open)",
+        "action": "scene"
+      },
+      {
+        "id": "to_room_202",
+        "why": "to \"Room 202 / A Enter\". not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[-15, 2000]], "end": "prompt", "end_after_ms": 1500}
+      },
+      {
+        "id": "enter_room_202",
+        "why": "A Enter, until control in the room",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts ~3 tiles in front of the elevator, facing it; ends at the autosave on entering Room 202"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

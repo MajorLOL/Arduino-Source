@@ -1,0 +1,47 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "01.03",
+    "title": "Main Mission 01: the starter and Andi",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "approach_starter",
+        "why": "to the chosen starter's \"A Talk\" prompt and A on it; the legs are Chikorita's; the Starter option's own walk replaces them. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[-66, 600]],
+          "held": true,
+          "end": "talk",
+          "to_starter": true
+        }
+      },
+      {
+        "id": "andi_battle_start",
+        "why": "choose it (top choice), through the battle tutorial cards to the battle HUD",
+        "action": "scene",
+        "args": {"battle_start": true}
+      },
+      {
+        "id": "andi_battle",
+        "why": "beat Andi's Pancham (Lv 6), until Andi's speech",
+        "action": "story_battle"
+      },
+      {
+        "id": "after_andi",
+        "why": "through MAIN MISSION 01 COMPLETE (waits for A) to the Main Mission 02 banner",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts in the battle area, where 01.02 ends"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

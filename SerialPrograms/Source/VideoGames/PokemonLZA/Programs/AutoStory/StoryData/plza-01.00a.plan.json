@@ -1,0 +1,20 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "01.00a",
+    "title": "New game choices",
+    "events": [
+      {
+        "id": "new_game",
+        "why": "from HOME, game closed, no save: launch, then language, look and name from the panel; ends on Confirm Choices, unconfirmed",
+        "action": "new_game_intro"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game"
+    }
+  },
+  "execution": {}
+}

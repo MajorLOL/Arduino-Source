@@ -1,0 +1,32 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.04",
+    "title": "Main Mission 02: Hotel Z check-in",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_front_counter",
+        "why": "along the counter to the clerk's \"A Talk\", A on it. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[-5, 2500], [-85, 0]], "end": "talk"}
+      },
+      {
+        "id": "check_in",
+        "why": "through Taunie, AZ and check-in until control facing the elevator (autosave); no party bar shows until it ends",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts inside the lobby door, before the clerk; ends ~3 tiles in front of the elevator, facing it"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

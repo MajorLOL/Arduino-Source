@@ -1,0 +1,47 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.01",
+    "title": "Main Mission 02: Battle Zone to Brigitte",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "battle_zone_to_brigitte",
+        "why": "through the Battle Zone to Brigitte's scene. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[10, 4250], [90, 6000], [90, 6500]],
+          "held": true,
+          "wait_ms": 3000
+        }
+      },
+      {
+        "id": "brigitte_battle_start",
+        "why": "A through her talk to \"Brigitte sent out Cleffa!\"",
+        "action": "scene",
+        "args": {"battle_start": true}
+      },
+      {
+        "id": "brigitte_battle",
+        "why": "beat Brigitte's Cleffa (Lv 7), until her speech",
+        "action": "story_battle"
+      },
+      {
+        "id": "after_brigitte",
+        "why": "until free control alone in the plaza",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; ends at the autosave after Brigitte"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

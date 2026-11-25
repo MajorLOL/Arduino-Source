@@ -1,0 +1,59 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.11",
+    "title": "Mable's research, the Rock Smash TM",
+    "start": {
+      "place": "PokemonResearchLab"
+    },
+    "events": [
+      {
+        "id": "to_mable",
+        "why": "from the 3F autosave around the desk's left end into Mable's talk. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [
+            [
+              -90,
+              700
+            ],
+            [
+              90,
+              1300
+            ],
+            [
+              90,
+              1600
+            ]
+          ],
+          "end": "dialog"
+        }
+      },
+      {
+        "id": "mable_talk",
+        "why": "Mable's research requests until control: A takes \"Yes\" and closes her \"Press X...\" line",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      },
+      {
+        "id": "rock_smash_tm",
+        "why": "Mable's Research, Rewards: TM004 Rock Smash",
+        "action": "claim_mable_research_reward"
+      },
+      {
+        "id": "leave_mable",
+        "action": "scene",
+        "args": {"button": "B"},
+        "why": "through Mable's talk until control. B closes her mission and reward screens, which the default A scene sits on"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts on 3F at the elevator, as the 03.10 autosave reloads. Chained start and start signature are guesses"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

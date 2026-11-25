@@ -55,6 +55,7 @@
 #include "Programs/TestPrograms/PokemonLZA_MoveBoxArrow.h"
 #include "Programs/TestPrograms/PokemonLZA_TestBoxCellInfo.h"
 #include "InferenceTraining/PokemonLZA_GenerateLocationNameOCR.h"
+#include "Programs/AutoStory/PokemonLZA_AutoStory.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -126,6 +127,7 @@ std::vector<PanelEntry> PanelListFactory::make_panels() const{
 
     ret.emplace_back("---- Public Betas ----");
     ret.emplace_back(make_SingleSwitchProgram<StatsReset>());
+    ret.emplace_back(make_SingleSwitchProgram<AutoStory>());
 
     if (STATIC_GLOBALS.DEVELOPER_MODE){
         ret.emplace_back("---- Developer Tools ----");

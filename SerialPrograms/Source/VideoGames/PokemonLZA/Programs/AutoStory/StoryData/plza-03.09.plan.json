@@ -1,0 +1,73 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.09",
+    "title": "From Wild Zone 1's gate into the Research Lab",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_research_lab",
+        "why": "face the street by the minimap arrow (257), down it 6.5 s, left into the lab's gate until Ryon's dialog. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [
+            [
+              0,
+              6500
+            ],
+            [
+              -90,
+              13000
+            ]
+          ],
+          "end": "dialog",
+          "heading": 257
+        }
+      },
+      {
+        "id": "research_lab_gate",
+        "why": "Ryon at the lab gate; with five species he goes on, and a black fade puts the player at the lab's steps (~20 s)",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      },
+      {
+        "id": "five_registered",
+        "action": "scene",
+        "args": {"button": "B"},
+        "why": "until control; at once when research_lab_gate played the whole scene. A scene with a start window would wait 45 s for another scene"
+      },
+      {
+        "id": "up_the_lab_steps",
+        "why": "up the steps to the lab's \"A Enter\". not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 4000]],
+          "end": "prompt"
+        }
+      },
+      {
+        "id": "lab_lobby",
+        "why": "A Enter (up_the_lab_steps ended on its prompt; A waits for the fade), the receptionist; autosaves when control returns in the lobby",
+        "action": "scene",
+        "args": {
+          "press_a_first": true
+        }
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts just outside Wild Zone 1's far gate; ends in the lab lobby"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "lab_lobby",
+    "start_signature": {
+      "party": 5,
+      "wild_zone": false
+    }
+  }
+}

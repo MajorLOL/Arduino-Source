@@ -1,0 +1,30 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.08",
+    "title": "Wild Zone 1: fourth species",
+    "start": {
+      "place": "WildZone1"
+    },
+    "events": [
+      {
+        "id": "catch_more_species",
+        "why": "catch Scatterbug (spot 100) from Taunie's rocks for four species; autosaves at party 4 (03.08a catches the fifth)",
+        "action": "catch_in_zone"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at 03.07's autosave at Taunie's rocks (party 3), ends on the fourth species's autosave (party 4)"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "catch_more_species",
+    "start_signature": {
+      "wild_zone": true,
+      "party": 3
+    }
+  }
+}

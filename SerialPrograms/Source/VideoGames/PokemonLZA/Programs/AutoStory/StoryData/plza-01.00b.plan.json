@@ -1,0 +1,31 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "01.00b",
+    "title": "Confirm Choices to the station platform",
+    "events": [
+      {
+        "id": "confirm",
+        "why": "Confirm Choices (checked, no press) proves the save is fresh; then DOWN to Ready! and A",
+        "action": "confirm_new_game"
+      },
+      {
+        "id": "opening",
+        "why": "Plus held 0.75 s after each fade-in of the opening, until it skips to the platform (A does not advance it); then the autosave badge and the platform's controls hint",
+        "action": "opening_to_platform",
+        "args": {
+          "timeout_ms": 240000
+        }
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "opening"
+  }
+}

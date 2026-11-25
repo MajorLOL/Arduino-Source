@@ -1,0 +1,30 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.08a",
+    "title": "Wild Zone 1: fifth species",
+    "start": {
+      "place": "WildZone1"
+    },
+    "events": [
+      {
+        "id": "catch_fifth_species",
+        "why": "catch Weedle/Pichu (spot 80) from 03.08's autosave for five species; autosaves at party 5 (03.08b walks out)",
+        "action": "catch_in_zone"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at 03.08's fourth-species autosave in Wild Zone 1 (party 4), ends on the fifth species's autosave (party 5)"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "catch_fifth_species",
+    "start_signature": {
+      "wild_zone": true,
+      "party": 4
+    }
+  }
+}

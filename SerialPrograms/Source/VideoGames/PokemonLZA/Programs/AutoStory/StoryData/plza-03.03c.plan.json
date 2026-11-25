@@ -1,0 +1,35 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.03c",
+    "title": "Off the roof to Station Front",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "off_the_roof",
+        "why": "off the roof's edge to South Boulevard, until the scene there. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 8000]],
+          "end": "scene"
+        }
+      },
+      {
+        "id": "south_boulevard",
+        "why": "Taunie walks to the Pokemon Center, until Station Front",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "starts at the rooftop autosave, where a reload lands"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "south_boulevard"
+  }
+}

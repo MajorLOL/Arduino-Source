@@ -1,0 +1,37 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.06",
+    "title": "To the Wild Zones card",
+    "start": {
+      "place": "LumioseCity",
+      "spot": "PokemonCenterDoor"
+    },
+    "events": [
+      {
+        "id": "center_to_zone_1",
+        "why": "from outside the Pokemon Center straight on to Wild Zone 1's gate, into Taunie's scene. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 15000]]
+        }
+      },
+      {
+        "id": "wild_zones_tutorial",
+        "why": "Taunie on wild zones, the Wild Zones card",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts outside the Center where 03.04's autosave ends; ends on the autosave in wild_zones_tutorial"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "wild_zones_tutorial",
+    "start_signature": {"minimap": "03.06-start"}
+  }
+}

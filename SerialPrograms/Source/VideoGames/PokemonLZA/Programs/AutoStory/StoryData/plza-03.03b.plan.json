@@ -1,0 +1,39 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.03b",
+    "title": "Up the ladder to the rooftop scene",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "side_street_to_wall",
+        "why": "down the side street and across to the wall; ends in control against it. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 8000]]
+        }
+      },
+      {
+        "id": "climb_ladder",
+        "why": "step along the wall until Climb Up shows, A, hold up",
+        "action": "climb_ladder"
+      },
+      {
+        "id": "rooftop_scene",
+        "why": "Taunie on the roof",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at the rock pile autosave on the side street (where a reload lands), Taunie gone; ends at the game's autosave in the rooftop scene"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "rooftop_scene"
+  }
+}

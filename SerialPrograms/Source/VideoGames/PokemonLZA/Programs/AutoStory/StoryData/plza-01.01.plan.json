@@ -1,0 +1,60 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "01.01",
+    "title": "The platform to Main Mission 01",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "on_platform",
+        "why": "start check: on the platform with free control, read by its controls hint (the platform has no party bar)",
+        "action": "wait_for_platform",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "id": "text_speed_fast",
+        "why": "text speed to fast through the main menu's options; blind presses on the options screens, which no detector reads",
+        "action": "set_text_speed_fast"
+      },
+      {
+        "id": "platform_to_plaza",
+        "why": "down the platform, then right until the white fade into the arrival scenes. not planned: the platform has no map",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 4500], [90, 10000]],
+          "end": "fade_white"
+        }
+      },
+      {
+        "id": "arrival_to_ad",
+        "why": "arrival scenes to the black fade that opens the president's ad",
+        "action": "scene",
+        "args": {
+          "end_on_black_fade": true
+        }
+      },
+      {
+        "id": "skip_ad",
+        "why": "Plus skips the president's ad",
+        "action": "plus_skip"
+      },
+      {
+        "id": "arrival_scenes",
+        "why": "the rest of the arrival scenes to the MAIN MISSION 01 banner; ends on the controls hint",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

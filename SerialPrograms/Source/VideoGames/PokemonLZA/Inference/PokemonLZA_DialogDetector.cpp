@@ -205,8 +205,11 @@ void FlatWhiteDialogDetector::make_overlays(VideoOverlaySet& items) const{
     items.add(m_color, m_bottom);
     items.add(m_color, DIALOG_ARROW_BOX);
 }
+bool FlatWhiteDialogDetector::detect_box(const ImageViewRGB32& screen) const{
+    return is_white(extract_box_reference(screen, m_bottom), /*min_rgb_sum=*/500.0, /*max_stddev_sum=*/20.0);
+}
 bool FlatWhiteDialogDetector::detect(const ImageViewRGB32& screen){
-    if (!is_white(extract_box_reference(screen, m_bottom), 500.0, 20.0)){
+    if (!detect_box(screen)){
         m_last_detected_box_scope.reset();
         return false;
     }

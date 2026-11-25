@@ -102,6 +102,8 @@ Candidates:
 
 The branch takes Pokémon Automation's changes by merging its `main`. PocketPilot's own code sits in one folder to keep those merges small; the files it changes elsewhere are the main window, the program list, the theme option, the global names and the handful of files of the fixes.
 
+Taken from a fork on 25 November 2026: the PLZA AutoStory and the story engine under it come from dayfine's fork (MIT), cut out of its `plza/lean` branch without the files that fork added for its own tooling. Its BDSP AutoStory is to follow, one at a time, since the two branches change nine of the same files. Its FRLG AutoStory is not taken (this fork has its own), and its FRLG RNG programs only if they do not clash with the ones here. What was left out on purpose: the lab control window, the JSON tests, the sockets, audio and workflow changes.
+
 The fixes and the video frame conversion are separate commits, so that they can be offered to Pokémon Automation one at a time (its rules: new contributors at most two open pull requests, opened and answered by a person).
 
 ## 6. What people ask for, and what builds 4 and 5 have of it (experimental)
