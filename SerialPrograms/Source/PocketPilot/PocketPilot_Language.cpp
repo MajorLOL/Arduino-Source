@@ -98,18 +98,18 @@ UiLanguage language_of(const QString& code){
 
 //  The console of the setup, as the codes of its screen ("switch", "switch2";
 //  empty: none chosen).
-QString console_code_of(GameConsole console){
+QString console_code_of(SetupConsole console){
     switch (console){
-    case GameConsole::SWITCH:   return "switch";
-    case GameConsole::SWITCH2:  return "switch2";
-    case GameConsole::NONE:     break;
+    case SetupConsole::SWITCH:   return "switch";
+    case SetupConsole::SWITCH2:  return "switch2";
+    case SetupConsole::NONE:     break;
     }
     return QString();
 }
-GameConsole console_of(const QString& code){
-    if (code == "switch") return GameConsole::SWITCH;
-    if (code == "switch2") return GameConsole::SWITCH2;
-    return GameConsole::NONE;
+SetupConsole console_of(const QString& code){
+    if (code == "switch") return SetupConsole::SWITCH;
+    if (code == "switch2") return SetupConsole::SWITCH2;
+    return SetupConsole::NONE;
 }
 
 

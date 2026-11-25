@@ -81,12 +81,12 @@ GlobalSettings::GlobalSettings()
         "The console the program is used with. It is chosen in the setup, on the screen after the language, "
         "and can be changed here.",
         {
-            {GameConsole::NONE,    "none",    "Not chosen yet"},
-            {GameConsole::SWITCH,  "switch",  "Nintendo Switch"},
-            {GameConsole::SWITCH2, "switch2", "Nintendo Switch 2"},
+            {SetupConsole::NONE,    "none",    "Not chosen yet"},
+            {SetupConsole::SWITCH,  "switch",  "Nintendo Switch"},
+            {SetupConsole::SWITCH2, "switch2", "Nintendo Switch 2"},
         },
         LockMode::UNLOCK_WHILE_RUNNING,
-        GameConsole::NONE
+        SetupConsole::NONE
     )
     , OPEN_SETUP_BUTTON(
         "<b>Setup:</b><br>"
