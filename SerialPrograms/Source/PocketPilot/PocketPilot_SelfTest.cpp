@@ -303,8 +303,11 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         logger.log("UI test: opening the About window");
         //  With the button that checks for updates, answered by a made-up
         //  GitHub: the test does not use the network.
+        //  One that is newer than this build, to show the link as well.
         ScriptedTransport transport;
-        transport.answer = releases_answer(200, RELEASES_JSON);
+        transport.answer = releases_answer(
+            200, "[{\"tag_name\":\"pocketpilot-build-99999\",\"draft\":false,\"published_at\":\"2026-11-25T20:13:48Z\"}]"
+        );
         std::unique_ptr<QDialog> about = make_about(&window, window.about_info(), &transport);
         about->setAttribute(Qt::WA_DontShowOnScreen, true);
         about->show();
