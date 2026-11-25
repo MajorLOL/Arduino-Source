@@ -4,8 +4,8 @@
  *  (https://github.com/PokemonAutomation/).
  *
  *  The look of the program. Two themes (Night and Day), each in the color
- *  of a starter (Fire, Water or Grass): the top bar, the side bar and the
- *  status strip (the "shell") take the starter's color, the rest (the
+ *  of a starter (Fire, Water or Grass): the screens of the shell (the games, the
+ *  programs, the buttons along the top) take the starter's color, the rest (the
  *  "screen") stays quiet. Qt's Fusion style with a palette of these colors
  *  draws the standard widgets, with a style sheet (Resources/theme.qss) on
  *  top of it. The two classic looks of Pokemon Automation stay available.
@@ -35,7 +35,7 @@ enum class Starter{
 struct ThemeColors{
     bool dark = true;
 
-    //  The shell: top bar, side bar and status strip.
+    //  The shell: the screens of the games and the programs, and the buttons along the top.
     QColor shell;
     QColor shell_deep;
     QColor shell_text;

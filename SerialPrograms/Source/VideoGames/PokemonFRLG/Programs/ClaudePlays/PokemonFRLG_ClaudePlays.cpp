@@ -739,7 +739,7 @@ ClaudePlays::ClaudePlays()
         "screen, presses the buttons, and leaves whole battles, text and walking to the routines of the "
         "AutoStory. It is slow next to a program made for one task (every decision is a request to Claude), "
         "and it can get lost: it is for things no program exists for.<br>"
-        "<b>What it needs:</b> your Claude API key in the panel \"Claude\" (top bar). Each request is billed "
+        "<b>What it needs:</b> your Claude API key in the panel \"Claude\" (along the top of the window). Each request is billed "
         "to you by Anthropic; the pictures of the game and the text read from it are sent to Anthropic. What "
         "a session used is in the log and under the video.<br>"
         "<b>Setup:</b> as for the AutoStory. In the game options: Text Speed: Fast. Battle Scene: Off. Battle "
