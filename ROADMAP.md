@@ -96,6 +96,7 @@ Candidates:
 | **Colored texts after a change of theme** | A program that is open while the theme changes keeps the shades of the old theme in its colored texts until it is opened again. |
 | **Pokémon Automation's tests in this fork's workflow** | Its workflow runs the command-line tests after the build; this fork's workflow only takes the pictures. |
 | **A Dutch interface** | Everything is in English. |
+| **One interface, in the style of the setup** | The goal: the old main window (side bar, pages, status strip, the "Classic" look) goes away and everything is in the style of the setup screens. Done: the intro, the language, the board and its installation, and the choice of the game as screens of their own. Next, in this order: the programs of the chosen game as a screen of the same kind (a program's description and its start), the open program (options, log, video), the settings, Claude; then the old main window is removed. |
 
 ## 5. Keeping up with Pokémon Automation
 

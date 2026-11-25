@@ -590,6 +590,15 @@ public:
     bool asks_game() const{
         return m_request.ask_game && !m_request.games.empty();
     }
+    //  The installation of the board is over, finished or skipped: with games
+    //  to choose from a new screen follows, no part of the installation.
+    void end_installation(){
+        if (m_request.games.empty()){
+            finish();
+        }else{
+            go_games();
+        }
+    }
     //  Presses it as a click on its middle would; false when it is not there.
     bool click(const QString& id);
     //  Moves the mouse over it.
@@ -1514,7 +1523,7 @@ public:
             proceed(canvas);
         }else if (id == "skip"){
             canvas.result().board_done = true;
-            canvas.finish();
+            canvas.end_installation();
         }
     }
     virtual void hover(Canvas& canvas, const QString& id) override{
@@ -2082,7 +2091,7 @@ public:
         }else if (id == "skip"){
             canvas.result().board_done = true;
             canvas.result().board = m_board;
-            canvas.finish();
+            canvas.end_installation();
         }else if (id == "video"){
             canvas.play_video(m_board);
         }else if (id.startsWith("step:")){
@@ -3194,7 +3203,7 @@ public:
             canvas.go_board();
         }else if (id == "skip"){
             canvas.result().board_done = true;
-            canvas.finish();
+            canvas.end_installation();
         }else if (id == "web"){
             canvas.open_url(URL_GUIDE);
         }else if (id.startsWith("row:")){
@@ -3259,7 +3268,7 @@ public:
         }else if (id == "skip"){
             canvas.result().board_done = true;
             canvas.result().board = "other";
-            canvas.finish();
+            canvas.end_installation();
         }
     }
     virtual void enter_pressed(Canvas& canvas) override{
@@ -3319,11 +3328,7 @@ public:
         if (id == "start"){
             canvas.result().board_done = true;
             canvas.result().board = m_board;
-            if (canvas.request().games.empty()){
-                canvas.finish();
-            }else{
-                canvas.go_games();
-            }
+            canvas.end_installation();
         }
     }
     virtual void enter_pressed(Canvas& canvas) override{
@@ -5104,6 +5109,32 @@ int run_setup_test(QApplication& application, const QString& folder){
         checker.check(canvas.finished(), "Start ends the setup");
         checker.check(canvas.result().board_done && canvas.result().board == "pico", "the board is still the answer");
         checker.check(canvas.result().game == games[10].name, "the game is the answer");
+    }
+
+    //  ---- Skip setup: the choice of a game follows too
+    {
+        SetupRequest skipping;
+        skipping.ask_board = true;
+        skipping.games = test_games();
+        Canvas skip_canvas(skipping, true);
+        skip_canvas.resize(1280, 720);
+        QEventLoop skip_loop;
+        skip_canvas.start(&skip_loop);
+        skip_canvas.show();
+        skip_canvas.wait(2.0);
+        checker.check(skip_canvas.page_name() == "board", "the board list is there");
+        skip_canvas.click("skip");
+        skip_canvas.wait(0.3);
+        checker.check(!skip_canvas.finished(), "Skip setup does not leave the screen");
+        skip_canvas.wait(2.5);
+        checker.check(skip_canvas.page_name() == "games", "Skip setup leads to the choice of a game");
+        checker.check(skip_canvas.result().board_done && skip_canvas.result().board.isEmpty(), "and the setup counts as done");
+        save(skip_canvas, folder, "setup-35-games-after-skip");
+        skip_canvas.click("game:3");
+        skip_canvas.wait(0.3);
+        skip_canvas.click("start");
+        skip_canvas.wait(0.2);
+        checker.check(skip_canvas.finished() && skip_canvas.result().game == skipping.games[3].name, "the game that is picked is the answer");
     }
 
     //  ---- "Choose later", and no games at all
