@@ -1,7 +1,6 @@
 {
  "@what": "PocketPilot Studio: the texts of the program in this language. The key is the English text, the value its translation. Keep %1 and the tags as they are.",
  "Hardware": "Hardware",
- "General setup": "Algemene setup",
  "Controller": "Controller",
  "Finishing up": "Afronden",
  "Skip setup": "Setup overslaan",

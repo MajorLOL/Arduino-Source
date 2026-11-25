@@ -873,24 +873,26 @@ double draw_button(
     return width;
 }
 
-//  The four steps of the Setup Guide at the top. state: 0 done, 1 active, 2 next.
-void draw_stepper(QPainter& painter, const int (&states)[4], double reveal){
+//  The three steps of the Setup Guide at the top. state: 0 done, 1 active, 2 next.
+//  (The guide has a step in between, "General setup", that the program has no
+//  screen for: it is left out instead of being shown as done.)
+void draw_stepper(QPainter& painter, const int (&states)[3], double reveal){
     if (reveal < 0.004){
         return;
     }
-    static const char* const NAMES[4] = {"Hardware", "General setup", "Controller", "Finishing up"};
+    static const char* const NAMES[3] = {"Hardware", "Controller", "Finishing up"};
     const QFont font = ui_font(25, 600);
     constexpr double PILL_H = 56;
     constexpr double GAP = 26;
-    double widths[4];
-    double total = GAP * 3;
-    for (int c = 0; c < 4; c++){
+    double widths[3];
+    double total = GAP * 2;
+    for (int c = 0; c < 3; c++){
         widths[c] = text_width(font, T(NAMES[c])) + 36 + 18 + 28;
         total += widths[c];
     }
     double x = (DW - total) / 2.0;
     const double y = 44 - (1.0 - eo(reveal)) * 26;
-    for (int c = 0; c < 4; c++){
+    for (int c = 0; c < 3; c++){
         const QRectF rect(x, y, widths[c], PILL_H);
         const int state = states[c];
         const double a = eo(reveal);
@@ -919,7 +921,7 @@ void draw_stepper(QPainter& painter, const int (&states)[4], double reveal){
         }
         const double text_alpha = state == 1 ? 1.0 : state == 0 ? 0.62 : 0.5;
         draw_text_cy(painter, T(NAMES[c]), x + 54, y + PILL_H / 2 + 1, font, with_alpha(state == 1 ? Qt::black : Qt::white, text_alpha * a));
-        if (c < 3){
+        if (c < 2){
             painter.setPen(Qt::NoPen);
             painter.setBrush(white(0.2 * a));
             painter.drawRoundedRect(QRectF(x + widths[c] + 4, y + PILL_H / 2 - 1, GAP - 8, 2), 1, 1);
@@ -1557,7 +1559,7 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {1, 2, 2, 2};
+        const int states[3] = {1, 2, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Which microcontroller do you use?");
         draw_heading(painter, heading, 140, 250, 80, prog(t, in.head, in.head + 0.9), 1.0);
@@ -2091,7 +2093,7 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {0, 0, 1, 2};
+        const int states[3] = {0, 1, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Set up your %1").arg(short_board_name(m_board));
         draw_heading(painter, heading, 140, 160, 84, prog(t, in.head, in.head + 0.9), 1.0);
@@ -3185,7 +3187,7 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {1, 2, 2, 2};
+        const int states[3] = {1, 2, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("The Setup Guide");
         draw_heading(painter, heading, 140, 160, 84, prog(t, in.head, in.head + 0.9), 1.0);
@@ -3306,7 +3308,7 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {1, 2, 2, 2};
+        const int states[3] = {1, 2, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Your board is not supported yet");
         draw_heading(painter, heading, 140, 250, 80, prog(t, in.head, in.head + 0.9), 1.0);
@@ -3358,7 +3360,7 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {0, 0, 0, 1};
+        const int states[3] = {0, 0, 1};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("You are done!");
         draw_heading(painter, heading, 140, 300, 118, prog(t, in.head, in.head + 0.9), 1.0);
@@ -5639,7 +5641,7 @@ public:
         const Intro in = intro_for(canvas);
         //  The setup starts here: the same steps and the same place for the
         //  texts as the page of the board that follows.
-        const int states[4] = {1, 2, 2, 2};
+        const int states[3] = {1, 2, 2};
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Which console do you use?");
         draw_heading(painter, heading, 140, 250, 80, prog(t, in.head, in.head + 0.9), 1.0, 1500);
