@@ -360,5 +360,12 @@
  "A newer build is published: build %1, of %2. This is build %3.": "Er is een nieuwere build gepubliceerd: build %1, van %2. Dit is build %3.",
  "Open the page to download it": "Open de pagina om hem te downloaden",
  "The address of this program's releases is not known.": "Het adres van de releases van dit programma is niet bekend.",
- "There is no connection to use.": "Er is geen verbinding om te gebruiken."
+ "There is no connection to use.": "Er is geen verbinding om te gebruiken.",
+ "Find in the output": "Zoek in de uitvoer",
+ "Previous": "Vorige",
+ "Next": "Volgende",
+ "Matches: %1": "Gevonden: %1",
+ "No matches": "Niets gevonden",
+ "Only warnings and errors": "Alleen waarschuwingen en fouten",
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Toont alleen de regels in rood en oranje: de fouten en de waarschuwingen."
 }

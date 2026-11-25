@@ -360,5 +360,12 @@
  "A newer build is published: build %1, of %2. This is build %3.": "Hay una compilación más reciente publicada: la %1, del %2. Esta es la %3.",
  "Open the page to download it": "Abrir la página para descargarla",
  "The address of this program's releases is not known.": "No se conoce la dirección de las versiones publicadas de este programa.",
- "There is no connection to use.": "No hay ninguna conexión que usar."
+ "There is no connection to use.": "No hay ninguna conexión que usar.",
+ "Find in the output": "Buscar en la salida",
+ "Previous": "Anterior",
+ "Next": "Siguiente",
+ "Matches: %1": "Coincidencias: %1",
+ "No matches": "Sin coincidencias",
+ "Only warnings and errors": "Solo advertencias y errores",
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Muestra solo las líneas en rojo y naranja: los errores y las advertencias."
 }

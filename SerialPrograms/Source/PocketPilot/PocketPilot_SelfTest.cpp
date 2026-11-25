@@ -25,6 +25,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
 #include <QMouseEvent>
 #include <QPainter>
@@ -33,6 +34,7 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QStyleOptionSlider>
+#include <QTextEdit>
 #include <QTimer>
 #include <QToolTip>
 #include <QWheelEvent>
@@ -82,6 +84,7 @@
 #include "ClaudePlays/ClaudePlays_Program.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
+#include "PocketPilot_Language.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Setup.h"
 #include "PocketPilot_SelfTest.h"
@@ -1071,6 +1074,111 @@ int check_assistant(const QString& out, Logger& logger){
     return result.failed + wrong;
 }
 
+
+
+//  The output window's filter and search: lines in red and orange stay when
+//  only the warnings and errors are asked for, lines that come in under the
+//  filter follow it, and the search marks, counts and steps through its
+//  matches. Returns how many checks failed.
+int check_output_window(MainWindow& window, Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool ok, const char* what){
+        checks++;
+        if (!ok){
+            wrong++;
+            logger.log(std::string("Output window test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    LoggerWindow& output = window.output_window();
+    QTextEdit* text = output.findChild<QTextEdit*>("centralwidget");
+    QCheckBox* problems = output.findChild<QCheckBox*>("ppLogProblems");
+    QLineEdit* search = output.findChild<QLineEdit*>("ppLogSearch");
+    QPushButton* next = output.findChild<QPushButton*>("ppLogNext");
+    QPushButton* previous = output.findChild<QPushButton*>("ppLogPrevious");
+    QLabel* matches = output.findChild<QLabel*>("ppLogMatches");
+    if (text == nullptr || problems == nullptr || search == nullptr || next == nullptr || previous == nullptr || matches == nullptr){
+        logger.log("Output window test: FAILED: the window has no text, filter or search", COLOR_RED);
+        return 1;
+    }
+
+    //  The text as shown (a space in the log is a non-breaking one).
+    const auto shown = [&]{
+        return text->toPlainText().replace(QChar(0xa0), ' ');
+    };
+    const auto wait_for = [&](const QString& what){
+        for (int c = 0; c < 200 && !shown().contains(what); c++){
+            let_run(50);
+        }
+        return shown().contains(what);
+    };
+
+    output.log("zq7x plain one");
+    output.log("zq7x error", COLOR_RED);
+    output.log("zq7x warning", COLOR_ORANGE);
+    output.log("zq7x plain two", COLOR_BLUE);
+    check(wait_for("zq7x plain two"), "the lines came into the window");
+    {
+        const QString all = shown();
+        const qsizetype one = all.indexOf("zq7x plain one");
+        const qsizetype error = all.indexOf("zq7x error");
+        const qsizetype warning = all.indexOf("zq7x warning");
+        const qsizetype two = all.indexOf("zq7x plain two");
+        check(one >= 0 && one < error && error < warning && warning < two, "all four lines, in order");
+    }
+
+    //  The filter.
+    problems->setChecked(true);
+    check(
+        shown().contains("zq7x error") && shown().contains("zq7x warning") &&
+        !shown().contains("zq7x plain one") && !shown().contains("zq7x plain two"),
+        "only the red and the orange line stay under the filter"
+    );
+    output.log("zq7x late plain");
+    output.log("zq7x late error", COLOR_RED);
+    check(wait_for("zq7x late error"), "a line in red comes in under the filter");
+    check(!shown().contains("zq7x late plain"), "a plain line that comes in under the filter stays out");
+    problems->setChecked(false);
+    check(
+        shown().contains("zq7x plain one") && shown().contains("zq7x late plain") && shown().contains("zq7x late error"),
+        "without the filter every line is back, also the one that came in under it"
+    );
+
+    //  The search.
+    search->setText("zq7x");
+    check(text->extraSelections().size() == 6, "every match is marked (6)");
+    check(matches->text() == PocketPilot::tr_ui("Matches: %1").arg(6), "the matches are counted");
+    next->click();
+    check(text->textCursor().selectedText() == "zq7x", "next selects a match");
+    const int first = text->textCursor().selectionStart();
+    next->click();
+    const int second = text->textCursor().selectionStart();
+    check(second > first, "next goes on to the next match");
+    previous->click();
+    check(text->textCursor().selectionStart() == first, "previous goes back");
+    previous->click();
+    check(text->textCursor().selectionStart() > second, "previous from the first goes round to the last");
+    next->click();
+    check(text->textCursor().selectionStart() == first, "next from the last goes round to the first");
+
+    problems->setChecked(true);
+    check(
+        text->extraSelections().size() == 3 && matches->text() == PocketPilot::tr_ui("Matches: %1").arg(3),
+        "the search follows the filter (3)"
+    );
+    problems->setChecked(false);
+    search->setText("zq7x no such text");
+    check(text->extraSelections().isEmpty() && matches->text() == PocketPilot::tr_ui("No matches"), "no matches");
+    search->clear();
+    check(text->extraSelections().isEmpty() && matches->text().isEmpty(), "an empty search marks nothing");
+
+    logger.log(
+        "Output window test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
 
 
 //  "Check for updates" in the About window: reading the list of releases, the
@@ -5510,6 +5618,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     //  while its message and the pictures taken so far say what went wrong.
     try{
         int failed = take_pictures(application, window, out, logger);
+        failed += check_output_window(window, logger);
         failed += check_settings_file(window, logger);
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);

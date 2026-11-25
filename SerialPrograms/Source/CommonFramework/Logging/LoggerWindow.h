@@ -9,6 +9,7 @@
 #ifndef PokemonAutomation_Logging_FileWindowLogger_H
 #define PokemonAutomation_Logging_FileWindowLogger_H
 
+#include <deque>
 #include <QTextEdit>
 #include <QMainWindow>
 #include "Common/Cpp/Time.h"
@@ -16,6 +17,11 @@
 #include "Common/Cpp/Concurrency/SpinLock.h"
 #include "Common/Cpp/Containers/CircularBuffer.h"
 #include "Common/Cpp/Options/ConfigOption.h"
+
+class QCheckBox;
+class QLabel;
+class QLineEdit;
+class QPushButton;
 
 namespace PokemonAutomation{
 
@@ -52,12 +58,34 @@ signals:
     void signal_log();
 
 private:
+    //  A line of the output: what the window shows, and whether it is a
+    //  warning or an error (written in red or orange).
+    struct Line{
+        QString html;
+        bool problem = false;
+    };
+
     virtual void on_config_value_changed(void* object) override;
     void update();
     QString to_window_str(const std::string& msg, Color color);
 
+    //  The filter and the search.
+    bool shown(const Line& line) const;
+    void refill();
+    void update_search();
+    void find_step(bool backward);
+
     QMenuBar* m_menubar;
     QTextEdit* m_text;
+    QCheckBox* m_problems_only;
+    QLineEdit* m_search;
+    QPushButton* m_previous;
+    QPushButton* m_next;
+    QLabel* m_matches;
+
+    //  The lines that are kept (at most MAX_LINES), shown or not. Only the
+    //  UI thread uses them.
+    std::deque<Line> m_lines;
     bool m_pending_resize = false;
     bool m_pending_move = false;
 
@@ -65,7 +93,7 @@ private:
     bool m_pending_update = false;
     CircularBuffer<WallClock> m_timestamps;
 
-    CircularBuffer<QString> m_pending;
+    CircularBuffer<Line> m_pending;
 };
 
 

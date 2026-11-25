@@ -360,5 +360,12 @@
  "A newer build is published: build %1, of %2. This is build %3.": "Ein neuerer Build ist veröffentlicht: Build %1 vom %2. Dies ist Build %3.",
  "Open the page to download it": "Seite zum Herunterladen öffnen",
  "The address of this program's releases is not known.": "Die Adresse der Releases dieses Programms ist nicht bekannt.",
- "There is no connection to use.": "Es gibt keine Verbindung, die genutzt werden könnte."
+ "There is no connection to use.": "Es gibt keine Verbindung, die genutzt werden könnte.",
+ "Find in the output": "In der Ausgabe suchen",
+ "Previous": "Zurück",
+ "Next": "Weiter",
+ "Matches: %1": "Treffer: %1",
+ "No matches": "Keine Treffer",
+ "Only warnings and errors": "Nur Warnungen und Fehler",
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Zeigt nur die roten und orangefarbenen Zeilen: die Fehler und die Warnungen."
 }
