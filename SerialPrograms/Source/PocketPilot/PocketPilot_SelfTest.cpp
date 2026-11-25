@@ -16,6 +16,7 @@
 #include <vector>
 #include <QAbstractItemView>
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QDir>
@@ -371,6 +372,33 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         service.secrets().set(Assistant::Secret::GITHUB_TOKEN, "a-token-made-up-for-the-test", error);
         panel.show_start_page();
         save(window, "night-fire-claude-empty");
+
+        //  The keys can be kept in memory only: the box is on the page of the
+        //  first key and in the settings, and both follow the switch.
+        {
+            std::vector<QCheckBox*> boxes;
+            for (QCheckBox* box : panel.findChildren<QCheckBox*>()){
+                if (box->text() == "Remember the key on this computer"){
+                    boxes.push_back(box);
+                }
+            }
+            const auto all_are = [&](bool checked){
+                return std::all_of(boxes.begin(), boxes.end(), [&](QCheckBox* box){ return box->isChecked() == checked; });
+            };
+            bool ok = boxes.size() == 2 && all_are(true) && service.secrets().remembers();
+            if (ok){
+                boxes[0]->setChecked(false);
+                let_run(50);
+                ok = !service.secrets().remembers() && all_are(false) && service.secrets().has(Assistant::Secret::CLAUDE_API_KEY);
+                boxes[1]->setChecked(true);
+                let_run(50);
+                ok = ok && service.secrets().remembers() && all_are(true);
+            }
+            if (!ok){
+                failed++;
+                logger.log("UI test: the box that keeps the keys in memory only is not on both pages or does not follow the switch", COLOR_RED);
+            }
+        }
 
         auto wait_until = [&](const std::function<bool()>& done, const char* what){
             for (int waited = 0; waited < 20000 && !done(); waited += 50){
