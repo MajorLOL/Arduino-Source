@@ -666,6 +666,11 @@ void keep_language(const QString& code){
     }
 }
 
+std::function<void(std::vector<HomeGame>&)> g_game_lister;
+std::function<void(const QString&)> g_game_opener;
+//  A game that was chosen while there was no window to open it.
+QString g_chosen_game;
+
 void run_and_keep(bool ask_language, bool ask_board){
     GlobalSettings& settings = GlobalSettings::instance();
 
@@ -673,6 +678,10 @@ void run_and_keep(bool ask_language, bool ask_board){
     request.ask_language = ask_language;
     request.ask_board = ask_board;
     request.language_code = setting_code();
+    //  The choice of a game comes after the board, so only with that question.
+    if (ask_board && g_game_lister){
+        g_game_lister(request.games);
+    }
     const SetupResult result = run_setup(request);
 
     //  Asked is asked: a closed window does not bring the question back at
@@ -693,6 +702,16 @@ void run_and_keep(bool ask_language, bool ask_board){
     }
     //  What was only tried goes back to the language of the settings.
     apply_language();
+
+    //  The game that was chosen: shown in the window when there is one, kept
+    //  for the window that is made next when there is not.
+    if (!result.game.isEmpty()){
+        if (g_game_opener){
+            g_game_opener(result.game);
+        }else{
+            g_chosen_game = result.game;
+        }
+    }
 }
 
 
@@ -711,6 +730,18 @@ void ask_setup_if_needed(){
 
 void open_setup(){
     run_and_keep(true, true);
+}
+
+void set_game_lister(std::function<void(std::vector<HomeGame>&)> lister){
+    g_game_lister = std::move(lister);
+}
+void set_game_opener(std::function<void(const QString& game)> opener){
+    g_game_opener = std::move(opener);
+}
+QString take_chosen_game(){
+    QString game;
+    game.swap(g_chosen_game);
+    return game;
 }
 
 

@@ -33,6 +33,7 @@
 #include "CommonFramework/Windows/DpiScaler.h"
 #include "PocketPilot/PocketPilot_About.h"
 #include "PocketPilot/PocketPilot_Home.h"
+#include "PocketPilot/PocketPilot_Language.h"
 #include "PocketPilot/PocketPilot_Logo.h"
 #include "PocketPilot/PocketPilot_Shell.h"
 #include "PocketPilot/Assistant/Assistant_Panel.h"
@@ -243,9 +244,25 @@ MainWindow::MainWindow(QWidget* parent)
             }
         }, Qt::QueuedConnection);
     });
+
+    //  The game that was chosen at the end of the setup: shown once the
+    //  window is up (at the first start there was no window to show it in).
+    //  And the setup that is opened from the settings later shows it at once.
+    {
+        const QString chosen = PocketPilot::take_chosen_game();
+        if (!chosen.isEmpty()){
+            QMetaObject::invokeMethod(this, [this, chosen]{
+                open_game(chosen);
+            }, Qt::QueuedConnection);
+        }
+        PocketPilot::set_game_opener([this](const QString& game){
+            open_game(game);
+        });
+    }
 //    cout << "Done constructing" << endl;
 }
 MainWindow::~MainWindow(){
+    PocketPilot::set_game_opener(nullptr);
     set_panel_settings_saver(nullptr);
     //  The panel before what it shows.
     delete m_assistant_panel;
@@ -307,6 +324,17 @@ bool MainWindow::open_program(const std::string& game, const std::string& progra
         return false;
     }
     return m_program_list->open_program(game, program);
+}
+bool MainWindow::open_game(const QString& game){
+    if (m_busy || m_panel_transition){
+        return false;
+    }
+    //  Not over a panel that is open (the settings, say): the page with the
+    //  games first, then the game on it.
+    if (m_current_panel_widget != nullptr){
+        show_games();
+    }
+    return m_home->pick_game(game);
 }
 
 //  Claude: the service with what the tools may look at in this program, and

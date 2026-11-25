@@ -4,6 +4,8 @@
  *
  */
 
+#include <memory>
+#include <vector>
 #include <QLabel>
 #include <QLineEdit>
 #include <QStandardItemModel>
@@ -36,6 +38,67 @@
 
 namespace PokemonAutomation{
 
+
+namespace{
+
+//  All the games' lists, in the order of the program. The side bar and the
+//  setup (before there is a main window) list the same games.
+std::vector<std::unique_ptr<PanelListDescriptor>> make_all_lists(){
+    std::vector<std::unique_ptr<PanelListDescriptor>> lists;
+    lists.emplace_back(std::make_unique<NintendoSwitch::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonHome::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonLGPE::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonSwSh::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonBDSP::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonLA::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonSV::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonLZA::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonFRLG::PanelListFactory>());
+    lists.emplace_back(std::make_unique<NintendoSwitch::PokemonPokopia::PanelListFactory>());
+    if (STATIC_GLOBALS.DEVELOPER_MODE){
+        lists.emplace_back(std::make_unique<NintendoSwitch::PokemonRSE::PanelListFactory>());
+    }
+
+    lists.emplace_back(std::make_unique<NintendoSwitch::ZeldaTotK::PanelListFactory>());
+
+    //  PocketPilot: whatever game is on the screen, played by Claude.
+    lists.emplace_back(std::make_unique<PocketPilot::ClaudePlays::OtherGamesList>());
+
+    if (STATIC_GLOBALS.DEVELOPER_MODE){
+        lists.emplace_back(std::make_unique<ML::PanelListFactory>());
+    }
+    return lists;
+}
+
+//  What the page with the games shows of one list.
+PocketPilot::HomeGame describe_list(const PanelListDescriptor& list){
+    PocketPilot::HomeGame game;
+    game.name = QString::fromStdString(list.name());
+    const ImageViewRGB32& icon = list.icon();
+    if (icon){
+        //  A copy: the pixmap must not point into the list's picture.
+        game.icon = QPixmap::fromImage(to_QImage_ref(icon).copy());
+    }
+    game.enabled = list.enabled();
+    return game;
+}
+
+}
+
+
+void describe_all_games(std::vector<PocketPilot::HomeGame>& games){
+    games.clear();
+    try{
+        for (const std::unique_ptr<PanelListDescriptor>& list : make_all_lists()){
+            PocketPilot::HomeGame game = describe_list(*list);
+            game.programs = (int)list->program_summaries().size();
+            games.emplace_back(std::move(game));
+        }
+    }catch (...){
+        //  The setup goes on without the choice of a game.
+        games.clear();
+    }
+}
 
 
 ProgramSelect::ProgramSelect(QWidget& parent, PanelHolder& holder)
@@ -82,27 +145,8 @@ ProgramSelect::ProgramSelect(QWidget& parent, PanelHolder& holder)
     layout->addWidget(m_nothing_found);
 
 
-    add(std::make_unique<NintendoSwitch::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonHome::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonLGPE::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonSwSh::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonBDSP::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonLA::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonSV::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonLZA::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonFRLG::PanelListFactory>());
-    add(std::make_unique<NintendoSwitch::PokemonPokopia::PanelListFactory>());
-    if (STATIC_GLOBALS.DEVELOPER_MODE){
-        add(std::make_unique<NintendoSwitch::PokemonRSE::PanelListFactory>());
-    }
-
-    add(std::make_unique<NintendoSwitch::ZeldaTotK::PanelListFactory>());
-
-    //  PocketPilot: whatever game is on the screen, played by Claude.
-    add(std::make_unique<PocketPilot::ClaudePlays::OtherGamesList>());
-
-    if (STATIC_GLOBALS.DEVELOPER_MODE){
-        add(std::make_unique<ML::PanelListFactory>());
+    for (std::unique_ptr<PanelListDescriptor>& list : make_all_lists()){
+        add(std::move(list));
     }
 
 
@@ -241,14 +285,7 @@ void ProgramSelect::describe(
     programs.clear();
     for (size_t index = 0; index < m_lists.size(); index++){
         const PanelListDescriptor& list = *m_lists[index];
-        PocketPilot::HomeGame game;
-        game.name = QString::fromStdString(list.name());
-        const ImageViewRGB32& icon = list.icon();
-        if (icon){
-            //  A copy: the pixmap must not point into the list's picture.
-            game.icon = QPixmap::fromImage(to_QImage_ref(icon).copy());
-        }
-        game.enabled = list.enabled();
+        PocketPilot::HomeGame game = describe_list(list);
         for (PanelListDescriptor::ProgramSummary& summary : list.program_summaries()){
             PocketPilot::HomeProgram program;
             program.game = (int)index;

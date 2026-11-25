@@ -19,6 +19,13 @@ class QLineEdit;
 namespace PokemonAutomation{
 
 
+// The games of the program with their pictures and the number of programs
+// each has, in the order of the side bar. Needs no window: the setup uses it
+// to ask which game to start before the main window is made. Empty when the
+// lists could not be made.
+void describe_all_games(std::vector<PocketPilot::HomeGame>& games);
+
+
 // The program selection UI on the left side of the program window.
 // It has a dropdown menu to select which Switch game's program list to show, a
 // box to search that list, and a display list window to show the current active

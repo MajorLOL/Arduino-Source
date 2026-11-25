@@ -54,6 +54,10 @@ public:
     //  Opens a program by the name of its game and its own name. False if
     //  a program runs or there is no such game.
     bool open_program(const std::string& game, const std::string& program);
+    //  Shows a game by its name in the list of games, as a click on its
+    //  cartridge on the page with the games does. False if a program runs or
+    //  there is no such game.
+    bool open_game(const QString& game);
 
     PocketPilot::AboutInfo about_info() const;
     PocketPilot::HomePage& home_page(){ return *m_home; }

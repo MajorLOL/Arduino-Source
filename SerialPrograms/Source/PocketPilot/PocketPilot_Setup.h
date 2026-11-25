@@ -33,6 +33,11 @@
  *  tutorial" plays a film of the setup of the board (Resources/tutorial-*.mp4,
  *  made by Tools/TutorialFilms.cpp from these same screens).
  *
+ *  The last screen after "You are done!" asks which game to start, as
+ *  cartridges (the same games as the page with the games has, see
+ *  PocketPilot_Home.h). The one that is picked is opened in the main window
+ *  when the setup ends (see take_chosen_game() in PocketPilot_Language.h).
+ *
  *  The workflow that makes the builds also runs
  *
  *      SerialPrograms --setup-test <folder>
@@ -47,8 +52,10 @@
 #ifndef PokemonAutomation_PocketPilot_Setup_H
 #define PokemonAutomation_PocketPilot_Setup_H
 
+#include <vector>
 #include <QString>
 #include <QStringList>
+#include "PocketPilot_Home.h"
 
 class QApplication;
 
@@ -68,6 +75,11 @@ struct SetupRequest{
 
     //  The language that is in use now ("en", "nl", ...).
     QString language_code = "en";
+
+    //  The games to choose from at the end, in the order of the program's
+    //  list of games (what the page with the games shows too). Empty: there
+    //  is no choice at the end, "Start" just ends the setup.
+    std::vector<HomeGame> games;
 };
 
 struct SetupResult{
@@ -81,6 +93,11 @@ struct SetupResult{
     //  The board that was chosen: "pico", "pico2", "esp32", "esp32s3", or
     //  "other"; empty when skipped.
     QString board;
+
+    //  The game that was chosen at the end, by its name in the list of games
+    //  (HomeGame::name). Empty: none was chosen ("Choose later", the setup
+    //  was skipped or closed, or there were no games to choose from).
+    QString game;
 };
 
 

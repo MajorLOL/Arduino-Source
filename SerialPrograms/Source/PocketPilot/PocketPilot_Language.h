@@ -54,8 +54,10 @@
 
 #include <stddef.h>
 #include <functional>
+#include <vector>
 #include <QString>
 #include <QStringList>
+#include "PocketPilot_Home.h"
 
 class QApplication;
 class QObject;
@@ -116,6 +118,23 @@ void ask_setup_if_needed();
 
 //  The same, whatever the settings say: "Open the setup" in the settings.
 void open_setup();
+
+//  The setup ends with the choice of a game to start. The games to choose
+//  from are listed by this function (the main window does not exist yet at
+//  the first start): it fills the list with the games, their pictures and
+//  their number of programs. Set it before the setup is asked; without it
+//  there is no choice at the end.
+void set_game_lister(std::function<void(std::vector<HomeGame>&)> lister);
+
+//  What the main window does with a game that was chosen when the setup is
+//  opened from its settings (the window is there then): shows the game, as a
+//  click on its cartridge does. The window sets it while it lives.
+void set_game_opener(std::function<void(const QString& game)> opener);
+
+//  The game that was chosen at the end of the setup, when there was no main
+//  window yet to open it (the first start). Returns it once; empty when none
+//  was chosen. The main window asks for it when it is made.
+QString take_chosen_game();
 
 //  The folder with the languages of the user (Languages, next to the
 //  program), made if it is not there yet.

@@ -292,6 +292,10 @@ int run_program(int argc, char *argv[]){
         if (setup_test){
             return PocketPilot::run_setup_test(application, setup_folder);
         }
+        //  The setup ends with the choice of a game: these are the games.
+        PocketPilot::set_game_lister([](std::vector<PocketPilot::HomeGame>& games){
+            describe_all_games(games);
+        });
         if (ask_setup){
             PocketPilot::ask_setup_if_needed();
         }

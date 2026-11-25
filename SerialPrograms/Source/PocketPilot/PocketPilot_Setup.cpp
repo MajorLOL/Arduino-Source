@@ -527,6 +527,7 @@ public:
     void go_guide();
     void go_other();
     void go_done(const QString& board);
+    void go_games();
     //  The end: the loop of run_setup() stops.
     void finish();
 
@@ -1195,21 +1196,21 @@ Intro intro_for(const Canvas& canvas){
     return canvas.first_page() ? Intro{0.5, 1.1, 1.3, 1.9} : Intro{0.10, 0.35, 0.50, 0.85};
 }
 
-//  The heading, in the serif, as lines of at most 800 px.
-void draw_heading(QPainter& painter, const QString& text, double x, double y, double px, double reveal, double alpha){
+//  The heading, in the serif, as lines of at most 800 px (or "width").
+void draw_heading(QPainter& painter, const QString& text, double x, double y, double px, double reveal, double alpha, double width = 800){
     if (reveal < 0.004){
         return;
     }
     const QFont font = serif_font(px);
     const double a = eo(reveal) * alpha;
     const double slide = (1.0 - eo(reveal)) * 34;
-    const QStringList lines = wrap_text(font, text, 800);
+    const QStringList lines = wrap_text(font, text, width);
     for (int c = 0; c < lines.size(); c++){
         draw_text(painter, lines[c], x, y + slide + c * px * 1.02, font, white(a));
     }
 }
-double heading_height(const QString& text, double px){
-    return (double)wrap_text(serif_font(px), text, 800).size() * px * 1.02;
+double heading_height(const QString& text, double px, double width = 800){
+    return (double)wrap_text(serif_font(px), text, width).size() * px * 1.02;
 }
 void draw_sub(
     QPainter& painter, const QString& text, double x, double y, double reveal, double alpha,
@@ -3221,7 +3222,8 @@ public:
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("You are done!");
         draw_heading(painter, heading, 140, 300, 118, prog(t, in.head, in.head + 0.9), 1.0);
-        draw_sub(painter, T("Check keyboard, video and audio, then finish up."), 140,
+        const bool has_games = !canvas.request().games.empty();
+        draw_sub(painter, has_games ? T("Check keyboard, video and audio, then pick the game to start.") : T("Check keyboard, video and audio, then finish up."), 140,
             300 + heading_height(heading, 118) + 26, prog(t, in.sub, in.sub + 0.8), 1.0);
 
         const double reveal = eo(prog(t, in.bar, in.bar + 0.8));
@@ -3236,7 +3238,8 @@ public:
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
         draw_text(painter, T("Steps from the Pokémon Automation Setup Guide"), 140, 1010, ui_font(26, 500), white(0.62 * b));
-        const QString start = T("Start");
+        //  With games to choose from the setup goes on to the choice.
+        const QString start = has_games ? T("Choose a game") : T("Start");
         draw_button(canvas, painter, "start", start, 1780 - button_width(start, ButtonKind::PRIMARY), 950, ButtonKind::PRIMARY, b);
     }
 
@@ -3244,7 +3247,11 @@ public:
         if (id == "start"){
             canvas.result().board_done = true;
             canvas.result().board = m_board;
-            canvas.finish();
+            if (canvas.request().games.empty()){
+                canvas.finish();
+            }else{
+                canvas.go_games();
+            }
         }
     }
     virtual void enter_pressed(Canvas& canvas) override{
@@ -3254,6 +3261,276 @@ public:
 private:
     QString m_board;
     double m_clock = 0;
+};
+
+
+//  ---------------------------------------------------------------------
+//  After the end: which game to start
+//  ---------------------------------------------------------------------
+
+//  The outline of a game cartridge: a rounded box with its top right corner
+//  cut off (the same as on the page with the games).
+QPainterPath cartridge_outline(const QRectF& box, double corner, double cut){
+    QPainterPath path;
+    path.moveTo(box.left() + corner, box.top());
+    path.lineTo(box.right() - cut, box.top());
+    path.lineTo(box.right(), box.top() + cut);
+    path.lineTo(box.right(), box.bottom() - corner);
+    path.quadTo(box.right(), box.bottom(), box.right() - corner, box.bottom());
+    path.lineTo(box.left() + corner, box.bottom());
+    path.quadTo(box.left(), box.bottom(), box.left(), box.bottom() - corner);
+    path.lineTo(box.left(), box.top() + corner);
+    path.quadTo(box.left(), box.top(), box.left() + corner, box.top());
+    path.closeSubpath();
+    return path;
+}
+
+class GamesPage : public Page{
+public:
+    explicit GamesPage(Canvas& canvas)
+        : m_games(canvas.request().games)
+    {
+        const int count = (int)m_games.size();
+        m_columns = count <= 12 ? 4 : 5;
+        const int first = next_enabled(-1, +1);
+        canvas.set_focus_id(first >= 0 ? tile_id(first) : QString("later"));
+    }
+
+    virtual const char* name() const override{
+        return "games";
+    }
+
+    virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
+        const Intro in = intro_for(canvas);
+        const int states[4] = {0, 0, 0, 1};
+        draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
+        const QString heading = T("Which game do you want to start?");
+        draw_heading(painter, heading, 140, 150, 76, prog(t, in.head, in.head + 0.9), 1.0, 1500);
+        const double sub_y = 150 + heading_height(heading, 76, 1500) + 20;
+        draw_sub(painter, T("Pick a game. Its programs are shown right away."), 140, sub_y,
+            prog(t, in.sub, in.sub + 0.8), 1.0, 34, 1500);
+
+        const double top = sub_y + sub_height(T("Pick a game. Its programs are shown right away."), 34, 1500) + 24;
+        for (int c = 0; c < (int)m_games.size(); c++){
+            const double begin = in.bar + 0.05 * c;
+            paint_tile(canvas, painter, c, tile_rect(c, top), eo(prog(t, begin, begin + 0.55)));
+        }
+
+        const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
+        draw_button(canvas, painter, "later", T("Choose later"), 136, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+        const QString start_text = T("Start");
+        const double start_w = button_width(start_text, ButtonKind::PRIMARY);
+        draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, m_selected >= 0);
+        const QString back = T("Back");
+        draw_button(canvas, painter, "back", back, 1780 - start_w - 18 - button_width(back, ButtonKind::SECONDARY), 950,
+            ButtonKind::SECONDARY, b);
+    }
+
+    virtual void activate(Canvas& canvas, const QString& id) override{
+        if (id.startsWith("game:")){
+            const int index = id.mid(5).toInt();
+            if (index >= 0 && index < (int)m_games.size() && m_games[(size_t)index].enabled){
+                m_selected = index;
+                //  A game picked: the next Enter starts it.
+                canvas.set_focus_id("start");
+            }
+        }else if (id == "start"){
+            start(canvas);
+        }else if (id == "later"){
+            canvas.result().game.clear();
+            canvas.finish();
+        }else if (id == "back"){
+            canvas.go_done(canvas.result().board);
+        }
+    }
+    virtual bool key(Canvas& canvas, QKeyEvent& event) override{
+        int column_step = 0;
+        int row_step = 0;
+        switch (event.key()){
+        case Qt::Key_Left:
+            column_step = -1;
+            break;
+        case Qt::Key_Right:
+            column_step = +1;
+            break;
+        case Qt::Key_Up:
+            row_step = -1;
+            break;
+        case Qt::Key_Down:
+            row_step = +1;
+            break;
+        default:
+            return false;
+        }
+        const int current = index_of(canvas.focus_id());
+        int target = -1;
+        if (current < 0){
+            //  The focus is on a button: back to the cartridges.
+            target = m_selected >= 0 ? m_selected : next_enabled(-1, +1);
+        }else if (column_step != 0){
+            target = next_enabled(current, column_step);
+        }else{
+            //  A row up or down: the same place in that row, if there is a game.
+            const int wanted = current + row_step * m_columns;
+            if (wanted >= 0 && wanted < (int)m_games.size() && m_games[(size_t)wanted].enabled){
+                target = wanted;
+            }
+        }
+        if (target >= 0){
+            canvas.set_focus_id(tile_id(target));
+        }
+        return true;
+    }
+    virtual void enter_pressed(Canvas& canvas) override{
+        if (m_selected >= 0){
+            start(canvas);
+        }
+    }
+    virtual void escape_pressed(Canvas& canvas) override{
+        activate(canvas, "back");
+    }
+    virtual QString state() const override{
+        if (m_selected < 0){
+            return "selected=";
+        }
+        return "selected=" + m_games[(size_t)m_selected].name;
+    }
+
+private:
+    static QString tile_id(int index){
+        return "game:" + QString::number(index);
+    }
+    static int index_of(const QString& id){
+        return id.startsWith("game:") ? id.mid(5).toInt() : -1;
+    }
+    //  The next game that can be picked after "from" in this direction, or -1.
+    int next_enabled(int from, int direction) const{
+        for (int c = from + direction; c >= 0 && c < (int)m_games.size(); c += direction){
+            if (m_games[(size_t)c].enabled){
+                return c;
+            }
+        }
+        return -1;
+    }
+    void start(Canvas& canvas){
+        if (m_selected < 0){
+            return;
+        }
+        canvas.result().game = m_games[(size_t)m_selected].name;
+        canvas.finish();
+    }
+
+    //  The cartridges fill the room between the texts above and the buttons.
+    QRectF tile_rect(int index, double top) const{
+        constexpr double LEFT = 140;
+        constexpr double RIGHT = 1780;
+        constexpr double BOTTOM = 925;
+        constexpr double GAP = 22;
+        const int rows = ((int)m_games.size() + m_columns - 1) / m_columns;
+        const double width = (RIGHT - LEFT - GAP * (m_columns - 1)) / m_columns;
+        const double height = std::max(110.0, std::min(172.0, (BOTTOM - top - GAP * (rows - 1)) / std::max(1, rows)));
+        return QRectF(
+            LEFT + (width + GAP) * (index % m_columns),
+            top + (height + GAP) * (index / m_columns),
+            width, height
+        );
+    }
+
+    void paint_tile(Canvas& canvas, QPainter& painter, int index, const QRectF& place, double reveal){
+        if (reveal < 0.004){
+            return;
+        }
+        const HomeGame& game = m_games[(size_t)index];
+        const QString id = tile_id(index);
+        const bool enabled = game.enabled;
+        const bool hover = enabled && canvas.hovered(id);
+        const bool focus = enabled && canvas.focused(id);
+        const bool selected = index == m_selected;
+        const double a = reveal * (enabled ? 1.0 : 0.4);
+        const QRectF box = place.translated(0, (1.0 - reveal) * 26);
+        canvas.add_hit(id, place, enabled);
+
+        if (selected){
+            glow(painter, box, 24, ORANGE, 0.55 * reveal);
+        }
+
+        //  The cartridge.
+        const QPainterPath outline = cartridge_outline(box, 22, 30);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(selected ? with_alpha(QColor(44, 29, 24), 0.95 * a) : with_alpha(PANEL, 0.92 * a));
+        painter.drawPath(outline);
+        painter.setBrush(Qt::NoBrush);
+        if (selected){
+            painter.setPen(QPen(with_alpha(ORANGE, a), 2.6));
+        }else{
+            painter.setPen(QPen(white((hover ? 0.62 : 0.26) * a), hover ? 2.2 : 1.8));
+        }
+        painter.drawPath(outline);
+
+        //  The label: the colors of the game, with its picture on it.
+        const double text_room = 70;
+        const QRectF label(box.left() + 14, box.top() + 14, box.width() - 28, std::max(36.0, box.height() - 14 - text_room));
+        QColor first, second;
+        game_label_colors(game.name, first, second);
+        painter.save();
+        QPainterPath clip;
+        clip.addRoundedRect(label, 13, 13);
+        painter.setClipPath(clip);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(with_alpha(first.darker(112), 0.95 * a));
+        painter.drawRect(QRectF(label.left(), label.top(), label.width() / 2.0 + 1, label.height()));
+        painter.setBrush(with_alpha(second.darker(112), 0.95 * a));
+        painter.drawRect(QRectF(label.center().x(), label.top(), label.width() / 2.0, label.height()));
+        painter.setBrush(white(0.10 * a));
+        painter.drawRect(QRectF(label.left(), label.top(), label.width(), label.height() * 0.42));
+        painter.restore();
+
+        if (!game.icon.isNull()){
+            const QRectF room = label.adjusted(14, 8, -14, -8);
+            const double scale = std::min(room.width() / game.icon.width(), room.height() / game.icon.height());
+            const double w = game.icon.width() * scale;
+            const double h = game.icon.height() * scale;
+            draw_picture(painter, game.icon, QRectF(room.center().x() - w / 2.0, room.center().y() - h / 2.0, w, h), a);
+        }else{
+            const QString letter = short_game_name(game.name).left(1).toUpper();
+            draw_text_cy(painter, letter, label.center().x(), label.center().y() + 2, serif_font(54), white(0.9 * a), Qt::AlignHCenter);
+        }
+        if (selected){
+            const QRectF badge(label.right() - 44, label.top() + 10, 34, 34);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(ORANGE, a));
+            painter.drawEllipse(badge);
+            draw_check(painter, badge.adjusted(5, 5, -5, -5), with_alpha(Qt::black, a), 3.0);
+        }
+
+        //  The name and how many programs it has.
+        const double text_x = box.left() + 20;
+        const double text_w = box.width() - 40;
+        //  A long name gets a smaller type before it is cut off at the end.
+        {
+            const QString shown = short_game_name(game.name);
+            QFont font = ui_font(26, 600);
+            for (double px = 26; px > 20.5 && text_width(font, shown) > text_w; px -= 1.0){
+                font = ui_font(px, 600);
+            }
+            const QString fitted = QFontMetricsF(font).elidedText(shown, Qt::ElideRight, text_w);
+            draw_text_cy(painter, fitted, text_x, box.bottom() - 45, font, white(a));
+        }
+        const QString programs = game.programs == 1 ? tr_ui("1 program") : tr_ui("%1 programs").arg(game.programs);
+        draw_text_cy(painter, programs, text_x, box.bottom() - 19, ui_font(20, 500), white(0.55 * a));
+
+        if (focus){
+            const QPainterPath ring = cartridge_outline(box.adjusted(-6, -6, 6, 6), 28, 34);
+            painter.setBrush(Qt::NoBrush);
+            painter.setPen(QPen(with_alpha(YELLOW, 0.9 * reveal), 2.4));
+            painter.drawPath(ring);
+        }
+    }
+
+private:
+    std::vector<HomeGame> m_games;
+    int m_columns = 4;
+    int m_selected = -1;
 };
 
 
@@ -3375,6 +3652,11 @@ void Canvas::go_other(){
 void Canvas::go_done(const QString& board){
     queue_page([this, board]{
         return std::unique_ptr<Page>(new DonePage(*this, board));
+    });
+}
+void Canvas::go_games(){
+    queue_page([this]{
+        return std::unique_ptr<Page>(new GamesPage(*this));
     });
 }
 
@@ -3842,6 +4124,58 @@ bool has_content(const QImage& image){
 }
 
 
+//  The games as the program lists them, for the test: some with a picture
+//  of their own, some without; one that cannot be picked.
+std::vector<HomeGame> test_games(bool many = false){
+    static const struct{
+        const char* name;
+        int programs;
+        bool picture;
+        bool enabled;
+    } GAMES[] = {
+        {"Nintendo Switch", 26, true, true},
+        {"Pokemon Home", 4, true, true},
+        {"Pokemon Let's Go Pikachu and Eevee", 3, false, true},
+        {"Pokemon Sword and Shield", 98, true, true},
+        {"Pokemon Brilliant Diamond and Shining Pearl", 31, true, true},
+        {"Pokemon Legends: Arceus", 12, false, true},
+        {"Pokemon Legends: Z-A", 0, true, false},
+        {"Pokemon Scarlet and Violet", 74, true, true},
+        {"Pokemon FireRed and LeafGreen", 1, true, true},
+        {"Pokemon Pokopia", 6, false, true},
+        {"Zelda: Tears of the Kingdom", 5, true, true},
+        {"Other Games (Claude plays whatever is on the screen)", 2, true, true},
+        //  More than twelve: the cartridges go in five columns.
+        {"Pokemon Ruby and Sapphire", 9, true, true},
+        {"Machine Learning", 3, false, true},
+    };
+    std::vector<HomeGame> games;
+    const size_t count = many ? sizeof(GAMES) / sizeof(GAMES[0]) : sizeof(GAMES) / sizeof(GAMES[0]) - 2;
+    for (size_t index = 0; index < count; index++){
+        const auto& entry = GAMES[index];
+        HomeGame game;
+        game.name = QString::fromLatin1(entry.name);
+        game.programs = entry.programs;
+        game.enabled = entry.enabled;
+        if (entry.picture){
+            QImage image(192, 96, QImage::Format_ARGB32_Premultiplied);
+            image.fill(Qt::transparent);
+            QPainter painter(&image);
+            painter.setRenderHint(QPainter::Antialiasing);
+            painter.setPen(QPen(Qt::white, 6));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRoundedRect(QRectF(10, 10, 172, 76), 24, 24);
+            painter.setFont(QFont("sans-serif", 26, QFont::Bold));
+            painter.drawText(QRectF(10, 10, 172, 76), Qt::AlignCenter, short_game_name(game.name).left(3));
+            painter.end();
+            game.icon = QPixmap::fromImage(image);
+        }
+        games.push_back(game);
+    }
+    return games;
+}
+
+
 }   //  namespace
 
 
@@ -3852,6 +4186,7 @@ int run_setup_test(QApplication& application, const QString& folder){
     SetupRequest request;
     request.ask_language = true;
     request.ask_board = true;
+    request.games = test_games();
     Canvas canvas(request, true);
     canvas.resize(1920, 1080);
     QEventLoop loop;
@@ -4237,8 +4572,124 @@ int run_setup_test(QApplication& application, const QString& folder){
     save(canvas, folder, "setup-30-done");
     canvas.click("start");
     canvas.wait(0.2);
-    checker.check(canvas.finished(), "Start ends the setup");
+    checker.check(!canvas.finished(), "with games to choose from the end goes on to the choice");
+    canvas.wait(2.5);
+    checker.check(canvas.page_name() == "games", "the end leads to the choice of a game");
     checker.check(canvas.result().board_done && canvas.result().board == "pico", "the board is the answer");
+
+    //  ---- the game to start
+    {
+        const std::vector<HomeGame>& games = request.games;
+        save(canvas, folder, "setup-31-games");
+        save_preview(canvas, folder, "preview-games");
+        checker.check(has_content(canvas.picture()), "the games screen has something on it");
+        checker.check(!canvas.finished(), "the setup is not over before a game is chosen");
+        bool all_there = true;
+        for (size_t c = 0; c < games.size(); c++){
+            all_there = all_there && canvas.has_hit("game:" + QString::number(c));
+        }
+        checker.check(all_there, "every game has its cartridge");
+        checker.check(canvas.has_hit("later") && canvas.has_hit("back") && canvas.has_hit("start"), "the buttons are there");
+        checker.check(!canvas.hit_enabled("start"), "no game, no start");
+        checker.check(!canvas.hit_enabled("game:6"), "a game that is not available cannot be picked");
+        checker.check(!canvas.click("game:6"), "clicking it does nothing");
+        checker.check(canvas.page_state() == "selected=", "nothing is picked yet");
+
+        //  With the keyboard: the focus starts on the first game.
+        checker.check(canvas.focus_id() == "game:0", "the focus starts on the first game");
+        canvas.press_key(Qt::Key_Right);
+        checker.check(canvas.focus_id() == "game:1", "Right goes to the next game");
+        canvas.press_key(Qt::Key_Down);
+        checker.check(canvas.focus_id() == "game:5", "Down goes to the game below");
+        canvas.press_key(Qt::Key_Right);
+        checker.check(canvas.focus_id() == "game:7", "Right skips the game that is not available");
+        canvas.press_key(Qt::Key_Down);
+        checker.check(canvas.focus_id() == "game:11", "Down again");
+        canvas.press_key(Qt::Key_Down);
+        checker.check(canvas.focus_id() == "game:11", "Down at the last row stays");
+        canvas.press_key(Qt::Key_Up);
+        checker.check(canvas.focus_id() == "game:7", "Up goes to the game above");
+        canvas.press_key(Qt::Key_Left);
+        checker.check(canvas.focus_id() == "game:5", "Left skips the game that is not available too");
+        canvas.press_key(Qt::Key_Return);
+        canvas.wait(0.3);
+        checker.check(canvas.page_state() == "selected=" + games[5].name, "Enter picks the game that has the focus");
+        checker.check(canvas.focus_id() == "start", "after a pick the focus is on Start");
+        checker.check(canvas.hit_enabled("start"), "a game is picked: Start can be pressed");
+
+        //  With the mouse: another game.
+        canvas.move_to("game:9");
+        canvas.wait(0.4);
+        canvas.click("game:9");
+        canvas.wait(0.5);
+        checker.check(canvas.page_state() == "selected=" + games[9].name, "a click picks that game");
+        save(canvas, folder, "setup-32-games-picked");
+        save_preview(canvas, folder, "preview-games-picked");
+
+        //  Back, and the choice again.
+        canvas.click("back");
+        canvas.wait(0.6);
+        checker.check(canvas.page_name() == "done", "Back goes to the end screen");
+        canvas.wait(1.5);
+        canvas.click("start");
+        canvas.wait(2.5);
+        checker.check(canvas.page_name() == "games" && canvas.page_state() == "selected=", "the choice starts empty again");
+        canvas.press_key(Qt::Key_Escape);
+        canvas.wait(0.6);
+        checker.check(canvas.page_name() == "done", "Escape goes back too");
+        canvas.wait(1.5);
+        canvas.press_key(Qt::Key_Return);
+        canvas.wait(2.5);
+        checker.check(canvas.page_name() == "games", "Enter on the end screen goes to the choice");
+
+        //  The pick is the answer.
+        canvas.click("game:10");
+        canvas.wait(0.3);
+        canvas.press_key(Qt::Key_Return);
+        canvas.wait(0.2);
+        checker.check(canvas.finished(), "Start ends the setup");
+        checker.check(canvas.result().board_done && canvas.result().board == "pico", "the board is still the answer");
+        checker.check(canvas.result().game == games[10].name, "the game is the answer");
+    }
+
+    //  ---- "Choose later", and no games at all
+    {
+        SetupRequest with_games;
+        with_games.ask_board = true;
+        with_games.games = test_games(true);
+        Canvas third(with_games, true);
+        third.resize(1280, 720);
+        QEventLoop third_loop;
+        third.start(&third_loop);
+        third.show();
+        third.wait(0.5);
+        third.go_done("esp32s3");
+        third.wait(2.0);
+        third.click("start");
+        third.wait(2.5);
+        checker.check(third.page_name() == "games", "the choice also fits a small window");
+        save(third, folder, "setup-33-games-small-window");
+        third.click("later");
+        third.wait(0.2);
+        checker.check(third.finished() && third.result().game.isEmpty(), "Choose later ends the setup without a game");
+        checker.check(third.result().board_done && third.result().board == "esp32s3", "the board is kept");
+
+        SetupRequest without_games;
+        without_games.ask_board = true;
+        Canvas fourth(without_games, true);
+        fourth.resize(1280, 720);
+        QEventLoop fourth_loop;
+        fourth.start(&fourth_loop);
+        fourth.show();
+        fourth.wait(0.5);
+        fourth.go_done("esp32");
+        fourth.wait(2.0);
+        checker.check(fourth.page_name() == "done", "the end screen is there");
+        fourth.click("start");
+        fourth.wait(0.2);
+        checker.check(fourth.finished() && fourth.result().game.isEmpty() && fourth.result().board == "esp32",
+            "without games Start ends the setup");
+    }
 
     //  ---- the other way out: skip
     {

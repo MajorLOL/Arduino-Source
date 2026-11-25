@@ -212,6 +212,29 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     set_look(UiThemeMode::POCKET_NIGHT, Starter::FIRE);
     window.show_games();
     save(window, "night-fire-games");
+    //  The setup ends with the choice of a game: it lists the games without
+    //  a window, and the game it returns is shown as a click on its
+    //  cartridge does.
+    {
+        std::vector<HomeGame> listed;
+        describe_all_games(listed);
+        bool found = false;
+        for (const HomeGame& listed_game : listed){
+            if (listed_game.name == QString::fromStdString(GAME)){
+                found = listed_game.programs > 0;
+            }
+        }
+        if (!found){
+            failed++;
+            logger.log("UI test: the games of the setup do not have " + GAME, COLOR_RED);
+        }
+        if (!window.open_game(QString::fromStdString(GAME))){
+            failed++;
+            logger.log("UI test: the game that the setup chose could not be shown", COLOR_RED);
+        }
+        save(window, "night-fire-chosen-game");
+        window.show_games();
+    }
     //  As a click on the game's cartridge: its programs on the page and
     //  its list in the side bar.
     if (!window.home_page().pick_game(QString::fromStdString(GAME))){
