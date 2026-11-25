@@ -185,6 +185,11 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
             failed++;
             logger.log("UI test: could not save " + path.toStdString(), COLOR_RED);
         }
+        //  A few small pictures, for the log of the build (see the workflow).
+        const QString base = QString::fromLatin1(name);
+        if (base == "night-fire-about-update" || base == "night-fire-output-log"){
+            picture.scaledToWidth(960, Qt::SmoothTransformation).save(out + "/preview-" + base + ".jpg", "JPG", 72);
+        }
     };
     auto save = [&](QWidget& widget, const char* name){
         let_run(700);
