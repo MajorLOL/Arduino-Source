@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <utility>
 #include <QRegularExpression>
+#include "../PocketPilot_Scrub.h"
 #include "Assistant_Service.h"
 
 namespace PokemonAutomation{
@@ -211,7 +212,7 @@ void add_chat_tools(ToolSet& tools, Service& service){
                         kept += line;
                     }
                 }
-                QString settings = kept.join("\n");
+                QString settings = scrub_private_text(kept.join("\n"));
                 if (settings.size() > 9000){
                     settings = settings.left(9000) + "\n(Cut off: the options are longer than this.)";
                 }
@@ -251,7 +252,10 @@ void add_chat_tools(ToolSet& tools, Service& service){
             //  With a filter: looked for in much more of the log.
             const QStringList all = service.hooks().recent_log(contains.isEmpty() ? wanted : 10000);
             QStringList lines;
-            for (const QString& line : all){
+            for (const QString& raw : all){
+                //  Cleaned before it is looked in or sent: Claude cannot ask
+                //  the log for a token and be given it.
+                const QString line = scrub_private_text(raw);
                 if (contains.isEmpty() || line.contains(contains, Qt::CaseInsensitive)){
                     lines += line.size() > 600 ? line.left(600) + "..." : line;
                 }

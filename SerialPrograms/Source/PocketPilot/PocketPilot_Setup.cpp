@@ -75,8 +75,12 @@
 #include <QVideoWidget>
 #include <QWheelEvent>
 #include <QWidget>
+#include "Common/Cpp/Cryptography/SecretSeal.h"
+#include "Common/Cpp/Json/JsonValue.h"
+#include "Common/Cpp/Options/StringOption.h"
 #include "PocketPilot_Firmware.h"
 #include "PocketPilot_Language.h"
+#include "PocketPilot_Scrub.h"
 #include "PocketPilot_Setup.h"
 
 namespace PokemonAutomation{
@@ -2561,6 +2565,12 @@ private:
             m_flash_error = "file";
             return;
         }
+        //  A file that came with the program is the file the build hashed.
+        if (!firmware_matches_checksum(m_firmware_dir, path)){
+            m_flash = Flash::FAILED;
+            m_flash_error = "checksum";
+            return;
+        }
         if (is_pico()){
             m_flash = Flash::COPYING;
             if (!m_canvas.pretend()){
@@ -2585,17 +2595,19 @@ private:
             }
             m_flash_progress = std::max(0.0, m_fetch->progress());
             if (m_fetch->done()){
-                const bool ok = m_fetch->ok() && looks_like_firmware(QDir(m_firmware_dir).filePath(m_fetch_name));
+                const QString fetched = QDir(m_firmware_dir).filePath(m_fetch_name);
+                const bool ok = m_fetch->ok() && looks_like_firmware(fetched);
+                const bool matches = !ok || firmware_matches_checksum(m_firmware_dir, fetched);
                 const QString name = m_fetch_name;
                 m_fetch.reset();
-                if (ok){
+                if (ok && matches){
                     rebuild_versions(false);
                     m_versions.select(name);
                     m_flash = Flash::IDLE;
                 }else{
                     QFile::remove(QDir(m_firmware_dir).filePath(name));
                     m_flash = Flash::FAILED;
-                    m_flash_error = "download";
+                    m_flash_error = ok ? "checksum" : "download";
                 }
             }
             break;
@@ -3117,6 +3129,9 @@ private:
         }
         if (m_flash_error == "download"){
             return T("The download failed. Check the connection, or open the link in your browser.");
+        }
+        if (m_flash_error == "checksum"){
+            return T("This file is not the one the build of the program hashed. It was changed or damaged: it is not flashed. Download it again.");
         }
         if (m_flash_error == "copy"){
             return T("The file could not be copied to the Pico. Unplug it and start again from step 2.");
@@ -4833,7 +4848,7 @@ private:
         for (const LogEntry* entry : visible_lines()){
             lines << line_text(*entry);
         }
-        return lines.join("\n");
+        return scrub_private_text(lines.join("\n"));
     }
     bool in_range(const LogEntry& entry) const{
         if (!m_selection){
@@ -4932,7 +4947,8 @@ private:
         for (const LogEntry* entry : lines){
             out << line_text(*entry);
         }
-        return out.join("\n") + "\n";
+        //  Without what is private: it goes to Claude, a file, a forum.
+        return scrub_private_text(out.join("\n")) + "\n";
     }
 
     void save_report(Canvas& canvas){
@@ -8011,6 +8027,82 @@ int run_setup_test(QApplication& application, const QString& folder){
     write_file(app + "/Firmware/SOURCE.txt", "https://github.com/PokemonAutomation/Packages/tree/4ae6b4634628626cf1f31566d871635d0f87b79a/Firmware\n");
     //  The file that the "download" fetches.
     write_file(QDir(scratch.path()).filePath("online-ESP32-S3-2026120100.bin"), QByteArray(10000, 'n'));
+
+    //  The hashes of the build: a file that is not the one it hashed is not flashed.
+    {
+        const QString sums_folder = QDir(scratch.path()).filePath("sums");
+        QDir().mkpath(sums_folder);
+        const QString good = QDir(sums_folder).filePath("PABotBase2-ESP32-2026101400.bin");
+        const QString newer = QDir(sums_folder).filePath("PABotBase2-ESP32-2026120100.bin");
+        write_file(good, QByteArray(9000, 'b'));
+        write_file(newer, QByteArray(9000, 'n'));
+        checker.check(firmware_matches_checksum(sums_folder, good) && firmware_matches_checksum(sums_folder, newer),
+            "without a list of hashes every file passes");
+        const QString hash = file_sha256(good);
+        checker.check(hash.size() == 64, "the hash of a file is 64 hex digits");
+        write_file(QDir(sums_folder).filePath("SHA256SUMS.txt"),
+            (hash + "  PABotBase2-ESP32-2026101400.bin\r\n" + "not a line\r\n" + QString(64, QChar('A')) + " *Other.bin\r\n").toUtf8());
+        const std::map<QString, QString> sums = firmware_checksums(sums_folder);
+        checker.check(sums.size() == 2 && sums.at("PABotBase2-ESP32-2026101400.bin") == hash && sums.at("Other.bin") == QString(64, QChar('a')),
+            "the list of hashes is read, in the form of sha256sum, with the lines that are not one skipped");
+        checker.check(firmware_matches_checksum(sums_folder, good), "a file with the hash that is listed passes");
+        checker.check(firmware_matches_checksum(sums_folder, newer), "a version that the list does not know passes");
+        write_file(good, QByteArray(9000, 'x'));
+        checker.check(!firmware_matches_checksum(sums_folder, good), "a file that was changed does not pass");
+    }
+
+    //  What leaves the program (to Claude, to a file) has nothing private in it.
+    {
+        const QString webhook = "https://discord.com/api/webhooks/123456789012345678/AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_AbCdEf";
+        const QString scrubbed = scrub_private_text(
+            "Sending to " + webhook + "\n"
+            "Key sk-ant-api03-AbCdEf0123456789-xyz and token ghp_abcdefghijklmnopqrstuvwxyz0123456789\n"
+            "Opened C:\\Users\\Dennis van der Mijde\\Documents\\PocketPilot\\log.txt and /home/dennis/x\n"
+            "DEVELOPER_TOKEN = hunter2abc, password: \"p4ss w0rd\" and Authorization: Bearer abcdefgh12345678\n"
+            "max_tokens: 4096, a token count of 5, and the game's name\n"
+        );
+        checker.check(!scrubbed.contains("123456789012345678") && !scrubbed.contains("AbCdEfGhIj") && scrubbed.contains("<webhook address>"),
+            "a webhook address is taken out of what leaves the program");
+        checker.check(!scrubbed.contains("sk-ant-api03") && !scrubbed.contains("ghp_abcdef") && scrubbed.contains("<api key>") && scrubbed.contains("<token>"),
+            "the key of Claude and a GitHub token are taken out");
+        checker.check(!scrubbed.contains("Dennis") && !scrubbed.contains("Mijde") && !scrubbed.contains("dennis") &&
+            scrubbed.contains("C:\\Users\\<user>\\Documents\\PocketPilot\\log.txt") && scrubbed.contains("/home/<user>/x"),
+            "the name of the Windows account is taken out of a path, the rest of the path stays");
+        checker.check(!scrubbed.contains("hunter2abc") && !scrubbed.contains("p4ss") && !scrubbed.contains("abcdefgh12345678"),
+            "the value after token, password and authorization is taken out");
+        checker.check(scrubbed.contains("max_tokens: 4096") && scrubbed.contains("a token count of 5") && scrubbed.contains("the game's name"),
+            "the rest of a line is left as it was");
+    }
+
+    //  A secret (a Discord token, a webhook address) is sealed in the settings file where the computer can.
+    {
+        StringCell secret(true, LockMode::UNLOCK_WHILE_RUNNING, "", "");
+        secret.set("a-secret-token");
+        const JsonValue saved = secret.to_json();
+        const std::string* text = saved.to_string();
+        std::string probe;
+        const bool can_seal = seal_secret("probe", probe);
+        checker.check(
+            text != nullptr && (can_seal
+                ? (*text != "a-secret-token" && text->find("a-secret-token") == std::string::npos)
+                : *text == "a-secret-token"),
+            "a secret is not in the settings file as it is typed (where the computer can seal it)"
+        );
+        StringCell again(true, LockMode::UNLOCK_WHILE_RUNNING, "", "");
+        again.load_json(saved);
+        checker.check(std::string(again) == "a-secret-token", "and it is read back");
+        StringCell from_before(true, LockMode::UNLOCK_WHILE_RUNNING, "", "");
+        from_before.load_json(JsonValue(std::string("plain-from-before")));
+        checker.check(std::string(from_before) == "plain-from-before", "a settings file from before has it as it was, and it is read");
+        StringCell damaged(true, LockMode::UNLOCK_WHILE_RUNNING, "", "");
+        damaged.load_json(JsonValue(std::string("dpapi1:not-base64!")));
+        checker.check(std::string(damaged).empty(), "a sealed text that cannot be opened leaves the secret empty");
+        StringCell open_text(false, LockMode::UNLOCK_WHILE_RUNNING, "", "");
+        open_text.set("shown");
+        const JsonValue shown_json = open_text.to_json();
+        const std::string* shown = shown_json.to_string();
+        checker.check(shown != nullptr && *shown == "shown", "an option that is not a secret is saved as it is");
+    }
 
     struct Computer{
         std::mutex lock;

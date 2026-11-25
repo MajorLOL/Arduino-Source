@@ -32,7 +32,7 @@ The hardware and its setup are the same as for Pokémon Automation: see [its doc
 | **Fixes** | Fixes for bugs found in a review of the whole code: see [the list](SerialPrograms/Source/PocketPilot/FIXES.md). What Pokémon Automation's open issues and other controller programs' users run into, and where this fork stands on each: [ISSUES.md](SerialPrograms/Source/PocketPilot/ISSUES.md), [OTHERS.md](SerialPrograms/Source/PocketPilot/OTHERS.md). |
 | **Colors** | Colored text (in the options, the log window, the lists) is shown in a shade that can be read on the theme's background. |
 | **Builds** | Each build starts once on the build machine, as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that does not start, crashes on the way or cannot take its pictures is not published; one that looks broken shows in its pictures before anyone downloads it. A pull request into `pocketpilot` is built and tested the same way, as it will be once merged, and not published. |
-| **What it leaves out** | The check for a new version (it is for Pokémon Automation's releases) and Discord Rich Presence by default (it shows as Pokémon Automation, whose Discord application it is). The wallpaper is off until you turn it on. |
+| **What it leaves out** | The check for a new version (it is for Pokémon Automation's releases) and Discord Rich Presence by default (it shows as Pokémon Automation, whose Discord application it is). The Discord bot and the Discord Social SDK (the Windows build has both off: nothing here uses them, and D++ brings OpenSSL 1.1.1k, which is no longer maintained; the Discord webhooks stay). The wallpaper is off until you turn it on. |
 
 What is planned, what could be made faster and what could be added: [ROADMAP.md](ROADMAP.md).
 
@@ -81,7 +81,7 @@ Dependencies, as in Pokémon Automation:
 | [QDarkStyleSheet](https://github.com/ColinDuquesnoy/QDarkStyleSheet) | MIT |
 | [Qt Wav Reader](https://code.qt.io/cgit/qt/qtmultimedia.git/tree/examples/multimedia/spectrum/app/wavfile.cpp?h=5.15) | BSD |
 | [nlohmann json](https://github.com/nlohmann/json) | MIT |
-| [D++](https://github.com/brainboxdotcc/DPP) | Apache 2.0 |
+| [D++](https://github.com/brainboxdotcc/DPP) (in the source; the Windows build leaves it out) | Apache 2.0 |
 | [Tesseract](https://github.com/tesseract-ocr/tesseract) | Apache 2.0 |
 | [Tesseract for Windows](https://github.com/peirick/Tesseract-OCR_for_Windows) | Apache 2.0 |
 | [OpenCV](https://github.com/opencv/opencv) | Apache 2.0 |

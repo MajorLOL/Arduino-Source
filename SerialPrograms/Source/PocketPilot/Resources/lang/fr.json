@@ -181,6 +181,7 @@
  "Flash now": "Flasher maintenant",
  "This file is not a valid firmware file. Download it again.": "Ce n'est pas un fichier de firmware valide. Téléchargez-le à nouveau.",
  "The download failed. Check the connection, or open the link in your browser.": "Le téléchargement a échoué. Vérifiez la connexion ou ouvrez le lien dans votre navigateur.",
+ "This file is not the one the build of the program hashed. It was changed or damaged: it is not flashed. Download it again.": "Ce fichier n'est pas celui dont la compilation du programme a calculé l'empreinte. Il a été modifié ou endommagé : il n'est pas flashé. Téléchargez-le à nouveau.",
  "The file could not be copied to the Pico. Unplug it and start again from step 2.": "Le fichier n'a pas pu être copié sur le Pico. Débranchez-le et recommencez à l'étape 2.",
  "The Pico did not restart. Unplug it and start again from step 2.": "Le Pico n'a pas redémarré. Débranchez-le et recommencez à l'étape 2.",
  "The board did not answer. Hold its BOOT button while it connects, or try another cable or port.": "La carte n'a pas répondu. Maintenez son bouton BOOT pendant la connexion, ou essayez un autre câble ou port.",

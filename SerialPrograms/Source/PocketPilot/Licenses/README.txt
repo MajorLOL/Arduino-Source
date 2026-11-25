@@ -42,7 +42,7 @@ Libraries the builds use
   QDarkStyleSheet       MIT               https://github.com/ColinDuquesnoy/QDarkStyleSheet
   Qt Wav Reader         BSD               from the examples of Qt Multimedia
   nlohmann json         MIT               https://github.com/nlohmann/json
-  D++                   Apache 2.0        https://github.com/brainboxdotcc/DPP
+  D++                   Apache 2.0        https://github.com/brainboxdotcc/DPP (in the source; not in the Windows build)
   Tesseract             Apache 2.0        https://github.com/tesseract-ocr/tesseract
   OpenCV                Apache 2.0        https://github.com/opencv/opencv
   ONNX Runtime          MIT               https://github.com/microsoft/onnxruntime

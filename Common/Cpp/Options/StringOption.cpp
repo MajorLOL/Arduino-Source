@@ -7,6 +7,7 @@
 #include "Common/Cpp/Containers/Pimpl.tpp"
 #include "Common/Cpp/Concurrency/SpinLock.h"
 #include "Common/Cpp/Json/JsonValue.h"
+#include "Common/Cpp/Cryptography/SecretSeal.h"
 #include "StringOption.h"
 
 namespace PokemonAutomation{
@@ -98,11 +99,39 @@ void StringCell::load_json(const JsonValue& json){
     if (str == nullptr){
         return;
     }
+    if (m_data->m_is_password){
+        //  A secret (a token, a webhook address) is sealed in the settings
+        //  file. A file from before that has it as it was: that is read as
+        //  it is, and sealed at the next save.
+        std::string plain;
+        switch (open_secret(*str, plain)){
+        case SecretOpen::OPENED:
+            set(plain);
+            return;
+        case SecretOpen::FAILED:
+            //  Sealed for another account or computer: the secret has to be
+            //  entered again. The sealed text is not a secret to keep.
+            set(std::string());
+            return;
+        case SecretOpen::NOT_SEALED:
+            break;
+        }
+    }
     set(*str);
 }
 JsonValue StringCell::to_json() const{
-    ReadSpinLock lg(m_data->m_lock);
-    return m_data->m_current;
+    std::string current;
+    {
+        ReadSpinLock lg(m_data->m_lock);
+        current = m_data->m_current;
+    }
+    if (m_data->m_is_password && !current.empty()){
+        std::string sealed;
+        if (seal_secret(current, sealed)){
+            return sealed;
+        }
+    }
+    return current;
 }
 
 void StringCell::restore_defaults(){
