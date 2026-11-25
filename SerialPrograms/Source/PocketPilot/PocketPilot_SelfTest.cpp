@@ -38,6 +38,7 @@
 #include <QTextEdit>
 #include <QTimer>
 #include <QToolTip>
+#include <QVBoxLayout>
 #include <QWheelEvent>
 #include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/ColoredText.h"
@@ -46,6 +47,10 @@
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
+#include "Common/Cpp/Options/BatchOption.h"
+#include "Common/Cpp/Options/BooleanCheckBoxOption.h"
+#include "Common/Cpp/Options/GroupOption.h"
+#include "Common/Qt/Options/ConfigWidget.h"
 #include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
@@ -87,6 +92,7 @@
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Language.h"
+#include "PocketPilot_SettingsSearch.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Setup.h"
 #include "PocketPilot_SelfTest.h"
@@ -169,6 +175,9 @@ const char PROJECT_URL[] = "https://github.com/MajorLOL/Arduino-Source/tree/pock
 
 
 namespace{
+
+//  Defined further down, with the other checks.
+int check_settings_search(MainWindow& window, Logger& logger);
 
 //  Takes the pictures. Returns how many of them could not be taken. What it
 //  is about to do goes to the log first, so that the log of a test that
@@ -297,6 +306,16 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     logger.log("UI test: opening the settings");
     window.show_settings();
     save(window, "night-fire-settings");
+    //  The search of the settings page: a picture with a word in it, and the
+    //  checks.
+    if (QLineEdit* search = window.findChild<QLineEdit*>("ppOptionsSearch")){
+        search->setText("screen");
+        let_run(100);
+        save(window, "night-fire-settings-search");
+        search->clear();
+        let_run(50);
+    }
+    failed += check_settings_search(window, logger);
     //  The other windows, drawn without being put on the screen, like the
     //  main window in this test (see Main.cpp).
     {
@@ -1295,6 +1314,185 @@ int check_output_window(MainWindow& window, Logger& logger){
 
     logger.log(
         "Output window test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+//  Options that are made for the test of the search: a group with two
+//  options, one with an accent in it, a loose one, a group that is closed
+//  (what is in it is not made), and one that the program hides.
+class SearchTestOptions : public BatchOption{
+public:
+    SearchTestOptions()
+        : BatchOption(LockMode::UNLOCK_WHILE_RUNNING)
+        , alpha("Alpha group", LockMode::UNLOCK_WHILE_RUNNING)
+        , beta("Beta option", LockMode::UNLOCK_WHILE_RUNNING, false)
+        , gamma("Gamma option with caf\xc3\xa9", LockMode::UNLOCK_WHILE_RUNNING, false)
+        , delta("Delta option", LockMode::UNLOCK_WHILE_RUNNING, false)
+        , closed("Closed group", LockMode::UNLOCK_WHILE_RUNNING, GroupOption::EnableMode::ALWAYS_ENABLED, false, false)
+        , inside("Inside option", LockMode::UNLOCK_WHILE_RUNNING, false)
+        , secret("Secret option", LockMode::UNLOCK_WHILE_RUNNING, false)
+    {
+        alpha.add_option(beta, "beta");
+        alpha.add_option(gamma, "gamma");
+        closed.add_option(inside, "inside");
+        secret.set_visibility(ConfigOptionState::HIDDEN);
+        add_option(alpha, "alpha");
+        add_option(delta, "delta");
+        add_option(closed, "closed");
+        add_option(secret, "secret");
+    }
+
+    GroupOption alpha;
+    BooleanCheckBoxOption beta;
+    BooleanCheckBoxOption gamma;
+    BooleanCheckBoxOption delta;
+    GroupOption closed;
+    BooleanCheckBoxOption inside;
+    BooleanCheckBoxOption secret;
+};
+
+//  The search field of the settings: on the options of the settings page as
+//  they are, and on a few that are made for it. The settings page has to be
+//  open. Returns how many checks failed.
+int check_settings_search(MainWindow& window, Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool ok, const char* what){
+        checks++;
+        if (!ok){
+            wrong++;
+            logger.log(std::string("Settings search test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    //  The settings page.
+    QLineEdit* search = window.findChild<QLineEdit*>("ppOptionsSearch");
+    QLabel* none = window.findChild<QLabel*>("ppOptionsSearchNone");
+    if (search == nullptr || none == nullptr || search->parentWidget() == nullptr){
+        logger.log("Settings search test: FAILED: the settings page has no search field", COLOR_RED);
+        return 1;
+    }
+    QWidget* panel = search->parentWidget();
+    const auto text_of = [](QWidget* widget) -> QString{
+        if (QLabel* label = qobject_cast<QLabel*>(widget)){
+            return label->text();
+        }
+        if (QAbstractButton* button = qobject_cast<QAbstractButton*>(widget)){
+            return button->text();
+        }
+        return QString();
+    };
+    //  An option of the page, by a piece of its explanation.
+    const auto option_with = [&](const QString& piece) -> QWidget*{
+        for (QWidget* widget : panel->findChildren<QWidget*>()){
+            if (text_of(widget).contains(piece)){
+                return widget;
+            }
+        }
+        return nullptr;
+    };
+    const auto shown = [&](const QString& piece){
+        QWidget* widget = option_with(piece);
+        return widget != nullptr && widget->isVisibleTo(panel);
+    };
+    const auto hidden_by_program = [&]{
+        int count = 0;
+        for (QWidget* widget : panel->findChildren<QWidget*>()){
+            if (widget->isHidden() && !widget->property("ppSearchHidden").toBool()){
+                count++;
+            }
+        }
+        return count;
+    };
+    const auto hidden_by_search = [&]{
+        int count = 0;
+        for (QWidget* widget : panel->findChildren<QWidget*>()){
+            if (widget->property("ppSearchHidden").toBool()){
+                count++;
+            }
+        }
+        return count;
+    };
+
+    check(search->text().isEmpty() && none->isHidden(), "the field starts empty, without the message");
+    check(option_with("Holds off") != nullptr && option_with("The language of the menus") != nullptr, "the settings have the options the test looks for");
+    check(shown("Holds off") && shown("The language of the menus"), "every option is shown to begin with");
+    const int hidden_before = hidden_by_program();
+
+    search->setText("holds off");
+    check(shown("Holds off") && !shown("The language of the menus"), "a word of the explanation finds the option and hides the others");
+    check(none->isHidden(), "no message when something is found");
+    search->setText("  HOLDS   Off ");
+    check(shown("Holds off") && !shown("The language of the menus"), "capitals and extra spaces do not matter");
+    search->setText("francais");
+    check(shown("The language of the menus") && !shown("Holds off"), "a word without the accent finds the language (Français in its list)");
+    search->setText("qqqq zzzz");
+    check(!shown("Holds off") && !shown("The language of the menus"), "nothing is shown for words that nothing has");
+    check(!none->isHidden(), "the message comes when nothing is found");
+    search->clear();
+    check(shown("Holds off") && shown("The language of the menus") && none->isHidden(), "clearing shows everything again, without the message");
+    check(hidden_by_search() == 0, "nothing stays hidden by the search once it is cleared");
+    check(hidden_by_program() == hidden_before, "what the program hides is the same before and after");
+
+    //  The options that are made for it.
+    SearchTestOptions options;
+    QWidget host;
+    QVBoxLayout* layout = new QVBoxLayout(&host);
+    ConfigWidget* widget = ConfigWidget::make_from_option(options, &host);
+    layout->addWidget(&widget->widget());
+    host.setAttribute(Qt::WA_DontShowOnScreen, true);
+    host.show();
+    let_run(50);
+
+    const auto row_of = [&](ConfigOption& option) -> QWidget*{
+        for (QWidget* inner : host.findChildren<QWidget*>()){
+            ConfigWidget* config = dynamic_cast<ConfigWidget*>(inner);
+            if (config != nullptr && &config->option() == &option){
+                return inner;
+            }
+        }
+        return nullptr;
+    };
+    const auto is_shown = [&](ConfigOption& option){
+        QWidget* row = row_of(option);
+        return row != nullptr && row->isVisibleTo(&host);
+    };
+    //  Which of them are shown: group, beta, gamma, delta, closed group, secret.
+    const auto pattern = [&]{
+        std::string text;
+        for (ConfigOption* option : std::initializer_list<ConfigOption*>{
+            &options.alpha, &options.beta, &options.gamma, &options.delta, &options.closed, &options.secret
+        }){
+            text += is_shown(*option) ? '1' : '0';
+        }
+        return text;
+    };
+    QWidget* list = &widget->widget();
+
+    check(row_of(options.beta) != nullptr && row_of(options.inside) == nullptr, "the group that is open has its options and the closed one has not");
+    check(pattern() == "111110", "to begin with: all shown but the one that the program hides");
+    check(PocketPilot::filter_options(*list, "") == 4, "four options (the closed group counts as one)");
+
+    check(PocketPilot::filter_options(*list, "beta") == 1 && pattern() == "110000", "an option is shown with the group it is in, and the others are not");
+    check(PocketPilot::filter_options(*list, "alpha") == 2 && pattern() == "111000", "the title of a group shows everything in it");
+    check(PocketPilot::filter_options(*list, "alpha beta") == 1 && pattern() == "110000", "a word for the group and a word for the option");
+    check(PocketPilot::filter_options(*list, "beta gamma") == 0 && pattern() == "000000", "words that are in different options find nothing");
+    check(PocketPilot::filter_options(*list, "CAFE") == 1 && pattern() == "101000", "an accent does not matter, a capital neither");
+    check(PocketPilot::filter_options(*list, "option") == 3 && pattern() == "111100", "what the program hides is not found, and stays hidden");
+    check(PocketPilot::filter_options(*list, "secret") == 0 && pattern() == "000000", "the hidden option is not shown for its own name");
+    check(PocketPilot::filter_options(*list, "closed") == 1 && pattern() == "000010", "a group that is closed is found by its title");
+    check(PocketPilot::filter_options(*list, "inside") == 0 && pattern() == "000000", "a group that is closed is not searched inside");
+    check(PocketPilot::filter_options(*list, "delta") == 1 && pattern() == "000100", "a loose option");
+    check(PocketPilot::filter_options(*list, "   ") == 4 && pattern() == "111110", "only spaces show everything again, the hidden one still hidden");
+    {
+        QWidget* secret = row_of(options.secret);
+        check(secret != nullptr && secret->isHidden() && !secret->property("ppSearchHidden").toBool(), "the option of the program was never taken over by the search");
+    }
+
+    logger.log(
+        "Settings search test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;

@@ -367,5 +367,7 @@
  "Matches: %1": "Coincidencias: %1",
  "No matches": "Sin coincidencias",
  "Only warnings and errors": "Solo advertencias y errores",
- "Shows only the lines in red and in orange: the errors and the warnings.": "Muestra solo las líneas en rojo y naranja: los errores y las advertencias."
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Muestra solo las líneas en rojo y naranja: los errores y las advertencias.",
+ "Search the settings": "Buscar en los ajustes",
+ "No setting has these words.": "Ningún ajuste tiene estas palabras."
 }

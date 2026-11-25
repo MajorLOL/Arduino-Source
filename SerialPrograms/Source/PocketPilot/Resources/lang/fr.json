@@ -367,5 +367,7 @@
  "Matches: %1": "Résultats : %1",
  "No matches": "Aucun résultat",
  "Only warnings and errors": "Avertissements et erreurs seulement",
- "Shows only the lines in red and in orange: the errors and the warnings.": "N'affiche que les lignes en rouge et en orange : les erreurs et les avertissements."
+ "Shows only the lines in red and in orange: the errors and the warnings.": "N'affiche que les lignes en rouge et en orange : les erreurs et les avertissements.",
+ "Search the settings": "Rechercher dans les réglages",
+ "No setting has these words.": "Aucun réglage ne contient ces mots."
 }

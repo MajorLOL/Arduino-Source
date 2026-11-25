@@ -367,5 +367,7 @@
  "Matches: %1": "Treffer: %1",
  "No matches": "Keine Treffer",
  "Only warnings and errors": "Nur Warnungen und Fehler",
- "Shows only the lines in red and in orange: the errors and the warnings.": "Zeigt nur die roten und orangefarbenen Zeilen: die Fehler und die Warnungen."
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Zeigt nur die roten und orangefarbenen Zeilen: die Fehler und die Warnungen.",
+ "Search the settings": "Einstellungen durchsuchen",
+ "No setting has these words.": "Keine Einstellung enthält diese Wörter."
 }

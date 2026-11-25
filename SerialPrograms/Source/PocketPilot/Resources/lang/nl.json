@@ -367,5 +367,7 @@
  "Matches: %1": "Gevonden: %1",
  "No matches": "Niets gevonden",
  "Only warnings and errors": "Alleen waarschuwingen en fouten",
- "Shows only the lines in red and in orange: the errors and the warnings.": "Toont alleen de regels in rood en oranje: de fouten en de waarschuwingen."
+ "Shows only the lines in red and in orange: the errors and the warnings.": "Toont alleen de regels in rood en oranje: de fouten en de waarschuwingen.",
+ "Search the settings": "Zoek in de instellingen",
+ "No setting has these words.": "Geen instelling heeft deze woorden."
 }
