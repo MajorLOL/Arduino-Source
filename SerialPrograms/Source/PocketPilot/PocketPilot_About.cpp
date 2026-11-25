@@ -10,11 +10,14 @@
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPointer>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include "Assistant/Assistant_Http.h"
 #include "PocketPilot_Language.h"
 #include "PocketPilot_Logo.h"
 #include "PocketPilot_Theme.h"
+#include "PocketPilot_Update.h"
 #include "PocketPilot_About.h"
 
 namespace PokemonAutomation{
@@ -41,7 +44,7 @@ QLabel* paragraph(QWidget& parent, const QString& html){
 
 
 
-std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
+std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info, Assistant::HttpTransport* transport){
     const ThemeColors& theme = theme_colors();
     //  Links in a color that reads on the window: the accent at night, a
     //  plain blue otherwise.
@@ -139,6 +142,51 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
         ).arg(info.name, QString::fromLatin1(qVersion()))
     ));
 
+    //  The check for updates: only when the button is pressed.
+    if (transport != nullptr){
+        layout->addWidget(paragraph(dialog,
+            tr_ui(
+                "<b>Updates.</b> Nothing is checked by itself. The button asks github.com for the list "
+                "of the builds of this fork, and that is all it sends. The program does not update "
+                "itself: a newer build is downloaded from its page."
+            )
+        ));
+        QHBoxLayout* update_row = new QHBoxLayout();
+        update_row->setSpacing(12);
+        layout->addLayout(update_row);
+        QPushButton* check_button = new QPushButton(tr_ui("Check for updates"), &dialog);
+        check_button->setObjectName("ppAboutUpdateButton");
+        update_row->addWidget(check_button, 0, Qt::AlignTop);
+        QLabel* update_result = paragraph(dialog, QString());
+        update_result->setObjectName("ppAboutUpdateResult");
+        update_row->addWidget(update_result, 1);
+
+        //  The check goes with the button: it stops when the window is closed.
+        std::shared_ptr<UpdateCheck> check = std::make_shared<UpdateCheck>(*transport, info.project_url, info.build);
+        const QString color = link_color.name();
+        QPointer<QPushButton> button_pointer(check_button);
+        QPointer<QLabel> result_pointer(update_result);
+        QDialog* dialog_pointer = &dialog;
+        QVBoxLayout* layout_pointer = layout;
+        QObject::connect(check_button, &QPushButton::clicked, check_button, [=]{
+            if (check->running()){
+                return;
+            }
+            button_pointer->setEnabled(false);
+            result_pointer->setText(tr_ui("Checking..."));
+            check->start([=](const UpdateResult& result){
+                button_pointer->setEnabled(true);
+                result_pointer->setText(update_text(result, color));
+                //  The window grows with the text, and does not shrink.
+                layout_pointer->activate();
+                const int needed = layout_pointer->totalHeightForWidth(dialog_pointer->width());
+                if (needed > dialog_pointer->height()){
+                    dialog_pointer->resize(dialog_pointer->width(), needed);
+                }
+            });
+        });
+    }
+
     QLabel* details = new QLabel(
         tr_ui("Compiled for %1 with %2.").arg(info.architecture, info.compiler),
         &dialog
@@ -164,7 +212,8 @@ std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info){
 }
 
 void show_about(QWidget* parent, const AboutInfo& info){
-    std::unique_ptr<QDialog> dialog = make_about(parent, info);
+    std::unique_ptr<Assistant::HttpTransport> transport = Assistant::make_network_transport();
+    std::unique_ptr<QDialog> dialog = make_about(parent, info, transport.get());
     dialog->exec();
 }
 

@@ -1509,6 +1509,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/PocketPilot_SelfTest.h
     Source/PocketPilot/PocketPilot_Theme.cpp
     Source/PocketPilot/PocketPilot_Theme.h
+    Source/PocketPilot/PocketPilot_Update.cpp
+    Source/PocketPilot/PocketPilot_Update.h
     Source/Pokemon/Inference/Pokemon_AbilityReader.cpp
     Source/Pokemon/Inference/Pokemon_AbilityReader.h
     Source/Pokemon/Inference/Pokemon_BerryNameReader.cpp

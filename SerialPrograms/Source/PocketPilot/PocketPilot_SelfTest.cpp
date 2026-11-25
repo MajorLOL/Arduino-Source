@@ -24,6 +24,7 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QLabel>
 #include <QListWidget>
 #include <QMouseEvent>
 #include <QPainter>
@@ -84,6 +85,7 @@
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Setup.h"
 #include "PocketPilot_SelfTest.h"
+#include "PocketPilot_Update.h"
 
 namespace PokemonAutomation{
 namespace PocketPilot{
@@ -100,6 +102,63 @@ void let_run(int milliseconds){
     QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);
     loop.exec();
 }
+
+//  A connection that answers what it is told to, from the event loop as the
+//  network does, and keeps the requests.
+class ScriptedTransport : public Assistant::HttpTransport{
+public:
+    struct Call : public Assistant::HttpCall{
+        virtual void abort() override{
+            aborted = true;
+        }
+        bool aborted = false;
+    };
+
+    virtual std::shared_ptr<Assistant::HttpCall> send(
+        const Assistant::HttpRequest& request,
+        DataHandler, DoneHandler on_done
+    ) override{
+        requests.push_back(request);
+        std::shared_ptr<Call> call = std::make_shared<Call>();
+        calls.push_back(call);
+        if (!silent){
+            const Assistant::HttpResponse response = answer;
+            QTimer::singleShot(0, &m_context, [call, response, on_done]{
+                if (!call->aborted){
+                    on_done(response);
+                }
+            });
+        }
+        return call;
+    }
+
+    //  What the next requests are answered with.
+    Assistant::HttpResponse answer;
+    //  Never answers.
+    bool silent = false;
+    std::vector<Assistant::HttpRequest> requests;
+    std::vector<std::shared_ptr<Call>> calls;
+
+private:
+    QObject m_context;
+};
+
+//  The list of releases as GitHub answers it.
+Assistant::HttpResponse releases_answer(int status, const QByteArray& body){
+    Assistant::HttpResponse response;
+    response.status = status;
+    response.body = body;
+    return response;
+}
+
+const char RELEASES_JSON[] =
+    "[{\"tag_name\":\"pocketpilot-build-99\",\"draft\":true,\"prerelease\":true,\"published_at\":\"2026-11-26T08:00:00Z\"},"
+    "{\"tag_name\":\"pocketpilot-build-88\",\"draft\":false,\"prerelease\":true,\"published_at\":\"2026-11-25T20:13:48Z\","
+    "\"html_url\":\"https://evil.example/pocketpilot-build-88\"},"
+    "{\"tag_name\":\"pocketpilot-build-9\",\"draft\":false,\"prerelease\":true,\"published_at\":\"2026-10-01T08:00:00Z\"},"
+    "{\"tag_name\":\"v1.2.3\",\"draft\":false,\"prerelease\":false,\"published_at\":\"2026-12-01T08:00:00Z\"}]";
+
+const char PROJECT_URL[] = "https://github.com/MajorLOL/Arduino-Source/tree/pocketpilot";
 
 }
 
@@ -232,11 +291,21 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     //  main window in this test (see Main.cpp).
     {
         logger.log("UI test: opening the About window");
-        std::unique_ptr<QDialog> about = make_about(&window, window.about_info());
+        //  With the button that checks for updates, answered by a made-up
+        //  GitHub: the test does not use the network.
+        ScriptedTransport transport;
+        transport.answer = releases_answer(200, RELEASES_JSON);
+        std::unique_ptr<QDialog> about = make_about(&window, window.about_info(), &transport);
         about->setAttribute(Qt::WA_DontShowOnScreen, true);
         about->show();
         save(*about, "night-fire-about");
+        if (QPushButton* update = about->findChild<QPushButton*>("ppAboutUpdateButton")){
+            update->click();
+            let_run(100);
+            save(*about, "night-fire-about-update");
+        }
         about->close();
+        about.reset();
     }
     {
         logger.log("UI test: opening the output window");
@@ -1000,6 +1069,230 @@ int check_assistant(const QString& out, Logger& logger){
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return result.failed + wrong;
+}
+
+
+
+//  "Check for updates" in the About window: reading the list of releases, the
+//  verdict for a build, the request (and that nothing is asked before the
+//  button is pressed), and the window with its button. Returns how many
+//  checks failed.
+int check_updates(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool ok, const char* what){
+        checks++;
+        if (!ok){
+            wrong++;
+            logger.log(std::string("Update test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    //  Where the releases are.
+    const ReleaseLocation location = release_location(PROJECT_URL);
+    check(
+        location.api_url == "https://api.github.com/repos/MajorLOL/Arduino-Source/releases?per_page=30" &&
+        location.page_url == "https://github.com/MajorLOL/Arduino-Source/releases" &&
+        location.tag_page_url == "https://github.com/MajorLOL/Arduino-Source/releases/tag/",
+        "the addresses of the releases"
+    );
+    check(!release_location("https://example.com/MajorLOL/Arduino-Source/tree/x").valid(), "not another site's address");
+    check(!release_location("https://github.com/../Arduino-Source/tree/x").valid(), "no \"..\" for an owner");
+    check(!release_location("https://github.com/a b/c/tree/x").valid(), "no space in a name");
+    check(!release_location("https://github.com/MajorLOL").valid(), "an address without a repository");
+    check(!release_location(QString()).valid(), "no address");
+
+    //  The numbers.
+    check(build_of_tag("pocketpilot-build-88") == 88, "the number in a name of a build");
+    check(build_of_tag("pocketpilot-build-") == 0, "a name without a number");
+    check(build_of_tag("pocketpilot-build-8x") == 0, "a name with something after the number");
+    check(build_of_tag("pocketpilot-build-0") == 0, "build 0 is none");
+    check(build_of_tag("pocketpilot-build-1234567890") == 0, "a number that is too long");
+    check(build_of_tag("v1.2.3") == 0, "a release that is not a build");
+    check(build_of_this_program("88") == 88 && build_of_this_program(" 12 ") == 12, "the number of this program");
+    check(build_of_this_program("local") == 0 && build_of_this_program(QString()) == 0, "a local build has no number");
+
+    //  The newest build: by number (9 is before 88), no draft, no other release.
+    {
+        LatestBuild latest;
+        QString error;
+        check(newest_build(RELEASES_JSON, latest, error), "the list of releases was read");
+        check(latest.build == 88 && latest.date == "2026-11-25", "the newest build is 88, from the 25th");
+        check(newest_build("[]", latest, error) && latest.build == 0, "an empty list has no build");
+        check(newest_build("[{\"tag_name\":\"v1\"},5,\"x\",null]", latest, error) && latest.build == 0, "odd entries are passed over");
+        error.clear();
+        check(!newest_build("not json", latest, error) && !error.isEmpty(), "text that is not JSON");
+        error.clear();
+        check(!newest_build("{\"message\":\"Not Found\"}", latest, error) && !error.isEmpty(), "an object is not a list");
+    }
+
+    //  The verdict.
+    {
+        const auto verdict = [&](int status, const QByteArray& body, int current){
+            return update_result(releases_answer(status, body), location, current);
+        };
+        UpdateResult result = verdict(200, RELEASES_JSON, 80);
+        check(result.state == UpdateState::NEWER_AVAILABLE && result.latest.build == 88, "build 80 is told that 88 is out");
+        check(
+            result.page_url == "https://github.com/MajorLOL/Arduino-Source/releases/tag/pocketpilot-build-88",
+            "the page is made from the number, not taken from the answer"
+        );
+        const QString text = update_text(result, "#123456");
+        check(
+            text.contains("href=\"" + result.page_url + "\"") && !text.contains("evil.example") &&
+            text.contains("88") && text.contains("80") && text.contains("2026-11-25"),
+            "the text of a newer build: both numbers, the date and the link"
+        );
+        check(verdict(200, RELEASES_JSON, 88).state == UpdateState::UP_TO_DATE, "build 88 is up to date");
+        check(!update_text(verdict(200, RELEASES_JSON, 88), "#123456").contains("href"), "no link when it is up to date");
+        check(verdict(200, RELEASES_JSON, 90).state == UpdateState::NEWER_THAN_PUBLISHED, "build 90 is newer than what is published");
+        result = verdict(200, RELEASES_JSON, 0);
+        check(result.state == UpdateState::LOCAL_BUILD && result.latest.build == 88, "a local build is told the newest one, with no verdict");
+        result = verdict(200, "[]", 80);
+        check(result.state == UpdateState::NO_BUILDS && result.page_url == location.page_url, "no builds are published");
+        for (int status : {403, 404, 429, 500, 301}){
+            result = verdict(status, "{}", 80);
+            check(result.state == UpdateState::FAILED && !result.error.isEmpty(), "a status that is not an answer");
+        }
+        check(verdict(200, "not json", 80).state == UpdateState::FAILED, "an answer that cannot be read");
+        Assistant::HttpResponse broken;
+        broken.error = "Host not found <b>";
+        result = update_result(broken, location, 80);
+        const QString failed_text = update_text(result, "#123456");
+        check(
+            result.state == UpdateState::FAILED && failed_text.contains("Host not found") &&
+            !failed_text.contains("<b>") && !failed_text.contains("href"),
+            "no connection: the reason, in plain text"
+        );
+    }
+
+    //  The request, and what happens to it.
+    {
+        ScriptedTransport transport;
+        transport.answer = releases_answer(200, RELEASES_JSON);
+        UpdateCheck update(transport, PROJECT_URL, "80");
+        check(transport.requests.empty() && !update.running(), "nothing is asked before start");
+        int done_calls = 0;
+        UpdateResult got;
+        update.start([&](const UpdateResult& result){
+            done_calls++;
+            got = result;
+        });
+        check(update.running() && done_calls == 0 && transport.requests.size() == 1, "start sends one request and answers later");
+        update.start([&](const UpdateResult&){
+            done_calls += 100;
+        });
+        check(transport.requests.size() == 1, "a second start while one runs sends nothing");
+        let_run(50);
+        check(done_calls == 1 && !update.running() && got.state == UpdateState::NEWER_AVAILABLE, "the answer comes once");
+        if (!transport.requests.empty()){
+            const Assistant::HttpRequest& request = transport.requests[0];
+            bool agent = false;
+            bool accept = false;
+            bool secret = false;
+            for (const Assistant::HttpHeader& header : request.headers){
+                const QByteArray name = header.name.toLower();
+                agent = agent || name == "user-agent";
+                accept = accept || (name == "accept" && header.value.contains("github"));
+                secret = secret || name == "authorization" || name == "x-api-key" || name == "cookie";
+            }
+            check(
+                request.method == "GET" && request.url == QUrl(location.api_url) && request.body.isEmpty() && agent && accept,
+                "a plain GET of the list, with a user agent"
+            );
+            check(!secret, "the request carries no key, token or cookie");
+        }
+        //  Again after the answer.
+        update.start([&](const UpdateResult&){
+            done_calls++;
+        });
+        let_run(50);
+        check(done_calls == 2 && transport.requests.size() == 2, "a check can be made again");
+    }
+    {
+        //  Stopped by its end: nothing is called afterwards.
+        ScriptedTransport transport;
+        transport.answer = releases_answer(200, RELEASES_JSON);
+        int done_calls = 0;
+        {
+            UpdateCheck update(transport, PROJECT_URL, "80");
+            update.start([&](const UpdateResult&){
+                done_calls++;
+            });
+        }
+        let_run(50);
+        check(done_calls == 0 && transport.calls.size() == 1 && transport.calls[0]->aborted, "a check that is destroyed stops, and says nothing");
+    }
+    {
+        //  A fork without an address on github.com.
+        ScriptedTransport transport;
+        UpdateCheck update(transport, "https://example.com/x/y/tree/z", "80");
+        UpdateResult got;
+        int done_calls = 0;
+        update.start([&](const UpdateResult& result){
+            done_calls++;
+            got = result;
+        });
+        let_run(50);
+        check(
+            done_calls == 1 && got.state == UpdateState::FAILED && transport.requests.empty(),
+            "no address: an error, and nothing sent"
+        );
+    }
+
+    //  The window.
+    {
+        AboutInfo info;
+        info.name = "PocketPilot";
+        info.build = "80";
+        info.upstream_name = "Pokemon Automation";
+        info.upstream_version = "1";
+        info.architecture = "x86_64";
+        info.compiler = "test";
+        info.project_url = PROJECT_URL;
+        info.upstream_url = "https://github.com/PokemonAutomation/";
+
+        std::unique_ptr<QDialog> plain = make_about(nullptr, info);
+        check(plain->findChild<QPushButton*>("ppAboutUpdateButton") == nullptr, "no button without a connection");
+        plain.reset();
+
+        ScriptedTransport transport;
+        transport.answer = releases_answer(200, RELEASES_JSON);
+        std::unique_ptr<QDialog> about = make_about(nullptr, info, &transport);
+        about->setAttribute(Qt::WA_DontShowOnScreen, true);
+        about->show();
+        QPushButton* button = about->findChild<QPushButton*>("ppAboutUpdateButton");
+        QLabel* label = about->findChild<QLabel*>("ppAboutUpdateResult");
+        check(button != nullptr && label != nullptr, "the window has the button and the place for the answer");
+        if (button != nullptr && label != nullptr){
+            let_run(50);
+            check(transport.requests.empty() && label->text().isEmpty(), "the window asks nothing by itself");
+            button->click();
+            check(!button->isEnabled() && !label->text().isEmpty() && transport.requests.size() == 1, "the button asks once and waits");
+            button->click();
+            check(transport.requests.size() == 1, "pressed again while it waits: nothing more");
+            let_run(50);
+            check(
+                button->isEnabled() && label->text().contains("88") && label->text().contains("releases/tag/pocketpilot-build-88"),
+                "the answer is in the window, with the link"
+            );
+            check(label->openExternalLinks(), "the link opens in the browser");
+
+            //  A window closed while the check runs.
+            transport.silent = true;
+            button->click();
+            check(transport.requests.size() == 2 && !button->isEnabled(), "a check that is waiting");
+        }
+        about->close();
+        about.reset();
+        check(transport.calls.size() == 2 && transport.calls[1]->aborted, "closing the window stops the check");
+    }
+
+    logger.log(
+        "Update test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
 }
 
 
@@ -5221,6 +5514,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
         failed += check_name_mark(logger);
+        failed += check_updates(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);

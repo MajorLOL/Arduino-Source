@@ -4,12 +4,13 @@ Looked at on 25 November 2026, by reading the source (not by watching the networ
 
 ## What leaves the program
 
-Nothing goes out when the program starts, and there is no telemetry, no analytics and no check for a new version. Everything below happens only when you use that part.
+Nothing goes out when the program starts, and there is no telemetry, no analytics and no check for a new version that runs by itself. Everything below happens only when you use that part.
 
 | What | Where to | When |
 | --- | --- | --- |
 | The conversation with Claude: your messages, pictures of the screen, text read from it, lines of the log and the options of the open program (cleaned, see below) | `api.anthropic.com` | Only with a Claude API key entered, and while you use Claude or Claude Plays |
 | Source files and branches of this repository | `api.github.com`, `raw.githubusercontent.com` | Only with Claude; a commit only when you press **Commit** |
+| The list of releases of this fork (the numbers of its builds), to say whether a newer build is out. No key, no token, nothing of yours; the request carries what any web request does: your address and the user agent `PocketPilot` | `api.github.com` | Only when you press **Check for updates** in the About window. The program does not update itself: the download is the page of the release, which you open |
 | The list of firmware, and a firmware file | GitHub, the repository `PokemonAutomation/Packages` | Only on the firmware step of the setup |
 | The list of downloads, and the files (the OCR model) | `raw.githubusercontent.com` (Packages) | Only when you press the button to download in the settings, or start a program that needs a file that is not there (the zip has the OCR model) |
 | The list of banned players and a stop switch of the Tera raid host | `raw.githubusercontent.com` (Pokémon Automation's `ServerConfigs-PA-SHA`) | Only when that program runs |

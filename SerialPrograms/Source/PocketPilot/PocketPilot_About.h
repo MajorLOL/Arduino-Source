@@ -19,6 +19,9 @@ class QWidget;
 
 namespace PokemonAutomation{
 namespace PocketPilot{
+namespace Assistant{
+    class HttpTransport;
+}
 
 
 struct AboutInfo{
@@ -32,10 +35,13 @@ struct AboutInfo{
     QString upstream_url;       //  Where the upstream project's source is.
 };
 
-//  The window, not shown yet.
-std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info);
+//  The window, not shown yet. With a connection ("transport", which has to
+//  stay for as long as the window), the window has a button "Check for
+//  updates" (PocketPilot_Update.h); without one it has no such button.
+std::unique_ptr<QDialog> make_about(QWidget* parent, const AboutInfo& info, Assistant::HttpTransport* transport = nullptr);
 
-//  Shows the window and returns when it is closed.
+//  Shows the window, with the button to check for updates over the network,
+//  and returns when it is closed.
 void show_about(QWidget* parent, const AboutInfo& info);
 
 

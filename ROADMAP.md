@@ -4,7 +4,7 @@ What the first builds have, what could make the FRLG AutoStory faster, what coul
 
 ## 1. What the first build has
 
-- Its own name, icon, "About" window, window title and build number; the links to Pokémon Automation's Discord and its check for a new version are gone.
+- Its own name, icon, "About" window, window title and build number; the links to Pokémon Automation's Discord and its check for a new version are gone. In their place the About window has a button "Check for updates" that looks at this fork's own releases, only when it is pressed (26 November 2026).
 - A new interface: see [README.md](README.md).
 - Pokémon Automation's `main` of 11 November 2026 merged in (149 commits since the fork was made): among others gamepad support, the FRLG Box Sorter and Living Dex sorter, a reworked audio pipeline and device names for the dropdowns. Gamepad support (`PA_SDL`) is on in the builds. Build 10 has its `main` of 13 November (four commits more).
 - 20 bug fixes from a review of the whole code, of Pokémon Automation's open issues and of what goes wrong in other controller programs: [FIXES.md](SerialPrograms/Source/PocketPilot/FIXES.md).
@@ -91,7 +91,6 @@ Candidates:
 |---|---|
 | **The stream history's frames** | It still converts every frame with `QVideoFrame::toImage()` after mapping it; the memory test measured 13 KB of growth per picture for that path too. The converter of [VideoFrameConversion.h](SerialPrograms/Source/CommonFramework/VideoPipeline/Backends/VideoFrameConversion.h) can replace it. |
 | **The Qt version** | The builds use Qt 6.10.2 like Pokémon Automation's own workflow, while its build guide still names 6.8.3 (later versions hang when threads end, which the program works around by exiting hard). Worth one build with 6.8.3 to see whether the memory growth of `toImage()` is there too. |
-| **An update check of its own** | The one for Pokémon Automation's releases is off. PocketPilot could look at its own releases. |
 | **The program's file names** | The program is still `SerialPrograms.exe` and its settings `SerialPrograms-Settings.json`. Renaming needs a step that takes over the old settings. |
 | **The settings page** | One long page. Groups with a search box, as in the search over the programs, would make it easier to use. |
 | **The log window** | A filter for errors and a search. |
