@@ -137,7 +137,7 @@ bool starter_rng_can_wait_for(const InitialSeedEntry& seed){
 int64_t starter_rng_ingame_ms(uint64_t advances){
     const int64_t frames = int64_t(advances) - int64_t(STARTER_RNG_CONTINUE_SCREEN_FRAMES)
         + fixed_advances_offset(PokemonFRLG_RngTarget::starters);
-    return int64_t(frames * FRLG_FRAME_DURATION / 2);
+    return int64_t(double(frames) * FRLG_FRAME_DURATION / 2);
 }
 
 std::vector<RngAttempt> plan_starter_rng(const StarterRngPlanInputs& inputs){

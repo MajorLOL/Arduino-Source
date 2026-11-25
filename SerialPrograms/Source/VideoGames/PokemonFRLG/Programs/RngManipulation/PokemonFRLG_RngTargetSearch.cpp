@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <initializer_list>
 #include <map>
 #include "PokemonFRLG_RngTargetSearch.h"
 
@@ -356,8 +357,8 @@ void search_iv_states(const LowBitsTable& table, const AdvIVs& min_ivs, TargetCo
     while (true){
         uint16_t first = uint16_t(ivs[0] | (ivs[1] << 5) | (ivs[2] << 10));
         uint16_t second = uint16_t(ivs[3] | (ivs[4] << 5) | (ivs[5] << 10));
-        for (uint16_t first_top : {0x0000, 0x8000}){
-            for (uint32_t second_top : {0x0000, 0x8000}){
+        for (uint16_t first_top : std::initializer_list<uint16_t>{0x0000, 0x8000}){
+            for (uint32_t second_top : std::initializer_list<uint32_t>{0x0000, 0x8000}){
                 table.find_states(first | first_top, (second | second_top) << 16, 0x10000, found);
             }
         }
