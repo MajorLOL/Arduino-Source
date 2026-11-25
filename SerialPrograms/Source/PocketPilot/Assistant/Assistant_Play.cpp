@@ -354,7 +354,7 @@ std::string PlaySession::why_unavailable(CancellableScope& scope){
         if (service == nullptr){
             text = "Claude is not available in this window.";
         }else if (!service->has_api_key()){
-            text = "Claude has no API key yet. Click \"Claude\" in the top bar and add your key there first.";
+            text = "Claude has no API key yet. Click \"Claude\" along the top of the window and add your key there first.";
         }
         LockGuard<Mutex> lg(answer->lock);
         answer->text = std::move(text);

@@ -115,8 +115,8 @@ GlobalSettings::GlobalSettings()
     )
     , ASK_PROGRAM(
         "<b>Ask which program to start after the game:</b><br>"
-        "After the game comes a screen of its own with its programs, as in the list at the left of the main window. "
-        "Pick one and the program opens with its page; \"Choose later\" goes to the main window with the game's list. "
+        "After the game comes a screen of its own with its programs. "
+        "Pick one and the program opens with its page; \"Choose later\" goes to the main window with the game's programs. "
         "Turn this off to go straight to the main window after the game. Takes effect at the next start.",
         LockMode::UNLOCK_WHILE_RUNNING,
         true
