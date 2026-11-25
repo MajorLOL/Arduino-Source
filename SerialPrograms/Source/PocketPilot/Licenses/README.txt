@@ -49,5 +49,10 @@ Libraries the builds use
   SDL 3                 zlib              https://github.com/libsdl-org/SDL
   miniz                 MIT               https://github.com/richgel999/miniz
 
+The FRLG RNG target search (Source/VideoGames/PokemonFRLG/Programs/RngManipulation:
+PokemonFRLG_RngTargetSearch, PokemonFRLG_RngPlan, PokemonFRLG_RngPlanTracker and their
+tests) was taken from https://github.com/dayfine/Arduino-Source, a fork of Pokemon
+Automation under the same MIT license.
+
 The names of the games belong to their owners and are used only to say which
 game a program is for.
