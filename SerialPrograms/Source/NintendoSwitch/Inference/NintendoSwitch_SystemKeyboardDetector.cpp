@@ -260,8 +260,8 @@ void add_planned_tests(UnitTestDatabase& database){
 void add_tests_SystemKeyboardDetector(UnitTestDatabase& database){
     const SystemKeyboardKey key_1{0, 0};
     //  The OK button is blue with text in the field and grey without.
-    database.add<Test_SystemKeyboardDetector>(test_image_path("BDSP-PlayerName-Empty.png"), key_1, false);
-    database.add<Test_SystemKeyboardDetector>(test_image_path("BDSP-FriendName-Typed.png"), key_1, true);
+    add_if_present(database, test_image_path("BDSP-PlayerName-Empty.png"), key_1, false);
+    add_if_present(database, test_image_path("BDSP-FriendName-Typed.png"), key_1, true);
     const std::string_view languages[] = {
         "ChineseSimplified", "ChineseTraditional", "English", "French", "German",
         "Italian", "Japanese", "Korean", "Spanish", "SpanishLATAM",

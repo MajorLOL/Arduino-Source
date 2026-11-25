@@ -628,6 +628,10 @@ void add_tests_Detectors(UnitTestDatabase& database){
         database.add<DetectorCaseTest<PlateFrameCase, check_plate_frame>>("PokemonLZA::AutoStory - Caught mark reader: ", test);
     }
     for (const MapPinCase& test : MAP_PIN_CASES){
+        //  The console's frames are in a folder that the test images may not have.
+        if (test.name.starts_with("console:") && !test_folder_present("AutoStoryDetectors/Zone1Map")){
+            continue;
+        }
         database.add<DetectorCaseTest<MapPinCase, check_map_pin>>("PokemonLZA::AutoStory - Map pin reader: ", test);
     }
 }
