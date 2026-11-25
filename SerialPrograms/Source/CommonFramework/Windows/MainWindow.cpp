@@ -250,13 +250,14 @@ MainWindow::MainWindow(QWidget* parent)
     //  And the setup that is opened from the settings later shows it at once.
     {
         const QString chosen = PocketPilot::take_chosen_game();
+        const QString chosen_program = PocketPilot::take_chosen_program();
         if (!chosen.isEmpty()){
-            QMetaObject::invokeMethod(this, [this, chosen]{
-                open_game(chosen);
+            QMetaObject::invokeMethod(this, [this, chosen, chosen_program]{
+                open_game(chosen, chosen_program);
             }, Qt::QueuedConnection);
         }
-        PocketPilot::set_game_opener([this](const QString& game){
-            open_game(game);
+        PocketPilot::set_game_opener([this](const QString& game, const QString& program){
+            open_game(game, program);
         });
     }
 //    cout << "Done constructing" << endl;
@@ -335,6 +336,16 @@ bool MainWindow::open_game(const QString& game){
         show_games();
     }
     return m_home->pick_game(game);
+}
+bool MainWindow::open_game(const QString& game, const QString& program){
+    if (!open_game(game)){
+        return false;
+    }
+    if (program.isEmpty()){
+        return true;
+    }
+    //  The program that was chosen in the setup: its page, in the game's list.
+    return open_program(game.toStdString(), program.toStdString());
 }
 
 //  Claude: the service with what the tools may look at in this program, and

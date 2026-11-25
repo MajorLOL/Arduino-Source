@@ -61,6 +61,7 @@
 #ifndef PokemonAutomation_PocketPilot_Setup_H
 #define PokemonAutomation_PocketPilot_Setup_H
 
+#include <functional>
 #include <vector>
 #include <QString>
 #include <QStringList>
@@ -76,6 +77,19 @@ namespace PocketPilot{
 extern const char* const SETUP_TEST_OPTION;     //  --setup-test <folder>
 extern const char* const TUTORIAL_TEST_OPTION;  //  --tutorial-test
 
+
+//  One line of the output log of the program, for the log panel of the screen
+//  with the programs.
+struct SetupLogLine{
+    //  Counts up from 1; the panel asks for the lines after the last it has.
+    quint64 serial = 0;
+    //  When it was written (milliseconds since the epoch).
+    qint64 msec = 0;
+    //  0 information, 1 warning, 2 error.
+    int level = 0;
+    //  The line without its time.
+    QString text;
+};
 
 struct SetupRequest{
     //  Which questions to ask: the language, the board.
@@ -98,6 +112,20 @@ struct SetupRequest{
     //  (what the page with the games shows too). Empty: there is no choice,
     //  "Start" just ends the setup.
     std::vector<HomeGame> games;
+
+    //  The programs of those games (HomeProgram::game is the index into
+    //  "games"). When the game that was chosen has some, a screen of its own
+    //  follows the choice of the game: which program to start. Empty: none.
+    std::vector<HomeProgram> programs;
+
+    //  Fills "out" with the lines of the output log that came after "after"
+    //  (oldest first; the first call, with 0, gets what is kept). Empty: the
+    //  log panel stays empty.
+    std::function<void(quint64 after, std::vector<SetupLogLine>& out)> log_poll;
+
+    //  Which program this is ("PocketPilot 1.2.3, build 76"), for the report
+    //  that "Copy for Claude" makes.
+    QString build;
 
     //  Ask which game to start, as a screen of its own: after the questions
     //  that are asked (the language), or alone. (After the installation of
@@ -135,6 +163,9 @@ struct SetupResult{
     //  (HomeGame::name). Empty: none was chosen ("Choose later", the setup
     //  was skipped or closed, or there were no games to choose from).
     QString game;
+    //  The program that was chosen in that game, by its name (HomeProgram::name).
+    //  Empty: none was ("Choose later", or the game has none to choose from).
+    QString program;
 
     //  How the intro ended ("it played to the end", "it was skipped", or what
     //  went wrong); empty when there was no intro.

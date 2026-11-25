@@ -30,6 +30,11 @@ enum class PanelQualityStanding{
 //    UNCATEGORIZED,
 };
 
+//  PocketPilot: the small tag behind a program's name ("beta", "rough", "dev",
+//  ...; empty for a regular program) and, in "meaning", what it says. The side
+//  bar and the choice of a program in the setup show the same tags.
+std::string panel_standing_tag(PanelQualityStanding standing, std::string* meaning = nullptr);
+
 
 // Abstract base class that sets the interface for program descriptors.
 // A program descriptor contains various information (descriptions) of a program panel UI.

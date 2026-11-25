@@ -107,6 +107,7 @@ public:
     BooleanCheckBoxOption ASK_LANGUAGE;
     BooleanCheckBoxOption ASK_SETUP;
     BooleanCheckBoxOption ASK_GAME;
+    BooleanCheckBoxOption ASK_PROGRAM;
 
     ButtonOption OPEN_BASE_FOLDER_BUTTON;
     StringOption STATS_FILE;

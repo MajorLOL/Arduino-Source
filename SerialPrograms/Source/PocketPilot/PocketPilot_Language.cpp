@@ -8,11 +8,14 @@
 #include "Common/Compiler.h"
 #include <algorithm>
 #include <atomic>
+#include <deque>
 #include <functional>
+#include <mutex>
 #include <vector>
 #include <QAbstractButton>
 #include <QAction>
 #include <QApplication>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QDir>
 #include <QEvent>
@@ -41,7 +44,11 @@
 #include <QTreeWidget>
 #include <QUrl>
 #include <QVBoxLayout>
+#include "Common/Cpp/Logging/GlobalLogger.h"
+#include "Common/Cpp/Logging/LastLogTracker.h"
+#include "Common/Cpp/Logging/MultiOutputLogger.h"
 #include "Common/Cpp/Options/ConfigOption.h"
+#include "CommonFramework/Globals.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/PersistentSettings.h"
@@ -687,10 +694,92 @@ void keep_console(const QString& code){
     GlobalSettings::instance().GAME_CONSOLE.set(console_of(code));
 }
 
-std::function<void(std::vector<HomeGame>&)> g_game_lister;
-std::function<void(const QString&)> g_game_opener;
-//  A game that was chosen while there was no window to open it.
+//  The lines that the program writes, kept for the log panel on the screen
+//  with the programs (what "Copy for Claude" copies). It starts listening the
+//  first time the setup is asked, with the lines that the program kept until
+//  then, and keeps the last 1000.
+class SetupLogTap : public Logger{
+public:
+    virtual void log(const std::string& msg, Color color = Color()) override{
+        add(QDateTime::currentMSecsSinceEpoch(), msg, color);
+    }
+
+    void listen(){
+        if (m_listening.exchange(true)){
+            return;
+        }
+        //  What was written before this: the time is in the line itself.
+        const QRegularExpression stamp("^\\d{4}-\\d{1,2}-\\d{1,2} (\\d{1,2}):(\\d{2}):(\\d{2})(?:\\.(\\d+))? - ");
+        const QDateTime now = QDateTime::currentDateTime();
+        for (const LogLine& line : global_last_log_history().get_recent(400)){
+            qint64 msec = now.toMSecsSinceEpoch();
+            const QString text = QString::fromStdString(line.text);
+            const QRegularExpressionMatch match = stamp.match(text);
+            if (match.hasMatch()){
+                QDateTime when(now.date(), QTime(match.captured(1).toInt(), match.captured(2).toInt(), match.captured(3).toInt()));
+                if (when > now){
+                    when = when.addDays(-1);
+                }
+                msec = when.toMSecsSinceEpoch();
+            }
+            add(msec, line.text, line.color);
+        }
+        global_multi_logger().add_listener(*this);
+    }
+
+    void poll(quint64 after, std::vector<SetupLogLine>& out){
+        std::lock_guard<std::mutex> guard(m_lock);
+        for (const SetupLogLine& line : m_lines){
+            if (line.serial > after){
+                out.push_back(line);
+            }
+        }
+    }
+
+private:
+    void add(qint64 msec, const std::string& msg, Color color){
+        QString text = QString::fromStdString(msg);
+        //  The time of the line is shown on its own.
+        const qsizetype cut = text.indexOf(" - [");
+        if (cut >= 0 && cut < 40){
+            text = text.mid(cut + 3);
+        }
+        SetupLogLine line;
+        line.msec = msec;
+        line.text = text;
+        if (color == COLOR_RED){
+            line.level = 2;
+        }else if (color == COLOR_ORANGE || color == COLOR_YELLOW){
+            line.level = 1;
+        }else if (text.contains("error", Qt::CaseInsensitive) || text.contains("exception", Qt::CaseInsensitive)){
+            line.level = 2;
+        }else if (text.contains("warning", Qt::CaseInsensitive)){
+            line.level = 1;
+        }
+        std::lock_guard<std::mutex> guard(m_lock);
+        line.serial = ++m_serial;
+        m_lines.push_back(std::move(line));
+        while (m_lines.size() > 1000){
+            m_lines.pop_front();
+        }
+    }
+
+    std::atomic<bool> m_listening{false};
+    std::mutex m_lock;
+    std::deque<SetupLogLine> m_lines;
+    quint64 m_serial = 0;
+};
+SetupLogTap& setup_log_tap(){
+    static SetupLogTap tap;
+    return tap;
+}
+
+std::function<void(std::vector<HomeGame>&, std::vector<HomeProgram>&)> g_game_lister;
+std::function<void(const QString&, const QString&)> g_game_opener;
+//  A game (and the program in it) that was chosen while there was no window
+//  to open it.
 QString g_chosen_game;
+QString g_chosen_program;
 
 void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bool ask_game = false){
     GlobalSettings& settings = GlobalSettings::instance();
@@ -703,14 +792,29 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
     request.console_code = console_code_of(settings.GAME_CONSOLE.get());
     request.language_code = setting_code();
     request.play_intro = play_intro;
+    //  The output log on the screen with the programs, and the build for the
+    //  report that it copies.
+    setup_log_tap().listen();
+    request.log_poll = [](quint64 after, std::vector<SetupLogLine>& out){
+        setup_log_tap().poll(after, out);
+    };
+    request.build = QString::fromStdString(PROGRAM_NAME + " " + PROGRAM_VERSION + ", build " + PROGRAM_BUILD);
     //  At the start the main window is made after this: the screen stays up
     //  until it is there. (Opened from the settings, it is there already.)
     request.hold_screen = (g_game_opener == nullptr);
     //  The choice of a game: a screen of its own after the installation of the
     //  board, and, when the setting asks for it, at the start.
     if ((ask_board || ask_game) && g_game_lister){
-        g_game_lister(request.games);
-        global_logger_tagged().log("Setup: " + std::to_string(request.games.size()) + " games to choose from.");
+        g_game_lister(request.games, request.programs);
+        global_logger_tagged().log(
+            "Setup: " + std::to_string(request.games.size()) + " games to choose from, with " +
+            std::to_string(request.programs.size()) + " programs."
+        );
+        //  The setting can leave the choice of a program out: the game then
+        //  opens with its list, as before.
+        if (!settings.ASK_PROGRAM){
+            request.programs.clear();
+        }
     }
     request.ask_game = ask_game && !request.games.empty();
     const SetupResult result = run_setup(request);
@@ -745,9 +849,10 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
     //  for the window that is made next when there is not.
     if (!result.game.isEmpty()){
         if (g_game_opener){
-            g_game_opener(result.game);
+            g_game_opener(result.game, result.program);
         }else{
             g_chosen_game = result.game;
+            g_chosen_program = result.program;
         }
     }
 }
@@ -783,22 +888,36 @@ void show_start_screens(bool play_intro, bool ask_setup){
 
 size_t count_games_for_setup(){
     std::vector<HomeGame> games;
+    std::vector<HomeProgram> programs;
     if (g_game_lister){
-        g_game_lister(games);
+        g_game_lister(games, programs);
     }
     return games.size();
 }
+size_t count_programs_for_setup(){
+    std::vector<HomeGame> games;
+    std::vector<HomeProgram> programs;
+    if (g_game_lister){
+        g_game_lister(games, programs);
+    }
+    return programs.size();
+}
 
-void set_game_lister(std::function<void(std::vector<HomeGame>&)> lister){
+void set_game_lister(std::function<void(std::vector<HomeGame>&, std::vector<HomeProgram>&)> lister){
     g_game_lister = std::move(lister);
 }
-void set_game_opener(std::function<void(const QString& game)> opener){
+void set_game_opener(std::function<void(const QString& game, const QString& program)> opener){
     g_game_opener = std::move(opener);
 }
 QString take_chosen_game(){
     QString game;
     game.swap(g_chosen_game);
     return game;
+}
+QString take_chosen_program(){
+    QString program;
+    program.swap(g_chosen_program);
+    return program;
 }
 
 

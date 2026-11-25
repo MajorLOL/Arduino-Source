@@ -8,15 +8,23 @@
 #include "Common/Compiler.h"
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <deque>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <vector>
 #include <QApplication>
 #include <QAudioDevice>
+#include <QAudioFormat>
+#include <QAudioSource>
+#include <QCamera>
+#include <QCameraDevice>
 #include <QAudioOutput>
 #include <QClipboard>
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QDir>
 #include <QElapsedTimer>
@@ -29,6 +37,7 @@
 #include <QHash>
 #include <QImage>
 #include <QKeyEvent>
+#include <QMediaCaptureSession>
 #include <QMediaDevices>
 #include <QMediaMetaData>
 #include <QMediaPlayer>
@@ -39,9 +48,12 @@
 #include <QPixmap>
 #include <QPointer>
 #include <QRadialGradient>
+#include <QRegularExpression>
 #include <QScreen>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QStringList>
+#include <QSysInfo>
 #include <QTemporaryDir>
 #include <QThread>
 #include <QTimer>
@@ -50,6 +62,7 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 #include <QVideoWidget>
+#include <QWheelEvent>
 #include <QWidget>
 #include "PocketPilot_Firmware.h"
 #include "PocketPilot_Language.h"
@@ -381,6 +394,22 @@ public:
     virtual void escape_pressed(Canvas& canvas){
         (void)canvas;
     }
+    //  The wheel turned over this place (delta: 120 for one notch up). True
+    //  when the page used it.
+    virtual bool wheel(Canvas& canvas, const QPointF& at, int delta){
+        (void)canvas;
+        (void)at;
+        (void)delta;
+        return false;
+    }
+    //  The mouse is pressed (phase 0), moves (1) or is let go (2) on a place
+    //  whose id starts with "drag:".
+    virtual void drag(Canvas& canvas, const QString& id, const QPointF& at, int phase){
+        (void)canvas;
+        (void)id;
+        (void)at;
+        (void)phase;
+    }
     //  What the page is doing, in words (for the tests).
     virtual QString state() const{
         return QString();
@@ -531,7 +560,18 @@ public:
     void go_guide();
     void go_other();
     void go_done(const QString& board);
-    void go_games();
+    //  "selected": the game that is picked already (-1: none).
+    void go_games(int selected = -1);
+    //  The programs of this game (an index into the games).
+    void go_programs(int game);
+    bool has_programs(int game) const{
+        for (const HomeProgram& program : m_request.programs){
+            if (program.game == game){
+                return true;
+            }
+        }
+        return false;
+    }
     //  The end: the loop of run_setup() stops.
     void finish();
 
@@ -613,7 +653,13 @@ public:
     bool click(const QString& id);
     //  Moves the mouse over it.
     bool move_to(const QString& id);
-    void press_key(int key, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
+    void press_key(int key, Qt::KeyboardModifiers modifiers = Qt::NoModifier, const QString& text = QString());
+    //  Types the letters one by one.
+    void type_text(const QString& text);
+    //  Turns the wheel over the middle of it (positive: up).
+    bool scroll(const QString& id, int notches);
+    //  Drags over it, from one place to another (0 to 1 of its width).
+    bool drag_over(const QString& id, double from, double to);
     //  Time passes (with pictures drawn on the way).
     void wait(double seconds);
     QImage picture();
@@ -628,6 +674,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void mouseReleaseEvent(QMouseEvent* event) override;
     virtual void keyPressEvent(QKeyEvent* event) override;
+    virtual void wheelEvent(QWheelEvent* event) override;
     virtual void closeEvent(QCloseEvent* event) override;
 
 private:
@@ -667,6 +714,7 @@ private:
     QString m_focus;
     bool m_focus_visible = false;
     QString m_pressed;
+    QString m_drag_id;
 
     double m_scale = 1;
     QPointF m_offset;
@@ -3418,13 +3466,19 @@ LogoGround logo_ground(const QPixmap& logo){
 
 class GamesPage : public Page{
 public:
-    explicit GamesPage(Canvas& canvas)
+    explicit GamesPage(Canvas& canvas, int selected = -1)
         : m_games(canvas.request().games)
     {
         const int count = (int)m_games.size();
         m_columns = count <= 12 ? 4 : 5;
         for (const HomeGame& game : m_games){
             m_grounds.push_back(logo_ground(game.icon));
+        }
+        if (selected >= 0 && selected < count && m_games[(size_t)selected].enabled){
+            //  Back from the programs of this game.
+            m_selected = selected;
+            canvas.set_focus_id(tile_id(selected));
+            return;
         }
         const int first = next_enabled(-1, +1);
         canvas.set_focus_id(first >= 0 ? tile_id(first) : QString("later"));
@@ -3538,6 +3592,11 @@ private:
     }
     void start(Canvas& canvas){
         if (m_selected < 0){
+            return;
+        }
+        if (canvas.has_programs(m_selected)){
+            //  The game is picked; which program to start comes next.
+            canvas.go_programs(m_selected);
             return;
         }
         canvas.result().game = m_games[(size_t)m_selected].name;
@@ -3666,6 +3725,1780 @@ private:
     std::vector<LogoGround> m_grounds;
     int m_columns = 4;
     int m_selected = -1;
+};
+
+
+//  ---------------------------------------------------------------------
+//  The picture and the sound of a capture card, for the screen with the
+//  programs
+//  ---------------------------------------------------------------------
+
+//  The first capture card Qt can see: its picture (as small as the screen
+//  needs it), how many pictures come each second, and the loudness of the
+//  sound that belongs to it. Without a person (the test) a made-up picture
+//  and a made-up sound stand in, so that the screen can be looked at on a
+//  computer that has no card; they are never used otherwise.
+class LiveInput{
+public:
+    explicit LiveInput(bool synthetic)
+        : m_synthetic(synthetic)
+    {
+        m_clock.start();
+        refresh_devices();
+        if (m_synthetic){
+            m_video_names = QStringList{"USB3 Video", "HD60 X"};
+            m_audio_name = "USB3 Audio";
+            m_audio_ok = true;
+            m_video_index = 0;
+            m_device_ids.clear();
+            m_device_ids << QByteArray() << QByteArray();
+            return;
+        }
+        const QString wanted = QSettings(QSettings::IniFormat, QSettings::UserScope, "PocketPilot", "Setup")
+            .value("capture_device").toString();
+        int index = 0;
+        for (int c = 0; c < m_video_names.size(); c++){
+            if (m_video_names[c] == wanted){
+                index = c;
+            }
+        }
+        select_video(index, false);
+    }
+    ~LiveInput(){
+        stop();
+    }
+
+    //  The names of the capture cards, and which one is used (-1: none).
+    const QStringList& video_names() const{
+        return m_video_names;
+    }
+    int video_index() const{
+        return m_video_index;
+    }
+    void select_video(int index, bool remember = true){
+        stop();
+        m_picture = QImage();
+        m_has_picture = false;
+        m_fps = 0;
+        m_window_frames = 0;
+        m_error.clear();
+        m_audio_name.clear();
+        m_audio_ok = false;
+        m_level = 0;
+        if (index < 0 || index >= m_video_names.size()){
+            m_video_index = -1;
+            return;
+        }
+        m_video_index = index;
+        if (m_synthetic){
+            m_audio_name = index == 0 ? "USB3 Audio" : "HD60 X Audio";
+            return;
+        }
+        if (remember){
+            QSettings(QSettings::IniFormat, QSettings::UserScope, "PocketPilot", "Setup")
+                .setValue("capture_device", m_video_names[index]);
+        }
+        start_video(index);
+        start_audio(index);
+    }
+
+    bool has_picture() const{
+        return m_has_picture;
+    }
+    //  A picture came in the last two seconds.
+    bool live() const{
+        if (m_synthetic){
+            return m_video_index >= 0;
+        }
+        return m_has_picture && (double)m_clock.elapsed() / 1000.0 - m_last_frame < 2.0;
+    }
+    const QImage& picture() const{
+        return m_picture;
+    }
+    QSize picture_size() const{
+        return m_synthetic ? QSize(1920, 1080) : m_size;
+    }
+    double fps() const{
+        return m_synthetic && m_video_index >= 0 ? 60.0 : m_fps;
+    }
+    const QString& error() const{
+        return m_error;
+    }
+
+    const QString& audio_name() const{
+        return m_audio_name;
+    }
+    bool audio_ok() const{
+        return m_audio_ok;
+    }
+    //  0 (silence, -60 dB or less) to 1 (0 dB).
+    double level() const{
+        return m_level;
+    }
+    double level_db() const{
+        return m_level <= 0.001 ? -60.0 : m_level * 60.0 - 60.0;
+    }
+    const QStringList& audio_inputs() const{
+        return m_audio_inputs;
+    }
+
+    void step(double dt){
+        m_since_fps += dt;
+        m_since_devices += dt;
+        if (m_synthetic){
+            m_synthetic_time += dt;
+            if (m_video_index >= 0){
+                const double wave = 0.5 + 0.5 * std::sin(m_synthetic_time * 3.1) * std::sin(m_synthetic_time * 0.9 + 1.0);
+                m_level = clamp01(0.25 + 0.55 * wave * (0.6 + 0.4 * std::sin(m_synthetic_time * 11.0)));
+                m_has_picture = true;
+                if (m_picture.isNull()){
+                    m_picture = sunset_picture();
+                }
+            }
+            return;
+        }
+        if (m_since_fps >= 1.0){
+            m_fps = (double)m_window_frames / m_since_fps;
+            m_window_frames = 0;
+            m_since_fps = 0;
+        }
+        poll_audio(dt);
+        if (m_since_devices >= 3.0){
+            m_since_devices = 0;
+            const QStringList before = m_video_names;
+            refresh_devices();
+            if (before != m_video_names){
+                //  A card came or went: look again.
+                const QString used = m_video_index >= 0 && m_video_index < before.size() ? before[m_video_index] : QString();
+                int index = -1;
+                for (int c = 0; c < m_video_names.size(); c++){
+                    if (m_video_names[c] == used){
+                        index = c;
+                    }
+                }
+                select_video(index >= 0 ? index : (m_video_names.isEmpty() ? -1 : 0), false);
+            }
+        }
+    }
+
+private:
+    void refresh_devices(){
+        if (m_synthetic){
+            return;
+        }
+        m_video_names.clear();
+        m_device_ids.clear();
+        for (const QCameraDevice& device : QMediaDevices::videoInputs()){
+            m_video_names << device.description();
+            m_device_ids << device.id();
+        }
+        m_audio_inputs.clear();
+        for (const QAudioDevice& device : QMediaDevices::audioInputs()){
+            m_audio_inputs << device.description();
+        }
+    }
+
+    void stop(){
+        if (m_audio_source != nullptr){
+            m_audio_source->stop();
+        }
+        m_audio_io = nullptr;
+        m_audio_source.reset();
+        if (m_camera != nullptr){
+            m_camera->stop();
+        }
+        if (m_session != nullptr){
+            m_session->setCamera(nullptr);
+            m_session->setVideoSink(nullptr);
+        }
+        m_session.reset();
+        m_camera.reset();
+        m_sink.reset();
+    }
+
+    void start_video(int index){
+        const QList<QCameraDevice> devices = QMediaDevices::videoInputs();
+        QCameraDevice device;
+        bool found = false;
+        for (const QCameraDevice& candidate : devices){
+            if (candidate.id() == m_device_ids[index]){
+                device = candidate;
+                found = true;
+            }
+        }
+        if (!found){
+            m_error = "The card went away.";
+            return;
+        }
+        m_camera.reset(new QCamera(device));
+        //  The largest picture up to 1080p, the fastest of those.
+        QCameraFormat best;
+        double best_score = -1;
+        for (const QCameraFormat& format : device.videoFormats()){
+            const double area = (double)format.resolution().width() * format.resolution().height();
+            if (area > 1920.0 * 1080.0 + 1){
+                continue;
+            }
+            const double score = area + format.maxFrameRate() * 1000.0;
+            if (score > best_score){
+                best_score = score;
+                best = format;
+            }
+        }
+        if (!best.isNull()){
+            m_camera->setCameraFormat(best);
+        }
+        m_sink.reset(new QVideoSink());
+        m_session.reset(new QMediaCaptureSession());
+        m_session->setCamera(m_camera.get());
+        m_session->setVideoSink(m_sink.get());
+        QObject::connect(m_sink.get(), &QVideoSink::videoFrameChanged, &m_context, [this](const QVideoFrame& frame){
+            on_frame(frame);
+        });
+        QObject::connect(m_camera.get(), &QCamera::errorOccurred, &m_context, [this](QCamera::Error, const QString& text){
+            m_error = text.isEmpty() ? QString("The card gives no picture.") : text;
+        });
+        m_camera->start();
+    }
+
+    void on_frame(const QVideoFrame& frame){
+        const double now = (double)m_clock.elapsed() / 1000.0;
+        m_window_frames++;
+        m_last_frame = now;
+        if (now - m_last_convert < 0.066 && m_has_picture){
+            return;
+        }
+        m_last_convert = now;
+        const QImage image = frame.toImage();
+        if (image.isNull()){
+            return;
+        }
+        m_size = image.size();
+        m_picture = image.width() > 640 ? image.scaledToWidth(640, Qt::FastTransformation) : image;
+        m_has_picture = true;
+        m_error.clear();
+    }
+
+    //  The sound of the card is the input that has a word of its name.
+    void start_audio(int index){
+        static const QStringList GENERIC{"video", "audio", "capture", "camera", "webcam", "device", "digital", "interface", "input", "usb", "microphone"};
+        auto words = [&](const QString& text){
+            QStringList found;
+            for (const QString& word : text.toLower().split(QRegularExpression("[^a-z0-9]+"), Qt::SkipEmptyParts)){
+                if (word.size() >= 3 && !GENERIC.contains(word)){
+                    found << word;
+                }
+            }
+            return found;
+        };
+        const QStringList wanted = words(m_video_names[index]);
+        QAudioDevice best;
+        int best_score = 0;
+        for (const QAudioDevice& device : QMediaDevices::audioInputs()){
+            int score = 0;
+            for (const QString& word : words(device.description())){
+                if (wanted.contains(word)){
+                    score++;
+                }
+            }
+            if (score > best_score){
+                best_score = score;
+                best = device;
+            }
+        }
+        if (best.isNull()){
+            return;
+        }
+        m_audio_name = best.description();
+        const QAudioFormat format = best.preferredFormat();
+        if (format.sampleFormat() == QAudioFormat::Unknown){
+            return;
+        }
+        m_audio_format = format;
+        m_audio_source.reset(new QAudioSource(best, format));
+        m_audio_io = m_audio_source->start();
+        m_audio_ok = m_audio_io != nullptr;
+    }
+
+    void poll_audio(double dt){
+        if (m_audio_io == nullptr){
+            m_level = 0;
+            return;
+        }
+        const QByteArray data = m_audio_io->readAll();
+        double peak = 0;
+        switch (m_audio_format.sampleFormat()){
+        case QAudioFormat::UInt8:
+            for (char byte : data){
+                peak = std::max(peak, std::fabs(((double)(unsigned char)byte - 128.0) / 128.0));
+            }
+            break;
+        case QAudioFormat::Int16:
+            for (qsizetype c = 0; c + 1 < data.size(); c += 2){
+                qint16 sample;
+                std::memcpy(&sample, data.constData() + c, 2);
+                peak = std::max(peak, std::fabs((double)sample / 32768.0));
+            }
+            break;
+        case QAudioFormat::Int32:
+            for (qsizetype c = 0; c + 3 < data.size(); c += 4){
+                qint32 sample;
+                std::memcpy(&sample, data.constData() + c, 4);
+                peak = std::max(peak, std::fabs((double)sample / 2147483648.0));
+            }
+            break;
+        case QAudioFormat::Float:
+            for (qsizetype c = 0; c + 3 < data.size(); c += 4){
+                float sample;
+                std::memcpy(&sample, data.constData() + c, 4);
+                peak = std::max(peak, std::fabs((double)sample));
+            }
+            break;
+        default:
+            break;
+        }
+        //  Decibel, from -60 up to 0, as 0 to 1; it falls slowly.
+        const double now = peak < 0.001 ? 0.0 : clamp01((20.0 * std::log10(peak) + 60.0) / 60.0);
+        m_level = now > m_level ? now : std::max(now, m_level - dt * 1.2);
+    }
+
+    //  The made-up picture of the test: a sun on a hill.
+    static QImage sunset_picture(){
+        QImage image(640, 360, QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&image);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        QLinearGradient sky(0, 0, 0, 360);
+        sky.setColorAt(0.0, QColor(28, 33, 54));
+        sky.setColorAt(0.55, QColor(196, 112, 84));
+        sky.setColorAt(1.0, QColor(232, 160, 110));
+        painter.fillRect(image.rect(), sky);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(255, 226, 150));
+        painter.drawEllipse(QPointF(400, 205), 38, 38);
+        painter.setBrush(QColor(30, 34, 52));
+        QPainterPath hill;
+        hill.moveTo(0, 262);
+        hill.cubicTo(150, 230, 300, 300, 420, 262);
+        hill.cubicTo(520, 232, 600, 250, 640, 262);
+        hill.lineTo(640, 360);
+        hill.lineTo(0, 360);
+        painter.drawPath(hill);
+        painter.end();
+        return image;
+    }
+
+private:
+    bool m_synthetic;
+    double m_synthetic_time = 0;
+    QObject m_context;
+    QElapsedTimer m_clock;
+
+    QStringList m_video_names;
+    QList<QByteArray> m_device_ids;
+    QStringList m_audio_inputs;
+    int m_video_index = -1;
+    std::unique_ptr<QCamera> m_camera;
+    std::unique_ptr<QMediaCaptureSession> m_session;
+    std::unique_ptr<QVideoSink> m_sink;
+    QImage m_picture;
+    QSize m_size;
+    bool m_has_picture = false;
+    int m_window_frames = 0;
+    double m_since_fps = 0;
+    double m_since_devices = 0;
+    double m_last_frame = -10;
+    double m_last_convert = -10;
+    double m_fps = 0;
+    QString m_error;
+
+    std::unique_ptr<QAudioSource> m_audio_source;
+    QIODevice* m_audio_io = nullptr;
+    QAudioFormat m_audio_format;
+    QString m_audio_name;
+    bool m_audio_ok = false;
+    double m_level = 0;
+};
+
+
+//  ---------------------------------------------------------------------
+//  The programs of the game that was chosen: which one to start, with the
+//  picture of the game, the checks and the output log next to it
+//  ---------------------------------------------------------------------
+
+//  The six lanes of the timeline.
+enum class Lane{
+    VIDEO,
+    AUDIO,
+    BOARD,
+    LOG,
+    BUTTONS,
+    PROGRAM,
+};
+constexpr int LANE_COUNT = 6;
+
+//  What the program knew each half second.
+struct LaneSample{
+    double at = 0;          //  on the clock of the screen
+    double fps = 0;
+    double level = 0;       //  0 to 1
+    bool board = false;
+};
+
+struct LogEntry{
+    quint64 serial = 0;
+    double at = 0;          //  on the clock of the screen
+    qint64 msec = 0;
+    int level = 0;
+    QString text;
+};
+
+QString level_name(int level){
+    return level >= 2 ? "ERROR" : level == 1 ? "WARN" : "INFO";
+}
+
+//  A small picture for a lane, centered on c.
+void lane_icon(QPainter& painter, Lane lane, const QPointF& c, const QColor& color){
+    QPen pen(color, 1.8);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(pen);
+    painter.setBrush(Qt::NoBrush);
+    switch (lane){
+    case Lane::VIDEO:
+        painter.drawRoundedRect(QRectF(c.x() - 9, c.y() - 6, 13, 12), 3, 3);
+        painter.drawPolyline(QPolygonF({QPointF(c.x() + 4, c.y() - 2), QPointF(c.x() + 10, c.y() - 5), QPointF(c.x() + 10, c.y() + 5), QPointF(c.x() + 4, c.y() + 2)}));
+        break;
+    case Lane::AUDIO:
+        painter.drawPolyline(QPolygonF({QPointF(c.x() - 9, c.y() - 3), QPointF(c.x() - 5, c.y() - 3), QPointF(c.x(), c.y() - 8), QPointF(c.x(), c.y() + 8), QPointF(c.x() - 5, c.y() + 3), QPointF(c.x() - 9, c.y() + 3)}));
+        painter.drawArc(QRectF(c.x() - 3, c.y() - 5, 10, 10), -50 * 16, 100 * 16);
+        break;
+    case Lane::BOARD:
+        painter.drawRoundedRect(QRectF(c.x() - 6, c.y() - 6, 12, 12), 2, 2);
+        for (int c2 = -1; c2 <= 1; c2++){
+            painter.drawLine(QPointF(c.x() + c2 * 4, c.y() - 9), QPointF(c.x() + c2 * 4, c.y() - 6));
+            painter.drawLine(QPointF(c.x() + c2 * 4, c.y() + 6), QPointF(c.x() + c2 * 4, c.y() + 9));
+        }
+        break;
+    case Lane::LOG:
+        painter.drawLine(QPointF(c.x() - 8, c.y() - 6), QPointF(c.x() + 8, c.y() - 6));
+        painter.drawLine(QPointF(c.x() - 8, c.y()), QPointF(c.x() + 8, c.y()));
+        painter.drawLine(QPointF(c.x() - 8, c.y() + 6), QPointF(c.x() + 2, c.y() + 6));
+        break;
+    case Lane::BUTTONS:
+        painter.drawRoundedRect(QRectF(c.x() - 10, c.y() - 6, 20, 12), 6, 6);
+        painter.drawLine(QPointF(c.x() - 5, c.y() - 2), QPointF(c.x() - 5, c.y() + 2));
+        painter.drawLine(QPointF(c.x() - 7, c.y()), QPointF(c.x() - 3, c.y()));
+        painter.drawPoint(QPointF(c.x() + 4, c.y()));
+        break;
+    case Lane::PROGRAM:
+        painter.drawLine(QPointF(c.x() - 8, c.y() - 6), QPointF(c.x() - 8, c.y() + 6));
+        painter.drawPolyline(QPolygonF({QPointF(c.x() - 3, c.y() - 6), QPointF(c.x() + 8, c.y()), QPointF(c.x() - 3, c.y() + 6), QPointF(c.x() - 3, c.y() - 6)}));
+        break;
+    }
+}
+
+//  A check that is done, one that is still waiting, or one that failed.
+enum class Light{
+    OK,
+    WAIT,
+    BAD,
+};
+
+void draw_light(QPainter& painter, Light light, const QPointF& c, double radius, double alpha){
+    painter.setPen(Qt::NoPen);
+    switch (light){
+    case Light::OK:
+        painter.setBrush(with_alpha(ORANGE, alpha));
+        painter.drawEllipse(c, radius, radius);
+        draw_check(painter, QRectF(c.x() - radius, c.y() - radius, 2 * radius, 2 * radius).adjusted(2, 2, -2, -2), with_alpha(Qt::black, alpha), 2.4);
+        break;
+    case Light::WAIT:
+        painter.setPen(QPen(white(0.55 * alpha), 1.8));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(c, radius - 1, radius - 1);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(white(0.55 * alpha));
+        painter.drawEllipse(c, radius * 0.36, radius * 0.36);
+        break;
+    case Light::BAD:
+        painter.setBrush(with_alpha(YELLOW, alpha));
+        painter.drawEllipse(c, radius, radius);
+        painter.setPen(QPen(with_alpha(Qt::black, alpha), 2.6, Qt::SolidLine, Qt::RoundCap));
+        painter.drawLine(QPointF(c.x(), c.y() - radius * 0.5), QPointF(c.x(), c.y() + radius * 0.12));
+        painter.drawPoint(QPointF(c.x(), c.y() + radius * 0.52));
+        break;
+    }
+}
+
+class ProgramsPage : public Page{
+public:
+    ProgramsPage(Canvas& canvas, int game)
+        : m_game(game)
+        , m_request(&canvas.request())
+        , m_game_info(&canvas.request().games[(size_t)game])
+        , m_game_name(canvas.request().games[(size_t)game].name)
+        , m_build(canvas.request().build)
+        , m_input(canvas.test_mode())
+        , m_probe(canvas.app_folder(), canvas.scan_override())
+        , m_test_probe(canvas.test_mode())
+    {
+        const SetupRequest& request = canvas.request();
+        for (const HomeProgram& program : request.programs){
+            if (program.game == game){
+                m_programs.push_back(program);
+            }
+        }
+        std::set<QString> sections;
+        for (const HomeProgram& program : m_programs){
+            if (!program.section.isEmpty()){
+                sections.insert(program.section);
+            }
+        }
+        m_sections = sections.size() > 1;
+        rebuild_view(QString());
+        m_probe.step(10, true);
+        look_at_board();
+        poll_log();
+        canvas.set_focus_id("start");
+    }
+
+    virtual const char* name() const override{
+        return "programs";
+    }
+
+    //  ---- time
+
+    virtual void step(double dt) override{
+        m_clock += dt;
+        m_since_sample += dt;
+        m_since_poll += dt;
+        m_input.step(dt);
+        m_scroll.step(dt, 16.0);
+        if (m_toast_left > 0){
+            m_toast_left -= dt;
+        }
+        m_probe.step(dt, m_test_probe);
+        if (m_since_poll >= 0.5){
+            m_since_poll = 0;
+            look_at_board();
+            poll_log();
+        }
+        while (m_since_sample >= 0.5){
+            m_since_sample -= 0.5;
+            LaneSample sample;
+            sample.at = m_clock - m_since_sample;
+            sample.fps = m_input.live() ? m_input.fps() : 0;
+            sample.level = m_input.audio_ok() ? m_input.level() : 0;
+            sample.board = m_board_ok;
+            m_samples.push_back(sample);
+            while (!m_samples.empty() && m_clock - m_samples.front().at > 130.0){
+                m_samples.pop_front();
+            }
+        }
+    }
+
+    //  ---- the page
+
+    virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
+        const Intro in = intro_for(canvas);
+        const double a_head = eo(prog(t, in.head, in.head + 0.5));
+        const double a_body = eo(prog(t, in.sub, in.sub + 0.6));
+        const double a_foot = eo(prog(t, in.buttons, in.buttons + 0.5));
+
+        const QString heading = T("Which program do you want to start?");
+        draw_heading(painter, heading, 138, 34, 58, prog(t, in.head, in.head + 0.9), 1.0, 1100);
+        paint_game_badge(painter, a_head);
+        paint_search(canvas, painter, a_body);
+        paint_list(canvas, painter, a_body);
+        paint_detail(painter, a_body);
+        paint_video(canvas, painter, a_body);
+        paint_checks(painter, a_body);
+        paint_log(canvas, painter, a_body);
+        paint_lanes(canvas, painter, a_body);
+        paint_footer(canvas, painter, a_foot);
+        if (m_source_open){
+            paint_sources(canvas, painter);
+        }
+    }
+
+    virtual void activate(Canvas& canvas, const QString& id) override{
+        if (id.startsWith("prog:")){
+            select(id.mid(5).toInt());
+            canvas.set_focus_id("start");
+        }else if (id == "search"){
+            //  Typing goes to the search anyway.
+        }else if (id == "search-clear"){
+            set_query(QString());
+        }else if (id.startsWith("lvl:")){
+            m_level = id.mid(4).toInt();
+            m_log_offset = 0;
+        }else if (id == "copy-claude"){
+            canvas.copy_text(report());
+            toast(T("Copied. Paste it into Claude."));
+        }else if (id == "copy-log"){
+            canvas.copy_text(visible_log_text());
+            toast(T("Copied."));
+        }else if (id == "save-log"){
+            save_report(canvas);
+        }else if (id == "source"){
+            m_source_open = !m_source_open;
+        }else if (id.startsWith("src:")){
+            m_input.select_video(id.mid(4).toInt());
+            m_source_open = false;
+        }else if (id == "all"){
+            canvas.go_games(m_game);
+        }else if (id == "later"){
+            canvas.result().game = canvas.request().games[(size_t)m_game].name;
+            canvas.result().program.clear();
+            canvas.finish();
+        }else if (id == "start"){
+            start(canvas);
+        }
+    }
+
+    virtual bool key(Canvas& canvas, QKeyEvent& event) override{
+        m_keys_seen++;
+        m_key_times.push_back(m_clock);
+        while (!m_key_times.empty() && m_clock - m_key_times.front() > 130.0){
+            m_key_times.pop_front();
+        }
+        const QString focus = canvas.focus_id();
+        const bool on_button = !(focus.isEmpty() || focus == "start" || focus == "search" || focus.startsWith("prog:"));
+        const int key = event.key();
+        const Qt::KeyboardModifiers modifiers = event.modifiers();
+        switch (key){
+        case Qt::Key_Up:
+            move(-1);
+            return true;
+        case Qt::Key_Down:
+            move(+1);
+            return true;
+        case Qt::Key_PageUp:
+            move(-8);
+            return true;
+        case Qt::Key_PageDown:
+            move(+8);
+            return true;
+        case Qt::Key_Home:
+            if (!m_view.empty()){
+                select_view(0);
+            }
+            return true;
+        case Qt::Key_End:
+            if (!m_view.empty()){
+                select_view((int)m_view.size() - 1);
+            }
+            return true;
+        case Qt::Key_Backspace:
+            if (!m_query.isEmpty()){
+                set_query(m_query.left(m_query.size() - 1));
+            }
+            return true;
+        case Qt::Key_Delete:
+            set_query(QString());
+            return true;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+            if (on_button){
+                return false;
+            }
+            start(canvas);
+            return true;
+        case Qt::Key_Escape:
+        case Qt::Key_Tab:
+        case Qt::Key_Backtab:
+        case Qt::Key_Left:
+        case Qt::Key_Right:
+            return false;
+        default:
+            break;
+        }
+        if (modifiers & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier)){
+            return false;
+        }
+        const QString text = event.text();
+        if (text.isEmpty() || !text[0].isPrint()){
+            return false;
+        }
+        if (text[0] == ' '){
+            if (on_button){
+                return false;
+            }
+            if (m_query.isEmpty()){
+                return true;
+            }
+        }
+        set_query(m_query + text);
+        if (focus != "start"){
+            canvas.set_focus_id("start");
+        }
+        return true;
+    }
+    virtual void enter_pressed(Canvas& canvas) override{
+        start(canvas);
+    }
+    virtual void escape_pressed(Canvas& canvas) override{
+        if (m_source_open){
+            m_source_open = false;
+        }else if (!m_query.isEmpty()){
+            set_query(QString());
+        }else{
+            canvas.go_games(m_game);
+        }
+    }
+
+    virtual bool wheel(Canvas& canvas, const QPointF& at, int delta) override{
+        (void)canvas;
+        const double notches = (double)delta / 120.0;
+        if (LIST_RECT.contains(at) || SEARCH_RECT.contains(at)){
+            m_scroll.target = std::max(0.0, std::min(max_scroll(), m_scroll.target - notches * 2 * ROW_PITCH));
+            return true;
+        }
+        if (LOG_RECT.contains(at)){
+            m_log_offset = std::max(0, std::min(std::max(0, (int)visible_lines().size() - LOG_ROWS), m_log_offset + (int)std::lround(notches * 3)));
+            return true;
+        }
+        return false;
+    }
+
+    virtual void drag(Canvas& canvas, const QString& id, const QPointF& at, int phase) override{
+        (void)canvas;
+        if (id != "drag:lanes"){
+            return;
+        }
+        const double x = std::max(CHART_X0, std::min(CHART_X1, at.x()));
+        if (phase == 0){
+            m_drag_x = x;
+            m_dragging = true;
+        }else if (phase == 1 && m_dragging && std::fabs(x - m_drag_x) > 6){
+            m_sel_a = age_at(m_drag_x);
+            m_sel_b = age_at(x);
+            m_selection = true;
+        }else if (phase == 2){
+            if (m_dragging && std::fabs(x - m_drag_x) <= 6){
+                m_selection = false;
+            }
+            m_dragging = false;
+        }
+    }
+
+    virtual QString state() const override{
+        const QString program = m_selected >= 0 && m_selected < (int)m_view.size() ? m_programs[(size_t)m_view[(size_t)m_selected]].name : QString();
+        return "selected=" + program + ";query=" + m_query + ";level=" + QString::number(m_level) +
+            ";log=" + QString::number(m_log.size()) + ";shown=" + QString::number(visible_lines().size()) +
+            ";range=" + (m_selection ? QString::number((int)std::lround(std::fabs(m_sel_a - m_sel_b))) : QString("0")) +
+            ";rows=" + QString::number(m_view.size()) + ";saved=" + m_saved_path;
+    }
+
+private:
+    //  ---- the places, in the 1920 x 1080 of the screen
+    static constexpr double ROW_PITCH = 51;
+    static constexpr double HEAD_PITCH = 40;
+    static constexpr int LOG_ROWS = 6;
+    static constexpr double CHART_X0 = 806;
+    static constexpr double CHART_X1 = 1762;
+    static constexpr double LANE_Y0 = 574;
+    static constexpr double LANE_H = 52;
+    const QRectF SEARCH_RECT{135, 138, 375, 50};
+    const QRectF LIST_RECT{135, 200, 375, 468};
+    const QRectF DETAIL_RECT{135, 678, 375, 264};
+    const QRectF VIDEO_RECT{528, 138, 510, 287};
+    const QRectF CHECKS_RECT{528, 437, 510, 46};
+    const QRectF LOG_RECT{1056, 138, 729, 345};
+    const QRectF LANES_RECT{528, 497, 1257, 445};
+
+    struct Item{
+        bool header = false;
+        QString text;
+        int view = -1;          //  index in m_view
+        double y = 0;           //  from the top of the list
+        double h = 0;
+    };
+
+    //  ---- the list
+
+    void rebuild_view(const QString& query){
+        QString keep;
+        if (m_selected >= 0 && m_selected < (int)m_view.size()){
+            keep = m_programs[(size_t)m_view[(size_t)m_selected]].name;
+        }
+        m_view.clear();
+        for (size_t c = 0; c < m_programs.size(); c++){
+            if (query.isEmpty() || m_programs[c].name.contains(query, Qt::CaseInsensitive)){
+                m_view.push_back((int)c);
+            }
+        }
+        m_selected = m_view.empty() ? -1 : 0;
+        for (size_t c = 0; c < m_view.size(); c++){
+            if (m_programs[(size_t)m_view[c]].name == keep){
+                m_selected = (int)c;
+            }
+        }
+        m_items.clear();
+        double y = 0;
+        QString section = "\x01";
+        for (size_t c = 0; c < m_view.size(); c++){
+            const HomeProgram& program = m_programs[(size_t)m_view[c]];
+            if (m_sections && program.section != section){
+                section = program.section;
+                if (!section.isEmpty()){
+                    Item item;
+                    item.header = true;
+                    item.text = section;
+                    item.y = y;
+                    item.h = HEAD_PITCH;
+                    m_items.push_back(item);
+                    y += item.h;
+                }
+            }
+            Item item;
+            item.text = program.name;
+            item.view = (int)c;
+            item.y = y;
+            item.h = ROW_PITCH;
+            m_items.push_back(item);
+            y += item.h;
+        }
+        m_content = y;
+        m_scroll.target = std::max(0.0, std::min(max_scroll(), m_scroll.target));
+        ensure_visible();
+    }
+    void set_query(const QString& query){
+        m_query = query;
+        rebuild_view(query);
+    }
+    double max_scroll() const{
+        return std::max(0.0, m_content - LIST_RECT.height());
+    }
+    void select_view(int view){
+        m_selected = std::max(0, std::min((int)m_view.size() - 1, view));
+        ensure_visible();
+    }
+    void select(int view){
+        if (view >= 0 && view < (int)m_view.size()){
+            select_view(view);
+        }
+    }
+    void move(int step){
+        if (m_view.empty()){
+            return;
+        }
+        select_view(m_selected + step);
+    }
+    void ensure_visible(){
+        for (const Item& item : m_items){
+            if (item.view == m_selected && m_selected >= 0){
+                //  A header above the first row of its section comes with it.
+                double top = item.y;
+                const size_t at = (size_t)(&item - m_items.data());
+                if (at > 0 && m_items[at - 1].header){
+                    top = m_items[at - 1].y;
+                }
+                if (top < m_scroll.target){
+                    m_scroll.target = top;
+                }else if (item.y + item.h > m_scroll.target + LIST_RECT.height()){
+                    m_scroll.target = item.y + item.h - LIST_RECT.height();
+                }
+                m_scroll.target = std::max(0.0, std::min(max_scroll(), m_scroll.target));
+            }
+        }
+    }
+    const HomeProgram* selected_program() const{
+        if (m_selected < 0 || m_selected >= (int)m_view.size()){
+            return nullptr;
+        }
+        return &m_programs[(size_t)m_view[(size_t)m_selected]];
+    }
+    void start(Canvas& canvas){
+        const HomeProgram* program = selected_program();
+        if (program == nullptr){
+            return;
+        }
+        canvas.result().game = canvas.request().games[(size_t)m_game].name;
+        canvas.result().program = program->name;
+        canvas.finish();
+    }
+
+    //  ---- the log
+
+    void poll_log(){
+        if (!m_request->log_poll){
+            return;
+        }
+        std::vector<SetupLogLine> lines;
+        m_request->log_poll(m_last_serial, lines);
+        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        for (const SetupLogLine& line : lines){
+            LogEntry entry;
+            entry.serial = line.serial;
+            entry.msec = line.msec;
+            entry.level = line.level;
+            entry.text = line.text;
+            entry.at = m_clock - (double)(now - line.msec) / 1000.0;
+            m_log.push_back(entry);
+            m_last_serial = std::max(m_last_serial, line.serial);
+        }
+        while (m_log.size() > 3000){
+            m_log.pop_front();
+        }
+        if (!lines.empty() && m_log_offset > 0){
+            //  What is read stays where it is.
+            m_log_offset += (int)lines.size();
+        }
+    }
+    std::vector<const LogEntry*> visible_lines() const{
+        std::vector<const LogEntry*> shown;
+        for (const LogEntry& entry : m_log){
+            if (m_level == 0 || entry.level == m_level - 1){
+                shown.push_back(&entry);
+            }
+        }
+        return shown;
+    }
+    static QString time_text(qint64 msec){
+        return QDateTime::fromMSecsSinceEpoch(msec).toString("HH:mm:ss.zzz");
+    }
+    static QString line_text(const LogEntry& entry){
+        return time_text(entry.msec) + " " + level_name(entry.level) + " " + entry.text;
+    }
+    QString visible_log_text() const{
+        QStringList lines;
+        for (const LogEntry* entry : visible_lines()){
+            lines << line_text(*entry);
+        }
+        return lines.join("\n");
+    }
+    bool in_range(const LogEntry& entry) const{
+        if (!m_selection){
+            return false;
+        }
+        const double age = m_clock - entry.at;
+        return age >= std::min(m_sel_a, m_sel_b) && age <= std::max(m_sel_a, m_sel_b);
+    }
+
+    //  ---- the computer
+
+    void look_at_board(){
+        m_board_ok = false;
+        m_board_name.clear();
+        m_ports.clear();
+        for (const PortInfo& port : m_probe.state().ports){
+            QString text = port.name;
+            if (!port.chip.isEmpty()){
+                text += " (" + port.chip + ")";
+            }else if (!port.description.isEmpty()){
+                text += " (" + port.description + ")";
+            }
+            m_ports << text;
+            if (!m_board_ok && (!port.chip.isEmpty() || port.vendor == 0x2E8A)){
+                m_board_ok = true;
+                m_board_name = text;
+            }
+        }
+    }
+
+    //  What "Copy for Claude" and "Save .txt" give: where the program is,
+    //  what it sees, what was chosen, and the log (the selected range, or the
+    //  last 200 lines).
+    QString report() const{
+        QStringList out;
+        out << "# PocketPilot debug report";
+        out << "";
+        if (!m_build.isEmpty()){
+            out << "Build: " + m_build;
+        }
+        out << "Time: " + QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        out << "System: " + QSysInfo::prettyProductName() + " (" + QSysInfo::currentCpuArchitecture() + "), Qt " + QString::fromLatin1(qVersion());
+        out << "Language: " + current_language_code();
+        out << "";
+        out << "## What was chosen";
+        if (const HomeProgram* program = selected_program()){
+            out << "Program: " + program->name + (program->tag.isEmpty() ? QString() : " (" + program->tag + ": " + program->tag_meaning + ")");
+        }else{
+            out << "Program: none";
+        }
+        out << "Game: " + m_game_name;
+        out << "";
+        out << "## Devices";
+        if (m_input.video_index() >= 0){
+            QString video = "Video: " + m_input.video_names()[m_input.video_index()];
+            if (m_input.live()){
+                video += ", " + QString::number(m_input.picture_size().width()) + "x" + QString::number(m_input.picture_size().height()) +
+                    ", " + QString::number((int)std::lround(m_input.fps())) + " fps";
+            }else{
+                video += ", no picture" + (m_input.error().isEmpty() ? QString() : " (" + m_input.error() + ")");
+            }
+            out << video;
+        }else{
+            out << "Video: no capture card found";
+        }
+        if (m_input.audio_ok()){
+            out << "Audio: " + m_input.audio_name() + ", " + QString::number((int)std::lround(m_input.level_db())) + " dB";
+        }else{
+            out << "Audio: " + (m_input.audio_name().isEmpty() ? QString("no input found for this card") : m_input.audio_name() + ", cannot be read");
+        }
+        out << "Board: " + (m_board_ok ? m_board_name : QString("not found"));
+        out << "Serial ports: " + (m_ports.isEmpty() ? QString("none") : m_ports.join(", "));
+        out << "Video inputs: " + (m_input.video_names().isEmpty() ? QString("none") : m_input.video_names().join(", "));
+        out << "Audio inputs: " + (m_input.audio_inputs().isEmpty() ? QString("none") : m_input.audio_inputs().join(", "));
+        out << "";
+        std::vector<const LogEntry*> lines;
+        QString what;
+        if (m_selection){
+            for (const LogEntry& entry : m_log){
+                if (in_range(entry)){
+                    lines.push_back(&entry);
+                }
+            }
+            what = "the selected " + QString::number((int)std::lround(std::fabs(m_sel_a - m_sel_b))) + " s";
+        }else{
+            const size_t first = m_log.size() > 200 ? m_log.size() - 200 : 0;
+            for (size_t c = first; c < m_log.size(); c++){
+                lines.push_back(&m_log[c]);
+            }
+            what = "the last " + QString::number(lines.size()) + " lines";
+        }
+        out << "## Output log, " + what;
+        if (lines.empty()){
+            out << "(empty)";
+        }
+        for (const LogEntry* entry : lines){
+            out << line_text(*entry);
+        }
+        return out.join("\n") + "\n";
+    }
+
+    void save_report(Canvas& canvas){
+        QString folder = QDir(canvas.app_folder().isEmpty() ? QDir::currentPath() : canvas.app_folder()).filePath("Debug");
+        if (!QDir().mkpath(folder)){
+            folder = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath("PocketPilot Debug");
+            QDir().mkpath(folder);
+        }
+        const QString path = QDir(folder).filePath("PocketPilot-debug-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss") + ".txt");
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
+            file.write(report().toUtf8());
+            file.close();
+            m_saved_path = QFileInfo(path).fileName();
+            toast(T("Saved in the folder Debug."));
+            canvas.open_folder(folder);
+        }else{
+            toast(T("Could not save the file."));
+        }
+    }
+    void toast(const QString& text){
+        m_toast = text;
+        m_toast_left = 3.0;
+    }
+
+    //  ---- the timeline
+
+    double age_at(double x) const{
+        return (CHART_X1 - x) / (CHART_X1 - CHART_X0) * 60.0;
+    }
+    double x_at(double age) const{
+        return CHART_X1 - std::max(0.0, std::min(60.0, age)) / 60.0 * (CHART_X1 - CHART_X0);
+    }
+
+    //  ---- painting
+
+    void paint_game_badge(QPainter& painter, double a){
+        const HomeGame& game = *m_game_info;
+        const QString count = game.programs == 1 ? tr_ui("1 program") : tr_ui("%1 programs").arg((int)m_programs.size());
+        const QFont name_font = ui_font(31, 700);
+        const QFont count_font = ui_font(28, 500);
+        const double right = 1785;
+        const double count_w = text_width(count_font, count);
+        const double name_w = text_width(name_font, short_game_name(game.name));
+        const double name_x = right - count_w - 22 - name_w;
+        const QRectF icon(name_x - 18 - 66, 34, 66, 66);
+        panel(painter, icon, 16, with_alpha(PANEL, 0.7 * a), with_alpha(ORANGE, 0.9 * a), 2.2);
+        if (!game.icon.isNull()){
+            const QRectF room = icon.adjusted(8, 10, -8, -10);
+            const double scale = std::min(room.width() / game.icon.width(), room.height() / game.icon.height());
+            const double w = game.icon.width() * scale;
+            const double h = game.icon.height() * scale;
+            draw_picture(painter, game.icon, QRectF(room.center().x() - w / 2.0, room.center().y() - h / 2.0, w, h), a);
+        }else{
+            draw_text_cy(painter, short_game_name(game.name).left(1).toUpper(), icon.center().x(), icon.center().y() + 2, serif_font(38), white(0.9 * a), Qt::AlignHCenter);
+        }
+        draw_text_cy(painter, short_game_name(game.name), name_x, 67, name_font, white(a));
+        draw_text_cy(painter, count, right, 69, count_font, white(0.55 * a), Qt::AlignRight);
+    }
+    void paint_search(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        const bool hot = !m_query.isEmpty() || canvas.hovered("search") || canvas.focused("search");
+        panel(painter, SEARCH_RECT, 25, with_alpha(PANEL, 0.8 * a), hot ? with_alpha(ORANGE, 0.95 * a) : white(0.30 * a), 2.0);
+        canvas.add_hit("search", SEARCH_RECT, true, false);
+        //  The magnifying glass.
+        const QPointF glass(SEARCH_RECT.left() + 32, SEARCH_RECT.center().y() - 2);
+        painter.setPen(QPen(with_alpha(ORANGE, a), 2.2, Qt::SolidLine, Qt::RoundCap));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(glass, 8, 8);
+        painter.drawLine(QPointF(glass.x() + 6, glass.y() + 6), QPointF(glass.x() + 13, glass.y() + 13));
+        const QFont font = ui_font(25, 500);
+        const double x = SEARCH_RECT.left() + 62;
+        const double room = SEARCH_RECT.width() - 62 - 46;
+        if (m_query.isEmpty()){
+            draw_text_cy(painter, T("Search programs"), x + 8, SEARCH_RECT.center().y() + 1, font, white(0.5 * a));
+        }else{
+            const QString shown = QFontMetricsF(font).elidedText(m_query, Qt::ElideLeft, room);
+            draw_text_cy(painter, shown, x, SEARCH_RECT.center().y() + 1, font, white(a));
+        }
+        const QString shown_query = QFontMetricsF(font).elidedText(m_query, Qt::ElideLeft, room);
+        if (std::fmod(m_clock, 1.0) < 0.55){
+            const double cx = x + (m_query.isEmpty() ? 2 : text_width(font, shown_query) + 3);
+            painter.setPen(QPen(with_alpha(ORANGE, a), 2.4));
+            painter.drawLine(QPointF(cx, SEARCH_RECT.center().y() - 12), QPointF(cx, SEARCH_RECT.center().y() + 12));
+        }
+        if (!m_query.isEmpty()){
+            const QRectF clear(SEARCH_RECT.right() - 44, SEARCH_RECT.center().y() - 16, 32, 32);
+            const bool over = canvas.hovered("search-clear");
+            painter.setPen(QPen(white((over ? 0.95 : 0.6) * a), 2.0, Qt::SolidLine, Qt::RoundCap));
+            painter.drawLine(QPointF(clear.center().x() - 6, clear.center().y() - 6), QPointF(clear.center().x() + 6, clear.center().y() + 6));
+            painter.drawLine(QPointF(clear.center().x() - 6, clear.center().y() + 6), QPointF(clear.center().x() + 6, clear.center().y() - 6));
+            canvas.add_hit("search-clear", clear, true, false);
+        }
+    }
+
+    void paint_list(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        painter.save();
+        painter.setClipRect(LIST_RECT.adjusted(-8, 0, 8, 0));
+        const double offset = m_scroll.value;
+        if (m_view.empty()){
+            const QStringList lines = wrap_text(ui_font(24, 500), T("No program matches this search."), LIST_RECT.width() - 40);
+            for (int c = 0; c < lines.size(); c++){
+                draw_text(painter, lines[c], LIST_RECT.left() + 20, LIST_RECT.top() + 16 + c * 34, ui_font(24, 500), white(0.55 * a));
+            }
+        }
+        for (const Item& item : m_items){
+            const double y = LIST_RECT.top() + item.y - offset;
+            if (y + item.h < LIST_RECT.top() || y > LIST_RECT.bottom()){
+                continue;
+            }
+            if (item.header){
+                draw_text_cy(painter, item.text, LIST_RECT.left() + 20, y + item.h / 2.0 + 6, ui_font(20, 600), with_alpha(ORANGE, 0.85 * a));
+                continue;
+            }
+            const QRectF row(LIST_RECT.left(), y, LIST_RECT.width(), ROW_PITCH - 5);
+            const QString id = "prog:" + QString::number(item.view);
+            const bool selected = item.view == m_selected;
+            const bool hover = canvas.hovered(id);
+            if (selected){
+                panel(painter, row, 16, with_alpha(QColor(44, 29, 24), 0.95 * a), with_alpha(ORANGE, a), 2.2);
+            }else if (hover){
+                panel(painter, row, 16, white(0.09 * a));
+            }
+            const HomeProgram& program = m_programs[(size_t)m_view[(size_t)item.view]];
+            double right = row.right() - 14;
+            if (!program.tag.isEmpty()){
+                const double w = draw_chip(painter, program.tag, right, row.center().y(), ChipKind::ORANGE_RING, a, 17, 28, 12);
+                right -= w + 10;
+            }
+            const QFont font = ui_font(24, selected ? 600 : 500);
+            const QString shown = QFontMetricsF(font).elidedText(program.name, Qt::ElideRight, right - (row.left() + 20));
+            draw_text_cy(painter, shown, row.left() + 20, row.center().y() + 1, font, white(a));
+            //  Only the part that can be seen can be pressed.
+            const QRectF visible = row.intersected(LIST_RECT);
+            if (visible.height() > 6){
+                canvas.add_hit(id, visible, true, false);
+            }
+        }
+        painter.restore();
+        //  The scroll bar.
+        if (m_content > LIST_RECT.height() + 1){
+            const double track_h = LIST_RECT.height() - 12;
+            const double thumb_h = std::max(36.0, track_h * LIST_RECT.height() / m_content);
+            const double thumb_y = LIST_RECT.top() + 6 + (track_h - thumb_h) * (max_scroll() > 0 ? m_scroll.value / max_scroll() : 0);
+            panel(painter, QRectF(LIST_RECT.right() + 6, thumb_y, 5, thumb_h), 2.5, white(0.28 * a));
+        }
+    }
+
+    void paint_detail(QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        panel(painter, DETAIL_RECT, 24, with_alpha(PANEL, 0.78 * a), white(0.24 * a), 1.6);
+        const HomeProgram* program = selected_program();
+        if (program == nullptr){
+            return;
+        }
+        const double x = DETAIL_RECT.left() + 24;
+        const double w = DETAIL_RECT.width() - 48;
+
+        //  At the bottom: the tag, and what Start does. The rest is between.
+        const QFont note = ui_font(20, 500);
+        const QStringList note_lines = wrap_text(note, T("Opens its page, where you set it up and press Start."), w);
+        const double note_top = DETAIL_RECT.bottom() - 18 - (double)note_lines.size() * 27.0;
+        double chip_w = 0;
+        QStringList tag_lines;
+        double tag_h = 0;
+        if (!program->tag.isEmpty()){
+            chip_w = draw_chip(painter, program->tag, 0, 0, ChipKind::ORANGE_RING, a, 17, 28, 12, true);
+            tag_lines = wrap_text(ui_font(19, 500), program->tag_meaning, w - chip_w - 12);
+            if (tag_lines.size() > 2){
+                tag_lines = tag_lines.mid(0, 2);
+            }
+            tag_h = std::max(34.0, (double)tag_lines.size() * 24.0 + 8.0) + 10.0;
+        }
+        const double tag_top = note_top - tag_h;
+
+        //  The name: a smaller type when it needs two lines.
+        double y = DETAIL_RECT.top() + 18;
+        QFont title = serif_font(40);
+        double pitch = 44;
+        if (wrap_text(title, program->name, w).size() > 1){
+            title = serif_font(33);
+            pitch = 37;
+        }
+        for (const QString& line : wrap_text(title, program->name, w)){
+            draw_text(painter, line, x, y, title, white(a));
+            y += pitch;
+        }
+        y += 6;
+        if (!program->description.isEmpty()){
+            const QFont font = ui_font(23, 500);
+            const QStringList lines = wrap_text(font, program->description, w);
+            const int room = std::max(0, (int)std::floor((tag_top - 6 - y) / 31.0));
+            for (int c = 0; c < lines.size() && c < room; c++){
+                //  What does not fit ends in "...".
+                const bool cut = c == room - 1 && lines.size() > room;
+                const QString line = cut ? QFontMetricsF(font).elidedText(lines[c] + " ...", Qt::ElideRight, w) : lines[c];
+                draw_text(painter, line, x, y, font, white(0.9 * a));
+                y += 31;
+            }
+        }
+        if (!program->tag.isEmpty()){
+            draw_chip(painter, program->tag, x + chip_w, tag_top + 17, ChipKind::ORANGE_RING, a, 17, 28, 12);
+            for (int c = 0; c < tag_lines.size(); c++){
+                draw_text_cy(painter, tag_lines[c], x + chip_w + 12, tag_top + 17 + c * 24, ui_font(19, 500), white(0.6 * a));
+            }
+        }
+        for (int c = 0; c < note_lines.size(); c++){
+            draw_text(painter, note_lines[c], x, note_top + c * 27.0, note, white(0.5 * a));
+        }
+    }
+
+    void paint_video(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        const QRectF box = VIDEO_RECT;
+        painter.save();
+        QPainterPath clip;
+        clip.addRoundedRect(box, 24, 24);
+        painter.setClipPath(clip);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(with_alpha(QColor(6, 6, 8), 0.92 * a));
+        painter.drawRect(box);
+        if (m_input.has_picture() && !m_input.picture().isNull()){
+            const QImage& image = m_input.picture();
+            const double scale = std::max(box.width() / image.width(), box.height() / image.height());
+            const double w = image.width() * scale;
+            const double h = image.height() * scale;
+            const QRectF target(box.center().x() - w / 2.0, box.center().y() - h / 2.0, w, h);
+            const double base = painter.opacity();
+            painter.setOpacity(base * (m_input.live() ? 1.0 : 0.45));
+            painter.drawImage(target, image);
+            painter.setOpacity(base);
+        }else{
+            QString title = T("No picture");
+            QString sub = m_input.video_names().isEmpty() ? T("Connect a capture card.") : (m_input.error().isEmpty() ? T("Waiting for the card.") : m_input.error());
+            draw_text_cy(painter, title, box.center().x(), box.center().y() - 18, ui_font(34, 600), white(0.75 * a), Qt::AlignHCenter);
+            int line = 0;
+            for (const QString& text : wrap_text(ui_font(21, 500), sub, box.width() - 80)){
+                draw_text_cy(painter, text, box.center().x(), box.center().y() + 22 + line * 28, ui_font(21, 500), white(0.5 * a), Qt::AlignHCenter);
+                line++;
+            }
+        }
+        //  A dark band under the name of the card.
+        QLinearGradient shade(0, box.bottom() - 84, 0, box.bottom());
+        shade.setColorAt(0, QColor(0, 0, 0, 0));
+        shade.setColorAt(1, QColor(0, 0, 0, (int)std::lround(190 * a)));
+        painter.setBrush(shade);
+        painter.drawRect(QRectF(box.left(), box.bottom() - 84, box.width(), 84));
+        painter.restore();
+        panel(painter, box, 24, QColor(), white(0.26 * a), 1.6);
+
+        //  "Live", and the size of the picture.
+        if (m_input.video_index() >= 0){
+            const bool live = m_input.live();
+            const QString text = live ? T("Live") : T("No signal");
+            const QFont font = ui_font(21, 600);
+            const double w = text_width(font, text) + 54;
+            const QRectF badge(box.left() + 16, box.top() + 16, w, 38);
+            panel(painter, badge, 19, with_alpha(QColor(20, 20, 22), 0.85 * a));
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(live ? ORANGE : YELLOW, a));
+            painter.drawEllipse(QPointF(badge.left() + 20, badge.center().y()), 6, 6);
+            draw_text_cy(painter, text, badge.left() + 34, badge.center().y() + 1, font, white(a));
+            if (live){
+                const QString size = QString::number(m_input.picture_size().height()) + "p, " + QString::number((int)std::lround(m_input.fps())) + " fps";
+                const double sw = text_width(font, size) + 32;
+                const QRectF pill(box.right() - 16 - sw, box.top() + 16, sw, 38);
+                panel(painter, pill, 19, with_alpha(QColor(20, 20, 22), 0.85 * a));
+                draw_text_cy(painter, size, pill.center().x(), pill.center().y() + 1, font, white(a), Qt::AlignHCenter);
+            }
+        }
+
+        //  The name of the card (a list when there are more), and the sound.
+        const QString source = m_input.video_index() >= 0 ? m_input.video_names()[m_input.video_index()] : T("No capture card");
+        const QFont font = ui_font(25, 600);
+        const double name_w = std::min(text_width(font, source), box.width() - 260.0);
+        const QRectF source_rect(box.left() + 12, box.bottom() - 58, name_w + 76, 48);
+        const bool hot = canvas.hovered("source");
+        if (hot){
+            panel(painter, source_rect, 14, white(0.10 * a));
+        }
+        lane_icon(painter, Lane::VIDEO, QPointF(source_rect.left() + 24, source_rect.center().y()), white(0.9 * a));
+        const QString shown = QFontMetricsF(font).elidedText(source, Qt::ElideRight, name_w);
+        draw_text_cy(painter, shown, source_rect.left() + 46, source_rect.center().y() + 1, font, white(a));
+        if (m_input.video_names().size() > 1){
+            draw_chevron(painter, QRectF(source_rect.left() + 46 + text_width(font, shown) + 8, source_rect.center().y() - 11, 26, 22), white(0.9 * a), 2.4);
+            canvas.add_hit("source", source_rect, true, true);
+        }
+        const double level = m_input.audio_ok() ? m_input.level() : 0;
+        for (int c = 0; c < 8; c++){
+            const double h = 9 + c * 3.2;
+            const bool lit = level > (double)c / 8.0 + 0.02;
+            panel(painter, QRectF(box.right() - 22 - (8 - c) * 11, box.bottom() - 22 - h, 6, h), 3,
+                lit ? with_alpha(ORANGE, a) : white(0.22 * a));
+        }
+    }
+    void paint_sources(Canvas& canvas, QPainter& painter){
+        const QStringList& names = m_input.video_names();
+        const double row_h = 46;
+        const int shown = std::min((int)names.size(), 6);
+        const QRectF list(VIDEO_RECT.left() + 12, VIDEO_RECT.bottom() - 70 - shown * row_h - 12, 330, shown * row_h + 12);
+        panel(painter, list, 18, QColor(16, 16, 18, 245), white(0.3), 1.8);
+        for (int c = 0; c < shown; c++){
+            const QRectF row(list.left() + 6, list.top() + 6 + c * row_h, list.width() - 12, row_h);
+            const QString id = "src:" + QString::number(c);
+            if (c == m_input.video_index()){
+                panel(painter, row, 12, with_alpha(QColor(44, 29, 24), 0.95), with_alpha(ORANGE, 0.95), 1.8);
+            }else if (canvas.hovered(id)){
+                panel(painter, row, 12, white(0.1));
+            }
+            const QFont font = ui_font(22, 500);
+            draw_text_cy(painter, QFontMetricsF(font).elidedText(names[c], Qt::ElideRight, row.width() - 28), row.left() + 14, row.center().y() + 1, font, white(0.95));
+            canvas.add_hit(id, row, true, false);
+        }
+    }
+
+    void paint_checks(QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        const Light video = m_input.live() ? Light::OK : (m_input.video_names().isEmpty() ? Light::BAD : Light::WAIT);
+        const Light audio = m_input.audio_ok() ? Light::OK : (m_input.video_names().isEmpty() ? Light::WAIT : Light::BAD);
+        const Light board = m_board_ok ? Light::OK : Light::WAIT;
+        const Light keys = m_keys_seen > 0 ? Light::OK : Light::WAIT;
+        const struct{
+            const char* name;
+            Light light;
+        } checks[4] = {{"Video", video}, {"Audio", audio}, {"Board", board}, {"Keys", keys}};
+        const double gap = 10;
+        const double w = (CHECKS_RECT.width() - 3 * gap) / 4.0;
+        for (int c = 0; c < 4; c++){
+            const QRectF rect(CHECKS_RECT.left() + c * (w + gap), CHECKS_RECT.top(), w, CHECKS_RECT.height());
+            panel(painter, rect, 20, with_alpha(PANEL, 0.8 * a), checks[c].light == Light::BAD ? with_alpha(YELLOW, 0.9 * a) : white(0.24 * a), 1.8);
+            const QFont font = ui_font(20, 600);
+            const QString label = T(checks[c].name);
+            const double total = 24 + 8 + text_width(font, label);
+            const double left = rect.center().x() - total / 2.0;
+            draw_light(painter, checks[c].light, QPointF(left + 12, rect.center().y()), 12, a);
+            draw_text_cy(painter, label, left + 32, rect.center().y() + 1, font, white(a));
+        }
+    }
+
+    void paint_log(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        panel(painter, LOG_RECT, 26, with_alpha(PANEL, 0.80 * a), white(0.24 * a), 1.6);
+        const double x = LOG_RECT.left() + 24;
+        draw_text_cy(painter, T("Output log"), x, LOG_RECT.top() + 45, ui_font(22, 600), white(0.6 * a));
+
+        //  The levels to show.
+        const char* const names[4] = {"All", "Info", "Warn", "Error"};
+        double right = LOG_RECT.right() - 20;
+        for (int c = 3; c >= 0; c--){
+            const QString text = T(names[c]);
+            const QFont font = ui_font(20, 600);
+            const double w = text_width(font, text) + 30;
+            const QRectF chip(right - w, LOG_RECT.top() + 27, w, 36);
+            const bool on = m_level == c;
+            const bool warn = c >= 2;
+            if (on){
+                panel(painter, chip, 18, with_alpha(warn ? YELLOW : ORANGE, a));
+            }else{
+                panel(painter, chip, 18, canvas.hovered("lvl:" + QString::number(c)) ? white(0.08 * a) : QColor(),
+                    warn ? with_alpha(YELLOW, 0.9 * a) : white(0.34 * a), 1.6);
+            }
+            draw_text_cy(painter, text, chip.center().x(), chip.center().y() + 1, font,
+                on ? with_alpha(Qt::black, a) : (warn ? with_alpha(YELLOW, a) : white(a)), Qt::AlignHCenter);
+            canvas.add_hit("lvl:" + QString::number(c), chip);
+            right = chip.left() - 10;
+        }
+
+        //  The lines, the newest at the bottom.
+        const std::vector<const LogEntry*> lines = visible_lines();
+        const int count = (int)lines.size();
+        const int offset = std::max(0, std::min(std::max(0, count - LOG_ROWS), m_log_offset));
+        const double top = LOG_RECT.top() + 72;
+        const double pitch = 30;
+        if (lines.empty()){
+            draw_text_cy(painter, T("No log lines yet."), x + 6, top + 60, ui_font(23, 500), white(0.5 * a));
+        }
+        const int first = std::max(0, count - LOG_ROWS - offset);
+        for (int c = 0; c < LOG_ROWS && first + c < count; c++){
+            const LogEntry& entry = *lines[(size_t)(first + c)];
+            const double cy = top + c * pitch + pitch / 2.0;
+            const QRectF band(LOG_RECT.left() + 12, cy - pitch / 2.0 + 2, LOG_RECT.width() - 24, pitch - 4);
+            if (in_range(entry)){
+                panel(painter, band, 8, with_alpha(ORANGE, 0.16 * a));
+            }
+            draw_text_cy(painter, time_text(entry.msec), x, cy, ui_font(18, 500), white(0.5 * a));
+            const bool bad = entry.level >= 1;
+            const QRectF badge(x + 128, cy - 11, 66, 22);
+            if (entry.level >= 2){
+                panel(painter, badge, 6, with_alpha(YELLOW, a));
+            }else{
+                panel(painter, badge, 6, QColor(), bad ? with_alpha(YELLOW, 0.95 * a) : white(0.34 * a), 1.5);
+            }
+            draw_text_cy(painter, level_name(entry.level), badge.center().x(), badge.center().y() + 1, ui_font(15, 700),
+                entry.level >= 2 ? with_alpha(Qt::black, a) : (bad ? with_alpha(YELLOW, a) : white(0.8 * a)), Qt::AlignHCenter);
+            const QFont font = ui_font(20, 500);
+            const double room = LOG_RECT.right() - 22 - (badge.right() + 14);
+            draw_text_cy(painter, QFontMetricsF(font).elidedText(entry.text, Qt::ElideRight, room), badge.right() + 14, cy + 1, font,
+                bad ? with_alpha(YELLOW, a) : white(0.88 * a));
+        }
+        if (count > LOG_ROWS){
+            //  How far back the lines are read.
+            const double track = LOG_ROWS * pitch - 8;
+            const double thumb = std::max(24.0, track * LOG_ROWS / count);
+            const double thumb_y = top + 4 + (track - thumb) * (1.0 - (double)offset / (double)std::max(1, count - LOG_ROWS));
+            panel(painter, QRectF(LOG_RECT.right() - 14, thumb_y, 4, thumb), 2, white(0.28 * a));
+        }
+
+        //  The buttons.
+        const double by = LOG_RECT.bottom() - 70;
+        double bx = x - 4;
+        {
+            const QString text = T("Copy for Claude");
+            const double w = text_width(ui_font(22, 600), text) + 58;
+            const QRectF rect(bx, by, w, 50);
+            const bool hover = canvas.hovered("copy-claude");
+            const bool focus = canvas.focused("copy-claude");
+            if (hover || focus){
+                glow(painter, rect, 25, ORANGE, 0.7 * a);
+            }
+            panel(painter, rect, 25, with_alpha(hover ? ORANGE.lighter(112) : ORANGE, a));
+            //  The two sheets.
+            painter.setPen(QPen(with_alpha(Qt::black, a), 2.0));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRoundedRect(QRectF(rect.left() + 18, rect.center().y() - 4, 14, 14), 3, 3);
+            painter.drawRoundedRect(QRectF(rect.left() + 22, rect.center().y() - 9, 14, 14), 3, 3);
+            draw_text_cy(painter, text, rect.left() + 46, rect.center().y() + 1, ui_font(22, 600), with_alpha(Qt::black, a));
+            if (focus){
+                panel(painter, rect.adjusted(-5, -5, 5, 5), 30, QColor(), with_alpha(YELLOW, 0.9 * a), 2.2);
+            }
+            canvas.add_hit("copy-claude", rect);
+            bx = rect.right() + 14;
+        }
+        {
+            const QString text = T("Copy log");
+            const double w = text_width(ui_font(22, 600), text) + 50;
+            const QRectF rect(bx, by, w, 50);
+            const bool hover = canvas.hovered("copy-log");
+            panel(painter, rect, 25, white(hover ? 0.08 * a : 0.0), white((hover ? 0.6 : 0.34) * a), 1.8);
+            draw_text_cy(painter, text, rect.center().x(), rect.center().y() + 1, ui_font(22, 600), white(a), Qt::AlignHCenter);
+            if (canvas.focused("copy-log")){
+                panel(painter, rect.adjusted(-5, -5, 5, 5), 30, QColor(), with_alpha(YELLOW, 0.9 * a), 2.2);
+            }
+            canvas.add_hit("copy-log", rect);
+            bx = rect.right() + 22;
+        }
+        {
+            const QString text = T("Save .txt");
+            const double w = text_width(ui_font(22, 600), text) + 16;
+            const QRectF rect(bx, by, w, 50);
+            const bool hover = canvas.hovered("save-log");
+            draw_text_cy(painter, text, rect.center().x(), rect.center().y() + 1, ui_font(22, 600), with_alpha(ORANGE, (hover ? 1.0 : 0.85) * a), Qt::AlignHCenter);
+            if (canvas.focused("save-log")){
+                panel(painter, rect.adjusted(-5, -5, 5, 5), 30, QColor(), with_alpha(YELLOW, 0.9 * a), 2.2);
+            }
+            canvas.add_hit("save-log", rect);
+        }
+        if (m_toast_left > 0){
+            const QFont font = ui_font(21, 600);
+            const double w = text_width(font, m_toast) + 70;
+            const QRectF pill(LOG_RECT.right() - 20 - w, by - 62, w, 46);
+            const double fade = clamp01(m_toast_left / 0.4);
+            panel(painter, pill, 23, with_alpha(QColor(27, 27, 30), 0.97 * fade), with_alpha(ORANGE, fade), 2.0);
+            draw_light(painter, Light::OK, QPointF(pill.left() + 28, pill.center().y()), 11, fade);
+            draw_text_cy(painter, m_toast, pill.left() + 50, pill.center().y() + 1, font, white(fade));
+        }
+    }
+
+    void paint_lanes(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        panel(painter, LANES_RECT, 26, with_alpha(PANEL, 0.80 * a), white(0.24 * a), 1.6);
+        const double lx = LANES_RECT.left() + 28;
+
+        //  The time.
+        const QFont axis = ui_font(19, 500);
+        for (int c = 0; c <= 4; c++){
+            const double age = 60.0 - c * 15.0;
+            const QString text = c == 4 ? T("now") : "-" + QString::number((int)age) + " s";
+            const double x = x_at(age);
+            draw_text_cy(painter, text, x, LANES_RECT.top() + 34, axis, white(0.5 * a), c == 4 ? Qt::AlignRight : Qt::AlignHCenter);
+        }
+
+        //  The selection goes behind the lanes.
+        if (m_selection){
+            const double xa = x_at(std::max(m_sel_a, m_sel_b));
+            const double xb = x_at(std::min(m_sel_a, m_sel_b));
+            const QRectF band(xa, LANE_Y0 - 6, xb - xa, LANE_H * LANE_COUNT + 8);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(ORANGE, 0.14 * a));
+            painter.drawRect(band);
+            painter.setPen(QPen(with_alpha(ORANGE, 0.95 * a), 2.2));
+            painter.drawLine(QPointF(xa, band.top()), QPointF(xa, band.bottom()));
+            painter.drawLine(QPointF(xb, band.top()), QPointF(xb, band.bottom()));
+        }
+
+        const char* const names[LANE_COUNT] = {"Video", "Audio", "Board", "Log", "Buttons", "Program"};
+        for (int c = 0; c < LANE_COUNT; c++){
+            const Lane lane = (Lane)c;
+            const double y = LANE_Y0 + c * LANE_H;
+            const QRectF chart(CHART_X0, y, CHART_X1 - CHART_X0, LANE_H - 6);
+            if (c > 0){
+                painter.setPen(QPen(white(0.09 * a), 1.2));
+                painter.drawLine(QPointF(lx, y - 3), QPointF(CHART_X1, y - 3));
+            }
+            lane_icon(painter, lane, QPointF(lx + 10, y + 16), white(0.62 * a));
+            draw_text_cy(painter, T(names[c]), lx + 36, y + 12, ui_font(22, 600), white(a));
+            draw_text_cy(painter, lane_note(lane), lx + 36, y + 36, ui_font(17, 500), white(0.5 * a));
+            paint_lane(painter, lane, chart, a);
+        }
+
+        const QString note = m_selection
+            ? T("%1 s selected: Copy for Claude copies this range.").arg((int)std::lround(std::fabs(m_sel_a - m_sel_b)))
+            : T("Drag over the timeline to select a range for Copy for Claude.");
+        draw_text_cy(painter, note, CHART_X1, LANES_RECT.bottom() - 26, ui_font(19, 600),
+            m_selection ? with_alpha(ORANGE, a) : white(0.45 * a), Qt::AlignRight);
+        canvas.add_hit("drag:lanes", QRectF(CHART_X0, LANE_Y0 - 6, CHART_X1 - CHART_X0, LANE_H * LANE_COUNT));
+    }
+
+    QString lane_note(Lane lane) const{
+        switch (lane){
+        case Lane::VIDEO:
+            return m_input.live() ? tr_ui("%1 fps").arg((int)std::lround(m_input.fps())) : T("no picture");
+        case Lane::AUDIO:
+            return m_input.audio_ok() ? tr_ui("%1 dB").arg((int)std::lround(m_input.level_db())) : T("no sound");
+        case Lane::BOARD:
+            return m_board_ok ? m_board_name : T("not found");
+        case Lane::LOG:{
+            int warnings = 0;
+            int errors = 0;
+            for (const LogEntry& entry : m_log){
+                if (m_clock - entry.at <= 60.0){
+                    warnings += entry.level == 1 ? 1 : 0;
+                    errors += entry.level >= 2 ? 1 : 0;
+                }
+            }
+            const QString warning_text = warnings == 1 ? tr_ui("1 warning") : tr_ui("%1 warnings").arg(warnings);
+            const QString error_text = errors == 1 ? tr_ui("1 error") : tr_ui("%1 errors").arg(errors);
+            return warning_text + ", " + error_text;
+        }
+        case Lane::BUTTONS:
+            return T("keys of this window");
+        case Lane::PROGRAM:
+            return T("none is running");
+        }
+        return QString();
+    }
+
+    void paint_lane(QPainter& painter, Lane lane, const QRectF& chart, double a){
+        const double mid = chart.center().y();
+        painter.save();
+        painter.setClipRect(chart.adjusted(-2, -3, 2, 3));
+        switch (lane){
+        case Lane::VIDEO:{
+            QPainterPath path;
+            bool started = false;
+            for (const LaneSample& sample : m_samples){
+                const double age = m_clock - sample.at;
+                if (age > 60.0){
+                    continue;
+                }
+                const double y = chart.bottom() - 8 - std::min(1.0, sample.fps / 60.0) * (chart.height() - 20);
+                if (!started){
+                    path.moveTo(x_at(age), y);
+                    started = true;
+                }else{
+                    path.lineTo(x_at(age), y);
+                }
+            }
+            painter.setBrush(Qt::NoBrush);
+            if (started){
+                painter.setPen(QPen(with_alpha(ORANGE, 0.95 * a), 2.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+                painter.drawPath(path);
+            }else{
+                painter.setPen(QPen(white(0.16 * a), 1.6, Qt::DashLine));
+                painter.drawLine(QPointF(chart.left(), mid), QPointF(chart.right(), mid));
+            }
+            break;
+        }
+        case Lane::AUDIO:{
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(ORANGE, 0.9 * a));
+            const double bar = (CHART_X1 - CHART_X0) / 120.0 - 2.0;
+            for (const LaneSample& sample : m_samples){
+                const double age = m_clock - sample.at;
+                if (age > 60.0){
+                    continue;
+                }
+                const double h = std::max(3.0, sample.level * (chart.height() - 10));
+                painter.drawRoundedRect(QRectF(x_at(age) - bar, mid + 2 - h / 2.0, bar, h), 2, 2);
+            }
+            break;
+        }
+        case Lane::BOARD:{
+            //  A line while the board was there, a dashed one while it was not.
+            for (size_t c = 1; c < m_samples.size(); c++){
+                const double age0 = m_clock - m_samples[c - 1].at;
+                const double age1 = m_clock - m_samples[c].at;
+                if (age0 > 60.0){
+                    continue;
+                }
+                if (m_samples[c].board){
+                    painter.setPen(QPen(with_alpha(ORANGE, 0.95 * a), 2.4, Qt::SolidLine, Qt::RoundCap));
+                }else{
+                    painter.setPen(QPen(white(0.2 * a), 1.6, Qt::DashLine));
+                }
+                painter.drawLine(QPointF(x_at(age0), mid), QPointF(x_at(age1), mid));
+            }
+            break;
+        }
+        case Lane::LOG:{
+            for (const LogEntry& entry : m_log){
+                const double age = m_clock - entry.at;
+                if (age > 60.0 || age < 0){
+                    continue;
+                }
+                const double h = entry.level >= 2 ? chart.height() - 10 : entry.level == 1 ? 24 : 12;
+                painter.setPen(QPen(entry.level >= 1 ? with_alpha(YELLOW, a) : white(0.5 * a), entry.level >= 1 ? 3.4 : 2.0, Qt::SolidLine, Qt::RoundCap));
+                painter.drawLine(QPointF(x_at(age), mid - h / 2.0), QPointF(x_at(age), mid + h / 2.0));
+            }
+            break;
+        }
+        case Lane::BUTTONS:{
+            painter.setPen(QPen(with_alpha(ORANGE, 0.95 * a), 5.0, Qt::SolidLine, Qt::RoundCap));
+            for (double at : m_key_times){
+                const double age = m_clock - at;
+                if (age <= 60.0){
+                    painter.drawLine(QPointF(x_at(age), mid - 12), QPointF(x_at(age), mid + 12));
+                }
+            }
+            break;
+        }
+        case Lane::PROGRAM:
+            painter.setPen(QPen(white(0.16 * a), 1.6, Qt::DashLine));
+            painter.drawLine(QPointF(chart.left(), mid), QPointF(chart.right(), mid));
+            draw_text_cy(painter, T("A program that is started shows its loops here."), chart.left() + 14, mid - 1, ui_font(18, 500), white(0.4 * a));
+            break;
+        }
+        painter.restore();
+    }
+
+    void paint_footer(Canvas& canvas, QPainter& painter, double a){
+        if (a < 0.004){
+            return;
+        }
+        double x = 136;
+        {
+            const QString text = T("All games");
+            const double w = draw_button(canvas, painter, "all", text, x + 26, 960, ButtonKind::LINK, std::min(1.0, a * 1.35));
+            draw_chevron_left(painter, QPointF(x + 8, 982), white(0.7 * a));
+            x += 26 + w + 34;
+        }
+        {
+            const double w = draw_button(canvas, painter, "later", T("Choose later"), x, 960, ButtonKind::LINK, std::min(1.0, a * 1.35));
+            x += w + 34;
+        }
+        const QString start_text = T("Start");
+        const double start_w = button_width(start_text, ButtonKind::PRIMARY);
+        const QFont hint = ui_font(21, 500);
+        const double room = 1780 - start_w - 40 - x;
+        const QString line = T("Type to search · Up/Down to choose · Enter to start");
+        draw_text_cy(painter, QFontMetricsF(hint).elidedText(line, Qt::ElideRight, room), x, 982, hint, white(0.42 * a));
+        draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, a, m_selected >= 0);
+    }
+    static void draw_chevron_left(QPainter& painter, const QPointF& c, const QColor& color){
+        QPen pen(color, 2.6);
+        pen.setCapStyle(Qt::RoundCap);
+        pen.setJoinStyle(Qt::RoundJoin);
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+        painter.drawPolyline(QPolygonF({QPointF(c.x() + 5, c.y() - 9), QPointF(c.x() - 4, c.y()), QPointF(c.x() + 5, c.y() + 9)}));
+    }
+
+private:
+    int m_game;
+    const SetupRequest* m_request;
+    const HomeGame* m_game_info;
+    QString m_game_name;
+    QString m_build;
+    std::vector<HomeProgram> m_programs;
+    bool m_sections = false;
+
+    //  The list.
+    std::vector<int> m_view;                //  the programs that match, as indexes into m_programs
+    std::vector<Item> m_items;
+    double m_content = 0;
+    int m_selected = -1;                    //  index in m_view
+    QString m_query;
+    Smooth m_scroll;
+
+    //  The picture, the sound, the board.
+    LiveInput m_input;
+    HardwareProbe m_probe;
+    bool m_test_probe;
+    bool m_board_ok = false;
+    QString m_board_name;
+    QStringList m_ports;
+    int m_keys_seen = 0;
+    std::deque<double> m_key_times;
+
+    //  Time, and what the timeline has seen.
+    double m_clock = 0;
+    double m_since_sample = 0;
+    double m_since_poll = 0;
+    std::deque<LaneSample> m_samples;
+    bool m_selection = false;
+    double m_sel_a = 0;
+    double m_sel_b = 0;
+    double m_drag_x = 0;
+    bool m_dragging = false;
+
+    //  The log.
+    std::deque<LogEntry> m_log;
+    quint64 m_last_serial = 0;
+    int m_level = 0;                        //  0 all, 1 info, 2 warn, 3 error
+    int m_log_offset = 0;
+    QString m_toast;
+    double m_toast_left = 0;
+    QString m_saved_path;
+    bool m_source_open = false;
 };
 
 
@@ -4214,9 +6047,14 @@ void Canvas::go_done(const QString& board){
         return std::unique_ptr<Page>(new DonePage(*this, board));
     });
 }
-void Canvas::go_games(){
-    queue_page([this]{
-        return std::unique_ptr<Page>(new GamesPage(*this));
+void Canvas::go_games(int selected){
+    queue_page([this, selected]{
+        return std::unique_ptr<Page>(new GamesPage(*this, selected));
+    });
+}
+void Canvas::go_programs(int game){
+    queue_page([this, game]{
+        return std::unique_ptr<Page>(new ProgramsPage(*this, game));
     });
 }
 
@@ -4671,6 +6509,10 @@ void Canvas::mouseMoveEvent(QMouseEvent* event){
         return;
     }
     update_hover(event->position());
+    if (!m_drag_id.isEmpty() && m_page && !m_pending){
+        m_page->drag(*this, m_drag_id, to_design(event->position()), 1);
+        update();
+    }
 }
 
 void Canvas::mousePressEvent(QMouseEvent* event){
@@ -4688,11 +6530,27 @@ void Canvas::mousePressEvent(QMouseEvent* event){
     }
     m_focus_visible = false;
     const Hit* hit = find_hit(to_design(event->position()));
+    if (hit != nullptr && hit->enabled && hit->id.startsWith("drag:") && m_page && !m_pending){
+        m_drag_id = hit->id;
+        m_pressed.clear();
+        m_page->drag(*this, m_drag_id, to_design(event->position()), 0);
+        update();
+        return;
+    }
     m_pressed = hit != nullptr && hit->enabled ? hit->id : QString();
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent* event){
     if (event->button() != Qt::LeftButton || m_intro == IntroState::FILM || m_holding || m_releasing){
+        return;
+    }
+    if (!m_drag_id.isEmpty()){
+        const QString id = m_drag_id;
+        m_drag_id.clear();
+        if (m_page){
+            m_page->drag(*this, id, to_design(event->position()), 2);
+            update();
+        }
         return;
     }
     const Hit* hit = find_hit(to_design(event->position()));
@@ -4791,6 +6649,16 @@ void Canvas::keyPressEvent(QKeyEvent* event){
     update();
 }
 
+void Canvas::wheelEvent(QWheelEvent* event){
+    if (m_intro == IntroState::FILM || m_holding || m_releasing || m_video_open || m_page == nullptr || m_pending){
+        return;
+    }
+    if (m_page->wheel(*this, to_design(event->position()), event->angleDelta().y())){
+        event->accept();
+        update();
+    }
+}
+
 void Canvas::closeEvent(QCloseEvent* event){
     //  The window is closed (Alt+F4): what was chosen stays, the rest is skipped.
     if (m_request.ask_board && m_page && QString(m_page->name()) != "language"){
@@ -4828,9 +6696,35 @@ bool Canvas::move_to(const QString& id){
     }
     return false;
 }
-void Canvas::press_key(int key, Qt::KeyboardModifiers modifiers){
-    QKeyEvent event(QEvent::KeyPress, key, modifiers);
+void Canvas::press_key(int key, Qt::KeyboardModifiers modifiers, const QString& text){
+    QKeyEvent event(QEvent::KeyPress, key, modifiers, text);
     keyPressEvent(&event);
+}
+void Canvas::type_text(const QString& text){
+    for (const QChar letter : text){
+        const int key = letter == ' ' ? (int)Qt::Key_Space : (int)letter.toUpper().unicode();
+        press_key(key, Qt::NoModifier, QString(letter));
+    }
+}
+bool Canvas::scroll(const QString& id, int notches){
+    for (const Hit& hit : m_hits){
+        if (hit.id == id && m_page != nullptr && !m_pending){
+            return m_page->wheel(*this, hit.rect.center(), notches * 120);
+        }
+    }
+    return false;
+}
+bool Canvas::drag_over(const QString& id, double from, double to){
+    for (const Hit& hit : m_hits){
+        if (hit.id == id && m_page != nullptr && !m_pending){
+            const double y = hit.rect.center().y();
+            m_page->drag(*this, id, QPointF(hit.rect.left() + hit.rect.width() * from, y), 0);
+            m_page->drag(*this, id, QPointF(hit.rect.left() + hit.rect.width() * to, y), 1);
+            m_page->drag(*this, id, QPointF(hit.rect.left() + hit.rect.width() * to, y), 2);
+            return true;
+        }
+    }
+    return false;
 }
 void Canvas::wait(double seconds){
     const int frames = std::max(1, (int)std::lround(seconds * 30.0));
@@ -5037,6 +6931,63 @@ std::vector<HomeGame> test_games(bool many = false){
     }
     return games;
 }
+
+//  The programs of those games, for the test: the list of the Nintendo Switch
+//  as it is in the program, a long one with sections (Sword and Shield), the
+//  rest has none.
+std::vector<HomeProgram> test_programs(){
+    std::vector<HomeProgram> programs;
+    auto add = [&](int game, const char* section, const QString& name, const char* description, const char* tag = "", const char* meaning = ""){
+        HomeProgram program;
+        program.game = game;
+        program.section = QString::fromLatin1(section);
+        program.name = name;
+        program.description = QString::fromLatin1(description);
+        program.tag = QString::fromLatin1(tag);
+        program.tag_meaning = QString::fromLatin1(meaning);
+        programs.push_back(program);
+    };
+    add(0, "", "Turbo A", "Endlessly mash A.");
+    add(0, "", "Turbo Button", "Hold or mash any button.");
+    add(0, "", "Turbo Macro", "Repeat a macro of buttons and waits.");
+    add(0, "", "Push Joy Sticks", "Push the sticks all the way, round and round.");
+    add(0, "", "Prevent Sleep", "Presses a button now and then, so that the console stays awake.");
+    add(0, "", "Friend Code Adder", "Adds friends from a list of codes.");
+    add(0, "", "Friend Delete", "Removes friends from the list, one after the other.", "rough", "It works, but it is not polished.");
+    add(0, "", "Record Keyboard Controller", "Records what you press on the keyboard.");
+    add(0, "", "Typewriter", "Types text with the on-screen keyboard.", "beta", "It is new: it can still go wrong.");
+    for (int c = 0; c < 36; c++){
+        const char* const sections[3] = {"Farming", "Shiny hunting", "Other"};
+        add(3, sections[c / 12], QString("Program %1 of Sword and Shield").arg(c + 1), "A program with a longer description, to see how it fits in the panel below the list.",
+            c % 9 == 4 ? "unvetted" : "", c % 9 == 4 ? "Nobody has checked it yet." : "");
+    }
+    return programs;
+}
+
+//  A log that a test can add lines to.
+struct TestLog{
+    std::mutex lock;
+    std::vector<SetupLogLine> lines;
+    void add(int level, const QString& text, qint64 ago_ms = 0){
+        std::lock_guard<std::mutex> guard(lock);
+        SetupLogLine line;
+        line.serial = (quint64)lines.size() + 1;
+        line.msec = QDateTime::currentMSecsSinceEpoch() - ago_ms;
+        line.level = level;
+        line.text = text;
+        lines.push_back(line);
+    }
+    std::function<void(quint64, std::vector<SetupLogLine>&)> source(){
+        return [this](quint64 after, std::vector<SetupLogLine>& out){
+            std::lock_guard<std::mutex> guard(lock);
+            for (const SetupLogLine& line : lines){
+                if (line.serial > after){
+                    out.push_back(line);
+                }
+            }
+        };
+    }
+};
 
 
 }   //  namespace
@@ -5895,6 +7846,246 @@ int run_setup_test(QApplication& application, const QString& folder){
         skipped.wait(2.8);
         checker.check(skipped.page_name() == "games", "Skip setup on the console screen leads to the choice of a game");
         checker.check(!skipped.result().console_chosen && skipped.result().board_done, "no console is chosen, and the setup counts as done");
+    }
+
+    //  ---- the programs of the game that was picked
+    {
+        TestLog log;
+        log.add(0, "Global: settings loaded", 20000);
+        log.add(1, "Audio: input is quiet", 15000);
+        log.add(0, "Turbo A: loop 12 done", 9000);
+        log.add(0, "Board: sent A down", 8200);
+        log.add(1, "Board: no answer after 1.2 s", 6500);
+        log.add(0, "Board: answer after 6 ms", 6400);
+        log.add(2, "Video: black frame, signal lost?", 4200);
+        log.add(0, "Video: signal found again", 3700);
+
+        SetupRequest with_programs;
+        with_programs.ask_game = true;
+        with_programs.games = test_games();
+        with_programs.programs = test_programs();
+        with_programs.log_poll = log.source();
+        with_programs.build = "PocketPilot test build";
+        Canvas programs_canvas(with_programs, true);
+        programs_canvas.resize(1920, 1080);
+        programs_canvas.set_app_folder(app);
+        programs_canvas.set_scan([]{
+            HardwareState state;
+            PortInfo port;
+            port.name = "COM4";
+            port.description = "Pico";
+            port.vendor = 0x2E8A;
+            port.product = 0x000A;
+            state.ports.push_back(port);
+            return state;
+        });
+        QEventLoop programs_loop;
+        programs_canvas.start(&programs_loop);
+        programs_canvas.show();
+        programs_canvas.wait(2.5);
+        checker.check(programs_canvas.page_name() == "games", "the games come first");
+        programs_canvas.click("game:0");
+        programs_canvas.wait(0.2);
+        programs_canvas.click("start");
+        programs_canvas.wait(0.1);
+        checker.check(!programs_canvas.finished(), "a game that has programs does not end the setup: its programs come next");
+        programs_canvas.wait(1.6);
+        checker.check(programs_canvas.page_name() == "programs", "the programs of the game are a screen of their own");
+        save(programs_canvas, folder, "setup-40-programs");
+        save_preview(programs_canvas, folder, "preview-programs");
+        checker.check(has_content(programs_canvas.picture()), "the programs screen has something on it");
+        bool rows = true;
+        for (int c = 0; c < 9; c++){
+            rows = rows && programs_canvas.has_hit("prog:" + QString::number(c));
+        }
+        checker.check(rows, "every program of the Nintendo Switch has its row");
+        checker.check(programs_canvas.page_state().startsWith("selected=Turbo A;"), "the first program is picked");
+        checker.check(programs_canvas.has_hit("start") && programs_canvas.hit_enabled("start"), "and Start can be pressed");
+        checker.check(programs_canvas.has_hit("all") && programs_canvas.has_hit("later"), "All games and Choose later are there");
+        checker.check(programs_canvas.page_state().contains(";log=8;"), "the output log has the lines of the program");
+        checker.check(programs_canvas.has_hit("lvl:0") && programs_canvas.has_hit("lvl:3") && programs_canvas.has_hit("copy-claude") && programs_canvas.has_hit("copy-log") && programs_canvas.has_hit("save-log"),
+            "the log panel has its filters and its three buttons");
+        checker.check(programs_canvas.has_hit("drag:lanes"), "the timeline can be dragged over");
+
+        //  A program picked with the mouse and with the keyboard.
+        programs_canvas.click("prog:2");
+        checker.check(programs_canvas.page_state().startsWith("selected=Turbo Macro;"), "a click picks a program");
+        programs_canvas.press_key(Qt::Key_Down);
+        checker.check(programs_canvas.page_state().startsWith("selected=Push Joy Sticks;"), "Down goes to the next program");
+        programs_canvas.press_key(Qt::Key_Up);
+        programs_canvas.press_key(Qt::Key_Up);
+        checker.check(programs_canvas.page_state().startsWith("selected=Turbo Button;"), "Up goes to the one above");
+        programs_canvas.press_key(Qt::Key_End);
+        checker.check(programs_canvas.page_state().startsWith("selected=Typewriter;"), "End goes to the last");
+        programs_canvas.press_key(Qt::Key_Home);
+        checker.check(programs_canvas.page_state().startsWith("selected=Turbo A;"), "Home goes to the first");
+        programs_canvas.wait(0.5);
+        save(programs_canvas, folder, "setup-41-programs-tags");
+        programs_canvas.click("prog:6");
+        programs_canvas.wait(0.5);
+        save(programs_canvas, folder, "setup-42-programs-tag-picked");
+
+        //  Search: typing is enough.
+        programs_canvas.click("prog:2");
+        programs_canvas.type_text("tur");
+        programs_canvas.wait(0.4);
+        checker.check(programs_canvas.page_state().contains(";query=tur;") && programs_canvas.page_state().contains(";rows=3;"), "typing narrows the list down to the three Turbo programs");
+        checker.check(programs_canvas.page_state().startsWith("selected=Turbo Macro;"), "the program that was picked stays picked");
+        save(programs_canvas, folder, "setup-43-programs-search");
+        programs_canvas.type_text("xyz");
+        programs_canvas.wait(0.3);
+        checker.check(programs_canvas.page_state().contains(";rows=0;") && programs_canvas.page_state().startsWith("selected=;"), "nothing matches: no program is picked");
+        checker.check(programs_canvas.has_hit("start") && !programs_canvas.hit_enabled("start"), "and Start cannot be pressed");
+        save(programs_canvas, folder, "setup-44-programs-nothing");
+        programs_canvas.press_key(Qt::Key_Backspace);
+        programs_canvas.press_key(Qt::Key_Backspace);
+        programs_canvas.press_key(Qt::Key_Backspace);
+        checker.check(programs_canvas.page_state().contains(";query=tur;") && programs_canvas.page_state().contains(";rows=3;"), "Backspace takes the letters away again");
+        programs_canvas.press_key(Qt::Key_Escape);
+        programs_canvas.wait(0.3);
+        checker.check(programs_canvas.page_name() == "programs" && programs_canvas.page_state().contains(";query=;") && programs_canvas.page_state().contains(";rows=9;"),
+            "Escape empties the search first");
+
+        //  The log: the levels.
+        programs_canvas.click("lvl:2");
+        checker.check(programs_canvas.page_state().contains(";shown=2;"), "Warn shows the two warnings");
+        programs_canvas.click("lvl:3");
+        checker.check(programs_canvas.page_state().contains(";shown=1;"), "Error shows the one error");
+        programs_canvas.wait(0.3);
+        save(programs_canvas, folder, "setup-45-programs-errors");
+        programs_canvas.click("copy-log");
+        checker.check(programs_canvas.copied().contains("black frame") && !programs_canvas.copied().contains("loop 12"), "Copy log copies what is shown");
+        programs_canvas.click("lvl:1");
+        checker.check(programs_canvas.page_state().contains(";shown=5;"), "Info shows the five lines of information");
+        programs_canvas.click("lvl:0");
+        checker.check(programs_canvas.page_state().contains(";shown=8;"), "All shows all of them");
+        log.add(0, "Turbo A: loop 13 done");
+        programs_canvas.wait(1.2);
+        checker.check(programs_canvas.page_state().contains(";log=9;"), "a new line of the log comes in while the screen is up");
+
+        //  Copy for Claude: the whole story in one text.
+        programs_canvas.click("copy-claude");
+        const QString report = programs_canvas.copied();
+        checker.check(report.contains("# PocketPilot debug report") && report.contains("Build: PocketPilot test build"), "Copy for Claude starts with what it is, and the build");
+        checker.check(report.contains("Program: Turbo A") && report.contains("Game: Nintendo Switch"), "it says which program was picked");
+        checker.check(report.contains("Video: USB3 Video") && report.contains("Audio: USB3 Audio") && report.contains("Board: COM4"), "it says what the checks saw");
+        checker.check(report.contains("ERROR Video: black frame, signal lost?") && report.contains("WARN Board: no answer after 1.2 s"), "it has the lines of the log, with their levels");
+        checker.check(report.contains("System:"), "it says what computer it is");
+        programs_canvas.wait(0.3);
+        save(programs_canvas, folder, "setup-46-programs-copied");
+
+        //  A range of the timeline.
+        programs_canvas.wait(4.0);
+        checker.check(programs_canvas.drag_over("drag:lanes", 0.55, 0.9), "a range is dragged over");
+        checker.check(!programs_canvas.page_state().contains(";range=0;"), "the range is kept");
+        programs_canvas.wait(0.4);
+        save(programs_canvas, folder, "setup-47-programs-range");
+        programs_canvas.click("copy-claude");
+        checker.check(programs_canvas.copied().contains("Output log, the selected "), "Copy for Claude copies that range");
+        programs_canvas.drag_over("drag:lanes", 0.5, 0.5);
+        checker.check(programs_canvas.page_state().contains(";range=0;"), "a click on the timeline lets go of the range");
+
+        //  The file.
+        programs_canvas.click("save-log");
+        const QString saved_name = programs_canvas.page_state().section("saved=", 1);
+        checker.check(!saved_name.isEmpty() && QFile::exists(QDir(app + "/Debug").filePath(saved_name)), "Save .txt makes a file in the folder Debug");
+        checker.check(programs_canvas.last_folder().endsWith("Debug"), "and shows where it is");
+
+        //  The cards.
+        checker.check(programs_canvas.has_hit("source"), "there is a list of cards to pick from");
+        programs_canvas.click("source");
+        programs_canvas.wait(0.3);
+        checker.check(programs_canvas.has_hit("src:0") && programs_canvas.has_hit("src:1"), "it opens");
+        save(programs_canvas, folder, "setup-48-programs-cards");
+        programs_canvas.click("src:1");
+        programs_canvas.wait(0.2);
+        checker.check(!programs_canvas.has_hit("src:0"), "and closes once one is picked");
+
+        //  Start: the answer is the game and the program.
+        programs_canvas.click("prog:3");
+        programs_canvas.press_key(Qt::Key_Return);
+        programs_canvas.wait(0.2);
+        checker.check(programs_canvas.finished(), "Enter starts the program");
+        checker.check(programs_canvas.result().game == "Nintendo Switch" && programs_canvas.result().program == "Push Joy Sticks", "the game and the program are the answer");
+    }
+
+    //  ---- the programs: back, later, a long list with sections
+    {
+        SetupRequest with_programs;
+        with_programs.ask_game = true;
+        with_programs.games = test_games();
+        with_programs.programs = test_programs();
+        Canvas second(with_programs, true);
+        second.resize(1280, 720);
+        second.set_scan([]{
+            return HardwareState();
+        });
+        QEventLoop second_loop;
+        second.start(&second_loop);
+        second.show();
+        second.wait(2.5);
+        second.click("game:3");
+        second.wait(0.2);
+        second.click("start");
+        second.wait(1.6);
+        checker.check(second.page_name() == "programs", "Sword and Shield has programs too");
+        checker.check(second.has_hit("prog:0") && !second.has_hit("prog:35"), "of a long list only the first rows are on the screen");
+        save(second, folder, "setup-49-programs-long-list");
+        second.press_key(Qt::Key_End);
+        second.wait(1.0);
+        checker.check(second.has_hit("prog:35") && !second.has_hit("prog:0"), "End goes to the last, and the list scrolls to it");
+        save(second, folder, "setup-50-programs-end-of-list");
+        second.press_key(Qt::Key_Home);
+        second.wait(1.0);
+        checker.check(second.has_hit("prog:0"), "Home scrolls back");
+        second.scroll("prog:1", -3);
+        second.wait(0.8);
+        checker.check(!second.has_hit("prog:0") && second.has_hit("prog:8"), "the wheel scrolls the list");
+        second.scroll("prog:8", +10);
+        second.wait(0.8);
+        checker.check(second.has_hit("prog:0"), "and back");
+        checker.check(second.page_state().contains(";shown=0;"), "without a log there are no lines");
+        second.wait(0.3);
+        save(second, folder, "setup-51-programs-small-window");
+        second.type_text("ZZ");
+        second.press_key(Qt::Key_Escape);
+        second.wait(0.3);
+        checker.check(second.page_name() == "programs", "the first Escape only takes the letters of the search away");
+        second.press_key(Qt::Key_Escape);
+        second.wait(1.0);
+        checker.check(second.page_name() == "games" && !second.finished(), "Escape on an empty search goes back to the games");
+        checker.check(second.page_state() == "selected=" + with_programs.games[3].name, "and the game stays picked");
+        second.wait(0.2);
+        second.click("start");
+        second.wait(1.6);
+        second.click("later");
+        second.wait(0.2);
+        checker.check(second.finished() && second.result().game == with_programs.games[3].name && second.result().program.isEmpty(), "Choose later opens the game without a program");
+
+        //  All games.
+        Canvas third(with_programs, true);
+        third.resize(1920, 1080);
+        third.set_scan([]{
+            return HardwareState();
+        });
+        QEventLoop third_loop;
+        third.start(&third_loop);
+        third.show();
+        third.wait(2.5);
+        third.click("game:3");
+        third.wait(0.2);
+        third.click("start");
+        third.wait(1.6);
+        third.click("all");
+        third.wait(1.0);
+        checker.check(third.page_name() == "games" && third.page_state() == "selected=" + with_programs.games[3].name, "All games goes back to the games with that game still picked");
+
+        //  A game without programs ends the setup at once, as before.
+        third.click("game:1");
+        third.wait(0.2);
+        third.click("start");
+        third.wait(0.2);
+        checker.check(third.finished() && third.result().game == with_programs.games[1].name && third.result().program.isEmpty(), "a game without programs ends the setup, as before");
     }
 
     //  ---- the other way out: skip

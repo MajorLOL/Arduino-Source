@@ -41,7 +41,9 @@ std::vector<PanelListDescriptor::ProgramSummary> PanelListDescriptor::program_su
             section = entry.display_name;
             continue;
         }
-        ret.emplace_back(ProgramSummary{section, entry.display_name, entry.descriptor->description()});
+        ProgramSummary summary{section, entry.display_name, entry.descriptor->description(), std::string(), std::string()};
+        summary.tag = panel_standing_tag(entry.descriptor->standing(), &summary.tag_meaning);
+        ret.emplace_back(std::move(summary));
     }
     return ret;
 }

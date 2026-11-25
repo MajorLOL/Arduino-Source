@@ -292,9 +292,9 @@ int run_program(int argc, char *argv[]){
             return PocketPilot::run_setup_test(application, setup_folder);
         }
         //  The setup ends with the choice of a game: these are the games.
-        PocketPilot::set_game_lister([](std::vector<PocketPilot::HomeGame>& games){
+        PocketPilot::set_game_lister([](std::vector<PocketPilot::HomeGame>& games, std::vector<PocketPilot::HomeProgram>& programs){
             std::string error;
-            describe_all_games(games, &error);
+            describe_all_games(games, &error, &programs);
             if (!error.empty()){
                 global_logger_tagged().log("Setup: the games could not be listed: " + error, COLOR_RED);
             }
@@ -305,6 +305,9 @@ int run_program(int argc, char *argv[]){
             if (strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0){
                 global_logger_tagged().log(
                     "Setup: the games before the window: " + std::to_string(PocketPilot::count_games_for_setup()) + "."
+                );
+                global_logger_tagged().log(
+                    "Setup: the programs before the window: " + std::to_string(PocketPilot::count_programs_for_setup()) + "."
                 );
             }
         }

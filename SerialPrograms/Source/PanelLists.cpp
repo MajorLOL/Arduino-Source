@@ -30,6 +30,7 @@
 #include "VideoGames/PokemonPokopia/PokemonPokopia_Panels.h"
 #include "VideoGames/ZeldaTotK/ZeldaTotK_Panels.h"
 #include "PocketPilot/ClaudePlays/ClaudePlays_Program.h"
+#include "PocketPilot/PocketPilot_ProgramList.h"
 #include "PanelLists.h"
 
 //#include <iostream>
@@ -86,22 +87,56 @@ PocketPilot::HomeGame describe_list(const PanelListDescriptor& list){
 }
 
 
-void describe_all_games(std::vector<PocketPilot::HomeGame>& games, std::string* error){
+void describe_all_games(
+    std::vector<PocketPilot::HomeGame>& games,
+    std::string* error,
+    std::vector<PocketPilot::HomeProgram>* programs
+){
     games.clear();
+    if (programs != nullptr){
+        programs->clear();
+    }
     try{
         for (const std::unique_ptr<PanelListDescriptor>& list : make_all_lists()){
             PocketPilot::HomeGame game = describe_list(*list);
-            game.programs = (int)list->program_summaries().size();
+            //  The list of the Nintendo Switch has its settings, its virtual
+            //  consoles and its tests in it too: of these only the programs
+            //  are what the setup asks to start.
+            const bool only_programs = list->name() == "Nintendo Switch";
+            game.programs = 0;
+            for (const PanelListDescriptor::ProgramSummary& summary : list->program_summaries()){
+                const QString section = PocketPilot::section_title(QString::fromStdString(summary.section));
+                if (only_programs && section != "Programs"){
+                    continue;
+                }
+                game.programs++;
+                if (programs != nullptr){
+                    PocketPilot::HomeProgram program;
+                    program.game = (int)games.size();
+                    program.section = only_programs ? QString() : section;
+                    program.name = QString::fromStdString(summary.name);
+                    program.description = QString::fromStdString(summary.description);
+                    program.tag = QString::fromStdString(summary.tag);
+                    program.tag_meaning = QString::fromStdString(summary.tag_meaning);
+                    programs->emplace_back(std::move(program));
+                }
+            }
             games.emplace_back(std::move(game));
         }
     }catch (const std::exception& e){
         //  The setup goes on without the choice of a game.
         games.clear();
+        if (programs != nullptr){
+            programs->clear();
+        }
         if (error != nullptr){
             *error = e.what();
         }
     }catch (...){
         games.clear();
+        if (programs != nullptr){
+            programs->clear();
+        }
         if (error != nullptr){
             *error = "an unknown error";
         }
@@ -300,6 +335,8 @@ void ProgramSelect::describe(
             program.section = QString::fromStdString(summary.section);
             program.name = QString::fromStdString(summary.name);
             program.description = QString::fromStdString(summary.description);
+            program.tag = QString::fromStdString(summary.tag);
+            program.tag_meaning = QString::fromStdString(summary.tag_meaning);
             programs.emplace_back(std::move(program));
             game.programs++;
         }

@@ -44,6 +44,8 @@ struct HomeProgram{
     QString section;        //  The title of its section in the game's list. May be empty.
     QString name;
     QString description;
+    QString tag;            //  "beta", "rough", ...; empty for a regular program.
+    QString tag_meaning;
 };
 
 

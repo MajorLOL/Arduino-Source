@@ -41,6 +41,8 @@ public:
         std::string section;        //  The title of its section, as in the list.
         std::string name;
         std::string description;
+        std::string tag;            //  "beta", "rough", ...; empty for a regular program.
+        std::string tag_meaning;
     };
     std::vector<ProgramSummary> program_summaries() const;
 

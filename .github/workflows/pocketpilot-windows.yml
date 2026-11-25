@@ -342,6 +342,20 @@ jobs:
           if ($count -lt 8) {
             throw "The setup can list only $count games before the main window exists (at least 8 expected)."
           }
+          #  And the programs of those games, for the screen that asks which
+          #  program to start after the game.
+          $programs = $null
+          if (Test-Path $log) {
+            $programs = Select-String -Path $log -Pattern "Setup: the programs before the window: (\d+)" | Select-Object -First 1
+          }
+          if ($null -eq $programs) {
+            throw "The interface test did not log the programs of the setup."
+          }
+          $program_count = [int]$programs.Matches[0].Groups[1].Value
+          Write-Host "The setup can list $program_count programs before the main window exists."
+          if ($program_count -lt 50) {
+            throw "The setup can list only $program_count programs before the main window exists (at least 50 expected)."
+          }
           exit 0
 
       #  The intro that plays first when the program starts (see
