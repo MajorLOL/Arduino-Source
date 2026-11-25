@@ -33,6 +33,8 @@
 #include "Inference/PokemonFRLG_TypeReader.h"
 #include "Inference/PokemonFRLG_WildEncounterReader.h"
 #include "Programs/BoxOrganization/PokemonFRLG_BoxSorter_Tests.h"
+#include "Programs/RngManipulation/PokemonFRLG_RngPlanTracker_Tests.h"
+#include "Programs/RngManipulation/PokemonFRLG_RngTargetSearch_Tests.h"
 #include "Tests/TestUtils.h"
 
 #include "PokemonFRLG_Tests.h"
@@ -63,6 +65,8 @@ void add_tests(UnitTestDatabase& database){
     add_tests_PartyLevelUpReader(database);
     add_tests_PartyMenuDetector(database);
     add_tests_PrizeSelectDetector(database);
+    add_tests_RngPlanTracker(database);
+    add_tests_RngTargetSearch(database);
     add_tests_PartySlotDetector(database);
     add_tests_StatsReader(database);
     add_tests_SelectionDialogDetector(database);

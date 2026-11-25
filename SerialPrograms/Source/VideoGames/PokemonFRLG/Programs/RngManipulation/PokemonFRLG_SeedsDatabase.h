@@ -44,10 +44,6 @@ struct SeedMatch{
 
 class SeedsDatabase{
 public:
-    SeedsDatabase(const std::string& json_path);
-    SeedMatch find_seed(uint16_t target_seed, SoundSetting sound, int radius) const;
-
-private:
     struct SeedColumn{
         std::string name;
         SoundSetting sound;
@@ -56,6 +52,15 @@ private:
         std::vector<uint16_t> seeds;
     };
 
+public:
+    SeedsDatabase(const std::string& json_path);
+    SeedMatch find_seed(uint16_t target_seed, SoundSetting sound, int radius) const;
+
+    //  The delay in milliseconds before each row of the columns.
+    const std::vector<uint64_t>& delays() const{ return m_delays; }
+    const std::vector<SeedColumn>& columns() const{ return m_columns; }
+
+private:
     std::vector<uint64_t> m_delays;
     std::vector<SeedColumn> m_columns;
 };
