@@ -244,7 +244,7 @@ jobs:
           #  esptool is taken by changing both here, on purpose. A zip that is
           #  not the one pinned is not packaged.
           $esptoolTag = "v5.7.0"
-          $esptoolSha256 = ""
+          $esptoolSha256 = "c97911246149141eab535b3a6dd5367cd3c16ba17098bce27ac6af780708c9e9"
           try {
             $release = gh api "repos/espressif/esptool/releases/tags/$esptoolTag" | ConvertFrom-Json
             $asset = $release.assets | Where-Object { $_.name -match 'windows-amd64\.zip$' } | Select-Object -First 1
@@ -257,9 +257,7 @@ jobs:
             if ($asset.digest -and $asset.digest -ne "sha256:$actual") {
               throw "The zip that was downloaded is not the one GitHub lists for $($asset.name)."
             }
-            if ($esptoolSha256 -eq "") {
-              Write-Host "::warning::The SHA-256 of esptool is not pinned yet: $actual"
-            } elseif ($actual -ne $esptoolSha256) {
+            if ($actual -ne $esptoolSha256) {
               throw "The SHA-256 of $($asset.name) is $actual, not the pinned $esptoolSha256."
             }
             $tools = "$out/Tools/esptool"
@@ -283,6 +281,15 @@ jobs:
           } catch {
             Write-Host "::warning::esptool is not in this package: $_"
             if (Test-Path "$out/Tools") { Remove-Item -Recurse -Force "$out/Tools" }
+          }
+          #  Nothing of the Discord bot may be in the package: D++ and the Social
+          #  SDK are left out of the build, and with them the OpenSSL 1.1.1k,
+          #  libsodium and opus that came with them. If one of them comes back
+          #  (a change in the CMake files, a new package), the build stops here.
+          $banned = Get-ChildItem $out -Recurse -File | Where-Object { $_.Name -match '^(libssl-1_1|libcrypto-1_1|libsodium|opus|dpp|discord_partner_sdk)' }
+          if ($banned) {
+            $banned | ForEach-Object { Write-Host "::error::In the package, but left out of the build on purpose: $($_.FullName)" }
+            throw "Files of the Discord bot are in the package."
           }
           New-Item -ItemType Directory -Path "package" | Out-Null
           Copy-Item -Recurse $out "package/PocketPilot"
