@@ -403,21 +403,32 @@ if (WIN32)
         IMPORTED_LOCATION   ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/onnxruntime_providers_shared.lib
     )
 
-    add_library(dpp_lib IMPORTED UNKNOWN)
-    set_target_properties(dpp_lib PROPERTIES
-        IMPORTED_LOCATION   ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/dpp.lib
-    )
+    # The Discord bot (D++) and the rich presence (the Discord Social SDK) are
+    # optional on Windows too, as they are on the other platforms: the code is
+    # behind PA_DPP and PA_SOCIAL_SDK. On by default, as upstream has it.
+    # PocketPilot's workflow turns it off: nothing in PocketPilot uses the
+    # bot (a remote control through Discord), and D++ brings OpenSSL 1.1.1k,
+    # which is no longer maintained. The webhooks (a message to Discord) are
+    # not part of it.
+    option(PA_DISCORD_BOT "Windows: build in the Discord bot (D++) and the Discord Social SDK" ON)
 
-    add_library(discord_lib IMPORTED UNKNOWN)
-    target_include_directories(SerialProgramsLib SYSTEM PRIVATE ../3rdParty/discord_social_sdk/)
-    set_target_properties(discord_lib PROPERTIES
-        IMPORTED_LOCATION_RELEASE           ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/discord_social_sdk_win/lib/release/discord_partner_sdk.lib
-        IMPORTED_LOCATION_DEBUG             ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/discord_social_sdk_win/lib/debug/discord_partner_sdk.lib
-        MAP_IMPORTED_CONFIG_DEBUG           DEBUG
-        MAP_IMPORTED_CONFIG_RELEASE         RELEASE
-        MAP_IMPORTED_CONFIG_RELWITHDEBINFO  RELEASE
-        MAP_IMPORTED_CONFIG_MINSIZEREL      RELEASE
-    )
+    if (PA_DISCORD_BOT)
+        add_library(dpp_lib IMPORTED UNKNOWN)
+        set_target_properties(dpp_lib PROPERTIES
+            IMPORTED_LOCATION   ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/dpp.lib
+        )
+
+        add_library(discord_lib IMPORTED UNKNOWN)
+        target_include_directories(SerialProgramsLib SYSTEM PRIVATE ../3rdParty/discord_social_sdk/)
+        set_target_properties(discord_lib PROPERTIES
+            IMPORTED_LOCATION_RELEASE           ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/discord_social_sdk_win/lib/release/discord_partner_sdk.lib
+            IMPORTED_LOCATION_DEBUG             ${CMAKE_CURRENT_SOURCE_DIR}/../3rdPartyBinaries/discord_social_sdk_win/lib/debug/discord_partner_sdk.lib
+            MAP_IMPORTED_CONFIG_DEBUG           DEBUG
+            MAP_IMPORTED_CONFIG_RELEASE         RELEASE
+            MAP_IMPORTED_CONFIG_RELWITHDEBINFO  RELEASE
+            MAP_IMPORTED_CONFIG_MINSIZEREL      RELEASE
+        )
+    endif()
 
     target_link_libraries(
         SerialProgramsLib PRIVATE
@@ -425,17 +436,17 @@ if (WIN32)
         OpenCV_lib
         ONNX_lib
         ONNX_Providers_lib
-        dpp_lib
-        discord_lib
     )
+    if (PA_DISCORD_BOT)
+        target_link_libraries(SerialProgramsLib PRIVATE dpp_lib discord_lib)
+        target_compile_definitions(SerialProgramsLib PUBLIC PA_DPP PA_SOCIAL_SDK)
+    endif()
 
     target_compile_definitions(
         SerialProgramsLib PUBLIC
         _CRT_SECURE_NO_WARNINGS
         _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR
         PA_TESSERACT
-        PA_DPP
-        PA_SOCIAL_SDK
     )
 
     if(PA_ASSEMBLY_LISTINGS)
@@ -882,13 +893,15 @@ if (WIN32)
     endif()
 
     # Copy Discord SDK DLL
-    add_custom_command(
-        TARGET SerialPrograms POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "[Deploy] Copying Discord SDK DLL"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<IF:$<CONFIG:Debug>,${DISCORD_DLL_DEBUG},${DISCORD_DLL_RELEASE}>"
-            "${WIN_DEPLOY_DIR}/discord_partner_sdk.dll"
-    )
+    if (PA_DISCORD_BOT)
+        add_custom_command(
+            TARGET SerialPrograms POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "[Deploy] Copying Discord SDK DLL"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<IF:$<CONFIG:Debug>,${DISCORD_DLL_DEBUG},${DISCORD_DLL_RELEASE}>"
+                "${WIN_DEPLOY_DIR}/discord_partner_sdk.dll"
+        )
+    endif()
 
     # Move built .exe and .pdb to deploy folder, print if pdb is missing
     add_custom_command(
@@ -898,16 +911,18 @@ if (WIN32)
         COMMAND cmd /c "if exist \"$<TARGET_PDB_FILE:SerialPrograms>\" ( \"${CMAKE_COMMAND}\" -E rename \"$<TARGET_PDB_FILE:SerialPrograms>\" \"${WIN_DEPLOY_DIR}/$<TARGET_PDB_FILE_NAME:SerialPrograms>\" ) else ( echo [Deploy] PDB file missing: $<TARGET_PDB_FILE:SerialPrograms> )"
     )
 
-    extract_discord_sdk("${DISCORD_ZIP}" "${DISCORD_DIR}")
+    if (PA_DISCORD_BOT)
+        extract_discord_sdk("${DISCORD_ZIP}" "${DISCORD_DIR}")
 
-    # Copy dpp dll
-    add_custom_command(
-        TARGET SerialPrograms POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "[Deploy] Copying dpp DLL"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<IF:$<CONFIG:Debug>,${DPP_DEBUG_DLL},${DPP_RELEASE_DLL}>"
-            "${WIN_DEPLOY_DIR}/dpp.dll"
-    )
+        # Copy dpp dll
+        add_custom_command(
+            TARGET SerialPrograms POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "[Deploy] Copying dpp DLL"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<IF:$<CONFIG:Debug>,${DPP_DEBUG_DLL},${DPP_RELEASE_DLL}>"
+                "${WIN_DEPLOY_DIR}/dpp.dll"
+        )
+    endif()
 
     # Extract OpenCV debug DLL if missing
     if (NOT EXISTS "${OPENCV_DEBUG_DLL}")
@@ -932,6 +947,12 @@ if (WIN32)
     if (NOT PA_SDL)
         list(REMOVE_ITEM THIRD_PARTY_DLLS "${REPO_ROOT_DIR}/3rdPartyBinaries/SDL3.dll")
     endif()
+    if (NOT PA_DISCORD_BOT)
+        # What only D++ needs: OpenSSL 1.1.1k, and its voice libraries.
+        foreach(DPP_ONLY libssl-1_1-x64 libcrypto-1_1-x64 libsodium opus)
+            list(REMOVE_ITEM THIRD_PARTY_DLLS "${REPO_ROOT_DIR}/3rdPartyBinaries/${DPP_ONLY}.dll")
+        endforeach()
+    endif()
     foreach(DLL IN LISTS THIRD_PARTY_DLLS)
         get_filename_component(DLL_NAME "${DLL}" NAME)
         add_custom_command(
@@ -948,7 +969,7 @@ if (WIN32)
     )
 endif() # end WIN32
 
-if (WIN32 OR DPP_FOUND)
+if ((WIN32 AND PA_DISCORD_BOT) OR DPP_FOUND)
     # Deploy the CA bundle beside the executable for DPP certificate verification.
     if (WIN32)
         set(DPP_CERT_DIR "${WIN_DEPLOY_DIR}")

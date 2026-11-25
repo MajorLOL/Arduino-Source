@@ -181,6 +181,7 @@
  "Flash now": "Nu flashen",
  "This file is not a valid firmware file. Download it again.": "Dit is geen geldig firmwarebestand. Download het opnieuw.",
  "The download failed. Check the connection, or open the link in your browser.": "De download is mislukt. Controleer de verbinding of open de link in je browser.",
+ "This file is not the one the build of the program hashed. It was changed or damaged: it is not flashed. Download it again.": "Dit bestand is niet het bestand waarvan de build van het programma de hash maakte. Het is gewijzigd of beschadigd: het wordt niet geflasht. Download het opnieuw.",
  "The file could not be copied to the Pico. Unplug it and start again from step 2.": "Het bestand kon niet naar de Pico worden gekopieerd. Haal hem los en begin opnieuw bij stap 2.",
  "The Pico did not restart. Unplug it and start again from step 2.": "De Pico is niet opnieuw opgestart. Haal hem los en begin opnieuw bij stap 2.",
  "The board did not answer. Hold its BOOT button while it connects, or try another cable or port.": "Het board antwoordde niet. Houd de BOOT-knop ingedrukt terwijl het verbindt, of probeer een andere kabel of poort.",

@@ -75,6 +75,8 @@ file(GLOB CORE_LIBRARY_SOURCES
     ../Common/Cpp/CpuUtilization/CpuUtilization_Windows.tpp
     ../Common/Cpp/Cryptography/SHA256.cpp
     ../Common/Cpp/Cryptography/SHA256.h
+    ../Common/Cpp/Cryptography/SecretSeal.cpp
+    ../Common/Cpp/Cryptography/SecretSeal.h
     ../Common/Cpp/EarlyShutdown.h
     ../Common/Cpp/EnumStringMap.h
     ../Common/Cpp/EventRateTracker.h
@@ -1479,6 +1481,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/ClaudePlays/ClaudePlays_AnyGame.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.cpp
     Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_GameCard.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_GameCard.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Games.cpp
     Source/PocketPilot/ClaudePlays/ClaudePlays_Games.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Program.cpp
@@ -1499,6 +1503,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/PocketPilot_Logo.h
     Source/PocketPilot/PocketPilot_ProgramList.cpp
     Source/PocketPilot/PocketPilot_ProgramList.h
+    Source/PocketPilot/PocketPilot_Scrub.cpp
+    Source/PocketPilot/PocketPilot_Scrub.h
     Source/PocketPilot/PocketPilot_SelfTest.cpp
     Source/PocketPilot/PocketPilot_SelfTest.h
     Source/PocketPilot/PocketPilot_Shell.cpp

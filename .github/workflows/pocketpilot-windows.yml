@@ -2,9 +2,17 @@ name: PocketPilot - Windows build
 
 # Builds a ready-to-run Windows version of PocketPilot (Qt DLLs, resources and
 # firmware included), starts it once to take pictures of its interface, and
-# publishes the build with the pictures as a pre-release of this repository
-# and as a workflow artifact. A build that fails that test (it does not
-# start, crashes or cannot take its pictures) is not published.
+# publishes the zip as a pre-release of this repository (with its SHA-256);
+# the pictures stay in the workflow artifact. A build that fails that test (it
+# does not start, crashes or cannot take its pictures) is not published.
+#
+# Two jobs: "build" only reads the repository, so that what a pull request
+# changes (the changes Claude makes arrive that way) cannot use a token that
+# may write; "publish" has the right to write and does nothing but check the
+# zip against the hash the build made of it, and put it on a release. What
+# comes from outside is pinned: the actions by their commit, Packages by its
+# commit, esptool by its version and its SHA-256, the firmware by a list of
+# hashes that the program checks before it flashes.
 #
 # It runs
 #
@@ -33,7 +41,7 @@ on:
         default: true
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,6 +50,12 @@ concurrency:
 jobs:
   build:
     runs-on: windows-2025
+    permissions:
+      contents: read
+    outputs:
+      build_number: ${{ steps.number.outputs.build_number }}
+      publish: ${{ steps.number.outputs.publish }}
+      sha256: ${{ steps.hash.outputs.sha256 }}
     steps:
       #  As in the upstream workflow, for Windows with the MSVC compiler.
       #  "Ninja Multi-Config" keeps Visual Studio's output layout
@@ -54,29 +68,32 @@ jobs:
         run: |
           CMAKE_ADDITIONAL_FLAGS="-DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -DPA_ASSEMBLY_LISTINGS=OFF"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl"
+          #  Without the Discord bot (D++, with OpenSSL 1.1.1k that nobody maintains any more) and the Discord
+          #  Social SDK: PocketPilot uses neither. The webhooks stay.
+          CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DPA_DISCORD_BOT=OFF"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
           echo "CMAKE_GENERATOR=Ninja Multi-Config" >> $GITHUB_ENV
           echo "CMAKE_ADDITIONAL_FLAGS=$CMAKE_ADDITIONAL_FLAGS" >> $GITHUB_ENV
           echo "BUILD_PARALLEL=$(( $(nproc) + 2 ))" >> $GITHUB_ENV
 
       - name: Checkout Arduino-Source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
           path: 'Arduino-Source'
           submodules: 'recursive'
 
       #  The resources, firmware and scripts (Pokemon Automation's Packages).
       - name: Checkout Packages
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
           repository: 'PokemonAutomation/Packages'
-          ref: 'master'
+          ref: 'c4603991d0240cfd91a92021c9957c9c6803cda9'  # master on 25 November 2026; move it on purpose
           path: 'Arduino-Source/Packages'
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06  # v4.5.0
         with:
-          aqtsource: 'git+https://github.com/miurahr/aqtinstall'
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall@4c759852b1108cc801d8e24979136b895b5155d4'
           version: '6.10.2'
           modules: 'qtmultimedia qtserialport'
           cache: true
@@ -115,7 +132,7 @@ jobs:
       #  one on PATH. A pull request's build reads it and leaves none of its
       #  own, which would only take the room of the branch's.
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2.24
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d  # v1.2.24
         with:
           key: pocketpilot-windows-2025
           max-size: 5G
@@ -128,6 +145,7 @@ jobs:
       #  is published gets the number after the last published one; a pull
       #  request's build is named after the pull request.
       - name: Build number
+        id: number
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -148,6 +166,8 @@ jobs:
           echo "This build: $NUMBER (published: $PUBLISH)"
           echo "BUILD_NUMBER=$NUMBER" >> $GITHUB_ENV
           echo "PUBLISH=$PUBLISH" >> $GITHUB_ENV
+          echo "build_number=$NUMBER" >> $GITHUB_OUTPUT
+          echo "publish=$PUBLISH" >> $GITHUB_OUTPUT
           echo "#define POCKETPILOT_BUILD \"$NUMBER\"" > Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
           cat Arduino-Source/SerialPrograms/Source/PocketPilot/PocketPilot_Build.h
 
@@ -208,19 +228,38 @@ jobs:
           $packages = git -C Arduino-Source/Packages rev-parse HEAD
           New-Item -ItemType Directory -Force -Path "$out/Firmware" | Out-Null
           "https://github.com/PokemonAutomation/Packages/tree/$packages/Firmware" | Out-File "$out/Firmware/SOURCE.txt" -Encoding ascii
+          #  The hash of each firmware file that goes along: the program checks
+          #  a file against this list before it flashes it.
+          Get-ChildItem "$out/Firmware" -File | Where-Object { $_.Extension -in ".uf2", ".bin" } | Sort-Object Name | ForEach-Object {
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
+          } | Out-File "$out/Firmware/SHA256SUMS.txt" -Encoding ascii
+          if (Test-Path "$out/Firmware/SHA256SUMS.txt") { Get-Content "$out/Firmware/SHA256SUMS.txt" }
           Get-ChildItem "$out/Firmware" | Format-Table Name, Length
           #  The tool that flashes the ESP32 boards from the setup: esptool of
           #  Espressif, its stand-alone Windows build (no Python needed). It is
           #  a separate program that PocketPilot Studio starts. If it cannot be
           #  fetched the build goes on: the setup then looks for esptool on
           #  the computer of the user and says what to do when it is not there.
+          #  Pinned: the version, and the SHA-256 of its Windows zip. A newer
+          #  esptool is taken by changing both here, on purpose. A zip that is
+          #  not the one pinned is not packaged.
+          $esptoolTag = "v5.7.0"
+          $esptoolSha256 = "c97911246149141eab535b3a6dd5367cd3c16ba17098bce27ac6af780708c9e9"
           try {
-            $release = gh api repos/espressif/esptool/releases/latest | ConvertFrom-Json
+            $release = gh api "repos/espressif/esptool/releases/tags/$esptoolTag" | ConvertFrom-Json
             $asset = $release.assets | Where-Object { $_.name -match 'windows-amd64\.zip$' } | Select-Object -First 1
             if ($null -eq $asset) { throw "No Windows build in release $($release.tag_name)." }
             Write-Host "esptool $($release.tag_name): $($asset.name) ($($asset.size) bytes)"
             $zip = Join-Path $env:RUNNER_TEMP $asset.name
             Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
+            $actual = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+            Write-Host "esptool zip SHA-256: $actual (GitHub lists: $($asset.digest))"
+            if ($asset.digest -and $asset.digest -ne "sha256:$actual") {
+              throw "The zip that was downloaded is not the one GitHub lists for $($asset.name)."
+            }
+            if ($actual -ne $esptoolSha256) {
+              throw "The SHA-256 of $($asset.name) is $actual, not the pinned $esptoolSha256."
+            }
             $tools = "$out/Tools/esptool"
             New-Item -ItemType Directory -Force -Path $tools | Out-Null
             Expand-Archive -Path $zip -DestinationPath $tools -Force
@@ -243,10 +282,29 @@ jobs:
             Write-Host "::warning::esptool is not in this package: $_"
             if (Test-Path "$out/Tools") { Remove-Item -Recurse -Force "$out/Tools" }
           }
+          #  Nothing of the Discord bot may be in the package: D++ and the Social
+          #  SDK are left out of the build, and with them the OpenSSL 1.1.1k,
+          #  libsodium and opus that came with them. If one of them comes back
+          #  (a change in the CMake files, a new package), the build stops here.
+          $banned = Get-ChildItem $out -Recurse -File | Where-Object { $_.Name -match '^(libssl-1_1|libcrypto-1_1|libsodium|opus|dpp|discord_partner_sdk)' }
+          if ($banned) {
+            $banned | ForEach-Object { Write-Host "::error::In the package, but left out of the build on purpose: $($_.FullName)" }
+            throw "Files of the Discord bot are in the package."
+          }
           New-Item -ItemType Directory -Path "package" | Out-Null
           Copy-Item -Recurse $out "package/PocketPilot"
           Compress-Archive -Path "package/PocketPilot" -DestinationPath "PocketPilot-Windows.zip"
           Get-Item "PocketPilot-Windows.zip" | Format-List Name, Length
+
+      #  The hash of the zip, made here and checked again by the job that
+      #  publishes it: what goes on the release is what was built and tested.
+      - name: Hash of the zip
+        id: hash
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "PocketPilot-Windows.zip" -Algorithm SHA256).Hash.ToLower()
+          Write-Host "SHA-256 of PocketPilot-Windows.zip: $hash"
+          "sha256=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       #  Start the build once: it opens its main window, goes through its
       #  pages and themes, saves a picture of each and exits (see
@@ -519,7 +577,7 @@ jobs:
       #  Also for a build that failed the interface test: to look at.
       - name: Upload artifact
         if: success() || failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: PocketPilot-Windows
           path: |
@@ -529,7 +587,7 @@ jobs:
 
       - name: Upload what a failed interface test left behind
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
           name: interface-test-diagnostics
           if-no-files-found: ignore
@@ -537,20 +595,58 @@ jobs:
             ui-test-diagnostics/**
             symbols/*.pdb
 
-      - name: Publish pre-release
-        if: env.PUBLISH == 'true'
+  #  The only job that may write to the repository. It runs only for a build
+  #  that is to be published and that passed its tests ("needs"), and it does
+  #  not run what the build made: it takes the zip, checks it against the hash
+  #  the build made, and puts it on a release.
+  publish:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Fetch the zip of the build
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="pocketpilot-build-$BUILD_NUMBER"
-          FILES="PocketPilot-Windows.zip"
-          if ls ui-screenshots/*.png > /dev/null 2>&1; then
-            FILES="$FILES ui-screenshots/*.png"
+          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name PocketPilot-Windows --dir artifact
+          ZIP=$(find artifact -name PocketPilot-Windows.zip | head -n 1)
+          if [ -z "$ZIP" ]; then
+            echo "::error::The artifact of the build has no PocketPilot-Windows.zip."
+            exit 1
           fi
-          gh release create "$TAG" $FILES \
+          mv "$ZIP" PocketPilot-Windows.zip
+          ls -l PocketPilot-Windows.zip
+
+      - name: Check the zip against its hash
+        shell: bash
+        env:
+          EXPECTED: ${{ needs.build.outputs.sha256 }}
+        run: |
+          ACTUAL=$(sha256sum PocketPilot-Windows.zip | cut -d' ' -f1)
+          echo "built:   $EXPECTED"
+          echo "fetched: $ACTUAL"
+          if [ -z "$EXPECTED" ] || [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::The zip is not the one the build made. It is not published."
+            exit 1
+          fi
+
+      - name: Publish pre-release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_NUMBER: ${{ needs.build.outputs.build_number }}
+          SHA256: ${{ needs.build.outputs.sha256 }}
+        run: |
+          TAG="pocketpilot-build-$BUILD_NUMBER"
+          # Only the program itself goes on the release. The pictures of the
+          # interface test stay in the workflow artifact, to look at there.
+          gh release create "$TAG" PocketPilot-Windows.zip \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --prerelease \
             --title "PocketPilot Studio - Windows build $BUILD_NUMBER" \
-            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took the pictures below of its own interface. For non-commercial use. Built from ${{ github.sha }}."
+            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took pictures of its own interface. For non-commercial use. Built from ${{ github.sha }}. The program is not signed with a certificate, so Windows may warn when you start it: compare the SHA-256 of the zip you downloaded with this one before you do. SHA-256 of PocketPilot-Windows.zip: $SHA256"

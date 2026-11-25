@@ -8,6 +8,12 @@
  *  (FireRed and LeafGreen have a Claude Plays of their own, with the
  *  routines of the AutoStory: VideoGames/PokemonFRLG/Programs/ClaudePlays.)
  *
+ *  Every game that is added to the program gets a list with a Claude Plays
+ *  in it: a GameId and a profile here, and either a list of its own in
+ *  VideoGames/ (like ZeldaTotK) or, while it has no programs, an entry in
+ *  has_only_claude_plays() (the list is then made by GameOnlyList). The
+ *  notes of a profile say only what is certain.
+ *
  *  No Qt in this header.
  *
  */
@@ -35,6 +41,10 @@ enum class GameId{
     POKOPIA,
     RUBY_SAPPHIRE_EMERALD,
     ZELDA_TOTK,
+    OCTOPATH_TRAVELER_0,
+    MARIO_KART_8_DELUXE,
+    SPLATOON_3,
+    ANIMAL_CROSSING_NEW_HORIZONS,
 };
 
 //  The controller the game's programs use.
@@ -66,6 +76,11 @@ struct GameProfile{
 const GameProfile& game_profile(GameId id);
 //  All of them, in the order of the list of games.
 const std::vector<GameId>& all_games();
+
+//  The games that have a list of their own with nothing in it but Claude
+//  Plays (no program for the game itself yet): the list is made by
+//  GameOnlyList (ClaudePlays_Program.h).
+bool has_only_claude_plays(GameId id);
 
 //  The name of the list of games "Other Games".
 extern const char* const OTHER_GAMES_LIST;

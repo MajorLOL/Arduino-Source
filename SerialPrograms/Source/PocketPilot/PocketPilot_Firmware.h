@@ -26,6 +26,7 @@
 
 #include <atomic>
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -86,6 +87,20 @@ std::vector<FirmwareFile> parse_firmware_listing(const QByteArray& json, const Q
 std::vector<FirmwareFile> merge_firmware(const std::vector<FirmwareFile>& local, const std::vector<FirmwareFile>& online);
 //  The file is what it says: a .uf2 starts with its marker, a .bin is not tiny.
 bool looks_like_firmware(const QString& path);
+
+//  The hashes of the firmware files that came with the program: the lines
+//  "<SHA-256 in hex>  <file name>" of Firmware/SHA256SUMS.txt, which the build
+//  writes. The map goes from the file name to the hash in lower case. Lines
+//  that are not of this form are skipped.
+std::map<QString, QString> parse_firmware_checksums(const QByteArray& text);
+std::map<QString, QString> firmware_checksums(const QString& folder);
+//  The SHA-256 of a file in lower case hex; empty when it cannot be read.
+QString file_sha256(const QString& path);
+//  False when the build made a hash of a file with this name and this file is
+//  not what it hashed (the file was changed, or damaged on the way). True when
+//  it is that file, and when the build knows no file of that name: a version
+//  that is newer than the program has no hash to be checked against.
+bool firmware_matches_checksum(const QString& folder, const QString& path);
 
 
 

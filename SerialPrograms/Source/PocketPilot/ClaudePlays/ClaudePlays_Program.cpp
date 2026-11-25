@@ -31,6 +31,7 @@
 #include "VideoGames/PokemonSV/Programs/PokemonSV_SaveGame.h"
 #include "VideoGames/PokemonSwSh/Programs/PokemonSwSh_MenuNavigation.h"
 #include "ClaudePlays_AnyGame.h"
+#include "ClaudePlays_GameCard.h"
 #include "ClaudePlays_Program.h"
 
 namespace PokemonAutomation{
@@ -228,7 +229,7 @@ public:
         if (!snapshot){
             return false;
         }
-        const ImageViewRGB32 frame = snapshot;
+        const ImageViewRGB32& frame = *snapshot.frame;
         use(frame);
         return true;
     }
@@ -334,7 +335,7 @@ public:
         if (!snapshot){
             return false;
         }
-        const ImageViewRGB32 frame = snapshot;
+        const ImageViewRGB32& frame = *snapshot.frame;
         use(frame);
         return true;
     }
@@ -654,6 +655,41 @@ ImageRGB32 other_games_picture(){
     return QImage_to_ImageRGB32(std::move(image));
 }
 
+}
+
+
+namespace{
+
+//  The ground of a game's card.
+QRgb card_ground(GameId game){
+    switch (game){
+    case GameId::OCTOPATH_TRAVELER_0:
+        return qRgb(0x7a, 0x5c, 0x2e);
+    case GameId::MARIO_KART_8_DELUXE:
+        return qRgb(0xb3, 0x34, 0x2f);
+    case GameId::SPLATOON_3:
+        return qRgb(0x9a, 0x2f, 0x8c);
+    case GameId::ANIMAL_CROSSING_NEW_HORIZONS:
+        return qRgb(0x3a, 0x86, 0x58);
+    default:
+        return qRgb(0x44, 0x4a, 0x5c);
+    }
+}
+
+}
+
+GameOnlyList::GameOnlyList(GameId game)
+    : PanelListDescriptor(game_profile(game).title)
+    , m_game(game)
+{
+    m_icon = QImage_to_ImageRGB32(make_game_card(game_profile(game).title, card_ground(game)));
+}
+
+std::vector<PanelEntry> GameOnlyList::make_panels() const{
+    std::vector<PanelEntry> ret;
+    ret.emplace_back("---- Claude ----");
+    ret.emplace_back(make_claude_plays(m_game));
+    return ret;
 }
 
 

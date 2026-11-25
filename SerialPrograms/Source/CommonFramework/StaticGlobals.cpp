@@ -8,6 +8,7 @@
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonObject.h"
 #include "Common/Cpp/Cryptography/SHA256.h"
+#include "Common/Cpp/Cryptography/SecretSeal.h"
 #include "StaticGlobals.h"
 
 #ifdef PA_OFFICIAL
@@ -52,6 +53,11 @@ void StaticGlobals::load_json(const JsonValue& json){
 
     //  Developer mode stuff.
     const std::string* dev_token = obj->get_string("DEVELOPER_TOKEN");
+    //  The token is kept sealed in the settings file (see StringCell).
+    std::string opened_token;
+    if (dev_token && open_secret(*dev_token, opened_token) == SecretOpen::OPENED){
+        dev_token = &opened_token;
+    }
     if (dev_token){
         SHA256 hash;
         hash.push(dev_token->c_str(), dev_token->size());

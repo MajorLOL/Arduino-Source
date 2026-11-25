@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -171,6 +172,47 @@ bool looks_like_firmware(const QString& path){
         return size >= 512 && size % 512 == 0 && head == QByteArray("UF2\n");
     }
     return size >= 4096;
+}
+
+std::map<QString, QString> parse_firmware_checksums(const QByteArray& text){
+    std::map<QString, QString> sums;
+    static const QRegularExpression LINE("^([0-9a-fA-F]{64})\\s+\\*?(\\S.*?)\\s*$");
+    for (const QByteArray& raw : text.split('\n')){
+        const QRegularExpressionMatch match = LINE.match(QString::fromUtf8(raw).trimmed());
+        if (match.hasMatch()){
+            sums[match.captured(2)] = match.captured(1).toLower();
+        }
+    }
+    return sums;
+}
+
+std::map<QString, QString> firmware_checksums(const QString& folder){
+    QFile file(QDir(folder).filePath("SHA256SUMS.txt"));
+    if (!file.open(QIODevice::ReadOnly)){
+        return {};
+    }
+    return parse_firmware_checksums(file.read(1 << 20));
+}
+
+QString file_sha256(const QString& path){
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)){
+        return QString();
+    }
+    QCryptographicHash hash(QCryptographicHash::Sha256);
+    if (!hash.addData(&file)){
+        return QString();
+    }
+    return QString::fromLatin1(hash.result().toHex());
+}
+
+bool firmware_matches_checksum(const QString& folder, const QString& path){
+    const std::map<QString, QString> sums = firmware_checksums(folder);
+    const auto found = sums.find(QFileInfo(path).fileName());
+    if (found == sums.end()){
+        return true;
+    }
+    return file_sha256(path) == found->second;
 }
 
 
