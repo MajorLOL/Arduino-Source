@@ -322,7 +322,8 @@ TargetChoice choose_target(PlzaBackend& backend, HeldZl& held){
         view = held.flick(TARGET_FLICK);
     }
     const std::vector<LockTarget>& targets = cycle.targets();
-    TargetChoice choice{.saw_plates = !targets.empty()};
+    TargetChoice choice;
+    choice.saw_plates = !targets.empty();
     const std::optional<size_t> best = nearest_uncaught(targets);
     if (!best){
         backend.log(std::format("[PLZA] catch_in_zone: {} plates read, none of a species not caught", targets.size()));
