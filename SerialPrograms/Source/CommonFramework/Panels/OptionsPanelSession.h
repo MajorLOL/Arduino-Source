@@ -23,6 +23,8 @@ public:
     const OptionsPanelDescriptor& descriptor() const{ return m_descriptor; }
 
     ConfigOption& options();
+    //  PocketPilot: the options without the panel (see PanelSession).
+    virtual ConfigOption* config_options() override{ return &options(); }
 
 
 public:

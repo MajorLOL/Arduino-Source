@@ -4,14 +4,21 @@
  *
  */
 
+#include <atomic>
 #include <memory>
 #include <vector>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPointer>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
+#include "Common/Cpp/Color.h"
+#include "Common/Cpp/Json/JsonObject.h"
+#include "Common/Cpp/Options/ConfigOption.h"
 #include "Common/Qt/NoWheelComboBox.h"
+#include "Common/Qt/Options/ConfigWidget.h"
 #include "CommonFramework/StaticGlobals.h"
+#include "CommonFramework/Logging/Logger.h"
 #include "CommonFramework/PersistentSettings.h"
 #include "CommonFramework/ImageTypes/ImageRGB32_Qt.h"
 #include "CommonFramework/Windows/DpiScaler.h"
@@ -84,6 +91,134 @@ PocketPilot::HomeGame describe_list(const PanelListDescriptor& list){
     return game;
 }
 
+}
+
+
+namespace{
+
+//  The options of a program for the setup. The session of the program's panel
+//  is made, but never shown, and its console is not loaded: only the options
+//  are, from the settings of the page, and they are kept there again, next to
+//  the console setup (which stays as it is).
+class SetupOptionsHolder final : public PocketPilot::SetupProgramOptions, private ConfigOption::Listener{
+    //  Where the page keeps its console; not the options.
+    static constexpr const char* CONSOLE_KEY = "ConsoleSetup";
+
+public:
+    SetupOptionsHolder(QWidget* parent, PanelListDescriptor::ProgramPanel panel)
+        : m_panel(std::move(panel))
+        , m_id(m_panel.descriptor->identifier())
+    {
+        m_options = m_panel.session->config_options();
+        if (m_options == nullptr){
+            return;
+        }
+        load();
+        m_options->add_listener(*this);
+        ConfigWidget* widget = ConfigWidget::make_from_option(*m_options, parent);
+        if (widget != nullptr){
+            m_widget = &widget->widget();
+        }
+    }
+    virtual ~SetupOptionsHolder() override{
+        if (m_options != nullptr){
+            m_options->remove_listener(*this);
+        }
+        //  The widgets listen to the options: they go first.
+        delete m_widget.data();
+        m_panel.session.reset();
+    }
+
+    virtual QWidget* widget() override{
+        return m_widget.data();
+    }
+    virtual bool changed() const override{
+        return m_changed;
+    }
+    virtual void save() override{
+        m_changed = false;
+        if (m_options == nullptr || m_id.empty()){
+            return;
+        }
+        const JsonValue fresh = m_panel.session->to_json();
+        const JsonObject* now = fresh.to_object();
+        if (now == nullptr){
+            return;
+        }
+        //  What the page has kept stays, but for the options.
+        JsonObject merged;
+        if (JsonValue* node = PERSISTENT_SETTINGS().panels.get_value(m_id)){
+            if (const JsonObject* stored = node->to_object()){
+                merged = stored->clone();
+            }
+        }
+        for (const auto& item : *now){
+            if (item.first != CONSOLE_KEY){
+                merged[item.first] = item.second.clone();
+            }
+        }
+        PERSISTENT_SETTINGS().panels[m_id] = JsonValue(std::move(merged));
+        PERSISTENT_SETTINGS().write();
+    }
+
+private:
+    void load(){
+        JsonValue* node = PERSISTENT_SETTINGS().panels.get_value(m_id);
+        const JsonObject* stored = node == nullptr ? nullptr : node->to_object();
+        if (stored == nullptr){
+            return;
+        }
+        //  Without the console: it would open the camera of the page.
+        JsonObject options;
+        for (const auto& item : *stored){
+            if (item.first != CONSOLE_KEY){
+                options[item.first] = item.second.clone();
+            }
+        }
+        m_panel.session->load_json(JsonValue(std::move(options)));
+    }
+
+    virtual void on_config_value_changed(void* object) override{
+        (void)object;
+        m_changed = true;
+    }
+
+private:
+    //  The session refers to its descriptor: the panel goes last.
+    PanelListDescriptor::ProgramPanel m_panel;
+    std::string m_id;
+    ConfigOption* m_options = nullptr;
+    QPointer<QWidget> m_widget;
+    std::atomic<bool> m_changed{false};
+};
+
+}
+
+
+std::unique_ptr<PocketPilot::SetupProgramOptions> make_setup_options(
+    QWidget* parent, int game, const QString& program
+){
+    //  The lists are made once: their pictures are loaded then.
+    static const std::vector<std::unique_ptr<PanelListDescriptor>> lists = make_all_lists();
+    if (game < 0 || (size_t)game >= lists.size()){
+        return nullptr;
+    }
+    try{
+        PanelListDescriptor::ProgramPanel panel = lists[(size_t)game]->make_program_panel(program.toStdString());
+        if (panel.session == nullptr){
+            return nullptr;
+        }
+        std::unique_ptr<SetupOptionsHolder> holder(new SetupOptionsHolder(parent, std::move(panel)));
+        if (holder->widget() == nullptr){
+            return nullptr;
+        }
+        return holder;
+    }catch (const std::exception& e){
+        global_logger_tagged().log("Setup: the options of \"" + program.toStdString() + "\" could not be made: " + e.what(), COLOR_RED);
+    }catch (...){
+        global_logger_tagged().log("Setup: the options of \"" + program.toStdString() + "\" could not be made.", COLOR_RED);
+    }
+    return nullptr;
 }
 
 

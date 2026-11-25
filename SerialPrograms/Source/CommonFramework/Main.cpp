@@ -299,6 +299,11 @@ int run_program(int argc, char *argv[]){
                 global_logger_tagged().log("Setup: the games could not be listed: " + error, COLOR_RED);
             }
         });
+        //  The options of a program, as the widgets that its page has, for the
+        //  panel next to the list of programs.
+        PocketPilot::set_options_maker([](QWidget* parent, int game, const QString& program){
+            return make_setup_options(parent, game, program);
+        });
         //  The test of the interface also checks that the games can be listed
         //  now, before the main window is made, as the setup needs.
         for (int i = 1; i < argc; i++){
@@ -308,6 +313,9 @@ int run_program(int argc, char *argv[]){
                 );
                 global_logger_tagged().log(
                     "Setup: the programs before the window: " + std::to_string(PocketPilot::count_programs_for_setup()) + "."
+                );
+                global_logger_tagged().log(
+                    "Setup: the options before the window: " + std::to_string(PocketPilot::count_options_for_setup()) + "."
                 );
             }
         }

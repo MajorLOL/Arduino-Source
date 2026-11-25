@@ -15,6 +15,7 @@ class QWidget;
 namespace PokemonAutomation{
 
 class JsonValue;
+class ConfigOption;
 
 // Class to represent one instance of a pokemon automation program.
 // Since programs are listed in the program panels, so this class is called PanelSession.
@@ -35,6 +36,13 @@ public:
     virtual JsonValue to_json() const;
     virtual void load_json(const JsonValue& json);
     void load_json_from_global();
+
+
+public:
+    //  PocketPilot: the options of the panel, for the setup, which shows them
+    //  next to its list of programs without opening the panel. Null: the panel
+    //  has no options of its own.
+    virtual ConfigOption* config_options(){ return nullptr; }
 
 
 protected:

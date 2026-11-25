@@ -54,10 +54,12 @@
 
 #include <stddef.h>
 #include <functional>
+#include <memory>
 #include <vector>
 #include <QString>
 #include <QStringList>
 #include "PocketPilot_Home.h"
+#include "PocketPilot_Setup.h"
 
 class QApplication;
 class QObject;
@@ -132,6 +134,10 @@ void show_start_screens(bool play_intro, bool ask_setup);
 size_t count_games_for_setup();
 //  And how many programs it has to choose from after a game.
 size_t count_programs_for_setup();
+//  And for how many games the options of their first program can be made as
+//  widgets, as the panel next to the list of programs does (see
+//  set_options_maker()). The test of the interface checks it.
+size_t count_options_for_setup();
 
 //  The same, whatever the settings say: "Open the setup" in the settings.
 void open_setup();
@@ -143,6 +149,13 @@ void open_setup();
 //  knows its game by the index into the first). Set it before the setup is
 //  asked; without it there is no choice at the end.
 void set_game_lister(std::function<void(std::vector<HomeGame>&, std::vector<HomeProgram>&)> lister);
+
+//  Makes the options of a program (a game: an index into the games of the
+//  lister, and the name of the program in it) as the widgets that its own page
+//  has, as children of "parent", for the panel next to the list of programs.
+//  They are kept where the page keeps them. Without it the panel is not
+//  offered.
+void set_options_maker(std::function<std::unique_ptr<SetupProgramOptions>(QWidget* parent, int game, const QString& program)> maker);
 
 //  What the main window does with a game that was chosen when the setup is
 //  opened from its settings (the window is there then): shows the game, as a

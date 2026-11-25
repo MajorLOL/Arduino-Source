@@ -48,6 +48,19 @@ std::vector<PanelListDescriptor::ProgramSummary> PanelListDescriptor::program_su
     return ret;
 }
 
+PanelListDescriptor::ProgramPanel PanelListDescriptor::make_program_panel(const std::string& name) const{
+    ProgramPanel ret;
+    for (PanelEntry& entry : make_panels()){
+        if (entry.descriptor == nullptr || entry.display_name != name){
+            continue;
+        }
+        ret.descriptor = std::shared_ptr<const PanelDescriptor>(std::move(entry.descriptor));
+        ret.session = ret.descriptor->make_panel();
+        break;
+    }
+    return ret;
+}
+
 
 
 

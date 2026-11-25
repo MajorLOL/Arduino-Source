@@ -11,6 +11,7 @@
 #include <QWidget>
 #include "CommonFramework/Panels/PanelList.h"
 #include "PocketPilot/PocketPilot_Home.h"
+#include "PocketPilot/PocketPilot_Setup.h"
 
 class QComboBox;
 class QLabel;
@@ -30,6 +31,18 @@ void describe_all_games(
     std::vector<PocketPilot::HomeGame>& games,
     std::string* error = nullptr,
     std::vector<PocketPilot::HomeProgram>* programs = nullptr
+);
+
+
+// The options of one program of one game (an index into the games of
+// describe_all_games(), and the name of the program in it) as the widgets that
+// the page of the program has, as children of "parent". The setup shows them
+// next to its list of programs, before the main window is there. They are
+// loaded from and kept in the settings of the program's page, and only the
+// options: the console of the page is left alone (no camera or serial port is
+// opened). Null when there is no such program or it has no options.
+std::unique_ptr<PocketPilot::SetupProgramOptions> make_setup_options(
+    QWidget* parent, int game, const QString& program
 );
 
 

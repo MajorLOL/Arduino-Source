@@ -10,7 +10,9 @@
 #include <atomic>
 #include <deque>
 #include <functional>
+#include <memory>
 #include <mutex>
+#include <set>
 #include <vector>
 #include <QAbstractButton>
 #include <QAction>
@@ -776,6 +778,7 @@ SetupLogTap& setup_log_tap(){
 
 std::function<void(std::vector<HomeGame>&, std::vector<HomeProgram>&)> g_game_lister;
 std::function<void(const QString&, const QString&)> g_game_opener;
+std::function<std::unique_ptr<SetupProgramOptions>(QWidget*, int, const QString&)> g_options_maker;
 //  A game (and the program in it) that was chosen while there was no window
 //  to open it.
 QString g_chosen_game;
@@ -799,6 +802,7 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
         setup_log_tap().poll(after, out);
     };
     request.build = QString::fromStdString(PROGRAM_NAME + " " + PROGRAM_VERSION + ", build " + PROGRAM_BUILD);
+    request.make_options = g_options_maker;
     //  At the start the main window is made after this: the screen stays up
     //  until it is there. (Opened from the settings, it is there already.)
     request.hold_screen = (g_game_opener == nullptr);
@@ -903,8 +907,35 @@ size_t count_programs_for_setup(){
     return programs.size();
 }
 
+size_t count_options_for_setup(){
+    std::vector<HomeGame> games;
+    std::vector<HomeProgram> programs;
+    if (!g_game_lister || !g_options_maker){
+        return 0;
+    }
+    g_game_lister(games, programs);
+    //  The first program of each game: made as the panel makes them, and
+    //  deleted again (the parent outlives them).
+    QWidget parent;
+    std::set<int> seen;
+    size_t made = 0;
+    for (const HomeProgram& program : programs){
+        if (!seen.insert(program.game).second){
+            continue;
+        }
+        std::unique_ptr<SetupProgramOptions> options = g_options_maker(&parent, program.game, program.name);
+        if (options != nullptr && options->widget() != nullptr){
+            made++;
+        }
+    }
+    return made;
+}
+
 void set_game_lister(std::function<void(std::vector<HomeGame>&, std::vector<HomeProgram>&)> lister){
     g_game_lister = std::move(lister);
+}
+void set_options_maker(std::function<std::unique_ptr<SetupProgramOptions>(QWidget* parent, int game, const QString& program)> maker){
+    g_options_maker = std::move(maker);
 }
 void set_game_opener(std::function<void(const QString& game, const QString& program)> opener){
     g_game_opener = std::move(opener);

@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
+#include "CommonFramework/Panels/PanelSession.h"
 #include "CommonFramework/Panels/PanelTools.h"
 
 class QWidget;
@@ -45,6 +46,17 @@ public:
         std::string tag_meaning;
     };
     std::vector<ProgramSummary> program_summaries() const;
+
+    //  A program of this list by its name, with its panel made but not shown
+    //  (the setup shows the options of the panel next to its list of
+    //  programs). The session refers to its descriptor, so the two go
+    //  together, the descriptor outliving the session. Both empty when the
+    //  list has no program of that name.
+    struct ProgramPanel{
+        std::shared_ptr<const PanelDescriptor> descriptor;
+        std::unique_ptr<PanelSession> session;
+    };
+    ProgramPanel make_program_panel(const std::string& name) const;
 
 protected:
     virtual std::vector<PanelEntry> make_panels() const = 0;

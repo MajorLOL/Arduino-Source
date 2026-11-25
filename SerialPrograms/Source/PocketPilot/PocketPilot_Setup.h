@@ -62,12 +62,14 @@
 #define PokemonAutomation_PocketPilot_Setup_H
 
 #include <functional>
+#include <memory>
 #include <vector>
 #include <QString>
 #include <QStringList>
 #include "PocketPilot_Home.h"
 
 class QApplication;
+class QWidget;
 
 namespace PokemonAutomation{
 namespace PocketPilot{
@@ -90,6 +92,28 @@ struct SetupLogLine{
     //  The line without its time.
     QString text;
 };
+
+//  The options of one program as the widgets that its own page has, for the
+//  panel that slides open next to the list of programs. The options are those
+//  of the program, kept where its page keeps them: what is changed here is
+//  what the page shows later. The setup deletes it when another program is
+//  picked or the screen goes away (its widget goes with it).
+class SetupProgramOptions{
+public:
+    virtual ~SetupProgramOptions() = default;
+
+    //  The widget with the options, a child of the parent that it was made
+    //  for. Null: the program has no options. It lives as long as this does.
+    virtual QWidget* widget() = 0;
+
+    //  True while something was changed that is not kept yet.
+    virtual bool changed() const = 0;
+
+    //  Keeps the options (and only them: not the console that the page of the
+    //  program also keeps).
+    virtual void save() = 0;
+};
+
 
 struct SetupRequest{
     //  Which questions to ask: the language, the board.
@@ -122,6 +146,11 @@ struct SetupRequest{
     //  (oldest first; the first call, with 0, gets what is kept). Empty: the
     //  log panel stays empty.
     std::function<void(quint64 after, std::vector<SetupLogLine>& out)> log_poll;
+
+    //  The options of a program (an index into "games" and the name of the
+    //  program in it), made as children of "parent". Null when it cannot be
+    //  made. Empty: the panel with the options is not offered.
+    std::function<std::unique_ptr<SetupProgramOptions>(QWidget* parent, int game, const QString& program)> make_options;
 
     //  Which program this is ("PocketPilot 1.2.3, build 76"), for the report
     //  that "Copy for Claude" makes.
