@@ -1479,6 +1479,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/ClaudePlays/ClaudePlays_AnyGame.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.cpp
     Source/PocketPilot/ClaudePlays/ClaudePlays_Engine.h
+    Source/PocketPilot/ClaudePlays/ClaudePlays_GameCard.cpp
+    Source/PocketPilot/ClaudePlays/ClaudePlays_GameCard.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Games.cpp
     Source/PocketPilot/ClaudePlays/ClaudePlays_Games.h
     Source/PocketPilot/ClaudePlays/ClaudePlays_Program.cpp

@@ -157,6 +157,58 @@ std::map<GameId, GameProfile> make_profiles(){
         PadKind::PRO_CONTROLLER,
         false,
     });
+    add(GameProfile{
+        GameId::OCTOPATH_TRAVELER_0,
+        "OctopathTraveler0:ClaudePlays",
+        "Octopath Traveler 0",
+        "Octopath Traveler 0",
+        "Octopath Traveler 0",
+        "A turn-based role-playing game. The left stick walks, B dashes. A talks, examines and confirms, B "
+        "cancels, X opens the menu, Y uses the character's Path Action (on the people of a town), L and R "
+        "switch between the tabs of a menu, ZL opens the map of the area.",
+        PadKind::PRO_CONTROLLER,
+        false,
+    });
+    add(GameProfile{
+        GameId::MARIO_KART_8_DELUXE,
+        "MarioKart8Deluxe:ClaudePlays",
+        "Mario Kart 8 DX",
+        "Mario Kart 8 Deluxe",
+        "Mario Kart 8 Deluxe",
+        "The left stick steers. A accelerates, B brakes and, held, reverses. L or ZL uses the item, R or ZR "
+        "hops and, held while steering, drifts. X looks behind, PLUS pauses. The game has assists for "
+        "steering and acceleration: whether they are on shows in its options. A race goes on while Claude "
+        "thinks, so one decision is a long time on the track: prefer holding a button for a moment over "
+        "many short presses.",
+        PadKind::PRO_CONTROLLER,
+        false,
+    });
+    add(GameProfile{
+        GameId::SPLATOON_3,
+        "Splatoon3:ClaudePlays",
+        "Splatoon 3",
+        "Splatoon 3",
+        "Splatoon 3",
+        "The left stick moves, the right stick turns the camera and aims. B jumps. ZR fires the main weapon, "
+        "R uses the sub weapon, ZL turns into a squid and back (swimming in the player's own ink refills "
+        "it), pressing the right stick in uses the special weapon when it is charged. Y resets the camera, X "
+        "opens the menu. The game can also aim by the motion of the controller, which the program cannot "
+        "make: aim with the right stick.",
+        PadKind::PRO_CONTROLLER,
+        false,
+    });
+    add(GameProfile{
+        GameId::ANIMAL_CROSSING_NEW_HORIZONS,
+        "AnimalCrossingNH:ClaudePlays",
+        "Animal Crossing NH",
+        "Animal Crossing: New Horizons",
+        "Animal Crossing: New Horizons",
+        "A life simulation that runs on the Switch's clock, and saves by itself now and then. The left stick "
+        "walks, and B held runs. A talks, picks up, uses the tool in hand and enters houses, B cancels, X "
+        "opens the pockets, Y picks up an item that lies on the ground, ZL opens the NookPhone.",
+        PadKind::PRO_CONTROLLER,
+        false,
+    });
     return profiles;
 }
 
@@ -168,6 +220,18 @@ const GameProfile& game_profile(GameId id){
     //  file, which have to be there first.
     static const std::map<GameId, GameProfile> profiles = make_profiles();
     return profiles.at(id);
+}
+
+bool has_only_claude_plays(GameId id){
+    switch (id){
+    case GameId::OCTOPATH_TRAVELER_0:
+    case GameId::MARIO_KART_8_DELUXE:
+    case GameId::SPLATOON_3:
+    case GameId::ANIMAL_CROSSING_NEW_HORIZONS:
+        return true;
+    default:
+        return false;
+    }
 }
 
 const std::vector<GameId>& all_games(){
@@ -182,6 +246,10 @@ const std::vector<GameId>& all_games(){
         GameId::POKOPIA,
         GameId::RUBY_SAPPHIRE_EMERALD,
         GameId::ZELDA_TOTK,
+        GameId::OCTOPATH_TRAVELER_0,
+        GameId::MARIO_KART_8_DELUXE,
+        GameId::SPLATOON_3,
+        GameId::ANIMAL_CROSSING_NEW_HORIZONS,
         GameId::OTHER_GAMES,
     };
     return games;

@@ -77,6 +77,7 @@
 #include "ClaudePlays/ClaudePlays_AnyGame.h"
 #include "ClaudePlays/ClaudePlays_Engine.h"
 #include "ClaudePlays/ClaudePlays_Games.h"
+#include "ClaudePlays/ClaudePlays_Program.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Theme.h"
@@ -1150,11 +1151,30 @@ int check_assistant(const QString& out, Logger& logger){
             }
         }
     }
+    //  The games that have nothing but Claude Plays: their list is its name,
+    //  a card and that one program.
+    int list_cases = 0;
+    for (ClaudePlays::GameId id : ClaudePlays::all_games()){
+        if (!ClaudePlays::has_only_claude_plays(id)){
+            continue;
+        }
+        list_cases++;
+        const ClaudePlays::GameProfile& profile = ClaudePlays::game_profile(id);
+        const ClaudePlays::GameOnlyList list(id);
+        const ImageViewRGB32& card = list.icon();
+        const std::vector<PanelListDescriptor::ProgramSummary> programs = list.program_summaries();
+        if (list.name() != profile.title || !card || card.width() != 256 || card.height() != 128 ||
+            programs.size() != 1 || programs[0].name != "Claude Plays"
+        ){
+            wrong++;
+            logger.log("Assistant test: failed: the list of " + profile.title + " (a card and Claude Plays)", COLOR_RED);
+        }
+    }
     logger.log(
         wrong == 0
             ? "Assistant test: the tools of Claude Plays are what the API takes (FireRed and LeafGreen, and " +
               std::to_string(game_cases) + " cases of the " + std::to_string(ClaudePlays::all_games().size()) +
-              " other lists)."
+              " other lists; " + std::to_string(list_cases) + " lists have nothing else)."
             : std::string("Assistant test: the tools of Claude Plays are not right."),
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );

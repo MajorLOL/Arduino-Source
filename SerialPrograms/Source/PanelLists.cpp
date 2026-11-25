@@ -69,6 +69,15 @@ std::vector<std::unique_ptr<PanelListDescriptor>> make_all_lists(){
 
     lists.emplace_back(std::make_unique<NintendoSwitch::ZeldaTotK::PanelListFactory>());
 
+    //  PocketPilot: games with no program of their own yet, for Claude Plays.
+    //  A new game goes in here (a GameId and its profile, see
+    //  PocketPilot/ClaudePlays/ClaudePlays_Games.h) until it has programs.
+    for (PocketPilot::ClaudePlays::GameId game : PocketPilot::ClaudePlays::all_games()){
+        if (PocketPilot::ClaudePlays::has_only_claude_plays(game)){
+            lists.emplace_back(std::make_unique<PocketPilot::ClaudePlays::GameOnlyList>(game));
+        }
+    }
+
     //  PocketPilot: whatever game is on the screen, played by Claude.
     lists.emplace_back(std::make_unique<PocketPilot::ClaudePlays::OtherGamesList>());
 

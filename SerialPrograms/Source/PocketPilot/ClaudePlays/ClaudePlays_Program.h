@@ -93,6 +93,23 @@ private:
 };
 
 
+//  The list of a game that has no program of its own yet (see
+//  has_only_claude_plays()): a section with Claude Plays and nothing else,
+//  under a card that the program draws (ClaudePlays_GameCard.h). A game that
+//  gets programs gets a list of its own in VideoGames/ and the Claude Plays
+//  stays on top of it, as in every other list.
+class GameOnlyList : public PanelListDescriptor{
+public:
+    explicit GameOnlyList(GameId game);
+
+protected:
+    virtual std::vector<PanelEntry> make_panels() const override;
+
+private:
+    const GameId m_game;
+};
+
+
 //  The list of games "Other Games": Claude Plays for a game that has no
 //  list of its own.
 class OtherGamesList : public PanelListDescriptor{
