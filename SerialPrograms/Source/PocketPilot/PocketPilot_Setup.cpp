@@ -586,6 +586,10 @@ public:
         }
         return false;
     }
+    //  The choice of a game was asked for, and there are games to choose from.
+    bool asks_game() const{
+        return m_request.ask_game && !m_request.games.empty();
+    }
     //  Presses it as a click on its middle would; false when it is not there.
     bool click(const QString& id);
     //  Moves the mouse over it.
@@ -619,7 +623,7 @@ private:
     void move_focus(int direction);
     void tick();
     bool asks_anything() const{
-        return m_request.ask_language || m_request.ask_board;
+        return m_request.ask_language || m_request.ask_board || asks_game();
     }
     void end_intro(const QString& note);
     void drop_intro_player();
@@ -1417,6 +1421,8 @@ private:
         canvas.result().language_code = m_choice;
         if (canvas.request().ask_board){
             canvas.go_board();
+        }else if (canvas.asks_game()){
+            canvas.go_games();
         }else{
             canvas.finish();
         }
@@ -3678,6 +3684,8 @@ void Canvas::start(QEventLoop* loop){
         go_language();
     }else if (m_request.ask_board){
         go_board();
+    }else if (asks_game()){
+        go_games();
     }
     m_first_page = true;
     if (!m_test_mode){
@@ -4447,7 +4455,8 @@ QPointer<Canvas> g_held_screen;
 
 SetupResult run_setup(const SetupRequest& request){
     SetupResult result;
-    if (!request.ask_language && !request.ask_board && !request.play_intro){
+    const bool ask_game = request.ask_game && !request.games.empty();
+    if (!request.ask_language && !request.ask_board && !ask_game && !request.play_intro){
         return result;
     }
     std::unique_ptr<Canvas> canvas(new Canvas(request, false));
@@ -5136,6 +5145,56 @@ int run_setup_test(QApplication& application, const QString& folder){
             "without games Start ends the setup");
     }
 
+    //  ---- the game choice at the start: a screen of its own, no installation
+    {
+        //  Alone (the setup was done before).
+        SetupRequest only_games;
+        only_games.ask_game = true;
+        only_games.games = test_games();
+        Canvas first(only_games, true);
+        first.resize(1280, 720);
+        QEventLoop first_loop;
+        first.start(&first_loop);
+        first.show();
+        first.wait(2.0);
+        checker.check(first.page_name() == "games", "at the start the choice of a game is a screen of its own");
+        checker.check(!first.has_hit("back") && !first.has_hit("next"), "with nothing of the installation on it");
+        save(first, folder, "setup-34-games-alone");
+        first.click("game:1");
+        first.wait(0.3);
+        checker.check(first.page_state() == "selected=" + only_games.games[1].name, "a game can be picked");
+        first.click("start");
+        first.wait(0.2);
+        checker.check(first.finished() && first.result().game == only_games.games[1].name, "Start ends it with that game");
+        checker.check(!first.result().board_done && !first.result().language_chosen, "no question of the installation was answered");
+
+        //  After the language question only: the choice follows it.
+        SetupRequest language_and_games;
+        language_and_games.ask_language = true;
+        language_and_games.ask_game = true;
+        language_and_games.games = test_games();
+        Canvas second_choice(language_and_games, true);
+        second_choice.resize(1280, 720);
+        QEventLoop second_choice_loop;
+        second_choice.start(&second_choice_loop);
+        second_choice.show();
+        second_choice.wait(2.0);
+        checker.check(second_choice.page_name() == "language", "the language comes first");
+        second_choice.click("continue");
+        second_choice.wait(2.5);
+        checker.check(second_choice.page_name() == "games" && !second_choice.finished(), "the choice of a game follows the language");
+        second_choice.click("later");
+        second_choice.wait(0.2);
+        checker.check(second_choice.finished() && second_choice.result().game.isEmpty() && second_choice.result().language_chosen,
+            "Choose later ends it with no game, the language is kept");
+
+        //  Asked for, but there are no games: nothing to ask.
+        SetupRequest no_games;
+        no_games.ask_game = true;
+        Canvas third_choice(no_games, true);
+        checker.check(!third_choice.asks_game(), "no games, no choice");
+    }
+
     //  ---- the intro on the screen of the setup
     //  The film is decoded for real (in real time, the picture drawn by the
     //  canvas as the player is not on a screen here): it goes over into the
@@ -5285,6 +5344,41 @@ int run_setup_test(QApplication& application, const QString& folder){
             checker.check(seventh.intro_note() == "it was skipped", "and says so (" + seventh.intro_note() + ")");
             seventh.wait(1.5);
             checker.check(seventh.intro_state() == "none" && seventh.page_name() == "language", "the first question follows");
+        }
+    }
+
+    //  ---- the intro, then the game choice alone
+    {
+        const bool decodes_here = qEnvironmentVariableIsEmpty("PP_SETUP_TEST_NO_DECODER");
+        SetupRequest intro_games;
+        intro_games.play_intro = true;
+        intro_games.hold_screen = true;
+        intro_games.ask_game = true;
+        intro_games.games = test_games();
+        Canvas eighth(intro_games, true);
+        eighth.resize(1280, 720);
+        QEventLoop eighth_loop;
+        eighth.start(&eighth_loop);
+        eighth.show();
+        eighth.start_intro();
+        checker.check(eighth.page_name() == "games", "the choice of a game is ready under the film");
+        //  Real time passes while the film plays (as in the test above).
+        QElapsedTimer eighth_clock;
+        eighth_clock.start();
+        double eighth_last = 0;
+        while (eighth_clock.elapsed() < (decodes_here ? 25000 : 9000) && eighth.intro_state() != "none"){
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            const double now = (double)eighth_clock.elapsed() / 1000.0;
+            eighth.advance(std::min(0.05, now - eighth_last));
+            eighth_last = now;
+            QThread::msleep(6);
+        }
+        if (decodes_here){
+            checker.check(eighth.intro_state() == "none" && eighth.page_name() == "games",
+                "the film goes over into the choice of a game");
+            eighth.wait(1.5);
+            save_preview(eighth, folder, "preview-intro-games");
+            checker.check(eighth.has_hit("game:0") && !eighth.finished(), "and it can be answered");
         }
     }
 

@@ -38,10 +38,13 @@
  *  tutorial" plays a film of the setup of the board (Resources/tutorial-*.mp4,
  *  made by Tools/TutorialFilms.cpp from these same screens).
  *
- *  The last screen after "You are done!" asks which game to start, as
- *  cartridges (the same games as the page with the games has, see
- *  PocketPilot_Home.h). The one that is picked is opened in the main window
- *  when the setup ends (see take_chosen_game() in PocketPilot_Language.h).
+ *  After the installation ("You are done!") comes a new screen of its own that
+ *  asks which game to start, as cartridges with the logo of each game (the
+ *  same games as the page with the games has, see PocketPilot_Home.h). It is
+ *  no part of the installation. It is also shown alone, at each start, when
+ *  the setting "Ask which game to start" is on. The one that is picked is
+ *  opened in the main window (see take_chosen_game() in
+ *  PocketPilot_Language.h).
  *
  *  The workflow that makes the builds also runs
  *
@@ -81,10 +84,15 @@ struct SetupRequest{
     //  The language that is in use now ("en", "nl", ...).
     QString language_code = "en";
 
-    //  The games to choose from at the end, in the order of the program's
-    //  list of games (what the page with the games shows too). Empty: there
-    //  is no choice at the end, "Start" just ends the setup.
+    //  The games to choose from, in the order of the program's list of games
+    //  (what the page with the games shows too). Empty: there is no choice,
+    //  "Start" just ends the setup.
     std::vector<HomeGame> games;
+
+    //  Ask which game to start, as a screen of its own: after the questions
+    //  that are asked (the language), or alone. (After the installation of
+    //  the board the choice always follows when there are games.)
+    bool ask_game = false;
 
     //  Play the intro film first, on this same screen: its last picture goes
     //  over into the first page, so that no window opens or closes in

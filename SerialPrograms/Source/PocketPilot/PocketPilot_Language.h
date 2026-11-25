@@ -122,7 +122,9 @@ void ask_setup_if_needed();
 //  between: the film's last picture goes over into the first question, and
 //  when the questions are over the screen stays up until the main window is
 //  there (see release_setup_curtain() in PocketPilot_Setup.h, which Main
-//  calls). With neither, nothing is shown.
+//  calls). With neither, nothing is shown. When "ask_setup", and the setting
+//  "Ask which game to start" is on, a screen of its own with the games
+//  follows (alone, when the language and the board have been asked before).
 void show_start_screens(bool play_intro, bool ask_setup);
 
 //  How many games the setup would offer (what the lister returns), and the

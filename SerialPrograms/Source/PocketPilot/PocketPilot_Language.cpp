@@ -671,7 +671,7 @@ std::function<void(const QString&)> g_game_opener;
 //  A game that was chosen while there was no window to open it.
 QString g_chosen_game;
 
-void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false){
+void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bool ask_game = false){
     GlobalSettings& settings = GlobalSettings::instance();
 
     SetupRequest request;
@@ -682,11 +682,13 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false){
     //  At the start the main window is made after this: the screen stays up
     //  until it is there. (Opened from the settings, it is there already.)
     request.hold_screen = (g_game_opener == nullptr);
-    //  The choice of a game comes after the board, so only with that question.
-    if (ask_board && g_game_lister){
+    //  The choice of a game: a screen of its own after the installation of the
+    //  board, and, when the setting asks for it, at the start.
+    if ((ask_board || ask_game) && g_game_lister){
         g_game_lister(request.games);
         global_logger_tagged().log("Setup: " + std::to_string(request.games.size()) + " games to choose from.");
     }
+    request.ask_game = ask_game && !request.games.empty();
     const SetupResult result = run_setup(request);
     if (play_intro){
         global_logger_tagged().log("Intro: done, " + result.intro_note.toStdString() + ".");
@@ -744,10 +746,11 @@ void show_start_screens(bool play_intro, bool ask_setup){
     GlobalSettings& settings = GlobalSettings::instance();
     const bool ask_language = ask_setup && settings.ASK_LANGUAGE;
     const bool ask_board = ask_setup && settings.ASK_SETUP;
-    if (!ask_language && !ask_board && !play_intro){
+    const bool ask_game = ask_setup && settings.ASK_GAME;
+    if (!ask_language && !ask_board && !ask_game && !play_intro){
         return;
     }
-    run_and_keep(ask_language, ask_board, play_intro);
+    run_and_keep(ask_language, ask_board, play_intro, ask_game);
 }
 
 size_t count_games_for_setup(){

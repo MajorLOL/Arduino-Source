@@ -93,6 +93,14 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         true
     )
+    , ASK_GAME(
+        "<b>Ask which game to start at every start:</b><br>"
+        "A screen of its own with the games, after the intro and the setup. Pick a game and the program opens with it; "
+        "\"Choose later\" goes to the main window as it is. Turn this off to go straight to the main window. "
+        "Takes effect at the next start.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        true
+    )
     , OPEN_BASE_FOLDER_BUTTON(
         "<b>Runtime Base Folder:</b>",
         "Open Folder"
@@ -240,6 +248,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(OPEN_SETUP_BUTTON);
     PA_ADD_OPTION(ASK_LANGUAGE);
     PA_ADD_OPTION(ASK_SETUP);
+    PA_ADD_OPTION(ASK_GAME);
     PA_ADD_OPTION(OPEN_BASE_FOLDER_BUTTON);
     PA_ADD_OPTION(CHECK_FOR_UPDATES);
     PA_ADD_OPTION(STATS_FILE);
