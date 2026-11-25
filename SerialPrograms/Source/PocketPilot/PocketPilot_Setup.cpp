@@ -525,6 +525,7 @@ public:
     }
 
     void go_language();
+    void go_console();
     void go_board();
     void go_steps(const QString& board);
     void go_guide();
@@ -599,6 +600,15 @@ public:
             go_games();
         }
     }
+    //  The console is chosen: the question of the board follows (or, when it
+    //  is not asked, what comes after the installation).
+    void end_console(){
+        if (m_request.ask_board){
+            go_board();
+        }else{
+            end_installation();
+        }
+    }
     //  Presses it as a click on its middle would; false when it is not there.
     bool click(const QString& id);
     //  Moves the mouse over it.
@@ -632,7 +642,7 @@ private:
     void move_focus(int direction);
     void tick();
     bool asks_anything() const{
-        return m_request.ask_language || m_request.ask_board || asks_game();
+        return m_request.ask_language || m_request.ask_console || m_request.ask_board || asks_game();
     }
     void end_intro(const QString& note);
     void drop_intro_player();
@@ -1428,7 +1438,9 @@ private:
     void proceed(Canvas& canvas){
         canvas.result().language_chosen = true;
         canvas.result().language_code = m_choice;
-        if (canvas.request().ask_board){
+        if (canvas.request().ask_console){
+            canvas.go_console();
+        }else if (canvas.request().ask_board){
             canvas.go_board();
         }else if (canvas.asks_game()){
             canvas.go_games();
@@ -3658,6 +3670,259 @@ private:
 
 
 //  ---------------------------------------------------------------------
+//  The console: the one the board will be connected to
+//  ---------------------------------------------------------------------
+
+//  The Switch 2, drawn here in the style of the picture of the first Switch
+//  (the program has only that one): a thin frame round a large screen, and
+//  the controllers in blue.
+QPixmap switch2_picture(){
+    static QPixmap cache;
+    if (!cache.isNull()){
+        return cache;
+    }
+    constexpr int W = 900;
+    constexpr int H = 385;
+    QImage image(W, H, QImage::Format_ARGB32_Premultiplied);
+    image.fill(Qt::transparent);
+    QPainter p(&image);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setPen(Qt::NoPen);
+
+    //  The two controllers at the sides, with the rail on top.
+    const QRectF bodies[2] = {QRectF(0, 20, 136, 362), QRectF(764, 20, 136, 362)};
+    for (const QRectF& body : bodies){
+        QLinearGradient shade(0, body.top(), 0, body.bottom());
+        shade.setColorAt(0, QColor(84, 184, 214));
+        shade.setColorAt(1, QColor(40, 124, 160));
+        p.setBrush(shade);
+        p.drawRoundedRect(body, 58, 58);
+        p.setBrush(QColor(34, 104, 136));
+        p.drawRoundedRect(QRectF(body.left() + 20, 4, body.width() - 40, 22), 7, 7);
+    }
+
+    //  The frame and the screen.
+    p.setBrush(QColor(58, 61, 70));
+    p.drawRoundedRect(QRectF(140, 10, 620, 364), 22, 22);
+    p.setPen(QPen(QColor(124, 128, 140), 2));
+    p.setBrush(Qt::NoBrush);
+    p.drawRoundedRect(QRectF(141, 11, 618, 362), 21, 21);
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor(4, 4, 6));
+    const QRectF screen(154, 24, 592, 336);
+    p.drawRoundedRect(screen, 12, 12);
+    p.save();
+    QPainterPath clip;
+    clip.addRoundedRect(screen, 12, 12);
+    p.setClipPath(clip);
+    p.setBrush(QColor(255, 255, 255, 14));
+    p.drawPolygon(QPolygonF({QPointF(470, 24), QPointF(640, 24), QPointF(380, 360), QPointF(210, 360)}));
+    p.restore();
+
+    //  Sticks, buttons, minus and plus.
+    const QColor dark(26, 28, 34);
+    auto dot = [&](double x, double y, double r){
+        p.drawEllipse(QPointF(x, y), r, r);
+    };
+    p.setBrush(dark);
+    dot(68, 116, 36);
+    dot(832, 270, 36);
+    p.setBrush(QColor(62, 66, 76));
+    dot(68, 116, 25);
+    dot(832, 270, 25);
+    p.setBrush(dark);
+    dot(68, 232, 13);
+    dot(38, 262, 13);
+    dot(98, 262, 13);
+    dot(68, 292, 13);
+    dot(832, 100, 13);
+    dot(802, 130, 13);
+    dot(862, 130, 13);
+    dot(832, 160, 13);
+    p.drawRoundedRect(QRectF(86, 54, 24, 6), 3, 3);
+    p.drawRoundedRect(QRectF(790, 54, 24, 6), 3, 3);
+    p.drawRoundedRect(QRectF(799, 45, 6, 24), 3, 3);
+    p.end();
+    cache = QPixmap::fromImage(image);
+    return cache;
+}
+
+struct ConsoleInfo{
+    //  The value of the setting "console" (GlobalSettings::GAME_CONSOLE).
+    const char* code;
+    //  A name: not translated.
+    const char* name;
+    //  What it covers (the program's own list of models, see ConsoleType).
+    const char* note;
+};
+constexpr ConsoleInfo CONSOLES[] = {
+    {"switch",  "Nintendo Switch",   "Switch 1 and the OLED model"},
+    {"switch2", "Nintendo Switch 2", "International and Japan-only models"},
+};
+constexpr int CONSOLE_COUNT = (int)(sizeof(CONSOLES) / sizeof(CONSOLES[0]));
+
+class ConsolePage : public Page{
+public:
+    explicit ConsolePage(Canvas& canvas){
+        const QString kept = canvas.request().console_code;
+        for (int c = 0; c < CONSOLE_COUNT; c++){
+            if (kept == CONSOLES[c].code){
+                m_selected = c;
+            }
+        }
+        //  One that was chosen before is shown as picked: Continue is next.
+        canvas.set_focus_id(m_selected >= 0 ? QString("continue") : tile_id(0));
+    }
+
+    virtual const char* name() const override{
+        return "console";
+    }
+
+    virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
+        const Intro in = intro_for(canvas);
+        //  The setup starts here: the same steps and the same place for the
+        //  texts as the page of the board that follows.
+        const int states[4] = {1, 2, 2, 2};
+        draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
+        const QString heading = T("Which console do you use?");
+        draw_heading(painter, heading, 140, 250, 80, prog(t, in.head, in.head + 0.9), 1.0, 1500);
+        const QString sub = T("Pick the console you want to control. The board you pick next connects to it.");
+        const double sub_y = 250 + heading_height(heading, 80, 1500) + 26;
+        draw_sub(painter, sub, 140, sub_y, prog(t, in.sub, in.sub + 0.8), 1.0, 34, 1500);
+
+        const double top = sub_y + sub_height(sub, 34, 1500) + 40;
+        for (int c = 0; c < CONSOLE_COUNT; c++){
+            const double begin = in.bar + 0.12 * c;
+            paint_tile(canvas, painter, c, tile_rect(c, top), eo(prog(t, begin, begin + 0.6)));
+        }
+
+        const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
+        draw_skip(canvas, painter, b);
+        const QString text = T("Continue");
+        draw_button(canvas, painter, "continue", text, 1780 - button_width(text, ButtonKind::PRIMARY), 950,
+            ButtonKind::PRIMARY, b, m_selected >= 0);
+    }
+
+    virtual void activate(Canvas& canvas, const QString& id) override{
+        const int index = index_of(id);
+        if (index >= 0 && index < CONSOLE_COUNT){
+            m_selected = index;
+            //  A console picked: the next Enter goes on.
+            canvas.set_focus_id("continue");
+        }else if (id == "continue"){
+            proceed(canvas);
+        }else if (id == "skip"){
+            canvas.result().board_done = true;
+            canvas.end_installation();
+        }
+    }
+    virtual bool key(Canvas& canvas, QKeyEvent& event) override{
+        int step = 0;
+        if (event.key() == Qt::Key_Left || event.key() == Qt::Key_Up){
+            step = -1;
+        }else if (event.key() == Qt::Key_Right || event.key() == Qt::Key_Down){
+            step = +1;
+        }else{
+            return false;
+        }
+        const int current = index_of(canvas.focus_id());
+        int target;
+        if (current < 0){
+            //  The focus is on a button: back to the consoles.
+            target = m_selected >= 0 ? m_selected : 0;
+        }else{
+            target = std::max(0, std::min(CONSOLE_COUNT - 1, current + step));
+        }
+        canvas.set_focus_id(tile_id(target));
+        return true;
+    }
+    virtual void enter_pressed(Canvas& canvas) override{
+        proceed(canvas);
+    }
+    virtual QString state() const override{
+        return QString("selected=") + (m_selected >= 0 ? CONSOLES[m_selected].code : "");
+    }
+
+private:
+    static QString tile_id(int index){
+        return "console:" + QString::number(index);
+    }
+    static int index_of(const QString& id){
+        return id.startsWith("console:") ? id.mid(8).toInt() : -1;
+    }
+    void proceed(Canvas& canvas){
+        if (m_selected < 0){
+            return;
+        }
+        canvas.result().console_chosen = true;
+        canvas.result().console_code = CONSOLES[m_selected].code;
+        canvas.end_console();
+    }
+
+    //  Two large tiles side by side, under the texts.
+    static QRectF tile_rect(int index, double top){
+        constexpr double LEFT = 140;
+        constexpr double RIGHT = 1780;
+        constexpr double BOTTOM = 915;
+        constexpr double GAP = 40;
+        const double width = (RIGHT - LEFT - GAP * (CONSOLE_COUNT - 1)) / CONSOLE_COUNT;
+        const double height = std::max(300.0, std::min(470.0, BOTTOM - top));
+        return QRectF(LEFT + (width + GAP) * index, top, width, height);
+    }
+
+    void paint_tile(Canvas& canvas, QPainter& painter, int index, const QRectF& place, double reveal){
+        if (reveal < 0.004){
+            return;
+        }
+        const ConsoleInfo& info = CONSOLES[index];
+        const QString id = tile_id(index);
+        const bool hover = canvas.hovered(id);
+        const bool focus = canvas.focused(id);
+        const bool selected = index == m_selected;
+        const double a = reveal;
+        const QRectF box = place.translated(0, (1.0 - reveal) * 26);
+        canvas.add_hit(id, place);
+
+        if (selected){
+            glow(painter, box, 30, ORANGE, 0.55 * reveal);
+        }
+        panel(
+            painter, box, 30,
+            selected ? with_alpha(QColor(44, 29, 24), 0.95 * a) : with_alpha(PANEL, 0.92 * a),
+            selected ? with_alpha(ORANGE, a) : white((hover ? 0.62 : 0.26) * a),
+            selected ? 2.6 : hover ? 2.2 : 1.8
+        );
+
+        //  The console, as large as the tile lets it be.
+        const QPixmap picture = index == 0 ? plain_picture("switch") : switch2_picture();
+        const QRectF room(box.left() + 50, box.top() + 34, box.width() - 100, box.height() - 34 - 130);
+        if (!picture.isNull()){
+            const double scale = std::min(room.width() / picture.width(), room.height() / picture.height());
+            const double w = picture.width() * scale;
+            const double h = picture.height() * scale;
+            draw_picture(painter, picture, QRectF(room.center().x() - w / 2.0, room.center().y() - h / 2.0, w, h), a);
+        }
+
+        draw_text_cy(painter, QString::fromLatin1(info.name), box.left() + 46, box.bottom() - 84, ui_font(42, 600), white(a));
+        draw_text_cy(painter, T(info.note), box.left() + 46, box.bottom() - 36, ui_font(25, 500), white(0.55 * a));
+        if (selected){
+            const QRectF badge(box.right() - 46 - 44, box.bottom() - 60 - 22, 44, 44);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(ORANGE, a));
+            painter.drawEllipse(badge);
+            draw_check(painter, badge.adjusted(7, 7, -7, -7), with_alpha(Qt::black, a), 3.4);
+        }
+        if (focus){
+            panel(painter, box.adjusted(-6, -6, 6, 6), 36, QColor(), with_alpha(YELLOW, 0.9 * reveal), 2.4);
+        }
+    }
+
+private:
+    int m_selected = -1;
+};
+
+
+//  ---------------------------------------------------------------------
 //  Canvas
 //  ---------------------------------------------------------------------
 
@@ -3687,6 +3952,8 @@ void Canvas::start(QEventLoop* loop){
     m_loop = loop;
     if (m_request.ask_language){
         go_language();
+    }else if (m_request.ask_console){
+        go_console();
     }else if (m_request.ask_board){
         go_board();
     }else if (asks_game()){
@@ -3791,6 +4058,11 @@ void Canvas::queue_page(std::function<std::unique_ptr<Page>()> make){
 void Canvas::go_language(){
     queue_page([this]{
         return std::unique_ptr<Page>(new LanguagePage(*this));
+    });
+}
+void Canvas::go_console(){
+    queue_page([this]{
+        return std::unique_ptr<Page>(new ConsolePage(*this));
     });
 }
 void Canvas::go_board(){
@@ -4652,6 +4924,7 @@ int run_setup_test(QApplication& application, const QString& folder){
 
     SetupRequest request;
     request.ask_language = true;
+    request.ask_console = true;
     request.ask_board = true;
     request.games = test_games();
     Canvas canvas(request, true);
@@ -4684,7 +4957,36 @@ int run_setup_test(QApplication& application, const QString& folder){
     canvas.click("continue");
     canvas.wait(0.6);
     checker.check(canvas.result().language_chosen && canvas.result().language_code == "nl", "the language is the answer");
-    checker.check(canvas.page_name() == "board", "the board question follows");
+    checker.check(canvas.page_name() == "console", "the console question follows the language");
+
+    //  ---- the console: after the language, in the same style, then the board
+    canvas.wait(2.5);
+    save(canvas, folder, "setup-36-console-start");
+    save_preview(canvas, folder, "preview-console");
+    checker.check(has_content(canvas.picture()), "the console screen has something on it");
+    checker.check(canvas.has_hit("console:0") && canvas.has_hit("console:1"), "both consoles are tiles");
+    checker.check(canvas.has_hit("skip") && canvas.has_hit("continue"), "the console screen has Skip setup and Continue");
+    checker.check(!canvas.hit_enabled("continue"), "no console, no way on");
+    checker.check(canvas.page_state() == "selected=", "nothing is picked at first");
+    checker.check(canvas.focus_id() == "console:0", "the keyboard starts on the first console");
+    canvas.press_key(Qt::Key_Return);
+    canvas.wait(0.4);
+    checker.check(canvas.page_state() == "selected=switch", "Enter picks the console that has the focus");
+    checker.check(canvas.focus_id() == "continue" && canvas.hit_enabled("continue"), "and the way on is open, with the focus on it");
+    canvas.press_key(Qt::Key_Left);
+    canvas.press_key(Qt::Key_Right);
+    checker.check(canvas.focus_id() == "console:1", "the arrow keys go over the consoles");
+    canvas.move_to("console:1");
+    canvas.wait(0.5);
+    save(canvas, folder, "setup-37-console-hover");
+    checker.check(canvas.click("console:1"), "a console can be picked with the mouse");
+    canvas.wait(0.5);
+    checker.check(canvas.page_state() == "selected=switch2", "Nintendo Switch 2 is picked");
+    save(canvas, folder, "setup-38-console-picked");
+    canvas.click("continue");
+    canvas.wait(0.6);
+    checker.check(canvas.result().console_chosen && canvas.result().console_code == "switch2", "the console is the answer");
+    checker.check(canvas.page_name() == "board", "the board question follows the console");
 
     //  ---- the board
     canvas.wait(2.5);
@@ -5411,6 +5713,53 @@ int run_setup_test(QApplication& application, const QString& folder){
             save_preview(eighth, folder, "preview-intro-games");
             checker.check(eighth.has_hit("game:0") && !eighth.finished(), "and it can be answered");
         }
+    }
+
+    //  ---- the console: one that was chosen before is shown as picked
+    {
+        SetupRequest again;
+        again.ask_console = true;
+        again.ask_board = true;
+        again.console_code = "switch2";
+        again.games = test_games();
+        Canvas kept(again, true);
+        kept.resize(1280, 720);
+        QEventLoop kept_loop;
+        kept.start(&kept_loop);
+        kept.show();
+        kept.wait(2.5);
+        checker.check(kept.page_name() == "console", "without the language question it starts on the console");
+        checker.check(kept.page_state() == "selected=switch2" && kept.hit_enabled("continue"), "the console of the last time is picked");
+        checker.check(kept.focus_id() == "continue", "and Continue has the focus");
+        save(kept, folder, "setup-39-console-kept");
+        kept.press_key(Qt::Key_Escape);
+        kept.wait(0.3);
+        checker.check(kept.page_name() == "console" && !kept.finished(), "Escape does nothing here");
+        kept.click("console:0");
+        kept.wait(0.3);
+        kept.press_key(Qt::Key_Return);
+        kept.wait(2.0);
+        checker.check(kept.page_name() == "board", "Enter on Continue goes on to the board");
+        checker.check(kept.result().console_chosen && kept.result().console_code == "switch", "the new choice is the answer");
+    }
+
+    //  ---- the console: Skip setup leads on to the choice of a game
+    {
+        SetupRequest skipping_console;
+        skipping_console.ask_console = true;
+        skipping_console.ask_board = true;
+        skipping_console.games = test_games();
+        Canvas skipped(skipping_console, true);
+        skipped.resize(1280, 720);
+        QEventLoop skipped_loop;
+        skipped.start(&skipped_loop);
+        skipped.show();
+        skipped.wait(2.0);
+        checker.check(skipped.page_name() == "console", "the console screen is there");
+        skipped.click("skip");
+        skipped.wait(2.8);
+        checker.check(skipped.page_name() == "games", "Skip setup on the console screen leads to the choice of a game");
+        checker.check(!skipped.result().console_chosen && skipped.result().board_done, "no console is chosen, and the setup counts as done");
     }
 
     //  ---- the other way out: skip

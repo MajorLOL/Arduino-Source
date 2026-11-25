@@ -96,6 +96,22 @@ UiLanguage language_of(const QString& code){
     return UiLanguage::ENGLISH;
 }
 
+//  The console of the setup, as the codes of its screen ("switch", "switch2";
+//  empty: none chosen).
+QString console_code_of(GameConsole console){
+    switch (console){
+    case GameConsole::SWITCH:   return "switch";
+    case GameConsole::SWITCH2:  return "switch2";
+    case GameConsole::NONE:     break;
+    }
+    return QString();
+}
+GameConsole console_of(const QString& code){
+    if (code == "switch") return GameConsole::SWITCH;
+    if (code == "switch2") return GameConsole::SWITCH2;
+    return GameConsole::NONE;
+}
+
 
 struct State{
     QReadWriteLock lock;
@@ -666,6 +682,11 @@ void keep_language(const QString& code){
     }
 }
 
+//  Keeps the console that was chosen.
+void keep_console(const QString& code){
+    GlobalSettings::instance().GAME_CONSOLE.set(console_of(code));
+}
+
 std::function<void(std::vector<HomeGame>&)> g_game_lister;
 std::function<void(const QString&)> g_game_opener;
 //  A game that was chosen while there was no window to open it.
@@ -677,6 +698,9 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
     SetupRequest request;
     request.ask_language = ask_language;
     request.ask_board = ask_board;
+    //  The console is a screen of the setup: asked where the board is asked.
+    request.ask_console = ask_board;
+    request.console_code = console_code_of(settings.GAME_CONSOLE.get());
     request.language_code = setting_code();
     request.play_intro = play_intro;
     //  At the start the main window is made after this: the screen stays up
@@ -704,6 +728,10 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
     }
     if (ask_language && result.language_chosen){
         keep_language(result.language_code);
+    }
+    if (result.console_chosen){
+        keep_console(result.console_code);
+        global_logger_tagged().log("Setup: the console is " + result.console_code.toStdString() + ".");
     }
     try{
         PERSISTENT_SETTINGS().write();

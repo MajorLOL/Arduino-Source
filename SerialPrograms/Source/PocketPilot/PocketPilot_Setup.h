@@ -4,7 +4,8 @@
  *  (https://github.com/PokemonAutomation/).
  *
  *  The menus that come after the intro at the first start, and that can be
- *  opened again from the settings: the language, then the question which
+ *  opened again from the settings: the language, then the console (one of the
+ *  consoles that the program supports now), then the question which
  *  microcontroller is used, then the steps of its setup. Only the intro is a
  *  film; these are screens that wait for the user.
  *
@@ -81,6 +82,15 @@ struct SetupRequest{
     bool ask_language = false;
     bool ask_board = false;
 
+    //  Ask which console is used: a screen of its own between the language
+    //  and the board, in the same style, with the consoles that are supported
+    //  now. It belongs to the setup, so it goes with ask_board.
+    bool ask_console = false;
+
+    //  The console that was chosen before ("switch" or "switch2"), shown as
+    //  picked; empty: none yet.
+    QString console_code;
+
     //  The language that is in use now ("en", "nl", ...).
     QString language_code = "en";
 
@@ -110,6 +120,10 @@ struct SetupResult{
     //  "custom" for Other). Otherwise language_code stays as it was.
     bool language_chosen = false;
     QString language_code = "en";
+
+    //  The console was chosen: its code ("switch" or "switch2").
+    bool console_chosen = false;
+    QString console_code;
 
     //  The board question was answered or skipped.
     bool board_done = false;

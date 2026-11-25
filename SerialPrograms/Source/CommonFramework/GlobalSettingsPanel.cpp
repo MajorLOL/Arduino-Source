@@ -76,9 +76,21 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         UiLanguage::ENGLISH
     )
+    , GAME_CONSOLE(
+        "<b>Console:</b><br>"
+        "The console the program is used with. It is chosen in the setup, on the screen after the language, "
+        "and can be changed here.",
+        {
+            {GameConsole::NONE,    "none",    "Not chosen yet"},
+            {GameConsole::SWITCH,  "switch",  "Nintendo Switch"},
+            {GameConsole::SWITCH2, "switch2", "Nintendo Switch 2"},
+        },
+        LockMode::UNLOCK_WHILE_RUNNING,
+        GameConsole::NONE
+    )
     , OPEN_SETUP_BUTTON(
         "<b>Setup:</b><br>"
-        "The language and the microcontroller, with the steps for it, full screen like at the first start.",
+        "The language, the console and the microcontroller, with the steps for it, full screen like at the first start.",
         "Open the setup"
     )
     , ASK_LANGUAGE(
@@ -245,6 +257,7 @@ GlobalSettings::GlobalSettings()
     )
 {
     PA_ADD_OPTION(LANGUAGE);
+    PA_ADD_OPTION(GAME_CONSOLE);
     PA_ADD_OPTION(OPEN_SETUP_BUTTON);
     PA_ADD_OPTION(ASK_LANGUAGE);
     PA_ADD_OPTION(ASK_SETUP);

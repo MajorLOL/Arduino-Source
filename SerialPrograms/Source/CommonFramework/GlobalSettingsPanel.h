@@ -58,6 +58,14 @@ enum class UiLanguage{
     CUSTOM,     //  "Other": the file Languages/custom.json.
 };
 
+//  PocketPilot: the console that the program is used with, as chosen in the
+//  setup (the screen after the language).
+enum class GameConsole{
+    NONE,       //  Not chosen yet.
+    SWITCH,     //  Nintendo Switch (Switch 1 and OLED).
+    SWITCH2,    //  Nintendo Switch 2.
+};
+
 
 class FolderInputOption : public StringOption{
 public:
@@ -94,6 +102,7 @@ public:
     //  PocketPilot: the language, the setup (language and microcontroller),
     //  and whether its questions still have to be asked at the next start.
     EnumDropdownOption<UiLanguage> LANGUAGE;
+    EnumDropdownOption<GameConsole> GAME_CONSOLE;
     ButtonOption OPEN_SETUP_BUTTON;
     BooleanCheckBoxOption ASK_LANGUAGE;
     BooleanCheckBoxOption ASK_SETUP;
