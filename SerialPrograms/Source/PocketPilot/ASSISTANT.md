@@ -1,6 +1,6 @@
 # Claude in PocketPilot Studio
 
-The button "Claude" in the top bar opens a panel at the right of the main window: a conversation with Claude, the AI model of Anthropic. It answers questions about the programs, and it builds or fixes a program in the source of this repository. Its changes never go to the branch the builds are made from: they go to a branch of their own, which you turn into a pull request. In the program "Claude Plays", Claude plays the game itself.
+The button "Claude" along the top of the window opens a panel at the right of it: a conversation with Claude, the AI model of Anthropic. It answers questions about the programs, and it builds or fixes a program in the source of this repository. Its changes never go to the branch the builds are made from: they go to a branch of their own, which you turn into a pull request. In the program "Claude Plays", Claude plays the game itself.
 
 **Status: experimental.** The connection follows Anthropic's and GitHub's documentation as of November 2026. Every build tests it against made-up answers (see "How it is tested" below), but the build machine has no key, so it has not run against the real Claude API or made a real commit until someone with a key tries it. Claude Plays has run neither with a key nor on a console. If something does not work, the panel (or the program's log) shows what the API answered: that text is what to report.
 

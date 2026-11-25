@@ -8,7 +8,6 @@
 #include "Common/Compiler.h"
 #include <QPainter>
 #include <QPainterPath>
-#include "PocketPilot_Theme.h"
 #include "PocketPilot_Logo.h"
 
 namespace PokemonAutomation{
@@ -94,29 +93,6 @@ QIcon app_icon(){
     return icon;
 }
 
-
-
-LogoWidget::LogoWidget(QWidget& parent, int size)
-    : QWidget(&parent)
-    , m_size(size)
-{
-    //  Named for the style sheet: a sheet that gives every widget a
-    //  background (the classic dark look) would paint a square behind it.
-    setObjectName("ppLogo");
-    setFixedSize(size, size);
-}
-QSize LogoWidget::sizeHint() const{
-    return QSize(m_size, m_size);
-}
-void LogoWidget::paintEvent(QPaintEvent*){
-    const ThemeColors& theme = theme_colors();
-    LogoColors colors;
-    colors.body = theme.shell_text;
-    colors.screen = theme.shell_deep;
-    colors.mark = theme.dark ? theme.accent : theme.shell_text;
-    QPainter painter(this);
-    paint_logo(painter, QRectF(rect()), colors);
-}
 
 
 

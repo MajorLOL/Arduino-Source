@@ -89,7 +89,6 @@ namespace PocketPilot{
 
 const char* const SETUP_TEST_OPTION = "--setup-test";
 const char* const TUTORIAL_TEST_OPTION = "--tutorial-test";
-const char* const CLASSIC_INTERFACE_OPTION = "--classic-interface";
 
 
 namespace{

@@ -126,18 +126,9 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         let_run(700);
         save_picture(widget.grab(), name);
     };
-    //  The window much taller than a screen, so that the options of the
-    //  open program are in the picture too. (The window is not on the
-    //  screen in this test: it can have any size.)
-    const int PICTURE_WIDTH = 1360;
+    //  (The window is not on the screen in this test: it can have any size.)
+    const int PICTURE_WIDTH = 1600;
     const int PICTURE_HEIGHT = 900;
-    const int PICTURE_TALL = 2600;
-    auto save_tall = [&](const char* name){
-        window.resize(PICTURE_WIDTH, PICTURE_TALL);
-        save(window, name);
-        window.resize(PICTURE_WIDTH, PICTURE_HEIGHT);
-        let_run(300);
-    };
     auto set_look = [&](UiThemeMode mode, Starter starter){
         logger.log(
             "UI test: theme " + std::to_string((int)mode) + " in starter color " + std::to_string((int)starter)
@@ -173,36 +164,30 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         list->setAttribute(Qt::WA_DontShowOnScreen, false);
         return picture;
     };
-    //  One picture of two opened lists: the games of the side bar, and the
-    //  longest list among the options of the open program.
+    //  One picture of the opened list: the longest one among the options of
+    //  the open program.
     auto save_lists = [&](const char* name){
-        QComboBox* games = window.findChild<QComboBox*>("ppGamePicker");
         QComboBox* option = nullptr;
         for (QComboBox* box : window.findChildren<QComboBox*>()){
-            if (box == games || !box->isVisible() || !box->isEnabled() || box->isEditable()){
+            if (!box->isVisible() || !box->isEnabled() || box->isEditable()){
                 continue;
             }
             if (option == nullptr || box->count() > option->count()){
                 option = box;
             }
         }
-        if (games == nullptr || option == nullptr){
+        if (option == nullptr){
             failed++;
-            logger.log(std::string("UI test: no dropdowns found for ") + name, COLOR_RED);
+            logger.log(std::string("UI test: no dropdown found for ") + name, COLOR_RED);
             return;
         }
-        const QPixmap left = grab_list(*games);
-        const QPixmap right = grab_list(*option);
         const int MARGIN = 16;
-        QPixmap sheet(
-            left.width() + right.width() + 3 * MARGIN,
-            std::max(left.height(), right.height()) + 2 * MARGIN
-        );
+        const QPixmap list = grab_list(*option);
+        QPixmap sheet(list.width() + 2 * MARGIN, list.height() + 2 * MARGIN);
         sheet.fill(theme_colors().screen);
         {
             QPainter painter(&sheet);
-            painter.drawPixmap(MARGIN, MARGIN, left);
-            painter.drawPixmap(left.width() + 2 * MARGIN, MARGIN, right);
+            painter.drawPixmap(MARGIN, MARGIN, list);
         }
         save_picture(sheet, name);
     };
@@ -238,19 +223,8 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         save(window, "night-fire-chosen-game");
         window.show_games();
     }
-    //  As a click on the game's cartridge: its programs on the page and
-    //  its list in the side bar.
-    if (!window.home_page().pick_game(QString::fromStdString(GAME))){
-        failed++;
-        logger.log("UI test: no game named " + GAME, COLOR_RED);
-    }
-    save(window, "night-fire-one-game");
-    window.home_page().set_search_text("shiny");
-    save(window, "night-fire-search");
-    window.home_page().set_search_text("");
     open_program();
     save(window, "night-fire-program");
-    save_tall("night-fire-program-tall");
     logger.log("UI test: opening the settings");
     window.show_settings();
     save(window, "night-fire-settings");
@@ -282,17 +256,15 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     struct Look{
         const char* games;
         const char* program;
-        //  Also a tall picture of the program, with its options. Null: none.
-        const char* program_tall;
         UiThemeMode mode;
         Starter starter;
     };
     const Look LOOKS[] = {
-        {"day-water-games",     "day-water-program",        "day-water-program-tall",   UiThemeMode::POCKET_DAY,    Starter::WATER},
-        {"night-grass-games",   "night-grass-program",      nullptr,                    UiThemeMode::POCKET_NIGHT,  Starter::GRASS},
-        {"day-fire-games",      "day-fire-program",         nullptr,                    UiThemeMode::POCKET_DAY,    Starter::FIRE},
-        {"classic-light-games", "classic-light-program",    nullptr,                    UiThemeMode::DEFAULT_MODE,  Starter::FIRE},
-        {"classic-dark-games",  "classic-dark-program",     nullptr,                    UiThemeMode::DARK_MODE,     Starter::FIRE},
+        {"day-water-games",     "day-water-program",        UiThemeMode::POCKET_DAY,    Starter::WATER},
+        {"night-grass-games",   "night-grass-program",      UiThemeMode::POCKET_NIGHT,  Starter::GRASS},
+        {"day-fire-games",      "day-fire-program",         UiThemeMode::POCKET_DAY,    Starter::FIRE},
+        {"classic-light-games", "classic-light-program",    UiThemeMode::DEFAULT_MODE,  Starter::FIRE},
+        {"classic-dark-games",  "classic-dark-program",     UiThemeMode::DARK_MODE,     Starter::FIRE},
     };
     for (const Look& look : LOOKS){
         set_look(look.mode, look.starter);
@@ -300,9 +272,6 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         save(window, look.games);
         open_program();
         save(window, look.program);
-        if (look.program_tall != nullptr){
-            save_tall(look.program_tall);
-        }
     }
 
     //  The opened lists of two dropdowns. Last, so that the pictures above
@@ -331,15 +300,12 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     open_named("Level Trainer");
     let_run(500);
     save(window, "night-fire-level-trainer");
-    save_tall("night-fire-level-trainer-tall");
     open_named("Box Namer");
     let_run(500);
     save(window, "night-fire-box-namer");
-    save_tall("night-fire-box-namer-tall");
     open_named("Claude Plays");
     let_run(500);
     save(window, "night-fire-claude-plays");
-    save_tall("night-fire-claude-plays-tall");
     //  The Claude Plays of every other list, here of "Other Games".
     logger.log(std::string("UI test: opening ") + ClaudePlays::OTHER_GAMES_LIST + ", Claude Plays");
     if (!window.open_program(ClaudePlays::OTHER_GAMES_LIST, "Claude Plays")){
@@ -348,7 +314,6 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
     }
     let_run(500);
     save(window, "night-fire-claude-plays-any-game");
-    save_tall("night-fire-claude-plays-any-game-tall");
 
     //  Claude: its panel next to a program. The test answers for Claude
     //  and for GitHub itself (Assistant/Assistant_SelfTest.h): the build
@@ -734,179 +699,6 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         failed == 0 ? COLOR_BLUE : COLOR_RED
     );
     application.processEvents();
-    return failed;
-}
-
-
-//  The list of programs in the side bar scrolls, with the wheel and by its
-//  bar, also while a program runs: the list is locked then, and a click on
-//  another program opens nothing. (Up to build 19 the list was disabled
-//  while a program ran, and a disabled list does not scroll.)
-int check_program_list(MainWindow& window, Logger& logger){
-    const std::string GAME = Pokemon::STRING_POKEMON + " FireRed and LeafGreen";
-    const std::string PROGRAM = "AutoStory";
-    int failed = 0;
-    auto problem = [&](const std::string& what){
-        failed++;
-        logger.log("UI test: the list of programs: " + what, COLOR_RED);
-    };
-    auto open_name = [&]{
-        return window.assistant().hooks().open_program().name.toStdString();
-    };
-
-    //  As the program does when a run starts and ends.
-    PanelHolder& holder = window;
-    struct Idle{
-        PanelHolder& panel_holder;
-        ~Idle(){
-            panel_holder.on_idle();
-        }
-    };
-
-    const UiThemeMode LOOKS[] = {UiThemeMode::POCKET_NIGHT, UiThemeMode::DEFAULT_MODE};
-    for (UiThemeMode look : LOOKS){
-        GlobalSettings::instance().THEME->set(look);
-        let_run(300);
-        if (!window.open_program(GAME, PROGRAM)){
-            problem("could not open " + GAME + ", " + PROGRAM);
-            continue;
-        }
-        let_run(300);
-        QListWidget* list = window.findChild<QListWidget*>("ppProgramList");
-        if (list == nullptr){
-            problem("there is none in the window");
-            continue;
-        }
-        QScrollBar* bar = list->verticalScrollBar();
-        if (bar->maximum() <= 0){
-            //  A window so low that the list is longer than its room.
-            window.resize(1360, 480);
-            let_run(300);
-        }
-        if (bar->maximum() <= 0){
-            problem("it has nothing to scroll (" + std::to_string(list->count()) + " rows)");
-            continue;
-        }
-
-        auto turn_wheel = [&]{
-            const QPointF at(40, 60);
-            QWheelEvent event(
-                at, list->viewport()->mapToGlobal(at), QPoint(), QPoint(0, -120),
-                Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false
-            );
-            QApplication::sendEvent(list->viewport(), &event);
-        };
-        auto send_mouse = [&](
-            QWidget& target, QEvent::Type type, const QPoint& at, Qt::MouseButton button, Qt::MouseButtons held
-        ){
-            QMouseEvent event(type, QPointF(at), QPointF(target.mapToGlobal(at)), button, held, Qt::NoModifier);
-            QApplication::sendEvent(&target, &event);
-        };
-        //  The handle of the bar, taken with the mouse and moved down.
-        auto drag_bar = [&]{
-            QStyleOptionSlider option;
-            option.initFrom(bar);
-            option.orientation = Qt::Vertical;
-            option.minimum = bar->minimum();
-            option.maximum = bar->maximum();
-            option.sliderPosition = bar->sliderPosition();
-            option.sliderValue = bar->value();
-            option.singleStep = bar->singleStep();
-            option.pageStep = bar->pageStep();
-            const QRect handle = bar->style()->subControlRect(
-                QStyle::CC_ScrollBar, &option, QStyle::SC_ScrollBarSlider, bar
-            );
-            const QPoint from = handle.center();
-            const QPoint to = from + QPoint(0, 40);
-            send_mouse(*bar, QEvent::MouseButtonPress, from, Qt::LeftButton, Qt::LeftButton);
-            send_mouse(*bar, QEvent::MouseMove, to, Qt::NoButton, Qt::LeftButton);
-            send_mouse(*bar, QEvent::MouseButtonRelease, to, Qt::LeftButton, Qt::NoButton);
-        };
-
-        const std::string look_name = look == UiThemeMode::POCKET_NIGHT ? "Night" : "classic light";
-        //  The drag as this test makes it moved the bar while no program
-        //  ran: only then does it say anything about a run.
-        bool drag_works = false;
-        for (bool running : {false, true}){
-            const std::string when =
-                std::string(running ? "while a program runs" : "while no program runs") + " (" + look_name + ")";
-            if (running){
-                holder.on_busy();
-            }
-            Idle idle{holder};
-            let_run(100);
-
-            bar->setValue(0);
-            turn_wheel();
-            if (bar->value() <= 0){
-                problem("the wheel does not scroll it " + when);
-            }
-            if (!bar->isEnabled()){
-                problem("its bar is off " + when);
-            }
-            bar->setValue(0);
-            drag_bar();
-            if (!running){
-                drag_works = bar->value() > 0;
-                if (!drag_works){
-                    logger.log("UI test: the list of programs: the bar's handle could not be dragged by this test (" + look_name + ").");
-                }
-            }else if (drag_works && bar->value() <= 0){
-                problem("its bar does not move " + when);
-            }
-            bar->setValue(0);
-            let_run(50);
-
-            if (!running){
-                continue;
-            }
-            //  A click on another program: nothing is opened, and the row
-            //  of the program that runs stays the marked one.
-            QListWidgetItem* other = nullptr;
-            for (int row = 0; row < list->count() && other == nullptr; row++){
-                QListWidgetItem* item = list->item(row);
-                const QRect box = list->visualItemRect(item);
-                if (
-                    !item->isHidden() && !item->isSelected() && (item->flags() & Qt::ItemIsSelectable) &&
-                    list->viewport()->rect().contains(box)
-                ){
-                    other = item;
-                }
-            }
-            if (other == nullptr){
-                problem("no other program in sight to click on " + when);
-                continue;
-            }
-            const QPoint at = list->visualItemRect(other).center();
-            send_mouse(*list->viewport(), QEvent::MouseButtonPress, at, Qt::LeftButton, Qt::LeftButton);
-            send_mouse(*list->viewport(), QEvent::MouseButtonRelease, at, Qt::LeftButton, Qt::NoButton);
-            let_run(100);
-            QToolTip::hideText();
-            const QList<QListWidgetItem*> marked = list->selectedItems();
-            if (open_name() != PROGRAM || marked.size() != 1 || marked.front()->text().toStdString() != PROGRAM){
-                problem(
-                    "a click on \"" + other->text().toStdString() + "\" " + when + " opened or marked it (open: \"" +
-                    open_name() + "\")"
-                );
-            }
-        }
-        window.resize(1360, 900);
-        let_run(200);
-    }
-
-    //  Back to the first look and size, and to the page with the games.
-    GlobalSettings::instance().THEME->set(UiThemeMode::POCKET_NIGHT);
-    window.resize(1360, 900);
-    let_run(300);
-    window.show_games();
-    let_run(300);
-    logger.log(
-        failed == 0
-            ? "UI test: the list of programs scrolls with the wheel and by its bar, also while a program runs, "
-              "and a click opens no other program then."
-            : "UI test: the list of programs does not work as it should.",
-        failed == 0 ? COLOR_BLUE : COLOR_RED
-    );
     return failed;
 }
 
@@ -5425,7 +5217,6 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
     //  while its message and the pictures taken so far say what went wrong.
     try{
         int failed = take_pictures(application, window, out, logger);
-        failed += check_program_list(window, logger);
         failed += check_settings_file(window, logger);
         failed += check_older_audio_settings(logger);
         failed += check_assistant(out, logger);
@@ -5481,7 +5272,7 @@ int check_app_interface(const QString& out, Logger& logger){
         return lit > 60;
     };
 
-    MainWindow window(nullptr, true, true);
+    MainWindow window(nullptr, true);
     window.setAttribute(Qt::WA_DontShowOnScreen, true);
     window.resize(1600, 900);
     window.show();

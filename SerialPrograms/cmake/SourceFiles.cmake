@@ -1507,8 +1507,6 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/PocketPilot_Scrub.h
     Source/PocketPilot/PocketPilot_SelfTest.cpp
     Source/PocketPilot/PocketPilot_SelfTest.h
-    Source/PocketPilot/PocketPilot_Shell.cpp
-    Source/PocketPilot/PocketPilot_Shell.h
     Source/PocketPilot/PocketPilot_Theme.cpp
     Source/PocketPilot/PocketPilot_Theme.h
     Source/Pokemon/Inference/Pokemon_AbilityReader.cpp

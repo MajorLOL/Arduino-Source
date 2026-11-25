@@ -420,17 +420,9 @@ int run_program(int argc, char *argv[]){
     global_gamepad_tracker().start();
 #endif
     //  The window is the screens of the setup (the games, the programs, the
-    //  program itself). The test of the interface goes through the old window
-    //  first (its pages are what that test knows), then through the new one.
-    bool classic_interface = false;
-    for (int i = 1; i < argc; i++){
-        if (strcmp(argv[i], PocketPilot::CLASSIC_INTERFACE_OPTION) == 0){
-            classic_interface = true;
-        }
-    }
-    std::unique_ptr<MainWindow> window = std::make_unique<MainWindow>(
-        nullptr, !classic_interface && ui_screenshots_folder.empty()
-    );
+    //  program itself). The test of the interface goes through this window
+    //  with a clock of its own, then through one that its pictures drive.
+    std::unique_ptr<MainWindow> window = std::make_unique<MainWindow>();
     MainWindow& w = *window;
     if (!ui_screenshots_folder.empty()){
         //  The test of the interface draws the window without putting it
@@ -447,10 +439,10 @@ int run_program(int argc, char *argv[]){
     //  The test of the interface: pictures of every page, then exit. The
     //  settings are not written, since the test changes the theme.
     if (!ui_screenshots_folder.empty()){
-        const int old_code = PocketPilot::run_ui_screenshots(application, w, ui_screenshots_folder);
+        const int window_code = PocketPilot::run_ui_screenshots(application, w, ui_screenshots_folder);
         window.reset();
-        const int new_code = PocketPilot::run_app_screenshots(application, ui_screenshots_folder + "/app");
-        return old_code != 0 ? old_code : new_code;
+        const int app_code = PocketPilot::run_app_screenshots(application, ui_screenshots_folder + "/app");
+        return window_code != 0 ? window_code : app_code;
     }
 
     int ret = application.exec();

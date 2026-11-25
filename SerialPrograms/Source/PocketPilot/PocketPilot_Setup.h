@@ -88,10 +88,6 @@ namespace PocketPilot{
 //  Option on the command line.
 extern const char* const SETUP_TEST_OPTION;     //  --setup-test <folder>
 extern const char* const TUTORIAL_TEST_OPTION;  //  --tutorial-test
-//  Starts the old window (top bar, side bar, page with the games) instead of
-//  the screens of the setup as the main window.
-extern const char* const CLASSIC_INTERFACE_OPTION;  //  --classic-interface
-
 
 //  One line of the output log of the program, for the log panel of the screen
 //  with the programs.

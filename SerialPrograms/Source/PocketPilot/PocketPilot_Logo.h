@@ -16,7 +16,6 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QRectF>
-#include <QWidget>
 
 class QPainter;
 
@@ -37,21 +36,6 @@ void paint_logo(QPainter& painter, const QRectF& rect, const LogoColors& colors)
 QPixmap app_icon_pixmap(int size);
 //  The same in the sizes a window and the task bar ask for.
 QIcon app_icon();
-
-
-//  The mark in the colors of the shell, for the top bar.
-class LogoWidget : public QWidget{
-public:
-    LogoWidget(QWidget& parent, int size);
-
-    virtual QSize sizeHint() const override;
-
-protected:
-    virtual void paintEvent(QPaintEvent*) override;
-
-private:
-    int m_size;
-};
 
 
 

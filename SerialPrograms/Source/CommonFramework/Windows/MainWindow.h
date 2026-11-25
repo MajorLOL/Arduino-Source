@@ -18,8 +18,6 @@
 #include "CommonFramework/Panels/PanelSession.h"
 
 class QVBoxLayout;
-class QLabel;
-class QCheckBox;
 
 namespace PokemonAutomation{
 
@@ -28,8 +26,6 @@ class LoggerWindow;
 class WallpaperWidget;
 namespace PocketPilot{
     class AppView;
-    class Frame;
-    class HomePage;
     struct AboutInfo;
     namespace Assistant{
         class HttpTransport;
@@ -46,19 +42,17 @@ class MainWindow
     , public SystemSleepController::Listener
 {
 public:
-    //  "app_mode": the window's screen is the one of the setup (the games,
-    //  the programs, the program itself, see PocketPilot_Setup.h) instead of
-    //  the top bar, the side bar and the page with the games. The test of the
-    //  old interface makes the old window.
+    //  The window's screen is the one of the setup: the games, the programs,
+    //  the program itself (see PocketPilot_Setup.h).
     //  "app_test": the screens have no clock of their own and nothing opens
     //  outside the window (the test of the interface drives them).
-    MainWindow(QWidget* parent = nullptr, bool app_mode = false, bool app_test = false);
+    explicit MainWindow(QWidget* parent = nullptr, bool app_test = false);
     ~MainWindow();
 
-    //  The screens when the window is made in app mode; otherwise null.
+    //  The screens.
     PocketPilot::AppView* app_view(){ return m_app; }
 
-    //  What the top bar's buttons do. Also for the test of the interface
+    //  What the buttons along the top do. Also for the test of the interface
     //  (PocketPilot_SelfTest.cpp).
     void show_games();
     void show_settings();
@@ -69,12 +63,10 @@ public:
     //  programs (empty: none).
     bool open_game(const QString& game, const QString& program);
     //  Shows a game by its name in the list of games, as a click on its
-    //  cartridge on the page with the games does. False if a program runs or
-    //  there is no such game.
+    //  cartridge does. False if a program runs or there is no such game.
     bool open_game(const QString& game);
 
     PocketPilot::AboutInfo about_info() const;
-    PocketPilot::HomePage& home_page(){ return *m_home; }
     LoggerWindow& output_window(){ return *m_output_window; }
 
     //  The panel with Claude at the right: shown or hidden.
@@ -117,10 +109,9 @@ private:
     virtual void sleep_suppress_state_changed(SleepSuppress new_state) override;
 
     void update_wallpaper();
-    void update_page();
-    //  App mode: the screens, with what the buttons along the top do.
+    //  The screens, with what the buttons along the top do.
     void make_app_view(bool test);
-    //  App mode: the program of the last time, for "Continue with ..." on the games.
+    //  The program of the last time, for "Continue with ..." on the games.
     void update_resume();
     void set_sleep_label(const QString& text);
     void make_assistant(
@@ -132,22 +123,17 @@ private:
     WallpaperWidget* centralwidget = nullptr;
 //    QStatusBar* statusbar;
 
-    //  The top bar, the side bar, the room for the page or the program, and
-    //  the status strip.
-    std::unique_ptr<PocketPilot::Frame> m_frame;
-    //  The page with the games, shown while no program is open.
-    PocketPilot::HomePage* m_home = nullptr;
-    //  App mode: the window's own screen (a child of the central widget), and
-    //  the games it shows (the same order as the list of programs has).
+    //  The window's own screen (a child of the central widget), and the games
+    //  it shows (the same order as the list of programs has).
     PocketPilot::AppView* m_app = nullptr;
     std::vector<PocketPilot::HomeGame> m_game_list;
     //  Claude: what it needs to work, and its panel at the right.
     std::unique_ptr<PocketPilot::Assistant::Service> m_assistant;
     PocketPilot::Assistant::Panel* m_assistant_panel = nullptr;
 
-//    ProgramTabs* m_program_list = nullptr;
+    //  The programs and the panel of each, kept out of sight: the screens show
+    //  them.
     ProgramSelect* m_program_list = nullptr;
-    QVBoxLayout* m_right_panel_layout = nullptr;
 
     //  Keep a reference to the panel descriptor since it is referenced by the
     //  panel instance and the original descriptor may destroyed at any time.
@@ -158,8 +144,6 @@ private:
     std::unique_ptr<ButtonDiagram> m_button_diagram;
     std::unique_ptr<LoggerWindow> m_output_window;
 
-    QLabel* m_sleep_text = nullptr;
-    QCheckBox* m_sleep_box = nullptr;
     std::unique_ptr<SleepSuppressScope> m_sleep_scope;
 
     bool m_pending_resize = false;
