@@ -253,7 +253,8 @@ LookPickerReading read_look_picker(const ImageViewRGB32& frame){
             card = look;
         }
     }
-    LookPickerReading reading{.shows = true};
+    LookPickerReading reading;
+    reading.shows = true;
     if (lit_tiles == 1 && card){
         reading.highlighted = card;
     }
