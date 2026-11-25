@@ -262,6 +262,10 @@ public:
     virtual void unhost(QWidget* content) = 0;
     virtual bool hosting() const = 0;
 
+    //  The program of the last time ("Continue with ..." on the games): the
+    //  game's name and the program's. Empty: none.
+    virtual void set_resume(const QString& game, const QString& program) = 0;
+
     //  A program runs (or not): the state in the header, and no way back.
     virtual void set_state(bool busy, const QString& text) = 0;
     //  What is said about the computer's sleep, beside its switch.

@@ -337,5 +337,8 @@
  "Output": "Ausgabe",
  "Programs": "Programme",
  "Running": "Läuft",
- "Let the screen sleep": "Bildschirm schlafen lassen"
+ "Let the screen sleep": "Bildschirm schlafen lassen",
+ "Search all programs": "Alle Programme durchsuchen",
+ "No program matches.": "Kein Programm gefunden.",
+ "and %1 more: type more of the name": "und %1 weitere: mehr vom Namen eingeben"
 }

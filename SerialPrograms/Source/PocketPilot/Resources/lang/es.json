@@ -337,5 +337,8 @@
  "Output": "Salida",
  "Programs": "Programas",
  "Running": "En marcha",
- "Let the screen sleep": "Dejar que la pantalla se apague"
+ "Let the screen sleep": "Dejar que la pantalla se apague",
+ "Search all programs": "Buscar en todos los programas",
+ "No program matches.": "Ningún programa coincide.",
+ "and %1 more: type more of the name": "y %1 más: escribe más del nombre"
 }

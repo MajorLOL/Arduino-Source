@@ -560,6 +560,17 @@ public:
     virtual bool hosting() const override{
         return m_hosting;
     }
+    virtual void set_resume(const QString& game, const QString& program) override{
+        m_resume_game = game;
+        m_resume_program = program;
+        update();
+    }
+    const QString& resume_game() const{
+        return m_resume_game;
+    }
+    const QString& resume_program() const{
+        return m_resume_program;
+    }
     virtual void set_state(bool busy, const QString& text) override{
         m_app_busy = busy;
         m_app_state = text;
@@ -959,6 +970,8 @@ private:
     bool m_app_keep_on = false;
     QPointer<QWidget> m_claude;
     bool m_claude_shown = false;
+    QString m_resume_game;
+    QString m_resume_program;
 };
 
 
@@ -3675,6 +3688,7 @@ class GamesPage : public Page{
 public:
     explicit GamesPage(Canvas& canvas, int selected = -1)
         : m_games(canvas.request().games)
+        , m_app_mode(canvas.app_mode())
     {
         const int count = (int)m_games.size();
         m_columns = count <= 12 ? 4 : 5;
@@ -3704,9 +3718,17 @@ public:
             prog(t, in.sub, in.sub + 0.8), 1.0, 34, 1500);
 
         const double top = sub_y + sub_height(T("Pick a game. Its programs are shown right away."), 34, 1500) + 24;
-        for (int c = 0; c < (int)m_games.size(); c++){
-            const double begin = in.bar + 0.05 * c;
-            paint_tile(canvas, painter, c, tile_rect(c, top), eo(prog(t, begin, begin + 0.55)));
+        const bool searching = canvas.app_mode() && !m_query.isEmpty();
+        if (canvas.app_mode()){
+            paint_search(canvas, painter, eo(prog(t, in.sub, in.sub + 0.6)), sub_y - 4);
+        }
+        if (searching){
+            paint_found(canvas, painter, top, eo(prog(t, 0.0, 0.2)));
+        }else{
+            for (int c = 0; c < (int)m_games.size(); c++){
+                const double begin = in.bar + 0.05 * c;
+                paint_tile(canvas, painter, c, tile_rect(c, top), eo(prog(t, begin, begin + 0.55)));
+            }
         }
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
@@ -3724,13 +3746,52 @@ public:
         const QString start_text = T("Start");
         const double start_w = button_width(start_text, ButtonKind::PRIMARY);
         //  As the window's screen a game with no programs has nothing to open.
-        const bool can_start = m_selected >= 0 && (!canvas.app_mode() || canvas.has_programs(m_selected));
+        const bool can_start = m_selected >= 0 && !searching && (!canvas.app_mode() || canvas.has_programs(m_selected));
         draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, can_start);
+        if (canvas.app_mode() && !searching){
+            //  The program of the last time, one press away.
+            const HomeProgram* resume = resume_program(canvas);
+            if (resume != nullptr){
+                const QString text = QFontMetricsF(ui_font(28, 600)).elidedText(
+                    tr_ui("Continue with %1").arg(resume->name), Qt::ElideRight, 560
+                );
+                const double w = button_width(text, ButtonKind::SECONDARY);
+                draw_button(canvas, painter, "resume", text, 1780 - start_w - 26 - w, 950, ButtonKind::SECONDARY, b);
+            }
+        }
+    }
+
+    virtual void step(double dt) override{
+        m_clock += dt;
+    }
+    virtual void escape_pressed(Canvas& canvas) override{
+        (void)canvas;
+        if (!m_query.isEmpty()){
+            set_query(canvas, QString());
+        }
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
         if (id == "console"){
             canvas.go_console_again(m_selected);
+            return;
+        }
+        if (id == "resume"){
+            open_program(canvas, resume_program(canvas));
+            return;
+        }
+        if (id == "gsearch"){
+            return;
+        }
+        if (id == "gsearch-clear"){
+            set_query(canvas, QString());
+            return;
+        }
+        if (id.startsWith("found:")){
+            const int at = id.mid(6).toInt();
+            if (at >= 0 && at < (int)m_found.size()){
+                open_program(canvas, &canvas.request().programs[(size_t)m_found[(size_t)at]]);
+            }
             return;
         }
         if (id.startsWith("game:")){
@@ -3748,6 +3809,9 @@ public:
         }
     }
     virtual bool key(Canvas& canvas, QKeyEvent& event) override{
+        if (canvas.app_mode() && search_key(canvas, event)){
+            return true;
+        }
         int column_step = 0;
         int row_step = 0;
         switch (event.key()){
@@ -3786,15 +3850,22 @@ public:
         return true;
     }
     virtual void enter_pressed(Canvas& canvas) override{
+        if (canvas.app_mode() && !m_query.isEmpty()){
+            if (m_found_at >= 0 && m_found_at < (int)m_found.size()){
+                open_program(canvas, &canvas.request().programs[(size_t)m_found[(size_t)m_found_at]]);
+            }
+            return;
+        }
         if (m_selected >= 0){
             start(canvas);
         }
     }
     virtual QString state() const override{
-        if (m_selected < 0){
-            return "selected=";
+        QString text = m_selected < 0 ? QString("selected=") : "selected=" + m_games[(size_t)m_selected].name;
+        if (m_app_mode){
+            text += ";query=" + m_query + ";found=" + QString::number((int)m_found.size());
         }
-        return "selected=" + m_games[(size_t)m_selected].name;
+        return text;
     }
 
 private:
@@ -3813,6 +3884,181 @@ private:
         }
         return -1;
     }
+    //  ---- the search over all programs (the window's screen only): what is
+    //  typed turns the cartridges into the list of the programs that match.
+    static constexpr int FOUND_ROWS = 10;
+    static constexpr int FOUND_COLUMNS = 2;
+
+    //  The program of the last time, if it is in the list.
+    const HomeProgram* resume_program(const Canvas& canvas) const{
+        if (canvas.resume_game().isEmpty() || canvas.resume_program().isEmpty()){
+            return nullptr;
+        }
+        for (const HomeProgram& program : canvas.request().programs){
+            if (program.game >= 0 && program.game < (int)m_games.size() &&
+                m_games[(size_t)program.game].name == canvas.resume_game() &&
+                program.name == canvas.resume_program()
+            ){
+                return &program;
+            }
+        }
+        return nullptr;
+    }
+    void open_program(Canvas& canvas, const HomeProgram* program){
+        if (program == nullptr || program->game < 0 || program->game >= (int)m_games.size()){
+            return;
+        }
+        canvas.result().game = m_games[(size_t)program->game].name;
+        canvas.result().program = program->name;
+        canvas.finish();
+    }
+    void set_query(Canvas& canvas, const QString& query){
+        m_query = query;
+        m_found.clear();
+        m_found_at = 0;
+        if (!query.isEmpty()){
+            //  The name first, then what is only in its description or the game's name.
+            const std::vector<HomeProgram>& programs = canvas.request().programs;
+            for (int pass = 0; pass < 2; pass++){
+                for (size_t c = 0; c < programs.size(); c++){
+                    const HomeProgram& program = programs[c];
+                    if (program.game < 0 || program.game >= (int)m_games.size()){
+                        continue;
+                    }
+                    const bool in_name = program.name.contains(query, Qt::CaseInsensitive);
+                    const bool in_other = program.description.contains(query, Qt::CaseInsensitive) ||
+                        m_games[(size_t)program.game].name.contains(query, Qt::CaseInsensitive);
+                    if ((pass == 0 && in_name) || (pass == 1 && !in_name && in_other)){
+                        m_found.push_back((int)c);
+                    }
+                }
+            }
+        }
+    }
+    //  True when the key was for the search.
+    bool search_key(Canvas& canvas, QKeyEvent& event){
+        const int key = event.key();
+        if (!m_query.isEmpty()){
+            const int count = (int)m_found.size();
+            const int shown = std::min(count, FOUND_ROWS * FOUND_COLUMNS);
+            switch (key){
+            case Qt::Key_Backspace:
+                set_query(canvas, m_query.left(m_query.size() - 1));
+                return true;
+            case Qt::Key_Delete:
+                set_query(canvas, QString());
+                return true;
+            case Qt::Key_Up:
+                m_found_at = std::max(0, m_found_at - 1);
+                return true;
+            case Qt::Key_Down:
+                m_found_at = std::min(std::max(0, shown - 1), m_found_at + 1);
+                return true;
+            case Qt::Key_Left:
+                m_found_at = std::max(0, m_found_at - FOUND_ROWS);
+                return true;
+            case Qt::Key_Right:
+                m_found_at = std::min(std::max(0, shown - 1), m_found_at + FOUND_ROWS);
+                return true;
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                if (m_found_at >= 0 && m_found_at < count){
+                    open_program(canvas, &canvas.request().programs[(size_t)m_found[(size_t)m_found_at]]);
+                }
+                return true;
+            default:
+                break;
+            }
+        }
+        if (key == Qt::Key_Escape || key == Qt::Key_Tab || key == Qt::Key_Backtab || key == Qt::Key_Return || key == Qt::Key_Enter){
+            return false;
+        }
+        if (event.modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier)){
+            return false;
+        }
+        const QString text = event.text();
+        if (text.isEmpty() || !text[0].isPrint()){
+            return false;
+        }
+        if (text[0] == ' ' && m_query.isEmpty()){
+            //  The space bar presses the button that has the keyboard.
+            return false;
+        }
+        set_query(canvas, m_query + text);
+        return true;
+    }
+    void paint_search(Canvas& canvas, QPainter& painter, double a, double y){
+        if (a < 0.004){
+            return;
+        }
+        const QRectF rect(1180, y, 600, 50);
+        const bool hot = !m_query.isEmpty() || canvas.hovered("gsearch");
+        panel(painter, rect, 25, with_alpha(PANEL, 0.8 * a), hot ? with_alpha(ORANGE, 0.95 * a) : white(0.30 * a), 2.0);
+        canvas.add_hit("gsearch", rect, true, false);
+        const QPointF glass(rect.left() + 32, rect.center().y() - 2);
+        painter.setPen(QPen(with_alpha(ORANGE, a), 2.2, Qt::SolidLine, Qt::RoundCap));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(glass, 8, 8);
+        painter.drawLine(QPointF(glass.x() + 6, glass.y() + 6), QPointF(glass.x() + 13, glass.y() + 13));
+        const QFont font = ui_font(25, 500);
+        const double x = rect.left() + 62;
+        const double room = rect.width() - 62 - 46;
+        const QString shown = QFontMetricsF(font).elidedText(m_query, Qt::ElideLeft, room);
+        if (m_query.isEmpty()){
+            draw_text_cy(painter, T("Search all programs"), x + 8, rect.center().y() + 1, font, white(0.5 * a));
+        }else{
+            draw_text_cy(painter, shown, x, rect.center().y() + 1, font, white(a));
+        }
+        if (std::fmod(m_clock, 1.0) < 0.55){
+            const double cx = x + (m_query.isEmpty() ? 2 : text_width(font, shown) + 3);
+            painter.setPen(QPen(with_alpha(ORANGE, a), 2.4));
+            painter.drawLine(QPointF(cx, rect.center().y() - 12), QPointF(cx, rect.center().y() + 12));
+        }
+        if (!m_query.isEmpty()){
+            const QRectF clear(rect.right() - 44, rect.center().y() - 16, 32, 32);
+            const bool over = canvas.hovered("gsearch-clear");
+            painter.setPen(QPen(white((over ? 0.95 : 0.6) * a), 2.0, Qt::SolidLine, Qt::RoundCap));
+            painter.drawLine(QPointF(clear.center().x() - 6, clear.center().y() - 6), QPointF(clear.center().x() + 6, clear.center().y() + 6));
+            painter.drawLine(QPointF(clear.center().x() - 6, clear.center().y() + 6), QPointF(clear.center().x() + 6, clear.center().y() - 6));
+            canvas.add_hit("gsearch-clear", clear, true, false);
+        }
+    }
+    void paint_found(Canvas& canvas, QPainter& painter, double top, double a){
+        if (m_found.empty()){
+            draw_text_cy(painter, T("No program matches."), 144, top + 40, ui_font(30, 500), white(0.6 * a));
+            return;
+        }
+        constexpr double LEFT = 140;
+        constexpr double RIGHT = 1780;
+        constexpr double GAP = 22;
+        constexpr double ROW = 64;
+        const double width = (RIGHT - LEFT - GAP * (FOUND_COLUMNS - 1)) / FOUND_COLUMNS;
+        const int shown = std::min((int)m_found.size(), FOUND_ROWS * FOUND_COLUMNS);
+        for (int c = 0; c < shown; c++){
+            const HomeProgram& program = canvas.request().programs[(size_t)m_found[(size_t)c]];
+            const int column = c / FOUND_ROWS;
+            const int row = c % FOUND_ROWS;
+            const QRectF rect(LEFT + (width + GAP) * column, top + (ROW + 10) * row, width, ROW);
+            const bool picked = c == m_found_at;
+            const bool over = canvas.hovered("found:" + QString::number(c));
+            panel(painter, rect, 18, with_alpha(PANEL, (over ? 0.95 : 0.8) * a),
+                picked ? with_alpha(ORANGE, 0.95 * a) : white((over ? 0.45 : 0.22) * a), picked ? 2.4 : 1.6);
+            const QString game = short_game_name(m_games[(size_t)program.game].name);
+            const QFont game_font = ui_font(21, 500);
+            const double game_w = std::min(width * 0.4, text_width(game_font, game));
+            draw_text_cy(painter, QFontMetricsF(game_font).elidedText(game, Qt::ElideRight, game_w),
+                rect.right() - 20, rect.center().y() + 1, game_font, white(0.55 * a), Qt::AlignRight);
+            const QFont name_font = ui_font(27, 600);
+            draw_text_cy(painter, QFontMetricsF(name_font).elidedText(program.name, Qt::ElideRight, width - game_w - 64),
+                rect.left() + 22, rect.center().y() + 1, name_font, white(a));
+            canvas.add_hit("found:" + QString::number(c), rect, true, false);
+        }
+        if ((int)m_found.size() > shown){
+            draw_text_cy(painter, tr_ui("and %1 more: type more of the name").arg((int)m_found.size() - shown),
+                LEFT + 4, top + (ROW + 10) * FOUND_ROWS + 14, ui_font(22, 500), white(0.5 * a));
+        }
+    }
+
     void start(Canvas& canvas){
         if (m_selected < 0){
             return;
@@ -3951,6 +4197,11 @@ private:
     std::vector<LogoGround> m_grounds;
     int m_columns = 4;
     int m_selected = -1;
+    bool m_app_mode = false;
+    double m_clock = 0;
+    QString m_query;
+    std::vector<int> m_found;       //  indexes into the request's programs
+    int m_found_at = 0;
 };
 
 
@@ -9984,6 +10235,59 @@ int run_setup_test(QApplication& application, const QString& folder){
         checker.check(record.console == "switch2", "the window is told which console was picked");
         window_screen.wait(1.5);
         checker.check(window_screen.page_name() == "games" && !window_screen.finished(), "and the games are back");
+
+        //  The program of the last time is one press away.
+        checker.check(!window_screen.has_hit("resume"), "no 'Continue with' when there is no program of the last time");
+        window_screen.set_resume(request_app.games[0].name, "Turbo Macro");
+        window_screen.wait(0.3);
+        checker.check(window_screen.has_hit("resume"), "the program of the last time is on the games");
+        save(window_screen, folder, "setup-65-window-resume");
+        checker.check(window_screen.click("resume"), "it can be pressed");
+        window_screen.wait(1.8);
+        checker.check(window_screen.hosting() && record.open_program == "Turbo Macro", "and it opens that program");
+        window_screen.click("app:games");
+        window_screen.wait(1.8);
+        window_screen.set_resume("No such game", "Turbo Macro");
+        window_screen.wait(0.3);
+        checker.check(!window_screen.has_hit("resume"), "a program that is not in the list is not offered");
+
+        //  The search over all programs: what is typed turns the cartridges into a list.
+        checker.check(window_screen.has_hit("gsearch") && window_screen.has_hit("game:0"), "the games have a search field");
+        window_screen.type_text("typew");
+        window_screen.wait(0.3);
+        checker.check(window_screen.page_state().contains(";query=typew;found=1"), "typing finds the programs by name");
+        checker.check(window_screen.has_hit("found:0") && !window_screen.has_hit("game:0") && !window_screen.hit_enabled("start"), "the list replaces the cartridges");
+        save(window_screen, folder, "setup-66-window-search");
+        save_preview(window_screen, folder, "preview-window-search");
+        window_screen.press_key(Qt::Key_Escape);
+        window_screen.wait(0.2);
+        checker.check(window_screen.page_state().contains(";query=;") && window_screen.has_hit("game:0"), "Escape clears the search and the cartridges are back");
+        window_screen.type_text("turbo");
+        window_screen.wait(0.2);
+        checker.check(window_screen.page_state().contains(";query=turbo;found=3"), "three programs have Turbo in their name");
+        window_screen.press_key(Qt::Key_Down);
+        window_screen.press_key(Qt::Key_Return);
+        window_screen.wait(1.8);
+        checker.check(window_screen.hosting() && record.open_program == "Turbo Button", "the arrows pick one and Enter opens it");
+        window_screen.click("app:games");
+        window_screen.wait(1.8);
+        checker.check(window_screen.page_state().contains(";query=;"), "the search starts empty again");
+        window_screen.type_text("xyz");
+        window_screen.press_key(Qt::Key_Backspace);
+        checker.check(window_screen.page_state().contains(";query=xy;found=0"), "a word that is in no program finds none");
+        window_screen.wait(0.2);
+        save(window_screen, folder, "setup-67-window-search-none");
+        window_screen.click("gsearch-clear");
+        window_screen.wait(0.2);
+        checker.check(window_screen.page_state().contains(";query=;") && window_screen.has_hit("game:0"), "the cross clears it");
+        window_screen.type_text("sword");
+        window_screen.wait(0.2);
+        checker.check(window_screen.page_state().contains("found=36"), "the game's name finds its programs too");
+        window_screen.click("found:5");
+        window_screen.wait(1.8);
+        checker.check(window_screen.hosting() && record.open_game == 3 && record.open_program == "Program 6 of Sword and Shield", "a program of another game opens with its own game");
+        window_screen.click("app:games");
+        window_screen.wait(1.8);
     }
 
     //  The language is English again for what comes after.

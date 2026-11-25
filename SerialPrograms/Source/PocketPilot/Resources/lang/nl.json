@@ -337,5 +337,8 @@
  "Output": "Uitvoer",
  "Programs": "Programma's",
  "Running": "Bezig",
- "Let the screen sleep": "Scherm laten slapen"
+ "Let the screen sleep": "Scherm laten slapen",
+ "Search all programs": "Zoek in alle programma's",
+ "No program matches.": "Geen programma gevonden.",
+ "and %1 more: type more of the name": "en nog %1: typ meer van de naam"
 }

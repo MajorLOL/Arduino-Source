@@ -668,6 +668,7 @@ void MainWindow::load_panel(
                 game_name = PocketPilot::short_game_name(name);
             }
             m_app->host(m_current_panel_widget, game, game_name, title);
+            update_resume();
             return;
         }
         //  The page with the games makes room first.
@@ -835,6 +836,14 @@ void MainWindow::sleep_suppress_state_changed(SleepSuppress new_state){
         }
     });
 }
+void MainWindow::update_resume(){
+    if (m_app == nullptr){
+        return;
+    }
+    std::string game, program;
+    m_program_list->persistent_panel(game, program);
+    m_app->set_resume(QString::fromStdString(game), QString::fromStdString(program));
+}
 void MainWindow::set_sleep_label(const QString& text){
     if (m_sleep_text != nullptr){
         m_sleep_text->setText(text);
@@ -903,6 +912,7 @@ void MainWindow::make_app_view(bool test){
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(m_app->widget());
+    update_resume();
     MainWindow::sleep_suppress_state_changed(SystemSleepController::instance().current_state());
 }
 

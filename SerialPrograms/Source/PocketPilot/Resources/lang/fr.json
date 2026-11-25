@@ -337,5 +337,8 @@
  "Output": "Sortie",
  "Programs": "Programmes",
  "Running": "En cours",
- "Let the screen sleep": "Laisser l'écran se mettre en veille"
+ "Let the screen sleep": "Laisser l'écran se mettre en veille",
+ "Search all programs": "Chercher dans tous les programmes",
+ "No program matches.": "Aucun programme trouvé.",
+ "and %1 more: type more of the name": "et %1 de plus : tapez plus du nom"
 }

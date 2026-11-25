@@ -120,6 +120,8 @@ private:
     void update_page();
     //  App mode: the screens, with what the buttons along the top do.
     void make_app_view(bool test);
+    //  App mode: the program of the last time, for "Continue with ..." on the games.
+    void update_resume();
     void set_sleep_label(const QString& text);
     void make_assistant(
         std::unique_ptr<PocketPilot::Assistant::HttpTransport> transport,

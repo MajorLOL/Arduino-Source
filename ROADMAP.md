@@ -121,8 +121,8 @@ The first version of "one interface" was made without the old window's buttons b
 | Top bar > the **side bar** switch | showed and hid the side bar | gone: there is no side bar (the list of programs is kept out of sight, to make the programs and load their panels) | |
 | Status strip > the **state** | "Ready" / "Running ..." | a chip in the header of the open program; no state on the games | Also on the programs and the games? |
 | Status strip > **sleep** | the text and the check box | the text and "Keep the screen on" / "Let the screen sleep" at the foot of the open program; not kept for the next start | |
-| Page with the games > **Resume** | opened the program of the last session | **not there**: the window starts on the games, no program is loaded at the start | A "Continue ..." button on the games, from the setting that is kept |
-| Page with the games > the **search over all programs** | found a program in any game | **not there** (the programs have a search per game) | A search over all games on the games screen |
+| Page with the games > **Resume** | opened the program of the last session | the window starts on the games, no program is loaded at the start; a button "Continue with <program>" next to Start opens the program of the last time (the one the settings keep) | Should it load at the start, as before? |
+| Page with the games > the **search over all programs** | found a program in any game | a search field on the games: what is typed turns the cartridges into a list of the programs that match (name first, then description and game); Up, Down, Left, Right and Enter, or a click, open one; Escape clears it | Also a search in the settings? |
 | Choose another console (games) | - | the screen of the consoles, then back to the games; the console is kept at once | |
 | Settings > **Open the setup** | the setup as a window of its own | the same: the full screen setup over the window | |
 | **Closing** | options of the open program kept | the same | |
