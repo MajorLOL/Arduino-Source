@@ -3752,12 +3752,36 @@ struct ConsoleInfo{
     const char* code;
     //  A name: not translated.
     const char* name;
-    //  What it covers (the program's own list of models, see ConsoleType).
+    //  What it covers (the program's own list of models, see ConsoleType);
+    //  only for the consoles that are supported.
     const char* note;
+    //  The program can be used with it now. The others are shown on the screen
+    //  already, dimmed and with a dashed outline, and cannot be picked.
+    bool supported;
 };
+//  The supported consoles come first, as the large tiles.
+//
+//  To add a console later: set "supported" to true and give it a note, add a
+//  value to SetupConsole (GlobalSettingsPanel.h) and its slug to the setting
+//  GAME_CONSOLE (GlobalSettingsPanel.cpp), and let console_code_of() and
+//  console_of() (PocketPilot_Language.cpp) know its code. A console that has no
+//  picture yet gets the small tile, so it only has to be moved up in this list
+//  and given a picture in ConsolePage::paint_tile().
 constexpr ConsoleInfo CONSOLES[] = {
-    {"switch",  "Nintendo Switch",   "Switch 1 and the OLED model"},
-    {"switch2", "Nintendo Switch 2", "International and Japan-only models"},
+    {"switch",      "Nintendo Switch",      "Switch 1 and the OLED model",          true},
+    {"switch2",     "Nintendo Switch 2",    "International and Japan-only models",  true},
+    //  What the gamepad adapters of the community already speak (the
+    //  platforms of OGX-Mini) and what the commercial ones list.
+    {"ps5",         "PlayStation 5",        nullptr,    false},
+    {"ps4",         "PlayStation 4",        nullptr,    false},
+    {"ps3",         "PlayStation 3",        nullptr,    false},
+    {"psclassic",   "PlayStation Classic",  nullptr,    false},
+    {"xboxseries",  "Xbox Series X|S",      nullptr,    false},
+    {"xboxone",     "Xbox One",             nullptr,    false},
+    {"xbox360",     "Xbox 360",             nullptr,    false},
+    {"xbox",        "Original Xbox",        nullptr,    false},
+    {"wiiu",        "Nintendo Wii U",       nullptr,    false},
+    {"dreamcast",   "Sega Dreamcast",       nullptr,    false},
 };
 constexpr int CONSOLE_COUNT = (int)(sizeof(CONSOLES) / sizeof(CONSOLES[0]));
 
@@ -3766,12 +3790,12 @@ public:
     explicit ConsolePage(Canvas& canvas){
         const QString kept = canvas.request().console_code;
         for (int c = 0; c < CONSOLE_COUNT; c++){
-            if (kept == CONSOLES[c].code){
+            if (CONSOLES[c].supported && kept == CONSOLES[c].code){
                 m_selected = c;
             }
         }
         //  One that was chosen before is shown as picked: Continue is next.
-        canvas.set_focus_id(m_selected >= 0 ? QString("continue") : tile_id(0));
+        canvas.set_focus_id(m_selected >= 0 ? QString("continue") : tile_id(next_enabled(-1, +1)));
     }
 
     virtual const char* name() const override{
@@ -3790,10 +3814,20 @@ public:
         const double sub_y = 250 + heading_height(heading, 80, 1500) + 26;
         draw_sub(painter, sub, 140, sub_y, prog(t, in.sub, in.sub + 0.8), 1.0, 34, 1500);
 
-        const double top = sub_y + sub_height(sub, 34, 1500) + 40;
+        const double top = sub_y + sub_height(sub, 34, 1500) + 36;
         for (int c = 0; c < CONSOLE_COUNT; c++){
-            const double begin = in.bar + 0.12 * c;
+            const double begin = in.bar + 0.07 * c;
             paint_tile(canvas, painter, c, tile_rect(c, top), eo(prog(t, begin, begin + 0.6)));
+        }
+        //  Over the consoles that are not supported yet.
+        if (supported_count() < CONSOLE_COUNT){
+            const double begin = in.bar + 0.07 * supported_count();
+            const double reveal = eo(prog(t, begin, begin + 0.6));
+            const double y = top + BIG_HEIGHT + 24;
+            draw_text_cy(painter, T("Coming soon"), 144, y + 14, ui_font(24, 600), white(0.68 * reveal));
+            painter.setPen(QPen(white(0.2 * reveal), 1.4));
+            const double text_end = 144 + text_width(ui_font(24, 600), T("Coming soon")) + 22;
+            painter.drawLine(QPointF(text_end, y + 14), QPointF(1780, y + 14));
         }
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
@@ -3806,9 +3840,11 @@ public:
     virtual void activate(Canvas& canvas, const QString& id) override{
         const int index = index_of(id);
         if (index >= 0 && index < CONSOLE_COUNT){
-            m_selected = index;
-            //  A console picked: the next Enter goes on.
-            canvas.set_focus_id("continue");
+            if (CONSOLES[index].supported){
+                m_selected = index;
+                //  A console picked: the next Enter goes on.
+                canvas.set_focus_id("continue");
+            }
         }else if (id == "continue"){
             proceed(canvas);
         }else if (id == "skip"){
@@ -3829,11 +3865,17 @@ public:
         int target;
         if (current < 0){
             //  The focus is on a button: back to the consoles.
-            target = m_selected >= 0 ? m_selected : 0;
+            target = m_selected >= 0 ? m_selected : next_enabled(-1, +1);
         }else{
-            target = std::max(0, std::min(CONSOLE_COUNT - 1, current + step));
+            //  Only the consoles that can be picked: the others are skipped.
+            target = next_enabled(current, step);
+            if (target < 0){
+                target = current;
+            }
         }
-        canvas.set_focus_id(tile_id(target));
+        if (target >= 0){
+            canvas.set_focus_id(tile_id(target));
+        }
         return true;
     }
     virtual void enter_pressed(Canvas& canvas) override{
@@ -3844,11 +3886,30 @@ public:
     }
 
 private:
+    static constexpr double BIG_HEIGHT = 236;
+    static constexpr int SMALL_COLUMNS = 5;
+
     static QString tile_id(int index){
         return "console:" + QString::number(index);
     }
     static int index_of(const QString& id){
         return id.startsWith("console:") ? id.mid(8).toInt() : -1;
+    }
+    static int supported_count(){
+        int count = 0;
+        for (const ConsoleInfo& info : CONSOLES){
+            count += info.supported ? 1 : 0;
+        }
+        return count;
+    }
+    //  The next console after "from" in this direction that can be picked, or -1.
+    static int next_enabled(int from, int direction){
+        for (int c = from + direction; c >= 0 && c < CONSOLE_COUNT; c += direction){
+            if (CONSOLES[c].supported){
+                return c;
+            }
+        }
+        return -1;
     }
     void proceed(Canvas& canvas){
         if (m_selected < 0){
@@ -3859,15 +3920,27 @@ private:
         canvas.end_console();
     }
 
-    //  Two large tiles side by side, under the texts.
+    //  The supported consoles are large tiles side by side; under them, after
+    //  a line of text, the others in rows of small tiles.
     static QRectF tile_rect(int index, double top){
         constexpr double LEFT = 140;
         constexpr double RIGHT = 1780;
-        constexpr double BOTTOM = 915;
-        constexpr double GAP = 40;
-        const double width = (RIGHT - LEFT - GAP * (CONSOLE_COUNT - 1)) / CONSOLE_COUNT;
-        const double height = std::max(300.0, std::min(470.0, BOTTOM - top));
-        return QRectF(LEFT + (width + GAP) * index, top, width, height);
+        const int large = supported_count();
+        if (index < large){
+            constexpr double GAP = 40;
+            const double width = (RIGHT - LEFT - GAP * (large - 1)) / large;
+            return QRectF(LEFT + (width + GAP) * index, top, width, BIG_HEIGHT);
+        }
+        constexpr double GAP = 14;
+        constexpr double HEIGHT = 70;
+        const int k = index - large;
+        const double width = (RIGHT - LEFT - GAP * (SMALL_COLUMNS - 1)) / SMALL_COLUMNS;
+        const double first = top + BIG_HEIGHT + 18 + 28 + 18;
+        return QRectF(
+            LEFT + (width + GAP) * (k % SMALL_COLUMNS),
+            first + (HEIGHT + GAP) * (k / SMALL_COLUMNS),
+            width, HEIGHT
+        );
     }
 
     void paint_tile(Canvas& canvas, QPainter& painter, int index, const QRectF& place, double reveal){
@@ -3876,12 +3949,18 @@ private:
         }
         const ConsoleInfo& info = CONSOLES[index];
         const QString id = tile_id(index);
-        const bool hover = canvas.hovered(id);
-        const bool focus = canvas.focused(id);
+        const bool enabled = info.supported;
+        const bool hover = enabled && canvas.hovered(id);
+        const bool focus = enabled && canvas.focused(id);
         const bool selected = index == m_selected;
         const double a = reveal;
         const QRectF box = place.translated(0, (1.0 - reveal) * 26);
-        canvas.add_hit(id, place);
+        canvas.add_hit(id, place, enabled, enabled);
+
+        if (!enabled){
+            paint_small_tile(painter, info, box, a);
+            return;
+        }
 
         if (selected){
             glow(painter, box, 30, ORANGE, 0.55 * reveal);
@@ -3893,28 +3972,73 @@ private:
             selected ? 2.6 : hover ? 2.2 : 1.8
         );
 
-        //  The console, as large as the tile lets it be.
+        //  The console on the left, as large as the tile lets it be; its name
+        //  and what it covers on the right.
         const QPixmap picture = index == 0 ? plain_picture("switch") : switch2_picture();
-        const QRectF room(box.left() + 50, box.top() + 34, box.width() - 100, box.height() - 34 - 130);
+        const QRectF room(box.left() + 36, box.top() + 30, 360, box.height() - 60);
         if (!picture.isNull()){
             const double scale = std::min(room.width() / picture.width(), room.height() / picture.height());
             const double w = picture.width() * scale;
             const double h = picture.height() * scale;
             draw_picture(painter, picture, QRectF(room.center().x() - w / 2.0, room.center().y() - h / 2.0, w, h), a);
         }
-
-        draw_text_cy(painter, QString::fromLatin1(info.name), box.left() + 46, box.bottom() - 84, ui_font(42, 600), white(a));
-        draw_text_cy(painter, T(info.note), box.left() + 46, box.bottom() - 36, ui_font(25, 500), white(0.55 * a));
+        const double text_x = room.right() + 36;
+        const double text_w = box.right() - 28 - text_x;
+        const QFont name_font = ui_font(36, 600);
+        const QString note = T(info.note);
+        const QFont note_font = ui_font(23, 500);
+        const QStringList note_lines = wrap_text(note_font, note, text_w);
+        const double note_line = 23 * 1.35;
+        const double block = 44 + 14 + (double)note_lines.size() * note_line;
+        double y = box.center().y() - block / 2.0;
+        draw_text(painter, QString::fromLatin1(info.name), text_x, y, name_font, white(a));
+        y += 44 + 14;
+        for (const QString& line : note_lines){
+            draw_text(painter, line, text_x, y, note_font, white(0.55 * a));
+            y += note_line;
+        }
         if (selected){
-            const QRectF badge(box.right() - 46 - 44, box.bottom() - 60 - 22, 44, 44);
+            const QRectF badge(box.right() - 24 - 40, box.top() + 22, 40, 40);
             painter.setPen(Qt::NoPen);
             painter.setBrush(with_alpha(ORANGE, a));
             painter.drawEllipse(badge);
-            draw_check(painter, badge.adjusted(7, 7, -7, -7), with_alpha(Qt::black, a), 3.4);
+            draw_check(painter, badge.adjusted(6, 6, -6, -6), with_alpha(Qt::black, a), 3.2);
         }
         if (focus){
             panel(painter, box.adjusted(-6, -6, 6, 6), 36, QColor(), with_alpha(YELLOW, 0.9 * reveal), 2.4);
         }
+    }
+
+    //  A console that is not supported yet: a gamepad and its name, dimmed, in
+    //  a dashed outline.
+    static void paint_small_tile(QPainter& painter, const ConsoleInfo& info, const QRectF& box, double a){
+        //  A dark ground, so that the lines of the background do not run through the name.
+        painter.setBrush(with_alpha(PANEL, 0.88 * a));
+        QPen dashed(white(0.26 * a), 1.6);
+        dashed.setStyle(Qt::DashLine);
+        painter.setPen(dashed);
+        painter.drawRoundedRect(box.adjusted(0.8, 0.8, -0.8, -0.8), 20, 20);
+
+        //  A plain gamepad: the same for each, it is no picture of the console.
+        const QRectF pad(box.left() + 22, box.center().y() - 15, 50, 30);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(white(0.42 * a), 2.0));
+        painter.drawRoundedRect(pad, 13, 13);
+        draw_plus(painter, QPointF(pad.left() + 14, pad.center().y()), 5.5, white(0.42 * a), 2.0);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(white(0.42 * a));
+        painter.drawEllipse(QPointF(pad.right() - 17, pad.center().y() + 4), 3.2, 3.2);
+        painter.drawEllipse(QPointF(pad.right() - 9, pad.center().y() - 4), 3.2, 3.2);
+
+        //  A long name gets a smaller type before it is cut off at the end.
+        const double text_x = pad.right() + 18;
+        const double text_w = box.right() - 14 - text_x;
+        const QString shown = QString::fromLatin1(info.name);
+        QFont font = ui_font(24, 600);
+        for (double px = 24; px > 18.5 && text_width(font, shown) > text_w; px -= 1.0){
+            font = ui_font(px, 600);
+        }
+        draw_text_cy(painter, QFontMetricsF(font).elidedText(shown, Qt::ElideRight, text_w), text_x, box.center().y() + 1, font, white(0.62 * a));
     }
 
 private:
@@ -4964,7 +5088,11 @@ int run_setup_test(QApplication& application, const QString& folder){
     save(canvas, folder, "setup-36-console-start");
     save_preview(canvas, folder, "preview-console");
     checker.check(has_content(canvas.picture()), "the console screen has something on it");
-    checker.check(canvas.has_hit("console:0") && canvas.has_hit("console:1"), "both consoles are tiles");
+    checker.check(canvas.has_hit("console:0") && canvas.hit_enabled("console:0") && canvas.has_hit("console:1") && canvas.hit_enabled("console:1"),
+        "both supported consoles are tiles that can be picked");
+    checker.check(canvas.has_hit("console:2") && !canvas.hit_enabled("console:2") && canvas.has_hit("console:11") && !canvas.hit_enabled("console:11"),
+        "the other consoles are on the screen already, and cannot be picked");
+    checker.check(!canvas.click("console:2") && canvas.page_state() == "selected=", "a console that is not supported yet does nothing when it is clicked");
     checker.check(canvas.has_hit("skip") && canvas.has_hit("continue"), "the console screen has Skip setup and Continue");
     checker.check(!canvas.hit_enabled("continue"), "no console, no way on");
     checker.check(canvas.page_state() == "selected=", "nothing is picked at first");
@@ -4976,6 +5104,13 @@ int run_setup_test(QApplication& application, const QString& folder){
     canvas.press_key(Qt::Key_Left);
     canvas.press_key(Qt::Key_Right);
     checker.check(canvas.focus_id() == "console:1", "the arrow keys go over the consoles");
+    canvas.press_key(Qt::Key_Right);
+    checker.check(canvas.focus_id() == "console:1", "and skip the ones that are not supported yet");
+    canvas.press_key(Qt::Key_Tab);
+    canvas.press_key(Qt::Key_Tab);
+    checker.check(!canvas.focus_id().startsWith("console:") || canvas.focus_id() == "console:0" || canvas.focus_id() == "console:1",
+        "Tab does not stop on them either");
+    canvas.set_focus_id("console:1");
     canvas.move_to("console:1");
     canvas.wait(0.5);
     save(canvas, folder, "setup-37-console-hover");
