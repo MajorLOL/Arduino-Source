@@ -158,7 +158,7 @@ ScreenRead read_screen(StoryRuntime& rt){
         read.text = "No video comes in from the capture card.";
         return read;
     }
-    const ImageViewRGB32 frame = snapshot;
+    const ImageViewRGB32& frame = *snapshot.frame;
     BattleMenuDetector battle_menu(COLOR_RED);
     BattleDialogDetector battle_box(COLOR_RED);
     SelectionDialogDetector question(COLOR_RED);
@@ -201,7 +201,7 @@ std::string take_picture(StoryRuntime& rt, int enlarge){
     if (!snapshot){
         return std::string();
     }
-    const ImageViewRGB32 frame = snapshot;
+    const ImageViewRGB32& frame = *snapshot.frame;
     const ImageFloatBox game_box = GameSettings::instance().GAME_BOX;
     const ImageViewRGB32 game = extract_box_reference(frame, game_box);
     return PocketPilot::Assistant::play_picture(game, GAME_WIDTH, GAME_HEIGHT, enlarge);

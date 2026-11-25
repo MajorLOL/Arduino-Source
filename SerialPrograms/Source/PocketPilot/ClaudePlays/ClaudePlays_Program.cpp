@@ -229,7 +229,7 @@ public:
         if (!snapshot){
             return false;
         }
-        const ImageViewRGB32 frame = snapshot;
+        const ImageViewRGB32& frame = *snapshot.frame;
         use(frame);
         return true;
     }
@@ -335,7 +335,7 @@ public:
         if (!snapshot){
             return false;
         }
-        const ImageViewRGB32 frame = snapshot;
+        const ImageViewRGB32& frame = *snapshot.frame;
         use(frame);
         return true;
     }
