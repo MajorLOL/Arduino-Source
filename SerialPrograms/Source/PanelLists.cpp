@@ -86,7 +86,7 @@ PocketPilot::HomeGame describe_list(const PanelListDescriptor& list){
 }
 
 
-void describe_all_games(std::vector<PocketPilot::HomeGame>& games){
+void describe_all_games(std::vector<PocketPilot::HomeGame>& games, std::string* error){
     games.clear();
     try{
         for (const std::unique_ptr<PanelListDescriptor>& list : make_all_lists()){
@@ -94,9 +94,17 @@ void describe_all_games(std::vector<PocketPilot::HomeGame>& games){
             game.programs = (int)list->program_summaries().size();
             games.emplace_back(std::move(game));
         }
-    }catch (...){
+    }catch (const std::exception& e){
         //  The setup goes on without the choice of a game.
         games.clear();
+        if (error != nullptr){
+            *error = e.what();
+        }
+    }catch (...){
+        games.clear();
+        if (error != nullptr){
+            *error = "an unknown error";
+        }
     }
 }
 

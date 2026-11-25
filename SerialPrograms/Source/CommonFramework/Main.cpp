@@ -219,12 +219,14 @@ int run_program(int argc, char *argv[]){
     //  an event to every widget, also to a window that is still being made.
     apply_current_theme();
 
-    //  The intro plays first, before anything else is prepared: the short
-    //  film with the two Joy-Cons. Not in the tests (nobody is there to
-    //  watch it) and not when the setting or --no-intro turns it off. The
-    //  test of the intro itself decodes the film without a window.
+    //  The intro: the short film with the two Joy-Cons. Not in the tests
+    //  (nobody is there to watch it) and not when the setting or --no-intro
+    //  turns it off. It plays on the screen of the setup (see below), so that
+    //  the film goes over into the first question without a window opening or
+    //  closing in between. The test of the intro itself decodes the film
+    //  without a window.
+    bool play_intro = GlobalSettings::instance().PLAY_INTRO;
     {
-        bool play_intro = GlobalSettings::instance().PLAY_INTRO;
         bool intro_test = false;
         bool tutorial_test = false;
         for (int i = 1; i < argc; i++){
@@ -254,14 +256,11 @@ int run_program(int argc, char *argv[]){
             }
             return code;
         }
-        if (play_intro){
-            PocketPilot::play_intro();
-        }
     }
 
     //  The language: put into use now, before any window is made. The setup
-    //  (the language, then the microcontroller) is asked once, after the
-    //  intro. Not in the tests (nobody is there to answer).
+    //  (the language, then the microcontroller) is asked once, on the screen
+    //  of the intro. Not in the tests (nobody is there to answer).
     {
         bool ask_setup = true;
         bool language_test = false;
@@ -294,11 +293,24 @@ int run_program(int argc, char *argv[]){
         }
         //  The setup ends with the choice of a game: these are the games.
         PocketPilot::set_game_lister([](std::vector<PocketPilot::HomeGame>& games){
-            describe_all_games(games);
+            std::string error;
+            describe_all_games(games, &error);
+            if (!error.empty()){
+                global_logger_tagged().log("Setup: the games could not be listed: " + error, COLOR_RED);
+            }
         });
-        if (ask_setup){
-            PocketPilot::ask_setup_if_needed();
+        //  The test of the interface also checks that the games can be listed
+        //  now, before the main window is made, as the setup needs.
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0){
+                global_logger_tagged().log(
+                    "Setup: the games before the window: " + std::to_string(PocketPilot::count_games_for_setup()) + "."
+                );
+            }
         }
+        //  The intro and the setup: one screen. It stays up until the main
+        //  window is shown (see below).
+        PocketPilot::show_start_screens(play_intro, ask_setup);
     }
 
     //  Load the Switch framework settings now, not only when their panel is opened.
@@ -404,6 +416,8 @@ int run_program(int argc, char *argv[]){
     w.show();
     w.raise(); // bring the window to front on macOS
     set_permissions(w);
+    //  The screen of the intro and the setup goes now, over the window.
+    PocketPilot::release_setup_curtain();
 
     //  The test of the interface: pictures of every page, then exit. The
     //  settings are not written, since the test changes the theme.

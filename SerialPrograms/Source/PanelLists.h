@@ -22,8 +22,8 @@ namespace PokemonAutomation{
 // The games of the program with their pictures and the number of programs
 // each has, in the order of the side bar. Needs no window: the setup uses it
 // to ask which game to start before the main window is made. Empty when the
-// lists could not be made.
-void describe_all_games(std::vector<PocketPilot::HomeGame>& games);
+// lists could not be made (then "error" says why, when it is given).
+void describe_all_games(std::vector<PocketPilot::HomeGame>& games, std::string* error = nullptr);
 
 
 // The program selection UI on the left side of the program window.

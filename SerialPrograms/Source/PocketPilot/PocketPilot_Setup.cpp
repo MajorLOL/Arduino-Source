@@ -35,12 +35,15 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
+#include <QCursor>
 #include <QPixmap>
+#include <QPointer>
 #include <QRadialGradient>
 #include <QScreen>
 #include <QStandardPaths>
 #include <QStringList>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -535,6 +538,31 @@ public:
     void start(QEventLoop* loop);
     void advance(double dt);
 
+    //  ---- the intro: the film plays on this window, and its last picture
+    //  goes over into the first page (or stays, when no page follows).
+    //  Started once the window is on the screen.
+    void start_intro();
+    //  "none", "film" or "fade".
+    QString intro_state() const;
+    int intro_frames() const{
+        return m_intro_frames;
+    }
+    //  Why the film ended ("it played to the end", "it was skipped", ...).
+    const QString& intro_note() const{
+        return m_intro_note;
+    }
+
+    //  ---- after the end: the screen stays up (the page fades out, the
+    //  background stays) until it is released, then the window fades away.
+    void hold_screen();
+    void release_screen();
+    bool holding() const{
+        return m_holding;
+    }
+    bool released() const{
+        return m_release_done;
+    }
+
     //  ---- the test
     QString page_name() const{
         return m_page == nullptr ? QString() : QString::fromLatin1(m_page->name());
@@ -590,6 +618,12 @@ private:
     void update_hover(const QPointF& window_point);
     void move_focus(int direction);
     void tick();
+    bool asks_anything() const{
+        return m_request.ask_language || m_request.ask_board;
+    }
+    void end_intro(const QString& note);
+    void drop_intro_player();
+    void draw_fitted(QPainter& painter, const QImage& image, QPixmap& cache, QSize& cache_for, double opacity);
 
 private:
     SetupRequest m_request;
@@ -639,6 +673,37 @@ private:
     std::unique_ptr<QWidget> m_overlay;
     std::unique_ptr<QMediaPlayer> m_player;
     std::unique_ptr<QAudioOutput> m_audio;
+
+    //  The intro. The player goes before the window it plays on.
+    enum class IntroState{
+        NONE,
+        FILM,
+        FADE,
+    };
+    IntroState m_intro = IntroState::NONE;
+    double m_intro_clock = 0;
+    double m_intro_ended = -1;
+    double m_intro_fade = 1;
+    //  Nothing follows the film: its last picture stays.
+    bool m_intro_keep = false;
+    int m_intro_frames = 0;
+    QString m_intro_note;
+    QVideoFrame m_intro_last;
+    //  The latest picture (the test draws the film itself), and the last one
+    //  with its scaled copy, drawn over the page while it fades.
+    QImage m_intro_image;
+    QImage m_intro_still;
+    QPixmap m_intro_still_scaled;
+    QSize m_intro_still_for;
+    std::unique_ptr<QWidget> m_intro_overlay;
+    std::unique_ptr<QVideoSink> m_intro_sink;
+    std::unique_ptr<QMediaPlayer> m_intro_player;
+    std::unique_ptr<QAudioOutput> m_intro_audio;
+
+    bool m_holding = false;
+    bool m_releasing = false;
+    bool m_release_done = false;
+    double m_release_alpha = 1;
 };
 
 
@@ -3222,8 +3287,7 @@ public:
         draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("You are done!");
         draw_heading(painter, heading, 140, 300, 118, prog(t, in.head, in.head + 0.9), 1.0);
-        const bool has_games = !canvas.request().games.empty();
-        draw_sub(painter, has_games ? T("Check keyboard, video and audio, then pick the game to start.") : T("Check keyboard, video and audio, then finish up."), 140,
+        draw_sub(painter, T("Check keyboard, video and audio, then finish up."), 140,
             300 + heading_height(heading, 118) + 26, prog(t, in.sub, in.sub + 0.8), 1.0);
 
         const double reveal = eo(prog(t, in.bar, in.bar + 0.8));
@@ -3238,8 +3302,10 @@ public:
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
         draw_text(painter, T("Steps from the Pokémon Automation Setup Guide"), 140, 1010, ui_font(26, 500), white(0.62 * b));
-        //  With games to choose from the setup goes on to the choice.
-        const QString start = has_games ? T("Choose a game") : T("Start");
+        //  The installation ends here. With games to choose from, a screen of its
+        //  own follows (no part of the installation: no steps, no way back to it).
+        const bool has_games = !canvas.request().games.empty();
+        const QString start = has_games ? T("Continue") : T("Start");
         draw_button(canvas, painter, "start", start, 1780 - button_width(start, ButtonKind::PRIMARY), 950, ButtonKind::PRIMARY, b);
     }
 
@@ -3265,7 +3331,8 @@ private:
 
 
 //  ---------------------------------------------------------------------
-//  After the end: which game to start
+//  After the installation: which game to start. A screen of its own: it has no
+//  part in the four steps of the installation and no way back into them.
 //  ---------------------------------------------------------------------
 
 //  The outline of a game cartridge: a rounded box with its top right corner
@@ -3302,11 +3369,9 @@ public:
 
     virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
         const Intro in = intro_for(canvas);
-        const int states[4] = {0, 0, 0, 1};
-        draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
         const QString heading = T("Which game do you want to start?");
-        draw_heading(painter, heading, 140, 150, 76, prog(t, in.head, in.head + 0.9), 1.0, 1500);
-        const double sub_y = 150 + heading_height(heading, 76, 1500) + 20;
+        draw_heading(painter, heading, 140, 110, 84, prog(t, in.head, in.head + 0.9), 1.0, 1500);
+        const double sub_y = 110 + heading_height(heading, 84, 1500) + 20;
         draw_sub(painter, T("Pick a game. Its programs are shown right away."), 140, sub_y,
             prog(t, in.sub, in.sub + 0.8), 1.0, 34, 1500);
 
@@ -3321,9 +3386,6 @@ public:
         const QString start_text = T("Start");
         const double start_w = button_width(start_text, ButtonKind::PRIMARY);
         draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, m_selected >= 0);
-        const QString back = T("Back");
-        draw_button(canvas, painter, "back", back, 1780 - start_w - 18 - button_width(back, ButtonKind::SECONDARY), 950,
-            ButtonKind::SECONDARY, b);
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
@@ -3339,8 +3401,6 @@ public:
         }else if (id == "later"){
             canvas.result().game.clear();
             canvas.finish();
-        }else if (id == "back"){
-            canvas.go_done(canvas.result().board);
         }
     }
     virtual bool key(Canvas& canvas, QKeyEvent& event) override{
@@ -3385,9 +3445,6 @@ public:
         if (m_selected >= 0){
             start(canvas);
         }
-    }
-    virtual void escape_pressed(Canvas& canvas) override{
-        activate(canvas, "back");
     }
     virtual QString state() const override{
         if (m_selected < 0){
@@ -3564,7 +3621,7 @@ void Canvas::start(QEventLoop* loop){
     m_loop = loop;
     if (m_request.ask_language){
         go_language();
-    }else{
+    }else if (m_request.ask_board){
         go_board();
     }
     m_first_page = true;
@@ -3585,8 +3642,47 @@ void Canvas::tick(){
 }
 
 void Canvas::advance(double dt){
+    if (m_releasing){
+        m_release_alpha -= dt / 0.55;
+        setWindowOpacity(std::max(0.0, m_release_alpha));
+        if (m_release_alpha <= 0){
+            m_releasing = false;
+            m_release_done = true;
+            m_timer.stop();
+            close();
+        }
+        return;
+    }
+    if (m_intro == IntroState::FILM){
+        //  The first page waits: its time starts when the film fades.
+        m_intro_clock += dt;
+        const bool ended = m_intro_ended >= 0 && m_intro_clock - m_intro_ended >= 0.4;
+        if (ended){
+            end_intro("it played to the end");
+        }else if (m_intro_frames == 0 && m_intro_clock > 6.0){
+            end_intro("no picture came within 6 seconds");
+        }else if (m_intro_clock > 20.0){
+            end_intro("it took too long");
+        }
+        return;
+    }
     m_now += dt;
     m_page_time += dt;
+    if (m_intro == IntroState::FADE && !m_intro_keep){
+        m_intro_fade -= dt / 0.9;
+        if (m_intro_fade <= 0){
+            m_intro_fade = 0;
+            m_intro = IntroState::NONE;
+            m_intro_still = QImage();
+            m_intro_still_scaled = QPixmap();
+        }
+    }
+    if (m_holding){
+        //  The page goes, the background stays.
+        m_fade = std::max(0.0, m_fade - dt / 0.30);
+        m_pending = nullptr;
+        return;
+    }
     if (m_pending){
         m_fade -= dt / 0.20;
         if (m_fade <= 0){
@@ -3789,6 +3885,13 @@ void Canvas::finish(){
     if (m_video_open){
         close_video();
     }
+    if (m_intro == IntroState::FILM){
+        //  Closed during the film.
+        m_intro_note = "the window was closed";
+        drop_intro_player();
+        m_intro = IntroState::NONE;
+        unsetCursor();
+    }
     if (m_finished){
         return;
     }
@@ -3798,6 +3901,195 @@ void Canvas::finish(){
         m_loop->quit();
     }
 }
+
+//  ---------------------------------------------------------------------
+//  The intro on this window, and the screen that stays after the end
+//  ---------------------------------------------------------------------
+
+QString Canvas::intro_state() const{
+    switch (m_intro){
+    case IntroState::FILM:
+        return "film";
+    case IntroState::FADE:
+        return "fade";
+    default:
+        return "none";
+    }
+}
+
+void Canvas::start_intro(){
+    if (m_intro != IntroState::NONE){
+        return;
+    }
+    const QString path = extract_film("intro");
+    if (path.isEmpty()){
+        m_intro_note = "the film is not in this build";
+        if (!asks_anything()){
+            finish();
+        }
+        return;
+    }
+    m_intro = IntroState::FILM;
+    m_intro_clock = 0;
+    m_intro_ended = -1;
+    m_intro_frames = 0;
+    m_intro_note.clear();
+    setCursor(Qt::BlankCursor);
+
+    QVideoSink* sink = nullptr;
+    if (m_test_mode){
+        //  Nothing to show it on: the canvas draws the pictures itself.
+        m_intro_sink = std::make_unique<QVideoSink>();
+        sink = m_intro_sink.get();
+    }else{
+        m_intro_overlay = std::make_unique<VideoOverlay>(this, [this]{
+            QTimer::singleShot(0, this, [this]{
+                //  A click in the first moments is not meant for the intro.
+                if (m_intro == IntroState::FILM && m_intro_clock >= 0.5){
+                    end_intro("it was skipped");
+                }
+            });
+        });
+        m_intro_overlay->setGeometry(rect());
+        sink = static_cast<VideoOverlay*>(m_intro_overlay.get())->video()->videoSink();
+    }
+    QObject::connect(sink, &QVideoSink::videoFrameChanged, this, [this](const QVideoFrame& frame){
+        if (!frame.isValid()){
+            return;
+        }
+        m_intro_frames++;
+        m_intro_last = frame;
+        if (m_test_mode){
+            m_intro_image = frame.toImage();
+        }
+    });
+
+    m_intro_player = std::make_unique<QMediaPlayer>();
+    //  The sound only where there is something to play it on.
+    if (!QMediaDevices::audioOutputs().isEmpty()){
+        m_intro_audio = std::make_unique<QAudioOutput>();
+        m_intro_audio->setVolume(0.8f);
+        m_intro_player->setAudioOutput(m_intro_audio.get());
+    }
+    if (m_test_mode){
+        m_intro_player->setVideoSink(sink);
+    }else{
+        m_intro_player->setVideoOutput(static_cast<VideoOverlay*>(m_intro_overlay.get())->video());
+    }
+    QObject::connect(m_intro_player.get(), &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status){
+        if (status == QMediaPlayer::EndOfMedia){
+            //  A beat on the last picture, then on.
+            if (m_intro_ended < 0){
+                m_intro_ended = m_intro_clock;
+            }
+        }else if (status == QMediaPlayer::InvalidMedia){
+            QTimer::singleShot(0, this, [this]{
+                end_intro("the film cannot be decoded");
+            });
+        }
+    });
+    QObject::connect(m_intro_player.get(), &QMediaPlayer::errorOccurred, this, [this](QMediaPlayer::Error, const QString& message){
+        QTimer::singleShot(0, this, [this, message]{
+            end_intro("the player failed: " + message);
+        });
+    });
+    m_intro_player->setSource(QUrl::fromLocalFile(path));
+    if (m_intro_overlay != nullptr){
+        m_intro_overlay->show();
+        m_intro_overlay->raise();
+    }
+    m_intro_player->play();
+    setFocus();
+}
+
+void Canvas::drop_intro_player(){
+    if (m_intro_player != nullptr){
+        m_intro_player->stop();
+        m_intro_player->disconnect();
+    }
+    m_intro_player.reset();
+    m_intro_audio.reset();
+    m_intro_sink.reset();
+    m_intro_overlay.reset();
+}
+
+void Canvas::end_intro(const QString& note){
+    if (m_intro != IntroState::FILM){
+        return;
+    }
+    m_intro_note = note;
+
+    //  The last picture of the film, kept: the window the film plays on goes
+    //  away and this picture is drawn in its place, the same, and fades out.
+    m_intro_still = QImage();
+    if (m_intro_last.isValid()){
+        m_intro_still = m_intro_last.toImage();
+    }else if (!m_intro_image.isNull()){
+        m_intro_still = m_intro_image;
+    }
+    m_intro_last = QVideoFrame();
+    m_intro_still_scaled = QPixmap();
+    m_intro_still_for = QSize();
+
+    m_intro = IntroState::FADE;
+    m_intro_fade = 1.0;
+    m_intro_keep = !asks_anything();
+    unsetCursor();
+    //  Drawn under the film's window first, so that nothing shows between.
+    if (isVisible()){
+        repaint();
+    }
+    drop_intro_player();
+    if (m_intro_keep){
+        //  Nothing follows: the picture stays until the program is there.
+        finish();
+    }
+    update();
+}
+
+//  An image as large as fits the window, in its middle, with its own
+//  proportions. The scaled copy is kept in the cache.
+void Canvas::draw_fitted(QPainter& painter, const QImage& image, QPixmap& cache, QSize& cache_for, double opacity){
+    if (image.isNull() || opacity <= 0.002){
+        return;
+    }
+    const QSize target = image.size().scaled(size(), Qt::KeepAspectRatio);
+    if (cache.isNull() || cache_for != target){
+        cache = QPixmap::fromImage(image.scaled(target, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        cache_for = target;
+    }
+    painter.save();
+    painter.resetTransform();
+    painter.setOpacity(opacity);
+    painter.drawPixmap(QPoint((width() - target.width()) / 2, (height() - target.height()) / 2), cache);
+    painter.restore();
+}
+
+void Canvas::hold_screen(){
+    if (m_holding){
+        return;
+    }
+    m_holding = true;
+    if (!m_test_mode){
+        m_clock.restart();
+        m_clock_started = true;
+        m_timer.start();
+    }
+}
+
+void Canvas::release_screen(){
+    if (m_releasing || m_release_done){
+        return;
+    }
+    m_releasing = true;
+    m_release_alpha = 1.0;
+    if (!m_test_mode){
+        m_clock.restart();
+        m_clock_started = true;
+        m_timer.start();
+    }
+}
+
 
 void Canvas::paint_background(QPainter& painter){
     const double w = width();
@@ -3846,7 +4138,19 @@ void Canvas::paintEvent(QPaintEvent*){
     painter.setRenderHint(QPainter::TextAntialiasing, true);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter.fillRect(rect(), Qt::black);
-    paint_background(painter);
+    if (m_intro == IntroState::FILM){
+        //  The film is on the window over this one (the test draws it here).
+        m_hits.clear();
+        if (m_test_mode && !m_intro_image.isNull()){
+            QPixmap cache;
+            QSize cache_for;
+            draw_fitted(painter, m_intro_image, cache, cache_for, 1.0);
+        }
+        return;
+    }
+    if (!m_intro_keep || m_intro != IntroState::FADE){
+        paint_background(painter);
+    }
 
     m_scale = std::min(width() / DW, height() / DH);
     m_offset = QPointF((width() - DW * m_scale) / 2.0, (height() - DH * m_scale) / 2.0);
@@ -3858,12 +4162,21 @@ void Canvas::paintEvent(QPaintEvent*){
         painter.setOpacity(eo(clamp01(m_fade)));
         m_page->paint(*this, painter, m_page_time);
     }
+    if (m_intro == IntroState::FADE){
+        //  The last picture of the film over the page, going away.
+        const double fade = clamp01(m_intro_fade);
+        draw_fitted(painter, m_intro_still, m_intro_still_scaled, m_intro_still_for,
+            m_intro_keep ? 1.0 : fade * fade * (3.0 - 2.0 * fade));
+    }
 }
 
 void Canvas::resizeEvent(QResizeEvent* event){
     QWidget::resizeEvent(event);
     if (m_overlay != nullptr){
         m_overlay->setGeometry(rect());
+    }
+    if (m_intro_overlay != nullptr){
+        m_intro_overlay->setGeometry(rect());
     }
     update();
 }
@@ -3890,11 +4203,23 @@ void Canvas::update_hover(const QPointF& window_point){
 }
 
 void Canvas::mouseMoveEvent(QMouseEvent* event){
+    if (m_intro == IntroState::FILM || m_holding || m_releasing){
+        return;
+    }
     update_hover(event->position());
 }
 
 void Canvas::mousePressEvent(QMouseEvent* event){
     if (event->button() != Qt::LeftButton){
+        return;
+    }
+    if (m_intro == IntroState::FILM){
+        if (m_intro_clock >= 0.5){
+            end_intro("it was skipped");
+        }
+        return;
+    }
+    if (m_holding || m_releasing){
         return;
     }
     m_focus_visible = false;
@@ -3903,7 +4228,7 @@ void Canvas::mousePressEvent(QMouseEvent* event){
 }
 
 void Canvas::mouseReleaseEvent(QMouseEvent* event){
-    if (event->button() != Qt::LeftButton){
+    if (event->button() != Qt::LeftButton || m_intro == IntroState::FILM || m_holding || m_releasing){
         return;
     }
     const Hit* hit = find_hit(to_design(event->position()));
@@ -3941,6 +4266,17 @@ void Canvas::move_focus(int direction){
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event){
+    if (m_intro == IntroState::FILM){
+        //  Any key skips the film (not in the first moments: the program was
+        //  just started, perhaps by a double click).
+        if (m_intro_clock >= 0.5){
+            end_intro("it was skipped");
+        }
+        return;
+    }
+    if (m_holding || m_releasing){
+        return;
+    }
     if (m_video_open){
         //  Any of these ends the film.
         if (event->key() == Qt::Key_Escape || event->key() == Qt::Key_Space || event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
@@ -4049,26 +4385,64 @@ QImage Canvas::picture(){
 
 
 
+namespace{
+//  The screen that is kept up after the setup, until the main window is there.
+QPointer<Canvas> g_held_screen;
+}
+
 SetupResult run_setup(const SetupRequest& request){
     SetupResult result;
-    if (!request.ask_language && !request.ask_board){
+    if (!request.ask_language && !request.ask_board && !request.play_intro){
         return result;
     }
-    Canvas canvas(request, false);
+    std::unique_ptr<Canvas> canvas(new Canvas(request, false));
     QEventLoop loop;
-    QScreen* screen = QApplication::primaryScreen();
-    if (screen != nullptr){
-        canvas.setGeometry(screen->geometry());
+    //  On the screen the program was started on.
+    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+    if (screen == nullptr){
+        screen = QApplication::primaryScreen();
     }
-    canvas.start(&loop);
-    canvas.showFullScreen();
-    canvas.raise();
-    canvas.activateWindow();
-    canvas.setFocus();
+    if (screen != nullptr){
+        canvas->setScreen(screen);
+        canvas->setGeometry(screen->geometry());
+    }
+    canvas->start(&loop);
+    canvas->showFullScreen();
+    canvas->raise();
+    canvas->activateWindow();
+    canvas->setFocus();
+    if (request.play_intro){
+        canvas->start_intro();
+    }
     loop.exec();
-    result = canvas.result();
-    canvas.hide();
+    result = canvas->result();
+    result.intro_note = canvas->intro_note();
+
+    if (request.hold_screen){
+        //  The page fades out; the screen stays up. The window is deleted
+        //  when it is released.
+        canvas->hold_screen();
+        QEventLoop fade;
+        QTimer::singleShot(450, &fade, &QEventLoop::quit);
+        fade.exec();
+        canvas->setAttribute(Qt::WA_DeleteOnClose, true);
+        g_held_screen = canvas.release();
+        //  If nobody releases it (the main window never comes), it goes by itself.
+        QTimer::singleShot(20000, g_held_screen.data(), []{
+            release_setup_curtain();
+        });
+    }else{
+        canvas->hide();
+    }
     return result;
+}
+
+void release_setup_curtain(){
+    if (g_held_screen != nullptr){
+        Canvas* canvas = g_held_screen.data();
+        g_held_screen.clear();
+        canvas->release_screen();
+    }
 }
 
 
@@ -4570,11 +4944,12 @@ int run_setup_test(QApplication& application, const QString& folder){
     checker.check(canvas.page_name() == "done", "the last step goes to the end");
     canvas.wait(1.5);
     save(canvas, folder, "setup-30-done");
+    checker.check(canvas.has_hit("start"), "the end screen has its button");
     canvas.click("start");
     canvas.wait(0.2);
     checker.check(!canvas.finished(), "with games to choose from the end goes on to the choice");
     canvas.wait(2.5);
-    checker.check(canvas.page_name() == "games", "the end leads to the choice of a game");
+    checker.check(canvas.page_name() == "games", "the end leads to the choice of a game, a screen of its own");
     checker.check(canvas.result().board_done && canvas.result().board == "pico", "the board is the answer");
 
     //  ---- the game to start
@@ -4589,7 +4964,8 @@ int run_setup_test(QApplication& application, const QString& folder){
             all_there = all_there && canvas.has_hit("game:" + QString::number(c));
         }
         checker.check(all_there, "every game has its cartridge");
-        checker.check(canvas.has_hit("later") && canvas.has_hit("back") && canvas.has_hit("start"), "the buttons are there");
+        checker.check(canvas.has_hit("later") && canvas.has_hit("start"), "the buttons are there");
+        checker.check(!canvas.has_hit("back") && !canvas.has_hit("next"), "the installation is behind us: no way back into it");
         checker.check(!canvas.hit_enabled("start"), "no game, no start");
         checker.check(!canvas.hit_enabled("game:6"), "a game that is not available cannot be picked");
         checker.check(!canvas.click("game:6"), "clicking it does nothing");
@@ -4626,21 +5002,11 @@ int run_setup_test(QApplication& application, const QString& folder){
         save(canvas, folder, "setup-32-games-picked");
         save_preview(canvas, folder, "preview-games-picked");
 
-        //  Back, and the choice again.
-        canvas.click("back");
-        canvas.wait(0.6);
-        checker.check(canvas.page_name() == "done", "Back goes to the end screen");
-        canvas.wait(1.5);
-        canvas.click("start");
-        canvas.wait(2.5);
-        checker.check(canvas.page_name() == "games" && canvas.page_state() == "selected=", "the choice starts empty again");
+        //  Escape does not lead back into the installation.
         canvas.press_key(Qt::Key_Escape);
         canvas.wait(0.6);
-        checker.check(canvas.page_name() == "done", "Escape goes back too");
-        canvas.wait(1.5);
-        canvas.press_key(Qt::Key_Return);
-        canvas.wait(2.5);
-        checker.check(canvas.page_name() == "games", "Enter on the end screen goes to the choice");
+        checker.check(canvas.page_name() == "games" && !canvas.finished(), "Escape does not leave this screen");
+        checker.check(canvas.page_state() == "selected=" + games[9].name, "and keeps the pick");
 
         //  The pick is the answer.
         canvas.click("game:10");
@@ -4689,6 +5055,158 @@ int run_setup_test(QApplication& application, const QString& folder){
         fourth.wait(0.2);
         checker.check(fourth.finished() && fourth.result().game.isEmpty() && fourth.result().board == "esp32",
             "without games Start ends the setup");
+    }
+
+    //  ---- the intro on the screen of the setup
+    //  The film is decoded for real (in real time, the picture drawn by the
+    //  canvas as the player is not on a screen here): it goes over into the
+    //  first question without the window changing, and nothing is empty
+    //  in between.
+    {
+        //  A build machine decodes it (the intro test says so); a machine
+        //  without a decoder (the local harness) skips what needs the picture.
+        const bool decodes = qEnvironmentVariableIsEmpty("PP_SETUP_TEST_NO_DECODER");
+
+        //  Real time passes while the film plays.
+        auto run_real = [&](Canvas& screen, double seconds, const std::function<bool()>& until){
+            QElapsedTimer clock;
+            clock.start();
+            double last = 0;
+            while (clock.elapsed() < (qint64)(seconds * 1000) && !until()){
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+                const double now = (double)clock.elapsed() / 1000.0;
+                screen.advance(std::min(0.05, now - last));
+                last = now;
+                QThread::msleep(6);
+            }
+        };
+
+        SetupRequest with_intro;
+        with_intro.ask_language = true;
+        with_intro.ask_board = true;
+        with_intro.play_intro = true;
+        with_intro.hold_screen = true;
+        Canvas fifth(with_intro, true);
+        fifth.resize(1280, 720);
+        QEventLoop fifth_loop;
+        fifth.start(&fifth_loop);
+        fifth.show();
+        fifth.start_intro();
+        checker.check(fifth.intro_state() == "film", "the film starts on the window of the setup");
+        checker.check(fifth.page_name() == "language", "the first question is ready under the film");
+
+        //  The film, with a picture now and then: never an empty window.
+        int empty_pictures = 0;
+        int pictures = 0;
+        bool saw_fade = false;
+        bool preview_film = false;
+        bool preview_fade = false;
+        QElapsedTimer since_picture;
+        since_picture.start();
+        QElapsedTimer fade_clock;
+        run_real(fifth, 25.0, [&]{
+            const QString state = fifth.intro_state();
+            if (state == "fade" && !saw_fade){
+                saw_fade = true;
+                fade_clock.start();
+            }
+            if (state == "none"){
+                return true;
+            }
+            if (since_picture.elapsed() > 140){
+                since_picture.restart();
+                const QImage image = fifth.picture();
+                //  The first moments of the film are black on purpose.
+                if (state == "fade" || fifth.intro_frames() > 45){
+                    pictures++;
+                    if (!has_content(image)){
+                        empty_pictures++;
+                    }
+                }
+                if (!preview_film && state == "film" && fifth.intro_frames() > 100){
+                    preview_film = true;
+                    save_preview(fifth, folder, "preview-intro-film");
+                }
+                if (!preview_fade && state == "fade" && fade_clock.elapsed() > 350){
+                    preview_fade = true;
+                    save_preview(fifth, folder, "preview-intro-fade");
+                }
+            }
+            return false;
+        });
+        const QString intro_note = fifth.intro_note();
+        if (decodes){
+            checker.check(intro_note == "it played to the end", "the film plays to the end on the window (" + intro_note + ")");
+            checker.check(fifth.intro_frames() >= 150, "the film has its pictures (" + QString::number(fifth.intro_frames()) + ")");
+            checker.check(saw_fade, "the last picture of the film fades over into the first question");
+            checker.check(pictures >= 20 && empty_pictures == 0,
+                "no empty window between film and question (" + QString::number(empty_pictures) + " of " + QString::number(pictures) + ")");
+        }
+        checker.check(fifth.intro_state() == "none", "the film is over and the first question is all that is left");
+        checker.check(fifth.page_name() == "language" && fifth.isVisible(), "the same window shows the first question");
+        fifth.wait(1.0);
+        save_preview(fifth, folder, "preview-intro-done");
+        checker.check(has_content(fifth.picture()), "the first question is there");
+
+        //  The question can be answered as always.
+        checker.check(fifth.has_hit("bar") && fifth.has_hit("continue"), "the first question can be answered");
+
+        //  The setup is over: the screen stays up, then goes.
+        fifth.hold_screen();
+        fifth.wait(0.8);
+        checker.check(fifth.holding() && fifth.isVisible(), "the screen stays up after the setup");
+        checker.check(has_content(fifth.picture()), "the background stays on it");
+        fifth.release_screen();
+        fifth.wait(1.0);
+        checker.check(fifth.released(), "the screen goes when the window is there");
+
+        //  Nothing to ask: the film is the whole screen, its last picture stays.
+        SetupRequest only_intro;
+        only_intro.play_intro = true;
+        only_intro.hold_screen = true;
+        Canvas sixth(only_intro, true);
+        sixth.resize(1280, 720);
+        QEventLoop sixth_loop;
+        sixth.start(&sixth_loop);
+        sixth.show();
+        sixth.start_intro();
+        run_real(sixth, 25.0, [&]{
+            return sixth.finished();
+        });
+        checker.check(sixth.finished(), "with nothing to ask the screen is the film, then it is over");
+        if (decodes){
+            checker.check(sixth.intro_note() == "it played to the end", "that film plays to the end too (" + sixth.intro_note() + ")");
+            sixth.hold_screen();
+            sixth.wait(0.8);
+            save_preview(sixth, folder, "preview-intro-only");
+            checker.check(has_content(sixth.picture()), "its last picture stays");
+        }
+        sixth.release_screen();
+        sixth.wait(1.0);
+        checker.check(sixth.released(), "and goes when the window is there");
+
+        //  A key skips the film; not in the first moments.
+        Canvas seventh(with_intro, true);
+        seventh.resize(1280, 720);
+        QEventLoop seventh_loop;
+        seventh.start(&seventh_loop);
+        seventh.show();
+        seventh.start_intro();
+        run_real(seventh, 0.2, []{
+            return false;
+        });
+        seventh.press_key(Qt::Key_Space);
+        checker.check(seventh.intro_state() == "film" || !decodes, "a key in the first moments does not skip the film");
+        run_real(seventh, 1.0, []{
+            return false;
+        });
+        if (decodes){
+            seventh.press_key(Qt::Key_Space);
+            checker.check(seventh.intro_state() == "fade", "a key later skips the film");
+            checker.check(seventh.intro_note() == "it was skipped", "and says so (" + seventh.intro_note() + ")");
+            seventh.wait(1.5);
+            checker.check(seventh.intro_state() == "none" && seventh.page_name() == "language", "the first question follows");
+        }
     }
 
     //  ---- the other way out: skip

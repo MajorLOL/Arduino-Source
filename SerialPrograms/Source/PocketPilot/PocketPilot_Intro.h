@@ -8,6 +8,12 @@
  *  It is in the program (Resources/intro.mp4: picture and sound in one
  *  file) and plays full screen on a black background.
  *
+ *  It plays on the screen of the setup (see PocketPilot_Setup.h): one window
+ *  from the film to the first question, whose last picture fades into it, and
+ *  to the main window after it. Nothing opens or closes in between. When
+ *  there is nothing to ask, the last picture of the film stays until the main
+ *  window is there.
+ *
  *  It never gets in the way:
  *    - a click or any key skips it;
  *    - Settings > "Play the intro at startup" turns it off, and so does
@@ -37,10 +43,6 @@ namespace PocketPilot{
 //  Options on the command line.
 extern const char* const NO_INTRO_OPTION;       //  --no-intro
 extern const char* const INTRO_TEST_OPTION;     //  --intro-test
-
-//  Plays the intro and returns when it is over or skipped. Needs a
-//  QApplication. Does not throw: what goes wrong is logged and the intro ends.
-void play_intro();
 
 //  Decodes the intro without a window and without sound output. Returns the
 //  program's exit code: 0 when the whole film came through with its sound.

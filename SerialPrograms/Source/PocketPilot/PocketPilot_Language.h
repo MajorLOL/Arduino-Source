@@ -116,6 +116,19 @@ void preview_language(const QString& code);
 //  Returns when it is done. Does nothing when both questions were answered.
 void ask_setup_if_needed();
 
+//  What comes on the screen when the program starts: the intro (when
+//  "play_intro"), then the setup (when "ask_setup", and there is a question
+//  left to ask). All on one screen, so that nothing opens or closes in
+//  between: the film's last picture goes over into the first question, and
+//  when the questions are over the screen stays up until the main window is
+//  there (see release_setup_curtain() in PocketPilot_Setup.h, which Main
+//  calls). With neither, nothing is shown.
+void show_start_screens(bool play_intro, bool ask_setup);
+
+//  How many games the setup would offer (what the lister returns), and the
+//  same for the log: the games must be there before the main window is.
+size_t count_games_for_setup();
+
 //  The same, whatever the settings say: "Open the setup" in the settings.
 void open_setup();
 

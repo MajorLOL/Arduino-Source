@@ -8,6 +8,11 @@
  *  microcontroller is used, then the steps of its setup. Only the intro is a
  *  film; these are screens that wait for the user.
  *
+ *  The intro and the menus are one screen: the film plays on the window of
+ *  the setup, its last picture stays and fades into the first menu, and when
+ *  the setup is over the screen stays up (the menu fades out, the background
+ *  stays) until the main window is there. Nothing opens or closes in between.
+ *
  *  Each screen starts with a short animation (the controllers in the
  *  background, the heading, the bar with the choice) and then waits for the
  *  choice, with the mouse or the keyboard:
@@ -80,6 +85,16 @@ struct SetupRequest{
     //  list of games (what the page with the games shows too). Empty: there
     //  is no choice at the end, "Start" just ends the setup.
     std::vector<HomeGame> games;
+
+    //  Play the intro film first, on this same screen: its last picture goes
+    //  over into the first page, so that no window opens or closes in
+    //  between. With no question to ask the screen is just the intro.
+    bool play_intro = false;
+
+    //  Keep the screen up when the setup is over (the page fades out) until
+    //  release_setup_curtain() is called: the main window is made next, and
+    //  the desktop must not show in between.
+    bool hold_screen = false;
 };
 
 struct SetupResult{
@@ -98,6 +113,10 @@ struct SetupResult{
     //  (HomeGame::name). Empty: none was chosen ("Choose later", the setup
     //  was skipped or closed, or there were no games to choose from).
     QString game;
+
+    //  How the intro ended ("it played to the end", "it was skipped", or what
+    //  went wrong); empty when there was no intro.
+    QString intro_note;
 };
 
 
@@ -105,6 +124,11 @@ struct SetupResult{
 //  Needs a QApplication. The language is tried on the screens as it is
 //  picked (see preview_language()); making it final is left to the caller.
 SetupResult run_setup(const SetupRequest& request);
+
+//  Ends the screen that was kept up with SetupRequest::hold_screen: it fades
+//  away, over the window that was made in the meantime. Does nothing when no
+//  screen is kept; it also goes by itself after a while.
+void release_setup_curtain();
 
 //  The test: all the screens, driven with the mouse and the keyboard. The
 //  pictures go in the folder (when it is not empty). Returns the program's

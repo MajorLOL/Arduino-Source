@@ -671,18 +671,26 @@ std::function<void(const QString&)> g_game_opener;
 //  A game that was chosen while there was no window to open it.
 QString g_chosen_game;
 
-void run_and_keep(bool ask_language, bool ask_board){
+void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false){
     GlobalSettings& settings = GlobalSettings::instance();
 
     SetupRequest request;
     request.ask_language = ask_language;
     request.ask_board = ask_board;
     request.language_code = setting_code();
+    request.play_intro = play_intro;
+    //  At the start the main window is made after this: the screen stays up
+    //  until it is there. (Opened from the settings, it is there already.)
+    request.hold_screen = (g_game_opener == nullptr);
     //  The choice of a game comes after the board, so only with that question.
     if (ask_board && g_game_lister){
         g_game_lister(request.games);
+        global_logger_tagged().log("Setup: " + std::to_string(request.games.size()) + " games to choose from.");
     }
     const SetupResult result = run_setup(request);
+    if (play_intro){
+        global_logger_tagged().log("Intro: done, " + result.intro_note.toStdString() + ".");
+    }
 
     //  Asked is asked: a closed window does not bring the question back at
     //  every start (it is in the settings, under "Open the setup").
@@ -730,6 +738,24 @@ void ask_setup_if_needed(){
 
 void open_setup(){
     run_and_keep(true, true);
+}
+
+void show_start_screens(bool play_intro, bool ask_setup){
+    GlobalSettings& settings = GlobalSettings::instance();
+    const bool ask_language = ask_setup && settings.ASK_LANGUAGE;
+    const bool ask_board = ask_setup && settings.ASK_SETUP;
+    if (!ask_language && !ask_board && !play_intro){
+        return;
+    }
+    run_and_keep(ask_language, ask_board, play_intro);
+}
+
+size_t count_games_for_setup(){
+    std::vector<HomeGame> games;
+    if (g_game_lister){
+        g_game_lister(games);
+    }
+    return games.size();
 }
 
 void set_game_lister(std::function<void(std::vector<HomeGame>&)> lister){
