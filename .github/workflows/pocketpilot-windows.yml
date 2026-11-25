@@ -544,13 +544,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="pocketpilot-build-$BUILD_NUMBER"
-          FILES="PocketPilot-Windows.zip"
-          if ls ui-screenshots/*.png > /dev/null 2>&1; then
-            FILES="$FILES ui-screenshots/*.png"
-          fi
-          gh release create "$TAG" $FILES \
+          # Only the program itself goes on the release. The pictures of the
+          # interface test stay in the workflow artifact, to look at there.
+          gh release create "$TAG" PocketPilot-Windows.zip \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --prerelease \
             --title "PocketPilot Studio - Windows build $BUILD_NUMBER" \
-            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took the pictures below of its own interface. For non-commercial use. Built from ${{ github.sha }}."
+            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took pictures of its own interface. For non-commercial use. Built from ${{ github.sha }}."
