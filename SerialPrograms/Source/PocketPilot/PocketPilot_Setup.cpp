@@ -3352,6 +3352,47 @@ QPainterPath cartridge_outline(const QRectF& box, double corner, double cut){
     return path;
 }
 
+//  The ground of a game's own logo. A logo that has no see-through corners comes
+//  with a background of its own (white, black, red and blue halves): the label
+//  of the cartridge takes those colors, so that the logo is shown as it is
+//  and not boxed in on another color.
+struct LogoGround{
+    bool own = false;
+    QColor left;
+    QColor right;
+};
+
+LogoGround logo_ground(const QPixmap& logo){
+    LogoGround ground;
+    if (logo.isNull() || logo.width() < 4 || logo.height() < 4){
+        return ground;
+    }
+    const QImage image = logo.toImage().convertToFormat(QImage::Format_ARGB32);
+    const int last_x = image.width() - 2;
+    const int last_y = image.height() - 2;
+    const QColor corners[4] = {
+        image.pixelColor(1, 1), image.pixelColor(last_x, 1),
+        image.pixelColor(1, last_y), image.pixelColor(last_x, last_y),
+    };
+    for (const QColor& corner : corners){
+        if (corner.alpha() < 250){
+            return ground;
+        }
+    }
+    ground.own = true;
+    ground.left = QColor(
+        (corners[0].red() + corners[2].red()) / 2,
+        (corners[0].green() + corners[2].green()) / 2,
+        (corners[0].blue() + corners[2].blue()) / 2
+    );
+    ground.right = QColor(
+        (corners[1].red() + corners[3].red()) / 2,
+        (corners[1].green() + corners[3].green()) / 2,
+        (corners[1].blue() + corners[3].blue()) / 2
+    );
+    return ground;
+}
+
 class GamesPage : public Page{
 public:
     explicit GamesPage(Canvas& canvas)
@@ -3359,6 +3400,9 @@ public:
     {
         const int count = (int)m_games.size();
         m_columns = count <= 12 ? 4 : 5;
+        for (const HomeGame& game : m_games){
+            m_grounds.push_back(logo_ground(game.icon));
+        }
         const int first = next_enabled(-1, +1);
         canvas.set_focus_id(first >= 0 ? tile_id(first) : QString("later"));
     }
@@ -3485,7 +3529,7 @@ private:
         constexpr double GAP = 22;
         const int rows = ((int)m_games.size() + m_columns - 1) / m_columns;
         const double width = (RIGHT - LEFT - GAP * (m_columns - 1)) / m_columns;
-        const double height = std::max(110.0, std::min(172.0, (BOTTOM - top - GAP * (rows - 1)) / std::max(1, rows)));
+        const double height = std::max(110.0, std::min(200.0, (BOTTOM - top - GAP * (rows - 1)) / std::max(1, rows)));
         return QRectF(
             LEFT + (width + GAP) * (index % m_columns),
             top + (height + GAP) * (index / m_columns),
@@ -3527,23 +3571,33 @@ private:
         //  The label: the colors of the game, with its picture on it.
         const double text_room = 70;
         const QRectF label(box.left() + 14, box.top() + 14, box.width() - 28, std::max(36.0, box.height() - 14 - text_room));
-        QColor first, second;
-        game_label_colors(game.name, first, second);
+        const LogoGround& ground = m_grounds[(size_t)index];
         painter.save();
         QPainterPath clip;
         clip.addRoundedRect(label, 13, 13);
         painter.setClipPath(clip);
         painter.setPen(Qt::NoPen);
-        painter.setBrush(with_alpha(first.darker(112), 0.95 * a));
-        painter.drawRect(QRectF(label.left(), label.top(), label.width() / 2.0 + 1, label.height()));
-        painter.setBrush(with_alpha(second.darker(112), 0.95 * a));
-        painter.drawRect(QRectF(label.center().x(), label.top(), label.width() / 2.0, label.height()));
-        painter.setBrush(white(0.10 * a));
-        painter.drawRect(QRectF(label.left(), label.top(), label.width(), label.height() * 0.42));
+        if (ground.own){
+            //  The logo's own background goes on over the whole label.
+            painter.setBrush(with_alpha(ground.left, a));
+            painter.drawRect(QRectF(label.left(), label.top(), label.width() / 2.0 + 1, label.height()));
+            painter.setBrush(with_alpha(ground.right, a));
+            painter.drawRect(QRectF(label.center().x(), label.top(), label.width() / 2.0, label.height()));
+        }else{
+            QColor first, second;
+            game_label_colors(game.name, first, second);
+            painter.setBrush(with_alpha(first.darker(112), 0.95 * a));
+            painter.drawRect(QRectF(label.left(), label.top(), label.width() / 2.0 + 1, label.height()));
+            painter.setBrush(with_alpha(second.darker(112), 0.95 * a));
+            painter.drawRect(QRectF(label.center().x(), label.top(), label.width() / 2.0, label.height()));
+            painter.setBrush(white(0.10 * a));
+            painter.drawRect(QRectF(label.left(), label.top(), label.width(), label.height() * 0.42));
+        }
         painter.restore();
 
         if (!game.icon.isNull()){
-            const QRectF room = label.adjusted(14, 8, -14, -8);
+            //  The game's own logo, as large as the label lets it be.
+            const QRectF room = ground.own ? label.adjusted(8, 5, -8, -5) : label.adjusted(14, 8, -14, -8);
             const double scale = std::min(room.width() / game.icon.width(), room.height() / game.icon.height());
             const double w = game.icon.width() * scale;
             const double h = game.icon.height() * scale;
@@ -3586,6 +3640,7 @@ private:
 
 private:
     std::vector<HomeGame> m_games;
+    std::vector<LogoGround> m_grounds;
     int m_columns = 4;
     int m_selected = -1;
 };
@@ -4531,7 +4586,31 @@ std::vector<HomeGame> test_games(bool many = false){
         game.name = QString::fromLatin1(entry.name);
         game.programs = entry.programs;
         game.enabled = entry.enabled;
-        if (entry.picture){
+        //  A local run can point to a folder with the real logos of the program
+        //  (CategoryIcons) to see the cartridges as they are in the program.
+        const QString logo_folder = qEnvironmentVariable("PP_SETUP_TEST_LOGO_DIR");
+        if (!logo_folder.isEmpty()){
+            static const struct{
+                const char* word;
+                const char* file;
+            } LOGOS[] = {
+                {"Nintendo Switch", "NintendoSwitch"}, {"Home", "PokemonHome"}, {"Let's Go", "PokemonLGPE"},
+                {"Sword", "PokemonSwSh"}, {"Brilliant", "PokemonBDSP"}, {"Arceus", "PokemonLA"},
+                {"Z-A", "PokemonLZA"}, {"Scarlet", "PokemonSV"}, {"FireRed", "PokemonFRLG"},
+                {"Pokopia", "PokemonPokopia"}, {"Zelda", "ZeldaTotK"}, {"Other Games", "OtherGames"},
+                {"Ruby", "PokemonRS"},
+            };
+            for (const auto& logo : LOGOS){
+                if (game.name.contains(QLatin1String(logo.word))){
+                    const QPixmap picture(logo_folder + "/" + QString::fromLatin1(logo.file) + ".png");
+                    if (!picture.isNull()){
+                        game.icon = picture;
+                    }
+                    break;
+                }
+            }
+        }
+        if (game.icon.isNull() && entry.picture){
             QImage image(192, 96, QImage::Format_ARGB32_Premultiplied);
             image.fill(Qt::transparent);
             QPainter painter(&image);
