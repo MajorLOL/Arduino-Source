@@ -3723,7 +3723,9 @@ public:
         }
         const QString start_text = T("Start");
         const double start_w = button_width(start_text, ButtonKind::PRIMARY);
-        draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, m_selected >= 0);
+        //  As the window's screen a game with no programs has nothing to open.
+        const bool can_start = m_selected >= 0 && (!canvas.app_mode() || canvas.has_programs(m_selected));
+        draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, can_start);
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
@@ -3818,6 +3820,9 @@ private:
         if (canvas.has_programs(m_selected)){
             //  The game is picked; which program to start comes next.
             canvas.go_programs(m_selected);
+            return;
+        }
+        if (canvas.app_mode()){
             return;
         }
         canvas.result().game = m_games[(size_t)m_selected].name;
