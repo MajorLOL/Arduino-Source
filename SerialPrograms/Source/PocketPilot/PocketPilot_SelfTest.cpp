@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <stdexcept>
 #include <thread>
 #include <string>
 #include <vector>
@@ -79,6 +80,7 @@
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryScroll.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySlowSteps.h"
 #include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStorySmallRoom.h"
+#include "VideoGames/PokemonFRLG/Programs/AutoStory/PokemonFRLG_AutoStoryTimes.h"
 #include "VideoGames/PokemonFRLG/Programs/ClaudePlays/PokemonFRLG_ClaudePlays.h"
 #include "VideoGames/PokemonFRLG/Programs/PokemonFRLG_SafariOptimalAction.h"
 #include "Assistant/Assistant_Panel.h"
@@ -1493,6 +1495,100 @@ int check_settings_search(MainWindow& window, Logger& logger){
 
     logger.log(
         "Settings search test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The report of where the time of a run went: how a time is written, the
+//  lines for a run with goes that did not come through, a run of nothing, and
+//  the timer that counts a go as lost when it ends in an exception.
+int check_story_times(Logger& logger){
+    using namespace NintendoSwitch::PokemonFRLG;
+    namespace Times = AutoStoryTimes;
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("Story times test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+    const auto seconds = [](int64_t count){ return Milliseconds(count * 1000); };
+
+    check(Times::time_text(Milliseconds(0)) == "0 s", "no time");
+    check(Times::time_text(Milliseconds(499)) == "0 s" && Times::time_text(Milliseconds(500)) == "1 s", "rounded to the second");
+    check(Times::time_text(Milliseconds(-5000)) == "0 s", "no time below nothing");
+    check(Times::time_text(seconds(42)) == "42 s", "seconds");
+    check(Times::time_text(seconds(25 * 60 + 10)) == "25 min 10 s", "minutes and seconds");
+    check(Times::time_text(seconds(3599)) == "59 min 59 s", "just under an hour");
+    check(Times::time_text(Milliseconds(3599500)) == "1 h 0 min", "just over: an hour");
+    check(Times::time_text(seconds(2 * 3600 + 5 * 60 + 40)) == "2 h 5 min", "hours and minutes");
+
+    Times::Times times;
+    check(times.report(seconds(100)).empty(), "no lines for a run without a segment");
+    times.add("C01_01", "Alpha", 1, seconds(600), true);
+    times.add("C02_01", "Beta", 2, seconds(300), false);
+    times.add("C02_01", "Beta", 2, seconds(100), true);
+    times.add("C02_02", "Skipped", 2, Milliseconds(400), true);
+    check(times.goes() == 4 && times.failed_goes() == 1, "the goes are counted");
+    const std::vector<std::string> lines = times.report(seconds(1200));
+    check(lines.size() == 4, "a line for the run, two segments and the chapters");
+    if (lines.size() == 4){
+        check(
+            lines[0] == "Where the time went: 20 min 0 s in this run, 16 min 40 s (83 %) in 2 segments, "
+            "of which 5 min 0 s (25 %) in goes that did not come through. The rest (3 min 20 s) is the "
+            "start, the loads after a reset and what the program does between the segments.",
+            "the line for the run"
+        );
+        check(lines[1] == "  C01_01 (Alpha): 10 min 0 s (50 %)", "the longest segment");
+        check(
+            lines[2] == "  C02_01 (Beta): 6 min 40 s (33 %), 2 goes, 1 did not come through",
+            "the next one, with its goes"
+        );
+        check(lines[3] == "Longest chapters: 1: 10 min 0 s (50 %), 2: 6 min 40 s (33 %)", "the chapters");
+    }
+    check(times.report(seconds(1200), 1).size() == 3, "the number of segments listed can be set");
+    //  A run time that is shorter than its segments (a clock that went
+    //  back): the segments' time is taken for it.
+    {
+        const std::vector<std::string> short_run = times.report(seconds(10));
+        check(
+            !short_run.empty() &&
+            short_run[0].find("16 min 40 s in this run, 16 min 40 s (100 %)") != std::string::npos,
+            "never over 100 %"
+        );
+    }
+    //  One chapter: no line for the chapters. Nothing lost: no word of it.
+    {
+        Times::Times one;
+        one.add("C03_01", "Gamma", 3, seconds(90), true);
+        const std::vector<std::string> only = one.report(seconds(100));
+        check(
+            only.size() == 2 && only[0].find("goes that did not come through") == std::string::npos &&
+            only[0].find("in 1 segment.") != std::string::npos,
+            "one chapter, nothing lost"
+        );
+    }
+    //  The timer.
+    {
+        Times::Times timed;
+        {
+            Times::Timer timer(timed, "T01", "Done", 1);
+            timer.done();
+        }
+        try{
+            Times::Timer timer(timed, "T02", "Left by an exception", 1);
+            throw std::runtime_error("stop");
+        }catch (const std::runtime_error&){
+        }
+        check(timed.goes() == 2 && timed.failed_goes() == 1, "a go that ends in an exception is lost, one that was done is not");
+    }
+
+    logger.log(
+        "Story times test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -5943,6 +6039,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_assistant(out, logger);
         failed += check_name_mark(logger);
         failed += check_updates(logger);
+        failed += check_story_times(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);

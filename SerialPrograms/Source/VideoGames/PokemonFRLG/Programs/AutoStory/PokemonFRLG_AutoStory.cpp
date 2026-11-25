@@ -26,6 +26,8 @@
 #include <vector>
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
+#include "Common/Cpp/ScopeExit.h"
+#include "Common/Cpp/Time.h"
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/Globals.h"
 #include "CommonFramework/PersistentSettings.h"
@@ -47,6 +49,7 @@
 #include "PokemonFRLG_AutoStoryFishing.h"
 #include "PokemonFRLG_AutoStoryMemory.h"
 #include "PokemonFRLG_AutoStoryNewGame.h"
+#include "PokemonFRLG_AutoStoryTimes.h"
 #include "PokemonFRLG_AutoStory.h"
 
 namespace PokemonAutomation{
@@ -2279,6 +2282,25 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
         return;
     }
 
+    //  Where the time of the run goes: said at the end of the run, and when
+    //  the run ends any other way (a stop, an error).
+    AutoStoryTimes::Times segment_times;
+    const WallClock run_started = current_time();
+    bool times_reported = false;
+    auto report_times = [&]{
+        if (times_reported){
+            return;
+        }
+        times_reported = true;
+        const Milliseconds run_time = std::chrono::duration_cast<Milliseconds>(current_time() - run_started);
+        for (const std::string& line : segment_times.report(run_time)){
+            env.log(line, COLOR_BLUE);
+        }
+    };
+    ScopeExit report_times_at_exit([&]{
+        report_times();
+    });
+
     const Starter starter = STARTER;
     const StoryScript& script = script_for(starter);
 
@@ -3212,7 +3234,11 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
             rt.trip_wins_at_save = 0;
         }
         try{
-            run_segment(env, rt, script, segment, current_step);
+            {
+                AutoStoryTimes::Timer timer(segment_times, segment.id, segment.title, segment.chapter);
+                run_segment(env, rt, script, segment, current_step);
+                timer.done();
+            }
             stats.segments++;
             env.update_stats();
             failures = 0;
@@ -3796,6 +3822,7 @@ void AutoStory::program(SingleSwitchProgramEnvironment& env, ProControllerContex
                 : ".");
         env.log(table_at_the_end, COLOR_BLUE);
     }
+    report_times();
     send_program_finished_notification(env, NOTIFICATION_PROGRAM_FINISH, table_at_the_end);
     GO_HOME_WHEN_DONE.run_end_of_program(context);
 }
