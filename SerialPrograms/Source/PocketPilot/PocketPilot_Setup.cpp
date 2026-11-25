@@ -24,6 +24,8 @@
 #include <QAudioOutput>
 #include <QCheckBox>
 #include <QClipboard>
+#include <QAbstractButton>
+#include <QAbstractSpinBox>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDateTime>
@@ -41,6 +43,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPlainTextEdit>
 #include <QMediaCaptureSession>
 #include <QMediaDevices>
 #include <QMediaMetaData>
@@ -64,6 +67,8 @@
 #include <QThread>
 #include <QTimer>
 #include <QUrl>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QVideoFrame>
 #include <QVideoSink>
@@ -562,6 +567,22 @@ public:
     double window_scale() const{
         return std::min(width() / DW, height() / DH);
     }
+    //  The whole window in the places of the 1920 x 1080 screen (more than it
+    //  when the window is not 16:9): what a page that fills the window, the
+    //  video in full screen, draws over.
+    QRectF screen_rect() const{
+        const double scale = window_scale();
+        return QRectF(
+            -(width() - DW * scale) / 2.0 / scale,
+            -(height() - DH * scale) / 2.0 / scale,
+            width() / scale,
+            height() / scale
+        );
+    }
+    //  The console is being chosen again, from the games.
+    bool console_again() const{
+        return m_console_again;
+    }
     double page_fade() const{
         return m_fade;
     }
@@ -590,6 +611,11 @@ public:
 
     void go_language();
     void go_console();
+    //  From the games: the choice of the console again. Continue and Back
+    //  both lead back to the games ("games_selected": the game that was
+    //  picked); the board is not asked again.
+    void go_console_again(int games_selected);
+    void leave_console_again();
     void go_board();
     void go_steps(const QString& board);
     void go_guide();
@@ -678,7 +704,10 @@ public:
     //  The console is chosen: the question of the board follows (or, when it
     //  is not asked, what comes after the installation).
     void end_console(){
-        if (m_request.ask_board){
+        if (m_console_again){
+            m_console_again = false;
+            go_games(m_games_back);
+        }else if (m_request.ask_board){
             go_board();
         }else{
             end_installation();
@@ -739,6 +768,8 @@ private:
     SetupResult m_result;
     bool m_test_mode;
     bool m_first_page = true;
+    bool m_console_again = false;
+    int m_games_back = -1;
     bool m_finished = false;
     QEventLoop* m_loop = nullptr;
 
@@ -1409,6 +1440,16 @@ double sub_height(const QString& text, double px = 36, double width = 780){
 }
 
 //  The bottom row: "Skip setup" at the left, the buttons at the right.
+//  A chevron that points left: the mark of a link that goes back.
+void draw_chevron_back(QPainter& painter, const QPointF& c, const QColor& color){
+    QPen pen(color, 2.6);
+    pen.setCapStyle(Qt::RoundCap);
+    pen.setJoinStyle(Qt::RoundJoin);
+    painter.setPen(pen);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPolyline(QPolygonF({QPointF(c.x() + 5, c.y() - 9), QPointF(c.x() - 4, c.y()), QPointF(c.x() + 5, c.y() + 9)}));
+}
+
 void draw_skip(Canvas& canvas, QPainter& painter, double alpha){
     draw_button(canvas, painter, "skip", T("Skip setup"), 136, 960, ButtonKind::LINK, std::min(1.0, alpha * 1.35));
 }
@@ -3544,13 +3585,24 @@ public:
         }
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
-        draw_button(canvas, painter, "later", T("Choose later"), 136, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+        double x = 136;
+        {
+            //  Back to the console: another one can be picked.
+            const double w = draw_button(canvas, painter, "console", T("Choose another console"), x + 26, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+            draw_chevron_back(painter, QPointF(x + 8, 982), white(0.7 * b));
+            x += 26 + w + 34;
+        }
+        draw_button(canvas, painter, "later", T("Choose later"), x, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
         const QString start_text = T("Start");
         const double start_w = button_width(start_text, ButtonKind::PRIMARY);
         draw_button(canvas, painter, "start", start_text, 1780 - start_w, 950, ButtonKind::PRIMARY, b, m_selected >= 0);
     }
 
     virtual void activate(Canvas& canvas, const QString& id) override{
+        if (id == "console"){
+            canvas.go_console_again(m_selected);
+            return;
+        }
         if (id.startsWith("game:")){
             const int index = id.mid(5).toInt();
             if (index >= 0 && index < (int)m_games.size() && m_games[(size_t)index].enabled){
@@ -4321,6 +4373,8 @@ public:
         m_since_sample += dt;
         m_since_poll += dt;
         m_input.step(dt);
+        m_full.target = m_video_full ? 1.0 : 0.0;
+        m_full.step(dt, 14.0);
         m_scroll.step(dt, 16.0);
         if (m_toast_left > 0){
             m_toast_left -= dt;
@@ -4354,6 +4408,10 @@ public:
         const double a_body = eo(prog(t, in.sub, in.sub + 0.6));
         const double a_foot = eo(prog(t, in.buttons, in.buttons + 0.5));
         relayout();
+        if (m_video_full && m_full.value > 0.98){
+            paint_video_full(canvas, painter);
+            return;
+        }
 
         const QString heading = T("Which program do you want to start?");
         draw_heading(painter, heading, 138, 34, 58, prog(t, in.head, in.head + 0.9), 1.0, 1100);
@@ -4361,14 +4419,22 @@ public:
         paint_search(canvas, painter, a_body);
         paint_list(canvas, painter, a_body);
         paint_detail(painter, a_body);
+        const double wide = clamp01(m_wide.value * m_open.value);
+        const double right = a_body * (1.0 - wide);
+        if (right > 0.01){
+            paint_video(canvas, painter, right);
+            paint_checks(painter, right);
+            paint_log(canvas, painter, right);
+            paint_lanes(canvas, painter, right);
+        }
+        //  Over the rest when it is wide.
         paint_options(canvas, painter, a_body);
-        paint_video(canvas, painter, a_body);
-        paint_checks(painter, a_body);
-        paint_log(canvas, painter, a_body);
-        paint_lanes(canvas, painter, a_body);
         paint_footer(canvas, painter, a_foot);
-        if (m_source_open){
+        if (m_source_open && right > 0.01){
             paint_sources(canvas, painter);
+        }
+        if (m_full.value > 0.004){
+            paint_video_full(canvas, painter);
         }
     }
 
@@ -4396,6 +4462,10 @@ public:
             canvas.take_focus();
         }else if (id == "options"){
             focus_options();
+        }else if (id == "opt-wide"){
+            toggle_wide();
+        }else if (id == "video-full" || id == "video-exit"){
+            toggle_video_full();
         }else if (id == "source"){
             m_source_open = !m_source_open;
         }else if (id.startsWith("src:")){
@@ -4423,6 +4493,19 @@ public:
         const bool on_button = !(focus.isEmpty() || focus == "start" || focus == "search" || focus.startsWith("prog:"));
         const int key = event.key();
         const Qt::KeyboardModifiers modifiers = event.modifiers();
+        if (key == Qt::Key_F11){
+            if (m_video_full || m_input.has_picture()){
+                toggle_video_full();
+            }
+            return true;
+        }
+        if (m_video_full && key != Qt::Key_Escape && key != Qt::Key_Tab && key != Qt::Key_Backtab){
+            //  Nothing behind the picture is typed into; Enter and the space bar leave it.
+            if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Space){
+                toggle_video_full();
+            }
+            return true;
+        }
         switch (key){
         case Qt::Key_Up:
             move(-1);
@@ -4492,10 +4575,16 @@ public:
         return true;
     }
     virtual void enter_pressed(Canvas& canvas) override{
+        if (m_video_full){
+            toggle_video_full();
+            return;
+        }
         start(canvas);
     }
     virtual void escape_pressed(Canvas& canvas) override{
-        if (m_source_open){
+        if (m_video_full){
+            toggle_video_full();
+        }else if (m_source_open){
             m_source_open = false;
         }else if (!m_query.isEmpty()){
             set_query(QString());
@@ -4547,7 +4636,8 @@ public:
             ";log=" + QString::number(m_log.size()) + ";shown=" + QString::number(visible_lines().size()) +
             ";range=" + (m_selection ? QString::number((int)std::lround(std::fabs(m_sel_a - m_sel_b))) : QString("0")) +
             ";rows=" + QString::number(m_view.size()) + ";options=" + options_state_name() +
-            ";host=" + (m_host != nullptr && !m_host->isHidden() ? "shown" : "hidden") + ";saved=" + m_saved_path;
+            ";host=" + (m_host != nullptr && !m_host->isHidden() ? "shown" : "hidden") +
+            ";full=" + (m_video_full ? "yes" : "no") + ";wide=" + (m_wide.target > 0.5 ? "yes" : "no") + ";saved=" + m_saved_path;
     }
 
 private:
@@ -4567,6 +4657,10 @@ private:
     static constexpr double OPT_W = 424;
     static constexpr double OPT_H = 804;
     static constexpr double OPT_GAP = 18;
+    //  The width of the panel when it is wide: up to the right edge.
+    static constexpr double WIDE_W = 1785 - 528;
+    //  A program with this many options or more opens wide, unless the person chose.
+    static constexpr int MANY_OPTIONS = 12;
     //  The rest, as it is with the panel closed (the first four) and as it is
     //  now: the places that go with how far the panel is open.
     QRectF m_options_rect{OPT_X, OPT_Y, 0, OPT_H};
@@ -4920,7 +5014,7 @@ private:
         m_host = new QScrollArea(m_canvas);
         m_host->setFrameShape(QFrame::NoFrame);
         m_host->setWidgetResizable(true);
-        m_host->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        m_host->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         m_host->viewport()->setAutoFillBackground(false);
         //  The options are drawn by Qt, not by this screen: dark, in the
         //  colors of the panels around them.
@@ -4951,6 +5045,9 @@ private:
             "QScrollBar:vertical{background:transparent;width:10px;margin:0;}"
             "QScrollBar::handle:vertical{background:rgba(255,255,255,70);border-radius:5px;min-height:30px;}"
             "QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;}"
+            "QScrollBar:horizontal{background:transparent;height:10px;margin:0;}"
+            "QScrollBar::handle:horizontal{background:rgba(255,255,255,70);border-radius:5px;min-width:30px;}"
+            "QScrollBar::add-line:horizontal,QScrollBar::sub-line:horizontal{width:0;}"
             "*:disabled{color:#8a8a8a;}"
         ).arg(orange));
         m_host->hide();
@@ -4975,7 +5072,29 @@ private:
             //  The scroll bar (when there are many options) goes beside them, not over them.
             widget->setContentsMargins(0, 0, 12, 0);
             m_host_font = 0;
+            if (!m_wide_user){
+                m_wide.target = count_controls(widget) >= MANY_OPTIONS ? 1.0 : 0.0;
+            }
         }
+    }
+    //  How many things there are to set in the options.
+    static int count_controls(QWidget* widget){
+        int count = 0;
+        count += (int)widget->findChildren<QAbstractButton*>().size();
+        count += (int)widget->findChildren<QAbstractSpinBox*>().size();
+        count += (int)widget->findChildren<QComboBox*>().size();
+        count += (int)widget->findChildren<QPlainTextEdit*>().size();
+        for (QLineEdit* edit : widget->findChildren<QLineEdit*>()){
+            //  The field inside a spin box or a drop-down list is not one more.
+            if (qobject_cast<QAbstractSpinBox*>(edit->parentWidget()) == nullptr && qobject_cast<QComboBox*>(edit->parentWidget()) == nullptr){
+                count++;
+            }
+        }
+        return count;
+    }
+    void toggle_wide(){
+        m_wide_user = true;
+        m_wide.target = m_wide.target > 0.5 ? 0.0 : 1.0;
     }
     //  The keyboard goes into the options (the first widget that takes Tab).
     void focus_options(){
@@ -4993,6 +5112,7 @@ private:
     void step_options(double dt){
         m_open.target = m_options_wanted && options_offered() ? 1.0 : 0.0;
         m_open.step(dt, 9.0);
+        m_wide.step(dt, 9.0);
         const HomeProgram* program = selected_program();
         const QString wanted = m_open.target > 0.5 && program != nullptr ? program->name : QString();
         if (wanted != m_options_target){
@@ -5021,14 +5141,15 @@ private:
         if (m_host == nullptr){
             return;
         }
-        const bool show = m_options != nullptr && m_open.target >= 1.0 && m_open.value >= 0.995 && m_canvas->page_fade() >= 0.98;
+        const bool show = m_options != nullptr && m_open.target >= 1.0 && m_open.value >= 0.995 && m_canvas->page_fade() >= 0.98
+            && m_wide.value == m_wide.target && !m_video_full && m_full.value < 0.01;
         if (!show){
             if (!m_host->isHidden()){
                 m_host->hide();
             }
             return;
         }
-        const QRectF area(OPT_X + 12, OPT_Y + 84, OPT_W - 24, OPT_H - 84 - 56);
+        const QRectF area(OPT_X + 12, OPT_Y + 84, OPT_W + (WIDE_W - OPT_W) * m_wide.value - 24, OPT_H - 84 - 56);
         const QRect geometry = m_canvas->window_rect(area);
         if (m_host->geometry() != geometry){
             m_host->setGeometry(geometry);
@@ -5048,7 +5169,8 @@ private:
         const double p = m_open.value;
         const double rx = OPT_X + p * (OPT_W + OPT_GAP);
         const double rw = 1785 - rx;
-        m_options_rect = QRectF(OPT_X, OPT_Y, OPT_W * p, OPT_H);
+        //  Wide: it goes over the rest, which fades away under it.
+        m_options_rect = QRectF(OPT_X, OPT_Y, (OPT_W + (WIDE_W - OPT_W) * m_wide.value) * p, OPT_H);
         //  The checks go from one row of four to two rows of two.
         const double checks_h = 46 + p * 52;
         const double video_w = 510 - p * 170;
@@ -5224,12 +5346,28 @@ private:
         y += 6;
         if (!program->description.isEmpty()){
             const QFont font = ui_font(23, 500);
-            const QStringList lines = wrap_text(font, program->description, w);
             const int room = std::max(0, (int)std::floor((tag_top - 6 - y) / 31.0));
-            for (int c = 0; c < lines.size() && c < room; c++){
-                //  What does not fit ends in "...".
-                const bool cut = c == room - 1 && lines.size() > room;
-                const QString line = cut ? QFontMetricsF(font).elidedText(lines[c] + " ...", Qt::ElideRight, w) : lines[c];
+            QString text = program->description;
+            QStringList lines = wrap_text(font, text, w);
+            if ((int)lines.size() > room){
+                //  Too long for the card: the part before the first bracket, when that is a sentence by itself.
+                const int bracket = (int)text.indexOf(" (");
+                if (bracket > 20 && (int)wrap_text(font, text.left(bracket) + " ...", w).size() <= room){
+                    text = text.left(bracket) + " ...";
+                    lines = wrap_text(font, text, w);
+                }
+            }
+            for (int c = 0; c < (int)lines.size() && c < room; c++){
+                QString line = lines[(qsizetype)c];
+                if (c == room - 1 && (int)lines.size() > room){
+                    //  What does not fit ends in "...", after a whole word.
+                    QString cut = line;
+                    while (!cut.isEmpty() && text_width(font, cut + " ...") > w){
+                        const int space = (int)cut.lastIndexOf(' ');
+                        cut = space > 0 ? cut.left(space) : cut.left(cut.size() - 1);
+                    }
+                    line = cut + " ...";
+                }
                 draw_text(painter, line, x, y, font, white(0.9 * a));
                 y += 31;
             }
@@ -5251,6 +5389,9 @@ private:
             return;
         }
         const QRectF box = m_options_rect;
+        //  Its width at rest: wide or not.
+        const double panel_w = OPT_W + (WIDE_W - OPT_W) * m_wide.value;
+        const double edge = OPT_X + panel_w;
         //  What is inside shows as the panel comes open.
         const double inner = clamp01((p - 0.45) / 0.55) * a;
         panel(painter, box, 26, with_alpha(PANEL, 0.80 * a), white(0.24 * a), 1.6);
@@ -5258,18 +5399,20 @@ private:
         painter.setClipRect(box);
         const HomeProgram* program = selected_program();
         const double x = OPT_X + 24;
-        const QRectF close_rect(OPT_X + OPT_W - 58, OPT_Y + 18, 40, 40);
-        const QRectF head_rect(OPT_X + 8, OPT_Y + 10, OPT_W - 78, 62);
+        const QRectF close_rect(edge - 58, OPT_Y + 18, 40, 40);
+        const QRectF wide_rect(close_rect.left() - 48, OPT_Y + 18, 40, 40);
+        const QRectF head_rect(OPT_X + 8, OPT_Y + 10, panel_w - 78 - 48, 62);
         const QString kind = options_state_name();
         if (inner > 0.5){
             //  The head is a stop of the Tab key: it takes the keyboard into
             //  the options.
             canvas.add_hit("options", head_rect, m_options != nullptr, true);
             canvas.add_hit("opt-close", close_rect, true, false);
+            canvas.add_hit("opt-wide", wide_rect, true, false);
         }
         const QFont title = ui_font(25, 600);
         const QString program_name = program != nullptr ? program->name : QString();
-        draw_text_cy(painter, QFontMetricsF(title).elidedText(program_name, Qt::ElideRight, close_rect.left() - 10 - x), x, OPT_Y + 36, title, white(inner));
+        draw_text_cy(painter, QFontMetricsF(title).elidedText(program_name, Qt::ElideRight, wide_rect.left() - 10 - x), x, OPT_Y + 36, title, white(inner));
         draw_text_cy(painter, T("Options"), x, OPT_Y + 62, ui_font(19, 500), white(0.5 * inner));
         if (canvas.focused("options") && m_options != nullptr){
             panel(painter, head_rect.adjusted(-2, -2, 2, 2), 18, QColor(), with_alpha(YELLOW, 0.9 * inner), 2.2);
@@ -5283,26 +5426,42 @@ private:
                 panel(painter, close_rect.adjusted(-3, -3, 3, 3), 23, QColor(), with_alpha(YELLOW, 0.9 * inner), 2.2);
             }
         }
+        {
+            //  Two arrows: apart to make the panel wide, together to make it narrow again.
+            const bool over = canvas.hovered("opt-wide");
+            const bool is_wide = m_wide.target > 0.5;
+            const QColor color = white((over ? 0.95 : 0.6) * inner);
+            painter.setPen(QPen(color, 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            painter.setBrush(Qt::NoBrush);
+            const QPointF c = wide_rect.center();
+            const double dir = is_wide ? -1.0 : 1.0;
+            painter.drawLine(QPointF(c.x() - 12, c.y()), QPointF(c.x() + 12, c.y()));
+            painter.drawPolyline(QPolygonF({QPointF(c.x() + 12 - 6 * dir, c.y() - 6), QPointF(c.x() + 12, c.y()), QPointF(c.x() + 12 - 6 * dir, c.y() + 6)}));
+            painter.drawPolyline(QPolygonF({QPointF(c.x() - 12 + 6 * dir, c.y() - 6), QPointF(c.x() - 12, c.y()), QPointF(c.x() - 12 + 6 * dir, c.y() + 6)}));
+            if (canvas.focused("opt-wide")){
+                panel(painter, wide_rect.adjusted(-3, -3, 3, 3), 23, QColor(), with_alpha(YELLOW, 0.9 * inner), 2.2);
+            }
+        }
         painter.setPen(QPen(white(0.12 * inner), 1.2));
-        painter.drawLine(QPointF(OPT_X + 20, OPT_Y + 76), QPointF(OPT_X + OPT_W - 20, OPT_Y + 76));
+        painter.drawLine(QPointF(OPT_X + 20, OPT_Y + 76), QPointF(edge - 20, OPT_Y + 76));
 
         const QFont note = ui_font(20, 500);
         if (kind == "loading"){
             draw_text_cy(painter, T("Loading the options..."), x, OPT_Y + 116, note, white(0.5 * inner));
         }else if (kind == "none"){
             int line = 0;
-            for (const QString& text : wrap_text(ui_font(22, 500), T("This program has no options of its own."), OPT_W - 48)){
+            for (const QString& text : wrap_text(ui_font(22, 500), T("This program has no options of its own."), panel_w - 48)){
                 draw_text_cy(painter, text, x, OPT_Y + 116 + line * 30, ui_font(22, 500), white(0.7 * inner));
                 line++;
             }
-            for (const QString& text : wrap_text(note, T("Start it to open its page."), OPT_W - 48)){
+            for (const QString& text : wrap_text(note, T("Start it to open its page."), panel_w - 48)){
                 draw_text_cy(painter, text, x, OPT_Y + 124 + line * 30, note, white(0.5 * inner));
                 line++;
             }
         }else if (kind == "ready"){
             //  The options themselves are widgets over this place; under them
             //  what they are.
-            const QStringList lines = wrap_text(ui_font(18, 500), T("The same options as on the page of the program."), OPT_W - 48);
+            const QStringList lines = wrap_text(ui_font(18, 500), T("The same options as on the page of the program."), panel_w - 48);
             for (int c = 0; c < lines.size(); c++){
                 draw_text_cy(painter, lines[c], x, OPT_Y + OPT_H - 22 - (double)(lines.size() - 1 - c) * 24, ui_font(18, 500), white(0.42 * inner));
             }
@@ -5366,9 +5525,21 @@ private:
             if (live){
                 const QString size = QString::number(m_input.picture_size().height()) + "p, " + QString::number((int)std::lround(m_input.fps())) + " fps";
                 const double sw = text_width(font, size) + 32;
-                const QRectF pill(box.right() - 16 - sw, box.top() + 16, sw, 38);
+                const QRectF pill(box.right() - 16 - 46 - sw, box.top() + 16, sw, 38);
                 panel(painter, pill, 19, with_alpha(QColor(20, 20, 22), 0.85 * a));
                 draw_text_cy(painter, size, pill.center().x(), pill.center().y() + 1, font, white(a), Qt::AlignHCenter);
+            }
+        }
+
+        //  The button for the picture over the whole screen.
+        if (m_input.has_picture() && !m_input.picture().isNull()){
+            const QRectF button(box.right() - 16 - 38, box.top() + 16, 38, 38);
+            const bool over = canvas.hovered("video-full");
+            panel(painter, button, 19, with_alpha(QColor(20, 20, 22), (over ? 0.95 : 0.85) * a), over ? white(0.7 * a) : QColor(), 1.6);
+            draw_corners(painter, button.center(), 8.5, white((over ? 1.0 : 0.85) * a), false);
+            canvas.add_hit("video-full", button, true, true);
+            if (canvas.focused("video-full")){
+                panel(painter, button.adjusted(-3, -3, 3, 3), 22, QColor(), with_alpha(YELLOW, 0.9 * a), 2.2);
             }
         }
 
@@ -5395,6 +5566,124 @@ private:
             panel(painter, QRectF(box.right() - 22 - (8 - c) * 11, box.bottom() - 22 - h, 6, h), 3,
                 lit ? with_alpha(ORANGE, a) : white(0.22 * a));
         }
+    }
+    //  Four corners: apart for "full screen", together to leave it.
+    static void draw_corners(QPainter& painter, const QPointF& c, double r, const QColor& color, bool inward){
+        QPen pen(color, 2.2);
+        pen.setCapStyle(Qt::RoundCap);
+        pen.setJoinStyle(Qt::RoundJoin);
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+        const double arm = r * 0.6;
+        const double reach = inward ? r * 0.3 : r;
+        //  Apart: the elbows are at the corners and the arms point at the middle.
+        //  Together: the elbows are near the middle and the arms point out.
+        const double direction = inward ? +1.0 : -1.0;
+        for (int sx = -1; sx <= 1; sx += 2){
+            for (int sy = -1; sy <= 1; sy += 2){
+                const QPointF corner(c.x() + sx * reach, c.y() + sy * reach);
+                painter.drawPolyline(QPolygonF({
+                    QPointF(corner.x() + direction * sx * arm, corner.y()),
+                    corner,
+                    QPointF(corner.x(), corner.y() + direction * sy * arm)
+                }));
+            }
+        }
+    }
+    void toggle_video_full(){
+        m_video_full = !m_video_full;
+        m_source_open = false;
+        if (m_video_full){
+            canvas_focus_exit();
+        }
+    }
+    void canvas_focus_exit(){
+        if (m_canvas != nullptr){
+            m_canvas->set_focus_id("video-exit");
+        }
+    }
+    //  The picture over the whole window: as large as it goes without being
+    //  cut, with what is useful over it (live or not, how large, the card)
+    //  and the way out.
+    void paint_video_full(Canvas& canvas, QPainter& painter){
+        const double a = clamp01(m_full.value);
+        if (a < 0.004){
+            return;
+        }
+        const QRectF screen = canvas.screen_rect();
+        painter.save();
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(0, 0, 0, (int)std::lround(255 * a)));
+        painter.drawRect(screen.adjusted(-2, -2, 2, 2));
+        if (m_input.has_picture() && !m_input.picture().isNull()){
+            const QImage& image = m_input.picture();
+            const double scale = std::min(screen.width() / image.width(), screen.height() / image.height());
+            const double w = image.width() * scale;
+            const double h = image.height() * scale;
+            const QRectF target(screen.center().x() - w / 2.0, screen.center().y() - h / 2.0, w, h);
+            const double base = painter.opacity();
+            painter.setOpacity(base * a * (m_input.live() ? 1.0 : 0.45));
+            painter.drawImage(target, image);
+            painter.setOpacity(base);
+        }else{
+            draw_text_cy(painter, T("No picture"), screen.center().x(), screen.center().y(), ui_font(40, 600), white(0.75 * a), Qt::AlignHCenter);
+        }
+
+        //  Over the corners of the window, on a dark ground so that they read on any picture.
+        const QFont font = ui_font(22, 600);
+        const QColor ground = with_alpha(QColor(20, 20, 22), 0.82 * a);
+        double x = screen.left() + 24;
+        const double top = screen.top() + 24;
+        if (m_input.video_index() >= 0){
+            const bool live = m_input.live();
+            const QString text = live ? T("Live") : T("No signal");
+            const double w = text_width(font, text) + 58;
+            const QRectF badge(x, top, w, 42);
+            panel(painter, badge, 21, ground);
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(with_alpha(live ? ORANGE : YELLOW, a));
+            painter.drawEllipse(QPointF(badge.left() + 22, badge.center().y()), 6.5, 6.5);
+            draw_text_cy(painter, text, badge.left() + 38, badge.center().y() + 1, font, white(a));
+            x += w + 12;
+            if (live){
+                const QString size = QString::number(m_input.picture_size().height()) + "p, " + QString::number((int)std::lround(m_input.fps())) + " fps";
+                const double sw = text_width(font, size) + 36;
+                const QRectF pill(x, top, sw, 42);
+                panel(painter, pill, 21, ground);
+                draw_text_cy(painter, size, pill.center().x(), pill.center().y() + 1, font, white(a), Qt::AlignHCenter);
+            }
+        }
+        //  The way out: a button, with the key on it.
+        {
+            const QString label = T("Exit full screen");
+            const QFont key_font = ui_font(18, 600);
+            const double key_w = text_width(key_font, "Esc") + 22;
+            const double w = 22 + 26 + 12 + text_width(font, label) + 16 + key_w + 14;
+            const QRectF exit_rect(screen.right() - 24 - w, top, w, 46);
+            const bool over = canvas.hovered("video-exit");
+            panel(painter, exit_rect, 23, with_alpha(QColor(20, 20, 22), (over ? 0.95 : 0.82) * a), over ? white(0.7 * a) : QColor(), 1.6);
+            draw_corners(painter, QPointF(exit_rect.left() + 35, exit_rect.center().y()), 11.0, white(a), true);
+            draw_text_cy(painter, label, exit_rect.left() + 22 + 26 + 12, exit_rect.center().y() + 1, font, white(a));
+            const QRectF key_rect(exit_rect.right() - 14 - key_w, exit_rect.center().y() - 15, key_w, 30);
+            panel(painter, key_rect, 8, QColor(), white(0.4 * a), 1.4);
+            draw_text_cy(painter, "Esc", key_rect.center().x(), key_rect.center().y() + 1, key_font, white(0.8 * a), Qt::AlignHCenter);
+            if (m_video_full){
+                canvas.add_hit("video-exit", exit_rect, true, true);
+                if (canvas.focused("video-exit")){
+                    panel(painter, exit_rect.adjusted(-4, -4, 4, 4), 27, QColor(), with_alpha(YELLOW, 0.9 * a), 2.2);
+                }
+            }
+        }
+        //  The card, at the bottom.
+        if (m_input.video_index() >= 0){
+            const QString source = m_input.video_names()[m_input.video_index()];
+            const double w = std::min(text_width(font, source) + 60, screen.width() - 48);
+            const QRectF name(screen.left() + 24, screen.bottom() - 24 - 42, w, 42);
+            panel(painter, name, 21, ground);
+            lane_icon(painter, Lane::VIDEO, QPointF(name.left() + 24, name.center().y()), white(0.9 * a));
+            draw_text_cy(painter, QFontMetricsF(font).elidedText(source, Qt::ElideRight, w - 60), name.left() + 46, name.center().y() + 1, font, white(a));
+        }
+        painter.restore();
     }
     void paint_sources(Canvas& canvas, QPainter& painter){
         const QStringList& names = m_input.video_names();
@@ -5867,6 +6156,13 @@ private:
     double m_dirty_for = 0;                 //  how long a change has been waiting to be kept
     int m_host_font = 0;
     Smooth m_open;                          //  how far the panel is open: 0 to 1
+    //  The panel can take the room of the picture, the log and the timeline
+    //  ("wide"): a program with many options reads better that way.
+    Smooth m_wide;                          //  0 to 1
+    bool m_wide_user = false;               //  the person chose: it stays for the other programs
+    //  The picture over the whole screen.
+    bool m_video_full = false;
+    Smooth m_full;                          //  0 to 1
 };
 
 
@@ -5976,12 +6272,16 @@ constexpr ConsoleInfo CONSOLES[] = {
     {"ps5",         "PlayStation 5",        nullptr,    false},
     {"ps4",         "PlayStation 4",        nullptr,    false},
     {"ps3",         "PlayStation 3",        nullptr,    false},
+    {"ps2",         "PlayStation 2",        nullptr,    false},
+    {"ps1",         "PlayStation",          nullptr,    false},
     {"psclassic",   "PlayStation Classic",  nullptr,    false},
     {"xboxseries",  "Xbox Series X|S",      nullptr,    false},
     {"xboxone",     "Xbox One",             nullptr,    false},
     {"xbox360",     "Xbox 360",             nullptr,    false},
     {"xbox",        "Original Xbox",        nullptr,    false},
     {"wiiu",        "Nintendo Wii U",       nullptr,    false},
+    {"gamecube",    "Nintendo GameCube",    nullptr,    false},
+    {"n64",         "Nintendo 64",          nullptr,    false},
     {"dreamcast",   "Sega Dreamcast",       nullptr,    false},
 };
 constexpr int CONSOLE_COUNT = (int)(sizeof(CONSOLES) / sizeof(CONSOLES[0]));
@@ -5989,7 +6289,11 @@ constexpr int CONSOLE_COUNT = (int)(sizeof(CONSOLES) / sizeof(CONSOLES[0]));
 class ConsolePage : public Page{
 public:
     explicit ConsolePage(Canvas& canvas){
-        const QString kept = canvas.request().console_code;
+        m_again = canvas.console_again();
+        QString kept = canvas.request().console_code;
+        if (m_again && canvas.result().console_chosen){
+            kept = canvas.result().console_code;
+        }
         for (int c = 0; c < CONSOLE_COUNT; c++){
             if (CONSOLES[c].supported && kept == CONSOLES[c].code){
                 m_selected = c;
@@ -6008,7 +6312,9 @@ public:
         //  The setup starts here: the same steps and the same place for the
         //  texts as the page of the board that follows.
         const int states[3] = {1, 2, 2};
-        draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
+        if (!m_again){
+            draw_stepper(painter, states, prog(t, in.head - 0.05, in.head + 0.7));
+        }
         const QString heading = T("Which console do you use?");
         draw_heading(painter, heading, 140, 250, 80, prog(t, in.head, in.head + 0.9), 1.0, 1500);
         const QString sub = T("Pick the console you want to control. The board you pick next connects to it.");
@@ -6032,7 +6338,14 @@ public:
         }
 
         const double b = eo(prog(t, in.buttons, in.buttons + 0.5));
-        draw_skip(canvas, painter, b);
+        if (m_again){
+            //  From the games: back to them, not a step of the setup.
+            const double w = draw_button(canvas, painter, "back", T("Back to the games"), 136 + 26, 960, ButtonKind::LINK, std::min(1.0, b * 1.35));
+            (void)w;
+            draw_chevron_back(painter, QPointF(136 + 8, 982), white(0.7 * b));
+        }else{
+            draw_skip(canvas, painter, b);
+        }
         const QString text = T("Continue");
         draw_button(canvas, painter, "continue", text, 1780 - button_width(text, ButtonKind::PRIMARY), 950,
             ButtonKind::PRIMARY, b, m_selected >= 0);
@@ -6048,9 +6361,16 @@ public:
             }
         }else if (id == "continue"){
             proceed(canvas);
+        }else if (id == "back"){
+            canvas.leave_console_again();
         }else if (id == "skip"){
             canvas.result().board_done = true;
             canvas.end_installation();
+        }
+    }
+    virtual void escape_pressed(Canvas& canvas) override{
+        if (m_again){
+            canvas.leave_console_again();
         }
     }
     virtual bool key(Canvas& canvas, QKeyEvent& event) override{
@@ -6089,6 +6409,7 @@ public:
 private:
     static constexpr double BIG_HEIGHT = 236;
     static constexpr int SMALL_COLUMNS = 5;
+    bool m_again = false;                   //  chosen again, from the games
 
     static QString tile_id(int index){
         return "console:" + QString::number(index);
@@ -6132,8 +6453,8 @@ private:
             const double width = (RIGHT - LEFT - GAP * (large - 1)) / large;
             return QRectF(LEFT + (width + GAP) * index, top, width, BIG_HEIGHT);
         }
-        constexpr double GAP = 14;
-        constexpr double HEIGHT = 70;
+        constexpr double GAP = 10;
+        constexpr double HEIGHT = 60;
         const int k = index - large;
         const double width = (RIGHT - LEFT - GAP * (SMALL_COLUMNS - 1)) / SMALL_COLUMNS;
         const double first = top + BIG_HEIGHT + 18 + 28 + 18;
@@ -6389,6 +6710,15 @@ void Canvas::go_console(){
     queue_page([this]{
         return std::unique_ptr<Page>(new ConsolePage(*this));
     });
+}
+void Canvas::go_console_again(int games_selected){
+    m_console_again = true;
+    m_games_back = games_selected;
+    go_console();
+}
+void Canvas::leave_console_again(){
+    m_console_again = false;
+    go_games(m_games_back);
 }
 void Canvas::go_board(){
     queue_page([this]{
@@ -7412,6 +7742,95 @@ private:
     bool m_changed = false;
 };
 
+//  The options of a program with many of them, as AutoStory has: long labels,
+//  paragraphs of text, drop-down lists, numbers, a group.
+class RichTestOptions final : public SetupProgramOptions{
+public:
+    explicit RichTestOptions(QWidget* parent){
+        g_test_options.made++;
+        g_test_options.programs << "AutoStory";
+        QWidget* panel = new QWidget(parent);
+        QVBoxLayout* layout = new QVBoxLayout(panel);
+        auto text = [&](const QString& words){
+            QLabel* label = new QLabel(words, panel);
+            label->setWordWrap(true);
+            layout->addWidget(label);
+        };
+        auto row = [&](const QString& words, QWidget* control){
+            QHBoxLayout* line = new QHBoxLayout();
+            QLabel* label = new QLabel(words, panel);
+            label->setWordWrap(true);
+            line->addWidget(label, 1);
+            line->addWidget(control, 1);
+            layout->addLayout(line);
+        };
+        auto drop = [&](const QString& words, const QStringList& items){
+            QComboBox* combo = new QComboBox(panel);
+            combo->addItems(items);
+            row(words, combo);
+        };
+        auto number = [&](const QString& words, int value){
+            QSpinBox* spin = new QSpinBox(panel);
+            spin->setRange(0, 9999);
+            spin->setValue(value);
+            row(words, spin);
+        };
+        auto check = [&](const QString& words, bool on){
+            QCheckBox* box = new QCheckBox(words, panel);
+            box->setChecked(on);
+            layout->addWidget(box);
+        };
+        text("Start from a new game or from a save of the game. A new game needs the game at its first screen, with the cartridge in and the Switch's home menu behind it. The program types the name of the player and of the rival itself.");
+        drop("Starter:", {"Charmander", "Squirtle", "Bulbasaur"});
+        drop("Game version:", {"FireRed", "LeafGreen"});
+        check("Start a new game", true);
+        QLineEdit* name = new QLineEdit("RED", panel);
+        row("Name of the player:", name);
+        row("Name of the rival:", new QLineEdit("BLUE", panel));
+        check("Continue from the save of the game, not from a new game", false);
+        drop("Start at this part of the story:", {"1. Pallet Town", "2. Viridian City", "3. Pewter City"});
+        number("Start at this step of the part:", 0);
+        drop("Stop after this part of the story:", {"1. Pallet Town", "2. Viridian City", "3. Pewter City"});
+        drop("Wild Pokemon in battles:", {"Run from them all", "Catch the ones the table wants", "Fight them all"});
+        check("Stop and wait when a shiny Pokemon shows up, so that it can be kept", true);
+        number("Levels over the next trainer's team, to train in the grass:", 2);
+        check("Reset the game at the start of each part of the story", false);
+        check("Save the game after each visit to a Pokemon Center", true);
+        number("Tries of a step before it is called failed:", 3);
+        number("Wait between the checks for a Pokemon in the grass, in milliseconds:", 250);
+        check("Check that each walk moved the player on the screen", true);
+        check("Run with the B button held down", true);
+        check("Faster battles (experimental)", false);
+        check("Shorter looks in the grass (experimental)", false);
+        check("Show notes on the video (experimental)", false);
+        row("Pokemon caught so far (for the collection):", new QLineEdit(panel));
+        text("The Pokedex collection catches what the chosen game can still register in the grass, the caves and the Safari Zone, and then evolves and trades what the boxes hold. It takes many hours.");
+        QGroupBox* group = new QGroupBox("Notifications", panel);
+        QVBoxLayout* inside = new QVBoxLayout(group);
+        inside->addWidget(new QCheckBox("Status updates, every 30 minutes", group));
+        inside->addWidget(new QCheckBox("Program finished", group));
+        inside->addWidget(new QCheckBox("Error", group));
+        layout->addWidget(group);
+        layout->addStretch(1);
+        m_widget = panel;
+    }
+    virtual ~RichTestOptions() override{
+        delete m_widget.data();
+        g_test_options.destroyed++;
+    }
+    virtual QWidget* widget() override{
+        return m_widget.data();
+    }
+    virtual bool changed() const override{
+        return false;
+    }
+    virtual void save() override{
+    }
+
+private:
+    QPointer<QWidget> m_widget;
+};
+
 //  A log that a test can add lines to.
 struct TestLog{
     std::mutex lock;
@@ -8294,6 +8713,145 @@ int run_setup_test(QApplication& application, const QString& folder){
         skipped.wait(2.8);
         checker.check(skipped.page_name() == "games", "Skip setup on the console screen leads to the choice of a game");
         checker.check(!skipped.result().console_chosen && skipped.result().board_done, "no console is chosen, and the setup counts as done");
+    }
+
+    //  ---- the games: back to the console, and on to the games again
+    {
+        SetupRequest back_request;
+        back_request.ask_console = true;
+        back_request.ask_board = true;
+        back_request.console_code = "switch";
+        back_request.games = test_games();
+        const QString game_two = back_request.games[2].name;
+        Canvas back(back_request, true);
+        back.resize(1280, 720);
+        QEventLoop back_loop;
+        back.start(&back_loop);
+        back.show();
+        back.wait(2.0);
+        back.click("skip");
+        back.wait(2.8);
+        checker.check(back.page_name() == "games" && back.has_hit("console"), "the games have a way back to the console");
+        back.click("game:2");
+        back.wait(0.3);
+        back.click("console");
+        back.wait(2.0);
+        checker.check(back.page_name() == "console" && back.page_state() == "selected=switch", "it leads to the console, the one of the request picked");
+        checker.check(back.has_hit("back") && !back.has_hit("skip"), "with a way back to the games, not Skip setup");
+        save(back, folder, "setup-54-console-again");
+        back.press_key(Qt::Key_Escape);
+        back.wait(2.0);
+        checker.check(back.page_name() == "games" && back.page_state() == "selected=" + game_two, "Escape goes back to the games, with the game still picked");
+        back.click("console");
+        back.wait(2.0);
+        back.click("console:1");
+        back.wait(0.3);
+        checker.check(back.page_state() == "selected=switch2" && back.focus_id() == "continue", "another console is picked");
+        back.click("continue");
+        back.wait(2.8);
+        checker.check(back.page_name() == "games", "Continue leads to the games, the board is not asked again");
+        checker.check(back.page_state() == "selected=" + game_two, "the game is still picked");
+        checker.check(back.result().console_chosen && back.result().console_code == "switch2", "the new console is the answer");
+        back.click("console");
+        back.wait(2.0);
+        back.click("back");
+        back.wait(2.0);
+        checker.check(back.page_name() == "games" && !back.finished(), "Back leaves the console as it was");
+        checker.check(back.result().console_code == "switch2", "and the answer stays");
+    }
+
+    //  ---- a program with many options opens wide; the picture in full screen
+    {
+        g_test_options = TestOptionsLog();
+        SetupRequest rich;
+        rich.ask_game = true;
+        rich.games = test_games();
+        rich.programs = test_programs();
+        HomeProgram story;
+        story.game = 0;
+        story.name = "AutoStory";
+        story.description = "Play the FireRed/LeafGreen story from the bedroom to the Hall of Fame and on after it (the legendary Pokemon, the Sevii Islands, 60 species for the National POKeDEX, the Ruby and the Sapphire, the roaming legendary with the Master Ball, Mewtwo, then the Pokedex collection: what the chosen game can still register in the grass, caves and Safari Zone), on routes generated from the game's map data.";
+        story.tag = "beta";
+        story.tag_meaning = "It is new: it can still go wrong.";
+        rich.programs.insert(rich.programs.begin() + 9, story);
+        rich.make_options = [](QWidget* parent, int, const QString& program) -> std::unique_ptr<SetupProgramOptions>{
+            if (program == "AutoStory"){
+                return std::unique_ptr<SetupProgramOptions>(new RichTestOptions(parent));
+            }
+            return std::unique_ptr<SetupProgramOptions>(new TestOptions(parent, program));
+        };
+        Canvas wide(rich, true);
+        wide.resize(1280, 720);
+        wide.set_scan([]{
+            return HardwareState();
+        });
+        QEventLoop wide_loop;
+        wide.start(&wide_loop);
+        wide.show();
+        wide.wait(2.5);
+        wide.click("game:0");
+        wide.wait(0.2);
+        wide.click("start");
+        wide.wait(1.6);
+        checker.check(wide.page_name() == "programs" && wide.page_state().contains(";full=no;wide=no;"), "the programs start narrow, the picture in its place");
+        wide.click("prog:0");
+        wide.wait(1.4);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 30);
+        checker.check(wide.page_state().contains(";options=ready;host=shown;full=no;wide=no;"), "a program with a few options keeps the panel narrow");
+        checker.check(wide.has_hit("video-full") && wide.has_hit("opt-wide"), "the picture has its button for full screen, the panel its button for wide");
+
+        wide.click("prog:9");
+        wide.wait(2.0);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 30);
+        wide.wait(0.2);
+        checker.check(wide.page_state().contains("selected=AutoStory;") && wide.page_state().contains(";options=ready;host=shown;full=no;wide=yes;"), "a program with many options opens wide");
+        checker.check(!wide.has_hit("video-full") && !wide.has_hit("source") && !wide.has_hit("drag:lanes"), "the picture, the log and the timeline give way");
+        checker.check(wide.has_hit("opt-wide") && wide.has_hit("opt-close") && wide.has_hit("start"), "the panel keeps its buttons, and Start stays");
+        save(wide, folder, "setup-55-programs-options-wide");
+        save_preview(wide, folder, "preview-programs-options-wide", 1280);
+
+        wide.click("opt-wide");
+        wide.wait(1.6);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents, 30);
+        wide.wait(0.2);
+        checker.check(wide.page_state().contains(";options=ready;host=shown;full=no;wide=no;") && wide.has_hit("video-full"), "the button makes it narrow again, the picture is back");
+        save(wide, folder, "setup-56-programs-options-narrow");
+        wide.click("prog:1");
+        wide.wait(1.0);
+        wide.click("prog:9");
+        wide.wait(2.0);
+        checker.check(wide.page_state().contains(";options=ready;") && wide.page_state().contains(";wide=no;"), "what the person chose stays for the other programs");
+        wide.click("opt-wide");
+        wide.wait(1.6);
+        checker.check(wide.page_state().contains(";wide=yes;"), "and can be changed again");
+        wide.click("opt-wide");
+        wide.wait(1.6);
+
+        //  The picture over the whole screen.
+        wide.click("video-full");
+        wide.wait(0.8);
+        checker.check(wide.page_state().contains(";full=yes;") && wide.has_hit("video-exit"), "the button puts the picture over the whole screen, with a way out");
+        checker.check(!wide.has_hit("prog:9") && !wide.has_hit("start") && !wide.has_hit("opt-close"), "nothing behind it can be pressed");
+        checker.check(wide.page_state().contains(";host=hidden;"), "and the options are not over it");
+        save(wide, folder, "setup-57-video-full");
+        save_preview(wide, folder, "preview-video-full", 1280);
+        wide.press_key(Qt::Key_A, Qt::NoModifier, "a");
+        wide.wait(0.1);
+        checker.check(wide.page_state().contains("query=;"), "typing does not go into the search behind it");
+        wide.press_key(Qt::Key_Escape);
+        wide.wait(0.8);
+        checker.check(wide.page_name() == "programs" && wide.page_state().contains(";full=no;") && wide.has_hit("prog:9"), "Escape brings the page back");
+        wide.press_key(Qt::Key_F11);
+        wide.wait(0.8);
+        checker.check(wide.page_state().contains(";full=yes;"), "F11 does the same as the button");
+        wide.press_key(Qt::Key_F11);
+        wide.wait(0.8);
+        checker.check(wide.page_state().contains(";full=no;"), "and leaves it");
+        wide.click("video-full");
+        wide.wait(0.8);
+        wide.click("video-exit");
+        wide.wait(0.8);
+        checker.check(wide.page_state().contains(";full=no;") && !wide.finished(), "the button on the picture leaves it too");
     }
 
     //  ---- the programs of the game that was picked
