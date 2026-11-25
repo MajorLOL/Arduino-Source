@@ -340,5 +340,6 @@
  "Let the screen sleep": "Laisser l'écran se mettre en veille",
  "Search all programs": "Chercher dans tous les programmes",
  "No program matches.": "Aucun programme trouvé.",
- "and %1 more: type more of the name": "et %1 de plus : tapez plus du nom"
+ "and %1 more: type more of the name": "et %1 de plus : tapez plus du nom",
+ "<b>Keep the screen on:</b><br>Holds off the screen's sleep while the program is open. It is switched at the foot of an open program, and kept for the next start.": "<b>Garder l'écran allumé :</b><br>Empêche la mise en veille de l'écran tant que le programme est ouvert. Ça se règle au bas d'un programme ouvert et c'est retenu pour le prochain démarrage."
 }

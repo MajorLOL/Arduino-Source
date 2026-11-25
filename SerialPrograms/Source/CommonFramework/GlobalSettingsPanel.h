@@ -108,6 +108,7 @@ public:
     BooleanCheckBoxOption ASK_SETUP;
     BooleanCheckBoxOption ASK_GAME;
     BooleanCheckBoxOption ASK_PROGRAM;
+    BooleanCheckBoxOption KEEP_SCREEN_ON;
 
     ButtonOption OPEN_BASE_FOLDER_BUTTON;
     StringOption STATS_FILE;

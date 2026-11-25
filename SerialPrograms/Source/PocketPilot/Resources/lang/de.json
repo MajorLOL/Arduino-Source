@@ -340,5 +340,6 @@
  "Let the screen sleep": "Bildschirm schlafen lassen",
  "Search all programs": "Alle Programme durchsuchen",
  "No program matches.": "Kein Programm gefunden.",
- "and %1 more: type more of the name": "und %1 weitere: mehr vom Namen eingeben"
+ "and %1 more: type more of the name": "und %1 weitere: mehr vom Namen eingeben",
+ "<b>Keep the screen on:</b><br>Holds off the screen's sleep while the program is open. It is switched at the foot of an open program, and kept for the next start.": "<b>Bildschirm eingeschaltet lassen:</b><br>Hält den Bildschirm wach, solange das Programm geöffnet ist. Es wird am Fuß eines geöffneten Programms geschaltet und für den nächsten Start gemerkt."
 }

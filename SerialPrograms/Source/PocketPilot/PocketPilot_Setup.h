@@ -270,6 +270,9 @@ public:
     virtual void set_state(bool busy, const QString& text) = 0;
     //  What is said about the computer's sleep, beside its switch.
     virtual void set_sleep_text(const QString& text) = 0;
+    //  The switch "Keep the screen on" is shown as set (or not), without the
+    //  action: for the state that was kept from the last time.
+    virtual void set_keep_on(bool on) = 0;
 
     //  Claude's panel, over the right of the screen when it is shown. The
     //  panel stays the window's.

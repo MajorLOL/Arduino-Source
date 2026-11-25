@@ -121,6 +121,11 @@ GlobalSettings::GlobalSettings()
         LockMode::UNLOCK_WHILE_RUNNING,
         true
     )
+    , KEEP_SCREEN_ON(
+        "<b>Keep the screen on:</b><br>Holds off the screen's sleep while the program is open. It is switched at the foot of an open program, and kept for the next start.",
+        LockMode::UNLOCK_WHILE_RUNNING,
+        false
+    )
     , OPEN_BASE_FOLDER_BUTTON(
         "<b>Runtime Base Folder:</b>",
         "Open Folder"
@@ -271,6 +276,7 @@ GlobalSettings::GlobalSettings()
     PA_ADD_OPTION(ASK_SETUP);
     PA_ADD_OPTION(ASK_GAME);
     PA_ADD_OPTION(ASK_PROGRAM);
+    PA_ADD_OPTION(KEEP_SCREEN_ON);
     PA_ADD_OPTION(OPEN_BASE_FOLDER_BUTTON);
     PA_ADD_OPTION(CHECK_FOR_UPDATES);
     PA_ADD_OPTION(STATS_FILE);

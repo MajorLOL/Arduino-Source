@@ -580,6 +580,10 @@ public:
         m_app_sleep = text;
         update();
     }
+    virtual void set_keep_on(bool on) override{
+        m_app_keep_on = on;
+        update();
+    }
     virtual void set_claude(QWidget* panel) override;
     virtual void show_claude(bool show) override;
     virtual bool claude_shown() const override{
@@ -10183,6 +10187,11 @@ int run_setup_test(QApplication& application, const QString& folder){
         checker.check(record.keep_on == 1 && window_screen.app_keep_on(), "the switch keeps the screen on");
         window_screen.click("host-sleep");
         checker.check(record.keep_off == 1 && !window_screen.app_keep_on(), "and lets it sleep again");
+        //  As it was left the last time: shown as set, without the action.
+        window_screen.set_keep_on(true);
+        checker.check(window_screen.app_keep_on() && record.keep_on == 1 && record.keep_off == 1, "the switch can be shown as it was kept, without the action");
+        window_screen.click("host-sleep");
+        checker.check(record.keep_off == 2 && !window_screen.app_keep_on(), "and it lets the screen sleep from there");
 
         //  A program that runs: the state, and no way back.
         window_screen.set_state(true, "Running Push Joy Sticks");

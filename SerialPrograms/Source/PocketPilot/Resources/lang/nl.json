@@ -340,5 +340,6 @@
  "Let the screen sleep": "Scherm laten slapen",
  "Search all programs": "Zoek in alle programma's",
  "No program matches.": "Geen programma gevonden.",
- "and %1 more: type more of the name": "en nog %1: typ meer van de naam"
+ "and %1 more: type more of the name": "en nog %1: typ meer van de naam",
+ "<b>Keep the screen on:</b><br>Holds off the screen's sleep while the program is open. It is switched at the foot of an open program, and kept for the next start.": "<b>Het scherm aan houden:</b><br>Houdt het scherm wakker zolang het programma open is. Het wordt geschakeld onderaan een geopend programma en onthouden voor de volgende start."
 }

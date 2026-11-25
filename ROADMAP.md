@@ -120,7 +120,7 @@ The first version of "one interface" was made without the old window's buttons b
 | Top bar > **About** | the dialog | the same dialog | Restyle |
 | Top bar > the **side bar** switch | showed and hid the side bar | gone: there is no side bar (the list of programs is kept out of sight, to make the programs and load their panels) | |
 | Status strip > the **state** | "Ready" / "Running ..." | a chip in the header of the open program; no state on the games | Also on the programs and the games? |
-| Status strip > **sleep** | the text and the check box | the text and "Keep the screen on" / "Let the screen sleep" at the foot of the open program; not kept for the next start | |
+| Status strip > **sleep** | the text and the check box | the text and "Keep the screen on" / "Let the screen sleep" at the foot of the open program; kept for the next start (also a setting, "Keep the screen on") | |
 | Page with the games > **Resume** | opened the program of the last session | the window starts on the games, no program is loaded at the start; a button "Continue with <program>" next to Start opens the program of the last time (the one the settings keep) | Should it load at the start, as before? |
 | Page with the games > the **search over all programs** | found a program in any game | a search field on the games: what is typed turns the cartridges into a list of the programs that match (name first, then description and game); Up, Down, Left, Right and Enter, or a click, open one; Escape clears it | Also a search in the settings? |
 | Choose another console (games) | - | the screen of the consoles, then back to the games; the console is kept at once | |

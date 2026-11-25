@@ -899,11 +899,20 @@ void MainWindow::make_app_view(bool test){
     actions.claude = [this](bool show){
         show_assistant(show);
     };
-    actions.keep_screen_on = [this](bool on){
+    actions.keep_screen_on = [this, test](bool on){
         if (on){
             m_sleep_scope.reset(new SleepSuppressScope(SleepSuppress::SCREEN_ON));
         }else{
             m_sleep_scope.reset();
+        }
+        //  Kept for the next start. (The test must not change the settings.)
+        if (!test){
+            GlobalSettings::instance().KEEP_SCREEN_ON = on;
+            try{
+                PERSISTENT_SETTINGS().write();
+            }catch (...){
+                global_logger_tagged().log("The switch for the screen could not be written to the settings file.", COLOR_RED);
+            }
         }
     };
 
@@ -913,6 +922,11 @@ void MainWindow::make_app_view(bool test){
     layout->setSpacing(0);
     layout->addWidget(m_app->widget());
     update_resume();
+    //  As it was left the last time.
+    if (!test && GlobalSettings::instance().KEEP_SCREEN_ON){
+        m_sleep_scope.reset(new SleepSuppressScope(SleepSuppress::SCREEN_ON));
+        m_app->set_keep_on(true);
+    }
     MainWindow::sleep_suppress_state_changed(SystemSleepController::instance().current_state());
 }
 
