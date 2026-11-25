@@ -349,6 +349,10 @@ jobs:
             Copy-Item $log $diagnostics
             Write-Host "---- the end of SerialPrograms.log ----"
             Get-Content $log -Tail 150
+            #  The checks of the tests that run inside the interface test: they
+            #  are logged before the end of the log.
+            Write-Host "---- the checks that the interface test ran ----"
+            Get-Content $log | Select-String -Pattern "checks passed|test: FAILED" | ForEach-Object { Write-Host $_.Line }
           } else {
             Write-Host "No SerialPrograms.log in $dir."
           }

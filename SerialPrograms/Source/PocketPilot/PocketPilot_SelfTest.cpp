@@ -196,7 +196,7 @@ int take_pictures(QApplication& application, MainWindow& window, const QString& 
         }
         //  A few small pictures, for the log of the build (see the workflow).
         const QString base = QString::fromLatin1(name);
-        if (base == "night-fire-about-update" || base == "night-fire-output-log"){
+        if (base == "night-fire-about-update" || base == "night-fire-output-log" || base == "night-fire-settings-search"){
             picture.scaledToWidth(960, Qt::SmoothTransformation).save(out + "/preview-" + base + ".jpg", "JPG", 72);
         }
     };
