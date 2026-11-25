@@ -88,11 +88,18 @@ bool unprotect(const QByteArray& stored, QByteArray& plain){
 }
 
 
-QString SecretStore::protection_text(){
+QString SecretStore::protection_text() const{
+    if (!m_remember){
+        return "Kept in memory only, until you close the program. Nothing of it is written to the disk.";
+    }
 #ifdef _WIN32
-    return "Saved on this computer, encrypted with your Windows account. Never written to the settings file or the log.";
+    return
+        "Saved on this computer, encrypted with your Windows account. Never written to the settings file or the "
+        "log. Other programs that run as you can decrypt it too: to rule that out, do not remember the key.";
 #else
-    return "Saved on this computer in a file only your account can read. Never written to the settings file or the log.";
+    return
+        "Saved on this computer in a file only your account can read. Never written to the settings file or the "
+        "log. Other programs that run as you can read it too: to rule that out, do not remember the key.";
 #endif
 }
 
@@ -105,7 +112,8 @@ SecretStore::SecretStore(const QString& file_path)
     }
     const QJsonObject object = QJsonDocument::fromJson(file.readAll()).object();
     const bool same_protection = object.value("protection").toString() == QLatin1String(PROTECTION);
-    for (int index = 0; index < 2; index++){
+    m_remember = object.value("remember").toBool(true);
+    for (int index = 0; index < 2 && m_remember; index++){
         const QString text = object.value(QLatin1String(SECRET_NAMES[index])).toString();
         if (text.isEmpty()){
             continue;
@@ -133,11 +141,23 @@ bool SecretStore::set(Secret secret, const QString& value, QString& error){
     return write(error);
 }
 
+bool SecretStore::set_remembers(bool remember, QString& error){
+    m_remember = remember;
+    if (!write(error)){
+        if (!remember){
+            error = "The keys that were saved could not be removed from the disk (" + error + ").";
+        }
+        return false;
+    }
+    return true;
+}
+
 bool SecretStore::write(QString& error) const{
     QJsonObject object;
     object["protection"] = QLatin1String(PROTECTION);
+    object["remember"] = m_remember;
     for (int index = 0; index < 2; index++){
-        if (m_values[index].isEmpty()){
+        if (!m_remember || m_values[index].isEmpty()){
             continue;
         }
         QByteArray stored;

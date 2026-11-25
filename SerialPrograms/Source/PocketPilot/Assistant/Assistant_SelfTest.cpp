@@ -799,6 +799,63 @@ CheckResult run_checks(const QString& folder, const std::function<void(const QSt
         }
         QFile::remove(path);
 
+        //  Not remembered: the keys are in memory only. The file never has
+        //  one, whatever is saved, and a new start has none.
+        const auto file_text = [&]{
+            QFile file(path);
+            return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray();
+        };
+        {
+            SecretStore store(path);
+            check(store.remembers(), "the keys are remembered unless it is switched off");
+            check(store.set(Secret::CLAUDE_API_KEY, key, error), "a key is saved before it is switched off");
+            check(!file_text().isEmpty() && file_text().contains("claude_api_key"), "a remembered key is in the file");
+            check(store.set_remembers(false, error) && !store.remembers(), "remembering is switched off");
+            check(store.get(Secret::CLAUDE_API_KEY) == key, "the key stays in use after it is switched off");
+            check(
+                !file_text().isEmpty() && !file_text().contains("claude_api_key") && !file_text().contains("github_token"),
+                "switched off, the file has no key any more"
+            );
+            check(store.set(Secret::GITHUB_TOKEN, token, error) && store.get(Secret::GITHUB_TOKEN) == token, "a token is kept in memory");
+            check(
+                !file_text().contains("github_token") && !file_text().contains(token.toUtf8()) && !file_text().contains(key.toUtf8()),
+                "a key that is not remembered is never written"
+            );
+            check(!store.protection_text().isEmpty() && store.protection_text().contains("memory"), "the note says the keys are in memory only");
+        }
+        {
+            SecretStore store(path);
+            check(!store.remembers(), "not remembering stays so after a new start");
+            check(!store.has(Secret::CLAUDE_API_KEY) && !store.has(Secret::GITHUB_TOKEN), "a key that is not remembered is gone after a new start");
+            check(!store.unreadable(Secret::CLAUDE_API_KEY), "no key is left that cannot be read");
+            //  Back on: the key in use is written.
+            check(store.set(Secret::CLAUDE_API_KEY, key, error), "a key is kept without remembering it");
+            check(store.set_remembers(true, error) && store.remembers(), "remembering is switched on");
+            check(file_text().contains("claude_api_key"), "switched on, the key in use is written");
+        }
+        {
+            SecretStore store(path);
+            check(store.remembers() && store.get(Secret::CLAUDE_API_KEY) == key, "the key is back after it was remembered again");
+        }
+        {
+            //  A key in a file that says not to remember is not read.
+            QFile::remove(path);
+            {
+                SecretStore store(path);
+                store.set(Secret::CLAUDE_API_KEY, key, error);
+            }
+            QByteArray content = file_text();
+            content.replace("\"remember\": true", "\"remember\": false");
+            QFile file(path);
+            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+                file.write(content);
+            }
+            file.close();
+            SecretStore store(path);
+            check(!store.remembers() && !store.has(Secret::CLAUDE_API_KEY), "a key in a file that says not to remember is not used");
+        }
+        QFile::remove(path);
+
         const QString settings_path = folder + "/Assistant-SelfTest-Settings.json";
         Settings settings;
         settings.chat_model = "claude-opus-5-5";

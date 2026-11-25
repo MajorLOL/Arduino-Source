@@ -46,8 +46,19 @@ public:
     //  Windows account, or on another computer.
     bool unreadable(Secret secret) const;
 
-    //  How the file protects the keys on this system, for the user.
-    static QString protection_text();
+    //  Whether the keys are kept in the file (the default) or only in memory,
+    //  until the program closes. In memory only, nothing of a key is ever
+    //  written, so no other program that runs as this user can read one from
+    //  a file (the keys of a file are encrypted for the user, and any program
+    //  of the same user can ask Windows to decrypt them).
+    bool remembers() const{ return m_remember; }
+    //  Changes it and writes the file: off, without the keys that are in it
+    //  (the ones in memory stay); on, with the keys that are in memory.
+    //  False if the file could not be written ("error" says why).
+    bool set_remembers(bool remember, QString& error);
+
+    //  How the keys are kept right now, for the user.
+    QString protection_text() const;
 
 private:
     bool write(QString& error) const;
@@ -56,6 +67,7 @@ private:
     QString m_path;
     QString m_values[2];
     bool m_unreadable[2] = {false, false};
+    bool m_remember = true;
 };
 
 

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <utility>
 #include <QAbstractTextDocumentLayout>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDesktopServices>
 #include <QDialog>
@@ -680,6 +681,7 @@ QWidget* Panel::make_connect_page(){
     m_key_error = make_label(page, "ppAssistantProblem", QString());
     m_key_error->setVisible(false);
     layout->addWidget(m_key_error);
+    layout->addWidget(make_remember_box(page));
     QHBoxLayout* buttons = new QHBoxLayout();
     QPushButton* save = make_button(page, "ppPrimary", "Save the key");
     buttons->addWidget(save);
@@ -697,7 +699,7 @@ QWidget* Panel::make_connect_page(){
         "In the Claude Console, make the key for one workspace: it then works here as it is. (A key that was "
         "not made for one workspace needs the workspace's ID, under Settings in this panel.)"
     ));
-    layout->addWidget(make_label(page, "ppAssistantSmall", SecretStore::protection_text()));
+    layout->addWidget(make_protection_note(page));
     layout->addStretch(1);
     return page;
 }
@@ -769,7 +771,10 @@ QWidget* Panel::make_settings_page(){
             QString error;
             m_service.secrets().set(Secret::CLAUDE_API_KEY, key, error);
             m_key_replace->clear();
-            m_key_result->setText(error.isEmpty() ? QString("Saved.") : error);
+            m_key_result->setText(
+                !error.isEmpty() ? error :
+                m_service.secrets().remembers() ? QString("Saved.") : QString("Kept until you close the program.")
+            );
             m_key_result->setVisible(true);
             refresh_settings_page();
             refresh_send_button();
@@ -811,7 +816,8 @@ QWidget* Panel::make_settings_page(){
         });
     }
     layout->addWidget(make_link(page, "How to get an API key", KEY_HELP_URL));
-    layout->addWidget(make_label(page, "ppAssistantSmall", SecretStore::protection_text()));
+    layout->addWidget(make_remember_box(page));
+    layout->addWidget(make_protection_note(page));
 
     //  The workspace, for a key that was not made for one.
     layout->addSpacing(4);
@@ -1142,18 +1148,64 @@ void Panel::refresh_models(){
     }
 }
 
+QCheckBox* Panel::make_remember_box(QWidget* parent){
+    QCheckBox* box = new QCheckBox("Remember the key on this computer", parent);
+    box->setObjectName("ppAssistantCheck");
+    box->setAccessibleName("Remember the keys on this computer");
+    box->setToolTip(
+        "On: the keys are saved, encrypted for your Windows account, and are there at the next start.\n"
+        "Off: the keys stay in memory until you close the program and are never written to the disk, so no "
+        "other program that runs as you can read them from a file. You enter them again at each start."
+    );
+    box->setChecked(m_service.secrets().remembers());
+    connect(box, &QCheckBox::toggled, this, [this](bool remember){
+        QString error;
+        m_service.secrets().set_remembers(remember, error);
+        refresh_protection();
+        refresh_settings_page();
+        if (!error.isEmpty()){
+            add_note(error);
+        }
+    });
+    m_remember_boxes.push_back(box);
+    return box;
+}
+
+QLabel* Panel::make_protection_note(QWidget* parent){
+    QLabel* note = make_label(parent, "ppAssistantSmall", m_service.secrets().protection_text());
+    m_protection_notes.push_back(note);
+    return note;
+}
+
+void Panel::refresh_protection(){
+    const SecretStore& secrets = m_service.secrets();
+    for (QCheckBox* box : m_remember_boxes){
+        box->blockSignals(true);
+        box->setChecked(secrets.remembers());
+        box->blockSignals(false);
+    }
+    for (QLabel* note : m_protection_notes){
+        note->setText(secrets.protection_text());
+    }
+}
+
 void Panel::refresh_settings_page(){
     SecretStore& secrets = m_service.secrets();
     if (secrets.has(Secret::CLAUDE_API_KEY)){
         const QString key = secrets.get(Secret::CLAUDE_API_KEY);
-        m_key_state->setText("A key is saved (it ends in ..." + key.right(4) + "). Enter a new one to replace it.");
+        m_key_state->setText(
+            secrets.remembers()
+                ? "A key is saved (it ends in ..." + key.right(4) + "). Enter a new one to replace it."
+                : "A key is in use (it ends in ..." + key.right(4) + "). It is not saved: it is gone when you close "
+                  "the program. Enter a new one to replace it."
+        );
     }else if (secrets.unreadable(Secret::CLAUDE_API_KEY)){
         m_key_state->setText(
             "A key was saved by another Windows account or on another computer and cannot be read here. "
             "Enter it again."
         );
     }else{
-        m_key_state->setText("No key is saved.");
+        m_key_state->setText(secrets.remembers() ? "No key is saved." : "No key is in use.");
     }
     if (secrets.has(Secret::GITHUB_TOKEN)){
         m_token_state->setText("A token is saved (it ends in ..." + secrets.get(Secret::GITHUB_TOKEN).right(4) + ").");

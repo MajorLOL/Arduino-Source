@@ -18,10 +18,12 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <vector>
 #include <QString>
 #include <QWidget>
 #include "Assistant_Service.h"
 
+class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
 class QLabel;
@@ -88,6 +90,10 @@ private:
     void connect_agent();
     void refresh_models();
     void refresh_settings_page();
+    //  The box "Remember the key on this computer", and the note under it.
+    QCheckBox* make_remember_box(QWidget* parent);
+    QLabel* make_protection_note(QWidget* parent);
+    void refresh_protection();
     void refresh_meter();
     void refresh_send_button();
     void refresh_empty_state();
@@ -159,6 +165,12 @@ private:
     QLineEdit* m_repository = nullptr;
     QLineEdit* m_branch = nullptr;
     QLabel* m_model_hint = nullptr;
+
+    //  The choice to keep the keys in the file or in memory only, and the
+    //  note on how they are kept: on the page of the first key and on the
+    //  settings.
+    std::vector<QCheckBox*> m_remember_boxes;
+    std::vector<QLabel*> m_protection_notes;
 };
 
 
