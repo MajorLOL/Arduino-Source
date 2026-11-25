@@ -41,6 +41,14 @@ namespace PokemonLZA{
 
 namespace{
 
+//  The pictures of these tests are in a folder of the test images that the
+//  PokemonAutomation/CommandLineTests do not have (yet). Without it the tests
+//  are left out, instead of all failing on a file that is not there.
+bool test_folder_present(std::string_view folder){
+    return Filesystem::exists(std::format("{}PokemonLZA/{}", UNIT_TEST_RESOURCE_PATH(), folder));
+}
+
+
 constexpr size_t WIDTH = 1920;
 constexpr size_t HEIGHT = 1080;
 constexpr uint32_t WHITE = 0xffffffff;
@@ -606,11 +614,15 @@ void add_tests_Detectors(UnitTestDatabase& database){
     for (const SyntheticFrameCase& test : SYNTHETIC_FRAME_CASES){
         database.add<DetectorCaseTest<SyntheticFrameCase, check_synthetic_frame>>("PokemonLZA::AutoStoryDetectors - synthetic frame: ", test);
     }
-    for (const FrameFolderCase& test : FRAME_FOLDER_CASES){
-        database.add<DetectorCaseTest<FrameFolderCase, check_frame_folder>>("PokemonLZA::AutoStoryDetectors - console frames: ", test);
+    if (test_folder_present("AutoStoryDetectors")){
+        for (const FrameFolderCase& test : FRAME_FOLDER_CASES){
+            database.add<DetectorCaseTest<FrameFolderCase, check_frame_folder>>("PokemonLZA::AutoStoryDetectors - console frames: ", test);
+        }
     }
-    for (const TutorialCardFrameCase& test : TUTORIAL_CARD_FRAME_CASES){
-        database.add<DetectorCaseTest<TutorialCardFrameCase, check_tutorial_card_frame>>("PokemonLZA::AutoStoryDetectors - tutorial card frame: ", test);
+    if (test_folder_present("AutoStoryScreenEvents")){
+        for (const TutorialCardFrameCase& test : TUTORIAL_CARD_FRAME_CASES){
+            database.add<DetectorCaseTest<TutorialCardFrameCase, check_tutorial_card_frame>>("PokemonLZA::AutoStoryDetectors - tutorial card frame: ", test);
+        }
     }
     for (const PlateFrameCase& test : PLATE_FRAME_CASES){
         database.add<DetectorCaseTest<PlateFrameCase, check_plate_frame>>("PokemonLZA::AutoStory - Caught mark reader: ", test);

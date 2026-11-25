@@ -9,7 +9,9 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/TestRunners/UnitTest.h"
+#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "NintendoSwitch/Inference/NintendoSwitch_SystemKeyboardDetector.h"
 #include "Tests/ImageUnitTest.h"
@@ -21,6 +23,13 @@ namespace NintendoSwitch{
 namespace PokemonLZA{
 
 namespace{
+
+//  The pictures of these tests are in a folder of the test images that the
+//  PokemonAutomation/CommandLineTests do not have (yet). Without it the tests
+//  are left out, instead of all failing on a file that is not there.
+bool test_folder_present(std::string_view folder){
+    return Filesystem::exists(std::format("{}PokemonLZA/{}", UNIT_TEST_RESOURCE_PATH(), folder));
+}
 
 std::string describe(std::optional<size_t> value){
     return value ? std::format("{}", *value) : std::string("none");
@@ -277,17 +286,21 @@ public:
 
 
 void add_tests_IntroScreens(UnitTestDatabase& database){
-    for (const FrameCase& test : FRAME_CASES){
-        database.add<Test_IntroScreenFrame>(test);
+    if (test_folder_present("AutoStoryNewGame")){
+        for (const FrameCase& test : FRAME_CASES){
+            database.add<Test_IntroScreenFrame>(test);
+        }
+        for (const SystemKeyboardCase& test : SYSTEM_KEYBOARD_CASES){
+            database.add<Test_SystemKeyboardOnNameKeyboard>(test);
+        }
+        for (const ConfirmCase& test : CONFIRM_CASES){
+            database.add<Test_ConfirmChoicesFrame>(test);
+        }
     }
-    for (const SystemKeyboardCase& test : SYSTEM_KEYBOARD_CASES){
-        database.add<Test_SystemKeyboardOnNameKeyboard>(test);
-    }
-    for (const ConfirmCase& test : CONFIRM_CASES){
-        database.add<Test_ConfirmChoicesFrame>(test);
-    }
-    for (const LanguageFramesCase& test : LANGUAGE_FRAMES_CASES){
-        database.add<Test_ConfirmChoicesFrames>(test);
+    if (test_folder_present("AutoStoryConfirmChoices")){
+        for (const LanguageFramesCase& test : LANGUAGE_FRAMES_CASES){
+            database.add<Test_ConfirmChoicesFrames>(test);
+        }
     }
 }
 

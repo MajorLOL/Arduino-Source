@@ -7,6 +7,8 @@
 #include <array>
 #include <format>
 #include <string>
+#include "Common/Cpp/Filesystem/Filesystem.h"
+#include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/ImageTools/ImageStats.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/VideoPipeline/VideoOverlayScopes.h"
@@ -282,6 +284,12 @@ private:
 
 
 void add_tests_PartyBarDetector(UnitTestDatabase& database){
+    //  The pictures are in a folder of the test images that the
+    //  PokemonAutomation/CommandLineTests do not have (yet): without it the
+    //  tests are left out, instead of failing on a file that is not there.
+    if (!Filesystem::exists(std::format("{}PokemonLZA/PartyBarDetector", UNIT_TEST_RESOURCE_PATH()))){
+        return;
+    }
     for (const PartyBarCase& item : PARTY_BAR_CASES){
         database.add<Test_PartyBarDetector>(item);
     }

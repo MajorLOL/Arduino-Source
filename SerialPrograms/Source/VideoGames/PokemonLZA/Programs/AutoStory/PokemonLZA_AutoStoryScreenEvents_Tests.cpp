@@ -25,6 +25,14 @@ namespace PokemonLZA{
 
 namespace{
 
+//  The pictures of these tests are in a folder of the test images that the
+//  PokemonAutomation/CommandLineTests do not have (yet). Without it the tests
+//  are left out, instead of all failing on a file that is not there.
+bool test_folder_present(std::string_view folder){
+    return Filesystem::exists(std::format("{}PokemonLZA/{}", UNIT_TEST_RESOURCE_PATH(), folder));
+}
+
+
 struct PromptAndControl{
     bool interact_prompt = false;
     bool can_move = false;
@@ -458,11 +466,15 @@ private:
 
 
 void add_tests_AutoStoryScreenEvents(UnitTestDatabase& database){
-    for (const FrameCase& test : FRAME_CASES){
-        database.add<CaseTest<FrameCase, check_frame>>("PokemonLZA::AutoStoryScreenEvents - console frame: ", test);
+    if (test_folder_present("AutoStoryScreenEvents")){
+        for (const FrameCase& test : FRAME_CASES){
+            database.add<CaseTest<FrameCase, check_frame>>("PokemonLZA::AutoStoryScreenEvents - console frame: ", test);
+        }
     }
-    for (const FolderCase& test : FOLDER_CASES){
-        database.add<CaseTest<FolderCase, check_folder>>("PokemonLZA::AutoStoryScreenEvents - console frames: ", test);
+    if (test_folder_present("AutoStoryDetectors")){
+        for (const FolderCase& test : FOLDER_CASES){
+            database.add<CaseTest<FolderCase, check_folder>>("PokemonLZA::AutoStoryScreenEvents - console frames: ", test);
+        }
     }
     for (const BuiltinCase& test : BUILTIN_CASES){
         database.add<CaseTest<BuiltinCase, check_builtin>>("PokemonLZA::AutoStoryStarts built-in - ", test);
@@ -470,8 +482,10 @@ void add_tests_AutoStoryScreenEvents(UnitTestDatabase& database){
     for (const TableCase& test : TABLE_CASES){
         database.add<CaseTest<TableCase, check_table>>("PokemonLZA::AutoStoryStarts table - ", test);
     }
-    for (const StartFrameCase& test : START_FRAME_CASES){
-        database.add<CaseTest<StartFrameCase, check_start_frame>>("PokemonLZA::AutoStoryStarts frame - ", test);
+    if (test_folder_present("AutoStoryStarts")){
+        for (const StartFrameCase& test : START_FRAME_CASES){
+            database.add<CaseTest<StartFrameCase, check_start_frame>>("PokemonLZA::AutoStoryStarts frame - ", test);
+        }
     }
 }
 
