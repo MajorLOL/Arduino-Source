@@ -13,6 +13,7 @@
 #include "NintendoSwitch/Commands/NintendoSwitch_Commands_PushButtons.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
+#include "PocketPilot/PocketPilot_ShinyClip.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "PokemonFRLG_LegendaryReset.h"
 
@@ -164,6 +165,8 @@ void LegendaryReset::program(SingleSwitchProgramEnvironment& env, ProControllerC
             if (TAKE_VIDEO){
                 pbf_press_button(context, BUTTON_CAPTURE, 2000ms, 0ms);
             }
+            //  PocketPilot: a clip of the last seconds, in Screenshots/ShinyClips and in a message.
+            PocketPilot::send_shiny_clip(env, env.console, NOTIFICATION_SHINY, "LegendaryReset");
             break;
         }
 

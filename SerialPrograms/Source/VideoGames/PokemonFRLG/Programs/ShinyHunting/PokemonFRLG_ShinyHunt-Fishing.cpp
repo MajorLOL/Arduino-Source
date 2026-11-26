@@ -19,6 +19,7 @@
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
 #include "Pokemon/Pokemon_Strings.h"
 #include "VideoGames/PokemonFRLG/Inference/Dialogs/PokemonFRLG_DialogDetector.h"
+#include "PocketPilot/PocketPilot_ShinyClip.h"
 #include "VideoGames/PokemonFRLG/PokemonFRLG_Navigation.h"
 #include "PokemonFRLG_ShinyHunt-Fishing.h"
 
@@ -123,6 +124,8 @@ void ShinyHuntFishing::program(
                 env.console.video().snapshot(),
                 true
             );
+            //  PocketPilot: a clip of the last seconds, in Screenshots/ShinyClips and in a message.
+            PocketPilot::send_shiny_clip(env, env.console, NOTIFICATION_SHINY, "ShinyHunt-Fishing");
             finished = true;
             break;
         }

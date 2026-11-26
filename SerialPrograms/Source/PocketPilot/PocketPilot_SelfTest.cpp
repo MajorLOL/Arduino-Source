@@ -95,6 +95,7 @@
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Language.h"
 #include "PocketPilot_SettingsSearch.h"
+#include "PocketPilot_ShinyClip.h"
 #include "PocketPilot_Theme.h"
 #include "PocketPilot_Setup.h"
 #include "PocketPilot_SelfTest.h"
@@ -1589,6 +1590,47 @@ int check_story_times(Logger& logger){
 
     logger.log(
         "Story times test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The clip of a shiny: its file name, how its size is written, and what is
+//  small enough to send. (The saving and the message need a console.)
+int check_shiny_clip(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("Shiny clip test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+    const std::string stamp = "20261126-153012123456";
+    check(
+        clip_file_name("ShinyHunt-Overworld", stamp) == "Shiny-ShinyHunt-Overworld-20261126-153012123456.mp4",
+        "the name has the program and the time"
+    );
+    check(clip_file_name("Legendary Reset", stamp) == "Shiny-Legendary-Reset-" + stamp + ".mp4", "a space becomes a dash");
+    check(clip_file_name("a/b\\c:d*e?\"f<g>h|i", stamp) == "Shiny-abcdefghi-" + stamp + ".mp4", "what a file name cannot have is left out");
+    check(clip_file_name("../../x", stamp) == "Shiny-x-" + stamp + ".mp4", "no way out of the folder");
+    check(clip_file_name("", stamp) == "Shiny-" + stamp + ".mp4", "no program");
+    check(clip_file_name("X", "a:b") == "Shiny-X.mp4", "a time with nothing of a time in it");
+    check(clip_file_name("X", "../../y") == "Shiny-X.mp4", "no way out of the folder through the time");
+
+    check(clip_size_text(0) == "0 KB", "no size");
+    check(clip_size_text(1) == "1 KB" && clip_size_text(1024) == "1 KB" && clip_size_text(1025) == "2 KB", "a size under a megabyte is rounded up");
+    check(clip_size_text(812 * 1024) == "812 KB", "kilobytes");
+    check(clip_size_text(1024 * 1024) == "1.0 MB" && clip_size_text(6710886) == "6.4 MB", "megabytes");
+
+    check(!clip_can_be_sent(0), "an empty clip is not sent");
+    check(clip_can_be_sent(1) && clip_can_be_sent(CLIP_SEND_LIMIT), "a small clip is sent, also at the limit");
+    check(!clip_can_be_sent(CLIP_SEND_LIMIT + 1), "a clip over the limit is not");
+
+    logger.log(
+        "Shiny clip test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -6040,6 +6082,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_name_mark(logger);
         failed += check_updates(logger);
         failed += check_story_times(logger);
+        failed += check_shiny_clip(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);

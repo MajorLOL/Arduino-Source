@@ -14,7 +14,7 @@ Nothing goes out when the program starts, and there is no telemetry, no analytic
 | The list of firmware, and a firmware file | GitHub, the repository `PokemonAutomation/Packages` | Only on the firmware step of the setup |
 | The list of downloads, and the files (the OCR model) | `raw.githubusercontent.com` (Packages) | Only when you press the button to download in the settings, or start a program that needs a file that is not there (the zip has the OCR model) |
 | The list of banned players and a stop switch of the Tera raid host | `raw.githubusercontent.com` (Pokémon Automation's `ServerConfigs-PA-SHA`) | Only when that program runs |
-| Messages and pictures to a Discord channel | The webhook address that you enter | Only for the notifications that you switch on |
+| Messages, pictures and the clip of a shiny to a Discord channel | The webhook address that you enter | Only for the notifications that you switch on (the clip only with the notification for a shiny, and only a video of the console that the program looked at, under 8 MB) |
 
 Error reports are not sent: the part that does it is in Pokémon Automation's official build only, and the setting is hidden. They are saved in `ErrorReportsLocal`, on your computer.
 
