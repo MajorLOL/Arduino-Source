@@ -369,5 +369,17 @@
  "Only warnings and errors": "Avertissements et erreurs seulement",
  "Shows only the lines in red and in orange: the errors and the warnings.": "N'affiche que les lignes en rouge et en orange : les erreurs et les avertissements.",
  "Search the settings": "Rechercher dans les réglages",
- "No setting has these words.": "Aucun réglage ne contient ces mots."
+ "No setting has these words.": "Aucun réglage ne contient ces mots.",
+ "Installations": "Installations",
+ "Installation %1": "Installation %1",
+ "New installation": "Nouvelle installation",
+ "It starts with the setup.": "Commence par la configuration.",
+ "Starting...": "Démarrage...",
+ "Not running": "À l'arrêt",
+ "A program runs": "Un programme tourne",
+ "A program is open": "Un programme est ouvert",
+ "Setup": "Configuration",
+ "Remove": "Supprimer",
+ "Really remove?": "Vraiment supprimer ?",
+ "Each installation has its own settings: its own capture card and its own microcontroller. Closing this window does not stop them.": "Chaque installation a ses propres réglages : sa propre carte de capture et son propre microcontrôleur. Fermer cette fenêtre ne les arrête pas."
 }

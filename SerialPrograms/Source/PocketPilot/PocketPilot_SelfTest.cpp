@@ -100,6 +100,7 @@
 #include "ClaudePlays/ClaudePlays_Program.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
+#include "PocketPilot_Instances.h"
 #include "PocketPilot_Language.h"
 #include "PocketPilot_OldSettings.h"
 #include "PocketPilot_SettingsSearch.h"
@@ -6282,6 +6283,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_shiny_clip(logger);
         failed += check_history_frames(logger);
         failed += check_old_settings(logger);
+        failed += run_instances_checks(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);

@@ -4,7 +4,9 @@
  *
  */
 
+#include <set>
 #include "Common/Cpp/EarlyShutdown.h"
+#include "Common/Cpp/Concurrency/Mutex.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/GlobalServices.h"
 #include "CommonFramework/VideoPipeline/VideoPipelineOptions.h"
@@ -18,6 +20,33 @@
 
 namespace PokemonAutomation{
 
+
+namespace{
+
+//  The sessions that exist (Claude GG: for latest_video_snapshot()). A session
+//  leaves the list before anything of it is taken down.
+Mutex& session_list_lock(){
+    static Mutex lock;
+    return lock;
+}
+std::set<VideoSession*>& session_list(){
+    static std::set<VideoSession*> list;
+    return list;
+}
+
+}
+
+VideoSnapshot latest_video_snapshot(WallClock::duration max_age){
+    LockGuard<Mutex> lg(session_list_lock());
+    const WallClock min_time = current_time() - max_age;
+    for (VideoSession* session : session_list()){
+        VideoSnapshot snapshot = session->snapshot_recent_nonblocking(min_time);
+        if (snapshot && snapshot.timestamp >= min_time){
+            return snapshot;
+        }
+    }
+    return VideoSnapshot();
+}
 
 
 void VideoSession::add_state_listener(StateListener& listener){
@@ -49,6 +78,10 @@ bool VideoSession::try_shutdown() noexcept{
     return global_watchdog().try_remove(*this);
 }
 VideoSession::~VideoSession(){
+    {
+        LockGuard<Mutex> lg(session_list_lock());
+        session_list().erase(this);
+    }
     blocking_shutdown(
         m_logger,
         "VideoSession",
@@ -65,6 +98,10 @@ VideoSession::VideoSession(Logger& logger, VideoSourceOption& option)
         global_watchdog().add(*this, std::chrono::seconds(watchdog_timeout));
     }
     set_source(option.descriptor(), option.m_resolution, option.m_format, option.m_fps);
+
+    //  Only now it is whole enough to be asked for a picture.
+    LockGuard<Mutex> lg(session_list_lock());
+    session_list().insert(this);
 }
 
 

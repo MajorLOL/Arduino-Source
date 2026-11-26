@@ -592,6 +592,91 @@ jobs:
             throw "The setup test failed (exit code $code): see the lines above."
           }
 
+      #  Several installations (see Source/PocketPilot/PocketPilot_Instances.h):
+      #  every installation is a process of its own, with a folder of its own
+      #  (its settings, its capture card, its microcontroller). Two tests: an
+      #  installation that is not the first (its folder, its lock, its status,
+      #  its miniature and its connection), and the overview that shows the
+      #  miniatures. Neither may touch the settings of installation 1.
+      - name: Installations test
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
+          New-Item -ItemType Directory -Force -Path "installations-screenshots" | Out-Null
+          $shots = (Resolve-Path "installations-screenshots").Path
+          $main_settings = "$dir/UserSettings/ClaudeGG-Settings.json"
+          $main_before = $null
+          if (Test-Path $main_settings) {
+            $main_before = (Get-FileHash $main_settings).Hash
+          }
+          $failed = $false
+
+          #  1. An installation that is not the first.
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--installation", "ci-test", "--installation-test" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(120000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          Write-Host "The installation test: exit code $code."
+          $log = "$dir/Installations/ci-test/ClaudeGG.log"
+          if (Test-Path $log) {
+            Write-Host "---- the end of Installations/ci-test/ClaudeGG.log ----"
+            Get-Content $log -Tail 60
+            Get-Content $log | Select-String -Pattern "Installation test" | ForEach-Object { Write-Host $_.Line }
+          } else {
+            Write-Host "No log in Installations/ci-test."
+            $failed = $true
+          }
+          if ($code -ne 0) {
+            $failed = $true
+          }
+          if (-not (Test-Path "$dir/Installations/ci-test/UserSettings/ClaudeGG-Settings.json")) {
+            Write-Host "::error::The installation wrote no settings in its own folder."
+            $failed = $true
+          }
+
+          #  2. The overview of the installations (a window of its own).
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--installations-hub-test", "`"$shots`"" -PassThru
+          $handle = $process.Handle
+          if ($process.WaitForExit(180000)) {
+            $code = $process.ExitCode
+          } else {
+            $process.Kill()
+            $code = -1
+          }
+          Write-Host "The test of the overview: exit code $code."
+          Get-ChildItem $shots | Format-Table Name, Length
+          Get-ChildItem "$shots/preview-*.jpg" -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "PP-PREVIEW-BEGIN $($_.Name)"
+            Write-Host ([Convert]::ToBase64String([IO.File]::ReadAllBytes($_.FullName)))
+            Write-Host "PP-PREVIEW-END $($_.Name)"
+          }
+          $hub_log = "$dir/ClaudeGG-Installations.log"
+          if (Test-Path $hub_log) {
+            Write-Host "---- the end of ClaudeGG-Installations.log ----"
+            Get-Content $hub_log -Tail 40
+          }
+          if ($code -ne 0) {
+            $failed = $true
+          }
+
+          #  3. Installation 1 is as it was.
+          if ($null -ne $main_before) {
+            $main_after = (Get-FileHash $main_settings).Hash
+            if ($main_after -ne $main_before) {
+              Write-Host "::error::The tests of the installations changed the settings of installation 1."
+              $failed = $true
+            }
+          }
+          if ($failed) {
+            throw "The installations test failed: see the lines above."
+          }
+          Write-Host "The installations test passed."
+
       #  Also for a build that failed the interface test: to look at.
       - name: Upload artifact
         if: success() || failure()

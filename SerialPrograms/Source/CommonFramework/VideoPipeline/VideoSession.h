@@ -256,6 +256,11 @@ private:
 };
 
 
+//  Claude GG: the latest picture of any video session that has one that is not
+//  older than "max_age" (the miniature of an installation shows it); a null
+//  snapshot when none has. Never blocks.
+VideoSnapshot latest_video_snapshot(WallClock::duration max_age);
+
 
 
 }

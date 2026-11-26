@@ -5,6 +5,7 @@
  */
 
 #include "Common/Cpp/Filesystem/Filesystem.h"
+#include "PocketPilot/PocketPilot_Instances.h"
 #include "PocketPilot/PocketPilot_OldSettings.h"
 #include "GlobalAutoPaths.h"
 
@@ -95,7 +96,9 @@ std::string get_user_file_path(){
 
 
 const std::string& RUNTIME_BASE_PATH(){
-    static std::string path = Filesystem::application_scratch_path().string();
+    //  The folder that the program was started in; for an installation that is
+    //  not the first, its folder in Installations/ (see PocketPilot_Instances.h).
+    static std::string path = PocketPilot::runtime_base_path(Filesystem::application_scratch_path().string());
     return path;
 }
 
@@ -142,7 +145,8 @@ const std::string& RESOURCE_PATH(){
     return path;
 }
 const std::string& DOWNLOADED_RESOURCE_PATH(){
-    static std::string path = RUNTIME_BASE_PATH() + "DownloadedResources/";
+    //  One folder for all the installations: it holds what the program downloaded.
+    static std::string path = PocketPilot::shared_base_path() + "DownloadedResources/";
     return path;
 }
 const std::string& UNIT_TEST_RESOURCE_PATH(){

@@ -55,6 +55,7 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/PersistentSettings.h"
+#include "PocketPilot_Instances.h"
 #include "CommonFramework/Logging/Logger.h"
 #include "PocketPilot_Language.h"
 #include "PocketPilot_Setup.h"
@@ -146,7 +147,8 @@ std::atomic<bool> g_active(false);
 
 
 QString user_folder_path(){
-    return QDir(QString::fromStdString(RUNTIME_BASE_PATH())).filePath("Languages");
+    //  The languages of the user are the same for every installation.
+    return QDir(QString::fromStdString(PocketPilot::shared_base_path())).filePath("Languages");
 }
 
 
@@ -846,6 +848,10 @@ void run_and_keep(bool ask_language, bool ask_board, bool play_intro = false, bo
     };
     request.build = QString::fromStdString(PROGRAM_NAME + " " + PROGRAM_VERSION + ", build " + PROGRAM_BUILD);
     request.make_options = g_options_maker;
+    //  The way back to the overview of the installations, in the corner.
+    request.show_overview = []{
+        show_instances_overview();
+    };
     //  At the start the main window is made after this: the screen stays up
     //  until it is there. (Opened from the settings, it is there already.)
     request.hold_screen = (g_game_opener == nullptr);

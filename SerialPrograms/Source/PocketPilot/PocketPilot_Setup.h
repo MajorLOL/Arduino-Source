@@ -56,6 +56,12 @@
  *  "Start" opens the program, it does not leave. (This is the first version
  *  of "one interface"; what each button does is listed in ROADMAP.md.)
  *
+ *  More than one installation of the program can run (see
+ *  PocketPilot_Instances.h). Their overview, as miniatures, is one more page of
+ *  these screens, in a window of its own (SetupRequest::overview); every other
+ *  window has a button that goes back to it (the one in the corner of the
+ *  setup's screens, "Installations" along the top of the main window).
+ *
  *  The workflow that makes the builds also runs
  *
  *      SerialPrograms --setup-test <folder>
@@ -77,6 +83,7 @@
 #include <QString>
 #include <QStringList>
 #include "PocketPilot_Home.h"
+#include "PocketPilot_Instances.h"
 
 class QApplication;
 class QWidget;
@@ -179,6 +186,28 @@ struct SetupRequest{
     //  release_setup_curtain() is called: the main window is made next, and
     //  the desktop must not show in between.
     bool hold_screen = false;
+
+    //  ---- the installations (see PocketPilot_Instances.h)
+
+    //  This screen is the overview of the installations, in a window of its own,
+    //  instead of the setup. It needs the four functions that follow.
+    bool overview = false;
+    //  The installations, with what they tell (called about once a second).
+    std::function<std::vector<InstanceInfo>()> instance_list;
+    //  A miniature was pressed: open that installation (bring its window
+    //  forward, or start it).
+    std::function<void(const QString& id)> instance_open;
+    //  "New installation" was pressed: makes one and starts it; returns its id
+    //  (empty: it could not be made).
+    std::function<QString()> instance_create;
+    //  "Remove" was pressed twice: deletes the installation's folder. False:
+    //  it was not deleted.
+    std::function<bool(const QString& id)> instance_remove;
+
+    //  The button in the corner of every other screen that is a window of its
+    //  own: it shows the overview (the screen puts its own window away). Empty:
+    //  the button is not drawn.
+    std::function<void()> show_overview;
 };
 
 struct SetupResult{
@@ -236,6 +265,10 @@ struct AppActions{
 
     //  "Keep the screen on" was switched.
     std::function<void(bool on)> keep_screen_on;
+
+    //  "Installations": shows the overview of the installations (the window is
+    //  put away by the screen). Empty: the button is not drawn.
+    std::function<void()> installations;
 };
 
 //  The screens as the main window's own screen: a child of "parent", it stays
@@ -294,6 +327,14 @@ AppView* make_app_view(QWidget* parent, const SetupRequest& request, AppActions 
 //  Needs a QApplication. The language is tried on the screens as it is
 //  picked (see preview_language()); making it final is left to the caller.
 SetupResult run_setup(const SetupRequest& request);
+
+//  The overview of the installations as a window of its own, full screen
+//  (SetupRequest::overview): returns when it is closed. With a folder it makes
+//  no window on the screen, goes through the overview with the mouse and the
+//  keyboard, saves pictures in the folder and returns 0 when all was well.
+int run_instances_overview(const SetupRequest& request, const QString& screenshots_folder);
+//  The overview comes forward, also when it was minimized.
+void bring_overview_forward();
 
 //  Ends the screen that was kept up with SetupRequest::hold_screen: it fades
 //  away, over the window that was made in the meantime. Does nothing when no

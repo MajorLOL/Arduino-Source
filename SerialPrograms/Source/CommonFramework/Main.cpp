@@ -46,6 +46,7 @@
 #include "Options/Environment/ThemeSelectorOption.h"
 #include "Startup/SetupSettings.h"
 #include "Windows/MainWindow.h"
+#include "PocketPilot/PocketPilot_Instances.h"
 #include "PocketPilot/PocketPilot_Intro.h"
 #include "PocketPilot/PocketPilot_Language.h"
 #include "PocketPilot/PocketPilot_OldSettings.h"
@@ -82,7 +83,10 @@ FileLogger& global_file_logger(){
     static FileLogger logger(
         GlobalThreadPools::unlimited_normal(),
         FileLoggerConfig{
-            .file_path = USER_FILE_PATH() + Filesystem::application_binary_name().stem().string() + ".log",
+            //  The overview of the installations has a log of its own: it runs at the
+            //  same time as the installation whose folder it was started in.
+            .file_path = USER_FILE_PATH() + Filesystem::application_binary_name().stem().string() +
+                (PocketPilot::is_overview_process() ? "-Installations" : "") + ".log",
         }
     );
     return logger;
@@ -101,6 +105,30 @@ int run_program(int argc, char *argv[]){
 #else
     QApplication application(argc, argv);
 #endif
+
+    //  A run of the tests does not report itself to the overview, does not
+    //  start other processes and does not take the lock of its installation.
+    {
+        bool test_run = false;
+        for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::SETUP_TEST_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::LANGUAGE_TEST_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::INTRO_TEST_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::TUTORIAL_TEST_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::INSTANCE_TEST_OPTION) == 0 ||
+                strcmp(argv[i], PocketPilot::INSTANCES_HUB_TEST_OPTION) == 0 ||
+                strcmp(argv[i], "--command-line-test-mode") == 0
+            ){
+                test_run = true;
+            }
+        }
+        PocketPilot::set_test_run(test_run);
+    }
+
+    //  The folder of an installation that is not the first is made before the
+    //  log is: the log is in it.
+    Filesystem::create_directories(Filesystem::Path(RUNTIME_BASE_PATH()));
 
 #ifdef PA_DPP
     // Configure OpenSSL before DPP or background tasks create a TLS context.
@@ -166,6 +194,7 @@ int run_program(int argc, char *argv[]){
     logger.log("Starting Program...");
     logger.log("Current path: " + Filesystem::current_path().string_slash_normalized());
     logger.log("Executable path: " + Filesystem::application_binary_directory().string_slash_normalized());
+    logger.log("Installation: " + PocketPilot::current_instance() + (PocketPilot::is_overview_process() ? " (the overview of the installations)" : ""));
     logger.log("Program setting folder: " + SETTINGS_PATH());
     logger.log("Program resources folder: " + RESOURCE_PATH());
 #ifdef PA_DPP
@@ -207,6 +236,36 @@ int run_program(int argc, char *argv[]){
         return 1;
     }
 
+    //  An installation runs once: starting one that already runs shows the
+    //  overview of the installations instead (where it can be opened, and a new
+    //  one made). Nothing of it is read or written first. Not for the tests, and
+    //  not for the overview itself, which has its own way of being once.
+    std::unique_ptr<PocketPilot::InstanceGuard> instance_guard;
+    std::unique_ptr<PocketPilot::InstanceLink> instance_link;
+    if (!PocketPilot::is_test_run() && !PocketPilot::is_overview_process()){
+        const std::string scratch = PocketPilot::shared_base_path();
+        instance_guard = std::make_unique<PocketPilot::InstanceGuard>(
+            QString::fromStdString(PocketPilot::instance_meta_path(scratch, PocketPilot::current_instance()))
+        );
+        if (!instance_guard->acquired()){
+            logger.log(
+                "Installation " + PocketPilot::current_instance() + " runs already: showing the overview of the installations.",
+                COLOR_BLUE
+            );
+            PocketPilot::show_instances_overview();
+            return 0;
+        }
+        //  The overview asks it to come forward on this connection.
+        instance_link = std::make_unique<PocketPilot::InstanceLink>(
+            PocketPilot::instance_link_name(scratch, QString::fromStdString("i" + PocketPilot::current_instance())),
+            [](const QString& command){
+                if (command == "show"){
+                    PocketPilot::bring_instance_forward();
+                }
+            }
+        );
+    }
+
     //  Read program settings from json file: ClaudeGG-Settings.json (named
     //  after the program; SerialPrograms-Settings.json before build 98, whose
     //  settings are taken over at the first start under the new name).
@@ -237,7 +296,9 @@ int run_program(int argc, char *argv[]){
     //  the film goes over into the first question without a window opening or
     //  closing in between. The test of the intro itself decodes the film
     //  without a window.
-    bool play_intro = GlobalSettings::instance().PLAY_INTRO;
+    //  (Not for an installation that is not the first: the film was seen. It
+    //  starts at once with the setup.)
+    bool play_intro = GlobalSettings::instance().PLAY_INTRO && PocketPilot::is_main_instance();
     {
         bool intro_test = false;
         bool tutorial_test = false;
@@ -277,8 +338,20 @@ int run_program(int argc, char *argv[]){
         bool ask_setup = true;
         bool language_test = false;
         bool setup_test = false;
+        bool instance_test = false;
+        bool hub_test = false;
         QString setup_folder;
+        QString hub_folder;
         for (int i = 1; i < argc; i++){
+            if (strcmp(argv[i], PocketPilot::INSTANCE_TEST_OPTION) == 0){
+                instance_test = true;
+            }
+            if (strcmp(argv[i], PocketPilot::INSTANCES_HUB_TEST_OPTION) == 0){
+                hub_test = true;
+                if (i + 1 < argc){
+                    hub_folder = QString::fromLocal8Bit(argv[i + 1]);
+                }
+            }
             if (strcmp(argv[i], PocketPilot::NO_LANGUAGE_PROMPT_OPTION) == 0 ||
                 strcmp(argv[i], PocketPilot::UI_SCREENSHOTS_OPTION) == 0 ||
                 strcmp(argv[i], PocketPilot::INTRO_TEST_OPTION) == 0 ||
@@ -302,6 +375,17 @@ int run_program(int argc, char *argv[]){
         PocketPilot::install_language_support(application);
         if (setup_test){
             return PocketPilot::run_setup_test(application, setup_folder);
+        }
+        //  The tests of the installations, and the overview of them: a process
+        //  of its own that shows the miniatures (see PocketPilot_Instances.h).
+        if (instance_test){
+            return PocketPilot::run_instance_test(application);
+        }
+        if (hub_test){
+            return PocketPilot::run_instances_hub(application, hub_folder);
+        }
+        if (PocketPilot::is_overview_process()){
+            return PocketPilot::run_instances_hub(application, QString());
         }
         //  The setup ends with the choice of a game: these are the games.
         PocketPilot::set_game_lister([](std::vector<PocketPilot::HomeGame>& games, std::vector<PocketPilot::HomeProgram>& programs){
@@ -457,6 +541,9 @@ int run_program(int argc, char *argv[]){
 
     int ret = application.exec();
 
+    //  The overview sees that it does not run any more.
+    PocketPilot::clear_instance_report();
+
     //  Write program settings back to the json file.
     std::cout << "Saving Settings..." << std::endl;
     PERSISTENT_SETTINGS().write();
@@ -470,6 +557,15 @@ int main(int argc, char *argv[]){
     // Retrieve and store program name
     set_program_path(argv[0]);
 #endif
+
+    //  Which installation this is: before any folder of the program is asked for.
+    {
+        QString error;
+        if (!PocketPilot::read_instance_options(argc, argv, &error)){
+            std::cerr << error.toStdString() << std::endl;
+            return 1;
+        }
+    }
 
 #if defined(__linux__)
     // Qt multimedia, default to gstreamer to prevent flickering

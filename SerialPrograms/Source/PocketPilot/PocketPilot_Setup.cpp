@@ -434,6 +434,11 @@ public:
     virtual bool shows_menu() const{
         return true;
     }
+    //  What the page shows, for the miniature of the installation ("Pokemon
+    //  FireRed: AutoStory"); empty: nothing in particular.
+    virtual QString about() const{
+        return QString();
+    }
 };
 
 struct Hit{
@@ -517,6 +522,32 @@ public:
     //  How often it was asked for (the test does not minimize its windows).
     int minimize_requests() const{
         return m_minimize_requests;
+    }
+
+    //  ---- the installations (see PocketPilot_Instances.h)
+    //  The button in the corner (and "Installations" along the top of the main
+    //  window): shows the overview and puts this window away (the test only
+    //  counts, and does not put its window away).
+    void go_overview(){
+        m_overview_requests++;
+        const std::function<void()>& show = m_app_mode ? m_app.installations : m_request.show_overview;
+        if (show){
+            show();
+        }
+        if (!m_test_mode){
+            if (QWidget* top = window()){
+                top->showMinimized();
+            }
+        }
+    }
+    int overview_requests() const{
+        return m_overview_requests;
+    }
+    //  The overview itself, as the page of this window.
+    void go_instances();
+    //  What this window tells the overview, once a second: see report_presence().
+    int presence_reports() const{
+        return m_presence_reports;
     }
 
     //  ---- the main window's own screen (see AppView)
@@ -893,6 +924,9 @@ private:
     void dispatch(const QString& id);
     void paint_app_menu(QPainter& painter);
     void paint_minimize(QPainter& painter);
+    void paint_overview_button(QPainter& painter);
+    void paint_close_button(QPainter& painter);
+    void report_presence();
     bool app_activate(const QString& id);
     void place_claude();
 
@@ -941,6 +975,10 @@ private:
     QString m_copied;
     bool m_device_manager_opened = false;
     int m_minimize_requests = 0;
+    int m_overview_requests = 0;
+    //  The status and the miniature that the overview reads, once a second.
+    QTimer m_presence;
+    int m_presence_reports = 0;
 
     //  The film on top of the page.
     bool m_video_open = false;
@@ -4255,8 +4293,9 @@ public:
             m_device_ids << QByteArray() << QByteArray();
             return;
         }
+        //  (Each installation remembers its own capture card.)
         const QString wanted = QSettings(QSettings::IniFormat, QSettings::UserScope, "PocketPilot", "Setup")
-            .value("capture_device").toString();
+            .value(instance_setting_key("capture_device")).toString();
         int index = 0;
         for (int c = 0; c < m_video_names.size(); c++){
             if (m_video_names[c] == wanted){
@@ -4297,7 +4336,7 @@ public:
         }
         if (remember){
             QSettings(QSettings::IniFormat, QSettings::UserScope, "PocketPilot", "Setup")
-                .setValue("capture_device", m_video_names[index]);
+                .setValue(instance_setting_key("capture_device"), m_video_names[index]);
         }
         start_video(index);
         start_audio(index);
@@ -7016,6 +7055,12 @@ public:
     virtual QString state() const override{
         return "title=" + m_title + ";game=" + QString::number(m_game);
     }
+    virtual QString about() const override{
+        if (m_game_name.isEmpty()){
+            return m_title;
+        }
+        return m_title.isEmpty() ? m_game_name : m_game_name + ": " + m_title;
+    }
 
     virtual void step(double dt) override{
         m_clock += dt;
@@ -7120,6 +7165,335 @@ private:
 
 
 //  ---------------------------------------------------------------------
+//  The overview of the installations: a miniature of each, and one more to
+//  make a new one. A window of its own (SetupRequest::overview).
+//  ---------------------------------------------------------------------
+
+//  Where the miniatures go: as large as the room allows, in rows.
+struct TileGrid{
+    int columns = 1;
+    double width = 0;
+    double picture_height = 0;
+    double tile_height = 0;
+};
+constexpr double TILE_X = 140;
+constexpr double TILE_Y = 330;
+constexpr double TILE_AREA_W = 1640;
+constexpr double TILE_AREA_H = 690;
+constexpr double TILE_GAP = 32;
+constexpr double TILE_CAPTION = 96;
+constexpr double TILE_MAX_W = 520;
+
+TileGrid tile_grid(size_t count){
+    TileGrid best;
+    const int n = (int)std::max<size_t>(1, count);
+    for (int columns = 1; columns <= std::min(n, 8); columns++){
+        const int rows = (n + columns - 1) / columns;
+        const double by_width = (TILE_AREA_W - (columns - 1) * TILE_GAP) / columns;
+        const double room = (TILE_AREA_H - (rows - 1) * TILE_GAP) / rows;
+        const double by_height = (room - TILE_CAPTION) * 16.0 / 9.0;
+        const double width = std::min(std::min(by_width, by_height), TILE_MAX_W);
+        //  More columns when it comes to the same.
+        if (width >= best.width){
+            best.columns = columns;
+            best.width = width;
+        }
+    }
+    best.width = std::max(80.0, best.width);
+    best.picture_height = best.width * 9.0 / 16.0;
+    best.tile_height = best.picture_height + TILE_CAPTION;
+    return best;
+}
+QRectF tile_rect(const TileGrid& grid, size_t index){
+    const int column = (int)(index % (size_t)grid.columns);
+    const int row = (int)(index / (size_t)grid.columns);
+    return QRectF(
+        TILE_X + column * (grid.width + TILE_GAP),
+        TILE_Y + row * (grid.tile_height + TILE_GAP),
+        grid.width,
+        grid.tile_height
+    );
+}
+
+QString instance_name_text(const InstanceInfo& info){
+    return info.name.isEmpty() ? T("Installation %1").arg(info.id) : info.name;
+}
+//  What an installation is doing, in words.
+QString instance_state_text(const InstanceInfo& info){
+    if (!info.running){
+        return info.starting ? T("Starting...") : T("Not running");
+    }
+    if (info.state == "running"){
+        return T("A program runs");
+    }
+    if (info.state == "setup"){
+        return T("Setup");
+    }
+    if (info.state == "program"){
+        return T("A program is open");
+    }
+    return T("Games");
+}
+
+class InstancesPage : public Page{
+public:
+    explicit InstancesPage(Canvas& canvas)
+        : m_canvas(&canvas)
+    {
+        refresh();
+        canvas.set_focus_id(m_infos.empty() ? QString("inst-new") : "inst:" + m_infos.front().id);
+    }
+
+    virtual const char* name() const override{
+        return "instances";
+    }
+    virtual bool shows_menu() const override{
+        return false;
+    }
+    virtual void step(double dt) override{
+        m_clock += dt;
+        m_poll += dt;
+        if (m_poll >= 1.0){
+            m_poll = 0;
+            refresh();
+        }
+        if (!m_confirm.isEmpty()){
+            m_confirm_time -= dt;
+            if (m_confirm_time <= 0){
+                m_confirm.clear();
+            }
+        }
+        if (!m_waiting.isEmpty()){
+            m_waiting_time -= dt;
+            if (m_waiting_time <= 0){
+                m_waiting.clear();
+            }
+        }
+    }
+    virtual QString state() const override{
+        return QString::number(m_infos.size()) + " installations";
+    }
+
+    virtual void paint(Canvas& canvas, QPainter& painter, double t) override{
+        const Intro in{0.10, 0.35, 0.50, 0.85};
+        const QString heading = T("Installations");
+        draw_heading(painter, heading, 140, 80, 104, prog(t, in.head, in.head + 0.9), 1.0, 1200);
+        draw_sub(
+            painter,
+            T("Each installation has its own settings: its own capture card and its own microcontroller. Closing this window does not stop them."),
+            140, 80 + heading_height(heading, 104, 1200) + 12, prog(t, in.sub, in.sub + 0.8), 1.0, 30, 1250
+        );
+
+        const double reveal = eo(prog(t, in.bar, in.bar + 0.8));
+        const TileGrid grid = tile_grid(m_infos.size() + 1);
+        for (size_t c = 0; c < m_infos.size(); c++){
+            paint_tile(canvas, painter, m_infos[c], tile_rect(grid, c), grid, reveal);
+        }
+        paint_new_tile(canvas, painter, tile_rect(grid, m_infos.size()), grid, reveal);
+    }
+
+    virtual void activate(Canvas& canvas, const QString& id) override{
+        const SetupRequest& request = canvas.request();
+        if (id == "inst-new"){
+            const QString made = request.instance_create ? request.instance_create() : QString();
+            if (!made.isEmpty()){
+                //  The window of the new one comes by itself; this one goes aside
+                //  when it is up.
+                m_waiting = made;
+                m_waiting_time = 30;
+                refresh();
+            }
+        }else if (id.startsWith("inst-remove:")){
+            const QString target = id.mid(QString("inst-remove:").size());
+            if (m_confirm != target){
+                m_confirm = target;
+                m_confirm_time = 4.0;
+            }else{
+                m_confirm.clear();
+                if (request.instance_remove){
+                    request.instance_remove(target);
+                }
+                refresh();
+            }
+        }else if (id.startsWith("inst:")){
+            const QString target = id.mid(QString("inst:").size());
+            bool running = false;
+            for (const InstanceInfo& info : m_infos){
+                if (info.id == target){
+                    running = info.running;
+                }
+            }
+            if (request.instance_open){
+                request.instance_open(target);
+            }
+            if (running){
+                //  Its window is on its way to the front.
+                canvas.minimize();
+            }else{
+                m_waiting = target;
+                m_waiting_time = 30;
+            }
+        }
+    }
+    virtual void enter_pressed(Canvas& canvas) override{
+        (void)canvas;
+    }
+
+private:
+    void refresh(){
+        const SetupRequest& request = m_canvas->request();
+        m_infos = request.instance_list ? request.instance_list() : std::vector<InstanceInfo>();
+        m_pictures.clear();
+        for (const InstanceInfo& info : m_infos){
+            m_pictures.push_back(info.picture.isNull() ? QPixmap() : QPixmap::fromImage(info.picture));
+        }
+        //  The one that was started is up: this window steps aside.
+        if (!m_waiting.isEmpty()){
+            for (const InstanceInfo& info : m_infos){
+                if (info.id == m_waiting && info.running){
+                    m_waiting.clear();
+                    m_canvas->minimize();
+                }
+            }
+        }
+        if (!m_confirm.isEmpty()){
+            bool still = false;
+            for (const InstanceInfo& info : m_infos){
+                if (info.id == m_confirm && !info.running && !info.main){
+                    still = true;
+                }
+            }
+            if (!still){
+                m_confirm.clear();
+            }
+        }
+    }
+
+    void paint_tile(
+        Canvas& canvas, QPainter& painter, const InstanceInfo& info,
+        const QRectF& tile, const TileGrid& grid, double reveal
+    ){
+        const size_t index = (size_t)(&info - m_infos.data());
+        const QString id = "inst:" + info.id;
+        const bool hover = canvas.hovered(id);
+        const bool focus = canvas.focused(id);
+        const QRectF picture(tile.left(), tile.top(), grid.width, grid.picture_height);
+        const double a = reveal;
+        const double slide = (1.0 - reveal) * 30;
+        painter.save();
+        painter.translate(0, slide);
+
+        //  The miniature: dimmed when the installation does not run.
+        if (hover || focus){
+            glow(painter, picture, 18, ORANGE, 0.8 * a);
+        }
+        panel(painter, picture, 18, with_alpha(QColor(8, 8, 9), a));
+        const double dim = info.running ? 1.0 : 0.42;
+        if (index < m_pictures.size() && !m_pictures[index].isNull()){
+            QPainterPath clip;
+            clip.addRoundedRect(picture.adjusted(1, 1, -1, -1), 17, 17);
+            painter.save();
+            painter.setClipPath(clip);
+            painter.setOpacity(a * dim);
+            painter.drawPixmap(picture.adjusted(1, 1, -1, -1), m_pictures[index], QRectF(m_pictures[index].rect()));
+            painter.restore();
+        }else{
+            const QPixmap logo = plain_picture("switch-gg");
+            if (!logo.isNull()){
+                const double w = picture.width() * 0.5;
+                const double h = w * logo.height() / logo.width();
+                draw_picture(painter, logo, QRectF(picture.center().x() - w / 2, picture.center().y() - h / 2, w, h), 0.35 * a);
+            }
+        }
+        panel(
+            painter, picture, 18, QColor(),
+            hover || focus ? with_alpha(ORANGE, 0.95 * a) : white(0.22 * a), hover || focus ? 3.0 : 1.8
+        );
+
+        //  What it is doing, in a chip in the corner.
+        QString chip;
+        ChipKind kind = ChipKind::RING;
+        if (!info.running){
+            chip = instance_state_text(info);
+            kind = info.starting ? ChipKind::RING : ChipKind::DIM;
+        }else if (info.state == "running"){
+            chip = T("Running");
+            kind = ChipKind::ORANGE_FILL;
+        }else if (info.state == "setup"){
+            chip = T("Setup");
+            kind = ChipKind::YELLOW_FILL;
+        }
+        if (!chip.isEmpty()){
+            draw_chip(painter, chip, picture.right() - 12, picture.top() + 28, kind, a, 20, 34, 13);
+        }
+
+        //  The name, and what it shows.
+        const double x = picture.left() + 4;
+        const double name_y = picture.bottom() + 28;
+        const bool removable = !info.main && !info.running && !info.starting;
+        const QString remove_text = m_confirm == info.id ? T("Really remove?") : T("Remove");
+        const double remove_w = removable ? button_width(remove_text, ButtonKind::LINK) : 0;
+        draw_elided(
+            painter, instance_name_text(info), x, name_y, grid.width - 8 - remove_w - 10,
+            ui_font(30, 600), white(a)
+        );
+        const QString line = info.running && !info.title.isEmpty() ? info.title : instance_state_text(info);
+        draw_elided(painter, line, x, name_y + 40, grid.width - 8, ui_font(22, 500), white(0.62 * a));
+        painter.restore();
+
+        //  The hits are in the places of the screen, without the slide of the entrance.
+        const QRectF whole(tile.left(), tile.top(), tile.width(), grid.picture_height + 56);
+        canvas.add_hit(id, whole, reveal > 0.9);
+        if (removable && reveal > 0.9){
+            const QString remove_id = "inst-remove:" + info.id;
+            const QRectF area(picture.right() - remove_w, picture.bottom() + 6, remove_w, 44);
+            if (m_confirm == info.id){
+                draw_text_cy(painter, remove_text, area.center().x(), area.center().y(), ui_font(24, 600), with_alpha(ORANGE, 0.95), Qt::AlignHCenter);
+                canvas.add_hit(remove_id, area, true);
+            }else{
+                draw_button(canvas, painter, remove_id, remove_text, area.left(), area.top(), ButtonKind::LINK, 1.0);
+            }
+        }
+    }
+
+    void paint_new_tile(Canvas& canvas, QPainter& painter, const QRectF& tile, const TileGrid& grid, double reveal){
+        const QString id = "inst-new";
+        const bool hover = canvas.hovered(id);
+        const bool focus = canvas.focused(id);
+        const QRectF picture(tile.left(), tile.top(), grid.width, grid.picture_height);
+        const double a = reveal;
+        painter.save();
+        painter.translate(0, (1.0 - reveal) * 30);
+        if (hover || focus){
+            glow(painter, picture, 18, ORANGE, 0.5 * a);
+        }
+        painter.setPen(QPen(hover || focus ? with_alpha(ORANGE, 0.95 * a) : white(0.34 * a), 2.2, Qt::DashLine));
+        painter.setBrush(white((hover ? 0.07 : 0.03) * a));
+        painter.drawRoundedRect(picture.adjusted(1.1, 1.1, -1.1, -1.1), 18, 18);
+        draw_plus(painter, picture.center(), std::max(14.0, grid.width * 0.07), hover || focus ? with_alpha(ORANGE, a) : white(0.7 * a), 5.0);
+        const double x = picture.left() + 4;
+        const double name_y = picture.bottom() + 28;
+        draw_elided(painter, T("New installation"), x, name_y, grid.width - 8, ui_font(30, 600), white(a));
+        draw_elided(painter, T("It starts with the setup."), x, name_y + 40, grid.width - 8, ui_font(22, 500), white(0.62 * a));
+        painter.restore();
+        canvas.add_hit(id, QRectF(tile.left(), tile.top(), tile.width(), grid.picture_height + 56), reveal > 0.9);
+    }
+
+    Canvas* m_canvas;
+    std::vector<InstanceInfo> m_infos;
+    std::vector<QPixmap> m_pictures;
+    double m_clock = 0;
+    double m_poll = 0;
+    //  "Remove" was pressed once on this one: it must be pressed again.
+    QString m_confirm;
+    double m_confirm_time = 0;
+    //  An installation that was started: this window steps aside when it runs.
+    QString m_waiting;
+    double m_waiting_time = 0;
+};
+
+
+//  ---------------------------------------------------------------------
 //  Canvas
 //  ---------------------------------------------------------------------
 
@@ -7128,12 +7502,17 @@ Canvas::Canvas(const SetupRequest& request, bool test_mode, QWidget* parent, App
     , m_request(request)
     , m_test_mode(test_mode)
     , m_timer(this)
+    , m_presence(this)
 {
     if (app != nullptr){
         m_app_mode = true;
         m_app = *app;
     }
-    setWindowTitle("Claude GG");
+    //  The windows of an installation that its overview may bring forward.
+    if (parent == nullptr && !m_request.overview){
+        mark_instance_window(this);
+    }
+    setWindowTitle(m_request.overview ? "Claude GG - Installations" : "Claude GG");
     m_app_folder = QCoreApplication::applicationDirPath();
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
@@ -7154,6 +7533,8 @@ void Canvas::start(QEventLoop* loop){
     if (m_app_mode){
         //  The window's own screen: it starts on the games and stays.
         go_games();
+    }else if (m_request.overview){
+        go_instances();
     }else if (m_request.ask_language){
         go_language();
     }else if (m_request.ask_console){
@@ -7168,6 +7549,15 @@ void Canvas::start(QEventLoop* loop){
         m_clock.start();
         m_clock_started = true;
         m_timer.start();
+        //  The overview reads what each installation says about itself.
+        if (!m_request.overview && !is_test_run()){
+            m_presence.setInterval(1000);
+            connect(&m_presence, &QTimer::timeout, this, [this]{
+                report_presence();
+            });
+            m_presence.start();
+            report_presence();
+        }
     }
 }
 
@@ -7315,6 +7705,11 @@ void Canvas::go_games(int selected){
 void Canvas::go_programs(int game){
     queue_page([this, game]{
         return std::unique_ptr<Page>(new ProgramsPage(*this, game));
+    });
+}
+void Canvas::go_instances(){
+    queue_page([this]{
+        return std::unique_ptr<Page>(new InstancesPage(*this));
     });
 }
 
@@ -7750,6 +8145,11 @@ void Canvas::paintEvent(QPaintEvent*){
         }
         if (can_minimize()){
             paint_minimize(painter);
+            if (m_request.overview){
+                paint_close_button(painter);
+            }else if (m_request.show_overview){
+                paint_overview_button(painter);
+            }
         }
     }
     if (m_intro == IntroState::FADE){
@@ -8063,6 +8463,14 @@ void Canvas::dispatch(const QString& id){
         minimize();
         return;
     }
+    if (id == "instances"){
+        go_overview();
+        return;
+    }
+    if (id == "close-overview"){
+        finish();
+        return;
+    }
     if (m_app_mode && id.startsWith("app:")){
         app_activate(id);
         return;
@@ -8087,6 +8495,63 @@ void Canvas::paint_minimize(QPainter& painter){
     add_hit("minimize", rect, true, false);
 }
 
+//  The button that goes back to the overview of the installations: left of the
+//  one that minimizes, four small squares in it (the miniatures).
+void Canvas::paint_overview_button(QPainter& painter){
+    constexpr double SIZE = 56;
+    const QRectF rect(DW - 36 - SIZE - 14 - SIZE, 30, SIZE, SIZE);
+    const bool hover = hovered("instances");
+    painter.setOpacity(1.0);
+    panel(painter, rect, 16, white(hover ? 0.10 : 0.0), white(hover ? 0.55 : 0.26), 1.8);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(white(hover ? 0.95 : 0.60));
+    constexpr double CELL = 11;
+    constexpr double GAP = 6;
+    const QPointF origin(rect.center().x() - CELL - GAP / 2, rect.center().y() - CELL - GAP / 2);
+    for (int row = 0; row < 2; row++){
+        for (int column = 0; column < 2; column++){
+            painter.drawRoundedRect(
+                QRectF(origin.x() + column * (CELL + GAP), origin.y() + row * (CELL + GAP), CELL, CELL),
+                3, 3
+            );
+        }
+    }
+    add_hit("instances", rect, true, false);
+}
+
+//  The overview's own window: a button that closes it, left of the one that
+//  minimizes. (The installations keep running.)
+void Canvas::paint_close_button(QPainter& painter){
+    constexpr double SIZE = 56;
+    const QRectF rect(DW - 36 - SIZE - 14 - SIZE, 30, SIZE, SIZE);
+    const bool hover = hovered("close-overview");
+    painter.setOpacity(1.0);
+    panel(painter, rect, 16, white(hover ? 0.10 : 0.0), white(hover ? 0.55 : 0.26), 1.8);
+    painter.setPen(QPen(white(hover ? 0.95 : 0.60), 3.4, Qt::SolidLine, Qt::RoundCap));
+    const QPointF c = rect.center();
+    painter.drawLine(QPointF(c.x() - 11, c.y() - 11), QPointF(c.x() + 11, c.y() + 11));
+    painter.drawLine(QPointF(c.x() - 11, c.y() + 11), QPointF(c.x() + 11, c.y() - 11));
+    add_hit("close-overview", rect, true, false);
+}
+
+//  What this window says about the installation, for the overview: whether it
+//  is in the setup, on the games or in a program (and if that one runs), and a
+//  picture of it.
+void Canvas::report_presence(){
+    QString state;
+    QString title;
+    if (!m_app_mode){
+        state = m_page != nullptr && (QString(m_page->name()) == "games" || QString(m_page->name()) == "programs") ? "games" : "setup";
+    }else if (m_page != nullptr && QString(m_page->name()) == "host"){
+        state = m_app_busy ? "running" : "program";
+        title = m_page->about();
+    }else{
+        state = "games";
+    }
+    m_presence_reports++;
+    write_instance_report(state, title, instance_picture(m_app_mode ? window() : this));
+}
+
 //  The buttons of the old top bar, along the top of every page.
 void Canvas::paint_app_menu(QPainter& painter){
     struct Entry{
@@ -8095,6 +8560,7 @@ void Canvas::paint_app_menu(QPainter& painter){
     };
     static const Entry ENTRIES[] = {
         {"app:games", "Games"},
+        {"app:installations", "Installations"},
         {"app:settings", "Settings"},
         {"app:claude", "Claude"},
         {"app:log", "Output"},
@@ -8107,6 +8573,10 @@ void Canvas::paint_app_menu(QPainter& painter){
     for (size_t c = sizeof(ENTRIES) / sizeof(ENTRIES[0]); c-- > 0;){
         const Entry& entry = ENTRIES[c];
         if (on_games && QString(entry.id) == "app:games"){
+            continue;
+        }
+        //  Only when the window can show the overview.
+        if (QString(entry.id) == "app:installations" && !m_app.installations){
             continue;
         }
         const QString text = T(entry.text);
@@ -8127,6 +8597,8 @@ bool Canvas::app_activate(const QString& id){
             }
         }
         go_games();
+    }else if (id == "app:installations"){
+        go_overview();
     }else if (id == "app:settings"){
         if (m_app.settings){
             m_app.settings();
@@ -8655,7 +9127,293 @@ struct TestLog{
 };
 
 
+//  The overview of the installations, with installations that are made up: what
+//  each one shows, what a press on a miniature, on "New installation" and on
+//  "Remove" does, the keyboard, and where the miniatures go.
+void check_overview(Checker& checker, const QString& folder){
+    struct Fake{
+        std::vector<InstanceInfo> list;
+        QStringList opened;
+        QStringList removed;
+        int created = 0;
+    };
+    const auto fake = std::make_shared<Fake>();
+
+    //  A miniature: what a capture card shows, made up.
+    auto picture = [](const QColor& sky, const QColor& ground, const QString& text){
+        QImage image(MINIATURE_WIDTH, MINIATURE_HEIGHT, QImage::Format_RGB32);
+        image.fill(sky);
+        QPainter painter(&image);
+        painter.fillRect(QRect(0, 170, MINIATURE_WIDTH, MINIATURE_HEIGHT - 170), ground);
+        painter.setPen(Qt::white);
+        painter.setFont(ui_font(34, 600));
+        painter.drawText(QRect(0, 40, MINIATURE_WIDTH, 80), Qt::AlignCenter, text);
+        return image;
+    };
+    auto make = [&](const QString& id, bool running, const QString& state, const QString& title, const QImage& image){
+        InstanceInfo info;
+        info.id = id;
+        info.main = id == "1";
+        info.running = running;
+        info.state = running ? state : QString();
+        info.title = title;
+        info.picture = image;
+        return info;
+    };
+    fake->list.push_back(make("1", true, "running", "Pokemon FireRed: AutoStory", picture(QColor(40, 90, 160), QColor(70, 130, 60), "FIRERED")));
+    fake->list.push_back(make("2", true, "setup", QString(), QImage()));
+    InstanceInfo stopped = make("3", false, QString(), QString(), picture(QColor(120, 60, 140), QColor(60, 60, 70), "SHINY HUNT"));
+    stopped.name = "Shiny hunter";
+    fake->list.push_back(stopped);
+    InstanceInfo starting = make("4", false, QString(), QString(), QImage());
+    starting.starting = true;
+    fake->list.push_back(starting);
+    fake->list.push_back(make("6", false, QString(), QString(), QImage()));
+
+    SetupRequest request;
+    request.overview = true;
+    request.build = "test";
+    request.instance_list = [fake]{
+        return fake->list;
+    };
+    request.instance_open = [fake](const QString& id){
+        fake->opened << id;
+    };
+    request.instance_create = [fake]() -> QString{
+        fake->created++;
+        const QString id = "7";
+        InstanceInfo info;
+        info.id = id;
+        info.starting = true;
+        fake->list.push_back(info);
+        return id;
+    };
+    request.instance_remove = [fake](const QString& id){
+        fake->removed << id;
+        for (size_t c = 0; c < fake->list.size(); c++){
+            if (fake->list[c].id == id){
+                fake->list.erase(fake->list.begin() + (long)c);
+                break;
+            }
+        }
+        return true;
+    };
+
+    Canvas hub(request, true);
+    hub.resize(1920, 1080);
+    QEventLoop loop;
+    hub.start(&loop);
+    hub.show();
+    hub.wait(2.2);
+    checker.check(hub.page_name() == "instances", "the overview of the installations is its own page");
+    checker.check(
+        hub.has_hit("inst:1") && hub.has_hit("inst:2") && hub.has_hit("inst:3") && hub.has_hit("inst:4") &&
+        hub.has_hit("inst:6") && hub.has_hit("inst-new"),
+        "each installation has a miniature, and there is one to make a new one"
+    );
+    checker.check(
+        !hub.has_hit("inst-remove:1") && !hub.has_hit("inst-remove:2") && !hub.has_hit("inst-remove:4") &&
+        hub.has_hit("inst-remove:3") && hub.has_hit("inst-remove:6"),
+        "only an installation that is stopped can be removed: not number 1, not one that runs, not one that starts"
+    );
+    checker.check(
+        hub.can_minimize() && hub.has_hit("minimize") && hub.has_hit("close-overview") && !hub.has_hit("instances"),
+        "the overview has the buttons that minimize and close it, and none that goes back to itself"
+    );
+    checker.check(has_content(hub.picture()), "the overview is drawn");
+    save(hub, folder, "setup-70-installations");
+    save_preview(hub, folder, "preview-installations");
+
+    //  A running installation: its window comes forward, this one steps aside.
+    hub.click("inst:1");
+    checker.check(fake->opened == QStringList({"1"}), "a press on a miniature opens that installation");
+    checker.check(hub.minimize_requests() == 1, "the overview steps aside when its window comes forward");
+    hub.wait(0.2);
+
+    //  One that is stopped is started: the overview waits until it runs.
+    hub.click("inst:3");
+    checker.check(fake->opened == QStringList({"1", "3"}), "a stopped installation is opened too (it is started)");
+    checker.check(hub.minimize_requests() == 1, "the overview stays while it starts");
+    fake->list[2].running = true;
+    fake->list[2].state = "setup";
+    hub.wait(1.3);
+    checker.check(hub.minimize_requests() == 2, "and steps aside when it runs");
+    fake->list[2].running = false;
+    fake->list[2].state.clear();
+    hub.wait(1.3);
+
+    //  Removing takes two presses, and the first one lapses.
+    hub.click("inst-remove:6");
+    checker.check(fake->removed.isEmpty(), "one press on Remove removes nothing");
+    hub.wait(4.6);
+    hub.click("inst-remove:6");
+    checker.check(fake->removed.isEmpty(), "a second press after a while does not either: it asks again");
+    hub.click("inst-remove:6");
+    hub.wait(1.3);
+    checker.check(fake->removed == QStringList({"6"}), "two presses remove it");
+    checker.check(!hub.has_hit("inst:6") && hub.has_hit("inst:1"), "and its miniature is gone, the others stay");
+    hub.click("inst-remove:3");
+    hub.click("inst-remove:4");
+    checker.check(fake->removed == QStringList({"6"}), "a press on another Remove starts again");
+
+    //  A new installation: it is made and started, and it is on the screen.
+    hub.click("inst-new");
+    hub.wait(1.2);
+    checker.check(fake->created == 1 && hub.has_hit("inst:7"), "'New installation' makes one, and it is in the list");
+    checker.check(hub.minimize_requests() == 2, "the overview waits for it to start");
+    fake->list.back().running = true;
+    fake->list.back().starting = false;
+    fake->list.back().state = "setup";
+    hub.wait(1.3);
+    checker.check(hub.minimize_requests() == 3, "and steps aside when it runs (its setup is on the screen)");
+
+    //  The keyboard: Tab to the next miniature, Enter opens it.
+    hub.click("minimize");
+    checker.check(hub.minimize_requests() == 4, "the button minimizes the overview");
+    fake->opened.clear();
+    hub.set_focus_id("inst:1");
+    hub.press_key(Qt::Key_Tab);
+    checker.check(hub.focus_id() == "inst:2", "Tab goes to the next miniature");
+    hub.press_key(Qt::Key_Return);
+    checker.check(fake->opened == QStringList({"2"}), "Enter opens it");
+
+    //  The overview can be closed.
+    checker.check(!hub.finished(), "the overview is not over before it is closed");
+    hub.click("close-overview");
+    checker.check(hub.finished(), "its close button ends it");
+
+    //  Where the miniatures go: all of them on the screen, none over another, in the area.
+    bool inside = true;
+    bool apart = true;
+    bool large_enough = true;
+    for (size_t count = 1; count <= 30; count++){
+        const TileGrid grid = tile_grid(count);
+        for (size_t a = 0; a < count; a++){
+            const QRectF rect = tile_rect(grid, a);
+            if (rect.left() < TILE_X - 0.01 || rect.right() > TILE_X + TILE_AREA_W + 0.01 ||
+                rect.top() < TILE_Y - 0.01 || rect.bottom() > TILE_Y + TILE_AREA_H + 0.01
+            ){
+                inside = false;
+            }
+            for (size_t b = a + 1; b < count; b++){
+                if (rect.intersects(tile_rect(grid, b))){
+                    apart = false;
+                }
+            }
+        }
+        if (count <= 12 && grid.width < 240){
+            large_enough = false;
+        }
+    }
+    checker.check(inside, "from 1 to 30 miniatures: all of them are in the area for them");
+    checker.check(apart, "none is over another");
+    checker.check(large_enough, "up to 12 of them are at least 240 wide");
+    checker.check(tile_grid(2).width == TILE_MAX_W && tile_grid(3).columns == 3, "a few are large, side by side");
+
+    //  The screens that are windows of their own have the button that goes back.
+    {
+        int shown = 0;
+        SetupRequest other;
+        other.ask_board = true;
+        other.games = test_games();
+        other.show_overview = [&]{
+            shown++;
+        };
+        Canvas window(other, true);
+        window.resize(1280, 720);
+        QEventLoop other_loop;
+        window.start(&other_loop);
+        window.show();
+        window.wait(2.0);
+        checker.check(window.has_hit("instances") && window.hit_enabled("instances"), "the setup has a button that goes back to the overview");
+        checker.check(!window.has_hit("close-overview"), "and none that closes the overview");
+        checker.check(window.click("instances") && shown == 1 && window.overview_requests() == 1, "it shows the overview");
+        window.wait(0.3);
+        checker.check(!window.finished() && window.page_name() == "board", "and leaves the setup as it was");
+        save_preview(window, folder, "preview-overview-button");
+        window.click("skip");
+        window.wait(2.5);
+        checker.check(window.page_name() == "games" && window.has_hit("instances"), "the next screen has it too");
+
+        SetupRequest none;
+        none.ask_board = true;
+        Canvas without(none, true);
+        without.resize(1280, 720);
+        QEventLoop none_loop;
+        without.start(&none_loop);
+        without.show();
+        without.wait(1.5);
+        checker.check(!without.has_hit("instances"), "no button where the window cannot show the overview");
+    }
+}
+
 }   //  namespace
+
+
+namespace{
+//  The overview's window while it is up.
+QPointer<Canvas> g_overview;
+}
+
+void bring_overview_forward(){
+    if (g_overview == nullptr){
+        return;
+    }
+    QWidget* window = g_overview.data();
+    window->setWindowState((window->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+    window->show();
+    window->raise();
+    window->activateWindow();
+}
+
+int run_instances_overview(const SetupRequest& request, const QString& screenshots_folder){
+    SetupRequest overview = request;
+    overview.overview = true;
+    if (!screenshots_folder.isEmpty()){
+        //  The test: the window is not put on the screen; a picture of it.
+        Checker checker;
+        Canvas canvas(overview, true);
+        canvas.resize(1920, 1080);
+        QEventLoop loop;
+        canvas.start(&loop);
+        canvas.show();
+        canvas.wait(2.5);
+        checker.check(canvas.page_name() == "instances", "the overview is on the screen");
+        checker.check(canvas.has_hit("inst-new") && canvas.has_hit("close-overview"), "with a miniature to make a new one, and a close button");
+        const std::vector<InstanceInfo> list = overview.instance_list ? overview.instance_list() : std::vector<InstanceInfo>();
+        checker.check(!list.empty() && list.front().main, "installation 1 is the first");
+        for (const InstanceInfo& info : list){
+            checker.check(canvas.has_hit("inst:" + info.id), "each installation has its miniature");
+        }
+        checker.check(has_content(canvas.picture()), "the overview is drawn");
+        save(canvas, screenshots_folder, "installations-hub");
+        save_preview(canvas, screenshots_folder, "preview-installations-hub");
+        for (const QString& line : checker.lines){
+            qWarning("%s", qUtf8Printable(line));
+        }
+        return checker.failures == 0 ? 0 : 1;
+    }
+    std::unique_ptr<Canvas> canvas(new Canvas(overview, false));
+    QEventLoop loop;
+    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+    if (screen == nullptr){
+        screen = QApplication::primaryScreen();
+    }
+    if (screen != nullptr){
+        canvas->setScreen(screen);
+        canvas->setGeometry(screen->geometry());
+    }
+    g_overview = canvas.get();
+    canvas->start(&loop);
+    canvas->showFullScreen();
+    canvas->raise();
+    canvas->activateWindow();
+    canvas->setFocus();
+    loop.exec();
+    g_overview.clear();
+    canvas->hide();
+    return 0;
+}
 
 
 int run_setup_test(QApplication& application, const QString& folder){
@@ -9292,6 +10050,9 @@ int run_setup_test(QApplication& application, const QString& folder){
         mini.wait(2.5);
         checker.check(mini.page_name() == "games" && mini.has_hit("minimize"), "the next screen has the button too");
     }
+
+    //  ---- The installations: the overview, and the way back to it
+    check_overview(checker, folder);
 
     //  ---- "Choose later", and no games at all
     {
@@ -10132,6 +10893,7 @@ int run_setup_test(QApplication& application, const QString& folder){
             int about = 0;
             int output = 0;
             int buttons = 0;
+            int installations = 0;
             int claude = 0;
             int open_game = -1;
             QString open_program;
@@ -10169,6 +10931,7 @@ int run_setup_test(QApplication& application, const QString& folder){
         actions.about = [&]{ record.about++; };
         actions.output = [&]{ record.output++; };
         actions.buttons = [&]{ record.buttons++; };
+        actions.installations = [&]{ record.installations++; };
         actions.claude = [&](bool show){
             record.claude++;
             screen->show_claude(show);
@@ -10207,6 +10970,7 @@ int run_setup_test(QApplication& application, const QString& folder){
         checker.check(window_screen.has_hit("app:settings") && window_screen.has_hit("app:claude") && window_screen.has_hit("app:log")
             && window_screen.has_hit("app:buttons") && window_screen.has_hit("app:about"), "the buttons of the top bar are along the top");
         checker.check(!window_screen.has_hit("app:games"), "and the way to the games is not on the games");
+        checker.check(window_screen.has_hit("app:installations") && !window_screen.has_hit("instances"), "so is the way to the overview of the installations (and no corner button)");
         checker.check(!window_screen.has_hit("later"), "there is no 'Choose later' to leave with");
         save(window_screen, folder, "setup-60-window-games");
         save_preview(window_screen, folder, "preview-window-games");
@@ -10240,6 +11004,9 @@ int run_setup_test(QApplication& application, const QString& folder){
         window_screen.click("app:log");
         window_screen.click("app:buttons");
         checker.check(record.settings == 1 && record.about == 1 && record.output == 1 && record.buttons == 1, "each button of the top bar does its own thing");
+        window_screen.click("app:installations");
+        checker.check(record.installations == 1 && window_screen.overview_requests() == 1, "'Installations' shows the overview");
+        checker.check(window_screen.page_name() == "host", "and leaves the program that is open as it was");
 
         //  Claude over the right.
         checker.check(!window_screen.claude_shown(), "Claude is not shown at first");

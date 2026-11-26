@@ -369,5 +369,17 @@
  "Only warnings and errors": "Alleen waarschuwingen en fouten",
  "Shows only the lines in red and in orange: the errors and the warnings.": "Toont alleen de regels in rood en oranje: de fouten en de waarschuwingen.",
  "Search the settings": "Zoek in de instellingen",
- "No setting has these words.": "Geen instelling heeft deze woorden."
+ "No setting has these words.": "Geen instelling heeft deze woorden.",
+ "Installations": "Installaties",
+ "Installation %1": "Installatie %1",
+ "New installation": "Nieuwe installatie",
+ "It starts with the setup.": "Begint met de setup.",
+ "Starting...": "Wordt gestart...",
+ "Not running": "Draait niet",
+ "A program runs": "Een programma draait",
+ "A program is open": "Een programma is geopend",
+ "Setup": "Setup",
+ "Remove": "Verwijderen",
+ "Really remove?": "Echt verwijderen?",
+ "Each installation has its own settings: its own capture card and its own microcontroller. Closing this window does not stop them.": "Elke installatie heeft eigen instellingen: een eigen capture card en een eigen microcontroller. Als je dit venster sluit, blijven ze draaien."
 }

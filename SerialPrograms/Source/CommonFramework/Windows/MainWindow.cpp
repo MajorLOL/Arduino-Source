@@ -31,6 +31,7 @@
 #include "CommonFramework/Windows/DpiScaler.h"
 #include "PocketPilot/PocketPilot_About.h"
 #include "PocketPilot/PocketPilot_Home.h"
+#include "PocketPilot/PocketPilot_Instances.h"
 #include "PocketPilot/PocketPilot_Language.h"
 #include "PocketPilot/PocketPilot_Logo.h"
 #include "PocketPilot/PocketPilot_Setup.h"
@@ -59,6 +60,9 @@ MainWindow::MainWindow(QWidget* parent, bool app_test)
         setObjectName(QString::fromUtf8("MainWindow"));
     }
     this->setWindowIcon(PocketPilot::app_icon());
+    //  The overview of the installations brings this window forward, and makes
+    //  its miniature from it.
+    PocketPilot::mark_instance_window(this);
 //    QSize window_size = PERSISTENT_SETTINGS().window_size;
     resize(
         GlobalSettings::instance().WINDOW_SIZE->WIDTH,
@@ -691,6 +695,10 @@ void MainWindow::make_app_view(bool test){
     };
     actions.claude = [this](bool show){
         show_assistant(show);
+    };
+    //  The overview of the installations (the screen puts this window away).
+    actions.installations = []{
+        PocketPilot::show_instances_overview();
     };
     actions.keep_screen_on = [this, test](bool on){
         if (on){
