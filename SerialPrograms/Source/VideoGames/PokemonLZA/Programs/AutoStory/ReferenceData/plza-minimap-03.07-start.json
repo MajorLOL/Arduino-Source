@@ -1,0 +1,24 @@
+{
+  "source": "the minimap at 03.07's start, before Wild Zone 1's gate, on the chained start of a new-game run: Spanish, console B, 2026-11-18 18:08, 1920x1080 (CommandLineTests PokemonLZA/AutoStoryStarts/Spanish_0307_start.png), recorded by AutoStory (Record Start Minimaps); 16x16 cells over x 52-184, y 55-187 of 1280x720",
+  "grid": {
+    "cols": 16,
+    "rows": [
+      "61707182adc0eaebdae9cdb4f2c1a2ecc1a2e5d0b8e3ceb0e1d2b9e3d4bbd9d5b2e7d2b2e7d2b0ebd5b4999976344c2f",
+      "6e9eb9d7d7bcebc4a8f3c1a1eec3a4e3d0b4f8f3dbe2ceb0e6dcc2fcf7e0efeccee1c6a7e9d3b2e6d0afecd5b58f8f7d",
+      "c7b7adecc0a1f2c1a1ecc5a5ebd3b2ebd5b4dfccaee8dec6f1edd5e7e3d1af9d96e2b9a3e5c9aae5d0b1e9dfc5eeedcc",
+      "f3c1a1ecc0a0dbceacead0a9ebca8fe6cb90e2e0a7e6ddbbe1d0b5595b6a7b7e8d5d5f71ece6d4eceacbececc9fbf8df",
+      "dec2a3dfddb5e6dda3e2cf93f5cd71f0d066cade6ed9cf78d3c2aa4b4f63dfdfe2686b7cd0d0baf5f2d6fcf9dfececc9",
+      "e3d1b0dfe2b7e0d494f5ca64f7cc54f5d775bfd64cd6c863e7d3b587878c5b5e707c7d88faf6e1f5f3d6e9e7c4ece6cb",
+      "e8d2b1e2cfafe4c68ef7c85eface4dfeda6af1c43ce7d7a1b5dbe5f3f0def8f4dff0edd2f7f4d8f8f4dce1ceb3e6d2b2",
+      "ead5b6e2d7bfd0d2b9bbd2b7d0d599cdcd91ccd2a0b2d6ca13a4fcd9e4dcebeac6eae4c6e9dfc7fbf7dfe6d8bfe8d2b1",
+      "dbd6b2a1dab08ae5c5a2e5d19edbd197d3d893d3ee74c2e57ac0de9bcae3e4d9c1ebd4b5e9d2b3e7ccb3efc0a1e9ceae",
+      "7febad9cf0bca2efcfa0eedf87e3de67d3d796d7f3dadacae2d0b4e6d6bbe8d2b2ead4b3ebd5b4ebcbabf3c1a1ebc3a3",
+      "9ff2b9a6f5c4a2f1cb9aead284e4d677d8dacbd1cfecd5b4ebd5b4e8d2b0ebd5b4e8d2b0ebd5b4ecd4b4e8c0a3d0b6a1",
+      "9af0b487ecae86e3b0a1dbbec1d8d3c9d4d2ecd5b5ebd5b4ebd5b4e9d4b2ead5b3e9d3b2e4d0b1cfc5aea6aca280989a",
+      "96dca6c5d5abe9d5b7dfd4bdd5d8cce9d4b6ead3b2ebd5b4ebd5b4ebd5b5e3ceb0d2c7afa8afa4859d9d74949b72929b",
+      "c5c6bfecd5b4ebd5b5e7d5b9e8d4b7ecd5b4e8d2b1ead4b3e5d1b2d2c7aea9b0a4879e9e75949b71929b71929b70939c",
+      "74a2b3cdc9bcecd5b4ebd5b4e8d2b1e8d3b2dccbadc2beab9faba3819b9c74939b71929b71929b71929b71929b72a4b9",
+      "596a706e9bb1c5c4bce4d1b2d1c5aeb6b7a895a6a17c979b73939a71929b71929b71929b71929b71939d71a3b77b8f95"
+    ]
+  }
+}

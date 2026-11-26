@@ -229,6 +229,13 @@ include(cmake/CoreLib.cmake)
 # Create the GUI library
 add_library(SerialProgramsLib STATIC ${CORE_LIBRARY_SOURCES} ${LIBRARY_SOURCES})
 
+# Data files built into the program (see cmake/EmbedTextFiles.cmake).
+include(cmake/EmbedTextFiles.cmake)
+pa_embed_text_files(SerialProgramsLib Source/VideoGames/PokemonLZA/Programs/AutoStory/StoryData
+    VideoGames/PokemonLZA/Programs/AutoStory/PokemonLZA_AutoStoryPlan.h PokemonAutomation::NintendoSwitch::PokemonLZA autostory_checkpoint_json)
+pa_embed_text_files(SerialProgramsLib Source/VideoGames/PokemonLZA/Programs/AutoStory/ReferenceData
+    VideoGames/PokemonLZA/Inference/Map/PokemonLZA_MinimapMatch.h PokemonAutomation::NintendoSwitch::PokemonLZA autostory_reference_json)
+
 
 # Create binary target
 if (APPLE)

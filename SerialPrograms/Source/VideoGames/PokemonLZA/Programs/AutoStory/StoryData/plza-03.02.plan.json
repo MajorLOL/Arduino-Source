@@ -1,0 +1,35 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.02",
+    "title": "Out of Hotel Z",
+    "start": {
+      "place": "HotelZ"
+    },
+    "events": [
+      {
+        "id": "to_hotel_front_door",
+        "why": "across the lobby to the front door. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 6000]]
+        }
+      },
+      {
+        "id": "leave_hotel_z",
+        "why": "A Leave, the Main Menu tutorial card",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; ends outside Hotel Z at the autosave after the Main Menu card"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "leave_hotel_z"
+  }
+}

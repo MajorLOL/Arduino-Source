@@ -1,0 +1,32 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.07",
+    "title": "Main Mission 02: the first evening to Main Mission 03",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_room_door",
+        "why": "to the door's \"A Leave\". not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[0, 2000]], "end": "prompt", "end_after_ms": 1500}
+      },
+      {
+        "id": "first_evening",
+        "why": "A Leave, Taunie, the rooftop, AZ, the Main Mission 03 banner and its autosave",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at the autosave after waking up"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

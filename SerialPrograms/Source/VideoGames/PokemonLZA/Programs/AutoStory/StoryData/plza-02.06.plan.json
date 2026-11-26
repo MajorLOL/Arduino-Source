@@ -1,0 +1,43 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.06",
+    "title": "Main Mission 02: the night in Room 202",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_bed",
+        "why": "to the bed's \"A Rest\"; an earlier prompt is passed on the way. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[45, 1500]], "held": true, "end": "prompt", "end_after_ms": 750}
+      },
+      {
+        "id": "rest_question",
+        "why": "A Rest, then A to \"Rest until tomorrow morning?\" before the choice shows",
+        "action": "scene",
+        "args": {"press_a_first": true, "stop_at_choice": true}
+      },
+      {
+        "id": "rest_until_morning",
+        "why": "yes",
+        "action": "choose_0"
+      },
+      {
+        "id": "wake_up",
+        "why": "sleep and wake up, until the party bar shows, facing the door",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at the Room 202 autosave; autosaves at wake_up's end"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "wake_up"
+  }
+}

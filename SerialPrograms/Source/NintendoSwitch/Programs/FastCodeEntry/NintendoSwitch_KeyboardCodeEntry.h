@@ -8,16 +8,25 @@
 #define PokemonAutomation_NintendoSwitch_KeyboardCodeEntry_H
 
 #include <string>
+#include <vector>
 #include "Controllers/StandardHid/StandardHid_Keyboard.h"
 #include "NintendoSwitch/Controllers/Procon/NintendoSwitch_ProController.h"
 #include "NintendoSwitch/NintendoSwitch_ConsoleHandle.h"
 #include "NintendoSwitch/Programs/FastCodeEntry/NintendoSwitch_KeyboardEntryMappings.h"
+#include "NintendoSwitch/Programs/FastCodeEntry/NintendoSwitch_CodeEntryTools.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
 namespace FastCodeEntry{
 
 
+
+//  The D-pad moves from "source" to "destination" on the on-screen keyboard,
+//  wrapping around the sides when that is shorter, then ENTER_CHAR.
+std::vector<CodeEntryAction> keyboard_get_path(
+    KeyboardEntryPosition source,
+    KeyboardEntryPosition destination
+);
 
 //  Automatically select between keyboard or pro controller depending on the
 //  controller type.

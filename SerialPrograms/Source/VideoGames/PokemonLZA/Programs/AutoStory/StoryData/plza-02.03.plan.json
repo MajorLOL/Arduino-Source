@@ -1,0 +1,32 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.03",
+    "title": "Main Mission 02: into the Hotel Z lobby",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_hotel_z_door",
+        "why": "up the steps to the door's \"A Enter\". not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {"legs": [[0, 4500]], "end": "prompt", "end_after_ms": 3375}
+      },
+      {
+        "id": "hotel_z_lobby",
+        "why": "A Enter, the loading screen, the lobby scene with Taunie; the game autosaves in the lobby, before the clerk",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; ends at the lobby autosave"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

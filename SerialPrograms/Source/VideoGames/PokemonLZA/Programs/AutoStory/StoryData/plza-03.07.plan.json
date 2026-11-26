@@ -1,0 +1,52 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.07",
+    "title": "Into Wild Zone 1: first catches",
+    "start": {
+      "place": "LumioseCity",
+      "spot": "WildZone1Gate"
+    },
+    "events": [
+      {
+        "id": "to_zone_1_gate",
+        "why": "run to Wild Zone 1's gate until its A prompt (~4.3 s)",
+        "action": "run_to_gate",
+        "args": {
+          "timeout_ms": 8000
+        }
+      },
+      {
+        "id": "enter_zone_1",
+        "why": "A Enter, Taunie, the Throwing Poke Balls card; the \"received 10 Poke Balls\" box has no detector and gets A as any unread screen",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      },
+      {
+        "id": "catch_fletchling",
+        "why": "catch Fletchling, again when it breaks out",
+        "action": "catch_tutorial"
+      },
+      {
+        "id": "catch_bunnelby",
+        "why": "weaken Bunnelby, then catch it",
+        "action": "battle_then_catch"
+      },
+      {
+        "id": "after_catches",
+        "why": "Taunie: tall grass, more Poke Balls, moves smash boulders",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts outside the zone's gate, where 03.06's autosave reloads; autosaves at after_catches"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "after_catches",
+    "start_signature": {"minimap": "03.07-start"}
+  }
+}

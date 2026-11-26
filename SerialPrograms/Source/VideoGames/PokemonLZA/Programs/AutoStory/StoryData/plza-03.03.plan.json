@@ -1,0 +1,42 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.03",
+    "title": "To the rock pile scene",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "taunie_runs_off",
+        "why": "the Main Missions card (A turns its pages), Taunie runs off; after a reload the card is gone and this ends on the move hints",
+        "action": "scene"
+      },
+      {
+        "id": "through_hotel_gate",
+        "why": "through the Hotel Z gate passage into the rock pile scene. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 7000]]
+        }
+      },
+      {
+        "id": "rock_pile_scene",
+        "why": "Taunie at the rocks blocking the street",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game. Start minimap recorded on the chained start. Ends at the game's autosave in the rock pile scene (split 2026-11-19: a reload lands after it)"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "rock_pile_scene",
+    "start_signature": {
+      "minimap": "03.03-start"
+    }
+  }
+}

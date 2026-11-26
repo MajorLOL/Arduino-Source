@@ -24,6 +24,11 @@ This folder holds:
       Authors, and Fredoka (the other texts), Copyright 2016 The Fredoka
       Project Authors, both SIL Open Font License 1.1.
 
+  The PLZA AutoStory and its story engine (Source/VideoGames/PokemonLZA/Programs/AutoStory,
+  Source/Pokemon/AutoStory, Source/Pokemon/Navigation, Source/CommonTools/ScreenEvents)
+      Taken from https://github.com/dayfine/Arduino-Source, a fork of Pokemon
+      Automation under the same MIT license.
+
 Use
 ---
 

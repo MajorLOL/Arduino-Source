@@ -1,0 +1,53 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.10",
+    "title": "Up the Research Lab's elevator to the Director's Office",
+    "start": {
+      "place": "PokemonResearchLab"
+    },
+    "events": [
+      {
+        "id": "to_lab_elevator",
+        "why": "to the elevator's \"A Take Elevator\"; an earlier prompt is passed on the way. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [
+            [
+              0,
+              1500
+            ]
+          ],
+          "end": "prompt",
+          "end_after_ms": 750
+        }
+      },
+      {
+        "id": "take_lab_elevator",
+        "action": "scene",
+        "args": {"press_a_first": true, "stop_at_choice": true},
+        "why": "A Take Elevator, then A through the attendant's question to the choices"
+      },
+      {
+        "id": "ride_to_3f",
+        "why": "\"3F: Director's Office\"; the choices show only after A closes the attendant's question",
+        "action": "choose_1"
+      },
+      {
+        "id": "arrive_3f",
+        "action": "scene",
+        "args": {"button": "B"},
+        "why": "the ride, until control on 3F"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts at the lobby save, ends on the 3F autosave after the ride. Start signature is a guess"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "arrive_3f"
+  }
+}

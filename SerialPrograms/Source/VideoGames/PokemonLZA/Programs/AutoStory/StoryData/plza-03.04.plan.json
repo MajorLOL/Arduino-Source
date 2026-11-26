@@ -1,0 +1,38 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.04",
+    "title": "Pokemon Center, the Pokedex",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "into_pokemon_center",
+        "why": "into the Pokemon Center to the nurse's \"A Talk\": the -90 run ends against the back wall at the counter's end; A on her \"A Talk\". The 20 leg turns in clear of the wall left of the Center's opening (2000 ran into it 4 of 6 times, console B 2026-11-19). not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 3000], [20, 2400], [-90, 2000]],
+          "end": "talk"
+        }
+      },
+      {
+        "id": "pokedex_app",
+        "why": "the Pokedex app, Chikorita's entry, the nurse, Taunie's scene outside (autosave), until control outside the Center",
+        "action": "scene",
+        "args": {"button": "B"}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; ends outside the Center on the autosave. The only PLZA row that reloads when chained: into_pokemon_center's timed legs assume the reloaded save's facing and ran into a wall chained without it. The roof before Station Front reads the same as its start bar the minimap"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "pokedex_app",
+    "reload_when_chained": true,
+    "start_signature": {"minimap": "03.04-start"}
+  }
+}

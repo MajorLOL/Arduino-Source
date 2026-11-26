@@ -1,0 +1,24 @@
+{
+  "source": "the minimap at 03.06's start (where 03.04 ends), outside the Pokemon Center at Station Front, on the chained start of a new-game run: Spanish, console B, 2026-11-18 15:15, 1920x1080 (CommandLineTests PokemonLZA/AutoStoryStarts/Spanish_0305_start.png), recorded by AutoStory (Record Start Minimaps); 16x16 cells over x 52-184, y 55-187 of 1280x720",
+  "grid": {
+    "cols": 16,
+    "rows": [
+      "71808186afc2ddceb8e9d2b1e7dec4fcf8e1fbf6dff6f4d7eff0ccefefccf7f4d9f6f1dae6d4b9e8d1b29993863b4757",
+      "83aec3ddd8c8e3d5bcebd5b4e7d2b2f0e9d1fefae2f5f2d7ececc8f9f5dcf0e8d2e5d2b6e9d3b1ead4b3ecd5b48b897e",
+      "cfc9bcece4cef7f2dce3cfb3ebd5b4e4d3b6f7f2dafdfae2fbf7dfede4cce7d2b4e7cdadead4b2e7d1b1e4d3b6e8e7c6",
+      "e4d5bbeee8d1eae3cde6d1b4ebd5b4e1d1b3f7f3dbfefbe3f8f3dbe3d2b8edc7a8f1c1a1eaceaee3d6bbeae9c5f9f6dc",
+      "ede3cde6d1b3e2d2b5eae1c9e5d6bbf6f2dae7dfc9f4f1d8e8e8c4f3ecd5eec0a3eec0a0e7d7bceaebc7fbf7defbf7df",
+      "e2d0b4ebd5b4ebd4b3e3d7bdfcf7e0f2edd7b9b7b0b8b8b7cecdc2edeccbf2e8d1f0e7cff5f2d7fdfae1fcf8e0fffce4",
+      "ebd5b4e7d1afe7d1b0e9d4b3efe9d1d7d6c2c1c1c1cfcfcf8dbfd9edead4fefae3fffbe4fffce4fdf9e2fcf8e0efeece",
+      "ded1b0e1cfafe8d2b1ecd4b4e4d1b4dcd4c1b6babcaad3e216a6fccfe4e8fefae2f6f3d9f2efd1fbf7dfebebc8e7e8c2",
+      "f7f5dcd5d6bdcfd7cebbd4daacd4e59ad1ec89d0f76ac0ee89c6e4b0d1ddf3efd7fffbe3fffce4f8f4dcf0eecefdf8e0",
+      "ecd9c3e7c4acd6ccbec8d8d6b3d5e0abddf398daf6c9e7f0fffce4f5f2d7f8f5dafffce4fdfae2fcf8e0f9f3dceac8ae",
+      "f2c2a3e8c4a8e2ded2d0dfddc2e5eab4e2efafe2fbfaf9e5fcf7e0fbf7dffcf7e0fcf8e0e0ddce939397aa9894f0c1a3",
+      "e4c7a6e3e1a7e8efcadae9d9d6eeeec7e9f2cce5dffbf7dff3f1d4e5e7bff8f4dafcf8e16b6e7b9b9da68f929da29896",
+      "f5cc60cbdf6ed4df8df6f7e8d8eadcc5e1dffaf8e5faf7dee7e7c1f8f5daf5ecd5eac8af888992a9abb1aaacb470828c",
+      "f3db8cc2d349d3de83f8f5e0e0decaddd4c1ece5ccfbf7e0fdf9e1f0dfc8eec0a2efc1a2ada098646979626e7e72939b",
+      "f6c955f4ce50dfd7b4f7f3dbede8d3e6d0b0e3cfb1f4ecd6ebcab1f2c1a2e4bea0beaf9f899b9a74929970929c659ab5",
+      "ad9e728baaafccc8b7e4d6beebccb2e9c7a8ecd5b4e1c3a7eec1a2d7b9a1a3a49d7c969a72929b6f929d6398b354728a"
+    ]
+  }
+}

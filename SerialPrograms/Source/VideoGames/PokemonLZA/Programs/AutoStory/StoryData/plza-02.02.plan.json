@@ -1,0 +1,70 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "02.02",
+    "title": "Main Mission 02: after Brigitte to Hotel Z",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_blocked_street",
+        "why": "on until the black fade into the street the trainers block. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 2000], [-75, 3500], [90, 3000]],
+          "end": "fade_black"
+        }
+      },
+      {
+        "id": "skip_street_cutscene",
+        "why": "Plus skips the cutscene the walk's black fade opens",
+        "action": "plus_skip"
+      },
+      {
+        "id": "street_scene",
+        "why": "a Pokemon drives the trainers off (no battle)",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      },
+      {
+        "id": "to_battle_zone_gate",
+        "why": "to the gate's \"A Leave\", A on it; Taunie's first line ~3.5 s later. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 10000]],
+          "end": "talk"
+        }
+      },
+      {
+        "id": "out_of_battle_zone",
+        "why": "Taunie: out of the Battle Zone",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      },
+      {
+        "id": "through_covered_passage",
+        "why": "through the wooden door and the covered passage into the Hotel Z scene. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[75, 3000], [40, 1500], [0, 3000]],
+          "held": true
+        }
+      },
+      {
+        "id": "hotel_z_arrival",
+        "why": "the Hotel Z arrival scene",
+        "action": "scene",
+        "args": {"start_window_ms": 45000}
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; ends at the autosave in front of Hotel Z"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

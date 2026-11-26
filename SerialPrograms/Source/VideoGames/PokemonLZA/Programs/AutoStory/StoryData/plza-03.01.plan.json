@@ -1,0 +1,62 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.01",
+    "title": "Down to the lobby",
+    "start": {
+      "place": "HotelZ"
+    },
+    "events": [
+      {
+        "id": "out_of_room_202",
+        "why": "to the room door's \"A Leave\". not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 1000], [-45, 1000]],
+          "end": "prompt",
+          "end_after_ms": 750
+        }
+      },
+      {
+        "id": "leave_room_202",
+        "why": "A Leave, until the party bar shows in the 2F hall",
+        "action": "scene",
+        "args": {"press_a_first": true}
+      },
+      {
+        "id": "to_2f_elevator",
+        "why": "down the hall to \"A Take Elevator\"; an earlier prompt is passed on the way. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[-15, 3000]],
+          "end": "prompt",
+          "end_after_ms": 1500
+        }
+      },
+      {
+        "id": "floor_question",
+        "why": "A Take Elevator, then A to \"Which floor?\", before the choice shows; B would close the talk",
+        "action": "scene",
+        "args": {"press_a_first": true, "stop_at_choice": true}
+      },
+      {
+        "id": "ride_to_lobby",
+        "why": "\"1F (Lobby)\"",
+        "action": "choose_0"
+      },
+      {
+        "id": "lobby_scene",
+        "why": "the ride, Z-A Royale, the outfit, AZ, Lida; autosave; Alton's choice is the top row",
+        "action": "scene"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game. No reload_when_chained: 02.07's save is unverified, so a reload could load an older save"
+    }
+  },
+  "execution": {
+    "save": "unverified"
+  }
+}

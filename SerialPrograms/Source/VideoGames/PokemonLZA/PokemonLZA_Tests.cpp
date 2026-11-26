@@ -17,8 +17,11 @@
 #include "Inference/PokemonLZA_MainMenuDetector.h"
 #include "Inference/Map/PokemonLZA_MapDetector.h"
 #include "Inference/Map/PokemonLZA_MapIconDetector.h"
+#include "Inference/PokemonLZA_Inference_Tests.h"
 #include "Inference/PokemonLZA_OverworldPartySelectionDetector.h"
+#include "Inference/PokemonLZA_PartyBarDetector.h"
 #include "Inference/PokemonLZA_SelectionArrowDetector.h"
+#include "Programs/AutoStory/PokemonLZA_AutoStory_Tests.h"
 
 namespace PokemonAutomation{
 namespace NintendoSwitch{
@@ -40,7 +43,12 @@ void add_tests(UnitTestDatabase& database){
     add_tests_MapDetector(database);
     add_tests_MapIconDetector(database);
     add_tests_OverworldPartySelectionDetector(database);
+    add_tests_PartyBarDetector(database);
     add_tests_SelectionArrowDetector(database);
+    add_tests_InferenceLogic(database);
+    add_tests_InferenceImage(database);
+    add_tests_AutoStoryLogic(database);
+    add_tests_AutoStoryImage(database);
 
 }
 

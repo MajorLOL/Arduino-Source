@@ -1,0 +1,79 @@
+{
+  "format": "pokesim-authored-checkpoint/1",
+  "game": "plza",
+  "checkpoint": {
+    "id": "03.02b",
+    "title": "Battle Taunie",
+    "start": {
+      "place": "LumioseCity"
+    },
+    "events": [
+      {
+        "id": "to_plaza_scene_prompt",
+        "why": "to the first A prompt, which starts a scene, not Taunie's talk (she is 3.25 s further on). not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [
+            [
+              0,
+              8000
+            ]
+          ],
+          "end": "prompt"
+        }
+      },
+      {
+        "id": "plaza_scene",
+        "why": "A starts the scene: two black fades and the Smart Rotom card, then control at the Quartiere Verde arch (~12 s)",
+        "action": "scene",
+        "args": {
+          "press_a_first": true
+        }
+      },
+      {
+        "id": "to_taunie",
+        "why": "on through the arch to Taunie's \"A Talk\", A on it. not planned: no tile grid in Lumiose",
+        "action": "walk",
+        "args": {
+          "legs": [[0, 8000]],
+          "end": "talk"
+        }
+      },
+      {
+        "id": "taunie_battle_start",
+        "why": "A through her talk and challenge (no A hint, subtitles without a box) to the battle HUD",
+        "action": "scene",
+        "args": {"battle_start": true}
+      },
+      {
+        "id": "battle_totodile",
+        "why": "beat Totodile, until \"We're not done just yet!\"",
+        "action": "story_battle"
+      },
+      {
+        "id": "tepig_battle_start",
+        "why": "A through the Type Matchups tutorial and Tepig's send-out to the battle HUD",
+        "action": "scene",
+        "args": {"battle_start": true}
+      },
+      {
+        "id": "battle_tepig",
+        "why": "beat Tepig, until Taunie's speech",
+        "action": "story_battle"
+      },
+      {
+        "id": "after_taunie_battle",
+        "why": "the Map & Missions card with A, the map closed with B, her talk with B",
+        "action": "talk_through_map_screen"
+      }
+    ],
+    "metadata": {
+      "phase": "testing",
+      "source": "played from a new game; starts outside Hotel Z after the Main Menu card (start unchecked). Ends at the autosave after her talk, in after_taunie_battle"
+    }
+  },
+  "execution": {
+    "save": "autosave",
+    "autosave_step": "after_taunie_battle"
+  }
+}
