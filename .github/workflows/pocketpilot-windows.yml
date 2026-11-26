@@ -198,6 +198,13 @@ jobs:
         run: |
           $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
           windeployqt --release --dir $out "$out/ClaudeGG.exe"
+          #  What Windows shows for the program (Task Manager, the file's
+          #  properties) comes from IconResource/IconResource.rc.
+          $info = (Get-Item "$out/ClaudeGG.exe").VersionInfo
+          Write-Host "ClaudeGG.exe: $($info.FileDescription), $($info.ProductName) $($info.ProductVersion)"
+          if ($info.FileDescription -ne "Claude GG" -or $info.ProductName -ne "Claude GG") {
+            throw "ClaudeGG.exe has not the name Claude GG in its properties."
+          }
           #  The function names for reading a crash: kept aside, not packaged.
           New-Item -ItemType Directory -Force -Path "symbols" | Out-Null
           Get-ChildItem "$out/*.pdb" -ErrorAction SilentlyContinue | Move-Item -Destination "symbols"
