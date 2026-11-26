@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <utility>
 #include <QApplication>
 #include <QCryptographicHash>
 #include <QDateTime>
@@ -54,28 +55,17 @@ const char* const INSTANCE_OPTION = "--installation";
 const char* const INSTANCES_OPTION = "--installations";
 const char* const INSTANCE_TEST_OPTION = "--installation-test";
 const char* const INSTANCES_HUB_TEST_OPTION = "--installations-hub-test";
-const char* const MAIN_INSTANCE = "1";
 
 
 namespace{
 
-std::string g_instance = MAIN_INSTANCE;
 bool g_overview = false;
 bool g_test_run = false;
-bool g_base_fixed = false;
 
 const char WINDOW_PROPERTY[] = "claudegg-instance-window";
 
 std::string with_slash(std::string path){
-    for (char& c : path){
-        if (c == '\\'){
-            c = '/';
-        }
-    }
-    if (!path.empty() && path.back() != '/'){
-        path += '/';
-    }
-    return path;
+    return path_with_slash(std::move(path));
 }
 
 QString to_qt(const std::string& text){
@@ -185,7 +175,7 @@ bool parse_instance_options(int argc, char* argv[], std::string& id, bool& overv
 
 bool read_instance_options(int argc, char* argv[], QString* error){
     //  The folders are made from the id: it cannot change once they were asked for.
-    if (g_base_fixed){
+    if (instance_paths_fixed()){
         if (error != nullptr){
             *error = "The installation was asked for after its folders were.";
         }
@@ -197,18 +187,12 @@ bool read_instance_options(int argc, char* argv[], QString* error){
         return false;
     }
     if (!id.empty()){
-        g_instance = id;
+        set_current_instance(id);
     }
     g_overview = overview;
     return true;
 }
 
-const std::string& current_instance(){
-    return g_instance;
-}
-bool is_main_instance(){
-    return g_instance == MAIN_INSTANCE;
-}
 bool is_overview_process(){
     return g_overview;
 }
@@ -222,34 +206,8 @@ bool is_test_run(){
 
 
 //  ---------------------------------------------------------------------
-//  Where the data is
+//  Where the data is: PocketPilot_InstancePaths.cpp
 //  ---------------------------------------------------------------------
-
-std::string shared_base_path(){
-    return with_slash(Filesystem::application_scratch_path().string());
-}
-
-std::string instances_root_path(const std::string& scratch){
-    return with_slash(scratch) + "Installations/";
-}
-std::string instance_meta_path(const std::string& scratch, const std::string& id){
-    return instances_root_path(scratch) + id + "/";
-}
-std::string instance_data_path(const std::string& scratch, const std::string& id){
-    if (id == MAIN_INSTANCE){
-        return with_slash(scratch);
-    }
-    return instance_meta_path(scratch, id);
-}
-
-std::string runtime_base_path(const std::string& scratch){
-    g_base_fixed = true;
-    if (is_main_instance()){
-        //  As it always was.
-        return scratch;
-    }
-    return instance_data_path(scratch, g_instance);
-}
 
 QString instance_setting_key_for(const QString& key, const std::string& id){
     if (id == MAIN_INSTANCE){
@@ -258,7 +216,7 @@ QString instance_setting_key_for(const QString& key, const std::string& id){
     return key + "-" + to_qt(id);
 }
 QString instance_setting_key(const QString& key){
-    return instance_setting_key_for(key, g_instance);
+    return instance_setting_key_for(key, current_instance());
 }
 
 
@@ -410,7 +368,7 @@ void write_instance_report(const QString& state, const QString& title, const QIm
         return;
     }
     write_instance_report_to(
-        to_qt(instance_meta_path(shared_base_path(), g_instance)),
+        to_qt(instance_meta_path(shared_base_path(), current_instance())),
         0, now, state, title, picture
     );
 }
@@ -419,7 +377,7 @@ void clear_instance_report(){
     if (g_test_run){
         return;
     }
-    QFile::remove(to_qt(instance_meta_path(shared_base_path(), g_instance)) + "status.json");
+    QFile::remove(to_qt(instance_meta_path(shared_base_path(), current_instance())) + "status.json");
 }
 
 QImage fit_miniature(const QImage& picture){

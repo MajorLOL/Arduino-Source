@@ -5,7 +5,7 @@
  */
 
 #include "Common/Cpp/Filesystem/Filesystem.h"
-#include "PocketPilot/PocketPilot_Instances.h"
+#include "PocketPilot/PocketPilot_InstancePaths.h"
 #include "PocketPilot/PocketPilot_OldSettings.h"
 #include "GlobalAutoPaths.h"
 

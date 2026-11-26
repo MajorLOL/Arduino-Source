@@ -73,6 +73,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include "PocketPilot_InstancePaths.h"
 
 class QApplication;
 class QLocalServer;
@@ -92,9 +93,6 @@ extern const char* const INSTANCES_OPTION;          //  --installations
 extern const char* const INSTANCE_TEST_OPTION;      //  --installation-test
 extern const char* const INSTANCES_HUB_TEST_OPTION; //  --installations-hub-test <folder>
 
-//  The id of the first installation: its data is in the folder of the program.
-extern const char* const MAIN_INSTANCE;             //  "1"
-
 
 //  ---------------------------------------------------------------------
 //  Which installation this is
@@ -113,9 +111,6 @@ bool parse_instance_options(int argc, char* argv[], std::string& id, bool& overv
 //  False: see parse_instance_options(); nothing is kept then.
 bool read_instance_options(int argc, char* argv[], QString* error = nullptr);
 
-//  This process's installation ("1" unless the command line said otherwise).
-const std::string& current_instance();
-bool is_main_instance();
 //  The process is the overview (--installations).
 bool is_overview_process();
 
@@ -126,25 +121,9 @@ bool is_test_run();
 
 
 //  ---------------------------------------------------------------------
-//  Where the data is (all with a "/" at the end)
+//  Where the data is: see PocketPilot_InstancePaths.h (shared_base_path(),
+//  instance_meta_path(), instance_data_path(), runtime_base_path() ...)
 //  ---------------------------------------------------------------------
-
-//  The folder that the program was started in (what the data of installation 1
-//  is in): the working directory, as the program has always used it.
-std::string shared_base_path();
-
-//  "<scratch>Installations/", and the folder in it of one installation: where
-//  its status and miniature are. "scratch" ends with "/".
-std::string instances_root_path(const std::string& scratch);
-std::string instance_meta_path(const std::string& scratch, const std::string& id);
-
-//  Where the data of an installation is: the folder itself for number 1,
-//  its folder in Installations for the others.
-std::string instance_data_path(const std::string& scratch, const std::string& id);
-
-//  What RUNTIME_BASE_PATH() is for this process; the id can no longer change
-//  after this was asked.
-std::string runtime_base_path(const std::string& scratch);
 
 //  A name for something that each installation keeps for itself in the
 //  settings of the user (QSettings): the key for installation 1, a key of its

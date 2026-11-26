@@ -358,6 +358,8 @@ file(GLOB CORE_LIBRARY_SOURCES
     Source/NintendoSwitch/Options/NintendoSwitch_CodeEntrySettingsOption.h
     Source/NintendoSwitch/Programs/FastCodeEntry/NintendoSwitch_KeyboardEntryMappings.cpp
     Source/NintendoSwitch/Programs/FastCodeEntry/NintendoSwitch_KeyboardEntryMappings.h
+    Source/PocketPilot/PocketPilot_InstancePaths.cpp
+    Source/PocketPilot/PocketPilot_InstancePaths.h
 )
 
 file(GLOB LIBRARY_SOURCES
