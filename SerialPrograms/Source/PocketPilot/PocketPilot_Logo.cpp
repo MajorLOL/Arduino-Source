@@ -1,6 +1,6 @@
-/*  PocketPilot Logo
+/*  Claude GG Logo
  *
- *  Part of PocketPilot, which is based on Pokemon Automation
+ *  Part of Claude GG (PocketPilot before), which is based on Pokemon Automation
  *  (https://github.com/PokemonAutomation/).
  *
  */
@@ -14,50 +14,33 @@ namespace PokemonAutomation{
 namespace PocketPilot{
 
 
+namespace{
 
-void paint_logo(QPainter& painter, const QRectF& rect, const LogoColors& colors){
-    const qreal side = qMin(rect.width(), rect.height());
-    const qreal left = rect.left() + (rect.width() - side) / 2;
-    const qreal top = rect.top() + (rect.height() - side) / 2;
-    auto x = [=](qreal part){ return left + side * part; };
-    auto y = [=](qreal part){ return top + side * part; };
+//  The picture is the same for every size: loaded once.
+const QPixmap& mark_picture(){
+    static const QPixmap picture(":/pocketpilot/setup/switch-gg.png");
+    return picture;
+}
 
-    painter.save();
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setPen(Qt::NoPen);
+}
 
-    //  The handheld: a wide body with round ends.
-    QPainterPath body;
-    body.addRoundedRect(QRectF(x(0.03), y(0.22), side * 0.94, side * 0.56), side * 0.17, side * 0.17);
-    painter.fillPath(body, colors.body);
 
-    //  Its screen in the middle.
-    QPainterPath screen;
-    screen.addRoundedRect(QRectF(x(0.30), y(0.30), side * 0.40, side * 0.40), side * 0.05, side * 0.05);
-    painter.fillPath(screen, colors.screen);
-
-    //  The "play" arrow on the screen: the game runs by itself.
-    QPainterPath arrow;
-    arrow.moveTo(x(0.435), y(0.385));
-    arrow.lineTo(x(0.435), y(0.615));
-    arrow.lineTo(x(0.615), y(0.500));
-    arrow.closeSubpath();
-    painter.fillPath(arrow, colors.mark);
-
-    //  The directional pad left of the screen and two buttons right of it.
-    //  Too small to draw in a small icon.
-    if (side >= 22){
-        const qreal arm = side * 0.085;
-        const qreal thick = side * 0.058;
-        const QPointF pad(x(0.165), y(0.50));
-        painter.fillRect(QRectF(pad.x() - arm, pad.y() - thick / 2, 2 * arm, thick), colors.screen);
-        painter.fillRect(QRectF(pad.x() - thick / 2, pad.y() - arm, thick, 2 * arm), colors.screen);
-        painter.setBrush(colors.screen);
-        const qreal radius = side * 0.042;
-        painter.drawEllipse(QPointF(x(0.800), y(0.545)), radius, radius);
-        painter.drawEllipse(QPointF(x(0.885), y(0.455)), radius, radius);
+void paint_logo(QPainter& painter, const QRectF& rect){
+    const QPixmap& picture = mark_picture();
+    if (picture.isNull() || rect.width() <= 0 || rect.height() <= 0){
+        return;
     }
-
+    const qreal scale = qMin(rect.width() / picture.width(), rect.height() / picture.height());
+    const qreal width = picture.width() * scale;
+    const qreal height = picture.height() * scale;
+    painter.save();
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.drawPixmap(
+        QRectF(rect.left() + (rect.width() - width) / 2, rect.top() + (rect.height() - height) / 2, width, height),
+        picture,
+        QRectF(picture.rect())
+    );
     painter.restore();
 }
 
@@ -70,18 +53,21 @@ QPixmap app_icon_pixmap(int size){
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(Qt::NoPen);
 
-    //  The tile: ember, the color of the Fire starter.
-    const QColor tile(0xe2, 0x57, 0x30);
+    //  The tile: black like the program's screens, with a thin light rim so
+    //  that its shape shows on a dark task bar.
+    const qreal rim = qMax<qreal>(1.0, size * 0.012);
+    const QRectF tile(rim / 2, rim / 2, size - rim, size - rim);
     QPainterPath path;
-    path.addRoundedRect(QRectF(0, 0, size, size), size * 0.22, size * 0.22);
-    painter.fillPath(path, tile);
+    path.addRoundedRect(tile, size * ICON_TILE_RADIUS, size * ICON_TILE_RADIUS);
+    painter.fillPath(path, QColor(0x0b, 0x0b, 0x0c));
+    painter.setPen(QPen(QColor(255, 255, 255, 56), rim));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawPath(path);
+    painter.setPen(Qt::NoPen);
 
-    LogoColors colors;
-    colors.body = QColor(0xff, 0xf6, 0xec);
-    colors.screen = QColor(0x2b, 0x1b, 0x17);
-    colors.mark = QColor(0xff, 0x9d, 0x70);
-    const qreal inset = size * 0.07;
-    paint_logo(painter, QRectF(inset, inset, size - 2 * inset, size - 2 * inset), colors);
+    const qreal width = size * ICON_MARK_WIDTH;
+    //  The mark is wide: it takes the middle of the tile.
+    paint_logo(painter, QRectF((size - width) / 2, size * 0.2, width, size * 0.6));
     return pixmap;
 }
 

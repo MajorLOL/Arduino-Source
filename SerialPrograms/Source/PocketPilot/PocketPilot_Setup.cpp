@@ -500,6 +500,25 @@ public:
         return m_test_mode;
     }
 
+    //  ---- minimizing
+    //  The screens that are a window of their own (the setup, the choice of a
+    //  game and of a program, full screen, with no title bar) have a button in
+    //  the top right corner that minimizes the window, and Ctrl+M does the
+    //  same. The main window has the buttons of its own title bar.
+    bool can_minimize() const{
+        return !m_app_mode && parentWidget() == nullptr;
+    }
+    void minimize(){
+        m_minimize_requests++;
+        if (!m_test_mode){
+            showMinimized();
+        }
+    }
+    //  How often it was asked for (the test does not minimize its windows).
+    int minimize_requests() const{
+        return m_minimize_requests;
+    }
+
     //  ---- the main window's own screen (see AppView)
     bool app_mode() const{
         return m_app_mode;
@@ -873,6 +892,7 @@ private:
     //  A button, a row ... of the page: or one of the buttons along the top.
     void dispatch(const QString& id);
     void paint_app_menu(QPainter& painter);
+    void paint_minimize(QPainter& painter);
     bool app_activate(const QString& id);
     void place_claude();
 
@@ -920,6 +940,7 @@ private:
     QString m_last_folder;
     QString m_copied;
     bool m_device_manager_opened = false;
+    int m_minimize_requests = 0;
 
     //  The film on top of the page.
     bool m_video_open = false;
@@ -7727,6 +7748,9 @@ void Canvas::paintEvent(QPaintEvent*){
             painter.setOpacity(1.0);
             paint_app_menu(painter);
         }
+        if (can_minimize()){
+            paint_minimize(painter);
+        }
     }
     if (m_intro == IntroState::FADE){
         //  The last picture of the film over the page, going away.
@@ -7855,6 +7879,11 @@ void Canvas::move_focus(int direction){
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event){
+    //  Ctrl+M minimizes the window of its own, whatever is on it (also the film).
+    if (event->key() == Qt::Key_M && (event->modifiers() & Qt::ControlModifier) && can_minimize()){
+        minimize();
+        return;
+    }
     if (m_intro == IntroState::FILM){
         //  Any key skips the film (not in the first moments: the program was
         //  just started, perhaps by a double click).
@@ -8030,11 +8059,32 @@ void Canvas::dispatch(const QString& id){
     if (m_page == nullptr){
         return;
     }
+    if (id == "minimize"){
+        minimize();
+        return;
+    }
     if (m_app_mode && id.startsWith("app:")){
         app_activate(id);
         return;
     }
     m_page->activate(*this, id);
+}
+
+//  The button that minimizes a window that has no title bar: a small square in
+//  the top right corner, a dash in it. Not a place for the keyboard to stop at
+//  (Ctrl+M does the same), so that the order of the pages stays what it was.
+void Canvas::paint_minimize(QPainter& painter){
+    constexpr double SIZE = 56;
+    const QRectF rect(DW - 36 - SIZE, 30, SIZE, SIZE);
+    const bool hover = hovered("minimize");
+    painter.setOpacity(1.0);
+    panel(painter, rect, 16, white(hover ? 0.10 : 0.0), white(hover ? 0.55 : 0.26), 1.8);
+    painter.setPen(QPen(white(hover ? 0.95 : 0.60), 3.4, Qt::SolidLine, Qt::RoundCap));
+    painter.drawLine(
+        QPointF(rect.center().x() - 12, rect.center().y() + 8),
+        QPointF(rect.center().x() + 12, rect.center().y() + 8)
+    );
+    add_hit("minimize", rect, true, false);
 }
 
 //  The buttons of the old top bar, along the top of every page.
@@ -9216,6 +9266,33 @@ int run_setup_test(QApplication& application, const QString& folder){
         checker.check(skip_canvas.finished() && skip_canvas.result().game == skipping.games[3].name, "the game that is picked is the answer");
     }
 
+    //  ---- Minimize: a window of its own has no title bar, so it has a button
+    {
+        SetupRequest minimizing;
+        minimizing.ask_board = true;
+        minimizing.games = test_games();
+        Canvas mini(minimizing, true);
+        mini.resize(1280, 720);
+        QEventLoop mini_loop;
+        mini.start(&mini_loop);
+        mini.show();
+        mini.wait(2.0);
+        checker.check(mini.can_minimize(), "the full screen of the setup can be minimized");
+        checker.check(mini.has_hit("minimize") && mini.hit_enabled("minimize"), "and has a button for it in the top right corner");
+        const QString page_before = mini.page_name();
+        checker.check(mini.click("minimize") && mini.minimize_requests() == 1, "the button asks for the window to be minimized");
+        mini.wait(0.3);
+        checker.check(!mini.finished() && mini.page_name() == page_before, "and leaves the screen as it was");
+        mini.press_key(Qt::Key_M, Qt::ControlModifier, "m");
+        checker.check(mini.minimize_requests() == 2, "Ctrl+M minimizes too");
+        mini.press_key(Qt::Key_M, Qt::NoModifier, "m");
+        checker.check(mini.minimize_requests() == 2, "the letter M alone does not");
+        save_preview(mini, folder, "preview-minimize");
+        mini.click("skip");
+        mini.wait(2.5);
+        checker.check(mini.page_name() == "games" && mini.has_hit("minimize"), "the next screen has the button too");
+    }
+
     //  ---- "Choose later", and no games at all
     {
         SetupRequest with_games;
@@ -10121,6 +10198,9 @@ int run_setup_test(QApplication& application, const QString& folder){
         window_screen.start(nullptr);
         window_screen.show();
         window_screen.wait(2.5);
+
+        //  The main window has a title bar of its own: no button for it here.
+        checker.check(!window_screen.can_minimize() && !window_screen.has_hit("minimize"), "the main window's screen has no minimize button (its title bar has one)");
 
         //  The games: no end, no "Choose later", the buttons of the top bar.
         checker.check(window_screen.page_name() == "games" && !window_screen.finished(), "as the window's screen it starts on the games");

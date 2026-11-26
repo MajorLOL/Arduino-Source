@@ -1,4 +1,4 @@
-IDI_ICON1 ICON "pocketpilot.ico"
+IDI_ICON1 ICON "claudegg.ico"
 
 //  What Windows shows for the program (Task Manager, the file's properties,
 //  the firewall's questions). Without it only the file name ClaudeGG.exe is
