@@ -20,6 +20,7 @@
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Logging/AbstractLogger.h"
 #include "Common/Cpp/Concurrency/SpinLock.h"
+#include "CommonFramework/ImageTypes/ImageRGB32_Qt.h"
 #include "CommonFramework/VideoPipeline/Backends/VideoFrameQt.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/Recording/StreamHistoryOption.h"
@@ -58,24 +59,20 @@ QImage decompress_video_frame(const std::vector<uchar> &compressed_buffer){
     return img.convertToFormat(QImage::Format_BGR888);
 }
 
-std::vector<uchar> compress_video_frame(const QVideoFrame& const_frame){
+std::vector<uchar> compress_video_frame(VideoFrameConverter& converter, const QVideoFrame& frame){
     // simulate_cpu_load(100);  // for testing, to see what happens when the CPU is overwhelmed, and needs to drop frames.
 
-
-    // Create a local non-const copy (cheap, uses explicit sharing)
-    QVideoFrame frame = const_frame;
-
-    // 1. Map the frame to CPU memory
-    if (!frame.map(QVideoFrame::ReadOnly)){
+    // 1. Convert to a picture. The converter maps the frame to CPU memory
+    // itself, and gives back its own conversion once that matched Qt's.
+    const ImageRGB32 converted = converter.convert(frame);
+    if (!converted){
         return {};
     }
 
-    // Ensure unmap() is called when this function exits (success or failure)
-    auto guard = qScopeGuard([&frame] { frame.unmap(); });
-
-    // 2. Convert to QImage (Qt 6.8+ handles internal conversions efficiently)
-    // For circular buffers, using a 3-channel RGB888 is common for OpenCV
-    QImage img = frame.toImage().convertToFormat(QImage::Format_RGB888);
+    // 2. A 3-channel RGB888 picture is common for OpenCV. (The QImage of the
+    // converted picture points into it, which lives to the end of this
+    // function.)
+    QImage img = to_QImage_ref(converted).convertToFormat(QImage::Format_RGB888);
     //  A frame that could not be converted: nothing to compress (and its
     //  width of 0 would divide by zero below).
     if (img.isNull()){
@@ -163,6 +160,7 @@ StreamHistoryTracker::StreamHistoryTracker(
     bool has_video
 )
     : m_logger(logger)
+    , m_converter(logger)
     , m_window(window)
     // , m_audio_samples_per_frame(audio_samples_per_frame)
     // , m_audio_frames_per_second(audio_frames_per_second)
@@ -401,7 +399,7 @@ void StreamHistoryTracker::worker_loop(){
         }
 
         // 2. Perform the expensive compression (Outside the lock)
-        auto compressed_data = compress_video_frame(frame->frame);
+        auto compressed_data = compress_video_frame(m_converter, frame->frame);
         //  A frame that could not be mapped or converted is left out.
         if (compressed_data.empty()){
             continue;

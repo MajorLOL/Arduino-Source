@@ -20,6 +20,7 @@
 #include "Common/Cpp/Concurrency/ConditionVariable.h"
 #include "Common/Cpp/Concurrency/AsyncTask.h"
 #include "CommonFramework/VideoPipeline/VideoFeed.h"
+#include "CommonFramework/VideoPipeline/Backends/VideoFrameConversion.h"
 
 
 namespace PokemonAutomation{
@@ -44,7 +45,11 @@ struct CompressedVideoFrame{
 };
 
 QImage decompress_video_frame(const std::vector<uchar> &compressed_buffer);
-std::vector<uchar> compress_video_frame(const QVideoFrame& const_frame);
+//  The frame as a JPEG. The converter turns it into a picture: not
+//  QVideoFrame::toImage(), which makes the memory of the process grow with
+//  every frame on some computers (VideoFrameConversion.h). Empty when the
+//  frame cannot be converted.
+std::vector<uchar> compress_video_frame(VideoFrameConverter& converter, const QVideoFrame& frame);
 
 class StreamHistoryTracker{
 public:
@@ -71,6 +76,8 @@ private:
 private:
     static constexpr size_t MAX_PENDING_FRAMES = 10;
     Logger& m_logger;
+    //  Used by the worker thread only.
+    VideoFrameConverter m_converter;
     mutable SpinLock m_lock;
     std::chrono::seconds m_window;
 

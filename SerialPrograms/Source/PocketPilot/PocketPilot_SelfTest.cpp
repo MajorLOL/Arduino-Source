@@ -18,6 +18,7 @@
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QCheckBox>
+#include <QColor>
 #include <QComboBox>
 #include <QDialog>
 #include <QDir>
@@ -40,6 +41,8 @@
 #include <QTimer>
 #include <QToolTip>
 #include <QVBoxLayout>
+#include <QVideoFrame>
+#include <QVideoFrameFormat>
 #include <QWheelEvent>
 #include "Common/Cpp/CancellableScope.h"
 #include "Common/Cpp/ColoredText.h"
@@ -56,6 +59,7 @@
 #include "CommonFramework/GlobalAutoPaths.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/PersistentSettings.h"
+#include "CommonFramework/Recording/StreamHistoryTracker_SaveFrames.h"
 #include "CommonFramework/ImageTypes/ImageRGB32.h"
 #include "CommonFramework/ImageTypes/ImageViewRGB32.h"
 #include "CommonFramework/Logging/Logger.h"
@@ -1631,6 +1635,113 @@ int check_shiny_clip(Logger& logger){
 
     logger.log(
         "Shiny clip test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The frames of the stream history: a frame as a capture card gives it
+//  (NV12), through compress_video_frame() and back. The four colors in it
+//  and their places must be those of Qt's own conversion, whichever of the
+//  two conversions the converter uses.
+int check_history_frames(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("History frames test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    //  Four quarters: red, green, blue and gray, in BT.601 as the video of a
+    //  console has them.
+    struct Yuv{
+        uchar y;
+        uchar u;
+        uchar v;
+    };
+    const Yuv quarters[4] = {{82, 90, 240}, {145, 54, 34}, {41, 240, 110}, {128, 128, 128}};
+    constexpr int WIDTH = 64;
+    constexpr int HEIGHT = 48;
+    QVideoFrame frame(QVideoFrameFormat(QSize(WIDTH, HEIGHT), QVideoFrameFormat::Format_NV12));
+    if (!frame.isValid() || !frame.map(QVideoFrame::WriteOnly) || frame.planeCount() < 2){
+        logger.log("History frames test: FAILED: no NV12 frame could be made to test with", COLOR_RED);
+        return 1;
+    }
+    for (int row = 0; row < HEIGHT; row++){
+        uchar* line = frame.bits(0) + (ptrdiff_t)row * frame.bytesPerLine(0);
+        for (int x = 0; x < WIDTH; x++){
+            line[x] = quarters[(row >= HEIGHT / 2 ? 2 : 0) + (x >= WIDTH / 2 ? 1 : 0)].y;
+        }
+    }
+    for (int row = 0; row < HEIGHT / 2; row++){
+        uchar* line = frame.bits(1) + (ptrdiff_t)row * frame.bytesPerLine(1);
+        for (int x = 0; x < WIDTH / 2; x++){
+            const Yuv& color = quarters[(row >= HEIGHT / 4 ? 2 : 0) + (x >= WIDTH / 4 ? 1 : 0)];
+            line[2 * x] = color.u;
+            line[2 * x + 1] = color.v;
+        }
+    }
+    frame.unmap();
+
+    //  What Qt makes of the frame is what the history showed before.
+    const QImage qt = frame.toImage();
+    check(!qt.isNull() && qt.width() == WIDTH && qt.height() == HEIGHT, "Qt converts the frame");
+    if (qt.isNull()){
+        return wrong + 1;
+    }
+
+    //  The middle of each quarter: the left and right, top and bottom of the
+    //  picture, at any size the history is set to.
+    const auto close = [](const QColor& a, const QColor& b){
+        return std::abs(a.red() - b.red()) <= 24 && std::abs(a.green() - b.green()) <= 24 && std::abs(a.blue() - b.blue()) <= 24;
+    };
+    VideoFrameConverter converter(logger);
+    bool all_close = true;
+    bool all_there = true;
+    int size_wrong = 0;
+    for (int attempt = 0; attempt < 3; attempt++){
+        const std::vector<uchar> jpeg = compress_video_frame(converter, frame);
+        if (jpeg.empty()){
+            all_there = false;
+            continue;
+        }
+        const QImage back = decompress_video_frame(jpeg);
+        if (back.isNull()){
+            all_there = false;
+            continue;
+        }
+        //  The same shape as the frame, whatever the size.
+        if (back.width() * HEIGHT != back.height() * WIDTH){
+            size_wrong++;
+        }
+        for (int quarter = 0; quarter < 4; quarter++){
+            const double fx = (quarter % 2 == 0) ? 0.25 : 0.75;
+            const double fy = (quarter / 2 == 0) ? 0.25 : 0.75;
+            const QColor expected = qt.pixelColor((int)(fx * qt.width()), (int)(fy * qt.height()));
+            const QColor got = back.pixelColor((int)(fx * back.width()), (int)(fy * back.height()));
+            if (!close(expected, got)){
+                all_close = false;
+                logger.log(
+                    "History frames test: quarter " + std::to_string(quarter) + ": Qt " + expected.name().toStdString() +
+                    ", the history " + got.name().toStdString(),
+                    COLOR_RED
+                );
+            }
+        }
+    }
+    check(all_there, "a frame is a JPEG and back");
+    check(size_wrong == 0, "the picture keeps the shape of the frame");
+    check(all_close, "the colors of the four quarters are Qt's, in the same places (red, green, blue, gray)");
+
+    //  A frame without anything in it is left out, not an error.
+    check(compress_video_frame(converter, QVideoFrame()).empty(), "an empty frame gives nothing");
+
+    logger.log(
+        "History frames test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -6083,6 +6194,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_updates(logger);
         failed += check_story_times(logger);
         failed += check_shiny_clip(logger);
+        failed += check_history_frames(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);
