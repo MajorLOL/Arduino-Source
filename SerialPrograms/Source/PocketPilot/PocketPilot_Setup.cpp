@@ -5260,7 +5260,7 @@ private:
     //  last 200 lines).
     QString report() const{
         QStringList out;
-        out << "# PocketPilot debug report";
+        out << "# Claude GG debug report";
         out << "";
         if (!m_build.isEmpty()){
             out << "Build: " + m_build;
@@ -5330,10 +5330,10 @@ private:
     void save_report(Canvas& canvas){
         QString folder = QDir(canvas.app_folder().isEmpty() ? QDir::currentPath() : canvas.app_folder()).filePath("Debug");
         if (!QDir().mkpath(folder)){
-            folder = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath("PocketPilot Debug");
+            folder = QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath("Claude GG Debug");
             QDir().mkpath(folder);
         }
-        const QString path = QDir(folder).filePath("PocketPilot-debug-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss") + ".txt");
+        const QString path = QDir(folder).filePath("ClaudeGG-debug-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss") + ".txt");
         QFile file(path);
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
             file.write(report().toUtf8());
@@ -7112,7 +7112,7 @@ Canvas::Canvas(const SetupRequest& request, bool test_mode, QWidget* parent, App
         m_app_mode = true;
         m_app = *app;
     }
-    setWindowTitle("PocketPilot Studio");
+    setWindowTitle("Claude GG");
     m_app_folder = QCoreApplication::applicationDirPath();
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
@@ -9796,7 +9796,7 @@ int run_setup_test(QApplication& application, const QString& folder){
         //  Copy for Claude: the whole story in one text.
         programs_canvas.click("copy-claude");
         const QString report = programs_canvas.copied();
-        checker.check(report.contains("# PocketPilot debug report") && report.contains("Build: PocketPilot test build"), "Copy for Claude starts with what it is, and the build");
+        checker.check(report.contains("# Claude GG debug report") && report.contains("Build: PocketPilot test build"), "Copy for Claude starts with what it is, and the build");
         checker.check(report.contains("Program: Turbo A") && report.contains("Game: Nintendo Switch"), "it says which program was picked");
         checker.check(report.contains("Video: USB3 Video") && report.contains("Audio: USB3 Audio") && report.contains("Board: COM4"), "it says what the checks saw");
         checker.check(report.contains("ERROR Video: black frame, signal lost?") && report.contains("WARN Board: no answer after 1.2 s"), "it has the lines of the log, with their levels");

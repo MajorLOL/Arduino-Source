@@ -5,6 +5,7 @@
  */
 
 #include "Common/Cpp/Filesystem/Filesystem.h"
+#include "PocketPilot/PocketPilot_OldSettings.h"
 #include "GlobalAutoPaths.h"
 
 //#include <iostream>
@@ -102,9 +103,23 @@ const std::string& SETTINGS_PATH(){
     static std::string path = get_setting_path();
     return path;
 }
+static bool& settings_taken_over_flag(){
+    static bool taken_over = false;
+    return taken_over;
+}
 const std::string& PROGRAM_SETTING_JSON_PATH(){
-    static std::string path = SETTINGS_PATH() + Filesystem::application_binary_name().replace_extension().string() + "-Settings.json";
+    static std::string path = [](){
+        const std::string file = Filesystem::application_binary_name().replace_extension().string() + "-Settings.json";
+        //  The program was called SerialPrograms before build 98: its first
+        //  start under the new name takes the old settings over.
+        settings_taken_over_flag() = PocketPilot::take_over_old_settings(SETTINGS_PATH(), file);
+        return SETTINGS_PATH() + file;
+    }();
     return path;
+}
+bool settings_taken_over_from_old_name(){
+    PROGRAM_SETTING_JSON_PATH();
+    return settings_taken_over_flag();
 }
 const std::string& SCREENSHOTS_PATH(){
     static std::string path = get_screenshot_path();

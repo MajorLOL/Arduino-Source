@@ -239,7 +239,7 @@ jobs:
         if: inputs.upload-build && startsWith(inputs.os, 'windows')
         with:
           name: Standalone Executable (os=${{inputs.os}})
-          path: ${{env.UPLOAD_FOLDER}}/SerialPrograms.exe
+          path: ${{env.UPLOAD_FOLDER}}/ClaudeGG.exe
 
       - name: Checkout CommandLineTests
         uses: actions/checkout@v7
@@ -272,7 +272,7 @@ jobs:
         if: startsWith(inputs.os, 'windows') && inputs.run-tests
         run: |
           cd Arduino-Source/SerialPrograms/bin
-          $process = Start-Process -FilePath "./RelWithDebInfo/SerialPrograms.exe" `
+          $process = Start-Process -FilePath "./RelWithDebInfo/ClaudeGG.exe" `
                                    -ArgumentList "--command-line-test-mode" `
                                    -NoNewWindow -Wait -PassThru
           if ($process.ExitCode -ne 0) {

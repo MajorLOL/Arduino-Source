@@ -103,6 +103,9 @@ namespace{
 
 //  What the sealed text is tied to besides the Windows account: a program
 //  that asks the API without it gets nothing out of a copied file.
+//  Do not change it with the program's name (Claude GG, PocketPilot Studio
+//  before): the keys that a computer has sealed with it cannot be opened with
+//  another text.
 const char ENTROPY[] = "PocketPilot Studio settings secret";
 
 DATA_BLOB entropy_blob(){

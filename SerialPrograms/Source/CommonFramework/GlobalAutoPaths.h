@@ -19,6 +19,8 @@ const std::string& RUNTIME_BASE_PATH();
 const std::string& SETTINGS_PATH();
 // The setting JSON file path. This path is a child of the folder SETTINGS_PATH().
 const std::string& PROGRAM_SETTING_JSON_PATH();
+// True when the settings file was made at this start by copying the one of the old name (SerialPrograms-Settings.json).
+bool settings_taken_over_from_old_name();
 
 // Folder path (end with "/") to hold screenshots from the program "Screenshot" button.
 const std::string& SCREENSHOTS_PATH();

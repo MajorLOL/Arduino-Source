@@ -35,7 +35,7 @@ void apply_current_theme(){
 ThemeSelectorOption::ThemeSelectorOption()
     : EnumDropdownOption<UiThemeMode>(
         "<b>Theme:</b><br>"
-        "Night and Day are PocketPilot's own looks. "
+        "Night and Day are Claude GG's own looks. "
         "The two classic ones are those of Pok\u00e9mon Automation.",
         {
             //  Other names than before ("default", "dark"): a setting saved

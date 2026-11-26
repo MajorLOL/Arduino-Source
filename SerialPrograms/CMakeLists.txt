@@ -253,6 +253,13 @@ if (APPLE)
 else()
     add_executable(SerialPrograms WIN32 ${EXECUTABLE_SOURCES})
     target_sources(SerialPrograms PRIVATE ../IconResource/IconResource.rc)
+    if (WIN32)
+        # The program's file is ClaudeGG.exe (SerialPrograms.exe until build 97);
+        # its log (ClaudeGG.log) and settings (ClaudeGG-Settings.json) are named
+        # after it. The target keeps its name, so that the rest of the build
+        # does not change.
+        set_target_properties(SerialPrograms PROPERTIES OUTPUT_NAME "ClaudeGG")
+    endif()
 endif()
 
 target_link_libraries(

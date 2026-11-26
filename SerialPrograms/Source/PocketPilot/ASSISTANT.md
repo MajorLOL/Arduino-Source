@@ -1,4 +1,4 @@
-# Claude in PocketPilot Studio
+# Claude in Claude GG
 
 The button "Claude" along the top of the window opens a panel at the right of it: a conversation with Claude, the AI model of Anthropic. It answers questions about the programs, and it builds or fixes a program in the source of this repository. Its changes never go to the branch the builds are made from: they go to a branch of their own, which you turn into a pull request. In the program "Claude Plays", Claude plays the game itself.
 

@@ -6,7 +6,7 @@
  *
  *  How to run:
  *  Launch the program with the argument "--command-line-test-mode", or set
- *  "20-GlobalSettings": "COMMAND_LINE_TESTS": "RUN" to true in SerialPrograms-Settings.json.
+ *  "20-GlobalSettings": "COMMAND_LINE_TESTS": "RUN" to true in the settings file (ClaudeGG-Settings.json; SerialPrograms-Settings.json before build 98).
  *
  *  How the tests work:
  *  - Each kind of test is a class inheriting `UnitTest` (Common/Cpp/TestRunners/UnitTest.h)

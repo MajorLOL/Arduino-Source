@@ -15,7 +15,7 @@
 namespace PokemonAutomation{
 
 // Global setting of the whole program.
-// The setting is stored in the local folder, named as SerialPrograms-Settings.json.
+// The setting is stored in the local folder, named after the program: ClaudeGG-Settings.json (SerialPrograms-Settings.json before build 98).
 // The settings json has three fields:
 // - "20-GlobalSettings": settings for CommonFramework/GlobalSettingsPanel.h: GlobalSetting,
 //   global settings like Discord settings, hardware instruction set, thread priority and debugging.

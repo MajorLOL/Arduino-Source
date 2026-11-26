@@ -1,4 +1,4 @@
-# Security of PocketPilot Studio
+# Security of Claude GG
 
 Looked at on 25 November 2026, by reading the source (not by watching the network of a running program). What follows is what that found, and what was done about it.
 
@@ -29,13 +29,13 @@ The program does not listen on any port. The Discord bot and the Discord Social 
 
 ## Other programs that run as you
 
-Windows ties the encryption to your account, not to PocketPilot. A program that runs as you can ask Windows to open the secrets as well. An extra secret that is mixed in ("entropy") does not change that, because the program can read where that is kept too; it only stops programs that do not look for PocketPilot. Browsers had the same problem: Chrome now lets a service that runs as SYSTEM check who asks, and stealers have found ways around that too. A separate protection for one program needs things this project does not have: an installer with administrator rights and a certificate for the service, or, for Windows' enclaves, Windows 11 24H2 and a signing account.
+Windows ties the encryption to your account, not to Claude GG. A program that runs as you can ask Windows to open the secrets as well. An extra secret that is mixed in ("entropy") does not change that, because the program can read where that is kept too; it only stops programs that do not look for PocketPilot. Browsers had the same problem: Chrome now lets a service that runs as SYSTEM check who asks, and stealers have found ways around that too. A separate protection for one program needs things this project does not have: an installer with administrator rights and a certificate for the service, or, for Windows' enclaves, Windows 11 24H2 and a signing account.
 
 What does help, from the strongest:
 
 1. **Do not keep the key on the disk.** In the Claude panel, under the box for the key and under Settings, switch off **Remember the key on this computer**. The Claude key and the GitHub token then stay in memory until you close the program, and the file of the keys has none of them (it only says that they are not remembered, and what was in it is removed when you switch it off). You enter the key again at each start. There is nothing left on the disk for another program to open; a program that reads the memory of PocketPilot while it runs is another matter, which only point 3 helps against. Removing the file's content is not a secure wipe of the disk: a key that was saved before can still be in free space until it is overwritten, so make a new key in the Claude Console if the old one mattered.
 2. **Lock the keys with a passphrase** that Windows does not know. A program that runs as you then also needs the passphrase. Not in the program yet either; the second choice after not keeping the key.
-3. **Run PocketPilot under its own Windows account.** Other programs of your main account cannot open what that account sealed. This works today and costs nothing.
+3. **Run Claude GG under its own Windows account.** Other programs of your main account cannot open what that account sealed. This works today and costs nothing.
 4. **Make a stolen key cheap.** Give the Claude key its own workspace and a spend limit in the Claude Console, make the GitHub token a fine-grained one for this repository only, with an expiry date, and remember that a Discord webhook can be deleted in the channel settings.
 
 ## What Claude may do
@@ -54,7 +54,7 @@ What does help, from the strongest:
 
 The notes of each release have the SHA-256 of the zip. In PowerShell:
 
-    Get-FileHash .\PocketPilot-Windows.zip -Algorithm SHA256
+    Get-FileHash .\ClaudeGG-Windows.zip -Algorithm SHA256
 
 It has to be the same. The program is not signed with a certificate, so Windows may warn when you start it.
 

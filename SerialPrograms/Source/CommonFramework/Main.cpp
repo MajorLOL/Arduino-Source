@@ -48,6 +48,7 @@
 #include "Windows/MainWindow.h"
 #include "PocketPilot/PocketPilot_Intro.h"
 #include "PocketPilot/PocketPilot_Language.h"
+#include "PocketPilot/PocketPilot_OldSettings.h"
 #include "PocketPilot/PocketPilot_Setup.h"
 #include "PocketPilot/PocketPilot_SelfTest.h"
 #include "GlobalSettingsPanel.h"
@@ -206,7 +207,16 @@ int run_program(int argc, char *argv[]){
         return 1;
     }
 
-    //  Read program settings from json file: SerialPrograms-Settings.json.
+    //  Read program settings from json file: ClaudeGG-Settings.json (named
+    //  after the program; SerialPrograms-Settings.json before build 98, whose
+    //  settings are taken over at the first start under the new name).
+    if (settings_taken_over_from_old_name()){
+        logger.log(
+            std::string("Settings: taken over from ") + PocketPilot::OLD_SETTINGS_FILE_NAME +
+            " (the program was called SerialPrograms before). The old file is still there.",
+            COLOR_BLUE
+        );
+    }
     try{
         PERSISTENT_SETTINGS().read();
     }catch (const FileException& error){

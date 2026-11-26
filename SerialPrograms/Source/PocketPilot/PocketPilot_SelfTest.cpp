@@ -38,6 +38,7 @@
 #include <QStyle>
 #include <QStyleOptionSlider>
 #include <QTextEdit>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <QToolTip>
 #include <QVBoxLayout>
@@ -48,6 +49,7 @@
 #include "Common/Cpp/ColoredText.h"
 #include "Common/Cpp/Exceptions.h"
 #include "Common/Cpp/Filesystem/FileIO.h"
+#include "Common/Cpp/Filesystem/Filesystem.h"
 #include "Common/Cpp/Json/JsonValue.h"
 #include "Common/Cpp/Json/JsonArray.h"
 #include "Common/Cpp/Json/JsonObject.h"
@@ -57,6 +59,7 @@
 #include "Common/Qt/Options/ConfigWidget.h"
 #include "CommonFramework/AudioPipeline/AudioOption.h"
 #include "CommonFramework/GlobalAutoPaths.h"
+#include "CommonFramework/Globals.h"
 #include "CommonFramework/GlobalSettingsPanel.h"
 #include "CommonFramework/PersistentSettings.h"
 #include "CommonFramework/Recording/StreamHistoryTracker_SaveFrames.h"
@@ -98,6 +101,7 @@
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
 #include "PocketPilot_Language.h"
+#include "PocketPilot_OldSettings.h"
 #include "PocketPilot_SettingsSearch.h"
 #include "PocketPilot_ShinyClip.h"
 #include "PocketPilot_Theme.h"
@@ -1742,6 +1746,88 @@ int check_history_frames(Logger& logger){
 
     logger.log(
         "History frames test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The program's name, and the settings that a computer has from the time
+//  the program was called SerialPrograms: the first start under the new name
+//  takes them over. A folder with a letter outside ASCII in its name, as a
+//  user's folder can have.
+int check_old_settings(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("Old settings test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    check(PROGRAM_NAME == "Claude GG", "the program is called Claude GG");
+#ifdef _WIN32
+    //  The file of the program is named after it, and so are its settings.
+    check(
+        Filesystem::application_binary_name().replace_extension().string() == "ClaudeGG",
+        "the program's file is ClaudeGG.exe"
+    );
+    const std::string settings_path = PROGRAM_SETTING_JSON_PATH();
+    const std::string wanted_end = "ClaudeGG-Settings.json";
+    check(
+        settings_path.size() >= wanted_end.size() &&
+        settings_path.compare(settings_path.size() - wanted_end.size(), wanted_end.size(), wanted_end) == 0,
+        "its settings file is ClaudeGG-Settings.json"
+    );
+#endif
+
+    QTemporaryDir temp;
+    if (!temp.isValid()){
+        logger.log("Old settings test: FAILED: no temporary folder to test in", COLOR_RED);
+        return wrong + 1;
+    }
+    const QString folder = temp.path() + "/Dénnis folder/";
+    QDir().mkpath(folder);
+    const std::string folder_utf8 = folder.toStdString();
+    const std::string new_name = "ClaudeGG-Settings.json";
+    const QString old_file = folder + PocketPilot::OLD_SETTINGS_FILE_NAME;
+    const QString new_file = folder + QString::fromStdString(new_name);
+    const auto write = [](const QString& path, const char* text){
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly)){
+            file.write(text);
+        }
+    };
+    const auto read = [](const QString& path){
+        QFile file(path);
+        return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray("(not there)");
+    };
+
+    //  A computer that never had settings.
+    check(!PocketPilot::take_over_old_settings(folder_utf8, new_name), "nothing to take over: nothing happens");
+    check(!QFile::exists(new_file), "and no file is made");
+
+    //  The old file only: copied, and left where it is.
+    write(old_file, "{\"20-GlobalSettings\": {\"a\": 1}}");
+    check(PocketPilot::take_over_old_settings(folder_utf8, new_name), "the old file is taken over");
+    check(read(new_file) == QByteArray("{\"20-GlobalSettings\": {\"a\": 1}}"), "the new file has what the old one had");
+    check(read(old_file) == QByteArray("{\"20-GlobalSettings\": {\"a\": 1}}"), "the old file is still there, unchanged");
+
+    //  Both: the new one is the settings now, and is never overwritten.
+    write(new_file, "{\"20-GlobalSettings\": {\"a\": 2}}");
+    check(!PocketPilot::take_over_old_settings(folder_utf8, new_name), "with both files, nothing is taken over");
+    check(read(new_file) == QByteArray("{\"20-GlobalSettings\": {\"a\": 2}}"), "the new settings are not overwritten");
+
+    //  A program that still has the old name has nothing to take over.
+    QFile::remove(new_file);
+    check(!PocketPilot::take_over_old_settings(folder_utf8, PocketPilot::OLD_SETTINGS_FILE_NAME), "the old name takes nothing from itself");
+    check(!PocketPilot::take_over_old_settings(folder_utf8, ""), "no name takes nothing");
+    check(!QFile::exists(new_file), "and no file is made");
+
+    logger.log(
+        "Old settings test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -6195,6 +6281,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_story_times(logger);
         failed += check_shiny_clip(logger);
         failed += check_history_frames(logger);
+        failed += check_old_settings(logger);
         failed += check_collection_lists(out, logger);
         failed += check_money_trip(logger);
         failed += check_ferry_talk(logger);

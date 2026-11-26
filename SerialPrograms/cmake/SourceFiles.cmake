@@ -1499,6 +1499,8 @@ file(GLOB LIBRARY_SOURCES
     Source/PocketPilot/PocketPilot_Language.h
     Source/PocketPilot/PocketPilot_SettingsSearch.cpp
     Source/PocketPilot/PocketPilot_SettingsSearch.h
+    Source/PocketPilot/PocketPilot_OldSettings.cpp
+    Source/PocketPilot/PocketPilot_OldSettings.h
     Source/PocketPilot/PocketPilot_ShinyClip.cpp
     Source/PocketPilot/PocketPilot_ShinyClip.h
     Source/PocketPilot/PocketPilot_Setup.cpp

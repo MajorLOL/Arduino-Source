@@ -1,6 +1,6 @@
-name: PocketPilot - Windows build
+name: Claude GG - Windows build
 
-# Builds a ready-to-run Windows version of PocketPilot (Qt DLLs, resources and
+# Builds a ready-to-run Windows version of Claude GG (Qt DLLs, resources and
 # firmware included), starts it once to take pictures of its interface, and
 # publishes the zip as a pre-release of this repository (with its SHA-256);
 # the pictures stay in the workflow artifact. A build that fails that test (it
@@ -20,7 +20,7 @@ name: PocketPilot - Windows build
 # - for every pull request into pocketpilot (the changes Claude makes from
 #   inside the program arrive that way, on a branch claude/...): built and
 #   tested as it will be once merged, not published. The build is the
-#   artifact "PocketPilot-Windows" of the run;
+#   artifact "ClaudeGG-Windows" of the run;
 # - by hand, published or not.
 #
 # The build itself follows the upstream workflow for Windows
@@ -69,7 +69,7 @@ jobs:
           CMAKE_ADDITIONAL_FLAGS="-DCMAKE_POLICY_DEFAULT_CMP0141=NEW -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT= -DPA_ASSEMBLY_LISTINGS=OFF"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl"
           #  Without the Discord bot (D++, with OpenSSL 1.1.1k that nobody maintains any more) and the Discord
-          #  Social SDK: PocketPilot uses neither. The webhooks stay.
+          #  Social SDK: Claude GG uses neither. The webhooks stay.
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DPA_DISCORD_BOT=OFF"
           CMAKE_ADDITIONAL_FLAGS="$CMAKE_ADDITIONAL_FLAGS -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
           echo "CMAKE_GENERATOR=Ninja Multi-Config" >> $GITHUB_ENV
@@ -141,7 +141,7 @@ jobs:
           install: binary
 
       #  The number of the build, in the window's title, the "About" window
-      #  and the programs' logs ("PocketPilot Studio build N"). A build that
+      #  and the programs' logs ("Claude GG build N"). A build that
       #  is published gets the number after the last published one; a pull
       #  request's build is named after the pull request.
       - name: Build number
@@ -197,7 +197,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $out = "Arduino-Source/SerialPrograms/bin/RelWithDebInfo"
-          windeployqt --release --dir $out "$out/SerialPrograms.exe"
+          windeployqt --release --dir $out "$out/ClaudeGG.exe"
           #  The function names for reading a crash: kept aside, not packaged.
           New-Item -ItemType Directory -Force -Path "symbols" | Out-Null
           Get-ChildItem "$out/*.pdb" -ErrorAction SilentlyContinue | Move-Item -Destination "symbols"
@@ -213,8 +213,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $res | Out-Null
           Expand-Archive -Path "Arduino-Source/Packages/DownloadedResources/PaddleOCRDetection.zip" -DestinationPath $res -Force
           Get-ChildItem $res | Format-Table Name, Length
-          #  The licenses: of Pokemon Automation, which PocketPilot is built
-          #  on, and of what PocketPilot adds.
+          #  The licenses: of Pokemon Automation, which Claude GG is built
+          #  on, and of what Claude GG adds.
           Copy-Item -Recurse "Arduino-Source/SerialPrograms/Source/PocketPilot/Licenses" "$out/Licenses"
           Copy-Item "Arduino-Source/LICENSE" "$out/Licenses/PokemonAutomation-MIT-License.txt"
           Copy-Item "Arduino-Source/SerialPrograms/Source/PocketPilot/Resources/Jersey20-OFL.txt" "$out/Licenses/Jersey20-OFL.txt"
@@ -237,7 +237,7 @@ jobs:
           Get-ChildItem "$out/Firmware" | Format-Table Name, Length
           #  The tool that flashes the ESP32 boards from the setup: esptool of
           #  Espressif, its stand-alone Windows build (no Python needed). It is
-          #  a separate program that PocketPilot Studio starts. If it cannot be
+          #  a separate program that Claude GG starts. If it cannot be
           #  fetched the build goes on: the setup then looks for esptool on
           #  the computer of the user and says what to do when it is not there.
           #  Pinned: the version, and the SHA-256 of its Windows zip. A newer
@@ -275,8 +275,8 @@ jobs:
             @(
               "esptool $($release.tag_name) (Espressif Systems), stand-alone Windows build.",
               "License: GPL-2.0-or-later. Source code: https://github.com/espressif/esptool",
-              "esptool is a separate program in the folder Tools/esptool. PocketPilot Studio starts it to flash the",
-              "firmware onto an ESP32 board; it is not part of PocketPilot Studio itself."
+              "esptool is a separate program in the folder Tools/esptool. Claude GG starts it to flash the",
+              "firmware onto an ESP32 board; it is not part of Claude GG itself."
             ) | Out-File "$out/Licenses/esptool-NOTICE.txt" -Encoding ascii
           } catch {
             Write-Host "::warning::esptool is not in this package: $_"
@@ -292,9 +292,9 @@ jobs:
             throw "Files of the Discord bot are in the package."
           }
           New-Item -ItemType Directory -Path "package" | Out-Null
-          Copy-Item -Recurse $out "package/PocketPilot"
-          Compress-Archive -Path "package/PocketPilot" -DestinationPath "PocketPilot-Windows.zip"
-          Get-Item "PocketPilot-Windows.zip" | Format-List Name, Length
+          Copy-Item -Recurse $out "package/ClaudeGG"
+          Compress-Archive -Path "package/ClaudeGG" -DestinationPath "ClaudeGG-Windows.zip"
+          Get-Item "ClaudeGG-Windows.zip" | Format-List Name, Length
 
       #  The hash of the zip, made here and checked again by the job that
       #  publishes it: what goes on the release is what was built and tested.
@@ -302,8 +302,8 @@ jobs:
         id: hash
         shell: pwsh
         run: |
-          $hash = (Get-FileHash "PocketPilot-Windows.zip" -Algorithm SHA256).Hash.ToLower()
-          Write-Host "SHA-256 of PocketPilot-Windows.zip: $hash"
+          $hash = (Get-FileHash "ClaudeGG-Windows.zip" -Algorithm SHA256).Hash.ToLower()
+          Write-Host "SHA-256 of ClaudeGG-Windows.zip: $hash"
           "sha256=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       #  Start the build once: it opens its main window, goes through its
@@ -322,7 +322,7 @@ jobs:
           $diagnostics = (Resolve-Path "ui-test-diagnostics").Path
           $symbols = (Resolve-Path "symbols").Path
           $started = Get-Date
-          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--ui-screenshots", "`"$shots`"" -PassThru
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--ui-screenshots", "`"$shots`"" -PassThru
           #  Keep the handle, or the exit code is not there afterwards.
           $handle = $process.Handle
           if ($process.WaitForExit(300000)) {
@@ -344,17 +344,17 @@ jobs:
           }
 
           #  What the program logged.
-          $log = "$dir/SerialPrograms.log"
+          $log = "$dir/ClaudeGG.log"
           if (Test-Path $log) {
             Copy-Item $log $diagnostics
-            Write-Host "---- the end of SerialPrograms.log ----"
+            Write-Host "---- the end of ClaudeGG.log ----"
             Get-Content $log -Tail 150
             #  The checks of the tests that run inside the interface test: they
             #  are logged before the end of the log.
             Write-Host "---- the checks that the interface test ran ----"
             Get-Content $log | Select-String -Pattern "checks passed|test: FAILED" | ForEach-Object { Write-Host $_.Line }
           } else {
-            Write-Host "No SerialPrograms.log in $dir."
+            Write-Host "No ClaudeGG.log in $dir."
           }
 
           if ($code -ne 0) {
@@ -362,7 +362,7 @@ jobs:
             Start-Sleep -Seconds 3
             try {
               Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Id = 1000; StartTime = $started } -MaxEvents 5 -ErrorAction Stop |
-                Where-Object { $_.Message -match 'SerialPrograms' } |
+                Where-Object { $_.Message -match 'ClaudeGG' } |
                 ForEach-Object { Write-Host "---- Windows event log ----"; Write-Host $_.Message }
             } catch {
               Write-Host "No crash in the Windows event log."
@@ -453,9 +453,9 @@ jobs:
         shell: pwsh
         run: |
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
-          $log = "$dir/SerialPrograms.log"
+          $log = "$dir/ClaudeGG.log"
           if (Test-Path $log) { Remove-Item $log }
-          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--intro-test" -PassThru
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--intro-test" -PassThru
           $handle = $process.Handle
           if ($process.WaitForExit(120000)) {
             $code = $process.ExitCode
@@ -488,9 +488,9 @@ jobs:
         shell: pwsh
         run: |
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
-          $log = "$dir/SerialPrograms.log"
+          $log = "$dir/ClaudeGG.log"
           if (Test-Path $log) { Remove-Item $log }
-          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--tutorial-test" -PassThru
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--tutorial-test" -PassThru
           $handle = $process.Handle
           if ($process.WaitForExit(240000)) {
             $code = $process.ExitCode
@@ -523,9 +523,9 @@ jobs:
         shell: pwsh
         run: |
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
-          $log = "$dir/SerialPrograms.log"
+          $log = "$dir/ClaudeGG.log"
           if (Test-Path $log) { Remove-Item $log }
-          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--language-test" -PassThru
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--language-test" -PassThru
           $handle = $process.Handle
           if ($process.WaitForExit(120000)) {
             $code = $process.ExitCode
@@ -562,7 +562,7 @@ jobs:
           } else {
             Write-Host "::warning::No CategoryIcons next to the program: the setup test shows its own pictures."
           }
-          $process = Start-Process -FilePath "$dir/SerialPrograms.exe" -WorkingDirectory $dir -ArgumentList "--setup-test", "`"$shots`"" -PassThru
+          $process = Start-Process -FilePath "$dir/ClaudeGG.exe" -WorkingDirectory $dir -ArgumentList "--setup-test", "`"$shots`"" -PassThru
           $handle = $process.Handle
           if ($process.WaitForExit(300000)) {
             $code = $process.ExitCode
@@ -590,9 +590,9 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7
         with:
-          name: PocketPilot-Windows
+          name: ClaudeGG-Windows
           path: |
-            PocketPilot-Windows.zip
+            ClaudeGG-Windows.zip
             ui-screenshots/*.png
             setup-screenshots/*.png
 
@@ -623,21 +623,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name PocketPilot-Windows --dir artifact
-          ZIP=$(find artifact -name PocketPilot-Windows.zip | head -n 1)
+          gh run download "${{ github.run_id }}" --repo "${{ github.repository }}" --name ClaudeGG-Windows --dir artifact
+          ZIP=$(find artifact -name ClaudeGG-Windows.zip | head -n 1)
           if [ -z "$ZIP" ]; then
-            echo "::error::The artifact of the build has no PocketPilot-Windows.zip."
+            echo "::error::The artifact of the build has no ClaudeGG-Windows.zip."
             exit 1
           fi
-          mv "$ZIP" PocketPilot-Windows.zip
-          ls -l PocketPilot-Windows.zip
+          mv "$ZIP" ClaudeGG-Windows.zip
+          ls -l ClaudeGG-Windows.zip
 
       - name: Check the zip against its hash
         shell: bash
         env:
           EXPECTED: ${{ needs.build.outputs.sha256 }}
         run: |
-          ACTUAL=$(sha256sum PocketPilot-Windows.zip | cut -d' ' -f1)
+          ACTUAL=$(sha256sum ClaudeGG-Windows.zip | cut -d' ' -f1)
           echo "built:   $EXPECTED"
           echo "fetched: $ACTUAL"
           if [ -z "$EXPECTED" ] || [ "$ACTUAL" != "$EXPECTED" ]; then
@@ -655,9 +655,9 @@ jobs:
           TAG="pocketpilot-build-$BUILD_NUMBER"
           # Only the program itself goes on the release. The pictures of the
           # interface test stay in the workflow artifact, to look at there.
-          gh release create "$TAG" PocketPilot-Windows.zip \
+          gh release create "$TAG" ClaudeGG-Windows.zip \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --prerelease \
-            --title "PocketPilot Studio - Windows build $BUILD_NUMBER" \
-            --notes "PocketPilot Studio, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run SerialPrograms.exe. This build passed its interface test: it started on the build machine, without settings, and took pictures of its own interface. For non-commercial use. Built from ${{ github.sha }}. The program is not signed with a certificate, so Windows may warn when you start it: compare the SHA-256 of the zip you downloaded with this one before you do. SHA-256 of PocketPilot-Windows.zip: $SHA256"
+            --title "Claude GG - Windows build $BUILD_NUMBER" \
+            --notes "Claude GG, a personal fork of Pokemon Automation's SerialPrograms. Unzip, then run ClaudeGG.exe. This build passed its interface test: it started on the build machine, without settings, and took pictures of its own interface. For non-commercial use. Built from ${{ github.sha }}. The program is not signed with a certificate, so Windows may warn when you start it: compare the SHA-256 of the zip you downloaded with this one before you do. SHA-256 of ClaudeGG-Windows.zip: $SHA256"
