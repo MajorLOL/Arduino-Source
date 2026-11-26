@@ -98,6 +98,10 @@ void PeriodicRunner::add_runnable(Runnable& runnable, WallDuration period){
             return;
         }
 
+        //  The entry's time must be the key of its place in the schedule: that is
+        //  how remove_runnable() finds it, until the runnable has run once.
+        ret.first->second.next = next;
+
         try{
             m_schedule.emplace(next, ret.first);
         }catch (...){
@@ -117,7 +121,16 @@ void PeriodicRunner::remove_runnable(Runnable& runnable) noexcept{
         }
 
         if (!iter->second.busy){
-            m_schedule.erase(iter->second.next);
+            //  Its own place in the schedule, not every place with the same time:
+            //  and one that is gone with the runnable, or the thread would run
+            //  what is not there any more.
+            auto range = m_schedule.equal_range(iter->second.next);
+            for (auto schedule_iter = range.first; schedule_iter != range.second; ++schedule_iter){
+                if (schedule_iter->second == iter){
+                    m_schedule.erase(schedule_iter);
+                    break;
+                }
+            }
             m_runnables.erase(iter);
             break;
         }

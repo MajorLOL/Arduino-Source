@@ -7,6 +7,8 @@
 
 #include "Common/Compiler.h"
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -97,6 +99,7 @@
 #include "ClaudePlays/ClaudePlays_AnyGame.h"
 #include "ClaudePlays/ClaudePlays_Engine.h"
 #include "ClaudePlays/ClaudePlays_Games.h"
+#include "Common/Cpp/Concurrency/PeriodicRunner.h"
 #include "ClaudePlays/ClaudePlays_Program.h"
 #include "PocketPilot_About.h"
 #include "PocketPilot_Home.h"
@@ -1747,6 +1750,63 @@ int check_history_frames(Logger& logger){
 
     logger.log(
         "History frames test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
+        wrong == 0 ? COLOR_BLUE : COLOR_RED
+    );
+    return wrong;
+}
+
+
+//  The periodic runner (Common/Cpp/Concurrency/PeriodicRunner.h): a runnable
+//  that is removed before it has run once. Its place in the schedule was found
+//  by the time of its entry, which was not the time the place was made for, so
+//  the place stayed behind and the runner's thread ran what was not there any
+//  more: a crash in the first moments of a program that starts and stops at
+//  once (the program stops its serial port poller on every way out, also when
+//  it was made a moment before). This was a fault of Pokemon Automation's code.
+struct CountingRunnable : public PeriodicRunner::Runnable{
+    std::atomic<int> count{0};
+    virtual void run() noexcept override{
+        count++;
+    }
+};
+int check_periodic_runner(Logger& logger){
+    int checks = 0;
+    int wrong = 0;
+    auto check = [&](bool fine, const char* what){
+        checks++;
+        if (!fine){
+            wrong++;
+            logger.log(std::string("Periodic runner test: FAILED: ") + what, COLOR_RED);
+        }
+    };
+
+    {
+        PeriodicRunner runner;
+        CountingRunnable removed;
+        CountingRunnable kept;
+        CountingRunnable twin;
+        runner.add_runnable(removed, std::chrono::seconds(1));
+        runner.remove_runnable(removed);
+        runner.add_runnable(kept, std::chrono::milliseconds(50));
+        //  Several in one moment: the removal takes its own place, not all of the
+        //  places with the same time.
+        runner.add_runnable(twin, std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        check(kept.count >= 3, "a runnable that stays is run again and again, after another was removed");
+        check(twin.count >= 3, "and another that was added in the same moment");
+        runner.remove_runnable(twin);
+        const int before = kept.count;
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        check(kept.count > before, "one is removed and the other goes on");
+        const int twin_count = twin.count;
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        check(twin.count == twin_count, "the one that was removed is not run any more");
+        runner.remove_runnable(kept);
+        runner.stop();
+    }
+
+    logger.log(
+        "Periodic runner test: " + std::to_string(checks - wrong) + " of " + std::to_string(checks) + " checks passed.",
         wrong == 0 ? COLOR_BLUE : COLOR_RED
     );
     return wrong;
@@ -6282,6 +6342,7 @@ int run_ui_screenshots(QApplication& application, MainWindow& window, const std:
         failed += check_story_times(logger);
         failed += check_shiny_clip(logger);
         failed += check_history_frames(logger);
+        failed += check_periodic_runner(logger);
         failed += check_old_settings(logger);
         failed += run_instances_checks(logger);
         failed += check_collection_lists(out, logger);
