@@ -447,9 +447,9 @@ QImage instance_picture(QWidget* window){
 //  One installation runs once
 //  ---------------------------------------------------------------------
 
-InstanceGuard::InstanceGuard(const QString& folder){
+InstanceGuard::InstanceGuard(const QString& folder, const QString& file_name){
     QDir().mkpath(folder);
-    m_lock = std::make_unique<QLockFile>(folder + "running.lock");
+    m_lock = std::make_unique<QLockFile>(folder + file_name);
     //  Only a process that is gone makes a lock stale, not the time.
     m_lock->setStaleLockTime(0);
     if (!m_lock->tryLock(0)){
@@ -667,17 +667,23 @@ int run_instances_hub(QApplication& application, const QString& test_folder){
         return registry->remove(id, QDateTime::currentMSecsSinceEpoch());
     };
 
-    //  There is one overview: a second one asks the first to come forward.
+    //  There is one overview: a second one asks the first to come forward. (The
+    //  lock decides which one is first: on Windows two servers can listen on the
+    //  same name of a pipe.)
     const QString link_name = instance_link_name(scratch, "hub");
+    std::unique_ptr<InstanceGuard> guard;
+    if (test_folder.isEmpty()){
+        guard = std::make_unique<InstanceGuard>(to_qt(instances_root_path(scratch)), "hub.lock");
+        if (!guard->acquired()){
+            send_instance_command(link_name, "show");
+            return 0;
+        }
+    }
     InstanceLink link(link_name, [](const QString& command){
         if (command == "show"){
             bring_overview_forward();
         }
     });
-    if (!link.listening() && test_folder.isEmpty()){
-        send_instance_command(link_name, "show");
-        return 0;
-    }
     return run_instances_overview(request, test_folder);
 }
 
@@ -843,6 +849,10 @@ int run_instances_checks(Logger& logger){
         check(!second.acquired(), "the second start of the same installation does not");
         InstanceGuard other(registry.folder("9"));
         check(other.acquired(), "another installation does");
+        //  The overview has a lock of its own, in the folder of all of them.
+        InstanceGuard hub(to_qt(instances_root_path(scratch)), "hub.lock");
+        InstanceGuard hub_twice(to_qt(instances_root_path(scratch)), "hub.lock");
+        check(hub.acquired() && !hub_twice.acquired(), "the overview is one, with a lock of its own");
         first.reset();
         InstanceGuard third(folder);
         check(third.acquired(), "when the first has ended the lock is free");
@@ -859,8 +869,6 @@ int run_instances_checks(Logger& logger){
             check(link.listening(), "an installation listens on its connection");
             check(send_instance_command(name, "show") && received == QStringList({"show"}), "'show' comes through and is answered");
             check(send_instance_command(name, "show") && received.size() == 2, "and again");
-            InstanceLink second(name, nullptr);
-            check(!second.listening(), "a second one cannot listen on the same name");
         }
         QElapsedTimer timer;
         timer.start();

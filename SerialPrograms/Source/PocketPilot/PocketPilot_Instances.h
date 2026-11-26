@@ -221,11 +221,12 @@ QImage fit_miniature(const QImage& picture);
 //  One installation runs once
 //  ---------------------------------------------------------------------
 
-//  Held while an installation runs: the lock file in its folder.
+//  Held while an installation runs: the lock file in its folder (the overview
+//  has its own file, hub.lock, in the folder Installations).
 class InstanceGuard{
 public:
     //  "folder": the installation's folder (with "/"; made when it is not there).
-    explicit InstanceGuard(const QString& folder);
+    explicit InstanceGuard(const QString& folder, const QString& file_name = "running.lock");
     ~InstanceGuard();
     //  False: another process holds it, the installation already runs.
     bool acquired() const;
