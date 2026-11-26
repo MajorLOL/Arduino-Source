@@ -605,6 +605,25 @@ jobs:
           $dir = (Resolve-Path "Arduino-Source/SerialPrograms/bin/RelWithDebInfo").Path
           New-Item -ItemType Directory -Force -Path "installations-screenshots" | Out-Null
           $shots = (Resolve-Path "installations-screenshots").Path
+          New-Item -ItemType Directory -Force -Path "symbols" | Out-Null
+          $symbols = (Resolve-Path "symbols").Path
+          #  What a crash left behind: the reports in every folder that holds
+          #  one (the installations have their own) and the stack from the dump.
+          function Show-Crash($what) {
+            Write-Host "---- $what crashed: what it left behind ----"
+            $cdb = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+            Get-ChildItem $dir -Recurse -Directory -Filter "ErrorReportsLocal" -ErrorAction SilentlyContinue | ForEach-Object {
+              Get-ChildItem $_.FullName -Recurse -File | ForEach-Object {
+                Write-Host "---- $($_.FullName) ($($_.Length) bytes) ----"
+                if ($_.Extension -eq ".json") {
+                  Get-Content $_.FullName -TotalCount 60
+                }
+                if ($_.Extension -eq ".dmp" -and (Test-Path $cdb)) {
+                  $null | & $cdb -z $_.FullName -y $symbols -i $dir -c ".ecxr; kn 40; q" 2>&1 | Select-Object -Last 70 | ForEach-Object { Write-Host $_ }
+                }
+              }
+            }
+          }
           $main_settings = "$dir/UserSettings/ClaudeGG-Settings.json"
           $main_before = $null
           if (Test-Path $main_settings) {
@@ -633,6 +652,7 @@ jobs:
           }
           if ($code -ne 0) {
             $failed = $true
+            Show-Crash "The installation test"
           }
           if (-not (Test-Path "$dir/Installations/ci-test/UserSettings/ClaudeGG-Settings.json")) {
             Write-Host "::error::The installation wrote no settings in its own folder."
@@ -662,6 +682,7 @@ jobs:
           }
           if ($code -ne 0) {
             $failed = $true
+            Show-Crash "The test of the overview"
           }
 
           #  3. Installation 1 is as it was.

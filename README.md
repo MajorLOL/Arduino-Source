@@ -35,6 +35,8 @@ The hardware and its setup are the same as for Pokémon Automation: see [its doc
 | **Builds** | Each build starts once on the build machine, as on a computer that never ran it, goes through its pages, themes and lists and saves a picture of each. A build that does not start, crashes on the way or cannot take its pictures is not published; one that looks broken shows in its pictures before anyone downloads it. A pull request into `pocketpilot` is built and tested the same way, as it will be once merged, and not published. |
 | **What it leaves out** | The check for a new version (it is for Pokémon Automation's releases) and Discord Rich Presence by default (it shows as Pokémon Automation, whose Discord application it is). The Discord bot and the Discord Social SDK (the Windows build has both off: nothing here uses them, and D++ brings OpenSSL 1.1.1k, which is no longer maintained; the Discord webhooks stay). The wallpaper is off until you turn it on. |
 
+Everything that differs from Pokémon Automation, with the reason for each change and the faults of the original that were found and fixed: [CHANGES.md](CHANGES.md). How to set this repository up on GitHub (settings, rights, releases, the token for Claude): [GITHUB-SETUP.md](GITHUB-SETUP.md).
+
 What is planned, what could be made faster and what could be added: [ROADMAP.md](ROADMAP.md).
 
 ## Building
